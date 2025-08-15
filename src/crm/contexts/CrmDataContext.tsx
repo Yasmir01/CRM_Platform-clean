@@ -1257,6 +1257,15 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addSubscriptionPlan,
     updateSubscriptionPlan,
     deleteSubscriptionPlan,
+    addWorkOrder,
+    updateWorkOrder,
+    deleteWorkOrder,
+    addNote,
+    updateNote,
+    deleteNote,
+    addAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncement,
   };
 
   return (
