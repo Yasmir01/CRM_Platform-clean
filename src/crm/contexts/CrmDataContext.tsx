@@ -833,6 +833,31 @@ const CrmDataContext = createContext<{
 export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(crmReducer, initialState);
 
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const storedData = LocalStorageService.loadAllData();
+    if (storedData.properties && storedData.properties.length > 0) {
+      dispatch({
+        type: 'INITIALIZE_DATA',
+        payload: {
+          properties: storedData.properties,
+          propertyManagers: storedData.managers || [],
+          tenants: storedData.tenants || [],
+          contacts: storedData.contacts || [],
+          deals: storedData.deals || [],
+          quotes: storedData.quotes || [],
+          campaigns: storedData.campaigns || [],
+          workOrders: storedData.workOrders || [],
+          notes: storedData.news || [], // Note: notes are loaded from news in LocalStorageService
+          announcements: storedData.announcements || [],
+          initialized: true
+        }
+      });
+    } else {
+      dispatch({ type: 'INITIALIZE_DATA', payload: { initialized: true } });
+    }
+  }, []);
+
   // Save data to localStorage whenever state changes
   useEffect(() => {
     if (state.initialized) {
