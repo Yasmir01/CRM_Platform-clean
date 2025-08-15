@@ -199,6 +199,67 @@ export interface SubscriptionPlan {
   updatedAt: string;
 }
 
+export interface WorkOrder {
+  id: string;
+  title: string;
+  description: string;
+  property: string;
+  propertyId: string;
+  tenant: string;
+  tenantId?: string;
+  unit?: string;
+  category: "Plumbing" | "Electrical" | "HVAC" | "Appliance" | "General Maintenance" | "Emergency" | "Landscaping" | "Cleaning" | "Other";
+  customCategory?: string;
+  priority: "Low" | "Medium" | "High" | "Emergency";
+  status: "Open" | "In Progress" | "Completed" | "Cancelled";
+  requestedBy: string;
+  assignedTo?: string;
+  createdDate: string;
+  dueDate?: string;
+  completedDate?: string;
+  estimatedCost?: number;
+  actualCost?: number;
+  notes?: string;
+  isEmergency: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  propertyId?: string;
+  tenantId?: string;
+  contactId?: string;
+  dealId?: string;
+  category: "General" | "Property" | "Tenant" | "Contact" | "Deal" | "Reminder" | "Important";
+  tags: string[];
+  isPrivate: boolean;
+  isPinned: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: "General" | "Maintenance" | "Policy" | "Event" | "Emergency";
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  targetAudience: "All" | "Tenants" | "Managers" | "Specific";
+  targetIds?: string[]; // Specific tenant/manager IDs if targetAudience is "Specific"
+  propertyIds?: string[]; // Properties this announcement applies to
+  publishDate: string;
+  expiryDate?: string;
+  isActive: boolean;
+  attachments?: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // State interface
 export interface CrmState {
   properties: Property[];
@@ -211,6 +272,9 @@ export interface CrmState {
   propertyGroups: PropertyGroup[];
   marketplaceItems: MarketplaceItem[];
   subscriptionPlans: SubscriptionPlan[];
+  workOrders: WorkOrder[];
+  notes: Note[];
+  announcements: Announcement[];
   initialized: boolean;
 }
 
@@ -246,7 +310,16 @@ type CrmAction =
   | { type: 'DELETE_MARKETPLACE_ITEM'; payload: string }
   | { type: 'ADD_SUBSCRIPTION_PLAN'; payload: SubscriptionPlan }
   | { type: 'UPDATE_SUBSCRIPTION_PLAN'; payload: SubscriptionPlan }
-  | { type: 'DELETE_SUBSCRIPTION_PLAN'; payload: string };
+  | { type: 'DELETE_SUBSCRIPTION_PLAN'; payload: string }
+  | { type: 'ADD_WORK_ORDER'; payload: WorkOrder }
+  | { type: 'UPDATE_WORK_ORDER'; payload: WorkOrder }
+  | { type: 'DELETE_WORK_ORDER'; payload: string }
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: Note }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'ADD_ANNOUNCEMENT'; payload: Announcement }
+  | { type: 'UPDATE_ANNOUNCEMENT'; payload: Announcement }
+  | { type: 'DELETE_ANNOUNCEMENT'; payload: string };
 
 // Initial state with sample data
 const initialState: CrmState = {
