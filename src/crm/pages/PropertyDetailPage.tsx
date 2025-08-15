@@ -413,7 +413,6 @@ export default function PropertyDetailPage({
   const [cardManagementOpen, setCardManagementOpen] = React.useState(false);
   const [backgroundPickerOpen, setBackgroundPickerOpen] = React.useState(false);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
-  const [newNote, setNewNote] = React.useState("");
   const [selectedAppliance, setSelectedAppliance] = React.useState<Appliance | null>(null);
   const [applianceImages, setApplianceImages] = React.useState<ApplianceImage[]>([]);
   const [applianceFormData, setApplianceFormData] = React.useState<Partial<Appliance>>({
@@ -845,7 +844,7 @@ export default function PropertyDetailPage({
                   >
                     <LocationOnRoundedIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
                     <Typography variant="h6" gutterBottom>
-                      ���� {property.address}
+                      📍 {property.address}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       Click below to view on map
