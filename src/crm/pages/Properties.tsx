@@ -552,13 +552,13 @@ export default function Properties() {
 
   // Update listings when real listings change
   React.useEffect(() => {
-    if (realListings.length > 0) {
+    if (realListings && Array.isArray(realListings) && realListings.length > 0) {
       setListings(realListings);
     }
   }, [realListings]);
 
   const activeListings = React.useMemo(() => {
-    if (!state?.initialized) return 0;
+    if (!state?.initialized || !realListings || !Array.isArray(realListings)) return 0;
     return realListings.filter(l => l && l.status === "Listed").length;
   }, [state?.initialized, realListings]);
 
@@ -5611,7 +5611,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          🚀 Share Property Listing - {shareProperty?.name}
+          �� Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
