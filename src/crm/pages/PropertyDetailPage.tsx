@@ -388,6 +388,7 @@ export default function PropertyDetailPage({
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
   const { state, updateProperty } = useCrmData();
+  const { getEntityActivities } = useActivityTracking();
   const { properties, propertyManagers, tenants } = state;
   const property = properties.find(p => p.id === propertyId) || mockProperty;
 
