@@ -122,7 +122,7 @@ export default function CrmDashboard() {
               }}
             >
               <CrmHeader />
-              <Outlet />
+              <ModeAwareContent />
             </Stack>
           </Box>
                 </Box>
