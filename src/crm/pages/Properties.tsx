@@ -476,20 +476,20 @@ export default function Properties() {
 
   // Get vacant properties for listings
   const vacantProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
     return properties.filter(p => p && p.status === "Available");
   }, [state?.initialized, properties]);
 
   // Get properties with existing listings
   const propertiesWithListings = React.useMemo(() => {
-    if (!state?.initialized || !properties || !listings) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(p =>
       p && listings.some(l => l && l.propertyId === p.id)
     );
   }, [state?.initialized, properties, listings]);
 
   const filteredProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
     const searchLower = (searchTerm || '').toLowerCase();
     return properties.filter(property =>
       property && (
@@ -501,28 +501,28 @@ export default function Properties() {
 
   // Stats calculations
   const totalProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.length;
   }, [state?.initialized, properties]);
 
   const occupiedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.filter(p => p && p.status === "Occupied").length;
   }, [state?.initialized, properties]);
 
   const availableProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.filter(p => p && p.status === "Available").length;
   }, [state?.initialized, properties]);
 
   const totalRevenue = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.reduce((sum, p) => sum + (p && p.status === "Occupied" ? (p.monthlyRent || 0) : 0), 0);
   }, [state?.initialized, properties]);
 
   // Generate real listings from actual properties
   const realListings = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
 
     // Create listings for available properties (simulating that they have listings)
     const availableProps = properties.filter(p => p && p.status === "Available");
@@ -552,29 +552,29 @@ export default function Properties() {
 
   // Update listings when real listings change
   React.useEffect(() => {
-    if (realListings.length > 0) {
+    if (realListings && Array.isArray(realListings) && realListings.length > 0) {
       setListings(realListings);
     }
   }, [realListings]);
 
   const activeListings = React.useMemo(() => {
-    if (!state?.initialized) return 0;
+    if (!state?.initialized || !realListings || !Array.isArray(realListings)) return 0;
     return realListings.filter(l => l && l.status === "Listed").length;
   }, [state?.initialized, realListings]);
 
   const totalListingViews = React.useMemo(() => {
-    if (!state?.initialized || !listings) return 0;
+    if (!state?.initialized || !listings || !Array.isArray(listings)) return 0;
     return listings.reduce((sum, l) => sum + (l && l.viewCount ? l.viewCount : 0), 0);
   }, [state?.initialized, listings]);
 
   const totalInquiries = React.useMemo(() => {
-    if (!state?.initialized || !listings) return 0;
+    if (!state?.initialized || !listings || !Array.isArray(listings)) return 0;
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
   // Calculate unlisted properties (available but not listed)
   const unlistedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties || !listings) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(property =>
       property && property.status === "Available" &&
       !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
@@ -643,7 +643,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     <div class="property-header">
         <h1 class="property-title">${property.name}</h1>
         <p><strong>📍 ${property.address}</strong></p>
-        <p><strong>���� $${property.monthlyRent.toLocaleString()}/month</strong></p>
+        <p><strong>����� $${property.monthlyRent.toLocaleString()}/month</strong></p>
     </div>
     
     ${mainImage ? `<img src="${mainImage.url}" alt="${mainImage.alt}" style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;">` : ''}
@@ -1137,7 +1137,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       const updatedProperty: Property = {
       ...selectedProperty,
       ...formData,
-      managerId: formData.managerIds.length > 0 ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
+      managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: selectedProperty.tenantIds,
       images: selectedProperty.images,
@@ -1155,7 +1155,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       type: formData.type,
       units: formData.units,
       monthlyRent: formData.monthlyRent,
-      managerId: formData.managerIds.length > 0 ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
+      managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: [] as string[],
       description: formData.description,
@@ -1185,7 +1185,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
           { field: 'name', oldValue: null, newValue: newPropertyData.name, displayName: 'Property Name' },
           { field: 'address', oldValue: null, newValue: newPropertyData.address, displayName: 'Address' },
           { field: 'monthlyRent', oldValue: null, newValue: newPropertyData.monthlyRent, displayName: 'Monthly Rent' },
-          { field: 'managerIds', oldValue: null, newValue: formData.managerIds.length > 0 ? formData.managerIds.map(id => {
+          { field: 'managerIds', oldValue: null, newValue: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds.map(id => {
           const manager = (propertyManagers || []).find(pm => pm.id === id);
           return manager ? `${manager.firstName} ${manager.lastName}` : id;
         }).join(', ') : 'Unassigned', displayName: 'Property Managers' },
@@ -1303,7 +1303,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
 
   return (
     <>
-      {!state || !state.initialized ? (
+      {!state || !state.initialized || !Array.isArray(state.properties) ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
           <Typography>Loading properties...</Typography>
         </Box>
@@ -3508,7 +3508,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n• Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);
@@ -3729,7 +3729,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             <Alert severity="success">
               <Typography variant="body2">
                 <strong>What happens next:</strong>
-                <br />• Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
+                <br />��� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
                 <br />• Task will be assigned to {inspectionData.inspector || 'selected inspector'}
                 <br />• {inspectionData.notifyTenant ? `Tenant will be notified ${inspectionData.reminderDays} days in advance` : 'No tenant notification will be sent'}
                 <br />• Inspection reminder will be sent to inspector 1 day before
@@ -4881,7 +4881,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
 
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={6}>
-                  {formData.assignedTenants.length > 0 ? (
+                  {(formData.assignedTenants && formData.assignedTenants.length > 0) ? (
                     <Box>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
                         Assigned Tenants ({formData.assignedTenants.length})
@@ -5050,9 +5050,9 @@ ${property.description || 'Beautiful property available for rent. Contact us for
           <Button
             variant="contained"
             onClick={() => setAssignTenantDialogOpen(false)}
-            disabled={formData.assignedTenants.length === 0}
+            disabled={!formData.assignedTenants || formData.assignedTenants.length === 0}
           >
-            Assign Selected ({formData.assignedTenants.length})
+            Assign Selected ({formData.assignedTenants ? formData.assignedTenants.length : 0})
           </Button>
         </DialogActions>
       </Dialog>
@@ -5611,7 +5611,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          🚀 Share Property Listing - {shareProperty?.name}
+          ��� Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>

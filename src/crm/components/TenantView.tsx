@@ -229,7 +229,7 @@ export default function TenantView() {
                       </ListItemIcon>
                       <ListItemText
                         primary={
-                          <Box component="div" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Typography component="span" variant="subtitle2">{order.title}</Typography>
                             <Chip
                               label={order.status}
@@ -239,11 +239,11 @@ export default function TenantView() {
                           </Box>
                         }
                         secondary={
-                          <Box component="div">
-                            <Typography component="div" variant="body2" color="text.secondary">
+                          <Box component="span" sx={{ display: 'block' }}>
+                            <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block' }}>
                               {order.description}
                             </Typography>
-                            <Typography component="div" variant="caption" color="text.secondary">
+                            <Typography component="span" variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                               Submitted: {order.submitted}
                             </Typography>
                           </Box>
