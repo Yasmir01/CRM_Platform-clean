@@ -472,16 +472,7 @@ export default function Properties() {
     }
   }, []);
 
-  // Early return if state is not properly initialized or properties is not an array
-  if (!state || !state.initialized || !Array.isArray(state.properties)) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-        <Typography>Loading properties...</Typography>
-      </Box>
-    );
-  }
-
-  const { properties = [], propertyManagers = [], tenants = [], contacts = [] } = state;
+  const { properties = [], propertyManagers = [], tenants = [], contacts = [] } = state || {};
 
   // Get vacant properties for listings
   const vacantProperties = React.useMemo(() => {
@@ -3517,7 +3508,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n• Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);
