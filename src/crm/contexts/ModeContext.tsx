@@ -24,14 +24,20 @@ export function ModeProvider({ children }: ModeProviderProps) {
   const { user, hasPermission } = useAuth();
   const [currentMode, setCurrentMode] = useState<UserMode>('management');
 
-  // Update mode when user changes
+  // Set initial mode based on user and localStorage
   useEffect(() => {
     if (user) {
-      console.log('ModeContext useEffect triggered:', { userRole: user.role, currentMode });
       // If user is a tenant, force tenant mode (they can't switch out)
       if (user.role === 'Tenant') {
-        console.log('Forcing tenant mode for tenant user');
         setCurrentMode('tenant');
+      } else {
+        // For non-tenant users, load from localStorage or default to management
+        const savedMode = localStorage.getItem('userMode');
+        if (savedMode === 'tenant' && (user.role === 'Admin' || user.role === 'Property Manager')) {
+          setCurrentMode('tenant');
+        } else {
+          setCurrentMode('management');
+        }
       }
     }
   }, [user]); // Only run when user changes, not when mode changes
