@@ -574,7 +574,7 @@ export default function Properties() {
 
   // Calculate unlisted properties (available but not listed)
   const unlistedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties || !listings) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(property =>
       property && property.status === "Available" &&
       !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
@@ -4013,7 +4013,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const showingDateTime = new Date(`${showingData.date}T${showingData.time}`);
               const formattedDateTime = showingDateTime.toLocaleString();
 
-              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n• Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
+              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n• Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n�� Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
 
               setShowingDialogOpen(false);
             }}
