@@ -1185,7 +1185,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
           { field: 'name', oldValue: null, newValue: newPropertyData.name, displayName: 'Property Name' },
           { field: 'address', oldValue: null, newValue: newPropertyData.address, displayName: 'Address' },
           { field: 'monthlyRent', oldValue: null, newValue: newPropertyData.monthlyRent, displayName: 'Monthly Rent' },
-          { field: 'managerIds', oldValue: null, newValue: formData.managerIds.length > 0 ? formData.managerIds.map(id => {
+          { field: 'managerIds', oldValue: null, newValue: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds.map(id => {
           const manager = (propertyManagers || []).find(pm => pm.id === id);
           return manager ? `${manager.firstName} ${manager.lastName}` : id;
         }).join(', ') : 'Unassigned', displayName: 'Property Managers' },
