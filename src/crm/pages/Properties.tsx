@@ -506,7 +506,7 @@ export default function Properties() {
   }, [state?.initialized, properties]);
 
   const occupiedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.filter(p => p && p.status === "Occupied").length;
   }, [state?.initialized, properties]);
 
