@@ -482,7 +482,7 @@ export default function Properties() {
 
   // Get properties with existing listings
   const propertiesWithListings = React.useMemo(() => {
-    if (!state?.initialized || !properties || !listings) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(p =>
       p && listings.some(l => l && l.propertyId === p.id)
     );
@@ -611,7 +611,7 @@ export default function Properties() {
 🚗 Parking: ${property.parkingSpaces || 0} space(s)
 🐕 Pet Policy: ${property.petPolicy || 'Contact for details'}
 
-��� Amenities:
+✨ Amenities:
 ${property.amenities?.map(amenity => `������ ${amenity}`).join('\n') || '• Contact for amenities list'}
 
 📝 Description:
