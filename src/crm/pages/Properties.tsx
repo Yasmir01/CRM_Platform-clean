@@ -516,7 +516,7 @@ export default function Properties() {
   }, [state?.initialized, properties]);
 
   const totalRevenue = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.reduce((sum, p) => sum + (p && p.status === "Occupied" ? (p.monthlyRent || 0) : 0), 0);
   }, [state?.initialized, properties]);
 
@@ -5632,7 +5632,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                 </Typography>
                 {shareProperty.bedrooms && shareProperty.bathrooms && (
                   <Typography variant="body2" color="text.secondary">
-                    {shareProperty.bedrooms} bed ��� {shareProperty.bathrooms} bath
+                    {shareProperty.bedrooms} bed �� {shareProperty.bathrooms} bath
                   </Typography>
                 )}
               </Box>
