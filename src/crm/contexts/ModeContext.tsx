@@ -35,8 +35,10 @@ export function ModeProvider({ children }: ModeProviderProps) {
   // Update mode when user changes
   useEffect(() => {
     if (user) {
+      console.log('ModeContext useEffect triggered:', { userRole: user.role, currentMode });
       // If user is a tenant, force tenant mode (they can't switch out)
       if (user.role === 'Tenant') {
+        console.log('Forcing tenant mode for tenant user');
         setCurrentMode('tenant');
       }
     }
