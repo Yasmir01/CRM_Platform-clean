@@ -653,7 +653,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         <div class="detail-item"><strong>�� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
         <div class="detail-item"><strong>�� Square Footage:</strong> ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}</div>
         <div class="detail-item"><strong>�� Parking:</strong> ${property.parkingSpaces || 0} space(s)</div>
-        <div class="detail-item"><strong>🐕 Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
+        <div class="detail-item"><strong>�� Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
     </div>
     
     <h3>✨ Amenities</h3>
@@ -738,8 +738,20 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         lastUpdated: new Date().toISOString().split('T')[0]
       };
       setListings(prev => [...(prev || []), newListing]);
+
+      // Track property listing creation
+      trackPropertyActivity(
+        'status_change',
+        selectedProperty.id,
+        selectedProperty.name,
+        [
+          { field: 'listing_status', oldValue: 'Unlisted', newValue: 'Listed', displayName: 'Listing Status' }
+        ],
+        `Property listing created and published`,
+        { notes: `Listed on ${Object.entries(listingFormData.listingSites).filter(([_, enabled]) => enabled).map(([site, _]) => site).join(', ')}` }
+      );
     }
-    
+
     setOpenListingDialog(false);
     alert(`Listing ${selectedListing ? 'updated' : 'created'} successfully!`);
   };
