@@ -1173,6 +1173,63 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_SUBSCRIPTION_PLAN', payload: id });
   };
 
+  const addWorkOrder = (workOrderData: Omit<WorkOrder, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const workOrder: WorkOrder = {
+      ...workOrderData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_WORK_ORDER', payload: workOrder });
+  };
+
+  const updateWorkOrder = (workOrder: WorkOrder) => {
+    const updatedWorkOrder = { ...workOrder, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_WORK_ORDER', payload: updatedWorkOrder });
+  };
+
+  const deleteWorkOrder = (id: string) => {
+    dispatch({ type: 'DELETE_WORK_ORDER', payload: id });
+  };
+
+  const addNote = (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const note: Note = {
+      ...noteData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_NOTE', payload: note });
+  };
+
+  const updateNote = (note: Note) => {
+    const updatedNote = { ...note, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_NOTE', payload: updatedNote });
+  };
+
+  const deleteNote = (id: string) => {
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+  };
+
+  const addAnnouncement = (announcementData: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const announcement: Announcement = {
+      ...announcementData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_ANNOUNCEMENT', payload: announcement });
+  };
+
+  const updateAnnouncement = (announcement: Announcement) => {
+    const updatedAnnouncement = { ...announcement, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_ANNOUNCEMENT', payload: updatedAnnouncement });
+  };
+
+  const deleteAnnouncement = (id: string) => {
+    dispatch({ type: 'DELETE_ANNOUNCEMENT', payload: id });
+  };
+
   const value = {
     state,
     dispatch,
