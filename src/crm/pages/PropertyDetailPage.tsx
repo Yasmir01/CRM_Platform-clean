@@ -52,6 +52,7 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import { useCrmData, Property } from "../contexts/CrmDataContext";
 import CrmActivitiesTimeline from "../components/CrmActivitiesTimeline";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
