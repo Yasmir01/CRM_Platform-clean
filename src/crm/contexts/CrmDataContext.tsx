@@ -833,27 +833,23 @@ const CrmDataContext = createContext<{
 export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(crmReducer, initialState);
 
-  // Load data from localStorage on mount
+  // Save data to localStorage whenever state changes
   useEffect(() => {
-    const storedData = LocalStorageService.loadAllData();
-    if (storedData.properties && storedData.properties.length > 0) {
-      dispatch({
-        type: 'INITIALIZE_DATA',
-        payload: {
-          properties: storedData.properties,
-          propertyManagers: storedData.managers || [],
-          tenants: storedData.tenants || [],
-          contacts: storedData.contacts || [],
-          deals: storedData.deals || [],
-          quotes: storedData.quotes || [],
-          campaigns: storedData.campaigns || [],
-          initialized: true
-        }
+    if (state.initialized) {
+      LocalStorageService.syncAllData({
+        properties: state.properties,
+        tenants: state.tenants,
+        managers: state.propertyManagers,
+        contacts: state.contacts,
+        deals: state.deals,
+        quotes: state.quotes,
+        campaigns: state.campaigns,
+        workOrders: state.workOrders,
+        news: state.notes, // Note: notes are saved as news in LocalStorageService
+        announcements: state.announcements
       });
-    } else {
-      dispatch({ type: 'INITIALIZE_DATA', payload: { initialized: true } });
     }
-  }, []);
+  }, [state]);
 
   // Save data to localStorage whenever state changes
   useEffect(() => {
@@ -879,7 +875,10 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       contacts: state.contacts,
       deals: state.deals,
       quotes: state.quotes,
-      campaigns: state.campaigns
+      campaigns: state.campaigns,
+      workOrders: state.workOrders,
+      news: state.notes, // Note: notes are saved as news in LocalStorageService
+      announcements: state.announcements
     }), 30000); // Auto-save every 30 seconds
 
     return cleanup;
