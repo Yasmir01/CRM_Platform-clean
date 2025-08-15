@@ -25,11 +25,15 @@ export function ModeProvider({ children }: ModeProviderProps) {
   const [currentMode, setCurrentMode] = useState<UserMode>(() => {
     // Load mode from localStorage or default based on user role
     const savedMode = localStorage.getItem('userMode');
+    console.log('Initial mode setup:', { savedMode, userRole: user?.role });
     if (savedMode === 'tenant' || savedMode === 'management') {
+      console.log('Using saved mode:', savedMode);
       return savedMode;
     }
     // Default mode based on user role
-    return user?.role === 'Tenant' ? 'tenant' : 'management';
+    const defaultMode = user?.role === 'Tenant' ? 'tenant' : 'management';
+    console.log('Using default mode:', defaultMode);
+    return defaultMode;
   });
 
   // Update mode when user changes
