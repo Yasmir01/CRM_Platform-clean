@@ -40,7 +40,8 @@ export function ModeProvider({ children }: ModeProviderProps) {
         setCurrentMode('tenant');
       }
       // Only force management mode if user doesn't have permission to be in tenant mode
-      else if (currentMode === 'tenant' && !canSwitchToTenantMode) {
+      // Admin and Property Manager should be allowed to stay in tenant mode
+      else if (currentMode === 'tenant' && user.role !== 'Admin' && user.role !== 'Property Manager' && user.role !== 'Tenant') {
         setCurrentMode('management');
       }
     }
