@@ -1303,7 +1303,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
 
   return (
     <>
-      {!state || !state.initialized ? (
+      {!state || !state.initialized || !Array.isArray(state.properties) ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
           <Typography>Loading properties...</Typography>
         </Box>
