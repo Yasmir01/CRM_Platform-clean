@@ -542,6 +542,9 @@ const initialState: CrmState = {
       updatedAt: "2024-01-01T00:00:00.000Z"
     }
   ],
+  workOrders: [],
+  notes: [],
+  announcements: [],
   initialized: false,
 };
 
@@ -728,6 +731,66 @@ function crmReducer(state: CrmState, action: CrmAction): CrmState {
       return {
         ...state,
         subscriptionPlans: state.subscriptionPlans.filter(plan => plan.id !== action.payload)
+      };
+
+    case 'ADD_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: [...state.workOrders, action.payload]
+      };
+
+    case 'UPDATE_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: state.workOrders.map(wo =>
+          wo.id === action.payload.id ? action.payload : wo
+        )
+      };
+
+    case 'DELETE_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: state.workOrders.filter(wo => wo.id !== action.payload)
+      };
+
+    case 'ADD_NOTE':
+      return {
+        ...state,
+        notes: [...state.notes, action.payload]
+      };
+
+    case 'UPDATE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.map(note =>
+          note.id === action.payload.id ? action.payload : note
+        )
+      };
+
+    case 'DELETE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.filter(note => note.id !== action.payload)
+      };
+
+    case 'ADD_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: [...state.announcements, action.payload]
+      };
+
+    case 'UPDATE_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: state.announcements.map(announcement =>
+          announcement.id === action.payload.id ? action.payload : announcement
+        )
+      };
+
+    case 'DELETE_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: state.announcements.filter(announcement => announcement.id !== action.payload)
       };
 
     default:
