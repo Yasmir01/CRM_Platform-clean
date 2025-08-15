@@ -720,53 +720,13 @@ export default function PropertyDetailPage({
                   </IconButton>
                 </Stack>
 
-                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<AddRoundedIcon />}
-                    onClick={() => setNoteDialogOpen(true)}
-                  >
-                    Add Note
-                  </Button>
-                </Stack>
-
-                {activities.length > 0 ? (
-                  <Stack spacing={2}>
-                    {activities.slice(0, 5).map((activity) => (
-                      <Paper key={activity.id} sx={{ p: 2 }} variant="outlined">
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight="medium">
-                              {activity.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {activity.description}
-                            </Typography>
-                          </Box>
-                          <Stack alignItems="flex-end" spacing={0.5}>
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(activity.timestamp).toLocaleDateString()}
-                            </Typography>
-                            <Chip
-                              label={activity.type}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Stack>
-                        </Stack>
-                      </Paper>
-                    ))}
-                    {activities.length > 5 && (
-                      <Typography variant="body2" color="text.secondary" textAlign="center">
-                        ... and {activities.length - 5} more activities
-                      </Typography>
-                    )}
-                  </Stack>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
-                    No notes or activities yet. Click "Add Note" to get started.
-                  </Typography>
-                )}
+                <CrmActivitiesTimeline
+                  entityType="property"
+                  entityId={propertyId}
+                  entityName={property.name}
+                  maxItems={5}
+                  showAddNote={true}
+                />
               </CardContent>
             </Card>
           </Grid>
