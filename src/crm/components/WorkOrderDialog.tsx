@@ -52,14 +52,14 @@ interface WorkOrderDialogProps {
   onWorkOrderCreated?: (workOrder: WorkOrder) => void;
 }
 
-export default function WorkOrderDialog({ 
-  open, 
-  onClose, 
-  propertyId, 
+export default function WorkOrderDialog({
+  open,
+  onClose,
+  propertyId,
   propertyName,
-  onWorkOrderCreated 
+  onWorkOrderCreated
 }: WorkOrderDialogProps) {
-  const { state } = useCrmData();
+  const { state, addWorkOrder } = useCrmData();
   const { user } = useAuth();
   const { properties, tenants } = state;
 
