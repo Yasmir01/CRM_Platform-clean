@@ -476,7 +476,7 @@ export default function Properties() {
 
   // Get vacant properties for listings
   const vacantProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
     return properties.filter(p => p && p.status === "Available");
   }, [state?.initialized, properties]);
 
@@ -611,7 +611,7 @@ export default function Properties() {
 🚗 Parking: ${property.parkingSpaces || 0} space(s)
 🐕 Pet Policy: ${property.petPolicy || 'Contact for details'}
 
-✨ Amenities:
+��� Amenities:
 ${property.amenities?.map(amenity => `������ ${amenity}`).join('\n') || '• Contact for amenities list'}
 
 📝 Description:
