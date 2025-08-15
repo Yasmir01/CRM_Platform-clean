@@ -827,6 +827,15 @@ const CrmDataContext = createContext<{
   addSubscriptionPlan: (plan: Omit<SubscriptionPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateSubscriptionPlan: (plan: SubscriptionPlan) => void;
   deleteSubscriptionPlan: (id: string) => void;
+  addWorkOrder: (workOrder: Omit<WorkOrder, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateWorkOrder: (workOrder: WorkOrder) => void;
+  deleteWorkOrder: (id: string) => void;
+  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateNote: (note: Note) => void;
+  deleteNote: (id: string) => void;
+  addAnnouncement: (announcement: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateAnnouncement: (announcement: Announcement) => void;
+  deleteAnnouncement: (id: string) => void;
 } | undefined>(undefined);
 
 // Provider component
