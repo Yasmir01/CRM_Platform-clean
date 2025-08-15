@@ -2116,7 +2116,13 @@ export default function PropertyDetailPage({
                   <CalendarTodayRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Activity Timeline
                 </Typography>
-                <CrmActivitiesTimeline activities={activities} />
+                <CrmActivitiesTimeline
+                  entityType="property"
+                  entityId={propertyId}
+                  entityName={property.name}
+                  maxItems={20}
+                  showAddNote={true}
+                />
               </CardContent>
             </Card>
           </Grid>
