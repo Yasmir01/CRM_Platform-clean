@@ -22,19 +22,7 @@ interface ModeProviderProps {
 
 export function ModeProvider({ children }: ModeProviderProps) {
   const { user, hasPermission } = useAuth();
-  const [currentMode, setCurrentMode] = useState<UserMode>(() => {
-    // Load mode from localStorage or default based on user role
-    const savedMode = localStorage.getItem('userMode');
-    console.log('Initial mode setup:', { savedMode, userRole: user?.role });
-    if (savedMode === 'tenant' || savedMode === 'management') {
-      console.log('Using saved mode:', savedMode);
-      return savedMode;
-    }
-    // Default mode based on user role
-    const defaultMode = user?.role === 'Tenant' ? 'tenant' : 'management';
-    console.log('Using default mode:', defaultMode);
-    return defaultMode;
-  });
+  const [currentMode, setCurrentMode] = useState<UserMode>('management');
 
   // Update mode when user changes
   useEffect(() => {
