@@ -39,13 +39,8 @@ export function ModeProvider({ children }: ModeProviderProps) {
       if (user.role === 'Tenant') {
         setCurrentMode('tenant');
       }
-      // Only force management mode if user doesn't have permission to be in tenant mode
-      // Admin and Property Manager should be allowed to stay in tenant mode
-      else if (currentMode === 'tenant' && user.role !== 'Admin' && user.role !== 'Property Manager' && user.role !== 'Tenant') {
-        setCurrentMode('management');
-      }
     }
-  }, [user]); // Remove currentMode from dependency array to prevent immediate reversion
+  }, [user]); // Only run when user changes, not when mode changes
 
   // Save mode to localStorage
   useEffect(() => {
