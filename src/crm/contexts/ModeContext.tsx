@@ -35,16 +35,16 @@ export function ModeProvider({ children }: ModeProviderProps) {
   // Update mode when user changes
   useEffect(() => {
     if (user) {
-      // If user is a tenant, force tenant mode
+      // If user is a tenant, force tenant mode (they can't switch out)
       if (user.role === 'Tenant') {
         setCurrentMode('tenant');
       }
-      // If user was in tenant mode but is not a tenant, switch to management
-      else if (currentMode === 'tenant' && user.role !== 'Tenant') {
+      // Only force management mode if user doesn't have permission to be in tenant mode
+      else if (currentMode === 'tenant' && !canSwitchToTenantMode) {
         setCurrentMode('management');
       }
     }
-  }, [user, currentMode]);
+  }, [user]); // Remove currentMode from dependency array to prevent immediate reversion
 
   // Save mode to localStorage
   useEffect(() => {
