@@ -18,13 +18,38 @@ import {
 } from "@mui/material";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 
+// Local interface for the dialog's form handling (extends the CRM context tenant)
+interface TenantFormData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  propertyId: string;
+  propertyName: string;
+  unit?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  leaseStartDate?: string;
+  leaseEndDate?: string;
+  monthlyRent?: number;
+  securityDeposit?: number;
+  status: "Active" | "Inactive" | "Pending" | "Moving Out";
+  profileImage?: string;
+  documents?: any[];
+  notes?: string;
+}
+
 interface TenantDialogProps {
   open: boolean;
   onClose: () => void;
   propertyId?: string;
   propertyName?: string;
-  onTenantCreated?: (tenant: Tenant) => void;
-  existingTenant?: Tenant | null;
+  onTenantCreated?: (tenant: TenantFormData) => void;
+  existingTenant?: TenantFormData | null;
 }
 
 export default function TenantDialog({ 
