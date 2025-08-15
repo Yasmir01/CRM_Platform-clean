@@ -511,7 +511,7 @@ export default function Properties() {
   }, [state?.initialized, properties]);
 
   const availableProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.filter(p => p && p.status === "Available").length;
   }, [state?.initialized, properties]);
 
@@ -5632,7 +5632,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                 </Typography>
                 {shareProperty.bedrooms && shareProperty.bathrooms && (
                   <Typography variant="body2" color="text.secondary">
-                    {shareProperty.bedrooms} bed �� {shareProperty.bathrooms} bath
+                    {shareProperty.bedrooms} bed ��� {shareProperty.bathrooms} bath
                   </Typography>
                 )}
               </Box>
