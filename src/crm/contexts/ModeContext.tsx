@@ -58,21 +58,10 @@ export function ModeProvider({ children }: ModeProviderProps) {
   const effectiveUserRole = isTenantMode ? 'Tenant' : (user?.role || 'Admin');
 
   const toggleMode = () => {
-    console.log('toggleMode called:', {
-      currentMode,
-      canSwitchToTenantMode,
-      canSwitchToManagementMode,
-      userRole: user?.role
-    });
-
     if (currentMode === 'management' && canSwitchToTenantMode) {
-      console.log('Switching to tenant mode');
       setCurrentMode('tenant');
     } else if (currentMode === 'tenant' && canSwitchToManagementMode) {
-      console.log('Switching to management mode');
       setCurrentMode('management');
-    } else {
-      console.log('Toggle blocked - no permission or invalid state');
     }
   };
 
