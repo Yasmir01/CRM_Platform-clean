@@ -16,31 +16,7 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import { useCrmData } from "../contexts/CrmDataContext";
-
-interface Tenant {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  propertyId: string;
-  propertyName: string;
-  unit?: string;
-  emergencyContact?: {
-    name: string;
-    phone: string;
-    relationship: string;
-  };
-  leaseStartDate?: string;
-  leaseEndDate?: string;
-  monthlyRent?: number;
-  securityDeposit?: number;
-  status: "Active" | "Inactive" | "Pending" | "Moving Out";
-  profileImage?: string;
-  documents?: any[];
-  notes?: string;
-}
+import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 
 interface TenantDialogProps {
   open: boolean;
