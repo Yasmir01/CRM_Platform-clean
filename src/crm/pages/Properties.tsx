@@ -501,7 +501,7 @@ export default function Properties() {
 
   // Stats calculations
   const totalProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return 0;
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return 0;
     return properties.length;
   }, [state?.initialized, properties]);
 
