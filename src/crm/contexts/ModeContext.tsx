@@ -44,7 +44,6 @@ export function ModeProvider({ children }: ModeProviderProps) {
 
   // Save mode to localStorage
   useEffect(() => {
-    console.log('Mode changed to:', currentMode);
     localStorage.setItem('userMode', currentMode);
   }, [currentMode]);
 
