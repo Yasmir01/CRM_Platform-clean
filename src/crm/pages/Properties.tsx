@@ -522,7 +522,7 @@ export default function Properties() {
 
   // Generate real listings from actual properties
   const realListings = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
 
     // Create listings for available properties (simulating that they have listings)
     const availableProps = properties.filter(p => p && p.status === "Available");
