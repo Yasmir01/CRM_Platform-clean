@@ -643,7 +643,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     <div class="property-header">
         <h1 class="property-title">${property.name}</h1>
         <p><strong>📍 ${property.address}</strong></p>
-        <p><strong>���� $${property.monthlyRent.toLocaleString()}/month</strong></p>
+        <p><strong>����� $${property.monthlyRent.toLocaleString()}/month</strong></p>
     </div>
     
     ${mainImage ? `<img src="${mainImage.url}" alt="${mainImage.alt}" style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;">` : ''}
@@ -5050,9 +5050,9 @@ ${property.description || 'Beautiful property available for rent. Contact us for
           <Button
             variant="contained"
             onClick={() => setAssignTenantDialogOpen(false)}
-            disabled={formData.assignedTenants.length === 0}
+            disabled={!formData.assignedTenants || formData.assignedTenants.length === 0}
           >
-            Assign Selected ({formData.assignedTenants.length})
+            Assign Selected ({formData.assignedTenants ? formData.assignedTenants.length : 0})
           </Button>
         </DialogActions>
       </Dialog>
