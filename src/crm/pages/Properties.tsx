@@ -489,7 +489,7 @@ export default function Properties() {
   }, [state?.initialized, properties, listings]);
 
   const filteredProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
     const searchLower = (searchTerm || '').toLowerCase();
     return properties.filter(property =>
       property && (
