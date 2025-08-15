@@ -334,36 +334,7 @@ const mockProperty: Property = {
   mainImageId: "img1",
 };
 
-const mockActivities: Activity[] = [
-  {
-    id: "1",
-    type: "listing",
-    title: "Property Listed",
-    description: "Property was listed on multiple platforms",
-    timestamp: "2024-01-15T10:30:00",
-    user: "John Smith",
-    status: "completed"
-  },
-  {
-    id: "2",
-    type: "maintenance",
-    title: "HVAC Maintenance",
-    description: "Scheduled maintenance for heating system",
-    timestamp: "2024-01-10T14:00:00",
-    user: "Mike Wilson",
-    status: "completed",
-    amount: 250
-  },
-  {
-    id: "3",
-    type: "inquiry",
-    title: "Showing Request",
-    description: "Prospective tenant requested viewing",
-    timestamp: "2024-01-08T09:15:00",
-    user: "System",
-    status: "pending"
-  },
-];
+// Mock activities removed - now using real activity tracking system
 
 const mockExpenses: Expense[] = [
   { id: "1", category: "Maintenance", description: "HVAC Repair", amount: 450, date: "2024-01-15", vendor: "ABC Heating" },
