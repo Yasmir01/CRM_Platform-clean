@@ -4881,7 +4881,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
 
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} md={6}>
-                  {formData.assignedTenants.length > 0 ? (
+                  {(formData.assignedTenants && formData.assignedTenants.length > 0) ? (
                     <Box>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
                         Assigned Tenants ({formData.assignedTenants.length})
