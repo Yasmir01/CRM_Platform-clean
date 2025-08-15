@@ -441,17 +441,7 @@ export default function PropertyDetailPage({
   };
 
   const handleAddNote = () => {
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      type: "document",
-      title: "Note Added",
-      description: newNote,
-      timestamp: new Date().toISOString(),
-      user: "Current User",
-      status: "completed"
-    };
-    setActivities([newActivity, ...activities]);
-    setNewNote("");
+    // Note adding is now handled by CrmActivitiesTimeline component
     setNoteDialogOpen(false);
   };
 
