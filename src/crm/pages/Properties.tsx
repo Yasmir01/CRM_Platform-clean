@@ -727,7 +727,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       const newListing: PropertyListing = {
         id: Date.now().toString(),
         propertyId: selectedProperty.id,
-        status: "Draft",
+        status: "Listed", // Set as Listed so property moves out of unlisted section
         customContent: listingFormData.customContent,
         htmlContent: htmlContent,
         listingSites: listingFormData.listingSites,
