@@ -410,7 +410,9 @@ export default function PropertyDetailPage({
       </Box>
     );
   }
-  const [activities, setActivities] = React.useState<Activity[]>(mockActivities);
+
+  // Get real activities for this property
+  const propertyActivities = getEntityActivities('property', propertyId);
   const [expenses, setExpenses] = React.useState<Expense[]>(mockExpenses);
   const [income, setIncome] = React.useState<Income[]>(mockIncome);
   const [currentTab, setCurrentTab] = React.useState(0);
