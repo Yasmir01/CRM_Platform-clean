@@ -1,0 +1,244 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type UserRole = 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+  status: 'Active' | 'Inactive' | 'Pending';
+  permissions: string[];
+  properties?: string[]; // For Property Managers and Tenants
+  serviceType?: string; // For Service Providers
+  avatar?: string;
+  lastLogin?: string;
+  createdAt: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  users: User[];
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  logout: () => void;
+  switchUser: (userId: string) => void;
+  addUser: (userData: Omit<User, 'id' | 'createdAt'>) => User;
+  updateUser: (userId: string, userData: Partial<User>) => void;
+  deleteUser: (userId: string) => void;
+  getUsersByRole: (role: UserRole) => User[];
+  isAuthenticated: boolean;
+  hasPermission: (permission: string) => boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Mock user data
+const mockUsers: User[] = [
+  {
+    id: '1',
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@propcrm.com',
+    role: 'Admin',
+    status: 'Active',
+    permissions: ['all'],
+    createdAt: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: '2',
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'john.smith@propcrm.com',
+    phone: '(555) 111-2222',
+    role: 'Property Manager',
+    status: 'Active',
+    permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
+    properties: ['Sunset Apartments', 'Ocean View Villa'],
+    createdAt: '2024-01-02T00:00:00Z',
+  },
+  {
+    id: '3',
+    firstName: 'Sarah',
+    lastName: 'Johnson',
+    email: 'sarah.johnson@email.com',
+    phone: '(555) 123-4567',
+    role: 'Tenant',
+    status: 'Active',
+    permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
+    properties: ['Sunset Apartments'],
+    createdAt: '2024-01-03T00:00:00Z',
+  },
+  {
+    id: '4',
+    firstName: 'Mike',
+    lastName: 'Wilson',
+    email: 'mike@handyservices.com',
+    phone: '(555) 333-4444',
+    role: 'Service Provider',
+    status: 'Active',
+    permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
+    serviceType: 'Plumbing',
+    createdAt: '2024-01-04T00:00:00Z',
+  },
+];
+
+const rolePermissions: Record<UserRole, string[]> = {
+  'Admin': ['all'],
+  'Property Manager': [
+    'manage_properties',
+    'manage_tenants',
+    'manage_leases',
+    'view_reports',
+    'send_communications',
+    'manage_maintenance',
+    'manage_finances',
+  ],
+  'Tenant': [
+    'view_profile',
+    'view_lease',
+    'pay_rent',
+    'submit_maintenance',
+    'view_communications',
+  ],
+  'Service Provider': [
+    'view_work_orders',
+    'update_work_status',
+    'submit_invoices',
+    'view_communications',
+  ],
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Load user from localStorage on app start
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+    } else {
+      // Auto-login as admin for demo purposes
+      const adminUser = mockUsers[0];
+      setUser(adminUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('currentUser', JSON.stringify(adminUser));
+    }
+  }, []);
+
+  const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
+    // Simulate API call
+    const foundUser = users.find(u => u.email === email && u.status === 'Active');
+    
+    if (foundUser) {
+      const updatedUser = { ...foundUser, lastLogin: new Date().toISOString() };
+      setUser(updatedUser);
+      setIsAuthenticated(true);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      
+      // Update user in the list
+      setUsers(prev => prev.map(u => u.id === foundUser.id ? updatedUser : u));
+      
+      return { success: true, message: 'Login successful' };
+    } else {
+      return { success: false, message: 'Invalid credentials or inactive account' };
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('currentUser');
+  };
+
+  const switchUser = (userId: string) => {
+    const foundUser = users.find(u => u.id === userId);
+    if (foundUser) {
+      setUser(foundUser);
+      localStorage.setItem('currentUser', JSON.stringify(foundUser));
+    }
+  };
+
+  const addUser = (userData: Omit<User, 'id' | 'createdAt'>): User => {
+    const newUser: User = {
+      ...userData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      permissions: rolePermissions[userData.role] || [],
+    };
+    
+    setUsers(prev => [...prev, newUser]);
+    return newUser;
+  };
+
+  const updateUser = (userId: string, userData: Partial<User>) => {
+    setUsers(prev => 
+      prev.map(u => 
+        u.id === userId 
+          ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
+          : u
+      )
+    );
+    
+    // Update current user if it's the same user
+    if (user && user.id === userId) {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+    }
+  };
+
+  const deleteUser = (userId: string) => {
+    setUsers(prev => prev.filter(u => u.id !== userId));
+    
+    // Logout if deleting current user
+    if (user && user.id === userId) {
+      logout();
+    }
+  };
+
+  const getUsersByRole = (role: UserRole): User[] => {
+    return users.filter(u => u.role === role);
+  };
+
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    if (user.permissions.includes('all')) return true;
+    return user.permissions.includes(permission);
+  };
+
+  const value: AuthContextType = {
+    user,
+    users,
+    login,
+    logout,
+    switchUser,
+    addUser,
+    updateUser,
+    deleteUser,
+    getUsersByRole,
+    isAuthenticated,
+    hasPermission,
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+export default AuthContext;

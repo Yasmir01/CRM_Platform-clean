@@ -1,0 +1,33 @@
+/* Global styles */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Fix any input focus issues */
+input, textarea, select {
+  pointer-events: auto;
+  cursor: text;
+}
+
+/* Ensure proper layering without breaking interactions */
+.draggable-widget {
+  pointer-events: auto;
+}
+
+.draggable-widget.dragging {
+  pointer-events: none;
+}
+
+.draggable-widget.dragging * {
+  pointer-events: none;
+}
