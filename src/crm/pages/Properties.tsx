@@ -472,7 +472,16 @@ export default function Properties() {
     }
   }, []);
 
-  const { properties = [], propertyManagers = [], tenants = [], contacts = [] } = state || {};
+  // Early return if state is not properly initialized or properties is not an array
+  if (!state || !state.initialized || !Array.isArray(state.properties)) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <Typography>Loading properties...</Typography>
+      </Box>
+    );
+  }
+
+  const { properties = [], propertyManagers = [], tenants = [], contacts = [] } = state;
 
   // Get vacant properties for listings
   const vacantProperties = React.useMemo(() => {
@@ -3729,7 +3738,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             <Alert severity="success">
               <Typography variant="body2">
                 <strong>What happens next:</strong>
-                <br />• Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
+                <br />��� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
                 <br />• Task will be assigned to {inspectionData.inspector || 'selected inspector'}
                 <br />• {inspectionData.notifyTenant ? `Tenant will be notified ${inspectionData.reminderDays} days in advance` : 'No tenant notification will be sent'}
                 <br />• Inspection reminder will be sent to inspector 1 day before
