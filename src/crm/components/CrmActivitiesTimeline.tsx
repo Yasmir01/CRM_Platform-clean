@@ -151,69 +151,168 @@ export default function CrmActivitiesTimeline({
     setOpenNoteDialog(false);
   };
   return (
-    <Card
-      variant="outlined"
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <CardContent sx={{ p: 0, "&:last-child": { pb: 0 }, flexGrow: 1 }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={2}
-          sx={{ p: 2, pb: 1 }}
-        >
-          <Typography variant="h6" component="h3">
-            Recent Activities
-          </Typography>
-          <Button endIcon={<ArrowForwardRoundedIcon />} size="small">
-            View All
-          </Button>
-        </Stack>
+    <>
+      <Card
+        variant="outlined"
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 }, flexGrow: 1 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            spacing={2}
+            sx={{ p: 2, pb: 1 }}
+          >
+            <Typography variant="h6" component="h3">
+              Recent Activities
+              {entityName && ` - ${entityName}`}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              {showAddNote && (
+                <IconButton
+                  size="small"
+                  onClick={() => setOpenNoteDialog(true)}
+                  title="Add Note"
+                >
+                  <AddRoundedIcon />
+                </IconButton>
+              )}
+              <Button endIcon={<ArrowForwardRoundedIcon />} size="small">
+                View All
+              </Button>
+            </Stack>
+          </Stack>
 
-        <Box sx={{ p: 2 }}>
-          {activities.map((activity) => (
-            <Box
-              key={activity.id}
-              sx={{
-                display: "flex",
-                mb: 2,
-                gap: 2,
-                alignItems: "flex-start",
-              }}
-            >
-              <Box
-                sx={{
-                  bgcolor: `${activity.color}.main`,
-                  borderRadius: "50%",
-                  p: 0.75,
-                  display: "flex",
-                  color: "white",
-                }}
+          <Box sx={{ p: 2 }}>
+            {realActivities.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
+                No activities yet. {showAddNote && `Click "+" to add a note.`}
+              </Typography>
+            ) : (
+              realActivities.map((activity) => {
+                // Handle both real activity events and mock activity data
+                const activityType = activity.action || activity.type || 'note';
+                const activityTitle = activity.description || activity.title || 'Activity';
+                const activityDesc = activity.metadata?.notes || activity.description || '';
+                const activityTime = activity.timestamp || activity.time;
+                const activityColor = getActivityColor(activityType, activity.severity);
+                const activityIcon = getActivityIcon(activityType);
+
+                return (
+                  <Box
+                    key={activity.id}
+                    sx={{
+                      display: "flex",
+                      mb: 2,
+                      gap: 2,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        bgcolor: `${activityColor}.main`,
+                        borderRadius: "50%",
+                        p: 0.75,
+                        display: "flex",
+                        color: "white",
+                      }}
+                    >
+                      {activityIcon}
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <Typography variant="subtitle2" component="span">
+                          {activityTitle}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {activityTime ? formatActivityTime(activityTime) : 'Recently'}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {activityDesc}
+                      </Typography>
+                      {activity.severity && (
+                        <Chip
+                          label={activity.severity.toUpperCase()}
+                          size="small"
+                          color={getActivityColor(activityType, activity.severity) as any}
+                          variant="outlined"
+                          sx={{ mt: 0.5 }}
+                        />
+                      )}
+                      {activity.userDisplayName && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          by {activity.userDisplayName}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                );
+              })
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Add Note Dialog */}
+      <Dialog open={openNoteDialog} onClose={() => setOpenNoteDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Note</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <TextField
+              label="Note Title"
+              fullWidth
+              required
+              value={noteData.title}
+              onChange={(e) => setNoteData({ ...noteData, title: e.target.value })}
+              placeholder="Enter a title for this note"
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={noteData.category}
+                label="Category"
+                onChange={(e) => setNoteData({ ...noteData, category: e.target.value as any })}
               >
-                {activity.icon}
-              </Box>
-              <Box sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <Typography variant="subtitle2" component="span">
-                    {activity.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {activity.time}
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  {activity.description}
-                </Typography>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </CardContent>
-    </Card>
+                <MenuItem value="General">General</MenuItem>
+                <MenuItem value="Property">Property</MenuItem>
+                <MenuItem value="Tenant">Tenant</MenuItem>
+                <MenuItem value="Contact">Contact</MenuItem>
+                <MenuItem value="Deal">Deal</MenuItem>
+                <MenuItem value="Reminder">Reminder</MenuItem>
+                <MenuItem value="Important">Important</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              label="Note Content"
+              fullWidth
+              multiline
+              rows={4}
+              required
+              value={noteData.content}
+              onChange={(e) => setNoteData({ ...noteData, content: e.target.value })}
+              placeholder="Enter the note content..."
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenNoteDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleAddNote}
+            disabled={!noteData.title.trim() || !noteData.content.trim()}
+          >
+            Add Note
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }
