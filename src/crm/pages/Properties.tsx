@@ -1137,7 +1137,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       const updatedProperty: Property = {
       ...selectedProperty,
       ...formData,
-      managerId: formData.managerIds.length > 0 ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
+      managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: selectedProperty.tenantIds,
       images: selectedProperty.images,
@@ -1155,7 +1155,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       type: formData.type,
       units: formData.units,
       monthlyRent: formData.monthlyRent,
-      managerId: formData.managerIds.length > 0 ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
+      managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: [] as string[],
       description: formData.description,
@@ -5611,7 +5611,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          �� Share Property Listing - {shareProperty?.name}
+          ��� Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
