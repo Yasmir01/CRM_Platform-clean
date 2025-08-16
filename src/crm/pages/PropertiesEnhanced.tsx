@@ -90,7 +90,7 @@ interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
-  status: "Available" | "Occupied" | "Maintenance" | "Pending";
+  status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   manager: string;
   tenant?: string;
   images: PropertyImage[];
