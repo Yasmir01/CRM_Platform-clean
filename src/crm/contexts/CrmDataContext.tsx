@@ -68,7 +68,7 @@ export interface Tenant {
   leaseEnd?: string;
   monthlyRent?: number;
   depositAmount?: number;
-  status: "Active" | "Inactive" | "Prospective";
+  status: "Active" | "Inactive" | "Prospective" | "Past Tenant";
   emergencyContact?: {
     name: string;
     phone: string;
