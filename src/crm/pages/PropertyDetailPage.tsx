@@ -66,7 +66,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRoundedIcon";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import MessageRoundedIcon from "@mui/icons-material/MessageRounded";
