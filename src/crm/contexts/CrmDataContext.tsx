@@ -260,6 +260,23 @@ export interface Announcement {
   updatedAt: string;
 }
 
+export interface Document {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "Other";
+  propertyId?: string;
+  tenantId?: string;
+  contactId?: string;
+  dealId?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  description?: string;
+  tags: string[];
+}
+
 // State interface
 export interface CrmState {
   properties: Property[];
@@ -275,6 +292,7 @@ export interface CrmState {
   workOrders: WorkOrder[];
   notes: Note[];
   announcements: Announcement[];
+  documents: Document[];
   initialized: boolean;
 }
 
@@ -319,7 +337,10 @@ type CrmAction =
   | { type: 'DELETE_NOTE'; payload: string }
   | { type: 'ADD_ANNOUNCEMENT'; payload: Announcement }
   | { type: 'UPDATE_ANNOUNCEMENT'; payload: Announcement }
-  | { type: 'DELETE_ANNOUNCEMENT'; payload: string };
+  | { type: 'DELETE_ANNOUNCEMENT'; payload: string }
+  | { type: 'ADD_DOCUMENT'; payload: Document }
+  | { type: 'UPDATE_DOCUMENT'; payload: Document }
+  | { type: 'DELETE_DOCUMENT'; payload: string };
 
 // Initial state with sample data
 const initialState: CrmState = {
