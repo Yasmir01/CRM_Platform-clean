@@ -360,7 +360,10 @@ type CrmAction =
   | { type: 'DELETE_ANNOUNCEMENT'; payload: string }
   | { type: 'ADD_DOCUMENT'; payload: Document }
   | { type: 'UPDATE_DOCUMENT'; payload: Document }
-  | { type: 'DELETE_DOCUMENT'; payload: string };
+  | { type: 'DELETE_DOCUMENT'; payload: string }
+  | { type: 'ADD_PAYMENT'; payload: Payment }
+  | { type: 'UPDATE_PAYMENT'; payload: Payment }
+  | { type: 'DELETE_PAYMENT'; payload: string };
 
 // Initial state with sample data
 const initialState: CrmState = {
