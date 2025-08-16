@@ -100,6 +100,14 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 interface PropertyDetailPageProps {
   propertyId: string;
   onClose?: () => void;
@@ -348,9 +356,9 @@ export default function PropertyDetailPage({
   onBackgroundColorChange
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
-  const { state, updateProperty } = useCrmData();
+  const { state, updateProperty, addDocument } = useCrmData();
   const { getEntityActivities } = useActivityTracking();
-  const { properties, propertyManagers, tenants } = state;
+  const { properties, propertyManagers, tenants, documents } = state;
   const property = properties.find(p => p.id === propertyId) || mockProperty;
 
   // Safety check to ensure property exists
@@ -382,6 +390,13 @@ export default function PropertyDetailPage({
   const [incomeDialogOpen, setIncomeDialogOpen] = React.useState(false);
   const [applianceDialogOpen, setApplianceDialogOpen] = React.useState(false);
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
+  const [documentUploadDialogOpen, setDocumentUploadDialogOpen] = React.useState(false);
+  const [uploadingDocument, setUploadingDocument] = React.useState(false);
+  const [documentUploadData, setDocumentUploadData] = React.useState({
+    file: null as File | null,
+    category: 'Other' as const,
+    description: ''
+  });
   const [workOrderDialogOpen, setWorkOrderDialogOpen] = React.useState(false);
   const [tenantDialogOpen, setTenantDialogOpen] = React.useState(false);
   const [draggedCard, setDraggedCard] = React.useState<string | null>(null);
