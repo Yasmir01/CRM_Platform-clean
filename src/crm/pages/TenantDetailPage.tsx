@@ -211,6 +211,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   const [dateFilter, setDateFilter] = React.useState("");
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [communicationDialogOpen, setCommunicationDialogOpen] = React.useState(false);
+  const [contractViewModalOpen, setContractViewModalOpen] = React.useState(false);
   const [communicationData, setCommunicationData] = React.useState({
     type: 'email' as 'email' | 'sms' | 'call',
     recipient: '',
