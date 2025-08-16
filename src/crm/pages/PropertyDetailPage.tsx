@@ -2677,7 +2677,10 @@ export default function PropertyDetailPage({
                             size="small"
                             variant="outlined"
                             startIcon={<VisibilityRoundedIcon />}
-                            onClick={() => window.open(doc.url, '_blank')}
+                            onClick={() => {
+                              setSelectedDocument(doc);
+                              setDocumentViewModalOpen(true);
+                            }}
                           >
                             View
                           </Button>
