@@ -566,6 +566,7 @@ const initialState: CrmState = {
   workOrders: [],
   notes: [],
   announcements: [],
+  documents: [],
   initialized: false,
 };
 
@@ -903,6 +904,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           workOrders: storedData.workOrders || [],
           notes: storedData.news || [], // Note: notes are loaded from news in LocalStorageService
           announcements: storedData.announcements || [],
+          documents: storedData.documents || [],
           initialized: true
         }
       });
