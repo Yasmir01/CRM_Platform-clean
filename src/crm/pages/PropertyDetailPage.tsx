@@ -70,6 +70,8 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import MessageRoundedIcon from "@mui/icons-material/MessageRounded";
+import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AttachMoneyRoundedIcon from "@mui/icons-material/AttachMoneyRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
