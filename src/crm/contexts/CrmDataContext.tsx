@@ -1134,6 +1134,52 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  const moveOutTenant = (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => {
+    const tenant = state.tenants.find(t => t.id === tenantId);
+    if (!tenant) return;
+
+    // Update tenant to Past Tenant status and add move-out information
+    const updatedTenant: Tenant = {
+      ...tenant,
+      status: 'Past Tenant',
+      moveOutDate: moveOutData.moveOutDate,
+      moveOutReason: moveOutData.moveOutReason,
+      forwardingAddress: moveOutData.forwardingAddress,
+      securityDepositRefunded: moveOutData.securityDepositRefunded,
+      finalCharges: moveOutData.finalCharges,
+      previousPropertyId: tenant.propertyId, // Store the property they moved out from
+      propertyId: undefined, // Remove current property assignment
+      updatedAt: new Date().toISOString()
+    };
+
+    dispatch({ type: 'UPDATE_TENANT', payload: updatedTenant });
+
+    // Update property status when tenant moves out
+    if (tenant.propertyId) {
+      const property = state.properties.find(p => p.id === tenant.propertyId);
+      if (property) {
+        const newTenantIds = (property.tenantIds || []).filter(id => id !== tenantId);
+        const newOccupancy = Math.max(0, property.occupancy - 1);
+
+        // Check if there are any other active tenants
+        const remainingActiveTenants = state.tenants.filter(t =>
+          t.propertyId === tenant.propertyId &&
+          t.status === 'Active' &&
+          t.id !== tenantId
+        );
+
+        const updatedProperty = {
+          ...property,
+          status: remainingActiveTenants.length === 0 ? 'Unlisted' as Property['status'] : property.status,
+          occupancy: newOccupancy,
+          tenantIds: newTenantIds,
+          updatedAt: new Date().toISOString()
+        };
+        dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
+      }
+    }
+  };
+
   const addContact = (contactData: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => {
     const contact: Contact = {
       ...contactData,
