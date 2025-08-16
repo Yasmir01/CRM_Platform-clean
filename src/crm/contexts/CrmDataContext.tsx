@@ -312,6 +312,7 @@ export interface CrmState {
   notes: Note[];
   announcements: Announcement[];
   documents: Document[];
+  payments: Payment[];
   initialized: boolean;
 }
 
