@@ -583,6 +583,8 @@ export default function Properties() {
 
   const getStatusColor = (status: Property["status"]) => {
     switch (status) {
+      case "Unlisted": return "secondary";
+      case "Listed": return "info";
       case "Available": return "success";
       case "Occupied": return "primary";
       case "Maintenance": return "warning";
@@ -2378,7 +2380,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                         startIcon={<WebRoundedIcon />}
                         onClick={() => {
                           const landingPageUrl = `${window.location.origin}/property-landing/${property.id}`;
-                          alert(`🚀 Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
+                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
                         }}
                       >
                         Create Landing Page
@@ -4025,7 +4027,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const showingDateTime = new Date(`${showingData.date}T${showingData.time}`);
               const formattedDateTime = showingDateTime.toLocaleString();
 
-              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n• Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
+              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
 
               setShowingDialogOpen(false);
             }}
