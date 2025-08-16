@@ -2887,6 +2887,147 @@ export default function PropertyDetailPage({
         </DialogActions>
       </Dialog>
 
+      {/* Document Viewer Modal */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => {
+          setDocumentViewModalOpen(false);
+          setSelectedDocument(null);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              {selectedDocument?.name || 'Document Viewer'}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CloudUploadRoundedIcon />}
+                onClick={() => {
+                  if (selectedDocument) {
+                    const link = document.createElement('a');
+                    link.href = selectedDocument.url;
+                    link.download = selectedDocument.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                }}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {selectedDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* Document Preview */}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 3,
+                  bgcolor: 'white',
+                  m: 2,
+                  borderRadius: 1,
+                  border: '1px solid #ddd'
+                }}
+              >
+                <Stack spacing={3} alignItems="center" textAlign="center">
+                  <DescriptionRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+                  <Typography variant="h6">
+                    Document Preview
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {selectedDocument.name}
+                  </Typography>
+                  <Chip
+                    label={selectedDocument.category}
+                    color="primary"
+                    variant="outlined"
+                    sx={{ mb: 1 }}
+                  />
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Type: {selectedDocument.type} • Size: {formatFileSize(selectedDocument.size)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    In a real application, this would display the actual document content using a document viewer component.
+                    For demo purposes, this shows a preview placeholder.
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<VisibilityRoundedIcon />}
+                      onClick={() => {
+                        // In a real app, this would open the document in a viewer
+                        window.open(selectedDocument.url, '_blank');
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CloudUploadRoundedIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = selectedDocument.url;
+                        link.download = selectedDocument.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      Download
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Document Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The selected document could not be loaded.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setDocumentViewModalOpen(false);
+            setSelectedDocument(null);
+          }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Tenant Dialog */}
       <TenantDialog
         open={tenantDialogOpen}
