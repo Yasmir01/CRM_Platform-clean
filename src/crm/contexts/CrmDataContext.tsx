@@ -590,6 +590,7 @@ const initialState: CrmState = {
   notes: [],
   announcements: [],
   documents: [],
+  payments: [],
   initialized: false,
 };
 
