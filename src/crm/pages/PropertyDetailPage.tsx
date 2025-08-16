@@ -438,10 +438,7 @@ export default function PropertyDetailPage({
     setEditDialogOpen(false);
   };
 
-  const handleAddNote = () => {
-    // Note adding is now handled by CrmActivitiesTimeline component
-    setNoteDialogOpen(false);
-  };
+  // handleAddNote removed - note adding is now handled by CrmActivitiesTimeline component
 
   const handleApplianceImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
