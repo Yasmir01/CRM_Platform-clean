@@ -364,6 +364,8 @@ export default function PropertiesEnhanced() {
 
   const getStatusColor = (status: Property["status"]) => {
     switch (status) {
+      case "Unlisted": return "secondary";
+      case "Listed": return "info";
       case "Available": return "success";
       case "Occupied": return "primary";
       case "Maintenance": return "warning";
