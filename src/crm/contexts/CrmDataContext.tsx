@@ -74,6 +74,13 @@ export interface Tenant {
     phone: string;
     relationship: string;
   };
+  moveOutDate?: string;
+  moveOutReason?: string;
+  forwardingAddress?: string;
+  securityDepositRefunded?: boolean;
+  securityDepositAmount?: number;
+  finalCharges?: number;
+  previousPropertyId?: string; // Track previous property when moved out
   createdAt: string;
   updatedAt: string;
 }
