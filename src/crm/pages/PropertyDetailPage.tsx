@@ -1043,14 +1043,7 @@ export default function PropertyDetailPage({
             >
               Edit Property
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => setNoteDialogOpen(true)}
-              sx={{ color: 'inherit', borderColor: 'rgba(255,255,255,0.5)' }}
-            >
-              Add Note
-            </Button>
+            {/* Add Note button removed - now handled by CrmActivitiesTimeline component */}
             <Button
               variant="outlined"
               onClick={() => setCardManagementOpen(true)}
