@@ -1276,6 +1276,25 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_ANNOUNCEMENT', payload: id });
   };
 
+  // Document functions
+  const addDocument = (documentData: Omit<Document, 'id' | 'uploadedAt'>) => {
+    const document: Document = {
+      ...documentData,
+      id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      uploadedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_DOCUMENT', payload: document });
+    return document;
+  };
+
+  const updateDocument = (document: Document) => {
+    dispatch({ type: 'UPDATE_DOCUMENT', payload: document });
+  };
+
+  const deleteDocument = (id: string) => {
+    dispatch({ type: 'DELETE_DOCUMENT', payload: id });
+  };
+
   const value = {
     state,
     dispatch,
@@ -1312,6 +1331,9 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
+    addDocument,
+    updateDocument,
+    deleteDocument,
   };
 
   return (
