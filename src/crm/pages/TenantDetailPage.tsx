@@ -111,11 +111,19 @@ interface Payment {
   id: string;
   amount: number;
   date: string;
-  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order";
-  status: "Completed" | "Pending" | "Failed" | "Refunded";
+  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order" | "Wire Transfer" | "Online";
+  status: "Completed" | "Pending" | "Failed" | "Refunded" | "Processing";
   description: string;
+  propertyId?: string;
+  tenantId?: string;
   recordedBy: string;
   transactionId?: string;
+  category: "Rent" | "Security Deposit" | "Pet Deposit" | "Late Fee" | "Utilities" | "Maintenance" | "Other";
+  dueDate?: string;
+  paidDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Charge {
@@ -1162,7 +1170,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                             {new Date(log.date).toLocaleString()}
                             {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
                             {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
-                            {log.logType === 'note' && ` �� by ${(log as any).createdBy}`}
+                            {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
                             {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
                             {log.logType === 'workorder' && ` • Created by Tenant`}
                             {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
