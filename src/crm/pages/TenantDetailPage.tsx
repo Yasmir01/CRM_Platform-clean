@@ -200,7 +200,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
-  const { state, updateTenant, addNote } = useCrmData();
+  const { state, updateTenant, addNote, addDocument } = useCrmData();
   const { getEntityActivities } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
