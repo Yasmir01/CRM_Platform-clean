@@ -316,7 +316,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   ]);
 
-  const [payments] = React.useState<Payment[]>([]); // Empty for new tenants
+  // Get real payments from CrmDataContext for this tenant
+  const payments = state.payments.filter(payment => payment.tenantId === tenant.id); // Empty for new tenants
   const [mockPayments] = React.useState<Payment[]>([
     {
       id: "1",
