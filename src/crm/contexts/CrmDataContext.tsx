@@ -859,6 +859,26 @@ function crmReducer(state: CrmState, action: CrmAction): CrmState {
         documents: state.documents.filter(document => document.id !== action.payload)
       };
 
+    case 'ADD_PAYMENT':
+      return {
+        ...state,
+        payments: [...state.payments, action.payload]
+      };
+
+    case 'UPDATE_PAYMENT':
+      return {
+        ...state,
+        payments: state.payments.map(payment =>
+          payment.id === action.payload.id ? action.payload : payment
+        )
+      };
+
+    case 'DELETE_PAYMENT':
+      return {
+        ...state,
+        payments: state.payments.filter(payment => payment.id !== action.payload)
+      };
+
     default:
       return state;
   }
