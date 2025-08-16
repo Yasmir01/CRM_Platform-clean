@@ -365,7 +365,7 @@ export default function NewsBoard() {
                     <Box>
                       <Typography variant="h6">Total Views</Typography>
                       <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                        {posts.reduce((sum, post) => sum + post.engagement.views, 0)}
+                        {posts.reduce((sum, post) => sum + (post.engagement?.views || 0), 0)}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Across all posts
@@ -383,8 +383,8 @@ export default function NewsBoard() {
                     <Box>
                       <Typography variant="h6">Engagement</Typography>
                       <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                        {Math.round((posts.reduce((sum, post) => sum + post.engagement.acknowledged, 0) / 
-                          posts.reduce((sum, post) => sum + post.engagement.views, 0)) * 100) || 0}%
+                        {Math.round((posts.reduce((sum, post) => sum + (post.engagement?.acknowledged || 0), 0) /
+                          posts.reduce((sum, post) => sum + (post.engagement?.views || 0), 0)) * 100) || 0}%
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Acknowledgment rate
@@ -510,7 +510,7 @@ export default function NewsBoard() {
                       {isManagementMode && (
                         <Stack direction="row" spacing={2} alignItems="center">
                           <Typography variant="body2" color="text.secondary">
-                            {post.engagement.views} views • {post.engagement.acknowledged} acknowledged
+                            {post.engagement?.views || 0} views • {post.engagement?.acknowledged || 0} acknowledged
                           </Typography>
                         </Stack>
                       )}
