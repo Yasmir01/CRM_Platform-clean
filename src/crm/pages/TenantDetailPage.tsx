@@ -1693,6 +1693,162 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           });
         }}
       />
+
+      {/* Contract View Modal */}
+      <Dialog
+        open={contractViewModalOpen}
+        onClose={() => setContractViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              Lease Contract - {tenant.firstName} {tenant.lastName}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<FileDownloadRoundedIcon />}
+                onClick={() => {
+                  // Download lease contract
+                  if (leaseDetails.leaseDocument) {
+                    const link = document.createElement('a');
+                    link.href = `/documents/${leaseDetails.leaseDocument}`;
+                    link.download = leaseDetails.leaseDocument;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    alert(`Downloading ${leaseDetails.leaseDocument}...`);
+                  }
+                }}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {leaseDetails.leaseDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* PDF Viewer or Document Preview */}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 3,
+                  bgcolor: 'white',
+                  m: 2,
+                  borderRadius: 1,
+                  border: '1px solid #ddd'
+                }}
+              >
+                <Stack spacing={3} alignItems="center" textAlign="center">
+                  <DescriptionRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+                  <Typography variant="h6">
+                    Lease Contract Preview
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Document: {leaseDetails.leaseDocument}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    In a real application, this would display the actual PDF content using a PDF viewer component.
+                    For demo purposes, this shows a preview placeholder.
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<VisibilityRoundedIcon />}
+                      onClick={() => {
+                        // In a real app, this would open the PDF in a viewer
+                        window.open(`/documents/${leaseDetails.leaseDocument}`, '_blank');
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<FileDownloadRoundedIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `/documents/${leaseDetails.leaseDocument}`;
+                        link.download = leaseDetails.leaseDocument;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        alert(`Downloading ${leaseDetails.leaseDocument}...`);
+                      }}
+                    >
+                      Download PDF
+                    </Button>
+                  </Stack>
+
+                  {/* Sample Contract Info Display */}
+                  <Divider sx={{ width: '100%', my: 2 }} />
+                  <Stack spacing={2} sx={{ width: '100%', maxWidth: 500 }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Contract Details:
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Tenant:</Typography>
+                        <Typography variant="body1">{tenant.firstName} {tenant.lastName}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Property:</Typography>
+                        <Typography variant="body1">{tenantProperty?.name || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Lease Period:</Typography>
+                        <Typography variant="body1">
+                          {new Date(leaseDetails.startDate).toLocaleDateString()} - {new Date(leaseDetails.endDate).toLocaleDateString()}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Monthly Rent:</Typography>
+                        <Typography variant="body1" color="success.main" fontWeight="bold">
+                          ${leaseDetails.monthlyRent.toLocaleString()}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Contract Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Please upload the lease contract document to view it here.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setContractViewModalOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
