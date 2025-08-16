@@ -1345,6 +1345,27 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_DOCUMENT', payload: id });
   };
 
+  // Payment functions
+  const addPayment = (paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const payment: Payment = {
+      ...paymentData,
+      id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_PAYMENT', payload: payment });
+    return payment;
+  };
+
+  const updatePayment = (payment: Payment) => {
+    const updatedPayment = { ...payment, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_PAYMENT', payload: updatedPayment });
+  };
+
+  const deletePayment = (id: string) => {
+    dispatch({ type: 'DELETE_PAYMENT', payload: id });
+  };
+
   const value = {
     state,
     dispatch,
