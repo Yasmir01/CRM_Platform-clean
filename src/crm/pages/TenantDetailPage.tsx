@@ -674,12 +674,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
+  // Get real activities from the activity tracking system
+  const tenantActivities = getEntityActivities('tenant', tenant.id);
+
   const allLogs = [
     ...callLogs.map(log => ({ ...log, logType: 'call' as const })),
     ...messageLogs.map(log => ({ ...log, logType: 'message' as const })),
     ...notes.map(note => ({ ...note, logType: 'note' as const })),
     ...workOrders.map(wo => ({ ...wo, logType: 'workorder' as const, date: wo.createdDate, content: wo.description })),
-    ...applicationUpdates.map(app => ({ ...app, logType: 'application' as const, content: app.details, createdBy: app.updatedBy }))
+    ...applicationUpdates.map(app => ({ ...app, logType: 'application' as const, content: app.details, createdBy: app.updatedBy })),
+    // Add real activities from the activity tracking service
+    ...tenantActivities.map(activity => ({
+      id: activity.id,
+      logType: 'activity' as const,
+      date: activity.timestamp,
+      content: activity.description,
+      createdBy: activity.userDisplayName,
+      type: activity.action,
+      metadata: activity.metadata
+    }))
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const filteredLogs = allLogs.filter(log => {
