@@ -352,38 +352,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Lease Agreement 2024.pdf",
-      type: "PDF",
-      size: 2400000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "John Manager",
-      category: "Lease",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Insurance Certificate.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2024-01-01T10:15:00Z",
-      uploadedBy: "Sarah Johnson",
-      category: "Legal",
-      url: "#"
-    },
-    {
-      id: "3",
-      name: "Rental Application - Sarah Johnson.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2023-12-15T09:00:00Z",
-      uploadedBy: "System",
-      category: "Application",
-      url: "#"
-    }
-  ]);
+  // Get real documents from CrmDataContext for this tenant
+  const documents = state.documents.filter(doc => doc.tenantId === tenant.id);
 
   const [workOrders] = React.useState<WorkOrder[]>([]); // Empty for new tenants
   const [mockWorkOrders] = React.useState<WorkOrder[]>([
