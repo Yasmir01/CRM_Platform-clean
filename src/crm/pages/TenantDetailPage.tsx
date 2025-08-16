@@ -1313,7 +1313,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       <Chip label={doc.category} size="small" variant="outlined" />
                     </TableCell>
                     <TableCell>{formatFileSize(doc.size)}</TableCell>
-                    <TableCell>{new Date(doc.uploadDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                     <TableCell>{doc.uploadedBy}</TableCell>
                     <TableCell>
                       <IconButton
