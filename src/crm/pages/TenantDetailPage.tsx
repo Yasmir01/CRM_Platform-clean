@@ -76,6 +76,7 @@ import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 
 interface CallLog {
   id: string;
