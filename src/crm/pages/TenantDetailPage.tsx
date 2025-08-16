@@ -1077,82 +1077,90 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
             {/* Activity Timeline */}
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>Activity Timeline</Typography>
-              <List>
-                {filteredLogs.map((log) => (
-                  <ListItem key={`${log.logType}-${log.id}`} divider>
-                    <ListItemIcon>
-                      {log.logType === 'call' && getCallIcon((log as any).type)}
-                      {log.logType === 'message' &&
-                        ((log as any).type === 'SMS' ? <SmsRoundedIcon /> : <EmailRoundedIcon />)}
-                      {log.logType === 'note' && <NoteAddRoundedIcon />}
-                      {log.logType === 'activity' && <NoteAddRoundedIcon />}
-                      {log.logType === 'workorder' && <BuildRoundedIcon />}
-                      {log.logType === 'application' && <PersonRoundedIcon />}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <>
-                          {log.logType === 'call' &&
-                            `${(log as any).type} Call • ${formatDuration((log as any).duration)}`
-                          }
-                          {log.logType === 'message' &&
-                            `${(log as any).type} ${(log as any).direction}${(log as any).subject ? ` • ${(log as any).subject}` : ''}`
-                          }
-                          {log.logType === 'note' &&
-                            `Note • ${(log as any).type}`
-                          }
-                          {log.logType === 'activity' &&
-                            `Activity • ${(log as any).type}`
-                          }
-                          {log.logType === 'workorder' &&
-                            `Work Order • ${(log as any).status} • ${(log as any).title}`
-                          }
-                          {log.logType === 'application' &&
-                            `${(log as any).type}`
-                          }
-                        </>
-                      }
-                      secondary={
-                        <>
-                          {log.logType === 'call' && (log as any).notes}
-                          {log.logType === 'message' && (log as any).content}
-                          {log.logType === 'note' && (log as any).content}
-                          {log.logType === 'activity' && (log as any).content}
-                          {log.logType === 'workorder' && `${(log as any).content} • Priority: ${(log as any).priority}${(log as any).assignedTo ? ` • Assigned to: ${(log as any).assignedTo}` : ''}`}
-                          {log.logType === 'application' && (log as any).content}
-                          {' • '}
-                          {new Date(log.date).toLocaleString()}
-                          {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
-                          {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
-                          {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
-                          {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
-                          {log.logType === 'workorder' && ` • Created by Tenant`}
-                          {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
-                        </>
-                      }
-                      primaryTypographyProps={{
-                        variant: "subtitle2",
-                        component: "span"
-                      }}
-                      secondaryTypographyProps={{
-                        variant: "body2",
-                        component: "span"
-                      }}
-                    />
-                    {log.logType === 'note' && (
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditNote(log as any)}
-                          title="Edit Note"
-                        >
-                          <EditRoundedIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    )}
-                  </ListItem>
-                ))}
-              </List>
+              {filteredLogs.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No activities found. Add a note to get started.
+                  </Typography>
+                </Box>
+              ) : (
+                <List>
+                  {filteredLogs.map((log) => (
+                    <ListItem key={`${log.logType}-${log.id}`} divider>
+                      <ListItemIcon>
+                        {log.logType === 'call' && getCallIcon((log as any).type)}
+                        {log.logType === 'message' &&
+                          ((log as any).type === 'SMS' ? <SmsRoundedIcon /> : <EmailRoundedIcon />)}
+                        {log.logType === 'note' && <NoteAddRoundedIcon />}
+                        {log.logType === 'activity' && <NoteAddRoundedIcon />}
+                        {log.logType === 'workorder' && <BuildRoundedIcon />}
+                        {log.logType === 'application' && <PersonRoundedIcon />}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <>
+                            {log.logType === 'call' &&
+                              `${(log as any).type} Call • ${formatDuration((log as any).duration)}`
+                            }
+                            {log.logType === 'message' &&
+                              `${(log as any).type} ${(log as any).direction}${(log as any).subject ? ` • ${(log as any).subject}` : ''}`
+                            }
+                            {log.logType === 'note' &&
+                              `Note • ${(log as any).type}`
+                            }
+                            {log.logType === 'activity' &&
+                              `Activity • ${(log as any).type}`
+                            }
+                            {log.logType === 'workorder' &&
+                              `Work Order • ${(log as any).status} • ${(log as any).title}`
+                            }
+                            {log.logType === 'application' &&
+                              `${(log as any).type}`
+                            }
+                          </>
+                        }
+                        secondary={
+                          <>
+                            {log.logType === 'call' && (log as any).notes}
+                            {log.logType === 'message' && (log as any).content}
+                            {log.logType === 'note' && (log as any).content}
+                            {log.logType === 'activity' && (log as any).content}
+                            {log.logType === 'workorder' && `${(log as any).content} • Priority: ${(log as any).priority}${(log as any).assignedTo ? ` • Assigned to: ${(log as any).assignedTo}` : ''}`}
+                            {log.logType === 'application' && (log as any).content}
+                            {' • '}
+                            {new Date(log.date).toLocaleString()}
+                            {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
+                            {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
+                            {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
+                            {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
+                            {log.logType === 'workorder' && ` • Created by Tenant`}
+                            {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
+                          </>
+                        }
+                        primaryTypographyProps={{
+                          variant: "subtitle2",
+                          component: "span"
+                        }}
+                        secondaryTypographyProps={{
+                          variant: "body2",
+                          component: "span"
+                        }}
+                      />
+                      {log.logType === 'note' && (
+                        <ListItemSecondaryAction>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditNote(log as any)}
+                            title="Edit Note"
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      )}
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </Paper>
           </Grid>
 
