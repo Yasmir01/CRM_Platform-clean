@@ -87,6 +87,7 @@ import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
+import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -441,6 +442,74 @@ export default function PropertyDetailPage({
   const handleSaveProperty = () => {
     updateProperty({ ...property, ...editFormData });
     setEditDialogOpen(false);
+  };
+
+  const handleDocumentFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setDocumentUploadData({ ...documentUploadData, file });
+    }
+  };
+
+  const handleDocumentUpload = async () => {
+    if (!documentUploadData.file) return;
+
+    setUploadingDocument(true);
+
+    try {
+      // In a real app, you would upload to a file storage service
+      // For demo purposes, we'll create a local blob URL
+      const fileUrl = URL.createObjectURL(documentUploadData.file);
+
+      const document = {
+        name: documentUploadData.file.name,
+        type: documentUploadData.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        size: documentUploadData.file.size,
+        url: fileUrl,
+        category: documentUploadData.category,
+        propertyId: propertyId,
+        uploadedBy: 'Current User',
+        description: documentUploadData.description,
+        tags: []
+      };
+
+      addDocument(document);
+
+      // Track document upload activity
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'property',
+        entityId: propertyId,
+        entityName: property.name,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: documentUploadData.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        description: `Document uploaded: ${documentUploadData.file.name}`,
+        metadata: {
+          category: documentUploadData.category,
+          fileSize: documentUploadData.file.size,
+          fileType: documentUploadData.file.type
+        },
+        severity: 'low',
+        category: 'operational'
+      });
+
+      // Reset form and close dialog
+      setDocumentUploadData({ file: null, category: 'Other', description: '' });
+      setDocumentUploadDialogOpen(false);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    } finally {
+      setUploadingDocument(false);
+    }
   };
 
   // handleAddNote removed - note adding is now handled by CrmActivitiesTimeline component
