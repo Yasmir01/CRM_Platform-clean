@@ -173,17 +173,7 @@ interface Property {
   appliances?: Appliance[];
 }
 
-interface Activity {
-  id: string;
-  type: "listing" | "maintenance" | "tenant" | "inquiry" | "payment" | "inspection" | "document";
-  title: string;
-  description: string;
-  timestamp: string;
-  user: string;
-  status?: "completed" | "pending" | "cancelled";
-  amount?: number;
-  attachments?: { name: string; url: string }[];
-}
+// Activity interface removed - now using real activity tracking system
 
 interface Expense {
   id: string;
@@ -870,7 +860,7 @@ export default function PropertyDetailPage({
                   </Box>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  📍 {property.address}
+                  ���� {property.address}
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                   <Button
