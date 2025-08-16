@@ -144,7 +144,36 @@ export default function CrmActivitiesTimeline({
       createdBy: 'Current User' // In real app, get from auth
     };
 
-    addNote(note);
+    // Save note to CrmDataContext for persistence
+    const savedNote = addNote(note);
+
+    // Also track as activity for the timeline
+    if (entityType && entityId && entityName) {
+      const { trackActivity } = useActivityTracking();
+      trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: entityType,
+        entityId: entityId,
+        entityName: entityName,
+        changes: [
+          {
+            field: 'notes',
+            oldValue: '',
+            newValue: noteData.title,
+            displayName: 'Note Added'
+          }
+        ],
+        description: `Note added: ${noteData.title}`,
+        metadata: {
+          notes: noteData.content,
+          category: noteData.category
+        },
+        severity: 'low',
+        category: 'communication'
+      });
+    }
 
     // Reset form and close dialog
     setNoteData({ title: '', content: '', category: 'General' });
