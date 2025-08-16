@@ -1430,6 +1430,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updatePropertyManager,
     addTenant,
     updateTenant,
+    moveOutTenant,
     addContact,
     addDeal,
     updateDeal,
