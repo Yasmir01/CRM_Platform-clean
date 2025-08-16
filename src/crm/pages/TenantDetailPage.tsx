@@ -700,7 +700,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     const matchesFilter = filterType === "All" ||
       (filterType === "Calls" && log.logType === 'call') ||
       (filterType === "Messages" && log.logType === 'message') ||
-      (filterType === "Notes" && log.logType === 'note') ||
+      (filterType === "Notes" && (log.logType === 'note' || log.logType === 'activity')) ||
       (filterType === "Work Orders" && log.logType === 'workorder') ||
       (filterType === "Applications" && log.logType === 'application');
 
