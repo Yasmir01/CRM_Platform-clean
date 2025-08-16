@@ -1056,14 +1056,14 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         else if (tenant.status !== 'Active' && previousTenant.status === 'Active') {
           newOccupancy = Math.max(0, property.occupancy - 1);
           newTenantIds = newTenantIds.filter(id => id !== tenant.id);
-          // If no active tenants, mark as available
+          // If no active tenants, mark as unlisted (vacant)
           const activeTenantsForProperty = state.tenants.filter(t =>
             t.propertyId === tenant.propertyId &&
             t.status === 'Active' &&
             t.id !== tenant.id
           );
           if (activeTenantsForProperty.length === 0) {
-            newStatus = 'Available';
+            newStatus = 'Unlisted';
           }
         }
 
