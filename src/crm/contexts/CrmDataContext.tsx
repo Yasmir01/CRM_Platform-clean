@@ -903,6 +903,7 @@ const CrmDataContext = createContext<{
   updatePropertyManager: (manager: PropertyManager) => void;
   addTenant: (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTenant: (tenant: Tenant) => void;
+  moveOutTenant: (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => void;
   addContact: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => void;
   addDeal: (deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateDeal: (deal: Deal) => void;
