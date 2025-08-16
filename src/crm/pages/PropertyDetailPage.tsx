@@ -2189,25 +2189,7 @@ export default function PropertyDetailPage({
         </DialogActions>
       </Dialog>
 
-      {/* Add Note Dialog */}
-      <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Note</DialogTitle>
-        <DialogContent>
-          <RichTextEditor
-            value={newNote}
-            onChange={setNewNote}
-            placeholder="Enter note content..."
-            minHeight={200}
-            label="Note Content"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNoteDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddNote} disabled={!newNote.trim()}>
-            Add Note
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Note: Add Note Dialog removed - now handled by CrmActivitiesTimeline component */}
 
       {/* Appliance Dialog */}
       <Dialog open={applianceDialogOpen} onClose={() => setApplianceDialogOpen(false)} maxWidth="md" fullWidth>
