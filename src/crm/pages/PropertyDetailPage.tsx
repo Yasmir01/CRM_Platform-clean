@@ -2009,27 +2009,62 @@ export default function PropertyDetailPage({
                   <DescriptionRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Documents & Files
                 </Typography>
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Document management system will be implemented to store leases, inspections, and other property-related documents.
-                </Alert>
+                {/* Display property documents */}
+                {(() => {
+                  const propertyDocuments = state.documents.filter(doc => doc.propertyId === property.id);
+                  return (
+                    <>
+                      {propertyDocuments.length > 0 ? (
+                        <TableContainer component={Paper} sx={{ mb: 2 }}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Category</TableCell>
+                                <TableCell>Size</TableCell>
+                                <TableCell>Upload Date</TableCell>
+                                <TableCell>Uploaded By</TableCell>
+                                <TableCell>Actions</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {propertyDocuments.map((doc) => (
+                                <TableRow key={doc.id}>
+                                  <TableCell>
+                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                      <AttachFileRoundedIcon fontSize="small" />
+                                      <Typography variant="body2">{doc.name}</Typography>
+                                    </Stack>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Chip label={doc.category} size="small" variant="outlined" />
+                                  </TableCell>
+                                  <TableCell>{(doc.size / 1024 / 1024).toFixed(2)} MB</TableCell>
+                                  <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
+                                  <TableCell>{doc.uploadedBy}</TableCell>
+                                  <TableCell>
+                                    <IconButton size="small" title={`Download ${doc.name}`}>
+                                      <DownloadRoundedIcon />
+                                    </IconButton>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                          No documents uploaded yet. Upload property-related documents such as leases, inspections, and maintenance records.
+                        </Alert>
+                      )}
+                    </>
+                  );
+                })()}
                 <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
                     startIcon={<CloudUploadRoundedIcon />}
-                    onClick={() => {
-                      // Open file upload dialog
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.multiple = true;
-                      input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
-                      input.onchange = (e) => {
-                        const files = (e.target as HTMLInputElement).files;
-                        if (files) {
-                          alert(`Uploading ${files.length} document(s) for ${property.name}`);
-                        }
-                      };
-                      input.click();
-                    }}
+                    onClick={() => setDocumentUploadDialogOpen(true)}
                   >
                     Upload Document
                   </Button>
