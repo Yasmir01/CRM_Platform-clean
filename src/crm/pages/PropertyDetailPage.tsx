@@ -2796,6 +2796,92 @@ export default function PropertyDetailPage({
         }}
       />
 
+      {/* Document Upload Dialog */}
+      <Dialog open={documentUploadDialogOpen} onClose={() => setDocumentUploadDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Upload Document</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              sx={{
+                height: 100,
+                borderStyle: 'dashed',
+                borderWidth: 2,
+                flexDirection: 'column',
+                gap: 1
+              }}
+            >
+              {documentUploadData.file ? (
+                <>
+                  <Typography variant="body2">{documentUploadData.file.name}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatFileSize(documentUploadData.file.size)}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body2">Click to select file</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Or drag and drop
+                  </Typography>
+                </>
+              )}
+              <VisuallyHiddenInput
+                type="file"
+                onChange={handleDocumentFileChange}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+              />
+            </Button>
+
+            <FormControl fullWidth>
+              <InputLabel>Document Category</InputLabel>
+              <Select
+                value={documentUploadData.category}
+                label="Document Category"
+                onChange={(e) => setDocumentUploadData({
+                  ...documentUploadData,
+                  category: e.target.value as any
+                })}
+              >
+                <MenuItem value="Lease">Lease</MenuItem>
+                <MenuItem value="Insurance">Insurance</MenuItem>
+                <MenuItem value="Inspection">Inspection</MenuItem>
+                <MenuItem value="Maintenance">Maintenance</MenuItem>
+                <MenuItem value="Legal">Legal</MenuItem>
+                <MenuItem value="Financial">Financial</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Description (Optional)"
+              multiline
+              rows={3}
+              value={documentUploadData.description}
+              onChange={(e) => setDocumentUploadData({
+                ...documentUploadData,
+                description: e.target.value
+              })}
+              placeholder="Add a description for this document..."
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentUploadDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleDocumentUpload}
+            disabled={!documentUploadData.file || uploadingDocument}
+            startIcon={uploadingDocument ? undefined : <CloudUploadRoundedIcon />}
+          >
+            {uploadingDocument ? 'Uploading...' : 'Upload Document'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Tenant Dialog */}
       <TenantDialog
         open={tenantDialogOpen}
