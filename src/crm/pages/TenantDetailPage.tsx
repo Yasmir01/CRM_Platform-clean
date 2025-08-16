@@ -829,6 +829,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     <MenuItem value="Pending">Pending</MenuItem>
                     <MenuItem value="Inactive">Inactive</MenuItem>
                     <MenuItem value="Late Payment">Late Payment</MenuItem>
+                    <MenuItem value="Past Tenant">Past Tenant</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
