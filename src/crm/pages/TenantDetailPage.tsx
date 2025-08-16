@@ -1283,9 +1283,9 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     size="small"
                     startIcon={<VisibilityRoundedIcon />}
                     onClick={() => {
-                      // Open lease contract in new window/tab
+                      // Open lease contract in modal
                       if (leaseDetails.leaseDocument) {
-                        window.open(`/documents/${leaseDetails.leaseDocument}`, '_blank');
+                        setContractViewModalOpen(true);
                       } else {
                         alert('Lease contract not found. Please upload the lease document.');
                       }
