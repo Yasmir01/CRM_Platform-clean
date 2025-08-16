@@ -741,6 +741,16 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       };
       setListings(prev => [...(prev || []), newListing]);
 
+      // Update property status to Listed
+      if (selectedProperty.status === 'Unlisted') {
+        const updatedProperty = {
+          ...selectedProperty,
+          status: 'Listed' as Property['status'],
+          updatedAt: new Date().toISOString()
+        };
+        updateProperty(updatedProperty);
+      }
+
       // Track property listing creation
       trackPropertyActivity(
         'status_change',
