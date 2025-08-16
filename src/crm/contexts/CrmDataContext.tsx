@@ -981,7 +981,8 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         campaigns: state.campaigns,
         workOrders: state.workOrders,
         news: state.notes, // Note: notes are saved as news in LocalStorageService
-        announcements: state.announcements
+        announcements: state.announcements,
+        documents: state.documents
       });
     }
   }, [state]);
