@@ -925,6 +925,9 @@ const CrmDataContext = createContext<{
   addDocument: (document: Omit<Document, 'id' | 'uploadedAt'>) => Document;
   updateDocument: (document: Document) => void;
   deleteDocument: (id: string) => void;
+  addPayment: (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => Payment;
+  updatePayment: (payment: Payment) => void;
+  deletePayment: (id: string) => void;
 } | undefined>(undefined);
 
 // Provider component
