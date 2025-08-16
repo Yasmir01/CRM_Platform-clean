@@ -814,6 +814,26 @@ function crmReducer(state: CrmState, action: CrmAction): CrmState {
         announcements: state.announcements.filter(announcement => announcement.id !== action.payload)
       };
 
+    case 'ADD_DOCUMENT':
+      return {
+        ...state,
+        documents: [...state.documents, action.payload]
+      };
+
+    case 'UPDATE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.map(document =>
+          document.id === action.payload.id ? action.payload : document
+        )
+      };
+
+    case 'DELETE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.filter(document => document.id !== action.payload)
+      };
+
     default:
       return state;
   }
@@ -857,6 +877,9 @@ const CrmDataContext = createContext<{
   addAnnouncement: (announcement: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateAnnouncement: (announcement: Announcement) => void;
   deleteAnnouncement: (id: string) => void;
+  addDocument: (document: Omit<Document, 'id' | 'uploadedAt'>) => Document;
+  updateDocument: (document: Document) => void;
+  deleteDocument: (id: string) => void;
 } | undefined>(undefined);
 
 // Provider component
