@@ -47,6 +47,8 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import CommunicationDialog from "../components/CommunicationDialog";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
+import { activityTracker } from "../services/ActivityTrackingService";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -198,7 +200,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
-  const { state, updateTenant } = useCrmData();
+  const { state, updateTenant, addNote } = useCrmData();
+  const { getEntityActivities } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterType, setFilterType] = React.useState("All");
@@ -490,7 +493,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       }
 
       if (editingNote) {
-        // Update existing note
+        // Update existing note - for now just update local state
+        // TODO: Implement note updating in CrmDataContext
         const updatedNote: Note = {
           ...editingNote,
           content: noteContent,
@@ -498,15 +502,56 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         };
         setNotes(prev => prev.map(note => note.id === editingNote.id ? updatedNote : note));
       } else {
-        // Create new note
-        const note: Note = {
-          id: Date.now().toString(),
+        // Create new note using CrmDataContext for persistence
+        const noteData = {
+          title: `${newNote.type} - ${tenant.firstName} ${tenant.lastName}`,
           content: noteContent,
-          date: new Date().toISOString(),
+          category: 'Tenant' as const,
+          tenantId: tenant.id,
+          tags: [newNote.type],
+          isPrivate: false,
+          isPinned: false,
+          createdBy: 'Current User'
+        };
+
+        // Save to CrmDataContext for persistence
+        const savedNote = addNote(noteData);
+
+        // Also track as activity for the timeline
+        activityTracker.trackActivity({
+          userId: 'current-user',
+          userDisplayName: 'Current User',
+          action: 'create',
+          entityType: 'tenant',
+          entityId: tenant.id,
+          entityName: `${tenant.firstName} ${tenant.lastName}`,
+          changes: [
+            {
+              field: 'notes',
+              oldValue: '',
+              newValue: newNote.type,
+              displayName: 'Note Added'
+            }
+          ],
+          description: `${newNote.type}: ${noteContent.substring(0, 100)}${noteContent.length > 100 ? '...' : ''}`,
+          metadata: {
+            notes: noteContent,
+            noteType: newNote.type,
+            ...(newNote.duration > 0 && { callDuration: newNote.duration })
+          },
+          severity: 'low',
+          category: 'communication'
+        });
+
+        // Update local state to show in the UI immediately
+        const localNote: Note = {
+          id: savedNote.id,
+          content: noteContent,
+          date: savedNote.createdAt,
           createdBy: "Current User",
           type: newNote.type
         };
-        setNotes(prev => [note, ...prev]);
+        setNotes(prev => [localNote, ...prev]);
       }
 
       resetNoteForm();
