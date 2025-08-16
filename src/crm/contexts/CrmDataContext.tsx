@@ -872,7 +872,7 @@ const CrmDataContext = createContext<{
   addWorkOrder: (workOrder: Omit<WorkOrder, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateWorkOrder: (workOrder: WorkOrder) => void;
   deleteWorkOrder: (id: string) => void;
-  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => Note;
   updateNote: (note: Note) => void;
   deleteNote: (id: string) => void;
   addAnnouncement: (announcement: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -1246,6 +1246,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedAt: new Date().toISOString(),
     };
     dispatch({ type: 'ADD_NOTE', payload: note });
+    return note;
   };
 
   const updateNote = (note: Note) => {
