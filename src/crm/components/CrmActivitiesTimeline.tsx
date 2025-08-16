@@ -28,6 +28,7 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { activityTracker } from "../services/ActivityTrackingService";
 
 interface CrmActivitiesTimelineProps {
   entityType?: 'property' | 'tenant' | 'contact' | 'all';
@@ -149,8 +150,7 @@ export default function CrmActivitiesTimeline({
 
     // Also track as activity for the timeline
     if (entityType && entityId && entityName) {
-      const { trackActivity } = useActivityTracking();
-      trackActivity({
+      activityTracker.trackActivity({
         userId: 'current-user',
         userDisplayName: 'Current User',
         action: 'create',
