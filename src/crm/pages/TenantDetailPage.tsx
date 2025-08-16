@@ -624,18 +624,48 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
 
   const handleUploadDocument = () => {
     if (newDocument.file) {
-      // In real app, upload the file
-      const mockDocument: Document = {
-        id: Date.now().toString(),
+      // Create a blob URL for the file to simulate file storage
+      const fileUrl = URL.createObjectURL(newDocument.file);
+
+      // Save document to CrmDataContext
+      const savedDocument = addDocument({
         name: newDocument.file.name,
         type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
         size: newDocument.file.size,
-        uploadDate: new Date().toISOString(),
-        uploadedBy: "Current User",
+        url: fileUrl,
         category: newDocument.category,
-        url: "#"
-      };
-      // Add to documents list (in real app, this would update the state)
+        tenantId: tenant.id,
+        uploadedBy: "Current User",
+        description: newDocument.description,
+        tags: []
+      });
+
+      // Track activity for the upload
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        entityName: `${tenant.firstName} ${tenant.lastName}`,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Uploaded'
+          }
+        ],
+        description: `Document uploaded: ${newDocument.file.name}`,
+        metadata: {
+          documentCategory: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type
+        },
+        severity: 'low',
+        category: 'documentation'
+      });
+
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
