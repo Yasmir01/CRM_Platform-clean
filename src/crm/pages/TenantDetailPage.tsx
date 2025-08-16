@@ -543,17 +543,47 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
 
   const handleAddPayment = () => {
     if (newPayment.amount > 0) {
-      const payment: Payment = {
-        id: Date.now().toString(),
+      // Save payment to CrmDataContext
+      const savedPayment = addPayment({
         amount: newPayment.amount,
         date: new Date().toISOString(),
         method: newPayment.method,
         status: "Completed",
         description: newPayment.description || `Manual payment entry`,
+        propertyId: tenant.propertyId,
+        tenantId: tenant.id,
         recordedBy: "Current User",
-        transactionId: newPayment.transactionId
-      };
-      // In real app, add to payments state
+        transactionId: newPayment.transactionId,
+        category: "Rent", // Default to rent, could be made selectable
+        paidDate: new Date().toISOString(),
+      });
+
+      // Track activity for the payment
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        entityName: `${tenant.firstName} ${tenant.lastName}`,
+        changes: [
+          {
+            field: 'payments',
+            oldValue: '',
+            newValue: `$${newPayment.amount}`,
+            displayName: 'Payment Recorded'
+          }
+        ],
+        description: `Payment recorded: $${newPayment.amount} via ${newPayment.method}`,
+        metadata: {
+          paymentAmount: newPayment.amount,
+          paymentMethod: newPayment.method,
+          transactionId: newPayment.transactionId
+        },
+        severity: 'low',
+        category: 'financial'
+      });
+
       setNewPayment({ amount: 0, method: "ACH", description: "", transactionId: "" });
       setOpenPaymentDialog(false);
       alert("Payment recorded successfully!");
@@ -1132,7 +1162,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                             {new Date(log.date).toLocaleString()}
                             {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
                             {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
-                            {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
+                            {log.logType === 'note' && ` �� by ${(log as any).createdBy}`}
                             {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
                             {log.logType === 'workorder' && ` • Created by Tenant`}
                             {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
