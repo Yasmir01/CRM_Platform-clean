@@ -392,6 +392,8 @@ export default function PropertyDetailPage({
   const [applianceDialogOpen, setApplianceDialogOpen] = React.useState(false);
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
   const [documentUploadDialogOpen, setDocumentUploadDialogOpen] = React.useState(false);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
   const [uploadingDocument, setUploadingDocument] = React.useState(false);
   const [documentUploadData, setDocumentUploadData] = React.useState({
     file: null as File | null,
