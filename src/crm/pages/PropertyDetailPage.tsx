@@ -2635,56 +2635,82 @@ export default function PropertyDetailPage({
             <Alert severity="info">
               All documents related to {property.name} are listed below. You can view, download, or manage documents from here.
             </Alert>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Lease Agreement"
-                  secondary="PDF • Uploaded: Jan 15, 2024 • Size: 2.1 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Property Insurance"
-                  secondary="PDF • Uploaded: Jan 10, 2024 • Size: 1.5 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Inspection Report"
-                  secondary="PDF • Uploaded: Dec 20, 2023 • Size: 3.2 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Maintenance Records"
-                  secondary="PDF • Uploaded: Dec 15, 2023 • Size: 0.8 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-            </List>
+            {(() => {
+              const propertyDocuments = documents.filter(doc => doc.propertyId === propertyId);
+
+              if (propertyDocuments.length === 0) {
+                return (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No documents uploaded yet.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<CloudUploadRoundedIcon />}
+                      onClick={() => setDocumentUploadDialogOpen(true)}
+                      sx={{ mt: 2 }}
+                    >
+                      Upload First Document
+                    </Button>
+                  </Box>
+                );
+              }
+
+              return (
+                <List>
+                  {propertyDocuments.map((doc, index) => (
+                    <React.Fragment key={doc.id}>
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>
+                            <DescriptionRoundedIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={doc.name}
+                          secondary={`${doc.type} • ${doc.category} • Uploaded: ${new Date(doc.uploadedAt).toLocaleDateString()} • Size: ${formatFileSize(doc.size)}`}
+                        />
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<VisibilityRoundedIcon />}
+                            onClick={() => window.open(doc.url, '_blank')}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<CloudUploadRoundedIcon />}
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = doc.url;
+                              link.download = doc.name;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                          >
+                            Download
+                          </Button>
+                        </Stack>
+                      </ListItem>
+                      {index < propertyDocuments.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              );
+            })()}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDocumentsDialogOpen(false)}>Close</Button>
-          <Button variant="contained" startIcon={<AddRoundedIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={() => setDocumentUploadDialogOpen(true)}
+          >
             Upload New Document
           </Button>
         </DialogActions>
