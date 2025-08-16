@@ -390,7 +390,6 @@ export default function PropertyDetailPage({
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [expenseDialogOpen, setExpenseDialogOpen] = React.useState(false);
   const [incomeDialogOpen, setIncomeDialogOpen] = React.useState(false);
-  const [noteDialogOpen, setNoteDialogOpen] = React.useState(false);
   const [applianceDialogOpen, setApplianceDialogOpen] = React.useState(false);
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
   const [workOrderDialogOpen, setWorkOrderDialogOpen] = React.useState(false);
