@@ -969,6 +969,8 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const property: Property = {
       ...propertyData,
       id: Date.now().toString(),
+      // New properties start as Unlisted until marked as Listed or a tenant is assigned
+      status: propertyData.status === 'Occupied' ? 'Occupied' : 'Unlisted',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
