@@ -277,6 +277,25 @@ export interface Document {
   tags: string[];
 }
 
+export interface Payment {
+  id: string;
+  amount: number;
+  date: string;
+  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order" | "Wire Transfer" | "Online";
+  status: "Completed" | "Pending" | "Failed" | "Refunded" | "Processing";
+  description: string;
+  propertyId?: string;
+  tenantId?: string;
+  recordedBy: string;
+  transactionId?: string;
+  category: "Rent" | "Security Deposit" | "Pet Deposit" | "Late Fee" | "Utilities" | "Maintenance" | "Other";
+  dueDate?: string;
+  paidDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // State interface
 export interface CrmState {
   properties: Property[];
