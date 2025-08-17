@@ -281,16 +281,26 @@ export default function UserRoles() {
   const [roles, setRoles] = React.useState<Role[]>(mockRoles);
 
   // Map AuthContext users to UserRoles interface
-  const users = authUsers.map(authUser => ({
-    id: authUser.id,
-    firstName: authUser.firstName,
-    lastName: authUser.lastName,
-    email: authUser.email,
-    roleId: "1", // Default to Admin role for demo
-    status: authUser.status,
-    lastLogin: authUser.lastLogin,
-    profilePicture: authUser.avatar,
-  }));
+  const users = authUsers.map(authUser => {
+    // Map auth role to role ID
+    const roleMapping: Record<string, string> = {
+      'Admin': '1',
+      'Property Manager': '2',
+      'Tenant': '6',
+      'Service Provider': '4',
+    };
+
+    return {
+      id: authUser.id,
+      firstName: authUser.firstName,
+      lastName: authUser.lastName,
+      email: authUser.email,
+      roleId: roleMapping[authUser.role] || "1",
+      status: authUser.status,
+      lastLogin: authUser.lastLogin,
+      profilePicture: authUser.avatar,
+    };
+  });
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openRoleDialog, setOpenRoleDialog] = React.useState(false);
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
