@@ -751,44 +751,81 @@ export default function NewsBoard() {
                   {/* Tenant Selection */}
                   {(formData.targetAudience === 'tenants' || formData.targetAudience === 'custom') && (
                     <Grid item xs={12}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>Select Tenants ({formData.targetTenants.length} selected)</InputLabel>
-                        <Select
-                          multiple
-                          value={formData.targetTenants}
-                          label={`Select Tenants (${formData.targetTenants.length} selected)`}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            targetTenants: typeof e.target.value === 'string'
-                              ? e.target.value.split(',')
-                              : e.target.value
-                          })}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((value) => {
-                                const tenant = tenants.find(t => t.id === value);
-                                return (
-                                  <Chip
-                                    key={value}
-                                    label={tenant ? `${tenant.firstName} ${tenant.lastName}` : value}
-                                    size="small"
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {tenants.map((tenant) => (
-                            <MenuItem key={tenant.id} value={tenant.id}>
-                              <Checkbox checked={formData.targetTenants.includes(tenant.id)} />
-                              <ListItemText
-                                primary={`${tenant.firstName} ${tenant.lastName}`}
-                                secondary={tenant.email}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
+                        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                          Select Tenants ({formData.targetTenants.length} selected)
+                        </Typography>
+                        <FormControl fullWidth variant="outlined">
+                          <Select
+                            multiple
+                            value={formData.targetTenants}
+                            displayEmpty
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              targetTenants: typeof e.target.value === 'string'
+                                ? e.target.value.split(',')
+                                : e.target.value
+                            })}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minHeight: '32px' }}>
+                                {selected.length === 0 ? (
+                                  <Typography variant="body2" color="text.secondary">
+                                    Click to select tenants...
+                                  </Typography>
+                                ) : (
+                                  selected.map((value) => {
+                                    const tenant = tenants.find(t => t.id === value);
+                                    return (
+                                      <Chip
+                                        key={value}
+                                        label={tenant ? `${tenant.firstName} ${tenant.lastName}` : value}
+                                        size="small"
+                                        color="secondary"
+                                        variant="outlined"
+                                      />
+                                    );
+                                  })
+                                )}
+                              </Box>
+                            )}
+                            sx={{ minHeight: 80 }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 400,
+                                  width: 600,
+                                },
+                              },
+                            }}
+                          >
+                            {tenants.map((tenant) => (
+                              <MenuItem key={tenant.id} value={tenant.id} sx={{ py: 1.5 }}>
+                                <Checkbox
+                                  checked={formData.targetTenants.includes(tenant.id)}
+                                  color="secondary"
+                                />
+                                <ListItemText
+                                  primary={
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                      {tenant.firstName} {tenant.lastName}
+                                    </Typography>
+                                  }
+                                  secondary={
+                                    <Box>
+                                      <Typography variant="body2" color="text.secondary">
+                                        📧 {tenant.email}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        📞 {tenant.phone} • Status: {tenant.status}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Paper>
                     </Grid>
                   )}
 
