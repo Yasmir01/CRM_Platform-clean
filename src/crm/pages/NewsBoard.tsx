@@ -168,6 +168,14 @@ export default function NewsBoard() {
   const [saveSelectionDialogOpen, setSaveSelectionDialogOpen] = React.useState(false);
   const [saveSelectionName, setSaveSelectionName] = React.useState('');
   const [saveSelectionDescription, setSaveSelectionDescription] = React.useState('');
+
+  // Quick group creation state
+  const [quickGroupDialogOpen, setQuickGroupDialogOpen] = React.useState(false);
+  const [quickGroupData, setQuickGroupData] = React.useState({
+    name: '',
+    description: '',
+    color: '#2196F3'
+  });
   // Auto-save posts to localStorage whenever they change
   React.useEffect(() => {
     LocalStorageService.saveNews(posts);
