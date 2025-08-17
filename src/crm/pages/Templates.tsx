@@ -1217,21 +1217,25 @@ export default function Templates() {
                 >
                   <ContentCopyRoundedIcon />
                 </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleEditTemplate(template)}
-                  title="Edit"
-                >
-                  <EditRoundedIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDeleteTemplate(template.id)}
-                  title="Delete"
-                >
-                  <DeleteRoundedIcon />
-                </IconButton>
+                {canEditTemplates() && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEditTemplate(template)}
+                    title="Edit"
+                  >
+                    <EditRoundedIcon />
+                  </IconButton>
+                )}
+                {canDeleteTemplates() && (
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDeleteTemplate(template.id)}
+                    title="Delete"
+                  >
+                    <DeleteRoundedIcon />
+                  </IconButton>
+                )}
               </CardActions>
             </Card>
           </Grid>
