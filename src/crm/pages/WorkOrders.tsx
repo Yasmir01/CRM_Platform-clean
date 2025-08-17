@@ -297,12 +297,70 @@ export default function WorkOrders() {
     setWorkOrders(prev => prev.filter(wo => wo.id !== id));
   };
 
-  const filteredWorkOrders = workOrders.filter(workOrder =>
-    workOrder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Enhanced filtering for tenant-specific access
+  const filteredWorkOrders = React.useMemo(() => {
+    let filtered = workOrders;
+
+    // If user is a tenant, filter to only show work orders for their property and lease period
+    if (user?.role === 'Tenant') {
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (currentTenant) {
+        filtered = workOrders.filter(workOrder => {
+          // Check if work order is for tenant's property
+          const isForTenantProperty =
+            workOrder.propertyId === currentTenant.propertyId ||
+            workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+            workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase()) ||
+            workOrder.tenantId === currentTenant.id;
+
+          if (!isForTenantProperty) {
+            return false;
+          }
+
+          // Check if work order is within tenant's lease period
+          const workOrderDate = new Date(workOrder.createdDate);
+          const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+          const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+          const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+          // If tenant has lease dates, check if work order is within the period
+          if (leaseStart) {
+            // Work order must be after lease start
+            if (workOrderDate < leaseStart) {
+              return false;
+            }
+          }
+
+          // Check end date - use moveOutDate if available, otherwise leaseEnd
+          const endDate = moveOutDate || leaseEnd;
+          if (endDate) {
+            // Work order must be before move-out/lease end
+            if (workOrderDate > endDate) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+      } else {
+        // If tenant not found in data, show no work orders
+        filtered = [];
+      }
+    }
+
+    // Apply search term filter
+    if (searchTerm) {
+      filtered = filtered.filter(workOrder =>
+        workOrder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [workOrders, user, tenants, searchTerm]);
 
   const getStatusColor = (status: WorkOrder["status"]) => {
     switch (status) {
