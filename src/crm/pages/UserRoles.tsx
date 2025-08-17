@@ -459,7 +459,7 @@ export default function UserRoles() {
   const handleDeleteUser = (id: string) => {
     const user = users.find(u => u.id === id);
     if (user) {
-      setUsers(prev => prev.filter(u => u.id !== id));
+      deleteUser(id); // Use AuthContext delete function
       // Update role user count
       setRoles(prev => 
         prev.map(r => 
