@@ -9,49 +9,33 @@ import {
   Typography,
   Stack,
   Chip,
+  Button,
+  Divider,
 } from "@mui/material";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import { useAuth } from "../contexts/AuthContext";
 
-// Mock user data (would normally come from AuthContext)
-const mockUsers = [
-  {
-    id: '1',
-    name: 'Admin User',
-    role: 'Admin',
-    email: 'admin@propcrm.com',
-    color: 'error',
-  },
-  {
-    id: '2',
-    name: 'John Smith',
-    role: 'Property Manager',
-    email: 'john.smith@propcrm.com',
-    color: 'primary',
-  },
-  {
-    id: '3',
-    name: 'Sarah Johnson',
-    role: 'Tenant',
-    email: 'sarah.johnson@email.com',
-    color: 'info',
-  },
-  {
-    id: '4',
-    name: 'Mike Wilson',
-    role: 'Service Provider',
-    email: 'mike@handyservices.com',
-    color: 'warning',
-  },
-];
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case 'Admin': return 'error';
+    case 'Property Manager': return 'primary';
+    case 'Tenant': return 'info';
+    case 'Service Provider': return 'warning';
+    default: return 'default';
+  }
+};
 
 export default function CrmUserSelector() {
-  const [selectedUser, setSelectedUser] = React.useState("1");
+  const { user, users, switchUser, logout } = useAuth();
 
   const handleChange = (event: SelectChangeEvent) => {
-    setSelectedUser(event.target.value as string);
+    const value = event.target.value as string;
+    if (value === 'logout') {
+      logout();
+    } else {
+      switchUser(value);
+    }
   };
-
-  const currentUser = mockUsers.find(user => user.id === selectedUser);
 
   return (
     <Box sx={{ width: "100%" }}>
