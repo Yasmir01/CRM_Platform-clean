@@ -493,7 +493,7 @@ export default function WorkOrders() {
       }
     }
 
-    setWorkOrders(prev => prev.filter(wo => wo.id !== id));
+    updateWorkOrders(prev => prev.filter(wo => wo.id !== id));
   };
 
   // Enhanced filtering for tenant-specific access
