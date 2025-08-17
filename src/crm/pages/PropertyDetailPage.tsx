@@ -1812,6 +1812,104 @@ export default function PropertyDetailPage({
               </CardContent>
             </Card>
           </Grid>
+
+          {/* Deposit and Charge Management */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 3 }}>
+                  <AttachMoneyRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                  Deposits & Charges Management
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Security Deposit Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'info.light', color: 'info.contrastText' }}>
+                      <Typography variant="h5">${property.securityDeposit || 0}</Typography>
+                      <Typography variant="body2">Security Deposit</Typography>
+                    </Paper>
+                  </Grid>
+
+                  {/* Pet Deposit Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.light', color: 'secondary.contrastText' }}>
+                      <Typography variant="h5">${property.petDeposit || 0}</Typography>
+                      <Typography variant="body2">Pet Deposit</Typography>
+                    </Paper>
+                  </Grid>
+
+                  {/* Pet Fee Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.light', color: 'warning.contrastText' }}>
+                      <Typography variant="h5">${property.petFee || 0}</Typography>
+                      <Typography variant="body2">Pet Fee</Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                {/* Charge/Credit Management Actions - Only for authorized users */}
+                {(hasPermission('all') || hasPermission('delete_charges') || hasPermission('add_credits')) && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                      Financial Management (Admin Only)
+                    </Typography>
+                    <Stack direction="row" spacing={2} flexWrap="wrap">
+                      {(hasPermission('all') || hasPermission('add_credits')) && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<AddRoundedIcon />}
+                          onClick={() => {
+                            // Add credit functionality
+                            alert('Add Credit functionality - This would open a dialog to add credits to tenant/property financial ledger');
+                          }}
+                        >
+                          Add Credit
+                        </Button>
+                      )}
+
+                      {(hasPermission('all') || hasPermission('delete_charges')) && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => {
+                            // Delete charge functionality
+                            if (window.confirm('Are you sure you want to delete a charge? This action will be recorded in the financial ledger.')) {
+                              alert('Delete Charge functionality - This would open a dialog to select and delete charges from tenant/property financial ledger');
+                            }
+                          }}
+                        >
+                          Delete Charge
+                        </Button>
+                      )}
+
+                      {(hasPermission('all') || hasPermission('view_financial_ledger')) && (
+                        <Button
+                          variant="outlined"
+                          startIcon={<DescriptionRoundedIcon />}
+                          onClick={() => {
+                            // View financial ledger
+                            alert('Financial Ledger - This would open a detailed view of all financial transactions for this property');
+                          }}
+                        >
+                          View Financial Ledger
+                        </Button>
+                      )}
+                    </Stack>
+
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      <Typography variant="body2">
+                        All financial changes are tracked in the activity log and reflected in the tenant's financial records.
+                        When tenants move out, charges will only be visible in their past tenant ledger.
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
       )}
 
