@@ -692,6 +692,20 @@ export default function PowerTools() {
     type: "URL" as QRCodeData["type"]
   });
 
+  // Helper function to update QR codes and save to localStorage
+  const updateQRCodes = React.useCallback((updater: (prev: QRCodeData[]) => QRCodeData[]) => {
+    setQrCodes(prev => {
+      const updated = updater(prev);
+      try {
+        LocalStorageService.saveQRCodes(updated);
+        console.log('QR codes updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save QR codes after update:', error);
+      }
+      return updated;
+    });
+  }, []);
+
   // Contest states
   const [contests, setContests] = React.useState<Contest[]>(mockContests);
   const [openContestDialog, setOpenContestDialog] = React.useState(false);
