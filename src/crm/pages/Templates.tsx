@@ -1256,7 +1256,7 @@ export default function Templates() {
                     applicationFee: applicationFee,
                     paymentMethods: paymentMethods,
                   };
-                  setTemplates(prev => [...prev, newTemplate]);
+                  updateTemplates(prev => [...prev, newTemplate]);
                   setOpenFormBuilderDialog(false);
                   // Auto-save functionality disabled to prevent infinite loops
                   alert("Template saved successfully!");
