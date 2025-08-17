@@ -1180,6 +1180,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       type: formData.type,
       units: formData.units,
       monthlyRent: formData.monthlyRent,
+      securityDeposit: formData.securityDeposit,
       managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: [] as string[],
