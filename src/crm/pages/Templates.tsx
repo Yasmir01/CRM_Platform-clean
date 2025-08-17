@@ -438,7 +438,28 @@ Signature: _________________ Date: _________________`,
 
 export default function Templates() {
   const theme = useTheme();
-  const [templates, setTemplates] = React.useState<Template[]>(mockTemplates);
+  // Load templates from localStorage, fallback to mock data
+  const [templates, setTemplates] = React.useState<Template[]>(() => {
+    const savedTemplates = LocalStorageService.getTemplates();
+    console.log('Loading templates from localStorage:', savedTemplates.length, 'templates found');
+    return savedTemplates.length > 0 ? savedTemplates : mockTemplates;
+  });
+
+  // Helper function to update templates and save to localStorage
+  const updateTemplates = React.useCallback((newTemplatesOrUpdater: Template[] | ((prev: Template[]) => Template[])) => {
+    setTemplates(prev => {
+      const updated = typeof newTemplatesOrUpdater === 'function'
+        ? newTemplatesOrUpdater(prev)
+        : newTemplatesOrUpdater;
+      try {
+        LocalStorageService.saveTemplates(updated);
+        console.log('Templates updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save templates after update:', error);
+      }
+      return updated;
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [openDialog, setOpenDialog] = React.useState(false);
