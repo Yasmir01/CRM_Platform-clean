@@ -354,24 +354,72 @@ export default function PropertyGroups() {
                       </Stack>
                     )}
 
-                    {/* Action Buttons */}
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<CampaignRoundedIcon />}
-                        fullWidth
-                      >
-                        Send Blast
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<BarChartRoundedIcon />}
-                        fullWidth
-                      >
-                        View Report
-                      </Button>
+                    {/* Enhanced Action Buttons */}
+                    <Stack spacing={1}>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          startIcon={<CampaignRoundedIcon />}
+                          fullWidth
+                          onClick={() => handleSendBlast(group)}
+                          sx={{ bgcolor: group.color, '&:hover': { bgcolor: group.color + 'CC' } }}
+                        >
+                          Send Announcement
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<BarChartRoundedIcon />}
+                          onClick={() => {
+                            alert(`View detailed analytics report for ${group.name} - Feature coming soon!`);
+                          }}
+                          sx={{ borderColor: group.color, color: group.color }}
+                        >
+                          Analytics
+                        </Button>
+                      </Stack>
+
+                      {/* Quick Marketing Actions */}
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip title="Create targeted marketing campaign">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<LocalOfferRoundedIcon />}
+                            onClick={() => handleCreateAnnouncement(group)}
+                            sx={{
+                              flex: 1,
+                              fontSize: '0.75rem',
+                              py: 0.5,
+                              borderColor: group.color + '50',
+                              color: group.color
+                            }}
+                          >
+                            Campaign
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="View group properties">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<HomeWorkRoundedIcon />}
+                            onClick={() => {
+                              // Navigate to properties page with group filter
+                              window.location.href = `/crm/properties?group=${group.id}`;
+                            }}
+                            sx={{
+                              flex: 1,
+                              fontSize: '0.75rem',
+                              py: 0.5,
+                              borderColor: group.color + '50',
+                              color: group.color
+                            }}
+                          >
+                            Properties
+                          </Button>
+                        </Tooltip>
+                      </Stack>
                     </Stack>
                   </Stack>
                 </CardContent>
