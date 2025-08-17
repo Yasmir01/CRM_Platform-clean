@@ -1054,7 +1054,7 @@ export default function PowerTools() {
             document.body.removeChild(link);
 
             // Update download count
-            setQrCodes(prev => prev.map(qr =>
+            updateQRCodes(prev => prev.map(qr =>
               qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
             ));
           };
