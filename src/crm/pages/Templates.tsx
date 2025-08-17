@@ -558,9 +558,9 @@ export default function Templates() {
     
     if (selectedTemplate) {
       // Edit existing template
-      setTemplates(prev => 
-        prev.map(t => 
-          t.id === selectedTemplate.id 
+      updateTemplates(prev =>
+        prev.map(t =>
+          t.id === selectedTemplate.id
             ? { ...t, ...formData, variables: variablesArray, formFields, applicationFee, paymentMethods }
             : t
         )
