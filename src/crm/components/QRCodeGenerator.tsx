@@ -79,6 +79,7 @@ import {
 } from "@mui/icons-material";
 import { uniformTooltipStyles } from "../utils/formStyles";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 // Enhanced QR Code interfaces
 interface QRCodeData {
@@ -483,14 +484,14 @@ export default function QRCodeGenerator({
   };
 
   const generateQRCode = (): string => {
-    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
-
     // Ensure URLs have proper protocol
     let content = formData.content;
     if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
       content = "https://" + content.replace(/^(www\.)?/, "www.");
     }
 
+    // Use QR.js compatible API for better style support
+    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
     const params = new URLSearchParams({
       size: "300x300",
       data: content,
@@ -501,35 +502,34 @@ export default function QRCodeGenerator({
       ecc: "M"
     });
 
-    // Apply style parameters to QR server
-    if (customization.style === "rounded") {
-      params.append("qr_style", "rounded");
-    } else if (customization.style === "dots") {
-      params.append("qr_style", "dots");
-    } else if (customization.style === "circle") {
-      params.append("qr_style", "circle");
-    }
+    // Apply improved style parameters with proper encoding
+    const applyCustomStyles = () => {
+      // Module style (data pattern)
+      if (customization.style === "rounded") {
+        params.append("style", "round");
+      } else if (customization.style === "dots") {
+        params.append("style", "dot");
+      } else if (customization.style === "circle") {
+        params.append("style", "circle");
+      } else {
+        params.append("style", "square");
+      }
 
-    // Apply pattern parameters
-    if (customization.pattern === "circle") {
-      params.append("pattern", "circle");
-    } else if (customization.pattern === "rounded") {
-      params.append("pattern", "rounded");
-    }
+      // Eye frame style
+      if (customization.eyeStyle === "circle") {
+        params.append("eyeRadius", "50");
+      } else if (customization.eyeStyle === "rounded") {
+        params.append("eyeRadius", "25");
+      }
 
-    // Apply eye style parameters
-    if (customization.eyeStyle === "circle") {
-      params.append("eye_style", "circle");
-    } else if (customization.eyeStyle === "rounded") {
-      params.append("eye_style", "rounded");
-    }
+      // Add margin for better appearance
+      params.append("margin", "10");
 
-    // Add frame if specified
-    if (customization.frameStyle !== "none" && customization.frameText) {
-      params.append("frame", customization.frameStyle);
-      params.append("frame_text", customization.frameText);
-      params.append("frame_color", customization.frameColor.replace("#", ""));
-    }
+      // Enhanced error correction for better scan reliability
+      params.set("ecc", "H");
+    };
+
+    applyCustomStyles();
 
     return `${baseUrl}?${params.toString()}`;
   };
@@ -563,10 +563,22 @@ export default function QRCodeGenerator({
       tracking
     };
 
+    let updatedQRCodes: QRCodeData[];
     if (selectedQR) {
-      setQrCodes(prev => prev.map(qr => qr.id === selectedQR.id ? newQR : qr));
+      updatedQRCodes = qrCodes.map(qr => qr.id === selectedQR.id ? newQR : qr);
     } else {
-      setQrCodes(prev => [...prev, newQR]);
+      updatedQRCodes = [...qrCodes, newQR];
+    }
+
+    // Update state
+    setQrCodes(updatedQRCodes);
+
+    // Save to localStorage for persistence
+    try {
+      LocalStorageService.saveData('qr_codes', updatedQRCodes);
+      console.log('QR codes saved successfully to localStorage');
+    } catch (error) {
+      console.error('Failed to save QR codes:', error);
     }
 
     onClose();
