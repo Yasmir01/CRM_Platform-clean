@@ -962,12 +962,10 @@ export default function NewsBoard() {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => {
-                              // TODO: Quick create group functionality
-                              alert('Quick Create Group feature - Coming soon!');
-                            }}
+                            onClick={() => setQuickGroupDialogOpen(true)}
+                            disabled={formData.targetProperties.length === 0}
                           >
-                            + Quick Create Group
+                            + Quick Create Group ({formData.targetProperties.length} props)
                           </Button>
                         </Stack>
                         <FormControl fullWidth variant="outlined">
