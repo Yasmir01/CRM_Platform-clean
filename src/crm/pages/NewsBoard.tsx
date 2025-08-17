@@ -148,7 +148,7 @@ const mockNewsPosts: NewsPost[] = [
 
 export default function NewsBoard() {
   const { isManagementMode, isTenantMode } = useMode();
-  const { state } = useCrmData();
+  const { state, addPropertyGroup } = useCrmData();
   const { properties, tenants, propertyGroups } = state;
   const [posts, setPosts] = React.useState<NewsPost[]>(() => {
     const saved = LocalStorageService.getNews();
@@ -938,7 +938,7 @@ export default function NewsBoard() {
                                         📧 {tenant.email}
                                       </Typography>
                                       <Typography variant="caption" color="text.secondary">
-                                        ���� {tenant.phone} • Status: {tenant.status}
+                                        📞 {tenant.phone} • Status: {tenant.status}
                                       </Typography>
                                     </Box>
                                   }
