@@ -999,9 +999,17 @@ export default function Templates() {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant="h4" component="h1">
-          Templates
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h4" component="h1">
+            Templates
+          </Typography>
+          <Chip
+            label={userRole}
+            color={isAdmin ? "primary" : "default"}
+            size="small"
+            variant="outlined"
+          />
+        </Stack>
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
