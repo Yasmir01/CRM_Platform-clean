@@ -26,6 +26,12 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function CrmSideMenu() {
+  const { user } = useAuth();
+
+  const getUserInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
   return (
     <Drawer
       variant="permanent"
