@@ -1024,29 +1024,35 @@ export default function NewsBoard() {
                                   checked={formData.targetPropertyGroups.includes(group.id)}
                                   sx={{ color: group.color }}
                                 />
-                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: '100%' }}>
-                                  <Box
-                                    sx={{
-                                      width: 12,
-                                      height: 12,
-                                      borderRadius: '50%',
-                                      bgcolor: group.color,
-                                      mt: 0.5,
-                                      flexShrink: 0
-                                    }}
-                                  />
-                                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
-                                      {group.name}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.25 }}>
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    bgcolor: group.color,
+                                    mt: 0.5,
+                                    mr: 1.5,
+                                    flexShrink: 0
+                                  }}
+                                />
+                                <ListItemText
+                                  primary={group.name}
+                                  secondary={
+                                    <>
                                       📝 {group.description}
-                                    </Typography>
-                                    <Typography variant="caption" color="text.secondary">
+                                      <br />
                                       🏠 {group.propertyIds.length} properties • Tags: {group.tags.join(', ')}
-                                    </Typography>
-                                  </Box>
-                                </Box>
+                                    </>
+                                  }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
+                                />
                               </MenuItem>
                             ))}
                           </Select>
