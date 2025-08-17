@@ -1003,7 +1003,7 @@ export default function PropertyDetailPage({
       <Paper sx={{
         p: 3,
         mb: 3,
-        bgcolor: backgroundColorOverride || (isModal ? 'secondary.main' : 'primary.main'),
+        bgcolor: backgroundColorOverride || savedHeaderColor || (isModal ? 'secondary.main' : 'primary.main'),
         color: 'primary.contrastText',
         transition: 'all 0.2s ease-in-out',
         position: 'relative',
