@@ -132,6 +132,31 @@ export class LocalStorageService {
     return this.getItem('propertyGroups', []);
   }
 
+  static saveQRCodes(qrCodes: any[]): void {
+    this.setItem('qrCodes', qrCodes);
+  }
+
+  static getQRCodes(): any[] {
+    return this.getItem('qrCodes', []);
+  }
+
+  static saveContactCaptures(contactCaptures: any[]): void {
+    this.setItem('contactCaptures', contactCaptures);
+  }
+
+  static getContactCaptures(): any[] {
+    return this.getItem('contactCaptures', []);
+  }
+
+  // Generic save data method for flexibility
+  static saveData<T>(key: string, data: T): void {
+    this.setItem(key, data);
+  }
+
+  static getData<T>(key: string, defaultValue: T): T {
+    return this.getItem(key, defaultValue);
+  }
+
   static saveUserPreferences(preferences: any): void {
     this.setItem('userPreferences', preferences);
   }
