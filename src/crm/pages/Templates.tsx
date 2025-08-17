@@ -439,6 +439,29 @@ Signature: _________________ Date: _________________`,
 
 export default function Templates() {
   const theme = useTheme();
+  const {
+    canAccessTemplateLibrary,
+    canCreateTemplates,
+    canEditTemplates,
+    canDeleteTemplates,
+    isAdmin,
+    userRole
+  } = useRoleManagement();
+
+  // Check if user has access to templates
+  if (!canAccessTemplateLibrary()) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          Access Denied
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          You don't have permission to access the template library. Contact your administrator for access.
+        </Typography>
+      </Box>
+    );
+  }
+
   // Load templates from localStorage, fallback to mock data
   const [templates, setTemplates] = React.useState<Template[]>(() => {
     const savedTemplates = LocalStorageService.getTemplates();
