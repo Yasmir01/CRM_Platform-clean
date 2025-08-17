@@ -148,6 +148,44 @@ export class LocalStorageService {
     return this.getItem('contactCaptures', []);
   }
 
+  static saveTemplates(templates: any[]): void {
+    this.setItem('templates', templates);
+  }
+
+  static getTemplates(): any[] {
+    return this.getItem('templates', []);
+  }
+
+  static saveCompanySettings(companySettings: any): void {
+    this.setItem('companySettings', companySettings);
+  }
+
+  static getCompanySettings(): any {
+    return this.getItem('companySettings', {
+      name: '',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      logoUrl: '',
+      hours: '',
+      emergencyLine: '',
+      taxId: '',
+      licenseNumber: ''
+    });
+  }
+
+  static saveUserRoles(userRoles: any): void {
+    this.setItem('userRoles', userRoles);
+  }
+
+  static getUserRoles(): any {
+    return this.getItem('userRoles', {
+      role: 'user', // user, admin, super_admin
+      permissions: []
+    });
+  }
+
   // Generic save data method for flexibility
   static saveData<T>(key: string, data: T): void {
     this.setItem(key, data);
