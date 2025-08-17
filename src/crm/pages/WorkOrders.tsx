@@ -243,7 +243,28 @@ export default function WorkOrders() {
 
     return true;
   };
-  const [workOrders, setWorkOrders] = React.useState<WorkOrder[]>(mockWorkOrders);
+  // Load work orders from localStorage, fallback to mock data
+  const [workOrders, setWorkOrders] = React.useState<WorkOrder[]>(() => {
+    const savedWorkOrders = LocalStorageService.getWorkOrders();
+    console.log('Loading work orders from localStorage:', savedWorkOrders.length, 'work orders found');
+    return savedWorkOrders.length > 0 ? savedWorkOrders : mockWorkOrders;
+  });
+
+  // Helper function to update work orders and save to localStorage
+  const updateWorkOrders = React.useCallback((newWorkOrdersOrUpdater: WorkOrder[] | ((prev: WorkOrder[]) => WorkOrder[])) => {
+    setWorkOrders(prev => {
+      const updated = typeof newWorkOrdersOrUpdater === 'function'
+        ? newWorkOrdersOrUpdater(prev)
+        : newWorkOrdersOrUpdater;
+      try {
+        LocalStorageService.saveWorkOrders(updated);
+        console.log('Work orders updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save work orders after update:', error);
+      }
+      return updated;
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedWorkOrder, setSelectedWorkOrder] = React.useState<WorkOrder | null>(null);
