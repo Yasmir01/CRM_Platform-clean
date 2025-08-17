@@ -355,6 +355,7 @@ export default function Properties() {
     customType: "",
     units: 1,
     monthlyRent: 0,
+    securityDeposit: 0, // Add security deposit field
     managerId: "", // Keep for compatibility
     managerIds: [] as string[], // Support multiple managers
     tenantIds: [] as string[],
@@ -4775,6 +4776,17 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                   required
                   value={formData.monthlyRent}
                   onChange={(value) => setFormData({ ...formData, monthlyRent: value })}
+                  min={0}
+                  prefix="$"
+                  allowDecimals={false}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <NumberInput
+                  label="Security Deposit"
+                  fullWidth
+                  value={formData.securityDeposit}
+                  onChange={(value) => setFormData({ ...formData, securityDeposit: value })}
                   min={0}
                   prefix="$"
                   allowDecimals={false}
