@@ -442,6 +442,8 @@ export default function NewsBoard() {
   };
 
   const handleDeletePost = (postId: string) => {
+    // Delete from CRM context
+    deleteAnnouncement(postId);
     setPosts(prev => prev.filter(p => p.id !== postId));
     setActionMenuAnchor(null);
   };
