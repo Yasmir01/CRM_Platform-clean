@@ -40,7 +40,7 @@ import PowerTools from "./pages/PowerTools";
 import AITools from "./pages/AITools";
 import NewsBoard from "./pages/NewsBoard";
 import SuperAdminApp from "./SuperAdminApp";
-import { AuthProvider } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext";
 import { SearchProvider } from "./contexts/SearchContext";
 import { NotificationsProvider } from "./contexts/NotificationsContext";
 import { ActivityTrackingProvider } from "./contexts/ActivityTrackingContext";
