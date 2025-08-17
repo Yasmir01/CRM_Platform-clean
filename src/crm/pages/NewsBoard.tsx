@@ -628,7 +628,7 @@ export default function NewsBoard() {
                           targetTenants: [],
                           targetPropertyGroups: []
                         })}
-                        sx={{ minHeight: 56 }}
+                        sx={{ minHeight: 64 }}
                       >
                         <MenuItem value="all">All Tenants</MenuItem>
                         <MenuItem value="properties">Specific Properties</MenuItem>
@@ -637,6 +637,34 @@ export default function NewsBoard() {
                         <MenuItem value="custom">Custom Selection</MenuItem>
                       </Select>
                     </FormControl>
+                  </Grid>
+
+                  {/* Quick Actions */}
+                  <Grid item xs={12} md={6}>
+                    <Stack direction="row" spacing={2} sx={{ height: '100%', alignItems: 'center' }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          // TODO: Open saved groups dialog
+                          alert('Load Saved Groups feature - Coming soon!');
+                        }}
+                        sx={{ minHeight: 48 }}
+                      >
+                        Load Saved Groups
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => {
+                          // TODO: Save current selection
+                          alert('Save Selection feature - Coming soon!');
+                        }}
+                        sx={{ minHeight: 48 }}
+                      >
+                        Save Selection
+                      </Button>
+                    </Stack>
                   </Grid>
 
                   {/* Property Selection */}
