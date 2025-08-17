@@ -668,7 +668,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     <p>${property.description || 'Beautiful property available for rent. Contact us for more details!'}</p>
     
     <div class="contact">
-        <h3>��� Contact us today to schedule a viewing!</h3>
+        <h3>���� Contact us today to schedule a viewing!</h3>
         <p>🕐 Available for immediate move-in</p>
     </div>
 </body>
@@ -1198,7 +1198,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       maxPetsAllowed: formData.maxPetsAllowed,
       parkingSpaces: formData.parkingSpaces,
       occupancy: 0,
-      status: "Available" as const,
+      status: "Unlisted" as const,
       images: [],
       tags: formData.tags,
     };
@@ -4253,7 +4253,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                 onChange={(e) => setCommunicationData({ ...communicationData, type: e.target.value })}
               >
                 <MenuItem value="email">📧 Email</MenuItem>
-                <MenuItem value="sms">📱 SMS/Text Message</MenuItem>
+                <MenuItem value="sms">�� SMS/Text Message</MenuItem>
                 <MenuItem value="call">📞 Phone Call</MenuItem>
                 <MenuItem value="letter">📬 Physical Letter</MenuItem>
               </Select>
