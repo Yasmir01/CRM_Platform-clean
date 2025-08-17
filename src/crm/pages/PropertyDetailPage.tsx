@@ -53,6 +53,7 @@ import RichTextEditor from "../components/RichTextEditor";
 import { useCrmData, Property } from "../contexts/CrmDataContext";
 import CrmActivitiesTimeline from "../components/CrmActivitiesTimeline";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import { useAuth } from "../contexts/AuthContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
@@ -359,8 +360,9 @@ export default function PropertyDetailPage({
   onBackgroundColorChange
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
-  const { state, updateProperty, addDocument } = useCrmData();
+  const { state, updateProperty, addDocument, deleteDocument } = useCrmData();
   const { getEntityActivities } = useActivityTracking();
+  const { user, hasPermission } = useAuth();
   const { properties, propertyManagers, tenants, documents } = state;
   const property = properties.find(p => p.id === propertyId) || mockProperty;
 
@@ -2045,9 +2047,58 @@ export default function PropertyDetailPage({
                                   <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                                   <TableCell>{doc.uploadedBy}</TableCell>
                                   <TableCell>
-                                    <IconButton size="small" title={`Download ${doc.name}`}>
-                                      <DownloadRoundedIcon />
-                                    </IconButton>
+                                    <Stack direction="row" spacing={1}>
+                                      <IconButton
+                                        size="small"
+                                        title={`Download ${doc.name}`}
+                                        onClick={() => {
+                                          // In a real app, this would download the file
+                                          window.open(doc.url, '_blank');
+                                        }}
+                                      >
+                                        <DownloadRoundedIcon />
+                                      </IconButton>
+                                      {(hasPermission('all') || (user?.role === 'Admin' && hasPermission('manage_documents'))) && (
+                                        <IconButton
+                                          size="small"
+                                          title={`Delete ${doc.name}`}
+                                          onClick={() => {
+                                            if (window.confirm(`Are you sure you want to delete "${doc.name}"? This action cannot be undone.`)) {
+                                              deleteDocument(doc.id);
+
+                                              // Track document deletion activity
+                                              activityTracker.trackActivity({
+                                                userId: user?.id || 'current-user',
+                                                userDisplayName: user ? `${user.firstName} ${user.lastName}` : 'Current User',
+                                                action: 'delete',
+                                                entityType: 'property',
+                                                entityId: propertyId,
+                                                entityName: property.name,
+                                                changes: [
+                                                  {
+                                                    field: 'documents',
+                                                    oldValue: doc.name,
+                                                    newValue: '',
+                                                    displayName: 'Document Deleted'
+                                                  }
+                                                ],
+                                                description: `Document deleted: ${doc.name}`,
+                                                metadata: {
+                                                  category: doc.category,
+                                                  fileSize: doc.size,
+                                                  deletedBy: user ? `${user.firstName} ${user.lastName}` : 'Current User'
+                                                },
+                                                severity: 'medium',
+                                                category: 'security'
+                                              });
+                                            }
+                                          }}
+                                          color="error"
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      )}
+                                    </Stack>
                                   </TableCell>
                                 </TableRow>
                               ))}
