@@ -81,6 +81,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { uniformTooltipStyles } from "../utils/formStyles";
 import QRCodeGenerator from "../components/QRCodeGenerator";
 import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 // QR Code interfaces
 interface QRCodeData {
