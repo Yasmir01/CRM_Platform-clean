@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
+import CrmLogin from "./crm/pages/CrmLogin";
+import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
 // Import CRM components
 import CrmMainDashboard from "./crm/components/CrmMainDashboard";
 import Calendar from "./crm/pages/Calendar";
