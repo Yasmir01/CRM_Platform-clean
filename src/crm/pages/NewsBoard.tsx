@@ -196,10 +196,29 @@ export default function NewsBoard() {
     description: '',
     color: '#2196F3'
   });
-  // Auto-save posts to localStorage whenever they change
+  // Sync posts with CRM context announcements when announcements change
   React.useEffect(() => {
-    LocalStorageService.saveNews(posts);
-  }, [posts]);
+    if (announcements && announcements.length > 0) {
+      const mappedPosts = announcements.map(ann => ({
+        id: ann.id,
+        title: ann.title,
+        content: ann.content,
+        type: ann.type.toLowerCase() as NewsPost['type'],
+        priority: ann.priority.toLowerCase() as NewsPost['priority'],
+        author: ann.createdBy,
+        publishDate: ann.publishDate,
+        expiryDate: ann.expiryDate,
+        isPinned: false,
+        isActive: ann.isActive,
+        targetAudience: 'all' as NewsPost['targetAudience'],
+        targetProperties: ann.propertyIds || [],
+        notifications: { email: true, sms: false, push: true },
+        views: 0,
+        engagement: { views: 0, clicks: 0, acknowledged: 0 }
+      }));
+      setPosts(mappedPosts);
+    }
+  }, [announcements]);
 
   // Auto-save selections to localStorage whenever they change
   React.useEffect(() => {
