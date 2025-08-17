@@ -173,6 +173,58 @@ export default function NewsBoard() {
     LocalStorageService.saveNews(posts);
   }, [posts]);
 
+  // Auto-save selections to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('announcementSavedSelections', JSON.stringify(savedSelections));
+  }, [savedSelections]);
+
+  const handleSaveSelection = () => {
+    if (!saveSelectionName.trim()) {
+      alert('Please enter a name for the selection');
+      return;
+    }
+
+    const newSelection: SavedSelection = {
+      id: Date.now().toString(),
+      name: saveSelectionName,
+      description: saveSelectionDescription,
+      targetAudience: formData.targetAudience,
+      targetProperties: formData.targetProperties,
+      targetTenants: formData.targetTenants,
+      targetPropertyGroups: formData.targetPropertyGroups,
+      createdAt: new Date().toISOString()
+    };
+
+    setSavedSelections([...savedSelections, newSelection]);
+    setSaveSelectionDialogOpen(false);
+    setSaveSelectionName('');
+    setSaveSelectionDescription('');
+    alert('Selection saved successfully!');
+  };
+
+  const handleLoadSelection = (selection: SavedSelection) => {
+    setFormData({
+      ...formData,
+      targetAudience: selection.targetAudience,
+      targetProperties: selection.targetProperties,
+      targetTenants: selection.targetTenants,
+      targetPropertyGroups: selection.targetPropertyGroups
+    });
+
+    // Update last used timestamp
+    const updatedSelections = savedSelections.map(s =>
+      s.id === selection.id ? { ...s, lastUsed: new Date().toISOString() } : s
+    );
+    setSavedSelections(updatedSelections);
+    setSavedSelectionsDialogOpen(false);
+  };
+
+  const handleDeleteSelection = (selectionId: string) => {
+    if (window.confirm('Are you sure you want to delete this saved selection?')) {
+      setSavedSelections(savedSelections.filter(s => s.id !== selectionId));
+    }
+  };
+
   const [formData, setFormData] = React.useState({
     title: '',
     content: '<p>Enter your announcement here...</p>',
