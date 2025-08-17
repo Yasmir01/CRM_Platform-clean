@@ -83,6 +83,7 @@ import { uniformTooltipStyles } from "../utils/formStyles";
 import QRCodeGenerator from "../components/QRCodeGenerator";
 import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 
 // QR Code interfaces
 interface QRCodeData {
