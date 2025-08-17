@@ -674,9 +674,15 @@ const mockPools: Pool[] = [
 export default function PowerTools() {
   const [currentTab, setCurrentTab] = React.useState(0);
 
-  // QR Code states
-  const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(mockQRCodes);
-  const [contactCaptures, setContactCaptures] = React.useState<ContactCapture[]>(mockContactCaptures);
+  // QR Code states - Load from localStorage if available, fallback to mock data
+  const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(() => {
+    const savedQRCodes = LocalStorageService.getQRCodes();
+    return savedQRCodes.length > 0 ? savedQRCodes : mockQRCodes;
+  });
+  const [contactCaptures, setContactCaptures] = React.useState<ContactCapture[]>(() => {
+    const savedCaptures = LocalStorageService.getContactCaptures();
+    return savedCaptures.length > 0 ? savedCaptures : mockContactCaptures;
+  });
   const [openQRDialog, setOpenQRDialog] = React.useState(false);
   const [openAnalyticsDialog, setOpenAnalyticsDialog] = React.useState(false);
   const [selectedQR, setSelectedQR] = React.useState<QRCodeData | null>(null);
