@@ -677,6 +677,7 @@ export default function PowerTools() {
   // QR Code states - Load from localStorage if available, fallback to mock data
   const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(() => {
     const savedQRCodes = LocalStorageService.getQRCodes();
+    console.log('Loading QR codes from localStorage:', savedQRCodes.length, 'codes found');
     return savedQRCodes.length > 0 ? savedQRCodes : mockQRCodes;
   });
   const [contactCaptures, setContactCaptures] = React.useState<ContactCapture[]>(() => {
@@ -3286,7 +3287,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
               </Typography>
               <Stack spacing={3}>
                 <Alert severity="info" sx={{ mb: 2 }}>
-                  🚀 Build custom web assets with rich text content, interactive forms, and advanced calculators. No coding required!
+                  ��� Build custom web assets with rich text content, interactive forms, and advanced calculators. No coding required!
                 </Alert>
 
                 <Grid container spacing={3}>
