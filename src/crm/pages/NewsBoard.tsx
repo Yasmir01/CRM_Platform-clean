@@ -148,9 +148,29 @@ const mockNewsPosts: NewsPost[] = [
 
 export default function NewsBoard() {
   const { isManagementMode, isTenantMode } = useMode();
-  const { state, addPropertyGroup } = useCrmData();
-  const { properties, tenants, propertyGroups } = state;
+  const { state, addPropertyGroup, addAnnouncement, updateAnnouncement, deleteAnnouncement } = useCrmData();
+  const { properties, tenants, propertyGroups, announcements } = state;
   const [posts, setPosts] = React.useState<NewsPost[]>(() => {
+    // First try to get from CRM context, then fallback to localStorage, then mock data
+    if (announcements && announcements.length > 0) {
+      return announcements.map(ann => ({
+        id: ann.id,
+        title: ann.title,
+        content: ann.content,
+        type: ann.type.toLowerCase() as NewsPost['type'],
+        priority: ann.priority.toLowerCase() as NewsPost['priority'],
+        author: ann.createdBy,
+        publishDate: ann.publishDate,
+        expiryDate: ann.expiryDate,
+        isPinned: false, // Add this field to Announcement interface if needed
+        isActive: ann.isActive,
+        targetAudience: 'all' as NewsPost['targetAudience'], // Map this properly if needed
+        targetProperties: ann.propertyIds,
+        notifications: { email: true, sms: false, push: true }, // Default values
+        views: 0,
+        engagement: { views: 0, clicks: 0, acknowledged: 0 }
+      }));
+    }
     const saved = LocalStorageService.getNews();
     return saved.length > 0 ? saved : mockNewsPosts;
   });
