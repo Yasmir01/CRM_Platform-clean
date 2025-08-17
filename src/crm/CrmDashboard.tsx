@@ -93,7 +93,6 @@ export default function CrmDashboard() {
   return (
     <CrmErrorBoundary>
       <CrmDataProvider>
-        <AuthProvider>
           <SearchProvider>
             <NotificationsProvider>
               <ActivityTrackingProvider>
@@ -133,7 +132,6 @@ export default function CrmDashboard() {
               </ActivityTrackingProvider>
             </NotificationsProvider>
           </SearchProvider>
-        </AuthProvider>
       </CrmDataProvider>
     </CrmErrorBoundary>
   );
