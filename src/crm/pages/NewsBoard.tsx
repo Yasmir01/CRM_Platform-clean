@@ -81,6 +81,18 @@ interface NewsPost {
   };
 }
 
+interface SavedSelection {
+  id: string;
+  name: string;
+  description: string;
+  targetAudience: NewsPost['targetAudience'];
+  targetProperties: string[];
+  targetTenants: string[];
+  targetPropertyGroups: string[];
+  createdAt: string;
+  lastUsed?: string;
+}
+
 const mockNewsPosts: NewsPost[] = [
   {
     id: 'news-1',
