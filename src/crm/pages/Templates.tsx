@@ -1024,13 +1024,15 @@ export default function Templates() {
           >
             Create Application Form
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={handleAddTemplate}
-          >
-            Create Template
-          </Button>
+          {canCreateTemplates() && (
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={handleAddTemplate}
+            >
+              Create Template
+            </Button>
+          )}
         </Stack>
       </Stack>
 
