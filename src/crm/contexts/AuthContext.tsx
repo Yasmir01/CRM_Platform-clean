@@ -107,6 +107,10 @@ const rolePermissions: Record<UserRole, string[]> = {
     'send_communications',
     'manage_maintenance',
     'manage_finances',
+    'manage_documents',
+    'delete_charges',
+    'add_credits',
+    'view_financial_ledger',
   ],
   'Tenant': [
     'view_profile',

@@ -135,12 +135,31 @@ export default function PropertyGroups() {
   const getGroupStats = (group: any) => {
     const groupProperties = properties.filter(p => group.propertyIds.includes(p.id));
     const totalUnits = groupProperties.reduce((sum, p) => sum + p.units, 0);
-    const totalRevenue = groupProperties.reduce((sum, p) => sum + p.monthlyRent * p.units, 0);
-    const avgOccupancy = groupProperties.length > 0 
-      ? groupProperties.reduce((sum, p) => sum + p.occupancy, 0) / groupProperties.length 
-      : 0;
-    
-    return { totalUnits, totalRevenue, avgOccupancy };
+    const occupiedUnits = groupProperties.reduce((sum, p) => sum + p.occupancy, 0);
+    const totalRevenue = groupProperties.reduce((sum, p) => sum + (p.monthlyRent * p.occupancy), 0);
+    const potentialRevenue = groupProperties.reduce((sum, p) => sum + (p.monthlyRent * p.units), 0);
+    const avgOccupancy = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+    const availableUnits = totalUnits - occupiedUnits;
+
+    return {
+      totalProperties: groupProperties.length,
+      totalUnits,
+      occupiedUnits,
+      availableUnits,
+      totalRevenue,
+      potentialRevenue,
+      avgOccupancy
+    };
+  };
+
+  const handleSendBlast = (group: any) => {
+    // Navigate to news board with pre-selected group
+    window.location.href = `/crm/news?preSelectGroup=${group.id}`;
+  };
+
+  const handleCreateAnnouncement = (group: any) => {
+    // Open announcement dialog with group pre-selected
+    alert(`Create announcement for ${group.name} - This will pre-select the group in the announcement dialog`);
   };
 
   return (
@@ -225,36 +244,78 @@ export default function PropertyGroups() {
                       {group.description}
                     </Typography>
 
-                    {/* Stats */}
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="primary">
+                    {/* Enhanced Stats */}
+                    <Grid container spacing={1.5}>
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'primary.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="primary.contrastText">
+                            {stats.totalProperties}
+                          </Typography>
+                          <Typography variant="caption" color="primary.contrastText">
+                            Properties
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="info.contrastText">
                             {stats.totalUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Units
+                          <Typography variant="caption" color="info.contrastText">
+                            Total Units
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="success.main">
-                            ${(stats.totalRevenue / 1000).toFixed(0)}K
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'success.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="success.contrastText">
+                            {stats.occupiedUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Revenue
+                          <Typography variant="caption" color="success.contrastText">
+                            Occupied
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="info.main">
-                            {stats.avgOccupancy.toFixed(0)}%
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'warning.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="warning.contrastText">
+                            {stats.availableUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Occupancy
+                          <Typography variant="caption" color="warning.contrastText">
+                            Available
                           </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="success.main">
+                                ${(stats.totalRevenue / 1000).toFixed(1)}K
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Current Revenue
+                              </Typography>
+                            </Box>
+                            <Divider orientation="vertical" flexItem />
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="text.primary">
+                                ${(stats.potentialRevenue / 1000).toFixed(1)}K
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Potential Revenue
+                              </Typography>
+                            </Box>
+                            <Divider orientation="vertical" flexItem />
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="info.main">
+                                {stats.avgOccupancy.toFixed(1)}%
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Occupancy Rate
+                              </Typography>
+                            </Box>
+                          </Stack>
                         </Box>
                       </Grid>
                     </Grid>
@@ -293,24 +354,72 @@ export default function PropertyGroups() {
                       </Stack>
                     )}
 
-                    {/* Action Buttons */}
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<CampaignRoundedIcon />}
-                        fullWidth
-                      >
-                        Send Blast
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<BarChartRoundedIcon />}
-                        fullWidth
-                      >
-                        View Report
-                      </Button>
+                    {/* Enhanced Action Buttons */}
+                    <Stack spacing={1}>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          startIcon={<CampaignRoundedIcon />}
+                          fullWidth
+                          onClick={() => handleSendBlast(group)}
+                          sx={{ bgcolor: group.color, '&:hover': { bgcolor: group.color + 'CC' } }}
+                        >
+                          Send Announcement
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<BarChartRoundedIcon />}
+                          onClick={() => {
+                            alert(`View detailed analytics report for ${group.name} - Feature coming soon!`);
+                          }}
+                          sx={{ borderColor: group.color, color: group.color }}
+                        >
+                          Analytics
+                        </Button>
+                      </Stack>
+
+                      {/* Quick Marketing Actions */}
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip title="Create targeted marketing campaign">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<LocalOfferRoundedIcon />}
+                            onClick={() => handleCreateAnnouncement(group)}
+                            sx={{
+                              flex: 1,
+                              fontSize: '0.75rem',
+                              py: 0.5,
+                              borderColor: group.color + '50',
+                              color: group.color
+                            }}
+                          >
+                            Campaign
+                          </Button>
+                        </Tooltip>
+                        <Tooltip title="View group properties">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<HomeWorkRoundedIcon />}
+                            onClick={() => {
+                              // Navigate to properties page with group filter
+                              window.location.href = `/crm/properties?group=${group.id}`;
+                            }}
+                            sx={{
+                              flex: 1,
+                              fontSize: '0.75rem',
+                              py: 0.5,
+                              borderColor: group.color + '50',
+                              color: group.color
+                            }}
+                          >
+                            Properties
+                          </Button>
+                        </Tooltip>
+                      </Stack>
                     </Stack>
                   </Stack>
                 </CardContent>

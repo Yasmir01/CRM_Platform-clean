@@ -86,6 +86,53 @@ interface SupportTicket {
 
 const mockFAQs: FAQItem[] = [
   {
+    id: "document-deletion-permissions",
+    question: "How do I delete uploaded documents and what permissions are required?",
+    answer: "Document deletion is restricted to authorized users for security: 1) Only Super Admins and users with 'manage_documents' permission can delete documents, 2) Go to Property Details → Documents tab, 3) Click the red delete button (trash icon) next to any document, 4) Confirm deletion in the security dialog, 5) All deletions are logged in the activity timeline with user information and timestamps. Super Admins can assign document deletion permissions to other admin users through the User Roles section. This ensures proper audit trails and prevents accidental data loss.",
+    category: "Security",
+    tags: ["document", "deletion", "permissions", "security", "admin", "audit"],
+    helpful: 97,
+    planRequired: "Professional",
+    isAdvanced: true
+  },
+  {
+    id: "security-deposit-management",
+    question: "How do I add and manage security deposits for properties?",
+    answer: "Security deposits are now fully integrated into the property management system: 1) When adding a new property, enter the security deposit amount in the field between Monthly Rent and Square Footage, 2) View deposit information in the Property Details → Financial tab under 'Deposits & Charges Management', 3) Deposits automatically appear in tenant financial records and property ledgers, 4) When tenants move out, deposit refunds and deductions are tracked in their past tenant ledger, 5) All deposit transactions are reflected in financial reports and activity logs. The system supports security deposits, pet deposits, and various fees with full audit trails.",
+    category: "Payments",
+    tags: ["security", "deposit", "property", "financial", "ledger", "tenant"],
+    helpful: 94,
+    planRequired: "Basic"
+  },
+  {
+    id: "property-color-persistence",
+    question: "How do I customize and save property header colors?",
+    answer: "Property header color customization is now persistent across sessions: 1) Open any Property Detail page, 2) Click the 🎨 button in the header, 3) Choose from available color options (Primary Blue, Secondary Pink, Success Green, etc.), 4) Your selection is automatically saved to localStorage and persists when you navigate away, 5) The color applies to all property detail views throughout the system, 6) Colors are saved per browser/device for personalized experience. This helps differentiate properties and improves visual organization of your property portfolio.",
+    category: "General",
+    tags: ["property", "color", "customization", "header", "persistence", "visual"],
+    helpful: 89,
+    planRequired: "Basic"
+  },
+  {
+    id: "unlisted-properties-management",
+    question: "How does the Unlisted Properties tab work and why don't new properties appear there?",
+    answer: "The Unlisted Properties system helps manage property marketing workflow: 1) New properties are automatically created with 'Unlisted' status, 2) They appear in the Unlisted tab under Property Management, 3) Properties remain unlisted until you create a listing for them, 4) Once listed, properties move to 'Listed' status and appear in the Listings tab, 5) The Unlisted tab shows both properties with 'Unlisted' status AND available properties without active listings. If properties aren't appearing, check that they have 'Unlisted' or 'Available' status and don't have existing active listings.",
+    category: "Properties",
+    tags: ["unlisted", "properties", "listings", "status", "marketing", "workflow"],
+    helpful: 92,
+    planRequired: "Basic"
+  },
+  {
+    id: "financial-permissions-management",
+    question: "What financial permissions are available and how do I assign them?",
+    answer: "The system includes comprehensive financial permission controls: 1) Super Admins have 'all' permissions by default, 2) Property Managers can be assigned specific permissions: 'manage_finances', 'delete_charges', 'add_credits', 'view_financial_ledger', 3) Go to User Roles to assign these permissions, 4) 'delete_charges' allows removal of fees and charges from tenant accounts, 5) 'add_credits' permits adding credits and refunds, 6) All financial actions are logged in activity timelines with user attribution. When tenants move out, their financial history becomes read-only in the past tenant ledger while remaining editable by authorized users.",
+    category: "Security",
+    tags: ["financial", "permissions", "charges", "credits", "ledger", "admin", "roles"],
+    helpful: 96,
+    planRequired: "Professional",
+    isAdvanced: true
+  },
+  {
     id: "template-editing-enhanced",
     question: "How do I edit rental application templates with the new form builder?",
     answer: "When editing a rental application template: 1) Click 'Edit' on any rental application template, 2) The enhanced editor now shows both rich text content AND form fields, 3) Use the left panel to add pre-built sections (Personal Info, Employment, etc.) or custom fields, 4) The right panel shows a live preview of your form, 5) Auto-save keeps your work safe every 3 seconds, 6) Use 'Preview Application' to see the full form as applicants will see it. The form builder includes drag-and-drop reordering, field validation, and professional styling.",
@@ -358,12 +405,69 @@ const mockFAQs: FAQItem[] = [
     helpful: 93
   },
   {
+    id: "property-groups-management",
+    question: "How do I create and manage property groups for targeted announcements?",
+    answer: "Property groups help organize properties for marketing and announcements: 1) Go to Property Groups page to view existing groups like 'Downtown Portfolio', 'Residential Complex A', and 'Luxury Properties', 2) Create new groups by selecting properties and using 'Quick Create Group' in announcement targeting, 3) Each group has a name, description, color coding, and property assignments, 4) Use groups in the NewsBoard for targeted announcements to specific property sets, 5) Groups show comprehensive stats including total properties, occupancy rates, and revenue metrics, 6) Color-coded visual indicators help distinguish different groups. Groups streamline marketing campaigns and announcement distribution.",
+    category: "Properties",
+    tags: ["property", "groups", "announcements", "marketing", "targeting"],
+    helpful: 96
+  },
+  {
+    id: "announcement-system-overview",
+    question: "How does the announcement system work with property targeting?",
+    answer: "The announcement system supports comprehensive targeting options: 1) Send To options include All Tenants, Specific Properties, Specific Tenants, Property Groups, or Custom Selection, 2) Property selection shows all available properties (Sunset Apartments, 590 Hawkins Store Rd, Ocean View Condos, Garden View Apartments, Riverside Townhomes) with full details, 3) Property groups display real data including Downtown Portfolio (3 properties), Residential Complex A (2 properties), and Luxury Properties (2 properties), 4) Save and load targeting selections for repeated use, 5) Quick group creation from selected properties, 6) Real-time blast summary shows exactly who will receive the announcement. All targeting uses live property and group data from your CRM.",
+    category: "General",
+    tags: ["announcements", "targeting", "properties", "groups", "broadcasting"],
+    helpful: 94
+  },
+  {
+    id: "crm-tools-overview",
+    question: "What are all the main tools and sections available in the CRM system?",
+    answer: "The CRM includes comprehensive tools organized by function: **Property Management**: Properties, Property Groups, Listings, Maintenance, Work Orders **Tenant Management**: Tenants, Applications, Communications, Activity Timeline **Marketing**: Email Marketing, Templates, NewsBoard, Property Landing Pages **Power Tools**: QR-it (QR code generator), Win-it (prize campaigns), Pool-it (group buying), Power Dialer (professional calling) **Financial**: Payments, Quotes, Financial Reports **Administration**: User Roles, Company Settings, Account Settings **Analytics**: Reports & Analytics, Dashboard insights **Support**: Help & Support, Onboarding Guides. Each section includes detailed sub-tools and features for comprehensive property management.",
+    category: "General",
+    tags: ["tools", "overview", "features", "navigation", "modules"],
+    helpful: 98
+  },
+  {
+    id: "dashboard-navigation",
+    question: "How do I navigate the main dashboard and key sections?",
+    answer: "The dashboard provides central access to all CRM functions: 1) Main navigation menu on the left includes all major sections, 2) Dashboard widgets show key metrics, recent activities, and quick actions, 3) Quick add buttons for properties, tenants, and contacts, 4) Activity timeline shows recent system activity, 5) Search functionality across all data types, 6) User menu provides access to settings and preferences, 7) Notifications panel for important alerts, 8) Breadcrumb navigation shows your current location. The interface is responsive and works on desktop and mobile devices.",
+    category: "General",
+    tags: ["dashboard", "navigation", "interface", "menu", "widgets"],
+    helpful: 89
+  },
+  {
+    id: "data-import-export",
+    question: "How do I import and export data in the CRM system?",
+    answer: "Data management supports various import/export options: 1) Bulk import properties, tenants, and contacts via CSV upload, 2) Export reports in PDF, Excel, and CSV formats, 3) Activity data export for compliance and analysis, 4) Template export/import for sharing configurations, 5) Backup and restore functionality for data protection, 6) API access for automated data synchronization, 7) Real-time data sync with integrated services. All imports include data validation and error reporting to ensure data integrity.",
+    category: "General",
+    tags: ["import", "export", "data", "backup", "csv", "sync"],
+    helpful: 91
+  },
+  {
+    id: "notification-management",
+    question: "How do I manage notifications and communication preferences?",
+    answer: "Notification management provides comprehensive control: 1) Set notification preferences in Account Settings for email, SMS, push, and desktop alerts, 2) Configure announcement notification methods (email, SMS, push) when creating announcements, 3) Tenant communication preferences tracked individually, 4) Auto-notifications for rent due, maintenance requests, and system events, 5) Real-time notifications for important activities, 6) Notification history and tracking, 7) Bulk notification settings for property groups. All notifications respect user preferences and compliance requirements.",
+    category: "General",
+    tags: ["notifications", "communication", "preferences", "alerts", "settings"],
+    helpful: 92
+  },
+  {
     id: "application-tracking",
     question: "How do tenant applications get tracked and reflected in the system?",
     answer: "Application tracking is automated: 1) When tenant applications are approved and moved into a property, this information automatically updates and reflects in the tenant page, 2) Any applications received for approved tenants appear in their Documents page under the appropriate category, 3) All communication and activity with prospects are reflected in the prospect page until they become tenants, 4) This ensures complete tracking from prospect to tenant with no information loss.",
     category: "Tenants",
     tags: ["applications", "tracking", "prospects", "approval"],
     helpful: 88
+  },
+  {
+    id: "complete-feature-guide",
+    question: "What is the complete list of CRM features and how do I access each one?",
+    answer: "**PROPERTY MANAGEMENT**: Properties (add, edit, view), Property Groups (organize properties), Unlisted Properties (manage listings), Property Landing Pages (marketing pages), **TENANT MANAGEMENT**: Tenants (full profiles), Applications (rental applications), Activity Timeline (communication history), Move-in/Move-out management, **FINANCIAL**: Payments (record, track), Quotes (generate estimates), Financial Reports (income/expense), Charges & Credits management, **MARKETING**: Email Marketing (campaigns), Templates (rental forms), NewsBoard (announcements), QR Codes (property marketing), **MAINTENANCE**: Work Orders (create, assign), Service Providers (manage contractors), Maintenance Tracking, **POWER TOOLS**: QR-it (QR generator), Win-it (contests), Pool-it (group buying), Power Dialer (calling), **ADMINISTRATION**: User Roles (permissions), Company Settings (branding), Integration Management (APIs), Account Settings (preferences), **ANALYTICS**: Dashboard (overview), Reports & Analytics (detailed insights), Activity Tracking (audit trails). Each feature is accessible from the main navigation menu with comprehensive sub-features and tools.",
+    category: "General",
+    tags: ["features", "complete", "guide", "access", "navigation", "tools"],
+    helpful: 99,
+    isAdvanced: true
   },
   {
     id: "7",

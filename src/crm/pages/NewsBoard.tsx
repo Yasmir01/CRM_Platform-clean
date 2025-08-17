@@ -81,6 +81,18 @@ interface NewsPost {
   };
 }
 
+interface SavedSelection {
+  id: string;
+  name: string;
+  description: string;
+  targetAudience: NewsPost['targetAudience'];
+  targetProperties: string[];
+  targetTenants: string[];
+  targetPropertyGroups: string[];
+  createdAt: string;
+  lastUsed?: string;
+}
+
 const mockNewsPosts: NewsPost[] = [
   {
     id: 'news-1',
@@ -136,9 +148,29 @@ const mockNewsPosts: NewsPost[] = [
 
 export default function NewsBoard() {
   const { isManagementMode, isTenantMode } = useMode();
-  const { state } = useCrmData();
-  const { properties, tenants, propertyGroups } = state;
+  const { state, addPropertyGroup, addAnnouncement, updateAnnouncement, deleteAnnouncement } = useCrmData();
+  const { properties, tenants, propertyGroups, announcements } = state;
   const [posts, setPosts] = React.useState<NewsPost[]>(() => {
+    // First try to get from CRM context, then fallback to localStorage, then mock data
+    if (announcements && announcements.length > 0) {
+      return announcements.map(ann => ({
+        id: ann.id,
+        title: ann.title,
+        content: ann.content,
+        type: ann.type.toLowerCase() as NewsPost['type'],
+        priority: ann.priority.toLowerCase() as NewsPost['priority'],
+        author: ann.createdBy,
+        publishDate: ann.publishDate,
+        expiryDate: ann.expiryDate,
+        isPinned: false, // Add this field to Announcement interface if needed
+        isActive: ann.isActive,
+        targetAudience: 'all' as NewsPost['targetAudience'], // Map this properly if needed
+        targetProperties: ann.propertyIds,
+        notifications: { email: true, sms: false, push: true }, // Default values
+        views: 0,
+        engagement: { views: 0, clicks: 0, acknowledged: 0 }
+      }));
+    }
     const saved = LocalStorageService.getNews();
     return saved.length > 0 ? saved : mockNewsPosts;
   });
@@ -146,10 +178,128 @@ export default function NewsBoard() {
   const [selectedPost, setSelectedPost] = React.useState<NewsPost | null>(null);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<HTMLElement | null>(null);
   const [selectedPostForAction, setSelectedPostForAction] = React.useState<NewsPost | null>(null);
-  // Auto-save posts to localStorage whenever they change
+
+  // Saved selections state
+  const [savedSelections, setSavedSelections] = React.useState<SavedSelection[]>(() => {
+    const saved = localStorage.getItem('announcementSavedSelections');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [savedSelectionsDialogOpen, setSavedSelectionsDialogOpen] = React.useState(false);
+  const [saveSelectionDialogOpen, setSaveSelectionDialogOpen] = React.useState(false);
+  const [saveSelectionName, setSaveSelectionName] = React.useState('');
+  const [saveSelectionDescription, setSaveSelectionDescription] = React.useState('');
+
+  // Quick group creation state
+  const [quickGroupDialogOpen, setQuickGroupDialogOpen] = React.useState(false);
+  const [quickGroupData, setQuickGroupData] = React.useState({
+    name: '',
+    description: '',
+    color: '#2196F3'
+  });
+  // Sync posts with CRM context announcements when announcements change
   React.useEffect(() => {
-    LocalStorageService.saveNews(posts);
-  }, [posts]);
+    if (announcements && announcements.length > 0) {
+      const mappedPosts = announcements.map(ann => ({
+        id: ann.id,
+        title: ann.title,
+        content: ann.content,
+        type: ann.type.toLowerCase() as NewsPost['type'],
+        priority: ann.priority.toLowerCase() as NewsPost['priority'],
+        author: ann.createdBy,
+        publishDate: ann.publishDate,
+        expiryDate: ann.expiryDate,
+        isPinned: false,
+        isActive: ann.isActive,
+        targetAudience: 'all' as NewsPost['targetAudience'],
+        targetProperties: ann.propertyIds || [],
+        notifications: { email: true, sms: false, push: true },
+        views: 0,
+        engagement: { views: 0, clicks: 0, acknowledged: 0 }
+      }));
+      setPosts(mappedPosts);
+    }
+  }, [announcements]);
+
+  // Auto-save selections to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('announcementSavedSelections', JSON.stringify(savedSelections));
+  }, [savedSelections]);
+
+  const handleSaveSelection = () => {
+    if (!saveSelectionName.trim()) {
+      alert('Please enter a name for the selection');
+      return;
+    }
+
+    const newSelection: SavedSelection = {
+      id: Date.now().toString(),
+      name: saveSelectionName,
+      description: saveSelectionDescription,
+      targetAudience: formData.targetAudience,
+      targetProperties: formData.targetProperties,
+      targetTenants: formData.targetTenants,
+      targetPropertyGroups: formData.targetPropertyGroups,
+      createdAt: new Date().toISOString()
+    };
+
+    setSavedSelections([...savedSelections, newSelection]);
+    setSaveSelectionDialogOpen(false);
+    setSaveSelectionName('');
+    setSaveSelectionDescription('');
+    alert('Selection saved successfully!');
+  };
+
+  const handleLoadSelection = (selection: SavedSelection) => {
+    setFormData({
+      ...formData,
+      targetAudience: selection.targetAudience,
+      targetProperties: selection.targetProperties,
+      targetTenants: selection.targetTenants,
+      targetPropertyGroups: selection.targetPropertyGroups
+    });
+
+    // Update last used timestamp
+    const updatedSelections = savedSelections.map(s =>
+      s.id === selection.id ? { ...s, lastUsed: new Date().toISOString() } : s
+    );
+    setSavedSelections(updatedSelections);
+    setSavedSelectionsDialogOpen(false);
+  };
+
+  const handleDeleteSelection = (selectionId: string) => {
+    if (window.confirm('Are you sure you want to delete this saved selection?')) {
+      setSavedSelections(savedSelections.filter(s => s.id !== selectionId));
+    }
+  };
+
+  const handleQuickCreateGroup = () => {
+    if (!quickGroupData.name.trim()) {
+      alert('Please enter a group name');
+      return;
+    }
+
+    if (formData.targetProperties.length === 0) {
+      alert('Please select at least one property for the group');
+      return;
+    }
+
+    const newGroup = {
+      name: quickGroupData.name,
+      description: quickGroupData.description,
+      propertyIds: formData.targetProperties,
+      color: quickGroupData.color,
+      tags: ['marketing', 'announcement']
+    };
+
+    // Add the group using CRM context
+    addPropertyGroup(newGroup);
+
+    // Reset form
+    setQuickGroupData({ name: '', description: '', color: '#2196F3' });
+    setQuickGroupDialogOpen(false);
+
+    alert(`Property group "${newGroup.name}" created successfully with ${newGroup.propertyIds.length} properties!`);
+  };
 
   const [formData, setFormData] = React.useState({
     title: '',
@@ -249,14 +399,33 @@ export default function NewsBoard() {
   const handleSavePost = () => {
     if (selectedPost) {
       // Edit existing post
-      setPosts(prev => prev.map(p => 
-        p.id === selectedPost.id 
-          ? { 
-              ...p, 
-              ...formData, 
-              publishDate: new Date().toISOString().split('T')[0] 
-            }
-          : p
+      const updatedPost = {
+        ...selectedPost,
+        ...formData,
+        publishDate: new Date().toISOString().split('T')[0]
+      };
+
+      // Update in CRM context
+      const announcementData = {
+        id: selectedPost.id,
+        title: formData.title,
+        content: formData.content,
+        type: formData.type.charAt(0).toUpperCase() + formData.type.slice(1) as any,
+        priority: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) as any,
+        targetAudience: 'All' as any,
+        propertyIds: formData.targetProperties,
+        publishDate: new Date().toISOString().split('T')[0],
+        expiryDate: formData.expiryDate,
+        isActive: true,
+        attachments: [],
+        createdBy: 'Current User',
+        createdAt: selectedPost.publishDate,
+        updatedAt: new Date().toISOString()
+      };
+      updateAnnouncement(announcementData);
+
+      setPosts(prev => prev.map(p =>
+        p.id === selectedPost.id ? updatedPost : p
       ));
     } else {
       // Create new post
@@ -269,12 +438,31 @@ export default function NewsBoard() {
         views: 0,
         engagement: { views: 0, clicks: 0, acknowledged: 0 }
       };
+
+      // Add to CRM context
+      const announcementData = {
+        title: formData.title,
+        content: formData.content,
+        type: formData.type.charAt(0).toUpperCase() + formData.type.slice(1) as any,
+        priority: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) as any,
+        targetAudience: 'All' as any,
+        propertyIds: formData.targetProperties,
+        publishDate: new Date().toISOString().split('T')[0],
+        expiryDate: formData.expiryDate,
+        isActive: true,
+        attachments: [],
+        createdBy: 'Current User'
+      };
+      addAnnouncement(announcementData);
+
       setPosts(prev => [newPost, ...prev]);
     }
     setOpenDialog(false);
   };
 
   const handleDeletePost = (postId: string) => {
+    // Delete from CRM context
+    deleteAnnouncement(postId);
     setPosts(prev => prev.filter(p => p.id !== postId));
     setActionMenuAnchor(null);
   };
@@ -523,13 +711,24 @@ export default function NewsBoard() {
         </Stack>
 
         {/* Create/Edit Post Dialog */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="lg" fullWidth>
-          <DialogTitle sx={{ pb: 2 }}>
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          maxWidth="xl"
+          fullWidth
+          PaperProps={{
+            sx: {
+              minHeight: '80vh',
+              maxHeight: '90vh'
+            }
+          }}
+        >
+          <DialogTitle sx={{ pb: 2, px: 4 }}>
             <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
               {selectedPost ? 'Edit Announcement' : 'Create New Announcement'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Share important information with your tenants
+              Share important information with your tenants across properties and groups
             </Typography>
           </DialogTitle>
           <DialogContent sx={{ px: 4, pb: 2 }}>
@@ -628,7 +827,7 @@ export default function NewsBoard() {
                           targetTenants: [],
                           targetPropertyGroups: []
                         })}
-                        sx={{ minHeight: 56 }}
+                        sx={{ minHeight: 64 }}
                       >
                         <MenuItem value="all">All Tenants</MenuItem>
                         <MenuItem value="properties">Specific Properties</MenuItem>
@@ -639,136 +838,303 @@ export default function NewsBoard() {
                     </FormControl>
                   </Grid>
 
+                  {/* Quick Actions */}
+                  <Grid item xs={12} md={6}>
+                    <Stack direction="row" spacing={2} sx={{ height: '100%', alignItems: 'center' }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setSavedSelectionsDialogOpen(true)}
+                        sx={{ minHeight: 48 }}
+                        disabled={savedSelections.length === 0}
+                      >
+                        Load Saved Groups ({savedSelections.length})
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setSaveSelectionDialogOpen(true)}
+                        sx={{ minHeight: 48 }}
+                        disabled={formData.targetAudience === 'all' || (
+                          formData.targetProperties.length === 0 &&
+                          formData.targetTenants.length === 0 &&
+                          formData.targetPropertyGroups.length === 0
+                        )}
+                      >
+                        Save Selection
+                      </Button>
+                    </Stack>
+                  </Grid>
+
                   {/* Property Selection */}
                   {(formData.targetAudience === 'properties' || formData.targetAudience === 'custom') && (
                     <Grid item xs={12}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>Select Properties ({formData.targetProperties.length} selected)</InputLabel>
-                        <Select
-                          multiple
-                          value={formData.targetProperties}
-                          label={`Select Properties (${formData.targetProperties.length} selected)`}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            targetProperties: typeof e.target.value === 'string'
-                              ? e.target.value.split(',')
-                              : e.target.value
-                          })}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((value) => {
-                                const property = properties.find(p => p.id === value);
-                                return (
-                                  <Chip
-                                    key={value}
-                                    label={property?.name || value}
-                                    size="small"
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {properties.map((property) => (
-                            <MenuItem key={property.id} value={property.id}>
-                              <Checkbox checked={formData.targetProperties.includes(property.id)} />
-                              <ListItemText
-                                primary={property.name}
-                                secondary={`${property.address} • ${property.units} units`}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
+                        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                          Select Properties ({formData.targetProperties.length} selected)
+                        </Typography>
+                        <FormControl fullWidth variant="outlined">
+                          <Select
+                            multiple
+                            value={formData.targetProperties}
+                            displayEmpty
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              targetProperties: typeof e.target.value === 'string'
+                                ? e.target.value.split(',')
+                                : e.target.value
+                            })}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minHeight: '32px' }}>
+                                {selected.length === 0 ? (
+                                  <Typography variant="body2" color="text.secondary">
+                                    Click to select properties...
+                                  </Typography>
+                                ) : (
+                                  selected.map((value) => {
+                                    const property = properties.find(p => p.id === value);
+                                    return (
+                                      <Chip
+                                        key={value}
+                                        label={property?.name || value}
+                                        size="small"
+                                        color="primary"
+                                        variant="outlined"
+                                      />
+                                    );
+                                  })
+                                )}
+                              </Box>
+                            )}
+                            sx={{ minHeight: 80 }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 400,
+                                  width: 600,
+                                },
+                              },
+                            }}
+                          >
+                            {properties.map((property) => (
+                              <MenuItem key={property.id} value={property.id} sx={{ py: 1.5 }}>
+                                <Checkbox
+                                  checked={formData.targetProperties.includes(property.id)}
+                                  color="primary"
+                                />
+                                <ListItemText
+                                  primary={property.name}
+                                  secondary={
+                                    <>
+                                      📍 {property.address}
+                                      <br />
+                                      {property.units} units • ${property.monthlyRent}/month • {property.status}
+                                    </>
+                                  }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Paper>
                     </Grid>
                   )}
 
                   {/* Tenant Selection */}
                   {(formData.targetAudience === 'tenants' || formData.targetAudience === 'custom') && (
                     <Grid item xs={12}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>Select Tenants ({formData.targetTenants.length} selected)</InputLabel>
-                        <Select
-                          multiple
-                          value={formData.targetTenants}
-                          label={`Select Tenants (${formData.targetTenants.length} selected)`}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            targetTenants: typeof e.target.value === 'string'
-                              ? e.target.value.split(',')
-                              : e.target.value
-                          })}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((value) => {
-                                const tenant = tenants.find(t => t.id === value);
-                                return (
-                                  <Chip
-                                    key={value}
-                                    label={tenant ? `${tenant.firstName} ${tenant.lastName}` : value}
-                                    size="small"
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {tenants.map((tenant) => (
-                            <MenuItem key={tenant.id} value={tenant.id}>
-                              <Checkbox checked={formData.targetTenants.includes(tenant.id)} />
-                              <ListItemText
-                                primary={`${tenant.firstName} ${tenant.lastName}`}
-                                secondary={tenant.email}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
+                        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                          Select Tenants ({formData.targetTenants.length} selected)
+                        </Typography>
+                        <FormControl fullWidth variant="outlined">
+                          <Select
+                            multiple
+                            value={formData.targetTenants}
+                            displayEmpty
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              targetTenants: typeof e.target.value === 'string'
+                                ? e.target.value.split(',')
+                                : e.target.value
+                            })}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minHeight: '32px' }}>
+                                {selected.length === 0 ? (
+                                  <Typography variant="body2" color="text.secondary">
+                                    Click to select tenants...
+                                  </Typography>
+                                ) : (
+                                  selected.map((value) => {
+                                    const tenant = tenants.find(t => t.id === value);
+                                    return (
+                                      <Chip
+                                        key={value}
+                                        label={tenant ? `${tenant.firstName} ${tenant.lastName}` : value}
+                                        size="small"
+                                        color="secondary"
+                                        variant="outlined"
+                                      />
+                                    );
+                                  })
+                                )}
+                              </Box>
+                            )}
+                            sx={{ minHeight: 80 }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 400,
+                                  width: 600,
+                                },
+                              },
+                            }}
+                          >
+                            {tenants.map((tenant) => (
+                              <MenuItem key={tenant.id} value={tenant.id} sx={{ py: 1.5 }}>
+                                <Checkbox
+                                  checked={formData.targetTenants.includes(tenant.id)}
+                                  color="secondary"
+                                />
+                                <ListItemText
+                                  primary={`${tenant.firstName} ${tenant.lastName}`}
+                                  secondary={
+                                    <>
+                                      📧 {tenant.email}
+                                      <br />
+                                      📞 {tenant.phone} • Status: {tenant.status}
+                                    </>
+                                  }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Paper>
                     </Grid>
                   )}
 
                   {/* Property Groups Selection */}
                   {(formData.targetAudience === 'property-groups' || formData.targetAudience === 'custom') && (
                     <Grid item xs={12}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>Select Property Groups ({formData.targetPropertyGroups.length} selected)</InputLabel>
-                        <Select
-                          multiple
-                          value={formData.targetPropertyGroups}
-                          label={`Select Property Groups (${formData.targetPropertyGroups.length} selected)`}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            targetPropertyGroups: typeof e.target.value === 'string'
-                              ? e.target.value.split(',')
-                              : e.target.value
-                          })}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((value) => {
-                                const group = propertyGroups.find(g => g.id === value);
-                                return (
-                                  <Chip
-                                    key={value}
-                                    label={group?.name || value}
-                                    size="small"
-                                    sx={{ bgcolor: group?.color + '15', borderColor: group?.color }}
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {propertyGroups.map((group) => (
-                            <MenuItem key={group.id} value={group.id}>
-                              <Checkbox checked={formData.targetPropertyGroups.includes(group.id)} />
-                              <ListItemText
-                                primary={group.name}
-                                secondary={`${group.propertyIds.length} properties • ${group.description}`}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            Select Property Groups ({formData.targetPropertyGroups.length} selected)
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => setQuickGroupDialogOpen(true)}
+                            disabled={formData.targetProperties.length === 0}
+                          >
+                            + Quick Create Group ({formData.targetProperties.length} props)
+                          </Button>
+                        </Stack>
+                        <FormControl fullWidth variant="outlined">
+                          <Select
+                            multiple
+                            value={formData.targetPropertyGroups}
+                            displayEmpty
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              targetPropertyGroups: typeof e.target.value === 'string'
+                                ? e.target.value.split(',')
+                                : e.target.value
+                            })}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minHeight: '32px' }}>
+                                {selected.length === 0 ? (
+                                  <Typography variant="body2" color="text.secondary">
+                                    Click to select property groups...
+                                  </Typography>
+                                ) : (
+                                  selected.map((value) => {
+                                    const group = propertyGroups.find(g => g.id === value);
+                                    return (
+                                      <Chip
+                                        key={value}
+                                        label={group?.name || value}
+                                        size="small"
+                                        sx={{
+                                          bgcolor: group?.color + '20',
+                                          borderColor: group?.color,
+                                          color: group?.color,
+                                          fontWeight: 600
+                                        }}
+                                        variant="outlined"
+                                      />
+                                    );
+                                  })
+                                )}
+                              </Box>
+                            )}
+                            sx={{ minHeight: 80 }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 400,
+                                  width: 600,
+                                },
+                              },
+                            }}
+                          >
+                            {propertyGroups.map((group) => (
+                              <MenuItem key={group.id} value={group.id} sx={{ py: 1.5 }}>
+                                <Checkbox
+                                  checked={formData.targetPropertyGroups.includes(group.id)}
+                                  sx={{ color: group.color }}
+                                />
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    borderRadius: '50%',
+                                    bgcolor: group.color,
+                                    mt: 0.5,
+                                    mr: 1.5,
+                                    flexShrink: 0
+                                  }}
+                                />
+                                <ListItemText
+                                  primary={group.name}
+                                  secondary={
+                                    <>
+                                      📝 {group.description}
+                                      <br />
+                                      🏠 {group.propertyIds.length} properties • Tags: {group.tags.join(', ')}
+                                    </>
+                                  }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Paper>
                     </Grid>
                   )}
                 </Grid>
@@ -937,6 +1303,201 @@ export default function NewsBoard() {
             </List>
           )}
         </Menu>
+
+        {/* Save Selection Dialog */}
+        <Dialog open={saveSelectionDialogOpen} onClose={() => setSaveSelectionDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Save Current Selection</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <TextField
+                label="Selection Name"
+                fullWidth
+                value={saveSelectionName}
+                onChange={(e) => setSaveSelectionName(e.target.value)}
+                placeholder="e.g., Downtown Properties, Emergency Contacts"
+              />
+              <TextField
+                label="Description (Optional)"
+                fullWidth
+                multiline
+                rows={2}
+                value={saveSelectionDescription}
+                onChange={(e) => setSaveSelectionDescription(e.target.value)}
+                placeholder="Brief description of this selection..."
+              />
+              <Alert severity="info">
+                <Typography variant="body2">
+                  This will save your current target selection: {formData.targetAudience === 'custom' ?
+                    `${formData.targetProperties.length} properties, ${formData.targetTenants.length} tenants, ${formData.targetPropertyGroups.length} groups` :
+                    `${formData.targetAudience} selection`}
+                </Typography>
+              </Alert>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSaveSelectionDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleSaveSelection}>
+              Save Selection
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Load Saved Selections Dialog */}
+        <Dialog open={savedSelectionsDialogOpen} onClose={() => setSavedSelectionsDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>Load Saved Selection</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {savedSelections.length === 0 ? (
+                <Alert severity="info">
+                  No saved selections yet. Create and save a selection to see it here.
+                </Alert>
+              ) : (
+                savedSelections
+                  .sort((a, b) => new Date(b.lastUsed || b.createdAt).getTime() - new Date(a.lastUsed || a.createdAt).getTime())
+                  .map((selection) => (
+                    <Paper key={selection.id} variant="outlined" sx={{ p: 2 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="start">
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            {selection.name}
+                          </Typography>
+                          {selection.description && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              {selection.description}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Type: {selection.targetAudience} •
+                            Properties: {selection.targetProperties.length} •
+                            Tenants: {selection.targetTenants.length} •
+                            Groups: {selection.targetPropertyGroups.length}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Created: {new Date(selection.createdAt).toLocaleDateString()}
+                            {selection.lastUsed && ` • Last used: ${new Date(selection.lastUsed).toLocaleDateString()}`}
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => handleLoadSelection(selection)}
+                          >
+                            Load
+                          </Button>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteSelection(selection.id)}
+                          >
+                            <DeleteRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                  ))
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSavedSelectionsDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Quick Create Group Dialog */}
+        <Dialog open={quickGroupDialogOpen} onClose={() => setQuickGroupDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Quick Create Property Group</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <Alert severity="info">
+                <Typography variant="body2">
+                  Creating a group with {formData.targetProperties.length} selected properties
+                </Typography>
+              </Alert>
+
+              <TextField
+                label="Group Name"
+                fullWidth
+                value={quickGroupData.name}
+                onChange={(e) => setQuickGroupData({ ...quickGroupData, name: e.target.value })}
+                placeholder="e.g., Downtown Marketing Campaign"
+                required
+              />
+
+              <TextField
+                label="Description (Optional)"
+                fullWidth
+                multiline
+                rows={2}
+                value={quickGroupData.description}
+                onChange={(e) => setQuickGroupData({ ...quickGroupData, description: e.target.value })}
+                placeholder="Brief description of this group..."
+              />
+
+              <FormControl fullWidth>
+                <InputLabel>Group Color</InputLabel>
+                <Select
+                  value={quickGroupData.color}
+                  label="Group Color"
+                  onChange={(e) => setQuickGroupData({ ...quickGroupData, color: e.target.value })}
+                >
+                  <MenuItem value="#2196F3">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#2196F3', borderRadius: '50%' }} />
+                      <Typography>Blue</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#4CAF50">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#4CAF50', borderRadius: '50%' }} />
+                      <Typography>Green</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#FF9800">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#FF9800', borderRadius: '50%' }} />
+                      <Typography>Orange</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#9C27B0">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#9C27B0', borderRadius: '50%' }} />
+                      <Typography>Purple</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#F44336">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#F44336', borderRadius: '50%' }} />
+                      <Typography>Red</Typography>
+                    </Stack>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Selected Properties:
+                </Typography>
+                <Stack spacing={0.5} sx={{ maxHeight: 120, overflow: 'auto' }}>
+                  {formData.targetProperties.map((propId) => {
+                    const property = properties.find(p => p.id === propId);
+                    return (
+                      <Typography key={propId} variant="body2" color="text.secondary">
+                        • {property?.name || propId}
+                      </Typography>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setQuickGroupDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleQuickCreateGroup}>
+              Create Group
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </Box>
   );

@@ -53,6 +53,7 @@ import RichTextEditor from "../components/RichTextEditor";
 import { useCrmData, Property } from "../contexts/CrmDataContext";
 import CrmActivitiesTimeline from "../components/CrmActivitiesTimeline";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import { useAuth } from "../contexts/AuthContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
@@ -359,8 +360,9 @@ export default function PropertyDetailPage({
   onBackgroundColorChange
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
-  const { state, updateProperty, addDocument } = useCrmData();
+  const { state, updateProperty, addDocument, deleteDocument } = useCrmData();
   const { getEntityActivities } = useActivityTracking();
+  const { user, hasPermission } = useAuth();
   const { properties, propertyManagers, tenants, documents } = state;
   const property = properties.find(p => p.id === propertyId) || mockProperty;
 
@@ -421,7 +423,16 @@ export default function PropertyDetailPage({
   ]);
   const [cardManagementOpen, setCardManagementOpen] = React.useState(false);
   const [backgroundPickerOpen, setBackgroundPickerOpen] = React.useState(false);
+  const [savedHeaderColor, setSavedHeaderColor] = React.useState<string | null>(null);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
+
+  // Load saved header color from localStorage
+  React.useEffect(() => {
+    const savedColor = localStorage.getItem('propertyHeaderColor');
+    if (savedColor) {
+      setSavedHeaderColor(savedColor);
+    }
+  }, []);
   const [selectedAppliance, setSelectedAppliance] = React.useState<Appliance | null>(null);
   const [applianceImages, setApplianceImages] = React.useState<ApplianceImage[]>([]);
   const [applianceFormData, setApplianceFormData] = React.useState<Partial<Appliance>>({
@@ -992,7 +1003,7 @@ export default function PropertyDetailPage({
       <Paper sx={{
         p: 3,
         mb: 3,
-        bgcolor: backgroundColorOverride || (isModal ? 'secondary.main' : 'primary.main'),
+        bgcolor: backgroundColorOverride || savedHeaderColor || (isModal ? 'secondary.main' : 'primary.main'),
         color: 'primary.contrastText',
         transition: 'all 0.2s ease-in-out',
         position: 'relative',
@@ -1127,7 +1138,7 @@ export default function PropertyDetailPage({
             >
               Manage Windows
             </Button>
-            {onBackgroundColorChange && (
+            {(onBackgroundColorChange || !isModal) && (
               <Button
                 variant="outlined"
                 onClick={() => setBackgroundPickerOpen(true)}
@@ -1733,9 +1744,11 @@ export default function PropertyDetailPage({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                   <Typography variant="h6">Income</Typography>
-                  <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setIncomeDialogOpen(true)}>
-                    Add Income
-                  </Button>
+                  {(hasPermission('all') || hasPermission('manage_finances') || hasPermission('add_credits')) && (
+                    <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setIncomeDialogOpen(true)}>
+                      Add Income
+                    </Button>
+                  )}
                 </Stack>
                 <TableContainer>
                   <Table size="small">
@@ -1768,9 +1781,11 @@ export default function PropertyDetailPage({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                   <Typography variant="h6">Expenses</Typography>
-                  <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setExpenseDialogOpen(true)}>
-                    Add Expense
-                  </Button>
+                  {(hasPermission('all') || hasPermission('manage_finances') || hasPermission('delete_charges')) && (
+                    <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setExpenseDialogOpen(true)}>
+                      Add Expense
+                    </Button>
+                  )}
                 </Stack>
                 <TableContainer>
                   <Table size="small">
@@ -1794,6 +1809,104 @@ export default function PropertyDetailPage({
                     </TableBody>
                   </Table>
                 </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Deposit and Charge Management */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 3 }}>
+                  <AttachMoneyRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                  Deposits & Charges Management
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Security Deposit Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'info.light', color: 'info.contrastText' }}>
+                      <Typography variant="h5">${property.securityDeposit || 0}</Typography>
+                      <Typography variant="body2">Security Deposit</Typography>
+                    </Paper>
+                  </Grid>
+
+                  {/* Pet Deposit Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'secondary.light', color: 'secondary.contrastText' }}>
+                      <Typography variant="h5">${property.petDeposit || 0}</Typography>
+                      <Typography variant="body2">Pet Deposit</Typography>
+                    </Paper>
+                  </Grid>
+
+                  {/* Pet Fee Info */}
+                  <Grid item xs={12} md={4}>
+                    <Paper sx={{ p: 2, textAlign: 'center', bgcolor: 'warning.light', color: 'warning.contrastText' }}>
+                      <Typography variant="h5">${property.petFee || 0}</Typography>
+                      <Typography variant="body2">Pet Fee</Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                {/* Charge/Credit Management Actions - Only for authorized users */}
+                {(hasPermission('all') || hasPermission('delete_charges') || hasPermission('add_credits')) && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+                      Financial Management (Admin Only)
+                    </Typography>
+                    <Stack direction="row" spacing={2} flexWrap="wrap">
+                      {(hasPermission('all') || hasPermission('add_credits')) && (
+                        <Button
+                          variant="contained"
+                          color="success"
+                          startIcon={<AddRoundedIcon />}
+                          onClick={() => {
+                            // Add credit functionality
+                            alert('Add Credit functionality - This would open a dialog to add credits to tenant/property financial ledger');
+                          }}
+                        >
+                          Add Credit
+                        </Button>
+                      )}
+
+                      {(hasPermission('all') || hasPermission('delete_charges')) && (
+                        <Button
+                          variant="contained"
+                          color="error"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => {
+                            // Delete charge functionality
+                            if (window.confirm('Are you sure you want to delete a charge? This action will be recorded in the financial ledger.')) {
+                              alert('Delete Charge functionality - This would open a dialog to select and delete charges from tenant/property financial ledger');
+                            }
+                          }}
+                        >
+                          Delete Charge
+                        </Button>
+                      )}
+
+                      {(hasPermission('all') || hasPermission('view_financial_ledger')) && (
+                        <Button
+                          variant="outlined"
+                          startIcon={<DescriptionRoundedIcon />}
+                          onClick={() => {
+                            // View financial ledger
+                            alert('Financial Ledger - This would open a detailed view of all financial transactions for this property');
+                          }}
+                        >
+                          View Financial Ledger
+                        </Button>
+                      )}
+                    </Stack>
+
+                    <Alert severity="info" sx={{ mt: 2 }}>
+                      <Typography variant="body2">
+                        All financial changes are tracked in the activity log and reflected in the tenant's financial records.
+                        When tenants move out, charges will only be visible in their past tenant ledger.
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
@@ -2045,9 +2158,58 @@ export default function PropertyDetailPage({
                                   <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                                   <TableCell>{doc.uploadedBy}</TableCell>
                                   <TableCell>
-                                    <IconButton size="small" title={`Download ${doc.name}`}>
-                                      <DownloadRoundedIcon />
-                                    </IconButton>
+                                    <Stack direction="row" spacing={1}>
+                                      <IconButton
+                                        size="small"
+                                        title={`Download ${doc.name}`}
+                                        onClick={() => {
+                                          // In a real app, this would download the file
+                                          window.open(doc.url, '_blank');
+                                        }}
+                                      >
+                                        <DownloadRoundedIcon />
+                                      </IconButton>
+                                      {(hasPermission('all') || (user?.role === 'Admin' && hasPermission('manage_documents'))) && (
+                                        <IconButton
+                                          size="small"
+                                          title={`Delete ${doc.name}`}
+                                          onClick={() => {
+                                            if (window.confirm(`Are you sure you want to delete "${doc.name}"? This action cannot be undone.`)) {
+                                              deleteDocument(doc.id);
+
+                                              // Track document deletion activity
+                                              activityTracker.trackActivity({
+                                                userId: user?.id || 'current-user',
+                                                userDisplayName: user ? `${user.firstName} ${user.lastName}` : 'Current User',
+                                                action: 'delete',
+                                                entityType: 'property',
+                                                entityId: propertyId,
+                                                entityName: property.name,
+                                                changes: [
+                                                  {
+                                                    field: 'documents',
+                                                    oldValue: doc.name,
+                                                    newValue: '',
+                                                    displayName: 'Document Deleted'
+                                                  }
+                                                ],
+                                                description: `Document deleted: ${doc.name}`,
+                                                metadata: {
+                                                  category: doc.category,
+                                                  fileSize: doc.size,
+                                                  deletedBy: user ? `${user.firstName} ${user.lastName}` : 'Current User'
+                                                },
+                                                severity: 'medium',
+                                                category: 'security'
+                                              });
+                                            }
+                                          }}
+                                          color="error"
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      )}
+                                    </Stack>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -2789,9 +2951,15 @@ export default function PropertyDetailPage({
                     fullWidth
                     variant="outlined"
                     onClick={() => {
+                      // Save to localStorage for persistence
+                      localStorage.setItem('propertyHeaderColor', colorOption.value);
+                      setSavedHeaderColor(colorOption.value);
+
+                      // Call parent callback if provided (for modal mode)
                       if (onBackgroundColorChange) {
                         onBackgroundColorChange(colorOption.value);
                       }
+
                       setBackgroundPickerOpen(false);
                     }}
                     sx={{

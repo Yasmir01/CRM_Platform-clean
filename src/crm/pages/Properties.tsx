@@ -355,6 +355,7 @@ export default function Properties() {
     customType: "",
     units: 1,
     monthlyRent: 0,
+    securityDeposit: 0, // Add security deposit field
     managerId: "", // Keep for compatibility
     managerIds: [] as string[], // Support multiple managers
     tenantIds: [] as string[],
@@ -572,12 +573,14 @@ export default function Properties() {
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
-  // Calculate unlisted properties (available but not listed)
+  // Calculate unlisted properties (properties with Unlisted status or Available but not listed)
   const unlistedProperties = React.useMemo(() => {
     if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(property =>
-      property && property.status === "Available" &&
-      !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
+      property && (
+        property.status === "Unlisted" ||
+        (property.status === "Available" && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed"))
+      )
     );
   }, [state?.initialized, properties, listings]);
 
@@ -1047,6 +1050,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       customType: "",
       units: 1,
       monthlyRent: 0,
+      securityDeposit: 0,
       managerId: "",
       managerIds: [],
       tenantIds: [],
@@ -1096,6 +1100,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       customType: property.customType || "",
       units: property.units,
       monthlyRent: property.monthlyRent,
+      securityDeposit: property.securityDeposit || 0,
       managerId: property.managerId || "",
       managerIds: property.managerIds || (property.managerId ? [property.managerId] : []),
       description: property.description || "",
@@ -1179,6 +1184,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       type: formData.type,
       units: formData.units,
       monthlyRent: formData.monthlyRent,
+      securityDeposit: formData.securityDeposit,
       managerId: (formData.managerIds && formData.managerIds.length > 0) ? formData.managerIds[0] : undefined, // Keep first manager for compatibility
       managerIds: formData.managerIds,
       tenantIds: [] as string[],
@@ -1194,7 +1200,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       maxPetsAllowed: formData.maxPetsAllowed,
       parkingSpaces: formData.parkingSpaces,
       occupancy: 0,
-      status: "Available" as const,
+      status: "Unlisted" as const,
       images: [],
       tags: formData.tags,
     };
@@ -4775,6 +4781,17 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                   required
                   value={formData.monthlyRent}
                   onChange={(value) => setFormData({ ...formData, monthlyRent: value })}
+                  min={0}
+                  prefix="$"
+                  allowDecimals={false}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <NumberInput
+                  label="Security Deposit"
+                  fullWidth
+                  value={formData.securityDeposit}
+                  onChange={(value) => setFormData({ ...formData, securityDeposit: value })}
                   min={0}
                   prefix="$"
                   allowDecimals={false}
