@@ -578,7 +578,7 @@ export default function Templates() {
         applicationFee,
         paymentMethods,
       };
-      setTemplates(prev => [...prev, newTemplate]);
+      updateTemplates(prev => [...prev, newTemplate]);
     }
     setOpenDialog(false);
     setFormFields([]);
