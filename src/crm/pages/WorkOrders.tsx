@@ -545,6 +545,31 @@ export default function WorkOrders() {
         </Button>
       </Stack>
 
+      {/* Tenant-specific information */}
+      {user?.role === 'Tenant' && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            You can only view and manage work orders for your property during your lease period.
+            {(() => {
+              const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+              if (currentTenant) {
+                const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart).toLocaleDateString() : 'N/A';
+                const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd).toLocaleDateString() : 'Ongoing';
+                const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate).toLocaleDateString() : null;
+
+                return (
+                  <>
+                    {' '}Your lease period: {leaseStart} to {moveOutDate || leaseEnd}.
+                    {moveOutDate && ' (Moved out: ' + moveOutDate + ')'}
+                  </>
+                );
+              }
+              return '';
+            })()}
+          </Typography>
+        </Alert>
+      )}
+
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
