@@ -1744,9 +1744,11 @@ export default function PropertyDetailPage({
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                   <Typography variant="h6">Income</Typography>
-                  <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setIncomeDialogOpen(true)}>
-                    Add Income
-                  </Button>
+                  {(hasPermission('all') || hasPermission('manage_finances') || hasPermission('add_credits')) && (
+                    <Button size="small" startIcon={<AddRoundedIcon />} onClick={() => setIncomeDialogOpen(true)}>
+                      Add Income
+                    </Button>
+                  )}
                 </Stack>
                 <TableContainer>
                   <Table size="small">
