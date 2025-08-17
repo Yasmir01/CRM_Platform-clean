@@ -730,22 +730,22 @@ export default function NewsBoard() {
                       <Button
                         variant="outlined"
                         size="small"
-                        onClick={() => {
-                          // TODO: Open saved groups dialog
-                          alert('Load Saved Groups feature - Coming soon!');
-                        }}
+                        onClick={() => setSavedSelectionsDialogOpen(true)}
                         sx={{ minHeight: 48 }}
+                        disabled={savedSelections.length === 0}
                       >
-                        Load Saved Groups
+                        Load Saved Groups ({savedSelections.length})
                       </Button>
                       <Button
                         variant="outlined"
                         size="small"
-                        onClick={() => {
-                          // TODO: Save current selection
-                          alert('Save Selection feature - Coming soon!');
-                        }}
+                        onClick={() => setSaveSelectionDialogOpen(true)}
                         sx={{ minHeight: 48 }}
+                        disabled={formData.targetAudience === 'all' || (
+                          formData.targetProperties.length === 0 &&
+                          formData.targetTenants.length === 0 &&
+                          formData.targetPropertyGroups.length === 0
+                        )}
                       >
                         Save Selection
                       </Button>
