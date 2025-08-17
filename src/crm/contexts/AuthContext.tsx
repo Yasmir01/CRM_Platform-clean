@@ -125,17 +125,34 @@ const rolePermissions: Record<UserRole, string[]> = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Load user from localStorage on app start
+  // Load users and current user from localStorage on app start
   useEffect(() => {
+    // Load users list
+    const savedUsers = localStorage.getItem('users');
+    let usersList = mockUsers;
+    if (savedUsers) {
+      try {
+        usersList = JSON.parse(savedUsers);
+      } catch (error) {
+        // Invalid JSON, use mock users
+        usersList = mockUsers;
+      }
+    } else {
+      // First time, save mock users to localStorage
+      localStorage.setItem('users', JSON.stringify(mockUsers));
+    }
+    setUsers(usersList);
+
+    // Load current user
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       try {
         const userData = JSON.parse(savedUser);
         // Verify user still exists in our user list
-        const foundUser = mockUsers.find(u => u.id === userData.id);
+        const foundUser = usersList.find(u => u.id === userData.id);
         if (foundUser) {
           setUser(foundUser);
           setIsAuthenticated(true);
@@ -190,20 +207,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
       permissions: rolePermissions[userData.role] || [],
     };
-    
-    setUsers(prev => [...prev, newUser]);
+
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
     return newUser;
   };
 
   const updateUser = (userId: string, userData: Partial<User>) => {
-    setUsers(prev => 
-      prev.map(u => 
-        u.id === userId 
-          ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
-          : u
-      )
+    const updatedUsers = users.map(u =>
+      u.id === userId
+        ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
+        : u
     );
-    
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+
     // Update current user if it's the same user
     if (user && user.id === userId) {
       const updatedUser = { ...user, ...userData };
@@ -213,8 +232,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    
+    const updatedUsers = users.filter(u => u.id !== userId);
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+
     // Logout if deleting current user
     if (user && user.id === userId) {
       logout();
