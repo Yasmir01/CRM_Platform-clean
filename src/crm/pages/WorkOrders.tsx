@@ -443,7 +443,7 @@ export default function WorkOrders() {
         assignedDate: formData.assignedTo ? new Date().toISOString() : undefined,
         assignedBy: formData.assignedTo ? currentUser : undefined,
       };
-      setWorkOrders(prev => [...prev, newWorkOrder]);
+      updateWorkOrders(prev => [...prev, newWorkOrder]);
     }
     setOpenDialog(false);
   };
