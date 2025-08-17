@@ -1048,6 +1048,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       customType: "",
       units: 1,
       monthlyRent: 0,
+      securityDeposit: 0,
       managerId: "",
       managerIds: [],
       tenantIds: [],
