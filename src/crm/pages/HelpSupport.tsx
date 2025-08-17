@@ -461,6 +461,15 @@ const mockFAQs: FAQItem[] = [
     helpful: 88
   },
   {
+    id: "complete-feature-guide",
+    question: "What is the complete list of CRM features and how do I access each one?",
+    answer: "**PROPERTY MANAGEMENT**: Properties (add, edit, view), Property Groups (organize properties), Unlisted Properties (manage listings), Property Landing Pages (marketing pages), **TENANT MANAGEMENT**: Tenants (full profiles), Applications (rental applications), Activity Timeline (communication history), Move-in/Move-out management, **FINANCIAL**: Payments (record, track), Quotes (generate estimates), Financial Reports (income/expense), Charges & Credits management, **MARKETING**: Email Marketing (campaigns), Templates (rental forms), NewsBoard (announcements), QR Codes (property marketing), **MAINTENANCE**: Work Orders (create, assign), Service Providers (manage contractors), Maintenance Tracking, **POWER TOOLS**: QR-it (QR generator), Win-it (contests), Pool-it (group buying), Power Dialer (calling), **ADMINISTRATION**: User Roles (permissions), Company Settings (branding), Integration Management (APIs), Account Settings (preferences), **ANALYTICS**: Dashboard (overview), Reports & Analytics (detailed insights), Activity Tracking (audit trails). Each feature is accessible from the main navigation menu with comprehensive sub-features and tools.",
+    category: "General",
+    tags: ["features", "complete", "guide", "access", "navigation", "tools"],
+    helpful: 99,
+    isAdvanced: true
+  },
+  {
     id: "7",
     question: "What user roles are available in the system?",
     answer: "The system supports multiple user roles: 1) Administrator - full system access and management, 2) Property Manager - manage properties, tenants, and day-to-day operations, 3) Tenant - access to personal information, payments, and maintenance requests, 4) Service Provider - access to assigned work orders and communication, 5) Owner - view reports and property performance. Each role has specific permissions and access levels.",
