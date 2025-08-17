@@ -62,37 +62,39 @@ export default function CrmSideMenu() {
       >
         <CrmMenuContent />
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: "center",
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Avatar
-          sizes="small"
-          alt="Alex Thompson"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
+      {user && (
+        <Stack
+          direction="row"
+          sx={{
+            p: 2,
+            gap: 1,
+            alignItems: "center",
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
         >
-          AT
-        </Avatar>
-        <Box sx={{ mr: "auto" }}>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 500, lineHeight: "16px" }}
+          <Avatar
+            sizes="small"
+            alt={`${user.firstName} ${user.lastName}`}
+            src={user.avatar || "/static/images/avatar/7.jpg"}
+            sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
           >
-            Alex Thompson
-          </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            alex@acmecrm.com
-          </Typography>
-        </Box>
-        <CrmOptionsMenu />
-      </Stack>
+            {getUserInitials(user.firstName, user.lastName)}
+          </Avatar>
+          <Box sx={{ mr: "auto" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500, lineHeight: "16px" }}
+            >
+              {user.firstName} {user.lastName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              {user.email}
+            </Typography>
+          </Box>
+          <CrmOptionsMenu />
+        </Stack>
+      )}
     </Drawer>
   );
 }
