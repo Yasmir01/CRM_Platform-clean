@@ -928,21 +928,22 @@ export default function NewsBoard() {
                                   color="secondary"
                                 />
                                 <ListItemText
-                                  primary={
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                      {tenant.firstName} {tenant.lastName}
-                                    </Typography>
-                                  }
+                                  primary={`${tenant.firstName} ${tenant.lastName}`}
                                   secondary={
-                                    <Box>
-                                      <Typography variant="body2" color="text.secondary">
-                                        📧 {tenant.email}
-                                      </Typography>
-                                      <Typography variant="caption" color="text.secondary">
-                                        📞 {tenant.phone} • Status: {tenant.status}
-                                      </Typography>
-                                    </Box>
+                                    <>
+                                      📧 {tenant.email}
+                                      <br />
+                                      📞 {tenant.phone} • Status: {tenant.status}
+                                    </>
                                   }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
                                 />
                               </MenuItem>
                             ))}
