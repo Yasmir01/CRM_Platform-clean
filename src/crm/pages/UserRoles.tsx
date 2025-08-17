@@ -423,30 +423,31 @@ export default function UserRoles() {
 
   const handleSaveUser = () => {
     if (selectedUser) {
-      // Edit existing user
-      setUsers(prev => 
-        prev.map(u => 
-          u.id === selectedUser.id 
-            ? { ...u, ...userFormData }
-            : u
-        )
-      );
+      // Edit existing user - find the auth user and update
+      const authUser = authUsers.find(u => u.id === selectedUser.id);
+      if (authUser) {
+        updateUser(authUser.id, {
+          firstName: userFormData.firstName,
+          lastName: userFormData.lastName,
+          email: userFormData.email,
+          status: userFormData.status,
+        });
+      }
     } else {
-      // Add new user
-      const newUser: User = {
-        id: Date.now().toString(),
+      // Add new user to AuthContext
+      const newAuthUser = addUser({
         firstName: userFormData.firstName,
         lastName: userFormData.lastName,
         email: userFormData.email,
-        roleId: userFormData.roleId,
+        role: 'Admin' as UserRole, // Default role, can be made configurable
         status: userFormData.status,
-      };
-      setUsers(prev => [...prev, newUser]);
-      
+        permissions: ['all'], // Default permissions for new admin users
+      });
+
       // Update role user count
-      setRoles(prev => 
-        prev.map(r => 
-          r.id === userFormData.roleId 
+      setRoles(prev =>
+        prev.map(r =>
+          r.id === userFormData.roleId
             ? { ...r, userCount: r.userCount + 1 }
             : r
         )
