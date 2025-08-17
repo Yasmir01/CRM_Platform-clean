@@ -423,7 +423,16 @@ export default function PropertyDetailPage({
   ]);
   const [cardManagementOpen, setCardManagementOpen] = React.useState(false);
   const [backgroundPickerOpen, setBackgroundPickerOpen] = React.useState(false);
+  const [savedHeaderColor, setSavedHeaderColor] = React.useState<string | null>(null);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
+
+  // Load saved header color from localStorage
+  React.useEffect(() => {
+    const savedColor = localStorage.getItem('propertyHeaderColor');
+    if (savedColor) {
+      setSavedHeaderColor(savedColor);
+    }
+  }, []);
   const [selectedAppliance, setSelectedAppliance] = React.useState<Appliance | null>(null);
   const [applianceImages, setApplianceImages] = React.useState<ApplianceImage[]>([]);
   const [applianceFormData, setApplianceFormData] = React.useState<Partial<Appliance>>({
