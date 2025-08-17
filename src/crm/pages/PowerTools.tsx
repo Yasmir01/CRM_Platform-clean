@@ -1521,6 +1521,11 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
             label="WordPress-it"
             iconPosition="start"
           />
+          <Tab
+            icon={<TransformRoundedIcon />}
+            label="TinyWow-it"
+            iconPosition="start"
+          />
         </Tabs>
       </Box>
 
