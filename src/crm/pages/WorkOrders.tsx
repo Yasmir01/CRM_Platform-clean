@@ -252,6 +252,42 @@ export default function WorkOrders() {
   };
 
   const handleEditWorkOrder = (workOrder: WorkOrder) => {
+    // Check if tenant is trying to edit a work order not belonging to them
+    if (user?.role === 'Tenant') {
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (currentTenant) {
+        // Check if work order belongs to the tenant
+        const isForTenantProperty =
+          workOrder.propertyId === currentTenant.propertyId ||
+          workOrder.tenantId === currentTenant.id ||
+          workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+          workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+        if (!isForTenantProperty) {
+          alert("You can only edit work orders for your own property.");
+          return;
+        }
+
+        // Check if work order is within tenant's lease period
+        const workOrderDate = new Date(workOrder.createdDate);
+        const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+        const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+        const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+        if (leaseStart && workOrderDate < leaseStart) {
+          alert("You cannot edit work orders from before your lease start date.");
+          return;
+        }
+
+        const endDate = moveOutDate || leaseEnd;
+        if (endDate && workOrderDate > endDate) {
+          alert("You cannot edit work orders from after your move-out date.");
+          return;
+        }
+      }
+    }
+
     setSelectedWorkOrder(workOrder);
     setFormData({
       title: workOrder.title,
