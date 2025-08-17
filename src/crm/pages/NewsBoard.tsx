@@ -523,13 +523,24 @@ export default function NewsBoard() {
         </Stack>
 
         {/* Create/Edit Post Dialog */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="lg" fullWidth>
-          <DialogTitle sx={{ pb: 2 }}>
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          maxWidth="xl"
+          fullWidth
+          PaperProps={{
+            sx: {
+              minHeight: '80vh',
+              maxHeight: '90vh'
+            }
+          }}
+        >
+          <DialogTitle sx={{ pb: 2, px: 4 }}>
             <Typography variant="h5" component="div" sx={{ fontWeight: 600 }}>
               {selectedPost ? 'Edit Announcement' : 'Create New Announcement'}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Share important information with your tenants
+              Share important information with your tenants across properties and groups
             </Typography>
           </DialogTitle>
           <DialogContent sx={{ px: 4, pb: 2 }}>
