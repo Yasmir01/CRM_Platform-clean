@@ -1138,7 +1138,7 @@ export default function PropertyDetailPage({
             >
               Manage Windows
             </Button>
-            {onBackgroundColorChange && (
+            {(onBackgroundColorChange || !isModal) && (
               <Button
                 variant="outlined"
                 onClick={() => setBackgroundPickerOpen(true)}
