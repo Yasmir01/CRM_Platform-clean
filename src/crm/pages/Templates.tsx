@@ -48,6 +48,7 @@ import VariablesCheatSheet from "../components/VariablesCheatSheet";
 import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
 // import { useAutoSave, useAutoSaveStatus } from "../hooks/useAutoSave";
 import { quickCopy } from "../utils/clipboardUtils";
+import { LocalStorageService } from "../services/LocalStorageService";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
