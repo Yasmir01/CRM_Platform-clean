@@ -347,6 +347,50 @@ export default function WorkOrders() {
   };
 
   const handleDeleteWorkOrder = (id: string) => {
+    // Check if tenant is trying to delete a work order not belonging to them
+    if (user?.role === 'Tenant') {
+      const workOrderToDelete = workOrders.find(wo => wo.id === id);
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (workOrderToDelete && currentTenant) {
+        // Check if work order belongs to the tenant
+        const isForTenantProperty =
+          workOrderToDelete.propertyId === currentTenant.propertyId ||
+          workOrderToDelete.tenantId === currentTenant.id ||
+          workOrderToDelete.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+          workOrderToDelete.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+        if (!isForTenantProperty) {
+          alert("You can only delete work orders for your own property.");
+          return;
+        }
+
+        // Check if work order is within tenant's lease period
+        const workOrderDate = new Date(workOrderToDelete.createdDate);
+        const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+        const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+        const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+        if (leaseStart && workOrderDate < leaseStart) {
+          alert("You cannot delete work orders from before your lease start date.");
+          return;
+        }
+
+        const endDate = moveOutDate || leaseEnd;
+        if (endDate && workOrderDate > endDate) {
+          alert("You cannot delete work orders from after your move-out date.");
+          return;
+        }
+
+        // Additional restriction: Tenants can only delete work orders they created
+        if (workOrderToDelete.createdBy !== `${currentTenant.firstName} ${currentTenant.lastName}` &&
+            workOrderToDelete.createdBy !== `${user.firstName} ${user.lastName}`) {
+          alert("You can only delete work orders that you created.");
+          return;
+        }
+      }
+    }
+
     setWorkOrders(prev => prev.filter(wo => wo.id !== id));
   };
 
