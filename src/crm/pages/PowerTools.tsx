@@ -2384,6 +2384,116 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
         </Box>
       </TabPanel>
 
+      {/* TinyWow-it Tab */}
+      <TabPanel value={currentTab} index={10}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h5">TinyWow Tools</Typography>
+          <Button
+            variant="contained"
+            startIcon={<TransformRoundedIcon />}
+            href="https://tinywow.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open TinyWow
+          </Button>
+        </Stack>
+
+        <Alert severity="info" sx={{ mb: 3 }}>
+          TinyWow provides free online tools for PDF, image, video, and document conversion. All processing is done securely in your browser.
+        </Alert>
+
+        <Grid container spacing={3}>
+          {[
+            {
+              category: "PDF Tools",
+              icon: "📄",
+              tools: [
+                { name: "PDF Merger", desc: "Combine multiple PDFs into one", url: "https://tinywow.com/pdf/merge" },
+                { name: "PDF Splitter", desc: "Split PDF into multiple files", url: "https://tinywow.com/pdf/split" },
+                { name: "PDF Converter", desc: "Convert to/from PDF format", url: "https://tinywow.com/pdf/convert" },
+                { name: "PDF Compressor", desc: "Reduce PDF file size", url: "https://tinywow.com/pdf/compress" },
+                { name: "PDF Protector", desc: "Add password protection", url: "https://tinywow.com/pdf/protect" },
+              ]
+            },
+            {
+              category: "Image Tools",
+              icon: "🖼️",
+              tools: [
+                { name: "Image Resizer", desc: "Resize images to specific dimensions", url: "https://tinywow.com/image/resize" },
+                { name: "Background Remover", desc: "Remove image backgrounds", url: "https://tinywow.com/image/bg-remover" },
+                { name: "Image Converter", desc: "Convert between image formats", url: "https://tinywow.com/image/convert" },
+                { name: "Image Compressor", desc: "Reduce image file size", url: "https://tinywow.com/image/compress" },
+                { name: "Image Cropper", desc: "Crop images to specific area", url: "https://tinywow.com/image/crop" },
+              ]
+            },
+            {
+              category: "Video Tools",
+              icon: "🎥",
+              tools: [
+                { name: "Video Converter", desc: "Convert video formats", url: "https://tinywow.com/video/convert" },
+                { name: "Video Compressor", desc: "Reduce video file size", url: "https://tinywow.com/video/compress" },
+                { name: "Video Trimmer", desc: "Cut video clips", url: "https://tinywow.com/video/trim" },
+                { name: "Audio Extractor", desc: "Extract audio from video", url: "https://tinywow.com/video/audio-extractor" },
+                { name: "Subtitle Adder", desc: "Add subtitles to videos", url: "https://tinywow.com/video/subtitle" },
+              ]
+            },
+            {
+              category: "Document Tools",
+              icon: "📝",
+              tools: [
+                { name: "Word Converter", desc: "Convert Word documents", url: "https://tinywow.com/document/word-converter" },
+                { name: "Excel Converter", desc: "Convert Excel spreadsheets", url: "https://tinywow.com/document/excel-converter" },
+                { name: "PowerPoint Converter", desc: "Convert presentations", url: "https://tinywow.com/document/powerpoint-converter" },
+                { name: "Text Extractor", desc: "Extract text from documents", url: "https://tinywow.com/document/text-extractor" },
+                { name: "OCR Scanner", desc: "Extract text from images", url: "https://tinywow.com/document/ocr" },
+              ]
+            }
+          ].map((category) => (
+            <Grid item xs={12} md={6} key={category.category}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                    <Typography variant="h2" sx={{ fontSize: 32 }}>{category.icon}</Typography>
+                    <Typography variant="h6">{category.category}</Typography>
+                  </Stack>
+
+                  <Stack spacing={1}>
+                    {category.tools.map((tool) => (
+                      <Card key={tool.name} variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography variant="subtitle2" gutterBottom>{tool.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{tool.desc}</Typography>
+                          </Box>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            href={tool.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            startIcon={<LaunchRoundedIcon />}
+                          >
+                            Open
+                          </Button>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Alert severity="success" sx={{ mt: 3 }}>
+          <Typography variant="subtitle2" gutterBottom>Why TinyWow?</Typography>
+          <Typography variant="body2">
+            • Completely free to use • No registration required • All processing happens locally • No file size limits • Supports all major formats
+          </Typography>
+        </Alert>
+      </TabPanel>
+
       {/* Fundraise-it Dialog */}
       <Dialog open={openFundraiseDialog} onClose={() => setOpenFundraiseDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Create Fundraising Campaign</DialogTitle>
