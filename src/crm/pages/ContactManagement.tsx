@@ -441,7 +441,7 @@ export default function ContactManagement() {
   };
 
   const handleDeleteContact = (id: string) => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
+    deleteContact(id);
   };
 
   const totalContacts = allContacts.length;
