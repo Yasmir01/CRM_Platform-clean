@@ -417,11 +417,11 @@ export default function WorkOrders() {
     
     if (selectedWorkOrder) {
       // Edit existing work order
-      setWorkOrders(prev => 
-        prev.map(wo => 
-          wo.id === selectedWorkOrder.id 
-            ? { 
-                ...wo, 
+      updateWorkOrders(prev =>
+        prev.map(wo =>
+          wo.id === selectedWorkOrder.id
+            ? {
+                ...wo,
                 ...formData,
                 estimatedCost: formData.estimatedCost ? parseFloat(formData.estimatedCost) : undefined,
                 assignedDate: formData.assignedTo && !selectedWorkOrder.assignedTo ? new Date().toISOString() : wo.assignedDate,
