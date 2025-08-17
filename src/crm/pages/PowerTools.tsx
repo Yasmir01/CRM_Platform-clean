@@ -674,7 +674,22 @@ const mockPools: Pool[] = [
 ];
 
 export default function PowerTools() {
+  const { canAccessPowerTools, userRole, isAdmin } = useRoleManagement();
   const [currentTab, setCurrentTab] = React.useState(0);
+
+  // Check if user has access to power tools
+  if (!canAccessPowerTools()) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          Access Denied
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          You don't have permission to access Power Tools. Contact your administrator for access.
+        </Typography>
+      </Box>
+    );
+  }
 
   // QR Code states - Load from localStorage if available, fallback to mock data
   const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(() => {
