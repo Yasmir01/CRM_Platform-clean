@@ -215,7 +215,7 @@ const getLeadScoreColor = (score: number) => {
 export default function ContactManagement() {
   const navigate = useNavigate();
   const { trackPropertyActivity } = useActivityTracking();
-  const { state, addContact, updateContact } = useCrmData();
+  const { state, addContact, updateContact, deleteContact } = useCrmData();
   const { contacts, tenants, propertyManagers } = state;
 
   // Generate contacts from CRM data (tenants, property managers, service providers)
