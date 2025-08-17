@@ -130,15 +130,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setIsAuthenticated(true);
-    } else {
-      // Auto-login as admin for demo purposes
-      const adminUser = mockUsers[0];
-      setUser(adminUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(adminUser));
+      try {
+        const userData = JSON.parse(savedUser);
+        // Verify user still exists in our user list
+        const foundUser = mockUsers.find(u => u.id === userData.id);
+        if (foundUser) {
+          setUser(foundUser);
+          setIsAuthenticated(true);
+        } else {
+          // User not found, clear storage
+          localStorage.removeItem('currentUser');
+        }
+      } catch (error) {
+        // Invalid JSON, clear storage
+        localStorage.removeItem('currentUser');
+      }
     }
   }, []);
 
