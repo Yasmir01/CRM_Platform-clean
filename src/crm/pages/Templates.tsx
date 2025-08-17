@@ -585,7 +585,7 @@ export default function Templates() {
   };
 
   const handleDeleteTemplate = (id: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== id));
+    updateTemplates(prev => prev.filter(t => t.id !== id));
   };
 
   const handlePreviewTemplate = (template: Template) => {
