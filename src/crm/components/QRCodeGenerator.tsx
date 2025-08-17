@@ -551,7 +551,7 @@ export default function QRCodeGenerator({
 
     // Save to localStorage for persistence
     try {
-      LocalStorageService.saveData('qr_codes', updatedQRCodes);
+      LocalStorageService.saveQRCodes(updatedQRCodes);
       console.log('QR codes saved successfully to localStorage');
     } catch (error) {
       console.error('Failed to save QR codes:', error);
