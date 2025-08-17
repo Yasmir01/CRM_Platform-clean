@@ -832,45 +832,108 @@ export default function NewsBoard() {
                   {/* Property Groups Selection */}
                   {(formData.targetAudience === 'property-groups' || formData.targetAudience === 'custom') && (
                     <Grid item xs={12}>
-                      <FormControl fullWidth variant="outlined">
-                        <InputLabel>Select Property Groups ({formData.targetPropertyGroups.length} selected)</InputLabel>
-                        <Select
-                          multiple
-                          value={formData.targetPropertyGroups}
-                          label={`Select Property Groups (${formData.targetPropertyGroups.length} selected)`}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            targetPropertyGroups: typeof e.target.value === 'string'
-                              ? e.target.value.split(',')
-                              : e.target.value
-                          })}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((value) => {
-                                const group = propertyGroups.find(g => g.id === value);
-                                return (
-                                  <Chip
-                                    key={value}
-                                    label={group?.name || value}
-                                    size="small"
-                                    sx={{ bgcolor: group?.color + '15', borderColor: group?.color }}
-                                  />
-                                );
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {propertyGroups.map((group) => (
-                            <MenuItem key={group.id} value={group.id}>
-                              <Checkbox checked={formData.targetPropertyGroups.includes(group.id)} />
-                              <ListItemText
-                                primary={group.name}
-                                secondary={`${group.propertyIds.length} properties • ${group.description}`}
-                              />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            Select Property Groups ({formData.targetPropertyGroups.length} selected)
+                          </Typography>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              // TODO: Quick create group functionality
+                              alert('Quick Create Group feature - Coming soon!');
+                            }}
+                          >
+                            + Quick Create Group
+                          </Button>
+                        </Stack>
+                        <FormControl fullWidth variant="outlined">
+                          <Select
+                            multiple
+                            value={formData.targetPropertyGroups}
+                            displayEmpty
+                            onChange={(e) => setFormData({
+                              ...formData,
+                              targetPropertyGroups: typeof e.target.value === 'string'
+                                ? e.target.value.split(',')
+                                : e.target.value
+                            })}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, minHeight: '32px' }}>
+                                {selected.length === 0 ? (
+                                  <Typography variant="body2" color="text.secondary">
+                                    Click to select property groups...
+                                  </Typography>
+                                ) : (
+                                  selected.map((value) => {
+                                    const group = propertyGroups.find(g => g.id === value);
+                                    return (
+                                      <Chip
+                                        key={value}
+                                        label={group?.name || value}
+                                        size="small"
+                                        sx={{
+                                          bgcolor: group?.color + '20',
+                                          borderColor: group?.color,
+                                          color: group?.color,
+                                          fontWeight: 600
+                                        }}
+                                        variant="outlined"
+                                      />
+                                    );
+                                  })
+                                )}
+                              </Box>
+                            )}
+                            sx={{ minHeight: 80 }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 400,
+                                  width: 600,
+                                },
+                              },
+                            }}
+                          >
+                            {propertyGroups.map((group) => (
+                              <MenuItem key={group.id} value={group.id} sx={{ py: 1.5 }}>
+                                <Checkbox
+                                  checked={formData.targetPropertyGroups.includes(group.id)}
+                                  sx={{ color: group.color }}
+                                />
+                                <ListItemText
+                                  primary={
+                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                      <Box
+                                        sx={{
+                                          width: 12,
+                                          height: 12,
+                                          borderRadius: '50%',
+                                          bgcolor: group.color
+                                        }}
+                                      />
+                                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                                        {group.name}
+                                      </Typography>
+                                    </Stack>
+                                  }
+                                  secondary={
+                                    <Box>
+                                      <Typography variant="body2" color="text.secondary">
+                                        📝 {group.description}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        🏠 {group.propertyIds.length} properties • Tags: {group.tags.join(', ')}
+                                      </Typography>
+                                    </Box>
+                                  }
+                                />
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Paper>
                     </Grid>
                   )}
                 </Grid>
