@@ -28,6 +28,8 @@ export interface AuthContextType {
   updateUser: (userId: string, userData: Partial<User>) => void;
   deleteUser: (userId: string) => void;
   getUsersByRole: (role: UserRole) => User[];
+  resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  sendPasswordEmail: (email: string, tempPassword: string) => void;
   isAuthenticated: boolean;
   hasPermission: (permission: string) => boolean;
 }
