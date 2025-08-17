@@ -126,7 +126,25 @@ export default function AccountSettings() {
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = React.useState(false);
   const [twoFactorDialogOpen, setTwoFactorDialogOpen] = React.useState(false);
   const [userPreferencesOpen, setUserPreferencesOpen] = React.useState(false);
+  const [companySettingsOpen, setCompanySettingsOpen] = React.useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
+
+  // Company information management
+  const { companyInfo, updateCompanyInfo } = useCompanyInfo();
+
+  // User role management
+  const [userRole, setUserRole] = React.useState(() => {
+    return LocalStorageService.getUserRoles();
+  });
+
+  const updateUserRole = React.useCallback((newRole: any) => {
+    setUserRole(newRole);
+    LocalStorageService.saveUserRoles(newRole);
+  }, []);
+
+  // Check if user has admin permissions
+  const isAdmin = userRole.role === 'admin' || userRole.role === 'super_admin';
+  const isSuperAdmin = userRole.role === 'super_admin';
 
   const handleNotificationChange = (setting: keyof NotificationSettings) => {
     setNotifications(prev => ({
