@@ -162,6 +162,36 @@ export default function WorkOrders() {
   const { state } = useCrmData();
   const { properties, tenants } = state;
   const { user } = useAuth();
+
+  // Helper function to check if tenant can interact with a work order
+  const canTenantInteractWithWorkOrder = (workOrder: WorkOrder): boolean => {
+    if (user?.role !== 'Tenant') return true; // Non-tenants can interact with all work orders
+
+    const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+    if (!currentTenant) return false;
+
+    // Check if work order belongs to the tenant's property
+    const isForTenantProperty =
+      workOrder.propertyId === currentTenant.propertyId ||
+      workOrder.tenantId === currentTenant.id ||
+      workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+      workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+    if (!isForTenantProperty) return false;
+
+    // Check if work order is within tenant's lease period
+    const workOrderDate = new Date(workOrder.createdDate);
+    const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+    const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+    const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+    if (leaseStart && workOrderDate < leaseStart) return false;
+
+    const endDate = moveOutDate || leaseEnd;
+    if (endDate && workOrderDate > endDate) return false;
+
+    return true;
+  };
   const [workOrders, setWorkOrders] = React.useState<WorkOrder[]>(mockWorkOrders);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
