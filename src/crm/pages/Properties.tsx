@@ -1097,6 +1097,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       customType: property.customType || "",
       units: property.units,
       monthlyRent: property.monthlyRent,
+      securityDeposit: property.securityDeposit || 0,
       managerId: property.managerId || "",
       managerIds: property.managerIds || (property.managerId ? [property.managerId] : []),
       description: property.description || "",
