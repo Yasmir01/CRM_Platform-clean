@@ -2849,9 +2849,15 @@ export default function PropertyDetailPage({
                     fullWidth
                     variant="outlined"
                     onClick={() => {
+                      // Save to localStorage for persistence
+                      localStorage.setItem('propertyHeaderColor', colorOption.value);
+                      setSavedHeaderColor(colorOption.value);
+
+                      // Call parent callback if provided (for modal mode)
                       if (onBackgroundColorChange) {
                         onBackgroundColorChange(colorOption.value);
                       }
+
                       setBackgroundPickerOpen(false);
                     }}
                     sx={{
