@@ -110,7 +110,7 @@ interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
-  status: "Available" | "Occupied" | "Maintenance" | "Pending";
+  status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   manager: string;
   tenant?: string;
   images: PropertyImage[];
@@ -583,6 +583,8 @@ export default function Properties() {
 
   const getStatusColor = (status: Property["status"]) => {
     switch (status) {
+      case "Unlisted": return "secondary";
+      case "Listed": return "info";
       case "Available": return "success";
       case "Occupied": return "primary";
       case "Maintenance": return "warning";
@@ -653,7 +655,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         <div class="detail-item"><strong>�� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
         <div class="detail-item"><strong>�� Square Footage:</strong> ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}</div>
         <div class="detail-item"><strong>�� Parking:</strong> ${property.parkingSpaces || 0} space(s)</div>
-        <div class="detail-item"><strong>🐕 Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
+        <div class="detail-item"><strong>�� Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
     </div>
     
     <h3>✨ Amenities</h3>
@@ -727,7 +729,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       const newListing: PropertyListing = {
         id: Date.now().toString(),
         propertyId: selectedProperty.id,
-        status: "Draft",
+        status: "Listed", // Set as Listed so property moves out of unlisted section
         customContent: listingFormData.customContent,
         htmlContent: htmlContent,
         listingSites: listingFormData.listingSites,
@@ -738,8 +740,30 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         lastUpdated: new Date().toISOString().split('T')[0]
       };
       setListings(prev => [...(prev || []), newListing]);
+
+      // Update property status to Listed
+      if (selectedProperty.status === 'Unlisted') {
+        const updatedProperty = {
+          ...selectedProperty,
+          status: 'Listed' as Property['status'],
+          updatedAt: new Date().toISOString()
+        };
+        updateProperty(updatedProperty);
+      }
+
+      // Track property listing creation
+      trackPropertyActivity(
+        'status_change',
+        selectedProperty.id,
+        selectedProperty.name,
+        [
+          { field: 'listing_status', oldValue: 'Unlisted', newValue: 'Listed', displayName: 'Listing Status' }
+        ],
+        `Property listing created and published`,
+        { notes: `Listed on ${Object.entries(listingFormData.listingSites).filter(([_, enabled]) => enabled).map(([site, _]) => site).join(', ')}` }
+      );
     }
-    
+
     setOpenListingDialog(false);
     alert(`Listing ${selectedListing ? 'updated' : 'created'} successfully!`);
   };
@@ -2366,7 +2390,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                         startIcon={<WebRoundedIcon />}
                         onClick={() => {
                           const landingPageUrl = `${window.location.origin}/property-landing/${property.id}`;
-                          alert(`🚀 Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
+                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
                         }}
                       >
                         Create Landing Page
@@ -4013,7 +4037,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const showingDateTime = new Date(`${showingData.date}T${showingData.time}`);
               const formattedDateTime = showingDateTime.toLocaleString();
 
-              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n• Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
+              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
 
               setShowingDialogOpen(false);
             }}
@@ -5611,7 +5635,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          ��� Share Property Listing - {shareProperty?.name}
+          ���� Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>

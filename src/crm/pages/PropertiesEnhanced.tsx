@@ -90,7 +90,7 @@ interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
-  status: "Available" | "Occupied" | "Maintenance" | "Pending";
+  status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   manager: string;
   tenant?: string;
   images: PropertyImage[];
@@ -364,6 +364,8 @@ export default function PropertiesEnhanced() {
 
   const getStatusColor = (status: Property["status"]) => {
     switch (status) {
+      case "Unlisted": return "secondary";
+      case "Listed": return "info";
       case "Available": return "success";
       case "Occupied": return "primary";
       case "Maintenance": return "warning";

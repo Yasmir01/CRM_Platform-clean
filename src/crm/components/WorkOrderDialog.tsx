@@ -52,14 +52,14 @@ interface WorkOrderDialogProps {
   onWorkOrderCreated?: (workOrder: WorkOrder) => void;
 }
 
-export default function WorkOrderDialog({ 
-  open, 
-  onClose, 
-  propertyId, 
+export default function WorkOrderDialog({
+  open,
+  onClose,
+  propertyId,
   propertyName,
-  onWorkOrderCreated 
+  onWorkOrderCreated
 }: WorkOrderDialogProps) {
-  const { state } = useCrmData();
+  const { state, addWorkOrder } = useCrmData();
   const { user } = useAuth();
   const { properties, tenants } = state;
 
@@ -93,8 +93,7 @@ export default function WorkOrderDialog({
   }, [open, propertyId, propertyName]);
 
   const handleSubmit = () => {
-    const newWorkOrder: WorkOrder = {
-      id: Date.now().toString(),
+    const workOrderData = {
       title: formData.title,
       description: formData.description,
       property: formData.property,
@@ -105,7 +104,7 @@ export default function WorkOrderDialog({
       category: formData.category,
       customCategory: formData.customCategory,
       priority: formData.isEmergency ? "Emergency" : formData.priority,
-      status: "Open",
+      status: "Open" as WorkOrder["status"],
       requestedBy: user?.name || "Unknown",
       assignedTo: formData.assignedTo,
       createdDate: new Date().toISOString(),
@@ -115,8 +114,17 @@ export default function WorkOrderDialog({
       isEmergency: formData.isEmergency
     };
 
-    // Call the callback to notify parent component
+    // Save to CrmDataContext (this will auto-save to localStorage)
+    addWorkOrder(workOrderData);
+
+    // Call the callback to notify parent component (if needed)
     if (onWorkOrderCreated) {
+      const newWorkOrder = {
+        ...workOrderData,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
       onWorkOrderCreated(newWorkOrder);
     }
 

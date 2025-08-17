@@ -47,6 +47,8 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import CommunicationDialog from "../components/CommunicationDialog";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
+import { activityTracker } from "../services/ActivityTrackingService";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -76,6 +78,7 @@ import LinkRoundedIcon from "@mui/icons-material/LinkRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 
 interface CallLog {
   id: string;
@@ -108,11 +111,19 @@ interface Payment {
   id: string;
   amount: number;
   date: string;
-  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order";
-  status: "Completed" | "Pending" | "Failed" | "Refunded";
+  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order" | "Wire Transfer" | "Online";
+  status: "Completed" | "Pending" | "Failed" | "Refunded" | "Processing";
   description: string;
+  propertyId?: string;
+  tenantId?: string;
   recordedBy: string;
   transactionId?: string;
+  category: "Rent" | "Security Deposit" | "Pet Deposit" | "Late Fee" | "Utilities" | "Maintenance" | "Other";
+  dueDate?: string;
+  paidDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Charge {
@@ -197,7 +208,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
-  const { state, updateTenant } = useCrmData();
+  const { state, updateTenant, addNote, addDocument, addPayment } = useCrmData();
+  const { getEntityActivities } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterType, setFilterType] = React.useState("All");
@@ -211,6 +223,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   const [dateFilter, setDateFilter] = React.useState("");
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [communicationDialogOpen, setCommunicationDialogOpen] = React.useState(false);
+  const [contractViewModalOpen, setContractViewModalOpen] = React.useState(false);
   const [communicationData, setCommunicationData] = React.useState({
     type: 'email' as 'email' | 'sms' | 'call',
     recipient: '',
@@ -311,7 +324,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   ]);
 
-  const [payments] = React.useState<Payment[]>([]); // Empty for new tenants
+  // Get real payments from CrmDataContext for this tenant
+  const payments = state.payments.filter(payment => payment.tenantId === tenant.id); // Empty for new tenants
   const [mockPayments] = React.useState<Payment[]>([
     {
       id: "1",
@@ -347,38 +361,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Lease Agreement 2024.pdf",
-      type: "PDF",
-      size: 2400000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "John Manager",
-      category: "Lease",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Insurance Certificate.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2024-01-01T10:15:00Z",
-      uploadedBy: "Sarah Johnson",
-      category: "Legal",
-      url: "#"
-    },
-    {
-      id: "3",
-      name: "Rental Application - Sarah Johnson.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2023-12-15T09:00:00Z",
-      uploadedBy: "System",
-      category: "Application",
-      url: "#"
-    }
-  ]);
+  // Get real documents from CrmDataContext for this tenant
+  const documents = state.documents.filter(doc => doc.tenantId === tenant.id);
 
   const [workOrders] = React.useState<WorkOrder[]>([]); // Empty for new tenants
   const [mockWorkOrders] = React.useState<WorkOrder[]>([
@@ -488,7 +472,8 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       }
 
       if (editingNote) {
-        // Update existing note
+        // Update existing note - for now just update local state
+        // TODO: Implement note updating in CrmDataContext
         const updatedNote: Note = {
           ...editingNote,
           content: noteContent,
@@ -496,15 +481,56 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         };
         setNotes(prev => prev.map(note => note.id === editingNote.id ? updatedNote : note));
       } else {
-        // Create new note
-        const note: Note = {
-          id: Date.now().toString(),
+        // Create new note using CrmDataContext for persistence
+        const noteData = {
+          title: `${newNote.type} - ${tenant.firstName} ${tenant.lastName}`,
           content: noteContent,
-          date: new Date().toISOString(),
+          category: 'Tenant' as const,
+          tenantId: tenant.id,
+          tags: [newNote.type],
+          isPrivate: false,
+          isPinned: false,
+          createdBy: 'Current User'
+        };
+
+        // Save to CrmDataContext for persistence
+        const savedNote = addNote(noteData);
+
+        // Also track as activity for the timeline
+        activityTracker.trackActivity({
+          userId: 'current-user',
+          userDisplayName: 'Current User',
+          action: 'create',
+          entityType: 'tenant',
+          entityId: tenant.id,
+          entityName: `${tenant.firstName} ${tenant.lastName}`,
+          changes: [
+            {
+              field: 'notes',
+              oldValue: '',
+              newValue: newNote.type,
+              displayName: 'Note Added'
+            }
+          ],
+          description: `${newNote.type}: ${noteContent.substring(0, 100)}${noteContent.length > 100 ? '...' : ''}`,
+          metadata: {
+            notes: noteContent,
+            noteType: newNote.type,
+            ...(newNote.duration > 0 && { callDuration: newNote.duration })
+          },
+          severity: 'low',
+          category: 'communication'
+        });
+
+        // Update local state to show in the UI immediately
+        const localNote: Note = {
+          id: savedNote.id,
+          content: noteContent,
+          date: savedNote.createdAt,
           createdBy: "Current User",
           type: newNote.type
         };
-        setNotes(prev => [note, ...prev]);
+        setNotes(prev => [localNote, ...prev]);
       }
 
       resetNoteForm();
@@ -525,17 +551,47 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
 
   const handleAddPayment = () => {
     if (newPayment.amount > 0) {
-      const payment: Payment = {
-        id: Date.now().toString(),
+      // Save payment to CrmDataContext
+      const savedPayment = addPayment({
         amount: newPayment.amount,
         date: new Date().toISOString(),
         method: newPayment.method,
         status: "Completed",
         description: newPayment.description || `Manual payment entry`,
+        propertyId: tenant.propertyId,
+        tenantId: tenant.id,
         recordedBy: "Current User",
-        transactionId: newPayment.transactionId
-      };
-      // In real app, add to payments state
+        transactionId: newPayment.transactionId,
+        category: "Rent", // Default to rent, could be made selectable
+        paidDate: new Date().toISOString(),
+      });
+
+      // Track activity for the payment
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        entityName: `${tenant.firstName} ${tenant.lastName}`,
+        changes: [
+          {
+            field: 'payments',
+            oldValue: '',
+            newValue: `$${newPayment.amount}`,
+            displayName: 'Payment Recorded'
+          }
+        ],
+        description: `Payment recorded: $${newPayment.amount} via ${newPayment.method}`,
+        metadata: {
+          paymentAmount: newPayment.amount,
+          paymentMethod: newPayment.method,
+          transactionId: newPayment.transactionId
+        },
+        severity: 'low',
+        category: 'financial'
+      });
+
       setNewPayment({ amount: 0, method: "ACH", description: "", transactionId: "" });
       setOpenPaymentDialog(false);
       alert("Payment recorded successfully!");
@@ -577,18 +633,48 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
 
   const handleUploadDocument = () => {
     if (newDocument.file) {
-      // In real app, upload the file
-      const mockDocument: Document = {
-        id: Date.now().toString(),
+      // Create a blob URL for the file to simulate file storage
+      const fileUrl = URL.createObjectURL(newDocument.file);
+
+      // Save document to CrmDataContext
+      const savedDocument = addDocument({
         name: newDocument.file.name,
         type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
         size: newDocument.file.size,
-        uploadDate: new Date().toISOString(),
-        uploadedBy: "Current User",
+        url: fileUrl,
         category: newDocument.category,
-        url: "#"
-      };
-      // Add to documents list (in real app, this would update the state)
+        tenantId: tenant.id,
+        uploadedBy: "Current User",
+        description: newDocument.description,
+        tags: []
+      });
+
+      // Track activity for the upload
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        entityName: `${tenant.firstName} ${tenant.lastName}`,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Uploaded'
+          }
+        ],
+        description: `Document uploaded: ${newDocument.file.name}`,
+        metadata: {
+          documentCategory: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type
+        },
+        severity: 'low',
+        category: 'documentation'
+      });
+
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
@@ -627,12 +713,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
+  // Get real activities from the activity tracking system
+  const tenantActivities = getEntityActivities('tenant', tenant.id);
+
   const allLogs = [
     ...callLogs.map(log => ({ ...log, logType: 'call' as const })),
     ...messageLogs.map(log => ({ ...log, logType: 'message' as const })),
     ...notes.map(note => ({ ...note, logType: 'note' as const })),
     ...workOrders.map(wo => ({ ...wo, logType: 'workorder' as const, date: wo.createdDate, content: wo.description })),
-    ...applicationUpdates.map(app => ({ ...app, logType: 'application' as const, content: app.details, createdBy: app.updatedBy }))
+    ...applicationUpdates.map(app => ({ ...app, logType: 'application' as const, content: app.details, createdBy: app.updatedBy })),
+    // Add real activities from the activity tracking service
+    ...tenantActivities.map(activity => ({
+      id: activity.id,
+      logType: 'activity' as const,
+      date: activity.timestamp,
+      content: activity.description,
+      createdBy: activity.userDisplayName,
+      type: activity.action,
+      metadata: activity.metadata
+    }))
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const filteredLogs = allLogs.filter(log => {
@@ -640,7 +739,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     const matchesFilter = filterType === "All" ||
       (filterType === "Calls" && log.logType === 'call') ||
       (filterType === "Messages" && log.logType === 'message') ||
-      (filterType === "Notes" && log.logType === 'note') ||
+      (filterType === "Notes" && (log.logType === 'note' || log.logType === 'activity')) ||
       (filterType === "Work Orders" && log.logType === 'workorder') ||
       (filterType === "Applications" && log.logType === 'application');
 
@@ -730,6 +829,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     <MenuItem value="Pending">Pending</MenuItem>
                     <MenuItem value="Inactive">Inactive</MenuItem>
                     <MenuItem value="Late Payment">Late Payment</MenuItem>
+                    <MenuItem value="Past Tenant">Past Tenant</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
@@ -1017,76 +1117,90 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
             {/* Activity Timeline */}
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>Activity Timeline</Typography>
-              <List>
-                {filteredLogs.map((log) => (
-                  <ListItem key={`${log.logType}-${log.id}`} divider>
-                    <ListItemIcon>
-                      {log.logType === 'call' && getCallIcon((log as any).type)}
-                      {log.logType === 'message' &&
-                        ((log as any).type === 'SMS' ? <SmsRoundedIcon /> : <EmailRoundedIcon />)}
-                      {log.logType === 'note' && <NoteAddRoundedIcon />}
-                      {log.logType === 'workorder' && <BuildRoundedIcon />}
-                      {log.logType === 'application' && <PersonRoundedIcon />}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <>
-                          {log.logType === 'call' &&
-                            `${(log as any).type} Call • ${formatDuration((log as any).duration)}`
-                          }
-                          {log.logType === 'message' &&
-                            `${(log as any).type} ${(log as any).direction}${(log as any).subject ? ` • ${(log as any).subject}` : ''}`
-                          }
-                          {log.logType === 'note' &&
-                            `Note • ${(log as any).type}`
-                          }
-                          {log.logType === 'workorder' &&
-                            `Work Order • ${(log as any).status} • ${(log as any).title}`
-                          }
-                          {log.logType === 'application' &&
-                            `${(log as any).type}`
-                          }
-                        </>
-                      }
-                      secondary={
-                        <>
-                          {log.logType === 'call' && (log as any).notes}
-                          {log.logType === 'message' && (log as any).content}
-                          {log.logType === 'note' && (log as any).content}
-                          {log.logType === 'workorder' && `${(log as any).content} • Priority: ${(log as any).priority}${(log as any).assignedTo ? ` • Assigned to: ${(log as any).assignedTo}` : ''}`}
-                          {log.logType === 'application' && (log as any).content}
-                          {' • '}
-                          {new Date(log.date).toLocaleString()}
-                          {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
-                          {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
-                          {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
-                          {log.logType === 'workorder' && ` • Created by Tenant`}
-                          {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
-                        </>
-                      }
-                      primaryTypographyProps={{
-                        variant: "subtitle2",
-                        component: "span"
-                      }}
-                      secondaryTypographyProps={{
-                        variant: "body2",
-                        component: "span"
-                      }}
-                    />
-                    {log.logType === 'note' && (
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditNote(log as any)}
-                          title="Edit Note"
-                        >
-                          <EditRoundedIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    )}
-                  </ListItem>
-                ))}
-              </List>
+              {filteredLogs.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No activities found. Add a note to get started.
+                  </Typography>
+                </Box>
+              ) : (
+                <List>
+                  {filteredLogs.map((log) => (
+                    <ListItem key={`${log.logType}-${log.id}`} divider>
+                      <ListItemIcon>
+                        {log.logType === 'call' && getCallIcon((log as any).type)}
+                        {log.logType === 'message' &&
+                          ((log as any).type === 'SMS' ? <SmsRoundedIcon /> : <EmailRoundedIcon />)}
+                        {log.logType === 'note' && <NoteAddRoundedIcon />}
+                        {log.logType === 'activity' && <NoteAddRoundedIcon />}
+                        {log.logType === 'workorder' && <BuildRoundedIcon />}
+                        {log.logType === 'application' && <PersonRoundedIcon />}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <>
+                            {log.logType === 'call' &&
+                              `${(log as any).type} Call • ${formatDuration((log as any).duration)}`
+                            }
+                            {log.logType === 'message' &&
+                              `${(log as any).type} ${(log as any).direction}${(log as any).subject ? ` • ${(log as any).subject}` : ''}`
+                            }
+                            {log.logType === 'note' &&
+                              `Note • ${(log as any).type}`
+                            }
+                            {log.logType === 'activity' &&
+                              `Activity • ${(log as any).type}`
+                            }
+                            {log.logType === 'workorder' &&
+                              `Work Order • ${(log as any).status} • ${(log as any).title}`
+                            }
+                            {log.logType === 'application' &&
+                              `${(log as any).type}`
+                            }
+                          </>
+                        }
+                        secondary={
+                          <>
+                            {log.logType === 'call' && (log as any).notes}
+                            {log.logType === 'message' && (log as any).content}
+                            {log.logType === 'note' && (log as any).content}
+                            {log.logType === 'activity' && (log as any).content}
+                            {log.logType === 'workorder' && `${(log as any).content} • Priority: ${(log as any).priority}${(log as any).assignedTo ? ` • Assigned to: ${(log as any).assignedTo}` : ''}`}
+                            {log.logType === 'application' && (log as any).content}
+                            {' • '}
+                            {new Date(log.date).toLocaleString()}
+                            {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
+                            {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
+                            {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
+                            {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
+                            {log.logType === 'workorder' && ` • Created by Tenant`}
+                            {log.logType === 'application' && ` • by ${(log as any).createdBy}`}
+                          </>
+                        }
+                        primaryTypographyProps={{
+                          variant: "subtitle2",
+                          component: "span"
+                        }}
+                        secondaryTypographyProps={{
+                          variant: "body2",
+                          component: "span"
+                        }}
+                      />
+                      {log.logType === 'note' && (
+                        <ListItemSecondaryAction>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditNote(log as any)}
+                            title="Edit Note"
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      )}
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </Paper>
           </Grid>
 
@@ -1239,7 +1353,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       <Chip label={doc.category} size="small" variant="outlined" />
                     </TableCell>
                     <TableCell>{formatFileSize(doc.size)}</TableCell>
-                    <TableCell>{new Date(doc.uploadDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                     <TableCell>{doc.uploadedBy}</TableCell>
                     <TableCell>
                       <IconButton
@@ -1282,9 +1396,9 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     size="small"
                     startIcon={<VisibilityRoundedIcon />}
                     onClick={() => {
-                      // Open lease contract in new window/tab
+                      // Open lease contract in modal
                       if (leaseDetails.leaseDocument) {
-                        window.open(`/documents/${leaseDetails.leaseDocument}`, '_blank');
+                        setContractViewModalOpen(true);
                       } else {
                         alert('Lease contract not found. Please upload the lease document.');
                       }
@@ -1692,6 +1806,162 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           });
         }}
       />
+
+      {/* Contract View Modal */}
+      <Dialog
+        open={contractViewModalOpen}
+        onClose={() => setContractViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              Lease Contract - {tenant.firstName} {tenant.lastName}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<FileDownloadRoundedIcon />}
+                onClick={() => {
+                  // Download lease contract
+                  if (leaseDetails.leaseDocument) {
+                    const link = document.createElement('a');
+                    link.href = `/documents/${leaseDetails.leaseDocument}`;
+                    link.download = leaseDetails.leaseDocument;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    alert(`Downloading ${leaseDetails.leaseDocument}...`);
+                  }
+                }}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {leaseDetails.leaseDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* PDF Viewer or Document Preview */}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 3,
+                  bgcolor: 'white',
+                  m: 2,
+                  borderRadius: 1,
+                  border: '1px solid #ddd'
+                }}
+              >
+                <Stack spacing={3} alignItems="center" textAlign="center">
+                  <DescriptionRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+                  <Typography variant="h6">
+                    Lease Contract Preview
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    Document: {leaseDetails.leaseDocument}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    In a real application, this would display the actual PDF content using a PDF viewer component.
+                    For demo purposes, this shows a preview placeholder.
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<VisibilityRoundedIcon />}
+                      onClick={() => {
+                        // In a real app, this would open the PDF in a viewer
+                        window.open(`/documents/${leaseDetails.leaseDocument}`, '_blank');
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<FileDownloadRoundedIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = `/documents/${leaseDetails.leaseDocument}`;
+                        link.download = leaseDetails.leaseDocument;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        alert(`Downloading ${leaseDetails.leaseDocument}...`);
+                      }}
+                    >
+                      Download PDF
+                    </Button>
+                  </Stack>
+
+                  {/* Sample Contract Info Display */}
+                  <Divider sx={{ width: '100%', my: 2 }} />
+                  <Stack spacing={2} sx={{ width: '100%', maxWidth: 500 }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      Contract Details:
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Tenant:</Typography>
+                        <Typography variant="body1">{tenant.firstName} {tenant.lastName}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Property:</Typography>
+                        <Typography variant="body1">{tenantProperty?.name || 'N/A'}</Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Lease Period:</Typography>
+                        <Typography variant="body1">
+                          {new Date(leaseDetails.startDate).toLocaleDateString()} - {new Date(leaseDetails.endDate).toLocaleDateString()}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" color="text.secondary">Monthly Rent:</Typography>
+                        <Typography variant="body1" color="success.main" fontWeight="bold">
+                          ${leaseDetails.monthlyRent.toLocaleString()}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Contract Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Please upload the lease contract document to view it here.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setContractViewModalOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -11,7 +11,7 @@ export interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
-  status: "Available" | "Occupied" | "Maintenance" | "Pending";
+  status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   managerId?: string; // Keep for backwards compatibility
   managerIds: string[]; // Support multiple managers
   tenantIds: string[];
@@ -68,12 +68,19 @@ export interface Tenant {
   leaseEnd?: string;
   monthlyRent?: number;
   depositAmount?: number;
-  status: "Active" | "Inactive" | "Prospective";
+  status: "Active" | "Inactive" | "Prospective" | "Past Tenant";
   emergencyContact?: {
     name: string;
     phone: string;
     relationship: string;
   };
+  moveOutDate?: string;
+  moveOutReason?: string;
+  forwardingAddress?: string;
+  securityDepositRefunded?: boolean;
+  securityDepositAmount?: number;
+  finalCharges?: number;
+  previousPropertyId?: string; // Track previous property when moved out
   createdAt: string;
   updatedAt: string;
 }
@@ -199,6 +206,103 @@ export interface SubscriptionPlan {
   updatedAt: string;
 }
 
+export interface WorkOrder {
+  id: string;
+  title: string;
+  description: string;
+  property: string;
+  propertyId: string;
+  tenant: string;
+  tenantId?: string;
+  unit?: string;
+  category: "Plumbing" | "Electrical" | "HVAC" | "Appliance" | "General Maintenance" | "Emergency" | "Landscaping" | "Cleaning" | "Other";
+  customCategory?: string;
+  priority: "Low" | "Medium" | "High" | "Emergency";
+  status: "Open" | "In Progress" | "Completed" | "Cancelled";
+  requestedBy: string;
+  assignedTo?: string;
+  createdDate: string;
+  dueDate?: string;
+  completedDate?: string;
+  estimatedCost?: number;
+  actualCost?: number;
+  notes?: string;
+  isEmergency: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  propertyId?: string;
+  tenantId?: string;
+  contactId?: string;
+  dealId?: string;
+  category: "General" | "Property" | "Tenant" | "Contact" | "Deal" | "Reminder" | "Important";
+  tags: string[];
+  isPrivate: boolean;
+  isPinned: boolean;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: "General" | "Maintenance" | "Policy" | "Event" | "Emergency";
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  targetAudience: "All" | "Tenants" | "Managers" | "Specific";
+  targetIds?: string[]; // Specific tenant/manager IDs if targetAudience is "Specific"
+  propertyIds?: string[]; // Properties this announcement applies to
+  publishDate: string;
+  expiryDate?: string;
+  isActive: boolean;
+  attachments?: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Document {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "Other";
+  propertyId?: string;
+  tenantId?: string;
+  contactId?: string;
+  dealId?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  description?: string;
+  tags: string[];
+}
+
+export interface Payment {
+  id: string;
+  amount: number;
+  date: string;
+  method: "ACH" | "Credit Card" | "Check" | "Cash" | "Money Order" | "Wire Transfer" | "Online";
+  status: "Completed" | "Pending" | "Failed" | "Refunded" | "Processing";
+  description: string;
+  propertyId?: string;
+  tenantId?: string;
+  recordedBy: string;
+  transactionId?: string;
+  category: "Rent" | "Security Deposit" | "Pet Deposit" | "Late Fee" | "Utilities" | "Maintenance" | "Other";
+  dueDate?: string;
+  paidDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // State interface
 export interface CrmState {
   properties: Property[];
@@ -211,6 +315,11 @@ export interface CrmState {
   propertyGroups: PropertyGroup[];
   marketplaceItems: MarketplaceItem[];
   subscriptionPlans: SubscriptionPlan[];
+  workOrders: WorkOrder[];
+  notes: Note[];
+  announcements: Announcement[];
+  documents: Document[];
+  payments: Payment[];
   initialized: boolean;
 }
 
@@ -246,7 +355,22 @@ type CrmAction =
   | { type: 'DELETE_MARKETPLACE_ITEM'; payload: string }
   | { type: 'ADD_SUBSCRIPTION_PLAN'; payload: SubscriptionPlan }
   | { type: 'UPDATE_SUBSCRIPTION_PLAN'; payload: SubscriptionPlan }
-  | { type: 'DELETE_SUBSCRIPTION_PLAN'; payload: string };
+  | { type: 'DELETE_SUBSCRIPTION_PLAN'; payload: string }
+  | { type: 'ADD_WORK_ORDER'; payload: WorkOrder }
+  | { type: 'UPDATE_WORK_ORDER'; payload: WorkOrder }
+  | { type: 'DELETE_WORK_ORDER'; payload: string }
+  | { type: 'ADD_NOTE'; payload: Note }
+  | { type: 'UPDATE_NOTE'; payload: Note }
+  | { type: 'DELETE_NOTE'; payload: string }
+  | { type: 'ADD_ANNOUNCEMENT'; payload: Announcement }
+  | { type: 'UPDATE_ANNOUNCEMENT'; payload: Announcement }
+  | { type: 'DELETE_ANNOUNCEMENT'; payload: string }
+  | { type: 'ADD_DOCUMENT'; payload: Document }
+  | { type: 'UPDATE_DOCUMENT'; payload: Document }
+  | { type: 'DELETE_DOCUMENT'; payload: string }
+  | { type: 'ADD_PAYMENT'; payload: Payment }
+  | { type: 'UPDATE_PAYMENT'; payload: Payment }
+  | { type: 'DELETE_PAYMENT'; payload: string };
 
 // Initial state with sample data
 const initialState: CrmState = {
@@ -469,6 +593,11 @@ const initialState: CrmState = {
       updatedAt: "2024-01-01T00:00:00.000Z"
     }
   ],
+  workOrders: [],
+  notes: [],
+  announcements: [],
+  documents: [],
+  payments: [],
   initialized: false,
 };
 
@@ -657,6 +786,106 @@ function crmReducer(state: CrmState, action: CrmAction): CrmState {
         subscriptionPlans: state.subscriptionPlans.filter(plan => plan.id !== action.payload)
       };
 
+    case 'ADD_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: [...state.workOrders, action.payload]
+      };
+
+    case 'UPDATE_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: state.workOrders.map(wo =>
+          wo.id === action.payload.id ? action.payload : wo
+        )
+      };
+
+    case 'DELETE_WORK_ORDER':
+      return {
+        ...state,
+        workOrders: state.workOrders.filter(wo => wo.id !== action.payload)
+      };
+
+    case 'ADD_NOTE':
+      return {
+        ...state,
+        notes: [...state.notes, action.payload]
+      };
+
+    case 'UPDATE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.map(note =>
+          note.id === action.payload.id ? action.payload : note
+        )
+      };
+
+    case 'DELETE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.filter(note => note.id !== action.payload)
+      };
+
+    case 'ADD_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: [...state.announcements, action.payload]
+      };
+
+    case 'UPDATE_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: state.announcements.map(announcement =>
+          announcement.id === action.payload.id ? action.payload : announcement
+        )
+      };
+
+    case 'DELETE_ANNOUNCEMENT':
+      return {
+        ...state,
+        announcements: state.announcements.filter(announcement => announcement.id !== action.payload)
+      };
+
+    case 'ADD_DOCUMENT':
+      return {
+        ...state,
+        documents: [...state.documents, action.payload]
+      };
+
+    case 'UPDATE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.map(document =>
+          document.id === action.payload.id ? action.payload : document
+        )
+      };
+
+    case 'DELETE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.filter(document => document.id !== action.payload)
+      };
+
+    case 'ADD_PAYMENT':
+      return {
+        ...state,
+        payments: [...state.payments, action.payload]
+      };
+
+    case 'UPDATE_PAYMENT':
+      return {
+        ...state,
+        payments: state.payments.map(payment =>
+          payment.id === action.payload.id ? action.payload : payment
+        )
+      };
+
+    case 'DELETE_PAYMENT':
+      return {
+        ...state,
+        payments: state.payments.filter(payment => payment.id !== action.payload)
+      };
+
     default:
       return state;
   }
@@ -674,7 +903,10 @@ const CrmDataContext = createContext<{
   updatePropertyManager: (manager: PropertyManager) => void;
   addTenant: (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTenant: (tenant: Tenant) => void;
+  moveOutTenant: (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => void;
   addContact: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContact: (contact: Contact) => void;
+  deleteContact: (id: string) => void;
   addDeal: (deal: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateDeal: (deal: Deal) => void;
   addQuote: (quote: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'>) => void;
@@ -691,6 +923,21 @@ const CrmDataContext = createContext<{
   addSubscriptionPlan: (plan: Omit<SubscriptionPlan, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateSubscriptionPlan: (plan: SubscriptionPlan) => void;
   deleteSubscriptionPlan: (id: string) => void;
+  addWorkOrder: (workOrder: Omit<WorkOrder, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateWorkOrder: (workOrder: WorkOrder) => void;
+  deleteWorkOrder: (id: string) => void;
+  addNote: (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => Note;
+  updateNote: (note: Note) => void;
+  deleteNote: (id: string) => void;
+  addAnnouncement: (announcement: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateAnnouncement: (announcement: Announcement) => void;
+  deleteAnnouncement: (id: string) => void;
+  addDocument: (document: Omit<Document, 'id' | 'uploadedAt'>) => Document;
+  updateDocument: (document: Document) => void;
+  deleteDocument: (id: string) => void;
+  addPayment: (payment: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => Payment;
+  updatePayment: (payment: Payment) => void;
+  deletePayment: (id: string) => void;
 } | undefined>(undefined);
 
 // Provider component
@@ -711,6 +958,10 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
           deals: storedData.deals || [],
           quotes: storedData.quotes || [],
           campaigns: storedData.campaigns || [],
+          workOrders: storedData.workOrders || [],
+          notes: storedData.news || [], // Note: notes are loaded from news in LocalStorageService
+          announcements: storedData.announcements || [],
+          documents: storedData.documents || [],
           initialized: true
         }
       });
@@ -718,6 +969,25 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       dispatch({ type: 'INITIALIZE_DATA', payload: { initialized: true } });
     }
   }, []);
+
+  // Save data to localStorage whenever state changes
+  useEffect(() => {
+    if (state.initialized) {
+      LocalStorageService.syncAllData({
+        properties: state.properties,
+        tenants: state.tenants,
+        managers: state.propertyManagers,
+        contacts: state.contacts,
+        deals: state.deals,
+        quotes: state.quotes,
+        campaigns: state.campaigns,
+        workOrders: state.workOrders,
+        news: state.notes, // Note: notes are saved as news in LocalStorageService
+        announcements: state.announcements,
+        documents: state.documents
+      });
+    }
+  }, [state]);
 
   // Save data to localStorage whenever state changes
   useEffect(() => {
@@ -743,7 +1013,11 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       contacts: state.contacts,
       deals: state.deals,
       quotes: state.quotes,
-      campaigns: state.campaigns
+      campaigns: state.campaigns,
+      workOrders: state.workOrders,
+      news: state.notes, // Note: notes are saved as news in LocalStorageService
+      announcements: state.announcements,
+      documents: state.documents
     }), 30000); // Auto-save every 30 seconds
 
     return cleanup;
@@ -754,6 +1028,8 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const property: Property = {
       ...propertyData,
       id: Date.now().toString(),
+      // New properties start as Unlisted until marked as Listed or a tenant is assigned
+      status: propertyData.status === 'Occupied' ? 'Occupied' : 'Unlisted',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -839,20 +1115,66 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         else if (tenant.status !== 'Active' && previousTenant.status === 'Active') {
           newOccupancy = Math.max(0, property.occupancy - 1);
           newTenantIds = newTenantIds.filter(id => id !== tenant.id);
-          // If no active tenants, mark as available
+          // If no active tenants, mark as unlisted (vacant)
           const activeTenantsForProperty = state.tenants.filter(t =>
             t.propertyId === tenant.propertyId &&
             t.status === 'Active' &&
             t.id !== tenant.id
           );
           if (activeTenantsForProperty.length === 0) {
-            newStatus = 'Available';
+            newStatus = 'Unlisted';
           }
         }
 
         const updatedProperty = {
           ...property,
           status: newStatus,
+          occupancy: newOccupancy,
+          tenantIds: newTenantIds,
+          updatedAt: new Date().toISOString()
+        };
+        dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
+      }
+    }
+  };
+
+  const moveOutTenant = (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => {
+    const tenant = state.tenants.find(t => t.id === tenantId);
+    if (!tenant) return;
+
+    // Update tenant to Past Tenant status and add move-out information
+    const updatedTenant: Tenant = {
+      ...tenant,
+      status: 'Past Tenant',
+      moveOutDate: moveOutData.moveOutDate,
+      moveOutReason: moveOutData.moveOutReason,
+      forwardingAddress: moveOutData.forwardingAddress,
+      securityDepositRefunded: moveOutData.securityDepositRefunded,
+      finalCharges: moveOutData.finalCharges,
+      previousPropertyId: tenant.propertyId, // Store the property they moved out from
+      propertyId: undefined, // Remove current property assignment
+      updatedAt: new Date().toISOString()
+    };
+
+    dispatch({ type: 'UPDATE_TENANT', payload: updatedTenant });
+
+    // Update property status when tenant moves out
+    if (tenant.propertyId) {
+      const property = state.properties.find(p => p.id === tenant.propertyId);
+      if (property) {
+        const newTenantIds = (property.tenantIds || []).filter(id => id !== tenantId);
+        const newOccupancy = Math.max(0, property.occupancy - 1);
+
+        // Check if there are any other active tenants
+        const remainingActiveTenants = state.tenants.filter(t =>
+          t.propertyId === tenant.propertyId &&
+          t.status === 'Active' &&
+          t.id !== tenantId
+        );
+
+        const updatedProperty = {
+          ...property,
+          status: remainingActiveTenants.length === 0 ? 'Unlisted' as Property['status'] : property.status,
           occupancy: newOccupancy,
           tenantIds: newTenantIds,
           updatedAt: new Date().toISOString()
@@ -870,6 +1192,15 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       updatedAt: new Date().toISOString(),
     };
     dispatch({ type: 'ADD_CONTACT', payload: contact });
+  };
+
+  const updateContact = (contact: Contact) => {
+    const updatedContact = { ...contact, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_CONTACT', payload: updatedContact });
+  };
+
+  const deleteContact = (id: string) => {
+    dispatch({ type: 'DELETE_CONTACT', payload: id });
   };
 
   const addDeal = (dealData: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -1004,6 +1335,104 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_SUBSCRIPTION_PLAN', payload: id });
   };
 
+  const addWorkOrder = (workOrderData: Omit<WorkOrder, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const workOrder: WorkOrder = {
+      ...workOrderData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_WORK_ORDER', payload: workOrder });
+  };
+
+  const updateWorkOrder = (workOrder: WorkOrder) => {
+    const updatedWorkOrder = { ...workOrder, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_WORK_ORDER', payload: updatedWorkOrder });
+  };
+
+  const deleteWorkOrder = (id: string) => {
+    dispatch({ type: 'DELETE_WORK_ORDER', payload: id });
+  };
+
+  const addNote = (noteData: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const note: Note = {
+      ...noteData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_NOTE', payload: note });
+    return note;
+  };
+
+  const updateNote = (note: Note) => {
+    const updatedNote = { ...note, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_NOTE', payload: updatedNote });
+  };
+
+  const deleteNote = (id: string) => {
+    dispatch({ type: 'DELETE_NOTE', payload: id });
+  };
+
+  const addAnnouncement = (announcementData: Omit<Announcement, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const announcement: Announcement = {
+      ...announcementData,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_ANNOUNCEMENT', payload: announcement });
+  };
+
+  const updateAnnouncement = (announcement: Announcement) => {
+    const updatedAnnouncement = { ...announcement, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_ANNOUNCEMENT', payload: updatedAnnouncement });
+  };
+
+  const deleteAnnouncement = (id: string) => {
+    dispatch({ type: 'DELETE_ANNOUNCEMENT', payload: id });
+  };
+
+  // Document functions
+  const addDocument = (documentData: Omit<Document, 'id' | 'uploadedAt'>) => {
+    const document: Document = {
+      ...documentData,
+      id: `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      uploadedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_DOCUMENT', payload: document });
+    return document;
+  };
+
+  const updateDocument = (document: Document) => {
+    dispatch({ type: 'UPDATE_DOCUMENT', payload: document });
+  };
+
+  const deleteDocument = (id: string) => {
+    dispatch({ type: 'DELETE_DOCUMENT', payload: id });
+  };
+
+  // Payment functions
+  const addPayment = (paymentData: Omit<Payment, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const payment: Payment = {
+      ...paymentData,
+      id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    dispatch({ type: 'ADD_PAYMENT', payload: payment });
+    return payment;
+  };
+
+  const updatePayment = (payment: Payment) => {
+    const updatedPayment = { ...payment, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_PAYMENT', payload: updatedPayment });
+  };
+
+  const deletePayment = (id: string) => {
+    dispatch({ type: 'DELETE_PAYMENT', payload: id });
+  };
+
   const value = {
     state,
     dispatch,
@@ -1014,7 +1443,10 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     updatePropertyManager,
     addTenant,
     updateTenant,
+    moveOutTenant,
     addContact,
+    updateContact,
+    deleteContact,
     addDeal,
     updateDeal,
     addQuote,
@@ -1031,6 +1463,21 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addSubscriptionPlan,
     updateSubscriptionPlan,
     deleteSubscriptionPlan,
+    addWorkOrder,
+    updateWorkOrder,
+    deleteWorkOrder,
+    addNote,
+    updateNote,
+    deleteNote,
+    addAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncement,
+    addDocument,
+    updateDocument,
+    deleteDocument,
+    addPayment,
+    updatePayment,
+    deletePayment,
   };
 
   return (

@@ -16,9 +16,10 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import { useCrmData } from "../contexts/CrmDataContext";
+import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 
-interface Tenant {
+// Local interface for the dialog's form handling (extends the CRM context tenant)
+interface TenantFormData {
   id: string;
   firstName: string;
   lastName: string;
@@ -47,8 +48,8 @@ interface TenantDialogProps {
   onClose: () => void;
   propertyId?: string;
   propertyName?: string;
-  onTenantCreated?: (tenant: Tenant) => void;
-  existingTenant?: Tenant | null;
+  onTenantCreated?: (tenant: TenantFormData) => void;
+  existingTenant?: TenantFormData | null;
 }
 
 export default function TenantDialog({ 
@@ -130,36 +131,58 @@ export default function TenantDialog({
   }, [open, existingTenant, propertyId, propertyName]);
 
   const handleSubmit = () => {
-    const tenantData: Tenant = {
-      id: existingTenant?.id || Date.now().toString(),
+    // Map form data to CrmDataContext Tenant interface
+    const tenantData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
       phone: formData.phone,
       propertyId: formData.propertyId,
-      propertyName: formData.propertyName,
-      unit: formData.unit,
       emergencyContact: formData.emergencyContactName ? {
         name: formData.emergencyContactName,
         phone: formData.emergencyContactPhone,
         relationship: formData.emergencyContactRelationship
       } : undefined,
-      leaseStartDate: formData.leaseStartDate,
-      leaseEndDate: formData.leaseEndDate,
+      leaseStart: formData.leaseStartDate,
+      leaseEnd: formData.leaseEndDate,
       monthlyRent: formData.monthlyRent ? parseFloat(formData.monthlyRent) : undefined,
-      securityDeposit: formData.securityDeposit ? parseFloat(formData.securityDeposit) : undefined,
-      status: formData.status,
-      notes: formData.notes
+      depositAmount: formData.securityDeposit ? parseFloat(formData.securityDeposit) : undefined,
+      // Map status values to CrmDataContext enum
+      status: (formData.status === "Pending" || formData.status === "Moving Out")
+        ? "Prospective" as const
+        : formData.status as "Active" | "Inactive"
     };
 
     if (existingTenant) {
-      updateTenant(tenantData);
+      updateTenant({ ...tenantData, id: existingTenant.id } as Tenant);
     } else {
       addTenant(tenantData);
     }
 
+    // Create a compatible object for the callback
     if (onTenantCreated) {
-      onTenantCreated(tenantData);
+      const callbackTenant = {
+        id: existingTenant?.id || Date.now().toString(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        propertyId: formData.propertyId,
+        propertyName: formData.propertyName,
+        unit: formData.unit,
+        emergencyContact: formData.emergencyContactName ? {
+          name: formData.emergencyContactName,
+          phone: formData.emergencyContactPhone,
+          relationship: formData.emergencyContactRelationship
+        } : undefined,
+        leaseStartDate: formData.leaseStartDate,
+        leaseEndDate: formData.leaseEndDate,
+        monthlyRent: formData.monthlyRent ? parseFloat(formData.monthlyRent) : undefined,
+        securityDeposit: formData.securityDeposit ? parseFloat(formData.securityDeposit) : undefined,
+        status: formData.status,
+        notes: formData.notes
+      };
+      onTenantCreated(callbackTenant as any);
     }
 
     handleClose();

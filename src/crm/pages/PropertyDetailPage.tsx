@@ -52,6 +52,7 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import { useCrmData, Property } from "../contexts/CrmDataContext";
 import CrmActivitiesTimeline from "../components/CrmActivitiesTimeline";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
@@ -65,10 +66,12 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRoundedIcon";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import MessageRoundedIcon from "@mui/icons-material/MessageRounded";
+import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AttachMoneyRoundedIcon from "@mui/icons-material/AttachMoneyRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
@@ -86,6 +89,7 @@ import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
+import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -98,6 +102,14 @@ const VisuallyHiddenInput = styled('input')({
   whiteSpace: 'nowrap',
   width: 1,
 });
+
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 interface PropertyDetailPageProps {
   propertyId: string;
@@ -172,17 +184,7 @@ interface Property {
   appliances?: Appliance[];
 }
 
-interface Activity {
-  id: string;
-  type: "listing" | "maintenance" | "tenant" | "inquiry" | "payment" | "inspection" | "document";
-  title: string;
-  description: string;
-  timestamp: string;
-  user: string;
-  status?: "completed" | "pending" | "cancelled";
-  amount?: number;
-  attachments?: { name: string; url: string }[];
-}
+// Activity interface removed - now using real activity tracking system
 
 interface Expense {
   id: string;
@@ -333,36 +335,7 @@ const mockProperty: Property = {
   mainImageId: "img1",
 };
 
-const mockActivities: Activity[] = [
-  {
-    id: "1",
-    type: "listing",
-    title: "Property Listed",
-    description: "Property was listed on multiple platforms",
-    timestamp: "2024-01-15T10:30:00",
-    user: "John Smith",
-    status: "completed"
-  },
-  {
-    id: "2",
-    type: "maintenance",
-    title: "HVAC Maintenance",
-    description: "Scheduled maintenance for heating system",
-    timestamp: "2024-01-10T14:00:00",
-    user: "Mike Wilson",
-    status: "completed",
-    amount: 250
-  },
-  {
-    id: "3",
-    type: "inquiry",
-    title: "Showing Request",
-    description: "Prospective tenant requested viewing",
-    timestamp: "2024-01-08T09:15:00",
-    user: "System",
-    status: "pending"
-  },
-];
+// Mock activities removed - now using real activity tracking system
 
 const mockExpenses: Expense[] = [
   { id: "1", category: "Maintenance", description: "HVAC Repair", amount: 450, date: "2024-01-15", vendor: "ABC Heating" },
@@ -386,8 +359,9 @@ export default function PropertyDetailPage({
   onBackgroundColorChange
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
-  const { state, updateProperty } = useCrmData();
-  const { properties, propertyManagers, tenants } = state;
+  const { state, updateProperty, addDocument } = useCrmData();
+  const { getEntityActivities } = useActivityTracking();
+  const { properties, propertyManagers, tenants, documents } = state;
   const property = properties.find(p => p.id === propertyId) || mockProperty;
 
   // Safety check to ensure property exists
@@ -408,16 +382,26 @@ export default function PropertyDetailPage({
       </Box>
     );
   }
-  const [activities, setActivities] = React.useState<Activity[]>(mockActivities);
+
+  // Get real activities for this property
+  const propertyActivities = getEntityActivities('property', propertyId);
   const [expenses, setExpenses] = React.useState<Expense[]>(mockExpenses);
   const [income, setIncome] = React.useState<Income[]>(mockIncome);
   const [currentTab, setCurrentTab] = React.useState(0);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [expenseDialogOpen, setExpenseDialogOpen] = React.useState(false);
   const [incomeDialogOpen, setIncomeDialogOpen] = React.useState(false);
-  const [noteDialogOpen, setNoteDialogOpen] = React.useState(false);
   const [applianceDialogOpen, setApplianceDialogOpen] = React.useState(false);
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
+  const [documentUploadDialogOpen, setDocumentUploadDialogOpen] = React.useState(false);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
+  const [uploadingDocument, setUploadingDocument] = React.useState(false);
+  const [documentUploadData, setDocumentUploadData] = React.useState({
+    file: null as File | null,
+    category: 'Other' as const,
+    description: ''
+  });
   const [workOrderDialogOpen, setWorkOrderDialogOpen] = React.useState(false);
   const [tenantDialogOpen, setTenantDialogOpen] = React.useState(false);
   const [draggedCard, setDraggedCard] = React.useState<string | null>(null);
@@ -438,7 +422,6 @@ export default function PropertyDetailPage({
   const [cardManagementOpen, setCardManagementOpen] = React.useState(false);
   const [backgroundPickerOpen, setBackgroundPickerOpen] = React.useState(false);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
-  const [newNote, setNewNote] = React.useState("");
   const [selectedAppliance, setSelectedAppliance] = React.useState<Appliance | null>(null);
   const [applianceImages, setApplianceImages] = React.useState<ApplianceImage[]>([]);
   const [applianceFormData, setApplianceFormData] = React.useState<Partial<Appliance>>({
@@ -465,20 +448,75 @@ export default function PropertyDetailPage({
     setEditDialogOpen(false);
   };
 
-  const handleAddNote = () => {
-    const newActivity: Activity = {
-      id: Date.now().toString(),
-      type: "document",
-      title: "Note Added",
-      description: newNote,
-      timestamp: new Date().toISOString(),
-      user: "Current User",
-      status: "completed"
-    };
-    setActivities([newActivity, ...activities]);
-    setNewNote("");
-    setNoteDialogOpen(false);
+  const handleDocumentFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setDocumentUploadData({ ...documentUploadData, file });
+    }
   };
+
+  const handleDocumentUpload = async () => {
+    if (!documentUploadData.file) return;
+
+    setUploadingDocument(true);
+
+    try {
+      // In a real app, you would upload to a file storage service
+      // For demo purposes, we'll create a local blob URL
+      const fileUrl = URL.createObjectURL(documentUploadData.file);
+
+      const document = {
+        name: documentUploadData.file.name,
+        type: documentUploadData.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        size: documentUploadData.file.size,
+        url: fileUrl,
+        category: documentUploadData.category,
+        propertyId: propertyId,
+        uploadedBy: 'Current User',
+        description: documentUploadData.description,
+        tags: []
+      };
+
+      addDocument(document);
+
+      // Track document upload activity
+      activityTracker.trackActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'property',
+        entityId: propertyId,
+        entityName: property.name,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: documentUploadData.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        description: `Document uploaded: ${documentUploadData.file.name}`,
+        metadata: {
+          category: documentUploadData.category,
+          fileSize: documentUploadData.file.size,
+          fileType: documentUploadData.file.type
+        },
+        severity: 'low',
+        category: 'operational'
+      });
+
+      // Reset form and close dialog
+      setDocumentUploadData({ file: null, category: 'Other', description: '' });
+      setDocumentUploadDialogOpen(false);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    } finally {
+      setUploadingDocument(false);
+    }
+  };
+
+  // handleAddNote removed - note adding is now handled by CrmActivitiesTimeline component
 
   const handleApplianceImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -755,53 +793,13 @@ export default function PropertyDetailPage({
                   </IconButton>
                 </Stack>
 
-                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<AddRoundedIcon />}
-                    onClick={() => setNoteDialogOpen(true)}
-                  >
-                    Add Note
-                  </Button>
-                </Stack>
-
-                {activities.length > 0 ? (
-                  <Stack spacing={2}>
-                    {activities.slice(0, 5).map((activity) => (
-                      <Paper key={activity.id} sx={{ p: 2 }} variant="outlined">
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight="medium">
-                              {activity.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {activity.description}
-                            </Typography>
-                          </Box>
-                          <Stack alignItems="flex-end" spacing={0.5}>
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(activity.timestamp).toLocaleDateString()}
-                            </Typography>
-                            <Chip
-                              label={activity.type}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Stack>
-                        </Stack>
-                      </Paper>
-                    ))}
-                    {activities.length > 5 && (
-                      <Typography variant="body2" color="text.secondary" textAlign="center">
-                        ... and {activities.length - 5} more activities
-                      </Typography>
-                    )}
-                  </Stack>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
-                    No notes or activities yet. Click "Add Note" to get started.
-                  </Typography>
-                )}
+                <CrmActivitiesTimeline
+                  entityType="property"
+                  entityId={propertyId}
+                  entityName={property.name}
+                  maxItems={5}
+                  showAddNote={true}
+                />
               </CardContent>
             </Card>
           </Grid>
@@ -950,7 +948,7 @@ export default function PropertyDetailPage({
                   </Box>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                  📍 {property.address}
+                  ���� {property.address}
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                   <Button
@@ -1119,14 +1117,7 @@ export default function PropertyDetailPage({
             >
               Edit Property
             </Button>
-            <Button
-              variant="outlined"
-              startIcon={<AddRoundedIcon />}
-              onClick={() => setNoteDialogOpen(true)}
-              sx={{ color: 'inherit', borderColor: 'rgba(255,255,255,0.5)' }}
-            >
-              Add Note
-            </Button>
+            {/* Add Note button removed - now handled by CrmActivitiesTimeline component */}
             <Button
               variant="outlined"
               onClick={() => setCardManagementOpen(true)}
@@ -1438,58 +1429,15 @@ export default function PropertyDetailPage({
                     <DescriptionRoundedIcon sx={{ mr: 1 }} />
                     Notes & Activities
                   </Typography>
-                  <IconButton size="small" sx={{ cursor: 'grab' }} title="Drag to rearrange">
-                    <DragIndicatorIcon fontSize="small" />
-                  </IconButton>
                 </Stack>
 
-                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<AddRoundedIcon />}
-                    onClick={() => setNoteDialogOpen(true)}
-                  >
-                    Add Note
-                  </Button>
-                </Stack>
-
-                {activities.length > 0 ? (
-                  <Stack spacing={2}>
-                    {activities.slice(0, 5).map((activity) => (
-                      <Paper key={activity.id} sx={{ p: 2 }} variant="outlined">
-                        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight="medium">
-                              {activity.title}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {activity.description}
-                            </Typography>
-                          </Box>
-                          <Stack alignItems="flex-end" spacing={0.5}>
-                            <Typography variant="caption" color="text.secondary">
-                              {new Date(activity.timestamp).toLocaleDateString()}
-                            </Typography>
-                            <Chip
-                              label={activity.type}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </Stack>
-                        </Stack>
-                      </Paper>
-                    ))}
-                    {activities.length > 5 && (
-                      <Typography variant="body2" color="text.secondary" textAlign="center">
-                        ... and {activities.length - 5} more activities
-                      </Typography>
-                    )}
-                  </Stack>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 3 }}>
-                    No notes or activities yet. Click "Add Note" to get started.
-                  </Typography>
-                )}
+                <CrmActivitiesTimeline
+                  entityType="property"
+                  entityId={propertyId}
+                  entityName={property.name}
+                  maxItems={5}
+                  showAddNote={true}
+                />
               </CardContent>
             </Card>
           </Grid>
@@ -2063,27 +2011,62 @@ export default function PropertyDetailPage({
                   <DescriptionRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Documents & Files
                 </Typography>
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Document management system will be implemented to store leases, inspections, and other property-related documents.
-                </Alert>
+                {/* Display property documents */}
+                {(() => {
+                  const propertyDocuments = state.documents.filter(doc => doc.propertyId === property.id);
+                  return (
+                    <>
+                      {propertyDocuments.length > 0 ? (
+                        <TableContainer component={Paper} sx={{ mb: 2 }}>
+                          <Table>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Category</TableCell>
+                                <TableCell>Size</TableCell>
+                                <TableCell>Upload Date</TableCell>
+                                <TableCell>Uploaded By</TableCell>
+                                <TableCell>Actions</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {propertyDocuments.map((doc) => (
+                                <TableRow key={doc.id}>
+                                  <TableCell>
+                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                      <AttachFileRoundedIcon fontSize="small" />
+                                      <Typography variant="body2">{doc.name}</Typography>
+                                    </Stack>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Chip label={doc.category} size="small" variant="outlined" />
+                                  </TableCell>
+                                  <TableCell>{(doc.size / 1024 / 1024).toFixed(2)} MB</TableCell>
+                                  <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
+                                  <TableCell>{doc.uploadedBy}</TableCell>
+                                  <TableCell>
+                                    <IconButton size="small" title={`Download ${doc.name}`}>
+                                      <DownloadRoundedIcon />
+                                    </IconButton>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      ) : (
+                        <Alert severity="info" sx={{ mb: 2 }}>
+                          No documents uploaded yet. Upload property-related documents such as leases, inspections, and maintenance records.
+                        </Alert>
+                      )}
+                    </>
+                  );
+                })()}
                 <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
                     startIcon={<CloudUploadRoundedIcon />}
-                    onClick={() => {
-                      // Open file upload dialog
-                      const input = document.createElement('input');
-                      input.type = 'file';
-                      input.multiple = true;
-                      input.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png';
-                      input.onchange = (e) => {
-                        const files = (e.target as HTMLInputElement).files;
-                        if (files) {
-                          alert(`Uploading ${files.length} document(s) for ${property.name}`);
-                        }
-                      };
-                      input.click();
-                    }}
+                    onClick={() => setDocumentUploadDialogOpen(true)}
                   >
                     Upload Document
                   </Button>
@@ -2112,7 +2095,13 @@ export default function PropertyDetailPage({
                   <CalendarTodayRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Activity Timeline
                 </Typography>
-                <CrmActivitiesTimeline activities={activities} />
+                <CrmActivitiesTimeline
+                  entityType="property"
+                  entityId={propertyId}
+                  entityName={property.name}
+                  maxItems={20}
+                  showAddNote={true}
+                />
               </CardContent>
             </Card>
           </Grid>
@@ -2302,25 +2291,7 @@ export default function PropertyDetailPage({
         </DialogActions>
       </Dialog>
 
-      {/* Add Note Dialog */}
-      <Dialog open={noteDialogOpen} onClose={() => setNoteDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Note</DialogTitle>
-        <DialogContent>
-          <RichTextEditor
-            value={newNote}
-            onChange={setNewNote}
-            placeholder="Enter note content..."
-            minHeight={200}
-            label="Note Content"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setNoteDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleAddNote} disabled={!newNote.trim()}>
-            Add Note
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Note: Add Note Dialog removed - now handled by CrmActivitiesTimeline component */}
 
       {/* Appliance Dialog */}
       <Dialog open={applianceDialogOpen} onClose={() => setApplianceDialogOpen(false)} maxWidth="md" fullWidth>
@@ -2703,56 +2674,85 @@ export default function PropertyDetailPage({
             <Alert severity="info">
               All documents related to {property.name} are listed below. You can view, download, or manage documents from here.
             </Alert>
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="Lease Agreement"
-                  secondary="PDF • Uploaded: Jan 15, 2024 • Size: 2.1 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Property Insurance"
-                  secondary="PDF • Uploaded: Jan 10, 2024 • Size: 1.5 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Inspection Report"
-                  secondary="PDF • Uploaded: Dec 20, 2023 • Size: 3.2 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-              <Divider />
-              <ListItem>
-                <ListItemText
-                  primary="Maintenance Records"
-                  secondary="PDF • Uploaded: Dec 15, 2023 • Size: 0.8 MB"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button size="small" variant="outlined">View</Button>
-                  <Button size="small" variant="outlined">Download</Button>
-                </Stack>
-              </ListItem>
-            </List>
+            {(() => {
+              const propertyDocuments = documents.filter(doc => doc.propertyId === propertyId);
+
+              if (propertyDocuments.length === 0) {
+                return (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No documents uploaded yet.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<CloudUploadRoundedIcon />}
+                      onClick={() => setDocumentUploadDialogOpen(true)}
+                      sx={{ mt: 2 }}
+                    >
+                      Upload First Document
+                    </Button>
+                  </Box>
+                );
+              }
+
+              return (
+                <List>
+                  {propertyDocuments.map((doc, index) => (
+                    <React.Fragment key={doc.id}>
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>
+                            <DescriptionRoundedIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={doc.name}
+                          secondary={`${doc.type} • ${doc.category} • Uploaded: ${new Date(doc.uploadedAt).toLocaleDateString()} • Size: ${formatFileSize(doc.size)}`}
+                        />
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<VisibilityRoundedIcon />}
+                            onClick={() => {
+                              setSelectedDocument(doc);
+                              setDocumentViewModalOpen(true);
+                            }}
+                          >
+                            View
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            startIcon={<CloudUploadRoundedIcon />}
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = doc.url;
+                              link.download = doc.name;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }}
+                          >
+                            Download
+                          </Button>
+                        </Stack>
+                      </ListItem>
+                      {index < propertyDocuments.length - 1 && <Divider />}
+                    </React.Fragment>
+                  ))}
+                </List>
+              );
+            })()}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDocumentsDialogOpen(false)}>Close</Button>
-          <Button variant="contained" startIcon={<AddRoundedIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={() => setDocumentUploadDialogOpen(true)}
+          >
             Upload New Document
           </Button>
         </DialogActions>
@@ -2837,6 +2837,233 @@ export default function PropertyDetailPage({
           console.log('Work order created:', workOrder);
         }}
       />
+
+      {/* Document Upload Dialog */}
+      <Dialog open={documentUploadDialogOpen} onClose={() => setDocumentUploadDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Upload Document</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              sx={{
+                height: 100,
+                borderStyle: 'dashed',
+                borderWidth: 2,
+                flexDirection: 'column',
+                gap: 1
+              }}
+            >
+              {documentUploadData.file ? (
+                <>
+                  <Typography variant="body2">{documentUploadData.file.name}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatFileSize(documentUploadData.file.size)}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography variant="body2">Click to select file</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Or drag and drop
+                  </Typography>
+                </>
+              )}
+              <VisuallyHiddenInput
+                type="file"
+                onChange={handleDocumentFileChange}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt"
+              />
+            </Button>
+
+            <FormControl fullWidth>
+              <InputLabel>Document Category</InputLabel>
+              <Select
+                value={documentUploadData.category}
+                label="Document Category"
+                onChange={(e) => setDocumentUploadData({
+                  ...documentUploadData,
+                  category: e.target.value as any
+                })}
+              >
+                <MenuItem value="Lease">Lease</MenuItem>
+                <MenuItem value="Insurance">Insurance</MenuItem>
+                <MenuItem value="Inspection">Inspection</MenuItem>
+                <MenuItem value="Maintenance">Maintenance</MenuItem>
+                <MenuItem value="Legal">Legal</MenuItem>
+                <MenuItem value="Financial">Financial</MenuItem>
+                <MenuItem value="Other">Other</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Description (Optional)"
+              multiline
+              rows={3}
+              value={documentUploadData.description}
+              onChange={(e) => setDocumentUploadData({
+                ...documentUploadData,
+                description: e.target.value
+              })}
+              placeholder="Add a description for this document..."
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentUploadDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleDocumentUpload}
+            disabled={!documentUploadData.file || uploadingDocument}
+            startIcon={uploadingDocument ? undefined : <CloudUploadRoundedIcon />}
+          >
+            {uploadingDocument ? 'Uploading...' : 'Upload Document'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document Viewer Modal */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => {
+          setDocumentViewModalOpen(false);
+          setSelectedDocument(null);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              {selectedDocument?.name || 'Document Viewer'}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<CloudUploadRoundedIcon />}
+                onClick={() => {
+                  if (selectedDocument) {
+                    const link = document.createElement('a');
+                    link.href = selectedDocument.url;
+                    link.download = selectedDocument.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }
+                }}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {selectedDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* Document Preview */}
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 3,
+                  bgcolor: 'white',
+                  m: 2,
+                  borderRadius: 1,
+                  border: '1px solid #ddd'
+                }}
+              >
+                <Stack spacing={3} alignItems="center" textAlign="center">
+                  <DescriptionRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+                  <Typography variant="h6">
+                    Document Preview
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {selectedDocument.name}
+                  </Typography>
+                  <Chip
+                    label={selectedDocument.category}
+                    color="primary"
+                    variant="outlined"
+                    sx={{ mb: 1 }}
+                  />
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Type: {selectedDocument.type} • Size: {formatFileSize(selectedDocument.size)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
+                    In a real application, this would display the actual document content using a document viewer component.
+                    For demo purposes, this shows a preview placeholder.
+                  </Typography>
+                  <Stack direction="row" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<VisibilityRoundedIcon />}
+                      onClick={() => {
+                        // In a real app, this would open the document in a viewer
+                        window.open(selectedDocument.url, '_blank');
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CloudUploadRoundedIcon />}
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = selectedDocument.url;
+                        link.download = selectedDocument.name;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      Download
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Document Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The selected document could not be loaded.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setDocumentViewModalOpen(false);
+            setSelectedDocument(null);
+          }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Tenant Dialog */}
       <TenantDialog

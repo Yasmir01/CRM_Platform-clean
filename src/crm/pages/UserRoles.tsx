@@ -57,6 +57,7 @@ import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { useAuth, UserRole } from "../contexts/AuthContext";
 
 interface Permission {
   id: string;
@@ -276,8 +277,30 @@ const mockUsers: User[] = [
 export default function UserRoles() {
   const { state } = useCrmData();
   const { properties } = state;
+  const { users: authUsers, addUser, updateUser, deleteUser } = useAuth();
   const [roles, setRoles] = React.useState<Role[]>(mockRoles);
-  const [users, setUsers] = React.useState<User[]>(mockUsers);
+
+  // Map AuthContext users to UserRoles interface
+  const users = authUsers.map(authUser => {
+    // Map auth role to role ID
+    const roleMapping: Record<string, string> = {
+      'Admin': '1',
+      'Property Manager': '2',
+      'Tenant': '6',
+      'Service Provider': '4',
+    };
+
+    return {
+      id: authUser.id,
+      firstName: authUser.firstName,
+      lastName: authUser.lastName,
+      email: authUser.email,
+      roleId: roleMapping[authUser.role] || "1",
+      status: authUser.status,
+      lastLogin: authUser.lastLogin,
+      profilePicture: authUser.avatar,
+    };
+  });
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openRoleDialog, setOpenRoleDialog] = React.useState(false);
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
@@ -410,30 +433,41 @@ export default function UserRoles() {
 
   const handleSaveUser = () => {
     if (selectedUser) {
-      // Edit existing user
-      setUsers(prev => 
-        prev.map(u => 
-          u.id === selectedUser.id 
-            ? { ...u, ...userFormData }
-            : u
-        )
-      );
+      // Edit existing user - find the auth user and update
+      const authUser = authUsers.find(u => u.id === selectedUser.id);
+      if (authUser) {
+        updateUser(authUser.id, {
+          firstName: userFormData.firstName,
+          lastName: userFormData.lastName,
+          email: userFormData.email,
+          status: userFormData.status,
+        });
+      }
     } else {
-      // Add new user
-      const newUser: User = {
-        id: Date.now().toString(),
+      // Add new user to AuthContext
+      // Map roleId to UserRole
+      const roleIdToUserRole: Record<string, UserRole> = {
+        '1': 'Admin',
+        '2': 'Property Manager',
+        '4': 'Service Provider',
+        '6': 'Tenant',
+      };
+
+      const selectedRole = roleIdToUserRole[userFormData.roleId] || 'Admin';
+
+      const newAuthUser = addUser({
         firstName: userFormData.firstName,
         lastName: userFormData.lastName,
         email: userFormData.email,
-        roleId: userFormData.roleId,
+        role: selectedRole,
         status: userFormData.status,
-      };
-      setUsers(prev => [...prev, newUser]);
-      
+        permissions: selectedRole === 'Admin' ? ['all'] : [], // Will be set by role permissions
+      });
+
       // Update role user count
-      setRoles(prev => 
-        prev.map(r => 
-          r.id === userFormData.roleId 
+      setRoles(prev =>
+        prev.map(r =>
+          r.id === userFormData.roleId
             ? { ...r, userCount: r.userCount + 1 }
             : r
         )
@@ -445,7 +479,7 @@ export default function UserRoles() {
   const handleDeleteUser = (id: string) => {
     const user = users.find(u => u.id === id);
     if (user) {
-      setUsers(prev => prev.filter(u => u.id !== id));
+      deleteUser(id); // Use AuthContext delete function
       // Update role user count
       setRoles(prev => 
         prev.map(r => 

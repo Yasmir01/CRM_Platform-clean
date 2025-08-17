@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import CrmUserSelector from "./CrmUserSelector";
 import CrmMenuContent from "./CrmMenuContent";
 import CrmOptionsMenu from "./CrmOptionsMenu";
+import { useAuth } from "../contexts/AuthContext";
 
 const drawerWidth = 240;
 
@@ -25,6 +26,12 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export default function CrmSideMenu() {
+  const { user } = useAuth();
+
+  const getUserInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
   return (
     <Drawer
       variant="permanent"
@@ -55,37 +62,39 @@ export default function CrmSideMenu() {
       >
         <CrmMenuContent />
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: "center",
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
-        <Avatar
-          sizes="small"
-          alt="Alex Thompson"
-          src="/static/images/avatar/7.jpg"
-          sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
+      {user && (
+        <Stack
+          direction="row"
+          sx={{
+            p: 2,
+            gap: 1,
+            alignItems: "center",
+            borderTop: "1px solid",
+            borderColor: "divider",
+          }}
         >
-          AT
-        </Avatar>
-        <Box sx={{ mr: "auto" }}>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 500, lineHeight: "16px" }}
+          <Avatar
+            sizes="small"
+            alt={`${user.firstName} ${user.lastName}`}
+            src={user.avatar || "/static/images/avatar/7.jpg"}
+            sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
           >
-            Alex Thompson
-          </Typography>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            alex@acmecrm.com
-          </Typography>
-        </Box>
-        <CrmOptionsMenu />
-      </Stack>
+            {getUserInitials(user.firstName, user.lastName)}
+          </Avatar>
+          <Box sx={{ mr: "auto" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500, lineHeight: "16px" }}
+            >
+              {user.firstName} {user.lastName}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              {user.email}
+            </Typography>
+          </Box>
+          <CrmOptionsMenu />
+        </Stack>
+      )}
     </Drawer>
   );
 }

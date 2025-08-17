@@ -9,49 +9,37 @@ import {
   Typography,
   Stack,
   Chip,
+  Button,
+  Divider,
 } from "@mui/material";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import { useAuth } from "../contexts/AuthContext";
 
-// Mock user data (would normally come from AuthContext)
-const mockUsers = [
-  {
-    id: '1',
-    name: 'Admin User',
-    role: 'Admin',
-    email: 'admin@propcrm.com',
-    color: 'error',
-  },
-  {
-    id: '2',
-    name: 'John Smith',
-    role: 'Property Manager',
-    email: 'john.smith@propcrm.com',
-    color: 'primary',
-  },
-  {
-    id: '3',
-    name: 'Sarah Johnson',
-    role: 'Tenant',
-    email: 'sarah.johnson@email.com',
-    color: 'info',
-  },
-  {
-    id: '4',
-    name: 'Mike Wilson',
-    role: 'Service Provider',
-    email: 'mike@handyservices.com',
-    color: 'warning',
-  },
-];
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case 'Admin': return 'error';
+    case 'Property Manager': return 'primary';
+    case 'Tenant': return 'info';
+    case 'Service Provider': return 'warning';
+    default: return 'default';
+  }
+};
 
 export default function CrmUserSelector() {
-  const [selectedUser, setSelectedUser] = React.useState("1");
+  const { user, users, switchUser, logout } = useAuth();
 
   const handleChange = (event: SelectChangeEvent) => {
-    setSelectedUser(event.target.value as string);
+    const value = event.target.value as string;
+    if (value === 'logout') {
+      logout();
+    } else {
+      switchUser(value);
+    }
   };
 
-  const currentUser = mockUsers.find(user => user.id === selectedUser);
+  if (!user) {
+    return null; // User not logged in
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -59,28 +47,28 @@ export default function CrmUserSelector() {
         <Select
           labelId="user-select-label"
           id="user-select"
-          value={selectedUser}
+          value={user.id}
           onChange={handleChange}
           renderValue={(value) => {
-            const user = mockUsers.find(u => u.id === value);
-            return user ? (
+            const selectedUser = users.find(u => u.id === value);
+            return selectedUser ? (
               <Stack direction="row" alignItems="center" spacing={1}>
-                <Avatar 
-                  sx={{ 
-                    width: 24, 
-                    height: 24, 
-                    bgcolor: `${user.color}.light`,
+                <Avatar
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    bgcolor: `${getRoleColor(selectedUser.role)}.light`,
                     fontSize: '0.75rem'
                   }}
                 >
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  {selectedUser.firstName[0]}{selectedUser.lastName[0]}
                 </Avatar>
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {user.name}
+                    {selectedUser.firstName} {selectedUser.lastName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {user.role}
+                    {selectedUser.role}
                   </Typography>
                 </Box>
               </Stack>
@@ -94,36 +82,45 @@ export default function CrmUserSelector() {
             },
           }}
         >
-          {mockUsers.map((user) => (
-            <MenuItem key={user.id} value={user.id}>
+          {users.map((userData) => (
+            <MenuItem key={userData.id} value={userData.id}>
               <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
-                <Avatar 
-                  sx={{ 
-                    width: 32, 
-                    height: 32, 
-                    bgcolor: `${user.color}.light`,
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: `${getRoleColor(userData.role)}.light`,
                     fontSize: '0.875rem'
                   }}
                 >
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  {userData.firstName[0]}{userData.lastName[0]}
                 </Avatar>
                 <Box sx={{ flexGrow: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {user.name}
+                    {userData.firstName} {userData.lastName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {user.email}
+                    {userData.email}
                   </Typography>
                 </Box>
-                <Chip 
-                  label={user.role} 
-                  size="small" 
-                  color={user.color as any}
+                <Chip
+                  label={userData.role}
+                  size="small"
+                  color={getRoleColor(userData.role) as any}
                   variant="outlined"
                 />
               </Stack>
             </MenuItem>
           ))}
+          <Divider />
+          <MenuItem value="logout">
+            <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%', color: 'error.main' }}>
+              <LogoutRoundedIcon />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                Logout
+              </Typography>
+            </Stack>
+          </MenuItem>
         </Select>
       </FormControl>
     </Box>

@@ -215,7 +215,7 @@ const getLeadScoreColor = (score: number) => {
 export default function ContactManagement() {
   const navigate = useNavigate();
   const { trackPropertyActivity } = useActivityTracking();
-  const { state, addContact, updateContact } = useCrmData();
+  const { state, addContact, updateContact, deleteContact } = useCrmData();
   const { contacts, tenants, propertyManagers } = state;
 
   // Generate contacts from CRM data (tenants, property managers, service providers)
@@ -422,35 +422,26 @@ export default function ContactManagement() {
   const handleSaveContact = () => {
     if (selectedContact) {
       // Update existing contact
-      setContacts(prev => prev.map(contact =>
-        contact.id === selectedContact.id
-          ? {
-              ...contact,
-              ...formData,
-              dateModified: new Date().toISOString().split('T')[0]
-            }
-          : contact
-      ));
+      const updatedContact = {
+        ...selectedContact,
+        ...formData,
+        updatedAt: new Date().toISOString()
+      };
+      updateContact(updatedContact);
     } else {
       // Add new contact
-      const newContact: Contact = {
-        id: Date.now().toString(),
+      const newContactData = {
         ...formData,
         lastContact: new Date().toISOString().split('T')[0],
-        leadScore: Math.floor(Math.random() * 40) + 60,
-        lifetime_value: 0,
-        interactions: [],
-        socialProfiles: {},
-        dateCreated: new Date().toISOString().split('T')[0],
-        dateModified: new Date().toISOString().split('T')[0]
+        notes: '' // Add missing required field
       };
-      setContacts(prev => [...prev, newContact]);
+      addContact(newContactData);
     }
     setOpenDialog(false);
   };
 
   const handleDeleteContact = (id: string) => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
+    deleteContact(id);
   };
 
   const totalContacts = allContacts.length;

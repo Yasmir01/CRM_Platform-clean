@@ -28,6 +28,8 @@ export interface AuthContextType {
   updateUser: (userId: string, userData: Partial<User>) => void;
   deleteUser: (userId: string) => void;
   getUsersByRole: (role: UserRole) => User[];
+  resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  sendPasswordEmail: (email: string, tempPassword: string) => void;
   isAuthenticated: boolean;
   hasPermission: (permission: string) => boolean;
 }
@@ -48,6 +50,17 @@ const mockUsers: User[] = [
   },
   {
     id: '2',
+    firstName: 'Alex',
+    lastName: 'Thompson',
+    email: 'alex@acmecrm.com',
+    phone: '(555) 101-2020',
+    role: 'Admin',
+    status: 'Active',
+    permissions: ['all'],
+    createdAt: '2024-01-02T00:00:00Z',
+  },
+  {
+    id: '3',
     firstName: 'John',
     lastName: 'Smith',
     email: 'john.smith@propcrm.com',
@@ -56,10 +69,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
     properties: ['Sunset Apartments', 'Ocean View Villa'],
-    createdAt: '2024-01-02T00:00:00Z',
+    createdAt: '2024-01-03T00:00:00Z',
   },
   {
-    id: '3',
+    id: '4',
     firstName: 'Sarah',
     lastName: 'Johnson',
     email: 'sarah.johnson@email.com',
@@ -68,10 +81,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
-    createdAt: '2024-01-03T00:00:00Z',
+    createdAt: '2024-01-04T00:00:00Z',
   },
   {
-    id: '4',
+    id: '5',
     firstName: 'Mike',
     lastName: 'Wilson',
     email: 'mike@handyservices.com',
@@ -80,7 +93,7 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
-    createdAt: '2024-01-04T00:00:00Z',
+    createdAt: '2024-01-05T00:00:00Z',
   },
 ];
 
@@ -112,22 +125,45 @@ const rolePermissions: Record<UserRole, string[]> = {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Load user from localStorage on app start
+  // Load users and current user from localStorage on app start
   useEffect(() => {
+    // Load users list
+    const savedUsers = localStorage.getItem('users');
+    let usersList = mockUsers;
+    if (savedUsers) {
+      try {
+        usersList = JSON.parse(savedUsers);
+      } catch (error) {
+        // Invalid JSON, use mock users
+        usersList = mockUsers;
+      }
+    } else {
+      // First time, save mock users to localStorage
+      localStorage.setItem('users', JSON.stringify(mockUsers));
+    }
+    setUsers(usersList);
+
+    // Load current user
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setIsAuthenticated(true);
-    } else {
-      // Auto-login as admin for demo purposes
-      const adminUser = mockUsers[0];
-      setUser(adminUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(adminUser));
+      try {
+        const userData = JSON.parse(savedUser);
+        // Verify user still exists in our user list
+        const foundUser = usersList.find(u => u.id === userData.id);
+        if (foundUser) {
+          setUser(foundUser);
+          setIsAuthenticated(true);
+        } else {
+          // User not found, clear storage
+          localStorage.removeItem('currentUser');
+        }
+      } catch (error) {
+        // Invalid JSON, clear storage
+        localStorage.removeItem('currentUser');
+      }
     }
   }, []);
 
@@ -171,20 +207,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
       permissions: rolePermissions[userData.role] || [],
     };
-    
-    setUsers(prev => [...prev, newUser]);
+
+    const updatedUsers = [...users, newUser];
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
     return newUser;
   };
 
   const updateUser = (userId: string, userData: Partial<User>) => {
-    setUsers(prev => 
-      prev.map(u => 
-        u.id === userId 
-          ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
-          : u
-      )
+    const updatedUsers = users.map(u =>
+      u.id === userId
+        ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
+        : u
     );
-    
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+
     // Update current user if it's the same user
     if (user && user.id === userId) {
       const updatedUser = { ...user, ...userData };
@@ -194,8 +232,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const deleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    
+    const updatedUsers = users.filter(u => u.id !== userId);
+    setUsers(updatedUsers);
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+
     // Logout if deleting current user
     if (user && user.id === userId) {
       logout();
@@ -212,6 +252,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user.permissions.includes(permission);
   };
 
+  const resetPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
+    const foundUser = users.find(u => u.email === email && u.status === 'Active');
+
+    if (foundUser) {
+      // Generate temporary password
+      const tempPassword = Math.random().toString(36).slice(-8);
+
+      // In a real app, you'd update the user's password in the database
+      // For demo purposes, we'll just trigger the email
+      sendPasswordEmail(email, tempPassword);
+
+      return {
+        success: true,
+        message: 'Password reset email sent. Check your email for the temporary password.'
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Email not found or account is inactive.'
+      };
+    }
+  };
+
+  const sendPasswordEmail = (email: string, tempPassword: string) => {
+    const subject = encodeURIComponent('PropCRM - Password Reset');
+    const body = encodeURIComponent(`Your temporary password is: ${tempPassword}\n\nPlease log in and change your password immediately.\n\nIf you did not request this password reset, please contact support.`);
+
+    // Create mailto link that will open user's default email client
+    const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+
+    // Open the default email client
+    window.open(mailtoLink, '_blank');
+  };
+
   const value: AuthContextType = {
     user,
     users,
@@ -222,6 +296,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUser,
     deleteUser,
     getUsersByRole,
+    resetPassword,
+    sendPasswordEmail,
     isAuthenticated,
     hasPermission,
   };

@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
+import CrmLogin from "./crm/pages/CrmLogin";
+import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
 // Import CRM components
 import CrmMainDashboard from "./crm/components/CrmMainDashboard";
 import Calendar from "./crm/pages/Calendar";
@@ -74,60 +76,91 @@ function NotFound() {
   );
 }
 
+// Protected Route Component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <CrmLogin />;
+  }
+
+  return <>{children}</>;
+}
+
+// App Routes Component (needs to be inside AuthProvider)
+function AppRoutes() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/login" element={<CrmLogin />} />
+      <Route path="/crm" element={
+        <ProtectedRoute>
+          <CrmDashboard />
+        </ProtectedRoute>
+      }>
+        <Route index element={<CrmMainDashboard />} />
+        <Route path="calendar" element={<Calendar />} />
+        <Route path="contacts" element={<ContactManagement />} />
+        <Route path="sales" element={<SalesAutomation />} />
+        <Route path="marketing" element={<MarketingAutomation />} />
+        <Route path="properties" element={<Properties />} />
+        <Route path="tenants" element={<Tenants />} />
+        <Route path="prospects" element={<Prospects />} />
+        <Route path="applications" element={<Applications />} />
+        <Route path="managers" element={<PropertyManagers />} />
+        <Route path="service-providers" element={<ServiceProviders />} />
+        <Route path="work-orders" element={<WorkOrders />} />
+        <Route path="customer-service" element={<CustomerService />} />
+        <Route path="communications" element={<Communications />} />
+        <Route path="news" element={<NewsBoard />} />
+        <Route path="power-tools" element={<PowerTools />} />
+        <Route path="ai-tools" element={<AITools />} />
+        <Route path="tasks" element={<Tasks />} />
+        <Route path="analytics" element={<AnalyticsInsights />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="email-marketing" element={<EmailMarketing />} />
+        <Route path="sms-marketing" element={<SmsMarketing />} />
+        <Route path="templates" element={<Templates />} />
+        <Route path="landing-pages" element={<PropertyLandingPages />} />
+        <Route path="promotions" element={<Promotions />} />
+        <Route path="integrations" element={<IntegrationManagement />} />
+        <Route path="automation" element={<MarketingAutomation />} />
+        <Route path="user-roles" element={<UserRoles />} />
+        <Route path="marketplace" element={<Marketplace />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="help" element={<HelpSupport />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+      <Route path="/" element={
+        isAuthenticated ? (
+          <Navigate to="/crm" replace />
+        ) : (
+          <CrmLogin />
+        )
+      } />
+      {/* Redirect common paths to CRM equivalents */}
+      <Route path="/profile" element={<Navigate to="/crm/profile" replace />} />
+      <Route path="/settings" element={<Navigate to="/crm/settings" replace />} />
+      <Route path="/properties" element={<Navigate to="/crm/properties" replace />} />
+      <Route path="/tenants" element={<Navigate to="/crm/tenants" replace />} />
+      <Route path="/contacts" element={<Navigate to="/crm/contacts" replace />} />
+      <Route path="/tasks" element={<Navigate to="/crm/tasks" replace />} />
+      <Route path="/reports" element={<Navigate to="/crm/reports" replace />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 export default function App() {
   return (
     <AppTheme>
       <CssBaseline enableColorScheme />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/crm" element={<CrmDashboard />}>
-            <Route index element={<CrmMainDashboard />} />
-            <Route path="calendar" element={<Calendar />} />
-            <Route path="contacts" element={<ContactManagement />} />
-            <Route path="sales" element={<SalesAutomation />} />
-            <Route path="marketing" element={<MarketingAutomation />} />
-            <Route path="properties" element={<Properties />} />
-            <Route path="tenants" element={<Tenants />} />
-            <Route path="prospects" element={<Prospects />} />
-            <Route path="applications" element={<Applications />} />
-            <Route path="managers" element={<PropertyManagers />} />
-            <Route path="service-providers" element={<ServiceProviders />} />
-            <Route path="work-orders" element={<WorkOrders />} />
-            <Route path="customer-service" element={<CustomerService />} />
-            <Route path="communications" element={<Communications />} />
-            <Route path="news" element={<NewsBoard />} />
-            <Route path="power-tools" element={<PowerTools />} />
-            <Route path="ai-tools" element={<AITools />} />
-            <Route path="tasks" element={<Tasks />} />
-            <Route path="analytics" element={<AnalyticsInsights />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="email-marketing" element={<EmailMarketing />} />
-            <Route path="sms-marketing" element={<SmsMarketing />} />
-            <Route path="templates" element={<Templates />} />
-            <Route path="landing-pages" element={<PropertyLandingPages />} />
-            <Route path="promotions" element={<Promotions />} />
-            <Route path="integrations" element={<IntegrationManagement />} />
-            <Route path="automation" element={<MarketingAutomation />} />
-            <Route path="user-roles" element={<UserRoles />} />
-            <Route path="marketplace" element={<Marketplace />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="help" element={<HelpSupport />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
-          <Route path="/" element={<CrmDashboard />}>
-            <Route index element={<CrmMainDashboard />} />
-          </Route>
-          {/* Redirect common paths to CRM equivalents */}
-          <Route path="/profile" element={<Navigate to="/crm/profile" replace />} />
-          <Route path="/settings" element={<Navigate to="/crm/settings" replace />} />
-          <Route path="/properties" element={<Navigate to="/crm/properties" replace />} />
-          <Route path="/tenants" element={<Navigate to="/crm/tenants" replace />} />
-          <Route path="/contacts" element={<Navigate to="/crm/contacts" replace />} />
-          <Route path="/tasks" element={<Navigate to="/crm/tasks" replace />} />
-          <Route path="/reports" element={<Navigate to="/crm/reports" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </AuthProvider>
     </AppTheme>
   );
 }
