@@ -1007,8 +1007,9 @@ export default function Templates() {
             variant="outlined"
             startIcon={<BusinessRoundedIcon />}
             onClick={() => setCompanySettingsOpen(true)}
+            disabled={!isAdmin}
           >
-            Company Info
+            Company Info {!isAdmin && '(Admin Only)'}
           </Button>
           <Button
             variant="outlined"
