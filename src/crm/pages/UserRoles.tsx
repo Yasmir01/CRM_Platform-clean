@@ -57,6 +57,7 @@ import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { useAuth, UserRole } from "../contexts/AuthContext";
 
 interface Permission {
   id: string;
