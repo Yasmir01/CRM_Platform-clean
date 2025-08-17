@@ -48,6 +48,17 @@ const mockUsers: User[] = [
   },
   {
     id: '2',
+    firstName: 'Alex',
+    lastName: 'Thompson',
+    email: 'alex@acmecrm.com',
+    phone: '(555) 101-2020',
+    role: 'Admin',
+    status: 'Active',
+    permissions: ['all'],
+    createdAt: '2024-01-02T00:00:00Z',
+  },
+  {
+    id: '3',
     firstName: 'John',
     lastName: 'Smith',
     email: 'john.smith@propcrm.com',
@@ -56,10 +67,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
     properties: ['Sunset Apartments', 'Ocean View Villa'],
-    createdAt: '2024-01-02T00:00:00Z',
+    createdAt: '2024-01-03T00:00:00Z',
   },
   {
-    id: '3',
+    id: '4',
     firstName: 'Sarah',
     lastName: 'Johnson',
     email: 'sarah.johnson@email.com',
@@ -68,10 +79,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
-    createdAt: '2024-01-03T00:00:00Z',
+    createdAt: '2024-01-04T00:00:00Z',
   },
   {
-    id: '4',
+    id: '5',
     firstName: 'Mike',
     lastName: 'Wilson',
     email: 'mike@handyservices.com',
@@ -80,7 +91,7 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
-    createdAt: '2024-01-04T00:00:00Z',
+    createdAt: '2024-01-05T00:00:00Z',
   },
 ];
 
