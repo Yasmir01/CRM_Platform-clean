@@ -758,23 +758,35 @@ export default function WorkOrders() {
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={1}>
-                    <Tooltip title="Edit Work Order">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditWorkOrder(workOrder)}
-                      >
-                        <EditRoundedIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Work Order">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteWorkOrder(workOrder.id)}
-                      >
-                        <DeleteRoundedIcon />
-                      </IconButton>
-                    </Tooltip>
+                    {canTenantInteractWithWorkOrder(workOrder) && (
+                      <>
+                        <Tooltip title="Edit Work Order">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditWorkOrder(workOrder)}
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        {(user?.role !== 'Tenant' ||
+                          workOrder.createdBy === `${user.firstName} ${user.lastName}`) && (
+                          <Tooltip title="Delete Work Order">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteWorkOrder(workOrder.id)}
+                            >
+                              <DeleteRoundedIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {!canTenantInteractWithWorkOrder(workOrder) && user?.role === 'Tenant' && (
+                      <Typography variant="caption" color="text.secondary">
+                        Not accessible
+                      </Typography>
+                    )}
                   </Stack>
                 </TableCell>
               </TableRow>
