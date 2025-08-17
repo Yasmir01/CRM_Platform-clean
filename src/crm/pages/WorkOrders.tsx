@@ -496,7 +496,17 @@ export default function WorkOrders() {
     updateWorkOrders(prev => prev.filter(wo => wo.id !== id));
   };
 
-  // Enhanced filtering for tenant-specific access
+  /**
+   * Enhanced filtering for tenant-specific access
+   *
+   * Tenants can only see work orders that:
+   * 1. Are for their specific property (matched by propertyId, tenantId, or tenant name)
+   * 2. Were created during their lease period (between leaseStart and leaseEnd/moveOutDate)
+   * 3. They have permission to interact with based on their lease status
+   *
+   * This ensures data privacy and prevents tenants from seeing work orders
+   * from before they moved in or after they moved out.
+   */
   const filteredWorkOrders = React.useMemo(() => {
     let filtered = workOrders;
 
