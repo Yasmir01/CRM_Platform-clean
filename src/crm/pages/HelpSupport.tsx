@@ -86,6 +86,53 @@ interface SupportTicket {
 
 const mockFAQs: FAQItem[] = [
   {
+    id: "document-deletion-permissions",
+    question: "How do I delete uploaded documents and what permissions are required?",
+    answer: "Document deletion is restricted to authorized users for security: 1) Only Super Admins and users with 'manage_documents' permission can delete documents, 2) Go to Property Details → Documents tab, 3) Click the red delete button (trash icon) next to any document, 4) Confirm deletion in the security dialog, 5) All deletions are logged in the activity timeline with user information and timestamps. Super Admins can assign document deletion permissions to other admin users through the User Roles section. This ensures proper audit trails and prevents accidental data loss.",
+    category: "Security",
+    tags: ["document", "deletion", "permissions", "security", "admin", "audit"],
+    helpful: 97,
+    planRequired: "Professional",
+    isAdvanced: true
+  },
+  {
+    id: "security-deposit-management",
+    question: "How do I add and manage security deposits for properties?",
+    answer: "Security deposits are now fully integrated into the property management system: 1) When adding a new property, enter the security deposit amount in the field between Monthly Rent and Square Footage, 2) View deposit information in the Property Details → Financial tab under 'Deposits & Charges Management', 3) Deposits automatically appear in tenant financial records and property ledgers, 4) When tenants move out, deposit refunds and deductions are tracked in their past tenant ledger, 5) All deposit transactions are reflected in financial reports and activity logs. The system supports security deposits, pet deposits, and various fees with full audit trails.",
+    category: "Payments",
+    tags: ["security", "deposit", "property", "financial", "ledger", "tenant"],
+    helpful: 94,
+    planRequired: "Basic"
+  },
+  {
+    id: "property-color-persistence",
+    question: "How do I customize and save property header colors?",
+    answer: "Property header color customization is now persistent across sessions: 1) Open any Property Detail page, 2) Click the 🎨 button in the header, 3) Choose from available color options (Primary Blue, Secondary Pink, Success Green, etc.), 4) Your selection is automatically saved to localStorage and persists when you navigate away, 5) The color applies to all property detail views throughout the system, 6) Colors are saved per browser/device for personalized experience. This helps differentiate properties and improves visual organization of your property portfolio.",
+    category: "General",
+    tags: ["property", "color", "customization", "header", "persistence", "visual"],
+    helpful: 89,
+    planRequired: "Basic"
+  },
+  {
+    id: "unlisted-properties-management",
+    question: "How does the Unlisted Properties tab work and why don't new properties appear there?",
+    answer: "The Unlisted Properties system helps manage property marketing workflow: 1) New properties are automatically created with 'Unlisted' status, 2) They appear in the Unlisted tab under Property Management, 3) Properties remain unlisted until you create a listing for them, 4) Once listed, properties move to 'Listed' status and appear in the Listings tab, 5) The Unlisted tab shows both properties with 'Unlisted' status AND available properties without active listings. If properties aren't appearing, check that they have 'Unlisted' or 'Available' status and don't have existing active listings.",
+    category: "Properties",
+    tags: ["unlisted", "properties", "listings", "status", "marketing", "workflow"],
+    helpful: 92,
+    planRequired: "Basic"
+  },
+  {
+    id: "financial-permissions-management",
+    question: "What financial permissions are available and how do I assign them?",
+    answer: "The system includes comprehensive financial permission controls: 1) Super Admins have 'all' permissions by default, 2) Property Managers can be assigned specific permissions: 'manage_finances', 'delete_charges', 'add_credits', 'view_financial_ledger', 3) Go to User Roles to assign these permissions, 4) 'delete_charges' allows removal of fees and charges from tenant accounts, 5) 'add_credits' permits adding credits and refunds, 6) All financial actions are logged in activity timelines with user attribution. When tenants move out, their financial history becomes read-only in the past tenant ledger while remaining editable by authorized users.",
+    category: "Security",
+    tags: ["financial", "permissions", "charges", "credits", "ledger", "admin", "roles"],
+    helpful: 96,
+    planRequired: "Professional",
+    isAdvanced: true
+  },
+  {
     id: "template-editing-enhanced",
     question: "How do I edit rental application templates with the new form builder?",
     answer: "When editing a rental application template: 1) Click 'Edit' on any rental application template, 2) The enhanced editor now shows both rich text content AND form fields, 3) Use the left panel to add pre-built sections (Personal Info, Employment, etc.) or custom fields, 4) The right panel shows a live preview of your form, 5) Auto-save keeps your work safe every 3 seconds, 6) Use 'Preview Application' to see the full form as applicants will see it. The form builder includes drag-and-drop reordering, field validation, and professional styling.",
