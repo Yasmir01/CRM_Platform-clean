@@ -1322,6 +1322,101 @@ export default function NewsBoard() {
             <Button onClick={() => setSavedSelectionsDialogOpen(false)}>Close</Button>
           </DialogActions>
         </Dialog>
+
+        {/* Quick Create Group Dialog */}
+        <Dialog open={quickGroupDialogOpen} onClose={() => setQuickGroupDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Quick Create Property Group</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <Alert severity="info">
+                <Typography variant="body2">
+                  Creating a group with {formData.targetProperties.length} selected properties
+                </Typography>
+              </Alert>
+
+              <TextField
+                label="Group Name"
+                fullWidth
+                value={quickGroupData.name}
+                onChange={(e) => setQuickGroupData({ ...quickGroupData, name: e.target.value })}
+                placeholder="e.g., Downtown Marketing Campaign"
+                required
+              />
+
+              <TextField
+                label="Description (Optional)"
+                fullWidth
+                multiline
+                rows={2}
+                value={quickGroupData.description}
+                onChange={(e) => setQuickGroupData({ ...quickGroupData, description: e.target.value })}
+                placeholder="Brief description of this group..."
+              />
+
+              <FormControl fullWidth>
+                <InputLabel>Group Color</InputLabel>
+                <Select
+                  value={quickGroupData.color}
+                  label="Group Color"
+                  onChange={(e) => setQuickGroupData({ ...quickGroupData, color: e.target.value })}
+                >
+                  <MenuItem value="#2196F3">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#2196F3', borderRadius: '50%' }} />
+                      <Typography>Blue</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#4CAF50">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#4CAF50', borderRadius: '50%' }} />
+                      <Typography>Green</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#FF9800">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#FF9800', borderRadius: '50%' }} />
+                      <Typography>Orange</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#9C27B0">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#9C27B0', borderRadius: '50%' }} />
+                      <Typography>Purple</Typography>
+                    </Stack>
+                  </MenuItem>
+                  <MenuItem value="#F44336">
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Box sx={{ width: 16, height: 16, bgcolor: '#F44336', borderRadius: '50%' }} />
+                      <Typography>Red</Typography>
+                    </Stack>
+                  </MenuItem>
+                </Select>
+              </FormControl>
+
+              <Box>
+                <Typography variant="subtitle2" gutterBottom>
+                  Selected Properties:
+                </Typography>
+                <Stack spacing={0.5} sx={{ maxHeight: 120, overflow: 'auto' }}>
+                  {formData.targetProperties.map((propId) => {
+                    const property = properties.find(p => p.id === propId);
+                    return (
+                      <Typography key={propId} variant="body2" color="text.secondary">
+                        • {property?.name || propId}
+                      </Typography>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setQuickGroupDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleQuickCreateGroup}>
+              Create Group
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </Box>
   );
