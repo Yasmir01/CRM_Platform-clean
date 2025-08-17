@@ -158,6 +158,16 @@ export default function NewsBoard() {
   const [selectedPost, setSelectedPost] = React.useState<NewsPost | null>(null);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<HTMLElement | null>(null);
   const [selectedPostForAction, setSelectedPostForAction] = React.useState<NewsPost | null>(null);
+
+  // Saved selections state
+  const [savedSelections, setSavedSelections] = React.useState<SavedSelection[]>(() => {
+    const saved = localStorage.getItem('announcementSavedSelections');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [savedSelectionsDialogOpen, setSavedSelectionsDialogOpen] = React.useState(false);
+  const [saveSelectionDialogOpen, setSaveSelectionDialogOpen] = React.useState(false);
+  const [saveSelectionName, setSaveSelectionName] = React.useState('');
+  const [saveSelectionDescription, setSaveSelectionDescription] = React.useState('');
   // Auto-save posts to localStorage whenever they change
   React.useEffect(() => {
     LocalStorageService.saveNews(posts);
