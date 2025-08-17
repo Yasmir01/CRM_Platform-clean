@@ -216,17 +216,34 @@ export default function WorkOrders() {
       completionDate: "",
     };
 
-    // If user is a tenant, auto-populate their information
-    if (user?.role === 'Tenant' && user.properties && user.properties.length > 0) {
-      const userProperty = properties.find(p => user.properties?.includes(p.id) || user.properties?.includes(p.name));
-      if (userProperty) {
-        initialFormData = {
-          ...initialFormData,
-          property: `${userProperty.name} - ${userProperty.address}`,
-          propertyId: userProperty.id,
-          tenant: `${user.firstName} ${user.lastName}`,
-          tenantId: user.id,
-        };
+    // If user is a tenant, auto-populate their information and restrict to their property
+    if (user?.role === 'Tenant') {
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (currentTenant && currentTenant.propertyId) {
+        const userProperty = properties.find(p => p.id === currentTenant.propertyId);
+
+        if (userProperty) {
+          initialFormData = {
+            ...initialFormData,
+            property: `${userProperty.name} - ${userProperty.address}`,
+            propertyId: userProperty.id,
+            tenant: `${currentTenant.firstName} ${currentTenant.lastName}`,
+            tenantId: currentTenant.id,
+          };
+        }
+      } else if (user.properties && user.properties.length > 0) {
+        // Fallback to user.properties if tenant data not found in tenant list
+        const userProperty = properties.find(p => user.properties?.includes(p.id) || user.properties?.includes(p.name));
+        if (userProperty) {
+          initialFormData = {
+            ...initialFormData,
+            property: `${userProperty.name} - ${userProperty.address}`,
+            propertyId: userProperty.id,
+            tenant: `${user.firstName} ${user.lastName}`,
+            tenantId: user.id,
+          };
+        }
       }
     }
 
