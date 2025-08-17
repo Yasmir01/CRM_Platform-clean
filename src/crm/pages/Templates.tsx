@@ -48,6 +48,8 @@ import VariablesCheatSheet from "../components/VariablesCheatSheet";
 import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
 // import { useAutoSave, useAutoSaveStatus } from "../hooks/useAutoSave";
 import { quickCopy } from "../utils/clipboardUtils";
+import { LocalStorageService } from "../services/LocalStorageService";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -437,7 +439,51 @@ Signature: _________________ Date: _________________`,
 
 export default function Templates() {
   const theme = useTheme();
-  const [templates, setTemplates] = React.useState<Template[]>(mockTemplates);
+  const {
+    canAccessTemplateLibrary,
+    canCreateTemplates,
+    canEditTemplates,
+    canDeleteTemplates,
+    isAdmin,
+    userRole
+  } = useRoleManagement();
+
+  // Check if user has access to templates
+  if (!canAccessTemplateLibrary()) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          Access Denied
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          You don't have permission to access the template library. Contact your administrator for access.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Load templates from localStorage, fallback to mock data
+  const [templates, setTemplates] = React.useState<Template[]>(() => {
+    const savedTemplates = LocalStorageService.getTemplates();
+    console.log('Loading templates from localStorage:', savedTemplates.length, 'templates found');
+    return savedTemplates.length > 0 ? savedTemplates : mockTemplates;
+  });
+
+  // Helper function to update templates and save to localStorage
+  const updateTemplates = React.useCallback((newTemplatesOrUpdater: Template[] | ((prev: Template[]) => Template[])) => {
+    setTemplates(prev => {
+      const updated = typeof newTemplatesOrUpdater === 'function'
+        ? newTemplatesOrUpdater(prev)
+        : newTemplatesOrUpdater;
+      try {
+        LocalStorageService.saveTemplates(updated);
+        console.log('Templates updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save templates after update:', error);
+      }
+      return updated;
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -536,9 +582,9 @@ export default function Templates() {
     
     if (selectedTemplate) {
       // Edit existing template
-      setTemplates(prev => 
-        prev.map(t => 
-          t.id === selectedTemplate.id 
+      updateTemplates(prev =>
+        prev.map(t =>
+          t.id === selectedTemplate.id
             ? { ...t, ...formData, variables: variablesArray, formFields, applicationFee, paymentMethods }
             : t
         )
@@ -556,14 +602,14 @@ export default function Templates() {
         applicationFee,
         paymentMethods,
       };
-      setTemplates(prev => [...prev, newTemplate]);
+      updateTemplates(prev => [...prev, newTemplate]);
     }
     setOpenDialog(false);
     setFormFields([]);
   };
 
   const handleDeleteTemplate = (id: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== id));
+    updateTemplates(prev => prev.filter(t => t.id !== id));
   };
 
   const handlePreviewTemplate = (template: Template) => {
@@ -953,16 +999,25 @@ export default function Templates() {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant="h4" component="h1">
-          Templates
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Typography variant="h4" component="h1">
+            Templates
+          </Typography>
+          <Chip
+            label={userRole}
+            color={isAdmin ? "primary" : "default"}
+            size="small"
+            variant="outlined"
+          />
+        </Stack>
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
             startIcon={<BusinessRoundedIcon />}
             onClick={() => setCompanySettingsOpen(true)}
+            disabled={!isAdmin}
           >
-            Company Info
+            Company Info {!isAdmin && '(Admin Only)'}
           </Button>
           <Button
             variant="outlined"
@@ -978,13 +1033,15 @@ export default function Templates() {
           >
             Create Application Form
           </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={handleAddTemplate}
-          >
-            Create Template
-          </Button>
+          {canCreateTemplates() && (
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={handleAddTemplate}
+            >
+              Create Template
+            </Button>
+          )}
         </Stack>
       </Stack>
 
@@ -1169,21 +1226,25 @@ export default function Templates() {
                 >
                   <ContentCopyRoundedIcon />
                 </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleEditTemplate(template)}
-                  title="Edit"
-                >
-                  <EditRoundedIcon />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleDeleteTemplate(template.id)}
-                  title="Delete"
-                >
-                  <DeleteRoundedIcon />
-                </IconButton>
+                {canEditTemplates() && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEditTemplate(template)}
+                    title="Edit"
+                  >
+                    <EditRoundedIcon />
+                  </IconButton>
+                )}
+                {canDeleteTemplates() && (
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => handleDeleteTemplate(template.id)}
+                    title="Delete"
+                  >
+                    <DeleteRoundedIcon />
+                  </IconButton>
+                )}
               </CardActions>
             </Card>
           </Grid>
@@ -1234,7 +1295,7 @@ export default function Templates() {
                     applicationFee: applicationFee,
                     paymentMethods: paymentMethods,
                   };
-                  setTemplates(prev => [...prev, newTemplate]);
+                  updateTemplates(prev => [...prev, newTemplate]);
                   setOpenFormBuilderDialog(false);
                   // Auto-save functionality disabled to prevent infinite loops
                   alert("Template saved successfully!");

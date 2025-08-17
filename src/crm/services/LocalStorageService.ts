@@ -132,6 +132,77 @@ export class LocalStorageService {
     return this.getItem('propertyGroups', []);
   }
 
+  static saveQRCodes(qrCodes: any[]): void {
+    this.setItem('qrCodes', qrCodes);
+  }
+
+  static getQRCodes(): any[] {
+    return this.getItem('qrCodes', []);
+  }
+
+  static saveContactCaptures(contactCaptures: any[]): void {
+    this.setItem('contactCaptures', contactCaptures);
+  }
+
+  static getContactCaptures(): any[] {
+    return this.getItem('contactCaptures', []);
+  }
+
+  static saveTemplates(templates: any[]): void {
+    this.setItem('templates', templates);
+  }
+
+  static getTemplates(): any[] {
+    return this.getItem('templates', []);
+  }
+
+  static saveCompanySettings(companySettings: any): void {
+    this.setItem('companySettings', companySettings);
+  }
+
+  static getCompanySettings(): any {
+    return this.getItem('companySettings', {
+      name: '',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      logoUrl: '',
+      hours: '',
+      emergencyLine: '',
+      taxId: '',
+      licenseNumber: ''
+    });
+  }
+
+  static saveUserRoles(userRoles: any): void {
+    this.setItem('userRoles', userRoles);
+  }
+
+  static getUserRoles(): any {
+    return this.getItem('userRoles', {
+      role: 'user', // user, admin, super_admin
+      permissions: []
+    });
+  }
+
+  // Generic save data method for flexibility
+  static saveData<T>(key: string, data: T): void {
+    this.setItem(key, data);
+  }
+
+  static getData<T>(key: string, defaultValue: T): T {
+    return this.getItem(key, defaultValue);
+  }
+
+  static saveWorkOrders(workOrders: any[]): void {
+    this.setItem('workOrders', workOrders);
+  }
+
+  static getWorkOrders(): any[] {
+    return this.getItem('workOrders', []);
+  }
+
   static saveUserPreferences(preferences: any): void {
     this.setItem('userPreferences', preferences);
   }

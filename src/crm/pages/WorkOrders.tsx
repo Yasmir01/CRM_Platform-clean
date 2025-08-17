@@ -36,6 +36,7 @@ import {
 import WorkOrderDetailPage from "./WorkOrderDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -79,8 +80,10 @@ const mockWorkOrders: WorkOrder[] = [
     title: "AC Unit Not Working",
     description: "Tenant reports AC unit in living room not cooling. Need immediate attention due to heat wave.",
     property: "Ocean View Apartments",
+    propertyId: "prop-1",
     unit: "Unit 2B",
     tenant: "John Smith",
+    tenantId: "tenant-1",
     category: "HVAC",
     priority: "Emergency",
     status: "Assigned",
@@ -98,8 +101,10 @@ const mockWorkOrders: WorkOrder[] = [
     title: "Kitchen Faucet Leak",
     description: "Slow drip from kitchen faucet handle. Tenant mentioned it's been ongoing for a week.",
     property: "Sunset Gardens",
+    propertyId: "prop-2",
     unit: "Unit 5A",
     tenant: "Sarah Johnson",
+    tenantId: "tenant-2",
     category: "Plumbing",
     priority: "Medium",
     status: "Open",
@@ -113,8 +118,10 @@ const mockWorkOrders: WorkOrder[] = [
     title: "Electrical Outlet Repair",
     description: "GFCI outlet in bathroom not working. Safety concern.",
     property: "Downtown Lofts",
+    propertyId: "prop-3",
     unit: "Unit 3C",
     tenant: "Mike Wilson",
+    tenantId: "tenant-3",
     category: "Electrical",
     priority: "High",
     status: "In Progress",
@@ -132,6 +139,7 @@ const mockWorkOrders: WorkOrder[] = [
     title: "Scheduled HVAC Maintenance",
     description: "Quarterly HVAC system inspection and filter replacement for Building A.",
     property: "Garden Heights Building A",
+    propertyId: "prop-4",
     category: "HVAC",
     priority: "Low",
     status: "Completed",
@@ -145,6 +153,49 @@ const mockWorkOrders: WorkOrder[] = [
     estimatedCost: 500,
     actualCost: 475,
     tenant: "Multiple Tenants",
+    tenantId: "system",
+    isEmergency: false,
+  },
+  // Test case: Work order from before lease start (should be filtered out for tenants)
+  {
+    id: "WO-005",
+    title: "Pre-Lease Cleaning",
+    description: "Deep cleaning before tenant move-in.",
+    property: "Ocean View Apartments",
+    propertyId: "prop-1",
+    unit: "Unit 2B",
+    tenant: "John Smith",
+    tenantId: "tenant-1",
+    category: "Cleaning",
+    priority: "Medium",
+    status: "Completed",
+    assignedTo: "Clean Team Pro",
+    assignedBy: "Property Manager",
+    createdBy: "Property Manager",
+    createdDate: "2023-12-15T10:00:00Z", // Before typical lease start
+    assignedDate: "2023-12-15T10:30:00Z",
+    startDate: "2023-12-16T09:00:00Z",
+    completionDate: "2023-12-16T15:00:00Z",
+    estimatedCost: 200,
+    actualCost: 200,
+    isEmergency: false,
+  },
+  // Test case: Work order from after move-out (should be filtered out for tenants)
+  {
+    id: "WO-006",
+    title: "Post-Move-Out Repairs",
+    description: "Repair damages after tenant moved out.",
+    property: "Sunset Gardens",
+    propertyId: "prop-2",
+    unit: "Unit 5A",
+    tenant: "Sarah Johnson",
+    tenantId: "tenant-2",
+    category: "General Maintenance",
+    priority: "Medium",
+    status: "Open",
+    createdBy: "Property Manager",
+    createdDate: "2024-12-15T10:00:00Z", // Future date, after typical lease end
+    estimatedCost: 300,
     isEmergency: false,
   },
 ];
@@ -162,7 +213,58 @@ export default function WorkOrders() {
   const { state } = useCrmData();
   const { properties, tenants } = state;
   const { user } = useAuth();
-  const [workOrders, setWorkOrders] = React.useState<WorkOrder[]>(mockWorkOrders);
+
+  // Helper function to check if tenant can interact with a work order
+  const canTenantInteractWithWorkOrder = (workOrder: WorkOrder): boolean => {
+    if (user?.role !== 'Tenant') return true; // Non-tenants can interact with all work orders
+
+    const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+    if (!currentTenant) return false;
+
+    // Check if work order belongs to the tenant's property
+    const isForTenantProperty =
+      workOrder.propertyId === currentTenant.propertyId ||
+      workOrder.tenantId === currentTenant.id ||
+      workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+      workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+    if (!isForTenantProperty) return false;
+
+    // Check if work order is within tenant's lease period
+    const workOrderDate = new Date(workOrder.createdDate);
+    const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+    const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+    const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+    if (leaseStart && workOrderDate < leaseStart) return false;
+
+    const endDate = moveOutDate || leaseEnd;
+    if (endDate && workOrderDate > endDate) return false;
+
+    return true;
+  };
+  // Load work orders from localStorage, fallback to mock data
+  const [workOrders, setWorkOrders] = React.useState<WorkOrder[]>(() => {
+    const savedWorkOrders = LocalStorageService.getWorkOrders();
+    console.log('Loading work orders from localStorage:', savedWorkOrders.length, 'work orders found');
+    return savedWorkOrders.length > 0 ? savedWorkOrders : mockWorkOrders;
+  });
+
+  // Helper function to update work orders and save to localStorage
+  const updateWorkOrders = React.useCallback((newWorkOrdersOrUpdater: WorkOrder[] | ((prev: WorkOrder[]) => WorkOrder[])) => {
+    setWorkOrders(prev => {
+      const updated = typeof newWorkOrdersOrUpdater === 'function'
+        ? newWorkOrdersOrUpdater(prev)
+        : newWorkOrdersOrUpdater;
+      try {
+        LocalStorageService.saveWorkOrders(updated);
+        console.log('Work orders updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save work orders after update:', error);
+      }
+      return updated;
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedWorkOrder, setSelectedWorkOrder] = React.useState<WorkOrder | null>(null);
@@ -216,17 +318,34 @@ export default function WorkOrders() {
       completionDate: "",
     };
 
-    // If user is a tenant, auto-populate their information
-    if (user?.role === 'Tenant' && user.properties && user.properties.length > 0) {
-      const userProperty = properties.find(p => user.properties?.includes(p.id) || user.properties?.includes(p.name));
-      if (userProperty) {
-        initialFormData = {
-          ...initialFormData,
-          property: `${userProperty.name} - ${userProperty.address}`,
-          propertyId: userProperty.id,
-          tenant: `${user.firstName} ${user.lastName}`,
-          tenantId: user.id,
-        };
+    // If user is a tenant, auto-populate their information and restrict to their property
+    if (user?.role === 'Tenant') {
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (currentTenant && currentTenant.propertyId) {
+        const userProperty = properties.find(p => p.id === currentTenant.propertyId);
+
+        if (userProperty) {
+          initialFormData = {
+            ...initialFormData,
+            property: `${userProperty.name} - ${userProperty.address}`,
+            propertyId: userProperty.id,
+            tenant: `${currentTenant.firstName} ${currentTenant.lastName}`,
+            tenantId: currentTenant.id,
+          };
+        }
+      } else if (user.properties && user.properties.length > 0) {
+        // Fallback to user.properties if tenant data not found in tenant list
+        const userProperty = properties.find(p => user.properties?.includes(p.id) || user.properties?.includes(p.name));
+        if (userProperty) {
+          initialFormData = {
+            ...initialFormData,
+            property: `${userProperty.name} - ${userProperty.address}`,
+            propertyId: userProperty.id,
+            tenant: `${user.firstName} ${user.lastName}`,
+            tenantId: user.id,
+          };
+        }
       }
     }
 
@@ -235,6 +354,42 @@ export default function WorkOrders() {
   };
 
   const handleEditWorkOrder = (workOrder: WorkOrder) => {
+    // Check if tenant is trying to edit a work order not belonging to them
+    if (user?.role === 'Tenant') {
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (currentTenant) {
+        // Check if work order belongs to the tenant
+        const isForTenantProperty =
+          workOrder.propertyId === currentTenant.propertyId ||
+          workOrder.tenantId === currentTenant.id ||
+          workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+          workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+        if (!isForTenantProperty) {
+          alert("You can only edit work orders for your own property.");
+          return;
+        }
+
+        // Check if work order is within tenant's lease period
+        const workOrderDate = new Date(workOrder.createdDate);
+        const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+        const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+        const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+        if (leaseStart && workOrderDate < leaseStart) {
+          alert("You cannot edit work orders from before your lease start date.");
+          return;
+        }
+
+        const endDate = moveOutDate || leaseEnd;
+        if (endDate && workOrderDate > endDate) {
+          alert("You cannot edit work orders from after your move-out date.");
+          return;
+        }
+      }
+    }
+
     setSelectedWorkOrder(workOrder);
     setFormData({
       title: workOrder.title,
@@ -262,11 +417,11 @@ export default function WorkOrders() {
     
     if (selectedWorkOrder) {
       // Edit existing work order
-      setWorkOrders(prev => 
-        prev.map(wo => 
-          wo.id === selectedWorkOrder.id 
-            ? { 
-                ...wo, 
+      updateWorkOrders(prev =>
+        prev.map(wo =>
+          wo.id === selectedWorkOrder.id
+            ? {
+                ...wo,
                 ...formData,
                 estimatedCost: formData.estimatedCost ? parseFloat(formData.estimatedCost) : undefined,
                 assignedDate: formData.assignedTo && !selectedWorkOrder.assignedTo ? new Date().toISOString() : wo.assignedDate,
@@ -288,21 +443,184 @@ export default function WorkOrders() {
         assignedDate: formData.assignedTo ? new Date().toISOString() : undefined,
         assignedBy: formData.assignedTo ? currentUser : undefined,
       };
-      setWorkOrders(prev => [...prev, newWorkOrder]);
+      updateWorkOrders(prev => [...prev, newWorkOrder]);
     }
     setOpenDialog(false);
   };
 
   const handleDeleteWorkOrder = (id: string) => {
-    setWorkOrders(prev => prev.filter(wo => wo.id !== id));
+    // Check if tenant is trying to delete a work order not belonging to them
+    if (user?.role === 'Tenant') {
+      const workOrderToDelete = workOrders.find(wo => wo.id === id);
+      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      if (workOrderToDelete && currentTenant) {
+        // Check if work order belongs to the tenant
+        const isForTenantProperty =
+          workOrderToDelete.propertyId === currentTenant.propertyId ||
+          workOrderToDelete.tenantId === currentTenant.id ||
+          workOrderToDelete.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+          workOrderToDelete.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase());
+
+        if (!isForTenantProperty) {
+          alert("You can only delete work orders for your own property.");
+          return;
+        }
+
+        // Check if work order is within tenant's lease period
+        const workOrderDate = new Date(workOrderToDelete.createdDate);
+        const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+        const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+        const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+        if (leaseStart && workOrderDate < leaseStart) {
+          alert("You cannot delete work orders from before your lease start date.");
+          return;
+        }
+
+        const endDate = moveOutDate || leaseEnd;
+        if (endDate && workOrderDate > endDate) {
+          alert("You cannot delete work orders from after your move-out date.");
+          return;
+        }
+
+        // Additional restriction: Tenants can only delete work orders they created
+        if (workOrderToDelete.createdBy !== `${currentTenant.firstName} ${currentTenant.lastName}` &&
+            workOrderToDelete.createdBy !== `${user.firstName} ${user.lastName}`) {
+          alert("You can only delete work orders that you created.");
+          return;
+        }
+      }
+    }
+
+    updateWorkOrders(prev => prev.filter(wo => wo.id !== id));
   };
 
-  const filteredWorkOrders = workOrders.filter(workOrder =>
-    workOrder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    workOrder.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  /**
+   * Enhanced filtering for tenant-specific access
+   *
+   * Tenants can only see work orders that:
+   * 1. Are for their specific property (matched by propertyId, tenantId, or tenant name)
+   * 2. Were created during their lease period (between leaseStart and leaseEnd/moveOutDate)
+   * 3. They have permission to interact with based on their lease status
+   *
+   * This ensures data privacy and prevents tenants from seeing work orders
+   * from before they moved in or after they moved out.
+   */
+  const filteredWorkOrders = React.useMemo(() => {
+    let filtered = workOrders;
+
+    console.log('Current user:', user);
+    console.log('User role:', user?.role);
+    console.log('Available tenants:', tenants);
+    console.log('All work orders:', workOrders);
+
+    // If user is a tenant, filter to only show work orders for their property and lease period
+    if (user?.role === 'Tenant') {
+      console.log('Filtering for tenant user...');
+
+      // Try multiple ways to find the current tenant
+      let currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      // If not found by exact match, try to find by name
+      if (!currentTenant) {
+        currentTenant = tenants.find(t =>
+          t.firstName === user.firstName && t.lastName === user.lastName
+        );
+      }
+
+      // If still not found, check properties array from user
+      if (!currentTenant && user.properties && user.properties.length > 0) {
+        // Try to find tenant by property
+        const userPropertyName = user.properties[0];
+        const userProperty = properties.find(p => p.name === userPropertyName);
+        if (userProperty) {
+          currentTenant = tenants.find(t => t.propertyId === userProperty.id);
+        }
+      }
+
+      console.log('Found tenant:', currentTenant);
+
+      if (currentTenant) {
+        // Get the property details
+        const tenantProperty = properties.find(p => p.id === currentTenant.propertyId);
+        console.log('Tenant property:', tenantProperty);
+
+        filtered = workOrders.filter(workOrder => {
+          console.log('Checking work order:', workOrder.id, workOrder.title);
+
+          // Check if work order is for tenant's property - multiple ways to match
+          const isForTenantProperty =
+            // Match by propertyId
+            workOrder.propertyId === currentTenant.propertyId ||
+            // Match by tenantId
+            workOrder.tenantId === currentTenant.id ||
+            // Match by tenant name (first or last name)
+            workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
+            workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase()) ||
+            // Match by property name
+            (tenantProperty && workOrder.property.toLowerCase().includes(tenantProperty.name.toLowerCase()));
+
+          console.log('Is for tenant property:', isForTenantProperty);
+
+          if (!isForTenantProperty) {
+            return false;
+          }
+
+          // Check if work order is within tenant's lease period
+          const workOrderDate = new Date(workOrder.createdDate);
+          const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart) : null;
+          const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
+          const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
+
+          console.log('Work order date:', workOrderDate);
+          console.log('Lease start:', leaseStart);
+          console.log('Lease end:', leaseEnd);
+          console.log('Move out date:', moveOutDate);
+
+          // If tenant has lease dates, check if work order is within the period
+          if (leaseStart) {
+            // Work order must be after lease start
+            if (workOrderDate < leaseStart) {
+              console.log('Work order before lease start, filtering out');
+              return false;
+            }
+          }
+
+          // Check end date - use moveOutDate if available, otherwise leaseEnd
+          const endDate = moveOutDate || leaseEnd;
+          if (endDate) {
+            // Work order must be before move-out/lease end
+            if (workOrderDate > endDate) {
+              console.log('Work order after lease end, filtering out');
+              return false;
+            }
+          }
+
+          console.log('Work order passes all filters');
+          return true;
+        });
+
+        console.log('Filtered work orders for tenant:', filtered);
+      } else {
+        console.log('No tenant found for user, showing empty list');
+        // If tenant not found in data, show no work orders
+        filtered = [];
+      }
+    }
+
+    // Apply search term filter
+    if (searchTerm) {
+      filtered = filtered.filter(workOrder =>
+        workOrder.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.tenant.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workOrder.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [workOrders, user, tenants, searchTerm]);
 
   const getStatusColor = (status: WorkOrder["status"]) => {
     switch (status) {
@@ -359,6 +677,31 @@ export default function WorkOrders() {
           Create Work Order
         </Button>
       </Stack>
+
+      {/* Tenant-specific information */}
+      {user?.role === 'Tenant' && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="body2">
+            You can only view and manage work orders for your property during your lease period.
+            {(() => {
+              const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+              if (currentTenant) {
+                const leaseStart = currentTenant.leaseStart ? new Date(currentTenant.leaseStart).toLocaleDateString() : 'N/A';
+                const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd).toLocaleDateString() : 'Ongoing';
+                const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate).toLocaleDateString() : null;
+
+                return (
+                  <>
+                    {' '}Your lease period: {leaseStart} to {moveOutDate || leaseEnd}.
+                    {moveOutDate && ' (Moved out: ' + moveOutDate + ')'}
+                  </>
+                );
+              }
+              return '';
+            })()}
+          </Typography>
+        </Alert>
+      )}
 
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -573,23 +916,35 @@ export default function WorkOrders() {
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={1}>
-                    <Tooltip title="Edit Work Order">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditWorkOrder(workOrder)}
-                      >
-                        <EditRoundedIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Work Order">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteWorkOrder(workOrder.id)}
-                      >
-                        <DeleteRoundedIcon />
-                      </IconButton>
-                    </Tooltip>
+                    {canTenantInteractWithWorkOrder(workOrder) && (
+                      <>
+                        <Tooltip title="Edit Work Order">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditWorkOrder(workOrder)}
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        {(user?.role !== 'Tenant' ||
+                          workOrder.createdBy === `${user.firstName} ${user.lastName}`) && (
+                          <Tooltip title="Delete Work Order">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteWorkOrder(workOrder.id)}
+                            >
+                              <DeleteRoundedIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {!canTenantInteractWithWorkOrder(workOrder) && user?.role === 'Tenant' && (
+                      <Typography variant="caption" color="text.secondary">
+                        Not accessible
+                      </Typography>
+                    )}
                   </Stack>
                 </TableCell>
               </TableRow>

@@ -37,8 +37,12 @@ import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
 import SmartphoneRoundedIcon from "@mui/icons-material/SmartphoneRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import UserPreferencesSettings from "../components/UserPreferencesSettings";
+import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
+import CompanySettingsIntegration from "../components/CompanySettingsIntegration";
 import { useMode } from "../contexts/ModeContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 interface NotificationSettings {
   emailNotifications: boolean;
@@ -124,7 +128,25 @@ export default function AccountSettings() {
   const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = React.useState(false);
   const [twoFactorDialogOpen, setTwoFactorDialogOpen] = React.useState(false);
   const [userPreferencesOpen, setUserPreferencesOpen] = React.useState(false);
+  const [companySettingsOpen, setCompanySettingsOpen] = React.useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
+
+  // Company information management
+  const { companyInfo, updateCompanyInfo } = useCompanyInfo();
+
+  // User role management
+  const [userRole, setUserRole] = React.useState(() => {
+    return LocalStorageService.getUserRoles();
+  });
+
+  const updateUserRole = React.useCallback((newRole: any) => {
+    setUserRole(newRole);
+    LocalStorageService.saveUserRoles(newRole);
+  }, []);
+
+  // Check if user has admin permissions
+  const isAdmin = userRole.role === 'admin' || userRole.role === 'super_admin';
+  const isSuperAdmin = userRole.role === 'super_admin';
 
   const handleNotificationChange = (setting: keyof NotificationSettings) => {
     setNotifications(prev => ({
@@ -422,6 +444,9 @@ export default function AccountSettings() {
             </CardContent>
           </Card>
         </Grid>
+
+        {/* Company Settings - Admin Only */}
+        <CompanySettingsIntegration userRole={userRole} />
 
         {/* Notification Settings */}
         <Grid item xs={12} md={6}>

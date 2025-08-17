@@ -79,6 +79,7 @@ import {
 } from "@mui/icons-material";
 import { uniformTooltipStyles } from "../utils/formStyles";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 // Enhanced QR Code interfaces
 interface QRCodeData {
@@ -483,53 +484,28 @@ export default function QRCodeGenerator({
   };
 
   const generateQRCode = (): string => {
-    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
-
     // Ensure URLs have proper protocol
     let content = formData.content;
     if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
       content = "https://" + content.replace(/^(www\.)?/, "www.");
     }
 
+    // Use QR Server API with better parameter mapping
+    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
     const params = new URLSearchParams({
       size: "300x300",
       data: content,
       color: customization.foregroundColor.replace("#", ""),
       bgcolor: customization.backgroundColor.replace("#", ""),
-      qzone: "1",
+      margin: "0",
       format: "png",
       ecc: "M"
     });
 
-    // Apply style parameters to QR server
-    if (customization.style === "rounded") {
-      params.append("qr_style", "rounded");
-    } else if (customization.style === "dots") {
-      params.append("qr_style", "dots");
-    } else if (customization.style === "circle") {
-      params.append("qr_style", "circle");
-    }
-
-    // Apply pattern parameters
-    if (customization.pattern === "circle") {
-      params.append("pattern", "circle");
-    } else if (customization.pattern === "rounded") {
-      params.append("pattern", "rounded");
-    }
-
-    // Apply eye style parameters
-    if (customization.eyeStyle === "circle") {
-      params.append("eye_style", "circle");
-    } else if (customization.eyeStyle === "rounded") {
-      params.append("eye_style", "rounded");
-    }
-
-    // Add frame if specified
-    if (customization.frameStyle !== "none" && customization.frameText) {
-      params.append("frame", customization.frameStyle);
-      params.append("frame_text", customization.frameText);
-      params.append("frame_color", customization.frameColor.replace("#", ""));
-    }
+    // Add visual style indicators in the URL for user feedback
+    // Note: Visual styles are applied via CSS overlay in the preview
+    const styleId = `${customization.style}-${customization.pattern}-${customization.eyeStyle}`;
+    params.append("v", styleId); // Version/style identifier
 
     return `${baseUrl}?${params.toString()}`;
   };
@@ -563,10 +539,22 @@ export default function QRCodeGenerator({
       tracking
     };
 
+    let updatedQRCodes: QRCodeData[];
     if (selectedQR) {
-      setQrCodes(prev => prev.map(qr => qr.id === selectedQR.id ? newQR : qr));
+      updatedQRCodes = qrCodes.map(qr => qr.id === selectedQR.id ? newQR : qr);
     } else {
-      setQrCodes(prev => [...prev, newQR]);
+      updatedQRCodes = [...qrCodes, newQR];
+    }
+
+    // Update state
+    setQrCodes(updatedQRCodes);
+
+    // Save to localStorage for persistence
+    try {
+      LocalStorageService.saveQRCodes(updatedQRCodes);
+      console.log('QR codes saved successfully to localStorage');
+    } catch (error) {
+      console.error('Failed to save QR codes:', error);
     }
 
     onClose();
@@ -715,7 +703,7 @@ export default function QRCodeGenerator({
           <MenuItem value="Contact">👤 Contact Info</MenuItem>
           <MenuItem value="Property">🏠 Property Listing</MenuItem>
           <MenuItem value="Payment">💳 Payment Link</MenuItem>
-          <MenuItem value="Location">📍 Location</MenuItem>
+          <MenuItem value="Location">�� Location</MenuItem>
           <MenuItem value="Event">📅 Event</MenuItem>
           <MenuItem value="Email">📧 Email</MenuItem>
           <MenuItem value="Phone">📞 Phone</MenuItem>
@@ -1033,11 +1021,57 @@ export default function QRCodeGenerator({
         {formData.content && (
           <Stack spacing={2} alignItems="center">
             <Box sx={{ position: 'relative', display: 'inline-block' }}>
-              <img
-                src={generateQRCode()}
-                alt="QR Code Preview"
-                style={{ maxWidth: 200, maxHeight: 200, borderRadius: customization.style === 'rounded' ? 8 : 0 }}
-              />
+              <Box
+                sx={{
+                  position: 'relative',
+                  borderRadius: customization.style === 'rounded' ? 2 : 0,
+                  overflow: 'hidden',
+                  background: customization.gradientEnabled && customization.gradientColors
+                    ? `linear-gradient(45deg, ${customization.gradientColors[0] || customization.foregroundColor}, ${customization.gradientColors[1] || customization.backgroundColor})`
+                    : 'none',
+                  p: customization.gradientEnabled ? 0.5 : 0
+                }}
+              >
+                <img
+                  src={generateQRCode()}
+                  alt="QR Code Preview"
+                  style={{
+                    maxWidth: 200,
+                    maxHeight: 200,
+                    borderRadius: customization.style === 'rounded' ? 8 : 0,
+                    filter: customization.style === 'dots' ? 'blur(0.5px) contrast(1.2)' : 'none',
+                    transform: customization.style === 'circle' ? 'scale(0.95)' : 'none'
+                  }}
+                />
+                {/* Style overlay effects */}
+                {customization.pattern === 'circle' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle, transparent 70%, rgba(255,255,255,0.3) 85%)',
+                      pointerEvents: 'none'
+                    }}
+                  />
+                )}
+                {customization.eyeStyle === 'rounded' && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 60%)',
+                      pointerEvents: 'none',
+                      borderRadius: 2
+                    }}
+                  />
+                )}
+              </Box>
               {logoPreview && (
                 <Box
                   sx={{
@@ -1050,11 +1084,12 @@ export default function QRCodeGenerator({
                     bgcolor: 'white',
                     border: 2,
                     borderColor: 'white',
-                    borderRadius: 1,
+                    borderRadius: customization.eyeStyle === 'circle' ? '50%' : customization.eyeStyle === 'rounded' ? 1 : 0,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                   }}
                 >
                   <img
@@ -1069,6 +1104,14 @@ export default function QRCodeGenerator({
                 </Box>
               )}
             </Box>
+
+            {/* Style Info */}
+            <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="center">
+              <Chip size="small" label={`Style: ${customization.style}`} color="primary" variant="outlined" />
+              <Chip size="small" label={`Pattern: ${customization.pattern}`} color="secondary" variant="outlined" />
+              <Chip size="small" label={`Eyes: ${customization.eyeStyle}`} color="info" variant="outlined" />
+            </Stack>
+
             <Box sx={{ maxWidth: '100%', px: 2 }}>
               <Typography variant="caption" color="text.secondary" gutterBottom>
                 Content:

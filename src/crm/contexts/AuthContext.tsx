@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type UserRole = 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
+export type UserRole = 'Super Admin' | 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
 
 export interface User {
   id: string;
@@ -39,13 +39,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Mock user data
 const mockUsers: User[] = [
   {
+    id: '0',
+    firstName: 'Super',
+    lastName: 'Administrator',
+    email: 'superadmin@propcrm.com',
+    role: 'Super Admin',
+    status: 'Active',
+    permissions: ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings'],
+    createdAt: '2024-01-01T00:00:00Z',
+  },
+  {
     id: '1',
     firstName: 'Admin',
     lastName: 'User',
     email: 'admin@propcrm.com',
     role: 'Admin',
     status: 'Active',
-    permissions: ['all'],
+    permissions: ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties'],
     createdAt: '2024-01-01T00:00:00Z',
   },
   {

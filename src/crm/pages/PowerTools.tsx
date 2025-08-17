@@ -69,6 +69,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DesignServicesRoundedIcon from "@mui/icons-material/DesignServicesRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
+import TransformRoundedIcon from "@mui/icons-material/TransformRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import RedeemRoundedIcon from "@mui/icons-material/RedeemRounded";
 import LaunchRoundedIcon from "@mui/icons-material/LaunchRounded";
@@ -81,6 +82,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { uniformTooltipStyles } from "../utils/formStyles";
 import QRCodeGenerator from "../components/QRCodeGenerator";
 import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
+import { LocalStorageService } from "../services/LocalStorageService";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 
 // QR Code interfaces
 interface QRCodeData {
@@ -671,11 +674,33 @@ const mockPools: Pool[] = [
 ];
 
 export default function PowerTools() {
+  const { canAccessPowerTools, userRole, isAdmin } = useRoleManagement();
   const [currentTab, setCurrentTab] = React.useState(0);
 
-  // QR Code states
-  const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(mockQRCodes);
-  const [contactCaptures, setContactCaptures] = React.useState<ContactCapture[]>(mockContactCaptures);
+  // Check if user has access to power tools
+  if (!canAccessPowerTools()) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="h6" color="error" gutterBottom>
+          Access Denied
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          You don't have permission to access Power Tools. Contact your administrator for access.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // QR Code states - Load from localStorage if available, fallback to mock data
+  const [qrCodes, setQrCodes] = React.useState<QRCodeData[]>(() => {
+    const savedQRCodes = LocalStorageService.getQRCodes();
+    console.log('Loading QR codes from localStorage:', savedQRCodes.length, 'codes found');
+    return savedQRCodes.length > 0 ? savedQRCodes : mockQRCodes;
+  });
+  const [contactCaptures, setContactCaptures] = React.useState<ContactCapture[]>(() => {
+    const savedCaptures = LocalStorageService.getContactCaptures();
+    return savedCaptures.length > 0 ? savedCaptures : mockContactCaptures;
+  });
   const [openQRDialog, setOpenQRDialog] = React.useState(false);
   const [openAnalyticsDialog, setOpenAnalyticsDialog] = React.useState(false);
   const [selectedQR, setSelectedQR] = React.useState<QRCodeData | null>(null);
@@ -684,6 +709,22 @@ export default function PowerTools() {
     content: "",
     type: "URL" as QRCodeData["type"]
   });
+
+  // Helper function to update QR codes and save to localStorage
+  const updateQRCodes = React.useCallback((newValueOrUpdater: QRCodeData[] | ((prev: QRCodeData[]) => QRCodeData[])) => {
+    setQrCodes(prev => {
+      const updated = typeof newValueOrUpdater === 'function'
+        ? newValueOrUpdater(prev)
+        : newValueOrUpdater;
+      try {
+        LocalStorageService.saveQRCodes(updated);
+        console.log('QR codes updated and saved to localStorage');
+      } catch (error) {
+        console.error('Failed to save QR codes after update:', error);
+      }
+      return updated;
+    });
+  }, []);
 
   // Contest states
   const [contests, setContests] = React.useState<Contest[]>(mockContests);
@@ -1033,7 +1074,7 @@ export default function PowerTools() {
             document.body.removeChild(link);
 
             // Update download count
-            setQrCodes(prev => prev.map(qr =>
+            updateQRCodes(prev => prev.map(qr =>
               qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
             ));
           };
@@ -1048,7 +1089,7 @@ export default function PowerTools() {
             document.body.removeChild(link);
 
             // Update download count
-            setQrCodes(prev => prev.map(qr =>
+            updateQRCodes(prev => prev.map(qr =>
               qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
             ));
           };
@@ -1064,7 +1105,7 @@ export default function PowerTools() {
           document.body.removeChild(link);
 
           // Update download count
-          setQrCodes(prev => prev.map(qr =>
+          updateQRCodes(prev => prev.map(qr =>
             qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
           ));
         }
@@ -1080,7 +1121,7 @@ export default function PowerTools() {
         document.body.removeChild(link);
 
         // Update download count
-        setQrCodes(prev => prev.map(qr =>
+        updateQRCodes(prev => prev.map(qr =>
           qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
         ));
       };
@@ -1096,7 +1137,7 @@ export default function PowerTools() {
       document.body.removeChild(link);
 
       // Update download count
-      setQrCodes(prev => prev.map(qr =>
+      updateQRCodes(prev => prev.map(qr =>
         qr.id === qrCode.id ? { ...qr, downloads: qr.downloads + 1 } : qr
       ));
     }
@@ -1494,6 +1535,11 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
           <Tab
             icon={<PublicIcon />}
             label="WordPress-it"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<TransformRoundedIcon />}
+            label="TinyWow-it"
             iconPosition="start"
           />
         </Tabs>
@@ -2352,6 +2398,116 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
             ))}
           </Grid>
         </Box>
+      </TabPanel>
+
+      {/* TinyWow-it Tab */}
+      <TabPanel value={currentTab} index={10}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h5">TinyWow Tools</Typography>
+          <Button
+            variant="contained"
+            startIcon={<TransformRoundedIcon />}
+            href="https://tinywow.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open TinyWow
+          </Button>
+        </Stack>
+
+        <Alert severity="info" sx={{ mb: 3 }}>
+          TinyWow provides free online tools for PDF, image, video, and document conversion. All processing is done securely in your browser.
+        </Alert>
+
+        <Grid container spacing={3}>
+          {[
+            {
+              category: "PDF Tools",
+              icon: "📄",
+              tools: [
+                { name: "PDF Merger", desc: "Combine multiple PDFs into one", url: "https://tinywow.com/pdf/merge" },
+                { name: "PDF Splitter", desc: "Split PDF into multiple files", url: "https://tinywow.com/pdf/split" },
+                { name: "PDF Converter", desc: "Convert to/from PDF format", url: "https://tinywow.com/pdf/convert" },
+                { name: "PDF Compressor", desc: "Reduce PDF file size", url: "https://tinywow.com/pdf/compress" },
+                { name: "PDF Protector", desc: "Add password protection", url: "https://tinywow.com/pdf/protect" },
+              ]
+            },
+            {
+              category: "Image Tools",
+              icon: "🖼️",
+              tools: [
+                { name: "Image Resizer", desc: "Resize images to specific dimensions", url: "https://tinywow.com/image/resize" },
+                { name: "Background Remover", desc: "Remove image backgrounds", url: "https://tinywow.com/image/bg-remover" },
+                { name: "Image Converter", desc: "Convert between image formats", url: "https://tinywow.com/image/convert" },
+                { name: "Image Compressor", desc: "Reduce image file size", url: "https://tinywow.com/image/compress" },
+                { name: "Image Cropper", desc: "Crop images to specific area", url: "https://tinywow.com/image/crop" },
+              ]
+            },
+            {
+              category: "Video Tools",
+              icon: "🎥",
+              tools: [
+                { name: "Video Converter", desc: "Convert video formats", url: "https://tinywow.com/video/convert" },
+                { name: "Video Compressor", desc: "Reduce video file size", url: "https://tinywow.com/video/compress" },
+                { name: "Video Trimmer", desc: "Cut video clips", url: "https://tinywow.com/video/trim" },
+                { name: "Audio Extractor", desc: "Extract audio from video", url: "https://tinywow.com/video/audio-extractor" },
+                { name: "Subtitle Adder", desc: "Add subtitles to videos", url: "https://tinywow.com/video/subtitle" },
+              ]
+            },
+            {
+              category: "Document Tools",
+              icon: "📝",
+              tools: [
+                { name: "Word Converter", desc: "Convert Word documents", url: "https://tinywow.com/document/word-converter" },
+                { name: "Excel Converter", desc: "Convert Excel spreadsheets", url: "https://tinywow.com/document/excel-converter" },
+                { name: "PowerPoint Converter", desc: "Convert presentations", url: "https://tinywow.com/document/powerpoint-converter" },
+                { name: "Text Extractor", desc: "Extract text from documents", url: "https://tinywow.com/document/text-extractor" },
+                { name: "OCR Scanner", desc: "Extract text from images", url: "https://tinywow.com/document/ocr" },
+              ]
+            }
+          ].map((category) => (
+            <Grid item xs={12} md={6} key={category.category}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                    <Typography variant="h2" sx={{ fontSize: 32 }}>{category.icon}</Typography>
+                    <Typography variant="h6">{category.category}</Typography>
+                  </Stack>
+
+                  <Stack spacing={1}>
+                    {category.tools.map((tool) => (
+                      <Card key={tool.name} variant="outlined" sx={{ p: 2 }}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Box>
+                            <Typography variant="subtitle2" gutterBottom>{tool.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">{tool.desc}</Typography>
+                          </Box>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            href={tool.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            startIcon={<LaunchRoundedIcon />}
+                          >
+                            Open
+                          </Button>
+                        </Stack>
+                      </Card>
+                    ))}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Alert severity="success" sx={{ mt: 3 }}>
+          <Typography variant="subtitle2" gutterBottom>Why TinyWow?</Typography>
+          <Typography variant="body2">
+            • Completely free to use • No registration required • All processing happens locally • No file size limits • Supports all major formats
+          </Typography>
+        </Alert>
       </TabPanel>
 
       {/* Fundraise-it Dialog */}
@@ -3265,7 +3421,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
               </Typography>
               <Stack spacing={3}>
                 <Alert severity="info" sx={{ mb: 2 }}>
-                  🚀 Build custom web assets with rich text content, interactive forms, and advanced calculators. No coding required!
+                  ��� Build custom web assets with rich text content, interactive forms, and advanced calculators. No coding required!
                 </Alert>
 
                 <Grid container spacing={3}>
@@ -4173,7 +4329,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
         open={openQRDialog}
         onClose={handleCloseQRDialog}
         qrCodes={qrCodes}
-        setQrCodes={setQrCodes}
+        setQrCodes={updateQRCodes}
         selectedQR={selectedQR}
       />
 
