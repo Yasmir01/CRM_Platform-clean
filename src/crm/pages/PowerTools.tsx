@@ -4194,7 +4194,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
         open={openQRDialog}
         onClose={handleCloseQRDialog}
         qrCodes={qrCodes}
-        setQrCodes={setQrCodes}
+        setQrCodes={updateQRCodes}
         selectedQR={selectedQR}
       />
 
