@@ -135,12 +135,31 @@ export default function PropertyGroups() {
   const getGroupStats = (group: any) => {
     const groupProperties = properties.filter(p => group.propertyIds.includes(p.id));
     const totalUnits = groupProperties.reduce((sum, p) => sum + p.units, 0);
-    const totalRevenue = groupProperties.reduce((sum, p) => sum + p.monthlyRent * p.units, 0);
-    const avgOccupancy = groupProperties.length > 0 
-      ? groupProperties.reduce((sum, p) => sum + p.occupancy, 0) / groupProperties.length 
-      : 0;
-    
-    return { totalUnits, totalRevenue, avgOccupancy };
+    const occupiedUnits = groupProperties.reduce((sum, p) => sum + p.occupancy, 0);
+    const totalRevenue = groupProperties.reduce((sum, p) => sum + (p.monthlyRent * p.occupancy), 0);
+    const potentialRevenue = groupProperties.reduce((sum, p) => sum + (p.monthlyRent * p.units), 0);
+    const avgOccupancy = totalUnits > 0 ? (occupiedUnits / totalUnits) * 100 : 0;
+    const availableUnits = totalUnits - occupiedUnits;
+
+    return {
+      totalProperties: groupProperties.length,
+      totalUnits,
+      occupiedUnits,
+      availableUnits,
+      totalRevenue,
+      potentialRevenue,
+      avgOccupancy
+    };
+  };
+
+  const handleSendBlast = (group: any) => {
+    // Navigate to news board with pre-selected group
+    window.location.href = `/crm/news?preSelectGroup=${group.id}`;
+  };
+
+  const handleCreateAnnouncement = (group: any) => {
+    // Open announcement dialog with group pre-selected
+    alert(`Create announcement for ${group.name} - This will pre-select the group in the announcement dialog`);
   };
 
   return (
