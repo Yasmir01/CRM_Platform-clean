@@ -233,6 +233,35 @@ export default function NewsBoard() {
     }
   };
 
+  const handleQuickCreateGroup = () => {
+    if (!quickGroupData.name.trim()) {
+      alert('Please enter a group name');
+      return;
+    }
+
+    if (formData.targetProperties.length === 0) {
+      alert('Please select at least one property for the group');
+      return;
+    }
+
+    const newGroup = {
+      name: quickGroupData.name,
+      description: quickGroupData.description,
+      propertyIds: formData.targetProperties,
+      color: quickGroupData.color,
+      tags: ['marketing', 'announcement']
+    };
+
+    // Add the group using CRM context
+    addPropertyGroup(newGroup);
+
+    // Reset form
+    setQuickGroupData({ name: '', description: '', color: '#2196F3' });
+    setQuickGroupDialogOpen(false);
+
+    alert(`Property group "${newGroup.name}" created successfully with ${newGroup.propertyIds.length} properties!`);
+  };
+
   const [formData, setFormData] = React.useState({
     title: '',
     content: '<p>Enter your announcement here...</p>',
@@ -909,7 +938,7 @@ export default function NewsBoard() {
                                         📧 {tenant.email}
                                       </Typography>
                                       <Typography variant="caption" color="text.secondary">
-                                        📞 {tenant.phone} • Status: {tenant.status}
+                                        ���� {tenant.phone} • Status: {tenant.status}
                                       </Typography>
                                     </Box>
                                   }
