@@ -380,14 +380,33 @@ export default function NewsBoard() {
   const handleSavePost = () => {
     if (selectedPost) {
       // Edit existing post
-      setPosts(prev => prev.map(p => 
-        p.id === selectedPost.id 
-          ? { 
-              ...p, 
-              ...formData, 
-              publishDate: new Date().toISOString().split('T')[0] 
-            }
-          : p
+      const updatedPost = {
+        ...selectedPost,
+        ...formData,
+        publishDate: new Date().toISOString().split('T')[0]
+      };
+
+      // Update in CRM context
+      const announcementData = {
+        id: selectedPost.id,
+        title: formData.title,
+        content: formData.content,
+        type: formData.type.charAt(0).toUpperCase() + formData.type.slice(1) as any,
+        priority: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) as any,
+        targetAudience: 'All' as any,
+        propertyIds: formData.targetProperties,
+        publishDate: new Date().toISOString().split('T')[0],
+        expiryDate: formData.expiryDate,
+        isActive: true,
+        attachments: [],
+        createdBy: 'Current User',
+        createdAt: selectedPost.publishDate,
+        updatedAt: new Date().toISOString()
+      };
+      updateAnnouncement(announcementData);
+
+      setPosts(prev => prev.map(p =>
+        p.id === selectedPost.id ? updatedPost : p
       ));
     } else {
       // Create new post
@@ -400,6 +419,23 @@ export default function NewsBoard() {
         views: 0,
         engagement: { views: 0, clicks: 0, acknowledged: 0 }
       };
+
+      // Add to CRM context
+      const announcementData = {
+        title: formData.title,
+        content: formData.content,
+        type: formData.type.charAt(0).toUpperCase() + formData.type.slice(1) as any,
+        priority: formData.priority.charAt(0).toUpperCase() + formData.priority.slice(1) as any,
+        targetAudience: 'All' as any,
+        propertyIds: formData.targetProperties,
+        publishDate: new Date().toISOString().split('T')[0],
+        expiryDate: formData.expiryDate,
+        isActive: true,
+        attachments: [],
+        createdBy: 'Current User'
+      };
+      addAnnouncement(announcementData);
+
       setPosts(prev => [newPost, ...prev]);
     }
     setOpenDialog(false);
