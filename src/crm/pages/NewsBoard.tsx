@@ -1187,6 +1187,106 @@ export default function NewsBoard() {
             </List>
           )}
         </Menu>
+
+        {/* Save Selection Dialog */}
+        <Dialog open={saveSelectionDialogOpen} onClose={() => setSaveSelectionDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Save Current Selection</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 2 }}>
+              <TextField
+                label="Selection Name"
+                fullWidth
+                value={saveSelectionName}
+                onChange={(e) => setSaveSelectionName(e.target.value)}
+                placeholder="e.g., Downtown Properties, Emergency Contacts"
+              />
+              <TextField
+                label="Description (Optional)"
+                fullWidth
+                multiline
+                rows={2}
+                value={saveSelectionDescription}
+                onChange={(e) => setSaveSelectionDescription(e.target.value)}
+                placeholder="Brief description of this selection..."
+              />
+              <Alert severity="info">
+                <Typography variant="body2">
+                  This will save your current target selection: {formData.targetAudience === 'custom' ?
+                    `${formData.targetProperties.length} properties, ${formData.targetTenants.length} tenants, ${formData.targetPropertyGroups.length} groups` :
+                    `${formData.targetAudience} selection`}
+                </Typography>
+              </Alert>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSaveSelectionDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleSaveSelection}>
+              Save Selection
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Load Saved Selections Dialog */}
+        <Dialog open={savedSelectionsDialogOpen} onClose={() => setSavedSelectionsDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>Load Saved Selection</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {savedSelections.length === 0 ? (
+                <Alert severity="info">
+                  No saved selections yet. Create and save a selection to see it here.
+                </Alert>
+              ) : (
+                savedSelections
+                  .sort((a, b) => new Date(b.lastUsed || b.createdAt).getTime() - new Date(a.lastUsed || a.createdAt).getTime())
+                  .map((selection) => (
+                    <Paper key={selection.id} variant="outlined" sx={{ p: 2 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="start">
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            {selection.name}
+                          </Typography>
+                          {selection.description && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              {selection.description}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Type: {selection.targetAudience} •
+                            Properties: {selection.targetProperties.length} •
+                            Tenants: {selection.targetTenants.length} •
+                            Groups: {selection.targetPropertyGroups.length}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Created: {new Date(selection.createdAt).toLocaleDateString()}
+                            {selection.lastUsed && ` • Last used: ${new Date(selection.lastUsed).toLocaleDateString()}`}
+                          </Typography>
+                        </Box>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => handleLoadSelection(selection)}
+                          >
+                            Load
+                          </Button>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteSelection(selection.id)}
+                          >
+                            <DeleteRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </Stack>
+                    </Paper>
+                  ))
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSavedSelectionsDialogOpen(false)}>Close</Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </Box>
   );
