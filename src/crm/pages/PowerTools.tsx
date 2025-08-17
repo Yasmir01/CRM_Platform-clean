@@ -694,9 +694,11 @@ export default function PowerTools() {
   });
 
   // Helper function to update QR codes and save to localStorage
-  const updateQRCodes = React.useCallback((updater: (prev: QRCodeData[]) => QRCodeData[]) => {
+  const updateQRCodes = React.useCallback((newValueOrUpdater: QRCodeData[] | ((prev: QRCodeData[]) => QRCodeData[])) => {
     setQrCodes(prev => {
-      const updated = updater(prev);
+      const updated = typeof newValueOrUpdater === 'function'
+        ? newValueOrUpdater(prev)
+        : newValueOrUpdater;
       try {
         LocalStorageService.saveQRCodes(updated);
         console.log('QR codes updated and saved to localStorage');
