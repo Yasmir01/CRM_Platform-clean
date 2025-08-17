@@ -231,6 +231,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user.permissions.includes(permission);
   };
 
+  const resetPassword = async (email: string): Promise<{ success: boolean; message: string }> => {
+    const foundUser = users.find(u => u.email === email && u.status === 'Active');
+
+    if (foundUser) {
+      // Generate temporary password
+      const tempPassword = Math.random().toString(36).slice(-8);
+
+      // In a real app, you'd update the user's password in the database
+      // For demo purposes, we'll just trigger the email
+      sendPasswordEmail(email, tempPassword);
+
+      return {
+        success: true,
+        message: 'Password reset email sent. Check your email for the temporary password.'
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Email not found or account is inactive.'
+      };
+    }
+  };
+
+  const sendPasswordEmail = (email: string, tempPassword: string) => {
+    const subject = encodeURIComponent('PropCRM - Password Reset');
+    const body = encodeURIComponent(`Your temporary password is: ${tempPassword}\n\nPlease log in and change your password immediately.\n\nIf you did not request this password reset, please contact support.`);
+
+    // Create mailto link that will open user's default email client
+    const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+
+    // Open the default email client
+    window.open(mailtoLink, '_blank');
+  };
+
   const value: AuthContextType = {
     user,
     users,
@@ -241,6 +275,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUser,
     deleteUser,
     getUsersByRole,
+    resetPassword,
+    sendPasswordEmail,
     isAuthenticated,
     hasPermission,
   };
