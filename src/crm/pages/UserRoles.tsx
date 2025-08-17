@@ -277,8 +277,20 @@ const mockUsers: User[] = [
 export default function UserRoles() {
   const { state } = useCrmData();
   const { properties } = state;
+  const { users: authUsers, addUser, updateUser, deleteUser } = useAuth();
   const [roles, setRoles] = React.useState<Role[]>(mockRoles);
-  const [users, setUsers] = React.useState<User[]>(mockUsers);
+
+  // Map AuthContext users to UserRoles interface
+  const users = authUsers.map(authUser => ({
+    id: authUser.id,
+    firstName: authUser.firstName,
+    lastName: authUser.lastName,
+    email: authUser.email,
+    roleId: "1", // Default to Admin role for demo
+    status: authUser.status,
+    lastLogin: authUser.lastLogin,
+    profilePicture: authUser.avatar,
+  }));
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openRoleDialog, setOpenRoleDialog] = React.useState(false);
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
