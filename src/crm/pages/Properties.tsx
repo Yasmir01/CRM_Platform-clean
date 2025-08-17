@@ -573,12 +573,14 @@ export default function Properties() {
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
-  // Calculate unlisted properties (available but not listed)
+  // Calculate unlisted properties (properties with Unlisted status or Available but not listed)
   const unlistedProperties = React.useMemo(() => {
     if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
     return properties.filter(property =>
-      property && property.status === "Available" &&
-      !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
+      property && (
+        property.status === "Unlisted" ||
+        (property.status === "Available" && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed"))
+      )
     );
   }, [state?.initialized, properties, listings]);
 
@@ -668,7 +670,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     <p>${property.description || 'Beautiful property available for rent. Contact us for more details!'}</p>
     
     <div class="contact">
-        <h3>���� Contact us today to schedule a viewing!</h3>
+        <h3>��� Contact us today to schedule a viewing!</h3>
         <p>🕐 Available for immediate move-in</p>
     </div>
 </body>
@@ -4253,7 +4255,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                 onChange={(e) => setCommunicationData({ ...communicationData, type: e.target.value })}
               >
                 <MenuItem value="email">📧 Email</MenuItem>
-                <MenuItem value="sms">�� SMS/Text Message</MenuItem>
+                <MenuItem value="sms">📱 SMS/Text Message</MenuItem>
                 <MenuItem value="call">📞 Phone Call</MenuItem>
                 <MenuItem value="letter">📬 Physical Letter</MenuItem>
               </Select>
