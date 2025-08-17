@@ -244,36 +244,78 @@ export default function PropertyGroups() {
                       {group.description}
                     </Typography>
 
-                    {/* Stats */}
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="primary">
+                    {/* Enhanced Stats */}
+                    <Grid container spacing={1.5}>
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'primary.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="primary.contrastText">
+                            {stats.totalProperties}
+                          </Typography>
+                          <Typography variant="caption" color="primary.contrastText">
+                            Properties
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="info.contrastText">
                             {stats.totalUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Units
+                          <Typography variant="caption" color="info.contrastText">
+                            Total Units
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="success.main">
-                            ${(stats.totalRevenue / 1000).toFixed(0)}K
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'success.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="success.contrastText">
+                            {stats.occupiedUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Revenue
+                          <Typography variant="caption" color="success.contrastText">
+                            Occupied
                           </Typography>
                         </Box>
                       </Grid>
-                      <Grid item xs={4}>
-                        <Box textAlign="center">
-                          <Typography variant="h6" color="info.main">
-                            {stats.avgOccupancy.toFixed(0)}%
+                      <Grid item xs={6}>
+                        <Box textAlign="center" sx={{ p: 1, bgcolor: 'warning.light', borderRadius: 1 }}>
+                          <Typography variant="h6" color="warning.contrastText">
+                            {stats.availableUnits}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Occupancy
+                          <Typography variant="caption" color="warning.contrastText">
+                            Available
                           </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ p: 1.5, bgcolor: 'background.default', borderRadius: 1 }}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="success.main">
+                                ${(stats.totalRevenue / 1000).toFixed(1)}K
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Current Revenue
+                              </Typography>
+                            </Box>
+                            <Divider orientation="vertical" flexItem />
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="text.primary">
+                                ${(stats.potentialRevenue / 1000).toFixed(1)}K
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Potential Revenue
+                              </Typography>
+                            </Box>
+                            <Divider orientation="vertical" flexItem />
+                            <Box textAlign="center">
+                              <Typography variant="subtitle2" color="info.main">
+                                {stats.avgOccupancy.toFixed(1)}%
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Occupancy Rate
+                              </Typography>
+                            </Box>
+                          </Stack>
                         </Box>
                       </Grid>
                     </Grid>
