@@ -1194,6 +1194,15 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'ADD_CONTACT', payload: contact });
   };
 
+  const updateContact = (contact: Contact) => {
+    const updatedContact = { ...contact, updatedAt: new Date().toISOString() };
+    dispatch({ type: 'UPDATE_CONTACT', payload: updatedContact });
+  };
+
+  const deleteContact = (id: string) => {
+    dispatch({ type: 'DELETE_CONTACT', payload: id });
+  };
+
   const addDeal = (dealData: Omit<Deal, 'id' | 'createdAt' | 'updatedAt'>) => {
     const deal: Deal = {
       ...dealData,
