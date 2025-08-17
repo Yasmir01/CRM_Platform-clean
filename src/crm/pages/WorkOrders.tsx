@@ -510,18 +510,58 @@ export default function WorkOrders() {
   const filteredWorkOrders = React.useMemo(() => {
     let filtered = workOrders;
 
+    console.log('Current user:', user);
+    console.log('User role:', user?.role);
+    console.log('Available tenants:', tenants);
+    console.log('All work orders:', workOrders);
+
     // If user is a tenant, filter to only show work orders for their property and lease period
     if (user?.role === 'Tenant') {
-      const currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+      console.log('Filtering for tenant user...');
+
+      // Try multiple ways to find the current tenant
+      let currentTenant = tenants.find(t => t.email === user.email || t.id === user.id);
+
+      // If not found by exact match, try to find by name
+      if (!currentTenant) {
+        currentTenant = tenants.find(t =>
+          t.firstName === user.firstName && t.lastName === user.lastName
+        );
+      }
+
+      // If still not found, check properties array from user
+      if (!currentTenant && user.properties && user.properties.length > 0) {
+        // Try to find tenant by property
+        const userPropertyName = user.properties[0];
+        const userProperty = properties.find(p => p.name === userPropertyName);
+        if (userProperty) {
+          currentTenant = tenants.find(t => t.propertyId === userProperty.id);
+        }
+      }
+
+      console.log('Found tenant:', currentTenant);
 
       if (currentTenant) {
+        // Get the property details
+        const tenantProperty = properties.find(p => p.id === currentTenant.propertyId);
+        console.log('Tenant property:', tenantProperty);
+
         filtered = workOrders.filter(workOrder => {
-          // Check if work order is for tenant's property
+          console.log('Checking work order:', workOrder.id, workOrder.title);
+
+          // Check if work order is for tenant's property - multiple ways to match
           const isForTenantProperty =
+            // Match by propertyId
             workOrder.propertyId === currentTenant.propertyId ||
+            // Match by tenantId
+            workOrder.tenantId === currentTenant.id ||
+            // Match by tenant name (first or last name)
             workOrder.tenant.toLowerCase().includes(currentTenant.firstName.toLowerCase()) ||
             workOrder.tenant.toLowerCase().includes(currentTenant.lastName.toLowerCase()) ||
-            workOrder.tenantId === currentTenant.id;
+            // Match by property name
+            (tenantProperty && workOrder.property.toLowerCase().includes(tenantProperty.name.toLowerCase()));
+
+          console.log('Is for tenant property:', isForTenantProperty);
 
           if (!isForTenantProperty) {
             return false;
@@ -533,10 +573,16 @@ export default function WorkOrders() {
           const leaseEnd = currentTenant.leaseEnd ? new Date(currentTenant.leaseEnd) : null;
           const moveOutDate = currentTenant.moveOutDate ? new Date(currentTenant.moveOutDate) : null;
 
+          console.log('Work order date:', workOrderDate);
+          console.log('Lease start:', leaseStart);
+          console.log('Lease end:', leaseEnd);
+          console.log('Move out date:', moveOutDate);
+
           // If tenant has lease dates, check if work order is within the period
           if (leaseStart) {
             // Work order must be after lease start
             if (workOrderDate < leaseStart) {
+              console.log('Work order before lease start, filtering out');
               return false;
             }
           }
@@ -546,13 +592,18 @@ export default function WorkOrders() {
           if (endDate) {
             // Work order must be before move-out/lease end
             if (workOrderDate > endDate) {
+              console.log('Work order after lease end, filtering out');
               return false;
             }
           }
 
+          console.log('Work order passes all filters');
           return true;
         });
+
+        console.log('Filtered work orders for tenant:', filtered);
       } else {
+        console.log('No tenant found for user, showing empty list');
         // If tenant not found in data, show no work orders
         filtered = [];
       }
