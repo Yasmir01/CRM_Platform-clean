@@ -585,7 +585,7 @@ const initialState: CrmState = {
       id: "1",
       name: "Downtown Portfolio",
       description: "All properties located in downtown area",
-      propertyIds: ["1", "3"],
+      propertyIds: ["1", "3", "4"],
       color: "#2196F3",
       tags: ["downtown", "commercial", "high-value"],
       createdAt: "2024-01-01T00:00:00Z",
@@ -595,9 +595,19 @@ const initialState: CrmState = {
       id: "2",
       name: "Residential Complex A",
       description: "Family-oriented residential properties",
-      propertyIds: ["2"],
+      propertyIds: ["2", "5"],
       color: "#4CAF50",
       tags: ["residential", "family", "suburban"],
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "3",
+      name: "Luxury Properties",
+      description: "High-end luxury properties with premium amenities",
+      propertyIds: ["3", "4"],
+      color: "#9C27B0",
+      tags: ["luxury", "premium", "high-rent"],
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-01T00:00:00Z"
     }
