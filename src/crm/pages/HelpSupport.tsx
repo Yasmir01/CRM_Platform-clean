@@ -405,6 +405,54 @@ const mockFAQs: FAQItem[] = [
     helpful: 93
   },
   {
+    id: "property-groups-management",
+    question: "How do I create and manage property groups for targeted announcements?",
+    answer: "Property groups help organize properties for marketing and announcements: 1) Go to Property Groups page to view existing groups like 'Downtown Portfolio', 'Residential Complex A', and 'Luxury Properties', 2) Create new groups by selecting properties and using 'Quick Create Group' in announcement targeting, 3) Each group has a name, description, color coding, and property assignments, 4) Use groups in the NewsBoard for targeted announcements to specific property sets, 5) Groups show comprehensive stats including total properties, occupancy rates, and revenue metrics, 6) Color-coded visual indicators help distinguish different groups. Groups streamline marketing campaigns and announcement distribution.",
+    category: "Properties",
+    tags: ["property", "groups", "announcements", "marketing", "targeting"],
+    helpful: 96
+  },
+  {
+    id: "announcement-system-overview",
+    question: "How does the announcement system work with property targeting?",
+    answer: "The announcement system supports comprehensive targeting options: 1) Send To options include All Tenants, Specific Properties, Specific Tenants, Property Groups, or Custom Selection, 2) Property selection shows all available properties (Sunset Apartments, 590 Hawkins Store Rd, Ocean View Condos, Garden View Apartments, Riverside Townhomes) with full details, 3) Property groups display real data including Downtown Portfolio (3 properties), Residential Complex A (2 properties), and Luxury Properties (2 properties), 4) Save and load targeting selections for repeated use, 5) Quick group creation from selected properties, 6) Real-time blast summary shows exactly who will receive the announcement. All targeting uses live property and group data from your CRM.",
+    category: "General",
+    tags: ["announcements", "targeting", "properties", "groups", "broadcasting"],
+    helpful: 94
+  },
+  {
+    id: "crm-tools-overview",
+    question: "What are all the main tools and sections available in the CRM system?",
+    answer: "The CRM includes comprehensive tools organized by function: **Property Management**: Properties, Property Groups, Listings, Maintenance, Work Orders **Tenant Management**: Tenants, Applications, Communications, Activity Timeline **Marketing**: Email Marketing, Templates, NewsBoard, Property Landing Pages **Power Tools**: QR-it (QR code generator), Win-it (prize campaigns), Pool-it (group buying), Power Dialer (professional calling) **Financial**: Payments, Quotes, Financial Reports **Administration**: User Roles, Company Settings, Account Settings **Analytics**: Reports & Analytics, Dashboard insights **Support**: Help & Support, Onboarding Guides. Each section includes detailed sub-tools and features for comprehensive property management.",
+    category: "General",
+    tags: ["tools", "overview", "features", "navigation", "modules"],
+    helpful: 98
+  },
+  {
+    id: "dashboard-navigation",
+    question: "How do I navigate the main dashboard and key sections?",
+    answer: "The dashboard provides central access to all CRM functions: 1) Main navigation menu on the left includes all major sections, 2) Dashboard widgets show key metrics, recent activities, and quick actions, 3) Quick add buttons for properties, tenants, and contacts, 4) Activity timeline shows recent system activity, 5) Search functionality across all data types, 6) User menu provides access to settings and preferences, 7) Notifications panel for important alerts, 8) Breadcrumb navigation shows your current location. The interface is responsive and works on desktop and mobile devices.",
+    category: "General",
+    tags: ["dashboard", "navigation", "interface", "menu", "widgets"],
+    helpful: 89
+  },
+  {
+    id: "data-import-export",
+    question: "How do I import and export data in the CRM system?",
+    answer: "Data management supports various import/export options: 1) Bulk import properties, tenants, and contacts via CSV upload, 2) Export reports in PDF, Excel, and CSV formats, 3) Activity data export for compliance and analysis, 4) Template export/import for sharing configurations, 5) Backup and restore functionality for data protection, 6) API access for automated data synchronization, 7) Real-time data sync with integrated services. All imports include data validation and error reporting to ensure data integrity.",
+    category: "General",
+    tags: ["import", "export", "data", "backup", "csv", "sync"],
+    helpful: 91
+  },
+  {
+    id: "notification-management",
+    question: "How do I manage notifications and communication preferences?",
+    answer: "Notification management provides comprehensive control: 1) Set notification preferences in Account Settings for email, SMS, push, and desktop alerts, 2) Configure announcement notification methods (email, SMS, push) when creating announcements, 3) Tenant communication preferences tracked individually, 4) Auto-notifications for rent due, maintenance requests, and system events, 5) Real-time notifications for important activities, 6) Notification history and tracking, 7) Bulk notification settings for property groups. All notifications respect user preferences and compliance requirements.",
+    category: "General",
+    tags: ["notifications", "communication", "preferences", "alerts", "settings"],
+    helpful: 92
+  },
+  {
     id: "application-tracking",
     question: "How do tenant applications get tracked and reflected in the system?",
     answer: "Application tracking is automated: 1) When tenant applications are approved and moved into a property, this information automatically updates and reflects in the tenant page, 2) Any applications received for approved tenants appear in their Documents page under the appropriate category, 3) All communication and activity with prospects are reflected in the prospect page until they become tenants, 4) This ensures complete tracking from prospect to tenant with no information loss.",
