@@ -37,6 +37,7 @@ import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
 import SmartphoneRoundedIcon from "@mui/icons-material/SmartphoneRounded";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import UserPreferencesSettings from "../components/UserPreferencesSettings";
 import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
 import { useMode } from "../contexts/ModeContext";
