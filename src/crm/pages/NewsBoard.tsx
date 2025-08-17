@@ -846,21 +846,22 @@ export default function NewsBoard() {
                                   color="primary"
                                 />
                                 <ListItemText
-                                  primary={
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                                      {property.name}
-                                    </Typography>
-                                  }
+                                  primary={property.name}
                                   secondary={
-                                    <Box>
-                                      <Typography variant="body2" color="text.secondary">
-                                        📍 {property.address}
-                                      </Typography>
-                                      <Typography variant="caption" color="text.secondary">
-                                        {property.units} units • ${property.monthlyRent}/month • {property.status}
-                                      </Typography>
-                                    </Box>
+                                    <>
+                                      📍 {property.address}
+                                      <br />
+                                      {property.units} units • ${property.monthlyRent}/month • {property.status}
+                                    </>
                                   }
+                                  primaryTypographyProps={{
+                                    variant: "subtitle2",
+                                    sx: { fontWeight: 600 }
+                                  }}
+                                  secondaryTypographyProps={{
+                                    variant: "body2",
+                                    color: "text.secondary"
+                                  }}
                                 />
                               </MenuItem>
                             ))}
