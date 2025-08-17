@@ -445,13 +445,23 @@ export default function UserRoles() {
       }
     } else {
       // Add new user to AuthContext
+      // Map roleId to UserRole
+      const roleIdToUserRole: Record<string, UserRole> = {
+        '1': 'Admin',
+        '2': 'Property Manager',
+        '4': 'Service Provider',
+        '6': 'Tenant',
+      };
+
+      const selectedRole = roleIdToUserRole[userFormData.roleId] || 'Admin';
+
       const newAuthUser = addUser({
         firstName: userFormData.firstName,
         lastName: userFormData.lastName,
         email: userFormData.email,
-        role: 'Admin' as UserRole, // Default role, can be made configurable
+        role: selectedRole,
         status: userFormData.status,
-        permissions: ['all'], // Default permissions for new admin users
+        permissions: selectedRole === 'Admin' ? ['all'] : [], // Will be set by role permissions
       });
 
       // Update role user count
