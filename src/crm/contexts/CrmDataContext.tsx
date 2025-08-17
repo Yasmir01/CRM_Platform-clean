@@ -11,6 +11,7 @@ export interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
+  securityDeposit?: number;
   status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   managerId?: string; // Keep for backwards compatibility
   managerIds: string[]; // Support multiple managers
