@@ -190,7 +190,7 @@ const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contactId, onBack
               color="primary"
               onClick={() => setShowCommunicationDialog(true)}
             >
-              <Communication />
+              <Message />
             </IconButton>
           </Tooltip>
           <Tooltip title={isEditing ? "Cancel Edit" : "Edit Contact"}>
