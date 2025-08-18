@@ -68,6 +68,9 @@ export default function WorkOrderDialog({
   // Check if user is a tenant - either by role or by current mode
   const isUserTenant = user?.role === 'Tenant' || isTenantMode;
 
+  // Add visual indicator in dialog title when in tenant mode for testing
+  const dialogTitle = isUserTenant ? "Create New Work Order (Tenant Mode)" : "Create New Work Order";
+
   const [formData, setFormData] = React.useState({
     title: "",
     description: "",
