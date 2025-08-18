@@ -208,7 +208,19 @@ export default function WorkOrderDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>{dialogTitle}</DialogTitle>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h6">{dialogTitle}</Typography>
+          {isUserTenant && (
+            <Chip
+              label="Tenant Mode"
+              color="secondary"
+              size="small"
+              sx={{ ml: 1 }}
+            />
+          )}
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <Grid container spacing={2}>
