@@ -1287,7 +1287,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Payment History Tab */}
-      <TabPanel value={currentTab} index={1}>
+      <TabPanel value={currentTab} index={2}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 2 }}>
@@ -1355,7 +1355,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Documents Tab */}
-      <TabPanel value={currentTab} index={2}>
+      <TabPanel value={currentTab} index={3}>
         <Paper sx={{ p: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">Documents</Typography>
@@ -1423,7 +1423,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Lease Details Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={4}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 3 }}>
