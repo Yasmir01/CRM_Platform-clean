@@ -105,10 +105,12 @@ const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contactId, onBack
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
-    const foundContact = contacts.find((c) => c.id === contactId);
-    if (foundContact) {
-      setContact(foundContact);
-      setEditForm(foundContact);
+    if (contacts && contacts.length > 0) {
+      const foundContact = contacts.find((c) => c.id === contactId);
+      if (foundContact) {
+        setContact(foundContact);
+        setEditForm(foundContact);
+      }
     }
   }, [contactId, contacts]);
 
