@@ -95,24 +95,13 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contactId, onBack }) => {
-  const { contacts, updateContact, deleteContact } = useCrmData();
-  const [contact, setContact] = useState<Contact | null>(null);
+const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contact, onBack }) => {
+  const { updateContact, deleteContact } = useCrmData();
   const [activeTab, setActiveTab] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<Contact>>({});
+  const [editForm, setEditForm] = useState<Partial<Contact>>(contact);
   const [showCommunicationDialog, setShowCommunicationDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  useEffect(() => {
-    if (contacts && contacts.length > 0) {
-      const foundContact = contacts.find((c) => c.id === contactId);
-      if (foundContact) {
-        setContact(foundContact);
-        setEditForm(foundContact);
-      }
-    }
-  }, [contactId, contacts]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
