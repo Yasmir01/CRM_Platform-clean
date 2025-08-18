@@ -449,6 +449,17 @@ export default function ContactManagement() {
     deleteContact(id);
   };
 
+  // Contact detail navigation handlers
+  const handleViewContactDetail = (contactId: string) => {
+    setDetailContactId(contactId);
+    setShowContactDetail(true);
+  };
+
+  const handleBackToContactList = () => {
+    setShowContactDetail(false);
+    setDetailContactId("");
+  };
+
   const totalContacts = allContacts.length;
   const activeContacts = allContacts.filter(c => c.status === "Active").length;
   const tenantContacts = allContacts.filter(c => c.type === "Tenant").length;
