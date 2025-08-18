@@ -865,18 +865,350 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       {/* Other dialogs would go here - Share, Permissions, Audit, etc. */}
       {/* For brevity, I'm including just the basic structure */}
       
+      {/* Share Dialog */}
       <Dialog open={openShareDialog} onClose={() => setOpenShareDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Generate Share Link</DialogTitle>
         <DialogContent>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Shared links provide temporary access to this document. Use with caution.
-          </Alert>
-          {/* Share form content would go here */}
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Alert severity="warning">
+              Shared links provide temporary access to this document. Use with caution.
+            </Alert>
+
+            <TextField
+              label="Expires in (hours)"
+              type="number"
+              value={shareData.expiresIn}
+              onChange={(e) => setShareData({ ...shareData, expiresIn: parseInt(e.target.value) })}
+              helperText="Link will expire after this many hours"
+            />
+
+            <TextField
+              label="Password (optional)"
+              type="password"
+              value={shareData.password}
+              onChange={(e) => setShareData({ ...shareData, password: e.target.value })}
+              helperText="Add password protection for extra security"
+            />
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={shareData.allowDownload}
+                  onChange={(e) => setShareData({ ...shareData, allowDownload: e.target.checked })}
+                />
+              }
+              label="Allow download"
+            />
+
+            <TextField
+              label="Maximum views (0 = unlimited)"
+              type="number"
+              value={shareData.maxViews}
+              onChange={(e) => setShareData({ ...shareData, maxViews: parseInt(e.target.value) })}
+              helperText="Limit the number of times this link can be accessed"
+            />
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenShareDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleGenerateShareLink}>
+          <Button variant="contained" onClick={handleGenerateShareLink} startIcon={<ShareIcon />}>
             Generate Link
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Version History Dialog */}
+      <Dialog open={openVersionDialog} onClose={() => setOpenVersionDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Version History - {selectedDocument?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3}>
+            {/* Create New Version */}
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6">Create New Version</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <input
+                    type="file"
+                    onChange={(e) => setVersionData({ ...versionData, file: e.target.files?.[0] || null })}
+                    style={{ marginBottom: 16 }}
+                  />
+                  <TextField
+                    label="Change Notes"
+                    value={versionData.changeNotes}
+                    onChange={(e) => setVersionData({ ...versionData, changeNotes: e.target.value })}
+                    multiline
+                    rows={3}
+                    placeholder="Describe what changed in this version"
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handleCreateVersion}
+                    disabled={!versionData.file}
+                    startIcon={<HistoryIcon />}
+                  >
+                    Create Version
+                  </Button>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* Version History */}
+            <Typography variant="h6">Version History</Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Version</TableCell>
+                    <TableCell>Size</TableCell>
+                    <TableCell>Created</TableCell>
+                    <TableCell>Notes</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {versionHistory.map((version) => (
+                    <TableRow key={version.id}>
+                      <TableCell>
+                        <Typography variant="subtitle2">v{version.version}</Typography>
+                      </TableCell>
+                      <TableCell>{formatFileSize(version.size)}</TableCell>
+                      <TableCell>
+                        <Stack>
+                          <Typography variant="body2">
+                            {formatDateTime(version.createdAt)}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            by {version.createdBy}
+                          </Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+                          {version.changeNotes}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {version.isActive ? (
+                          <Chip label="Current" size="small" color="primary" />
+                        ) : (
+                          <Chip label="Archived" size="small" variant="outlined" />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <Tooltip title="View Version" sx={uniformTooltipStyles}>
+                            <IconButton size="small">
+                              <VisibilityIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Download Version" sx={uniformTooltipStyles}>
+                            <IconButton size="small">
+                              <DownloadIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenVersionDialog(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Audit Log Dialog */}
+      <Dialog open={openAuditDialog} onClose={() => setOpenAuditDialog(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>
+          Security Audit Log - {selectedDocument?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3}>
+            <Alert severity="info">
+              Complete audit trail of all document access and modifications.
+            </Alert>
+
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Timestamp</TableCell>
+                    <TableCell>Action</TableCell>
+                    <TableCell>User</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Details</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {accessLog.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {formatDateTime(entry.timestamp)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={entry.action}
+                          size="small"
+                          color={
+                            entry.action === 'view' ? 'info' :
+                            entry.action === 'download' ? 'success' :
+                            entry.action === 'edit' ? 'warning' :
+                            entry.action === 'delete' ? 'error' :
+                            'default'
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack>
+                          <Typography variant="body2">{entry.userEmail}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            ID: {entry.userId}
+                          </Typography>
+                        </Stack>
+                      </TableCell>
+                      <TableCell>
+                        {entry.success ? (
+                          <Chip icon={<CheckCircleIcon />} label="Success" size="small" color="success" />
+                        ) : (
+                          <Chip icon={<ErrorIcon />} label="Failed" size="small" color="error" />
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ maxWidth: 300 }}>
+                          {entry.details?.action || entry.errorMessage || 'No additional details'}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAuditDialog(false)}>Close</Button>
+          <Button variant="outlined" startIcon={<DownloadIcon />}>
+            Export Log
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Permissions Dialog */}
+      <Dialog open={openPermissionsDialog} onClose={() => setOpenPermissionsDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          Manage Document Permissions - {selectedDocument?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Alert severity="info">
+              Configure who can view, edit, or manage this document.
+            </Alert>
+
+            <Typography variant="h6">Access Levels</Typography>
+
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Viewers (Read Only)</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Users who can view and download the document
+                  </Typography>
+                  <TextField
+                    label="Add viewer by email"
+                    placeholder="user@example.com"
+                    fullWidth
+                  />
+                  <List>
+                    {selectedDocument?.permissions.viewers.map((viewer: string, index: number) => (
+                      <ListItem key={index}>
+                        <ListItemIcon><VisibilityIcon /></ListItemIcon>
+                        <ListItemText primary={viewer} />
+                        <ListItemSecondaryAction>
+                          <IconButton edge="end">
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Editors (Read & Write)</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Users who can view, download, and upload new versions
+                  </Typography>
+                  <TextField
+                    label="Add editor by email"
+                    placeholder="user@example.com"
+                    fullWidth
+                  />
+                  <List>
+                    {selectedDocument?.permissions.editors.map((editor: string, index: number) => (
+                      <ListItem key={index}>
+                        <ListItemIcon><EditIcon /></ListItemIcon>
+                        <ListItemText primary={editor} />
+                        <ListItemSecondaryAction>
+                          <IconButton edge="end">
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Security Settings</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={2}>
+                  <FormControlLabel
+                    control={<Switch checked={selectedDocument?.permissions.restrictions.preventDownload} />}
+                    label="Prevent Download"
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={selectedDocument?.permissions.restrictions.preventPrint} />}
+                    label="Prevent Print"
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={selectedDocument?.permissions.restrictions.preventCopy} />}
+                    label="Prevent Copy"
+                  />
+                  <FormControlLabel
+                    control={<Switch checked={selectedDocument?.permissions.restrictions.requireAuthentication} />}
+                    label="Require Authentication"
+                  />
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPermissionsDialog(false)}>Cancel</Button>
+          <Button variant="contained" startIcon={<SecurityIcon />}>
+            Save Permissions
           </Button>
         </DialogActions>
       </Dialog>
