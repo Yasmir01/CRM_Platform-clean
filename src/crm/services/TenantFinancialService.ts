@@ -538,6 +538,84 @@ export class TenantFinancialService {
     // Initialize sample tenant profiles for demo
     this.initializeSampleTenantProfiles();
   }
+
+  // Initialize sample profiles for existing tenants
+  private initializeSampleTenantProfiles(): void {
+    const sampleTenantIds = ['tenant_1', 'tenant_2', 'tenant_3', 'tenant_4', 'tenant_5'];
+
+    sampleTenantIds.forEach((tenantId, index) => {
+      const isGoodTenant = index % 3 === 0; // Every 3rd tenant is a good tenant
+      const hasAutoPay = index % 2 === 0; // Every 2nd tenant has autopay
+      const hasSmsEnabled = index % 3 === 1; // Different pattern for SMS
+
+      const profile: TenantFinancialProfile = {
+        tenantId,
+        currentBalance: isGoodTenant ? 0 : (index * 150), // Some have balances
+        securityDeposit: 2500,
+        monthlyRent: 2000 + (index * 100), // Varying rent amounts
+        lastPaymentDate: isGoodTenant ? dayjs().subtract(5, 'days').toISOString() : undefined,
+        nextPaymentDue: dayjs().add(1, 'month').format('YYYY-MM-DD'),
+        paymentStatus: isGoodTenant ? 'current' : (index % 4 === 1 ? 'late' : 'overdue'),
+        daysLate: isGoodTenant ? 0 : (index * 3),
+        totalPaid: (index + 1) * 2000,
+        totalOwed: isGoodTenant ? 0 : (index * 200),
+        paymentHistory: [],
+        ledgerEntries: [],
+        autoPayStatus: {
+          isEnabled: hasAutoPay,
+          status: hasAutoPay ? 'active' : 'disabled',
+          failedAttempts: 0,
+          paymentMethodId: hasAutoPay ? `pm_${tenantId}` : undefined
+        },
+        notificationPreferences: {
+          email: {
+            enabled: true,
+            address: `tenant${index + 1}@example.com`,
+            types: ['payment_reminder', 'payment_confirmation']
+          },
+          sms: {
+            enabled: hasSmsEnabled,
+            phoneNumber: `555-000-${1000 + index}`,
+            types: ['payment_reminder', 'late_payment']
+          },
+          push: {
+            enabled: true,
+            types: ['payment_confirmation']
+          },
+          mail: {
+            enabled: false,
+            address: '',
+            types: []
+          }
+        },
+        paymentMethods: hasAutoPay ? [{
+          id: `pm_${tenantId}`,
+          type: 'card',
+          name: 'Default Card',
+          details: {
+            last4: '1234',
+            brand: 'visa',
+            expiryMonth: 12,
+            expiryYear: 2025,
+            holderName: `Tenant ${index + 1}`
+          },
+          isDefault: true,
+          isActive: true,
+          createdAt: dayjs().subtract(30, 'days').toISOString(),
+          updatedAt: dayjs().subtract(30, 'days').toISOString()
+        }] : [],
+        riskAssessment: {
+          score: isGoodTenant ? 10 : (index * 15),
+          level: isGoodTenant ? 'low' : (index % 4 === 1 ? 'medium' : 'high'),
+          factors: [],
+          lastUpdated: dayjs().toISOString(),
+          recommendations: isGoodTenant ? [] : ['Monitor payment patterns', 'Send payment reminders']
+        }
+      };
+
+      this.tenantProfiles.set(tenantId, profile);
+    });
+  }
 }
 
 export const tenantFinancialService = TenantFinancialService.getInstance();
