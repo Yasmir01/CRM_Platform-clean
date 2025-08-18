@@ -1056,6 +1056,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+          <Tab label="Financial Dashboard" />
           <Tab label="Activity & Logs" />
           <Tab label="Payment History" />
           <Tab label="Documents" />
