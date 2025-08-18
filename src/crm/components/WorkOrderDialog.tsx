@@ -390,6 +390,15 @@ export default function WorkOrderDialog({
             </Grid>
           </Grid>
 
+          {/* Show explanation for tenant users */}
+          {isUserTenant && (
+            <Box sx={{ p: 2, bgcolor: 'info.light', borderRadius: 1, mb: 2 }}>
+              <Typography variant="body2" color="info.dark">
+                ℹ️ Cost estimation and service provider assignment will be handled by management.
+              </Typography>
+            </Box>
+          )}
+
           {/* Only show estimated cost and assigned to fields for management users */}
           {!isUserTenant && (
             <Grid container spacing={2}>
