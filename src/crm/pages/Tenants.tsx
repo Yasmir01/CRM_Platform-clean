@@ -559,6 +559,9 @@ export default function Tenants() {
                 </TableCell>
                 <TableCell>${tenant.monthlyRent.toLocaleString()}</TableCell>
                 <TableCell>
+                  <TenantFinancialIndicators tenantId={tenant.id} compact />
+                </TableCell>
+                <TableCell>
                   <Chip
                     label={tenant.status}
                     color={getStatusColor(tenant.status)}
