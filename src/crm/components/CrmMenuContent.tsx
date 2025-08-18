@@ -56,6 +56,7 @@ const mainListItems = [
   { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
   { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
   { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
+  { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
