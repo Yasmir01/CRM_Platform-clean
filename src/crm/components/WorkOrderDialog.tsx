@@ -347,29 +347,32 @@ export default function WorkOrderDialog({
             </Grid>
           </Grid>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Estimated Cost"
-                type="number"
-                fullWidth
-                value={formData.estimatedCost}
-                onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
-                InputProps={{
-                  startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
-                }}
-              />
+          {/* Only show estimated cost and assigned to fields for management users */}
+          {!isTenantMode && (
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Estimated Cost"
+                  type="number"
+                  fullWidth
+                  value={formData.estimatedCost}
+                  onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Assigned To"
+                  fullWidth
+                  value={formData.assignedTo}
+                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                  placeholder="Service provider or team member"
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Assigned To"
-                fullWidth
-                value={formData.assignedTo}
-                onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                placeholder="Service provider or team member"
-              />
-            </Grid>
-          </Grid>
+          )}
 
           <TextField
             label="Additional Notes"
