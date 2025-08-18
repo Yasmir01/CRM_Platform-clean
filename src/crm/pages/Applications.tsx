@@ -509,12 +509,17 @@ export default function Applications() {
                     })()}
                   </Typography>
                 </Stack>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   {(() => {
                     const property = properties.find(p => p.id === selectedApplication.propertyId);
                     return property ? property.address : selectedApplication.propertyAddress || '';
                   })()}
                 </Typography>
+                {(selectedApplication.propertyCode || selectedApplication.propertyId) && (
+                  <Typography variant="body2" color="primary" sx={{ fontWeight: 'medium' }}>
+                    Property Code: {selectedApplication.propertyCode || selectedApplication.propertyId}
+                  </Typography>
+                )}
               </Paper>
 
               {/* Financial Information */}
