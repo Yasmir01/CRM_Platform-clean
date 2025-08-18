@@ -46,6 +46,7 @@ import {
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
 import CommunicationDialog from "../components/CommunicationDialog";
+import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
