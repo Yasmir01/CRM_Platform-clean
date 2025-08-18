@@ -111,6 +111,7 @@ function AppRoutes() {
         <Route path="applications" element={<Applications />} />
         <Route path="managers" element={<PropertyManagers />} />
         <Route path="service-providers" element={<ServiceProviders />} />
+        <Route path="rent-collection" element={<RentCollection />} />
         <Route path="work-orders" element={<WorkOrders />} />
         <Route path="customer-service" element={<CustomerService />} />
         <Route path="communications" element={<Communications />} />
