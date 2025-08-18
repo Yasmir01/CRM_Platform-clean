@@ -68,6 +68,18 @@ export default function WorkOrderDialog({
   // Check if user is a tenant - either by role or by current mode
   const isUserTenant = user?.role === 'Tenant' || isTenantMode;
 
+  // Debug logging
+  React.useEffect(() => {
+    if (open) {
+      console.log('WorkOrderDialog Debug:', {
+        userRole: user?.role,
+        isTenantMode,
+        isUserTenant,
+        userName: user?.name
+      });
+    }
+  }, [open, user?.role, isTenantMode, isUserTenant, user?.name]);
+
   const [formData, setFormData] = React.useState({
     title: "",
     description: "",
