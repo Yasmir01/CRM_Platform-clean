@@ -70,7 +70,7 @@ import CommunicationDialog from "../components/CommunicationDialog";
 import RichTextEditor from "../components/RichTextEditor";
 
 interface ContactDetailPageProps {
-  contactId: string;
+  contact: Contact;
   onBack: () => void;
 }
 
