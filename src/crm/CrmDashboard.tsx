@@ -39,6 +39,7 @@ import SubscriptionManagement from "./pages/SubscriptionManagement";
 import PowerTools from "./pages/PowerTools";
 import AITools from "./pages/AITools";
 import NewsBoard from "./pages/NewsBoard";
+import RentCollection from "./pages/RentCollection";
 import SuperAdminApp from "./SuperAdminApp";
 import { useAuth } from "./contexts/AuthContext";
 import { SearchProvider } from "./contexts/SearchContext";
