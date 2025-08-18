@@ -101,6 +101,7 @@ const mockApplications: Application[] = [
     applicantEmail: "m.chen@email.com",
     applicantPhone: "(555) 987-6543",
     propertyId: "1", // Uses first property from global state
+    propertyCode: "PROP-002",
     propertyName: "Ocean View Villa",
     propertyAddress: "456 Beach Blvd",
     applicationFee: 100,
