@@ -685,7 +685,7 @@ export default function ContactManagement() {
                             textDecoration: 'underline'
                           }
                         }}
-                        onClick={() => handleViewContactDetail(contact.id)}
+                        onClick={() => handleViewContactDetail(contact)}
                       >
                         {contact.firstName} {contact.lastName}
                       </Typography>
