@@ -81,6 +81,7 @@ const mockApplications: Application[] = [
     applicantEmail: "sarah.johnson@email.com",
     applicantPhone: "(555) 123-4567",
     propertyId: "1", // Uses first property from global state
+    propertyCode: "PROP-001",
     propertyName: "Sunset Apartments", // Fallback for compatibility
     propertyAddress: "123 Main St, Unit 2B",
     applicationFee: 75,
