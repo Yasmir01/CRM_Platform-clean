@@ -1264,8 +1264,84 @@ export default function PropertyDetailPage({
           </Grid>
 
 
-          {/* Quick Actions - Only show in modal mode */}
-          {isModal && (
+          {/* Quick Actions */}
+          <Grid item xs={12}>
+            <Card sx={{ bgcolor: isModal ? 'primary.light' : 'secondary.main', color: isModal ? 'primary.contrastText' : 'secondary.contrastText' }}>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 2, color: 'inherit' }}>
+                  🚀 Quick Actions
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={3}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<BuildRoundedIcon />}
+                      onClick={() => setWorkOrderDialogOpen(true)}
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: 'inherit'
+                      }}
+                    >
+                      Work Orders
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} md={3}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<DescriptionRoundedIcon />}
+                      onClick={() => {
+                        const applicationUrl = `/crm/applications/apply?property=${property.id}&code=${property.id}`;
+                        window.open(applicationUrl, '_blank');
+                      }}
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: 'inherit'
+                      }}
+                    >
+                      Application
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} md={3}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<PersonRoundedIcon />}
+                      onClick={() => setTenantDialogOpen(true)}
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: 'inherit'
+                      }}
+                    >
+                      Tenant Management
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} md={3}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={<CalendarTodayRoundedIcon />}
+                      onClick={() => navigate('/crm/work-orders')}
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: 'inherit'
+                      }}
+                    >
+                      Maintenance
+                    </Button>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Quick Actions - Only show in modal mode (legacy - now hidden) */}
+          {false && isModal && (
             <Grid item xs={12}>
               <Card sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}>
                 <CardContent>
