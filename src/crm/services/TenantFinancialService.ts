@@ -534,6 +534,9 @@ export class TenantFinancialService {
     ];
 
     this.ledgerEntries = mockEntries;
+
+    // Initialize sample tenant profiles for demo
+    this.initializeSampleTenantProfiles();
   }
 }
 
