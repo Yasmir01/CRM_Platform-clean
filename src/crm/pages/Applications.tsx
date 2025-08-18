@@ -58,6 +58,7 @@ interface Application {
   applicantEmail: string;
   applicantPhone: string;
   propertyId: string;
+  propertyCode?: string;
   propertyName?: string; // Keep for backwards compatibility
   propertyAddress?: string; // Keep for backwards compatibility
   applicationFee: number;
