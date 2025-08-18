@@ -56,7 +56,7 @@ import {
   Schedule,
   Note,
   Tag,
-  Communication,
+  Message,
   Event,
   Task,
   Assignment,
