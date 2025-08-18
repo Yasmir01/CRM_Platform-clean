@@ -120,6 +120,7 @@ export default function ModeAwareContent() {
       <Route path="tasks" element={<Tasks />} />
       <Route path="analytics" element={<AnalyticsInsights />} />
       <Route path="reports" element={<Reports />} />
+      <Route path="rent-collection" element={<RentCollection />} />
       <Route path="user-roles" element={<UserRoles />} />
       <Route path="settings" element={<Settings />} />
       <Route path="help" element={<HelpSupport />} />
