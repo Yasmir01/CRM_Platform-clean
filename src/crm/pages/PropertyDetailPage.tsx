@@ -1296,8 +1296,8 @@ export default function PropertyDetailPage({
                         variant="contained"
                         startIcon={<DescriptionRoundedIcon />}
                         onClick={() => {
-                          const applicationUrl = `/applications/apply?property=${property.id}&code=${property.id}`;
-                          window.open(applicationUrl, '_blank');
+                          const applicationUrl = `/crm/applications/apply?property=${property.id}&code=${property.id}`;
+                        window.open(applicationUrl, '_blank');
                         }}
                         sx={{
                           bgcolor: 'rgba(255,255,255,0.2)',
