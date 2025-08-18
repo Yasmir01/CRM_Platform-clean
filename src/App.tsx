@@ -36,6 +36,7 @@ import Profile from "./crm/pages/Profile";
 import NewsBoard from "./crm/pages/NewsBoard";
 import PowerTools from "./crm/pages/PowerTools";
 import AITools from "./crm/pages/AITools";
+import RentCollection from "./crm/pages/RentCollection";
 import CustomerService from "./crm/pages/CustomerService";
 import AnalyticsInsights from "./crm/pages/AnalyticsInsights";
 import MarketingAutomation from "./crm/pages/MarketingAutomation";
