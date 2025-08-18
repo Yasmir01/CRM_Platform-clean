@@ -272,8 +272,9 @@ export default function Applications() {
               <Typography variant="body2" color="text.secondary">
                 {(() => {
                   const property = properties.find(p => p.id === application.propertyId);
-                  return property ? `${property.name} • ${property.address}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}`;
+                  const propertyCode = application.propertyCode || application.propertyId;
+                  return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` • Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
