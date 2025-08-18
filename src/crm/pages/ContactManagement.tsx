@@ -221,7 +221,7 @@ export default function ContactManagement() {
 
   // State for contact detail view
   const [showContactDetail, setShowContactDetail] = React.useState(false);
-  const [detailContactId, setDetailContactId] = React.useState<string>("");
+  const [selectedDetailContact, setSelectedDetailContact] = React.useState<Contact | null>(null);
 
   // Generate contacts from CRM data (tenants, property managers, service providers)
   const allContacts = React.useMemo(() => {
