@@ -1064,8 +1064,45 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         </Tabs>
       </Box>
 
-      {/* Activity & Logs Tab */}
+      {/* Financial Dashboard Tab */}
       <TabPanel value={currentTab} index={0}>
+        <TenantFinancialDashboard
+          tenantId={tenant.id}
+          tenantName={`${tenant.firstName} ${tenant.lastName}`}
+          onPaymentAction={(action, data) => {
+            console.log('Payment action:', action, data);
+            // Handle various payment actions
+            switch (action) {
+              case 'add_payment_method':
+                // Navigate to payment method setup
+                break;
+              case 'send_reminder':
+                // Open communication dialog with payment reminder
+                setCommunicationData({
+                  type: 'email',
+                  recipient: `${tenant.firstName} ${tenant.lastName}`,
+                  subject: 'Payment Reminder',
+                  message: `Dear ${tenant.firstName},\n\nThis is a friendly reminder about your upcoming rent payment.\n\nThank you.`
+                });
+                setCommunicationDialogOpen(true);
+                break;
+              case 'view_history':
+                // Switch to payment history tab
+                setCurrentTab(2);
+                break;
+              case 'generate_report':
+                // Generate financial report
+                alert('Generating financial report...');
+                break;
+              default:
+                break;
+            }
+          }}
+        />
+      </TabPanel>
+
+      {/* Activity & Logs Tab */}
+      <TabPanel value={currentTab} index={1}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             {/* Search and Filter */}
