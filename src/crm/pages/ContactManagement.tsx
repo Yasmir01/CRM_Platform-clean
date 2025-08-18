@@ -675,7 +675,18 @@ export default function ContactManagement() {
                       {contact.firstName[0]}{contact.lastName[0]}
                     </Avatar>
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="medium">
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight="medium"
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': {
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }
+                        }}
+                        onClick={() => handleViewContactDetail(contact.id)}
+                      >
                         {contact.firstName} {contact.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
