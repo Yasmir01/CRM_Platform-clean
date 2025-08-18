@@ -453,6 +453,7 @@ export default function Tenants() {
               <TableCell>Property</TableCell>
               <TableCell>Lease Period</TableCell>
               <TableCell>Monthly Rent</TableCell>
+              <TableCell>Payment Status</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
