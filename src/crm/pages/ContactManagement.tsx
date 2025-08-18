@@ -450,14 +450,14 @@ export default function ContactManagement() {
   };
 
   // Contact detail navigation handlers
-  const handleViewContactDetail = (contactId: string) => {
-    setDetailContactId(contactId);
+  const handleViewContactDetail = (contact: Contact) => {
+    setSelectedDetailContact(contact);
     setShowContactDetail(true);
   };
 
   const handleBackToContactList = () => {
     setShowContactDetail(false);
-    setDetailContactId("");
+    setSelectedDetailContact(null);
   };
 
   const totalContacts = allContacts.length;
