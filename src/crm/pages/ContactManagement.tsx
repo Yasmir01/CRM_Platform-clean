@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import ContactDetailPage from "./ContactDetailPage";
 import {
   Box,
   Typography,
@@ -217,6 +218,10 @@ export default function ContactManagement() {
   const { trackPropertyActivity } = useActivityTracking();
   const { state, addContact, updateContact, deleteContact } = useCrmData();
   const { contacts, tenants, propertyManagers } = state;
+
+  // State for contact detail view
+  const [showContactDetail, setShowContactDetail] = React.useState(false);
+  const [detailContactId, setDetailContactId] = React.useState<string>("");
 
   // Generate contacts from CRM data (tenants, property managers, service providers)
   const allContacts = React.useMemo(() => {
