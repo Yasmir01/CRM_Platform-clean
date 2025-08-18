@@ -97,9 +97,9 @@ export default function WorkOrderDialog({
     }
   }, [open, propertyId, propertyName]);
 
-  // Auto-populate tenant information in tenant mode
+  // Auto-populate tenant information for tenant users
   React.useEffect(() => {
-    if (open && isTenantMode && user) {
+    if (open && isUserTenant && user) {
       // Find the current tenant data based on user email
       const currentTenant = tenants.find(t => t.email === user.email && t.status === 'Active');
       if (currentTenant) {
