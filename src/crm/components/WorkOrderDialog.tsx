@@ -94,6 +94,33 @@ export default function WorkOrderDialog({
     }
   }, [open, propertyId, propertyName]);
 
+  // Auto-populate tenant information in tenant mode
+  React.useEffect(() => {
+    if (open && isTenantMode && user) {
+      // Find the current tenant data based on user email
+      const currentTenant = tenants.find(t => t.email === user.email && t.status === 'Active');
+      if (currentTenant) {
+        setFormData(prev => ({
+          ...prev,
+          tenantId: currentTenant.id,
+          tenant: `${currentTenant.firstName} ${currentTenant.lastName}`,
+          // Also auto-populate property if tenant has one assigned
+          propertyId: currentTenant.propertyId || prev.propertyId,
+          property: currentTenant.propertyId ?
+            properties.find(p => p.id === currentTenant.propertyId)?.name || prev.property
+            : prev.property,
+          unit: currentTenant.unit || prev.unit
+        }));
+      } else if (user.firstName && user.lastName) {
+        // Fallback to user name if tenant record not found
+        setFormData(prev => ({
+          ...prev,
+          tenant: `${user.firstName} ${user.lastName}`
+        }));
+      }
+    }
+  }, [open, isTenantMode, user, tenants, properties]);
+
   const handleSubmit = () => {
     const workOrderData = {
       title: formData.title,
