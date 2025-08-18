@@ -30,6 +30,7 @@ import SubscriptionManagement from '../pages/SubscriptionManagement';
 import PowerTools from '../pages/PowerTools';
 import AITools from '../pages/AITools';
 import NewsBoard from '../pages/NewsBoard';
+import RentCollection from '../pages/RentCollection';
 import SuperAdminApp from '../SuperAdminApp';
 import ContactManagement from '../pages/ContactManagement';
 import SalesAutomation from '../pages/SalesAutomation';
