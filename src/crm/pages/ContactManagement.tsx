@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
+import ContactDetailPage from "./ContactDetailPage";
 import {
   Box,
   Typography,
@@ -217,6 +218,10 @@ export default function ContactManagement() {
   const { trackPropertyActivity } = useActivityTracking();
   const { state, addContact, updateContact, deleteContact } = useCrmData();
   const { contacts, tenants, propertyManagers } = state;
+
+  // State for contact detail view
+  const [showContactDetail, setShowContactDetail] = React.useState(false);
+  const [selectedDetailContact, setSelectedDetailContact] = React.useState<Contact | null>(null);
 
   // Generate contacts from CRM data (tenants, property managers, service providers)
   const allContacts = React.useMemo(() => {
@@ -444,12 +449,33 @@ export default function ContactManagement() {
     deleteContact(id);
   };
 
+  // Contact detail navigation handlers
+  const handleViewContactDetail = (contact: Contact) => {
+    setSelectedDetailContact(contact);
+    setShowContactDetail(true);
+  };
+
+  const handleBackToContactList = () => {
+    setShowContactDetail(false);
+    setSelectedDetailContact(null);
+  };
+
   const totalContacts = allContacts.length;
   const activeContacts = allContacts.filter(c => c.status === "Active").length;
   const tenantContacts = allContacts.filter(c => c.type === "Tenant").length;
   const managerContacts = allContacts.filter(c => c.type === "PropertyManager").length;
   const serviceProviders = allContacts.filter(c => c.type === "ServiceProvider").length;
   const prospects = allContacts.filter(c => c.type === "Prospect").length;
+
+  // Show contact detail page if a contact is selected
+  if (showContactDetail && selectedDetailContact) {
+    return (
+      <ContactDetailPage
+        contact={selectedDetailContact}
+        onBack={handleBackToContactList}
+      />
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -649,7 +675,18 @@ export default function ContactManagement() {
                       {contact.firstName[0]}{contact.lastName[0]}
                     </Avatar>
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="medium">
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight="medium"
+                        sx={{
+                          cursor: 'pointer',
+                          '&:hover': {
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }
+                        }}
+                        onClick={() => handleViewContactDetail(contact)}
+                      >
                         {contact.firstName} {contact.lastName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">

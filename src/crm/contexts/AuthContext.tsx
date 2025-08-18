@@ -108,7 +108,8 @@ const mockUsers: User[] = [
 ];
 
 const rolePermissions: Record<UserRole, string[]> = {
-  'Admin': ['all'],
+  'Super Admin': ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings', 'view_all_accounts', 'manage_subscriptions', 'activate_deactivate_accounts', 'manage_user_roles', 'view_system_analytics', 'manage_billing', 'system_configuration'],
+  'Admin': ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_finances', 'manage_documents', 'delete_charges', 'add_credits', 'view_financial_ledger'],
   'Property Manager': [
     'manage_properties',
     'manage_tenants',
