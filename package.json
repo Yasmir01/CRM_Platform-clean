@@ -20,11 +20,13 @@
     "@mui/x-charts": "^8.3.1",
     "@mui/x-data-grid": "^8.9.1",
     "@mui/x-date-pickers": "^8.3.1",
+    "@types/crypto-js": "^4.2.2",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
-    "recharts": "^2.15.4",
-    "dayjs": "^1.11.10"
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
     "@types/react": "^19.1.4",
