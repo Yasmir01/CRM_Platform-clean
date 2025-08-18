@@ -23,6 +23,7 @@ import PropertyLandingPages from '../pages/PropertyLandingPages';
 import Promotions from '../pages/Promotions';
 import Prospects from '../pages/Prospects';
 import Applications from '../pages/Applications';
+import RentalApplicationForm from '../pages/RentalApplicationForm';
 import Marketplace from '../pages/Marketplace';
 import Profile from '../pages/Profile';
 import AccountSettings from '../pages/AccountSettings';
