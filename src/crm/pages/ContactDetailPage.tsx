@@ -137,20 +137,6 @@ const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contact, onBack }
     setEditForm(prev => ({ ...prev, [field]: value }));
   };
 
-  if (!contact) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={onBack}
-          sx={{ mb: 2 }}
-        >
-          Back to Contacts
-        </Button>
-        <Typography variant="h5">Contact not found</Typography>
-      </Box>
-    );
-  }
 
   const statusColor = contact.status === "Active" ? "success" : "error";
 
