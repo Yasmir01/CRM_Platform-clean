@@ -36,6 +36,8 @@ import {
 } from "@mui/material";
 import { useCrmData } from "../contexts/CrmDataContext";
 import TenantDetailPage from "./TenantDetailPage";
+import TenantFinancialIndicators from "../components/TenantFinancialIndicators";
+import { tenantFinancialService } from "../services/TenantFinancialService";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -49,6 +51,8 @@ import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
+import AutoModeIcon from "@mui/icons-material/AutoMode";
+import PaymentIcon from "@mui/icons-material/Payment";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 
@@ -453,6 +457,7 @@ export default function Tenants() {
               <TableCell>Property</TableCell>
               <TableCell>Lease Period</TableCell>
               <TableCell>Monthly Rent</TableCell>
+              <TableCell>Payment Status</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -553,6 +558,9 @@ export default function Tenants() {
                   </Typography>
                 </TableCell>
                 <TableCell>${tenant.monthlyRent.toLocaleString()}</TableCell>
+                <TableCell>
+                  <TenantFinancialIndicators tenantId={tenant.id} compact />
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={tenant.status}

@@ -42,6 +42,7 @@ import AutorenewRoundedIcon from "@mui/icons-material/AutorenewRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import IntegrationInstructionsRoundedIcon from "@mui/icons-material/IntegrationInstructionsRounded";
+import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -55,6 +56,7 @@ const mainListItems = [
   { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
   { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
   { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
+  { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },

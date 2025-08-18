@@ -46,6 +46,7 @@ import {
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
 import CommunicationDialog from "../components/CommunicationDialog";
+import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
@@ -1055,6 +1056,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+          <Tab label="Financial Dashboard" />
           <Tab label="Activity & Logs" />
           <Tab label="Payment History" />
           <Tab label="Documents" />
@@ -1062,8 +1064,45 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         </Tabs>
       </Box>
 
-      {/* Activity & Logs Tab */}
+      {/* Financial Dashboard Tab */}
       <TabPanel value={currentTab} index={0}>
+        <TenantFinancialDashboard
+          tenantId={tenant.id}
+          tenantName={`${tenant.firstName} ${tenant.lastName}`}
+          onPaymentAction={(action, data) => {
+            console.log('Payment action:', action, data);
+            // Handle various payment actions
+            switch (action) {
+              case 'add_payment_method':
+                // Navigate to payment method setup
+                break;
+              case 'send_reminder':
+                // Open communication dialog with payment reminder
+                setCommunicationData({
+                  type: 'email',
+                  recipient: `${tenant.firstName} ${tenant.lastName}`,
+                  subject: 'Payment Reminder',
+                  message: `Dear ${tenant.firstName},\n\nThis is a friendly reminder about your upcoming rent payment.\n\nThank you.`
+                });
+                setCommunicationDialogOpen(true);
+                break;
+              case 'view_history':
+                // Switch to payment history tab
+                setCurrentTab(2);
+                break;
+              case 'generate_report':
+                // Generate financial report
+                alert('Generating financial report...');
+                break;
+              default:
+                break;
+            }
+          }}
+        />
+      </TabPanel>
+
+      {/* Activity & Logs Tab */}
+      <TabPanel value={currentTab} index={1}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             {/* Search and Filter */}
@@ -1248,7 +1287,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Payment History Tab */}
-      <TabPanel value={currentTab} index={1}>
+      <TabPanel value={currentTab} index={2}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Paper sx={{ p: 2 }}>
@@ -1316,7 +1355,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Documents Tab */}
-      <TabPanel value={currentTab} index={2}>
+      <TabPanel value={currentTab} index={3}>
         <Paper sx={{ p: 2 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
             <Typography variant="h6">Documents</Typography>
@@ -1384,7 +1423,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       </TabPanel>
 
       {/* Lease Details Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={4}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper sx={{ p: 3 }}>

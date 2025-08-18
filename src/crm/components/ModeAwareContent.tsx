@@ -30,6 +30,7 @@ import SubscriptionManagement from '../pages/SubscriptionManagement';
 import PowerTools from '../pages/PowerTools';
 import AITools from '../pages/AITools';
 import NewsBoard from '../pages/NewsBoard';
+import RentCollection from '../pages/RentCollection';
 import SuperAdminApp from '../SuperAdminApp';
 import ContactManagement from '../pages/ContactManagement';
 import SalesAutomation from '../pages/SalesAutomation';
@@ -119,6 +120,7 @@ export default function ModeAwareContent() {
       <Route path="tasks" element={<Tasks />} />
       <Route path="analytics" element={<AnalyticsInsights />} />
       <Route path="reports" element={<Reports />} />
+      <Route path="rent-collection" element={<RentCollection />} />
       <Route path="user-roles" element={<UserRoles />} />
       <Route path="settings" element={<Settings />} />
       <Route path="help" element={<HelpSupport />} />
