@@ -298,30 +298,40 @@ export default function WorkOrderDialog({
 
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Tenant</InputLabel>
-                <Select
-                  value={formData.tenantId}
+              {isTenantMode ? (
+                <TextField
                   label="Tenant"
-                  onChange={(e) => {
-                    const selectedTenant = tenants.find(t => t.id === e.target.value);
-                    setFormData({
-                      ...formData,
-                      tenantId: e.target.value,
-                      tenant: selectedTenant ? `${selectedTenant.firstName} ${selectedTenant.lastName}` : ""
-                    });
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Select tenant (optional)</em>
-                  </MenuItem>
-                  {tenants.map((tenant) => (
-                    <MenuItem key={tenant.id} value={tenant.id}>
-                      {tenant.firstName} {tenant.lastName} - {tenant.email}
+                  fullWidth
+                  value={formData.tenant}
+                  disabled
+                  helperText="Auto-populated for tenant users"
+                />
+              ) : (
+                <FormControl fullWidth>
+                  <InputLabel>Tenant</InputLabel>
+                  <Select
+                    value={formData.tenantId}
+                    label="Tenant"
+                    onChange={(e) => {
+                      const selectedTenant = tenants.find(t => t.id === e.target.value);
+                      setFormData({
+                        ...formData,
+                        tenantId: e.target.value,
+                        tenant: selectedTenant ? `${selectedTenant.firstName} ${selectedTenant.lastName}` : ""
+                      });
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Select tenant (optional)</em>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    {tenants.map((tenant) => (
+                      <MenuItem key={tenant.id} value={tenant.id}>
+                        {tenant.firstName} {tenant.lastName} - {tenant.email}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
