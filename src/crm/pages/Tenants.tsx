@@ -36,6 +36,7 @@ import {
 } from "@mui/material";
 import { useCrmData } from "../contexts/CrmDataContext";
 import TenantDetailPage from "./TenantDetailPage";
+import { tenantFinancialService } from "../services/TenantFinancialService";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
