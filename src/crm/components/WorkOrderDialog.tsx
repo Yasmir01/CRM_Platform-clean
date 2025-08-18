@@ -62,6 +62,7 @@ export default function WorkOrderDialog({
 }: WorkOrderDialogProps) {
   const { state, addWorkOrder } = useCrmData();
   const { user } = useAuth();
+  const { isTenantMode } = useMode();
   const { properties, tenants } = state;
 
   const [formData, setFormData] = React.useState({
