@@ -21,6 +21,7 @@ import Settings from "./crm/pages/Settings";
 import Reports from "./crm/pages/Reports";
 import WorkOrders from "./crm/pages/WorkOrders";
 import Applications from "./crm/pages/Applications";
+import RentalApplicationForm from "./crm/pages/RentalApplicationForm";
 import Prospects from "./crm/pages/Prospects";
 import ServiceProviders from "./crm/pages/ServiceProviders";
 import Communications from "./crm/pages/Communications";
