@@ -110,6 +110,7 @@ function AppRoutes() {
         <Route path="tenants" element={<Tenants />} />
         <Route path="prospects" element={<Prospects />} />
         <Route path="applications" element={<Applications />} />
+        <Route path="applications/apply" element={<RentalApplicationForm />} />
         <Route path="managers" element={<PropertyManagers />} />
         <Route path="service-providers" element={<ServiceProviders />} />
         <Route path="rent-collection" element={<RentCollection />} />
