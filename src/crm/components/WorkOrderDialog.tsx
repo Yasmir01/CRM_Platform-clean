@@ -388,7 +388,7 @@ export default function WorkOrderDialog({
           </Grid>
 
           {/* Only show estimated cost and assigned to fields for management users */}
-          {!isTenantMode && (
+          {!isUserTenant && (
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
