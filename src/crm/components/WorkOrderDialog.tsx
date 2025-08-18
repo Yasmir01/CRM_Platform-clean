@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useMode } from "../contexts/ModeContext";
 
 interface WorkOrder {
   id: string;
