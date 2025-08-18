@@ -16,9 +16,11 @@ import {
   Switch,
   Typography,
   Box,
+  Chip,
 } from "@mui/material";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useMode } from "../contexts/ModeContext";
 
 interface WorkOrder {
   id: string;
@@ -61,7 +63,16 @@ export default function WorkOrderDialog({
 }: WorkOrderDialogProps) {
   const { state, addWorkOrder } = useCrmData();
   const { user } = useAuth();
+  const { isTenantMode } = useMode();
   const { properties, tenants } = state;
+
+  // Check if user is a tenant - either by role or by current mode
+  // Also check localStorage as fallback
+  const isUserTenant = user?.role === 'Tenant' || isTenantMode ||
+    (user?.role !== 'Tenant' && localStorage.getItem('userMode') === 'tenant');
+
+  // Add visual indicator in dialog title when in tenant mode for testing
+  const dialogTitle = isUserTenant ? "Create New Work Order (Tenant Mode)" : "Create New Work Order";
 
   const [formData, setFormData] = React.useState({
     title: "",
@@ -91,6 +102,33 @@ export default function WorkOrderDialog({
       }));
     }
   }, [open, propertyId, propertyName]);
+
+  // Auto-populate tenant information for tenant users
+  React.useEffect(() => {
+    if (open && isUserTenant && user) {
+      // Find the current tenant data based on user email
+      const currentTenant = tenants.find(t => t.email === user.email && t.status === 'Active');
+      if (currentTenant) {
+        setFormData(prev => ({
+          ...prev,
+          tenantId: currentTenant.id,
+          tenant: `${currentTenant.firstName} ${currentTenant.lastName}`,
+          // Also auto-populate property if tenant has one assigned
+          propertyId: currentTenant.propertyId || prev.propertyId,
+          property: currentTenant.propertyId ?
+            properties.find(p => p.id === currentTenant.propertyId)?.name || prev.property
+            : prev.property,
+          unit: currentTenant.unit || prev.unit
+        }));
+      } else if (user.firstName && user.lastName) {
+        // Fallback to user name if tenant record not found
+        setFormData(prev => ({
+          ...prev,
+          tenant: `${user.firstName} ${user.lastName}`
+        }));
+      }
+    }
+  }, [open, isUserTenant, user, tenants, properties]);
 
   const handleSubmit = () => {
     const workOrderData = {
@@ -173,7 +211,19 @@ export default function WorkOrderDialog({
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>Create New Work Order</DialogTitle>
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h6">{dialogTitle}</Typography>
+          {isUserTenant && (
+            <Chip
+              label="Tenant Mode"
+              color="secondary"
+              size="small"
+              sx={{ ml: 1 }}
+            />
+          )}
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <Grid container spacing={2}>
@@ -269,30 +319,40 @@ export default function WorkOrderDialog({
 
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth>
-                <InputLabel>Tenant</InputLabel>
-                <Select
-                  value={formData.tenantId}
+              {isUserTenant ? (
+                <TextField
                   label="Tenant"
-                  onChange={(e) => {
-                    const selectedTenant = tenants.find(t => t.id === e.target.value);
-                    setFormData({
-                      ...formData,
-                      tenantId: e.target.value,
-                      tenant: selectedTenant ? `${selectedTenant.firstName} ${selectedTenant.lastName}` : ""
-                    });
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>Select tenant (optional)</em>
-                  </MenuItem>
-                  {tenants.map((tenant) => (
-                    <MenuItem key={tenant.id} value={tenant.id}>
-                      {tenant.firstName} {tenant.lastName} - {tenant.email}
+                  fullWidth
+                  value={formData.tenant}
+                  disabled
+                  helperText="Auto-populated for tenant users"
+                />
+              ) : (
+                <FormControl fullWidth>
+                  <InputLabel>Tenant</InputLabel>
+                  <Select
+                    value={formData.tenantId}
+                    label="Tenant"
+                    onChange={(e) => {
+                      const selectedTenant = tenants.find(t => t.id === e.target.value);
+                      setFormData({
+                        ...formData,
+                        tenantId: e.target.value,
+                        tenant: selectedTenant ? `${selectedTenant.firstName} ${selectedTenant.lastName}` : ""
+                      });
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>Select tenant (optional)</em>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                    {tenants.map((tenant) => (
+                      <MenuItem key={tenant.id} value={tenant.id}>
+                        {tenant.firstName} {tenant.lastName} - {tenant.email}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth required>
@@ -345,29 +405,41 @@ export default function WorkOrderDialog({
             </Grid>
           </Grid>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Estimated Cost"
-                type="number"
-                fullWidth
-                value={formData.estimatedCost}
-                onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
-                InputProps={{
-                  startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
-                }}
-              />
+          {/* Show explanation for tenant users */}
+          {isUserTenant && (
+            <Box sx={{ p: 2, bgcolor: 'info.light', borderRadius: 1, mb: 2 }}>
+              <Typography variant="body2" color="info.dark">
+                ℹ️ Cost estimation and service provider assignment will be handled by management.
+              </Typography>
+            </Box>
+          )}
+
+          {/* Only show estimated cost and assigned to fields for management users */}
+          {!isUserTenant && (
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Estimated Cost"
+                  type="number"
+                  fullWidth
+                  value={formData.estimatedCost}
+                  onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Assigned To"
+                  fullWidth
+                  value={formData.assignedTo}
+                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                  placeholder="Service provider or team member"
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Assigned To"
-                fullWidth
-                value={formData.assignedTo}
-                onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                placeholder="Service provider or team member"
-              />
-            </Grid>
-          </Grid>
+          )}
 
           <TextField
             label="Additional Notes"

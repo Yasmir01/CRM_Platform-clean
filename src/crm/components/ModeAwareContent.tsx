@@ -23,6 +23,7 @@ import PropertyLandingPages from '../pages/PropertyLandingPages';
 import Promotions from '../pages/Promotions';
 import Prospects from '../pages/Prospects';
 import Applications from '../pages/Applications';
+import RentalApplicationForm from '../pages/RentalApplicationForm';
 import Marketplace from '../pages/Marketplace';
 import Profile from '../pages/Profile';
 import AccountSettings from '../pages/AccountSettings';
@@ -128,6 +129,7 @@ export default function ModeAwareContent() {
       <Route path="promotions" element={<Promotions />} />
       <Route path="prospects" element={<Prospects />} />
       <Route path="applications" element={<Applications />} />
+      <Route path="applications/apply" element={<RentalApplicationForm />} />
       <Route path="marketplace" element={<Marketplace />} />
       <Route path="profile" element={<Profile />} />
       <Route path="account-settings" element={<AccountSettings />} />

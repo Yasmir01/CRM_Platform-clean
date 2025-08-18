@@ -58,6 +58,7 @@ interface Application {
   applicantEmail: string;
   applicantPhone: string;
   propertyId: string;
+  propertyCode?: string;
   propertyName?: string; // Keep for backwards compatibility
   propertyAddress?: string; // Keep for backwards compatibility
   applicationFee: number;
@@ -80,6 +81,7 @@ const mockApplications: Application[] = [
     applicantEmail: "sarah.johnson@email.com",
     applicantPhone: "(555) 123-4567",
     propertyId: "1", // Uses first property from global state
+    propertyCode: "PROP-001",
     propertyName: "Sunset Apartments", // Fallback for compatibility
     propertyAddress: "123 Main St, Unit 2B",
     applicationFee: 75,
@@ -99,6 +101,7 @@ const mockApplications: Application[] = [
     applicantEmail: "m.chen@email.com",
     applicantPhone: "(555) 987-6543",
     propertyId: "1", // Uses first property from global state
+    propertyCode: "PROP-002",
     propertyName: "Ocean View Villa",
     propertyAddress: "456 Beach Blvd",
     applicationFee: 100,
@@ -118,6 +121,7 @@ const mockApplications: Application[] = [
     applicantEmail: "lisa.r@email.com",
     applicantPhone: "(555) 456-7890",
     propertyId: "1", // Uses first property from global state
+    propertyCode: "PROP-003",
     propertyName: "Downtown Lofts",
     propertyAddress: "789 City Center, Loft 12",
     applicationFee: 50,
@@ -272,8 +276,9 @@ export default function Applications() {
               <Typography variant="body2" color="text.secondary">
                 {(() => {
                   const property = properties.find(p => p.id === application.propertyId);
-                  return property ? `${property.name} • ${property.address}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}`;
+                  const propertyCode = application.propertyCode || application.propertyId;
+                  return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` • Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -504,12 +509,17 @@ export default function Applications() {
                     })()}
                   </Typography>
                 </Stack>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                   {(() => {
                     const property = properties.find(p => p.id === selectedApplication.propertyId);
                     return property ? property.address : selectedApplication.propertyAddress || '';
                   })()}
                 </Typography>
+                {(selectedApplication.propertyCode || selectedApplication.propertyId) && (
+                  <Typography variant="body2" color="primary" sx={{ fontWeight: 'medium' }}>
+                    Property Code: {selectedApplication.propertyCode || selectedApplication.propertyId}
+                  </Typography>
+                )}
               </Paper>
 
               {/* Financial Information */}
