@@ -467,6 +467,16 @@ export default function ContactManagement() {
   const serviceProviders = allContacts.filter(c => c.type === "ServiceProvider").length;
   const prospects = allContacts.filter(c => c.type === "Prospect").length;
 
+  // Show contact detail page if a contact is selected
+  if (showContactDetail && detailContactId) {
+    return (
+      <ContactDetailPage
+        contactId={detailContactId}
+        onBack={handleBackToContactList}
+      />
+    );
+  }
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
