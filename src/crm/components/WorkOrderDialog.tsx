@@ -122,7 +122,7 @@ export default function WorkOrderDialog({
         }));
       }
     }
-  }, [open, isTenantMode, user, tenants, properties]);
+  }, [open, isUserTenant, user, tenants, properties]);
 
   const handleSubmit = () => {
     const workOrderData = {
