@@ -67,7 +67,9 @@ export default function WorkOrderDialog({
   const { properties, tenants } = state;
 
   // Check if user is a tenant - either by role or by current mode
-  const isUserTenant = user?.role === 'Tenant' || isTenantMode;
+  // Also check localStorage as fallback
+  const isUserTenant = user?.role === 'Tenant' || isTenantMode ||
+    (user?.role !== 'Tenant' && localStorage.getItem('userMode') === 'tenant');
 
   // Add visual indicator in dialog title when in tenant mode for testing
   const dialogTitle = isUserTenant ? "Create New Work Order (Tenant Mode)" : "Create New Work Order";
