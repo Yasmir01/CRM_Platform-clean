@@ -468,10 +468,10 @@ export default function ContactManagement() {
   const prospects = allContacts.filter(c => c.type === "Prospect").length;
 
   // Show contact detail page if a contact is selected
-  if (showContactDetail && detailContactId) {
+  if (showContactDetail && selectedDetailContact) {
     return (
       <ContactDetailPage
-        contactId={detailContactId}
+        contact={selectedDetailContact}
         onBack={handleBackToContactList}
       />
     );
