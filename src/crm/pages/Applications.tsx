@@ -53,6 +53,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import HomeIcon from "@mui/icons-material/Home";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
 interface Application {
   id: string;
