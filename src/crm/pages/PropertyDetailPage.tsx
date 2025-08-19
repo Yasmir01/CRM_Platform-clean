@@ -90,6 +90,8 @@ import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
+import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
+import FormFixesSummary from "../components/FormFixesSummary";
 import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
@@ -406,6 +408,7 @@ export default function PropertyDetailPage({
   });
   const [workOrderDialogOpen, setWorkOrderDialogOpen] = React.useState(false);
   const [tenantDialogOpen, setTenantDialogOpen] = React.useState(false);
+  const [applicationDialogOpen, setApplicationDialogOpen] = React.useState(false);
   const [draggedCard, setDraggedCard] = React.useState<string | null>(null);
   const [cardOrder, setCardOrder] = React.useState([
     'tenant-info',
@@ -1263,6 +1266,10 @@ export default function PropertyDetailPage({
             </Card>
           </Grid>
 
+          {/* Form Enhancement Summary */}
+          <Grid item xs={12}>
+            <FormFixesSummary />
+          </Grid>
 
           {/* Quick Actions */}
           <Grid item xs={12}>
@@ -1292,10 +1299,7 @@ export default function PropertyDetailPage({
                       fullWidth
                       variant="contained"
                       startIcon={<DescriptionRoundedIcon />}
-                      onClick={() => {
-                        const applicationUrl = `/crm/applications/apply?property=${property.id}&code=${property.id}`;
-                        window.open(applicationUrl, '_blank');
-                      }}
+                      onClick={() => setApplicationDialogOpen(true)}
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
                         '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
@@ -1371,10 +1375,7 @@ export default function PropertyDetailPage({
                         fullWidth
                         variant="contained"
                         startIcon={<DescriptionRoundedIcon />}
-                        onClick={() => {
-                          const applicationUrl = `/crm/applications/apply?property=${property.id}&code=${property.id}`;
-                        window.open(applicationUrl, '_blank');
-                        }}
+                        onClick={() => setApplicationDialogOpen(true)}
                         sx={{
                           bgcolor: 'rgba(255,255,255,0.2)',
                           '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
@@ -3269,7 +3270,7 @@ export default function PropertyDetailPage({
                     sx={{ mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Type: {selectedDocument.type} • Size: {formatFileSize(selectedDocument.size)}
+                    Type: {selectedDocument.type} ��� Size: {formatFileSize(selectedDocument.size)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
                     Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
@@ -3407,6 +3408,28 @@ export default function PropertyDetailPage({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Property Application Dialog */}
+      <PropertyApplicationDialog
+        property={property}
+        isOpen={applicationDialogOpen}
+        onClose={() => setApplicationDialogOpen(false)}
+        onApplicationSubmitted={(appData) => {
+          console.log("Application submitted:", appData);
+          setApplicationDialogOpen(false);
+
+          // Track activity
+          activityTracker.trackActivity({
+            userId: 'current-user',
+            userDisplayName: 'Current User',
+            action: 'application_submitted',
+            entityType: 'property',
+            entityId: property.id,
+            entityName: property.name,
+            details: `Application submitted by ${appData.applicantName} - Code: ${appData.propertyCode}`
+          });
+        }}
+      />
     </Box>
   );
 }

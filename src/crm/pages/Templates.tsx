@@ -46,6 +46,8 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import VariablesCheatSheet from "../components/VariablesCheatSheet";
 import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
+import ApplicationPaymentForm from "../components/ApplicationPaymentForm";
+import TermsAndConditions from "../components/TermsAndConditions";
 // import { useAutoSave, useAutoSaveStatus } from "../hooks/useAutoSave";
 import { quickCopy } from "../utils/clipboardUtils";
 import { LocalStorageService } from "../services/LocalStorageService";
@@ -83,6 +85,8 @@ import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 
 interface Template {
   id: string;
@@ -98,11 +102,15 @@ interface Template {
   formFields?: FormField[];
   applicationFee?: number;
   paymentMethods?: PaymentMethod[];
+  termsAndConditions?: any[];
+  requirePaymentBeforeSubmission?: boolean;
+  isDefault?: boolean;
+  propertyCode?: string;
 }
 
 interface FormField {
   id: string;
-  type: "text" | "number" | "email" | "phone" | "date" | "textarea" | "select" | "checkbox" | "radio" | "yesno" | "section" | "signature" | "payment";
+  type: "text" | "number" | "email" | "phone" | "date" | "textarea" | "select" | "checkbox" | "radio" | "yesno" | "section" | "signature" | "payment" | "terms" | "file_upload" | "multiselect";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -111,6 +119,9 @@ interface FormField {
   section?: string;
   description?: string;
   defaultValue?: string;
+  fileTypes?: string[];
+  maxFiles?: number;
+  maxFileSize?: number;
 }
 
 interface PaymentMethod {
@@ -212,7 +223,7 @@ const applicationSections: ApplicationSection[] = [
       { type: "select", label: "ID Type", options: ["Driver's License", "Passport", "State ID", "Military ID"], required: true },
       { type: "text", label: "ID Number", required: true },
       { type: "date", label: "ID Expiration Date", required: true },
-      { type: "text", label: "Issuing State/Country", required: true },
+      { type: "select", label: "Issuing State", required: true },
     ]
   },
   {
@@ -244,7 +255,10 @@ const applicationSections: ApplicationSection[] = [
     icon: <HomeRoundedIcon />,
     description: "Current living situation and housing history",
     defaultFields: [
-      { type: "text", label: "Current Address", required: true },
+      { type: "text", label: "Street Address", required: true },
+      { type: "text", label: "City", required: true },
+      { type: "select", label: "State", required: true },
+      { type: "text", label: "ZIP Code", required: true },
       { type: "date", label: "Move-in Date", required: true },
       { type: "number", label: "Monthly Rent/Mortgage", required: true },
       { type: "text", label: "Landlord/Property Manager Name" },
@@ -263,7 +277,10 @@ const applicationSections: ApplicationSection[] = [
       { type: "text", label: "Job Title", required: true },
       { type: "text", label: "Supervisor Name" },
       { type: "phone", label: "Work Phone", required: true },
-      { type: "text", label: "Work Address", required: true },
+      { type: "text", label: "Work Street Address", required: true },
+      { type: "text", label: "Work City", required: true },
+      { type: "select", label: "Work State", required: true },
+      { type: "text", label: "Work ZIP Code", required: true },
       { type: "date", label: "Employment Start Date", required: true },
       { type: "number", label: "Monthly Gross Income", required: true },
       { type: "select", label: "Employment Type", options: ["Full-time", "Part-time", "Contract", "Self-employed"], required: true },
@@ -509,6 +526,11 @@ export default function Templates() {
   const [formPreviewOpen, setFormPreviewOpen] = React.useState(false);
   const [variablesCheatSheetOpen, setVariablesCheatSheetOpen] = React.useState(false);
   const [companySettingsOpen, setCompanySettingsOpen] = React.useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = React.useState(false);
+  const [paymentTestOpen, setPaymentTestOpen] = React.useState(false);
+  const [requirePaymentBeforeSubmission, setRequirePaymentBeforeSubmission] = React.useState(true);
+  const [termsAndConditions, setTermsAndConditions] = React.useState<any[]>([]);
+  const [defaultConfirmDialog, setDefaultConfirmDialog] = React.useState<Template | null>(null);
   const { companyInfo, updateCompanyInfo } = useCompanyInfo();
   const [newFieldData, setNewFieldData] = React.useState<Partial<FormField>>({
     type: "text",
@@ -610,6 +632,23 @@ export default function Templates() {
 
   const handleDeleteTemplate = (id: string) => {
     updateTemplates(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleSetAsDefault = (template: Template) => {
+    if (template.type === "Rental Application") {
+      updateTemplates(prev =>
+        prev.map(t => ({
+          ...t,
+          isDefault: t.id === template.id && t.type === "Rental Application"
+        }))
+      );
+      setDefaultConfirmDialog(null);
+      alert(`"${template.name}" has been set as the default rental application template.`);
+    }
+  };
+
+  const getDefaultTemplate = (type: Template["type"]) => {
+    return templates.find(t => t.type === type && t.isDefault);
   };
 
   const handlePreviewTemplate = (template: Template) => {
@@ -804,6 +843,7 @@ export default function Templates() {
             required={field.required}
             type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"}
             fullWidth
+            disabled
             helperText={field.description}
             InputLabelProps={field.type === "date" ? { shrink: true } : undefined}
           />
@@ -955,6 +995,74 @@ export default function Templates() {
               </Grid>
             </CardContent>
           </Card>
+        );
+      case "terms":
+        return (
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {field.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Terms and conditions component will appear here
+              </Typography>
+              <Button variant="outlined" size="small">
+                Review Terms
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      case "file_upload":
+        return (
+          <Box>
+            <Typography variant="body1" gutterBottom>
+              {field.label} {field.required && "*"}
+            </Typography>
+            <Paper
+              sx={{
+                p: 3,
+                border: "2px dashed",
+                borderColor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300',
+                textAlign: "center",
+                bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50'
+              }}
+            >
+              <Typography color="text.secondary">
+                Drag & drop files here or click to browse
+              </Typography>
+              <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                {field.fileTypes && `Accepted: ${field.fileTypes.join(", ")}`}
+                {field.maxFiles && ` • Max ${field.maxFiles} files`}
+                {field.maxFileSize && ` • Max ${field.maxFileSize}MB per file`}
+              </Typography>
+            </Paper>
+            {field.description && (
+              <Typography variant="caption" color="text.secondary">
+                {field.description}
+              </Typography>
+            )}
+          </Box>
+        );
+      case "multiselect":
+        return (
+          <FormControl fullWidth>
+            <InputLabel>{field.label} {field.required && "*"}</InputLabel>
+            <Select
+              label={field.label}
+              multiple
+              defaultValue={[]}
+              disabled
+            >
+              {field.options?.map((option, index) => (
+                <MenuItem key={index} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+            {field.description && (
+              <Typography variant="caption" color="text.secondary">
+                {field.description}
+              </Typography>
+            )}
+          </FormControl>
         );
       default:
         return null;
@@ -1158,11 +1266,21 @@ export default function Templates() {
                       {template.type}
                     </Typography>
                   </Box>
-                  <Chip
-                    label={template.status}
-                    color={getStatusColor(template.status)}
-                    size="small"
-                  />
+                  <Stack direction="row" spacing={1}>
+                    <Chip
+                      label={template.status}
+                      color={getStatusColor(template.status)}
+                      size="small"
+                    />
+                    {template.isDefault && (
+                      <Chip
+                        label="Default"
+                        color="success"
+                        size="small"
+                        icon={<StarRoundedIcon />}
+                      />
+                    )}
+                  </Stack>
                 </Stack>
 
                 {template.subject && (
@@ -1235,6 +1353,16 @@ export default function Templates() {
                     <EditRoundedIcon />
                   </IconButton>
                 )}
+                {template.type === "Rental Application" && (
+                  <IconButton
+                    size="small"
+                    color={template.isDefault ? "success" : "default"}
+                    onClick={() => setDefaultConfirmDialog(template)}
+                    title={template.isDefault ? "Default Template" : "Set as Default"}
+                  >
+                    {template.isDefault ? <StarRoundedIcon /> : <StarBorderRoundedIcon />}
+                  </IconButton>
+                )}
                 {canDeleteTemplates() && (
                   <IconButton
                     size="small"
@@ -1273,6 +1401,20 @@ export default function Templates() {
               </Button>
               <Button
                 variant="outlined"
+                startIcon={<SecurityRoundedIcon />}
+                onClick={() => setTermsDialogOpen(true)}
+              >
+                Terms & Conditions
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PaymentRoundedIcon />}
+                onClick={() => setPaymentTestOpen(true)}
+              >
+                Test Payment
+              </Button>
+              <Button
+                variant="outlined"
                 startIcon={<VisibilityRoundedIcon />}
                 onClick={() => setFormPreviewOpen(true)}
               >
@@ -1294,6 +1436,8 @@ export default function Templates() {
                     formFields: formFields,
                     applicationFee: applicationFee,
                     paymentMethods: paymentMethods,
+                    termsAndConditions: termsAndConditions,
+                    requirePaymentBeforeSubmission: requirePaymentBeforeSubmission,
                   };
                   updateTemplates(prev => [...prev, newTemplate]);
                   setOpenFormBuilderDialog(false);
@@ -1382,6 +1526,45 @@ export default function Templates() {
                     }}
                   >
                     Add Payment Section
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<SecurityRoundedIcon />}
+                    onClick={() => {
+                      const termsField: FormField = {
+                        id: `terms_${Date.now()}`,
+                        type: "terms",
+                        label: "Terms and Conditions",
+                        required: true,
+                        order: formFields.length,
+                      };
+                      setFormFields(prev => [...prev, termsField]);
+                    }}
+                  >
+                    Add Terms & Conditions
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<AddRoundedIcon />}
+                    onClick={() => {
+                      const fileField: FormField = {
+                        id: `file_${Date.now()}`,
+                        type: "file_upload",
+                        label: "Document Upload",
+                        required: false,
+                        order: formFields.length,
+                        fileTypes: ["pdf", "jpg", "png", "doc"],
+                        maxFiles: 5,
+                        maxFileSize: 10,
+                      };
+                      setFormFields(prev => [...prev, fileField]);
+                    }}
+                  >
+                    Add File Upload
                   </Button>
                 </Stack>
               </Paper>
@@ -1991,6 +2174,75 @@ export default function Templates() {
         onSave={updateCompanyInfo}
         currentInfo={companyInfo}
       />
+
+      {/* Terms and Conditions Dialog */}
+      <Dialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>Terms and Conditions Management</DialogTitle>
+        <DialogContent>
+          <TermsAndConditions
+            showEditor={true}
+            onTermsUpdate={setTermsAndConditions}
+            customTerms={termsAndConditions}
+            applicationFee={applicationFee}
+            companyName={companyInfo.name}
+            onAccept={(accepted) => console.log("Terms accepted:", accepted)}
+            onDecline={() => console.log("Terms declined")}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTermsDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Payment Test Dialog */}
+      <ApplicationPaymentForm
+        isOpen={paymentTestOpen}
+        onClose={() => setPaymentTestOpen(false)}
+        applicationFee={applicationFee}
+        paymentMethods={paymentMethods}
+        applicantName="Test Applicant"
+        applicationId="TEST-001"
+        onPaymentSuccess={(data) => {
+          console.log("Payment successful:", data);
+          alert("Payment test completed successfully!");
+          setPaymentTestOpen(false);
+        }}
+        onPaymentError={(error) => {
+          console.error("Payment error:", error);
+          alert("Payment test failed: " + error);
+        }}
+      />
+
+      {/* Default Template Confirmation Dialog */}
+      <Dialog open={!!defaultConfirmDialog} onClose={() => setDefaultConfirmDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Set Default Template</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            {defaultConfirmDialog?.isDefault
+              ? `"${defaultConfirmDialog?.name}" is currently the default rental application template.`
+              : `Are you sure you want to set "${defaultConfirmDialog?.name}" as the default rental application template?`
+            }
+          </Typography>
+          {!defaultConfirmDialog?.isDefault && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              This template will be automatically used when creating new applications from property pages.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDefaultConfirmDialog(null)}>
+            {defaultConfirmDialog?.isDefault ? "Close" : "Cancel"}
+          </Button>
+          {!defaultConfirmDialog?.isDefault && (
+            <Button
+              variant="contained"
+              onClick={() => defaultConfirmDialog && handleSetAsDefault(defaultConfirmDialog)}
+            >
+              Set as Default
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

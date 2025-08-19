@@ -1,6 +1,8 @@
 import * as React from "react";
 import WorkflowService from "../services/WorkflowService";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { LocalStorageService } from "../services/LocalStorageService";
+import ApplicationFormRenderer from "../components/ApplicationFormRenderer";
 import {
   Box,
   Typography,
@@ -51,6 +53,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import HomeIcon from "@mui/icons-material/Home";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 
 interface Application {
   id: string;
@@ -166,13 +169,17 @@ export default function Applications() {
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [selectedAppForAction, setSelectedAppForAction] = React.useState<Application | null>(null);
+  const [newApplicationDialog, setNewApplicationDialog] = React.useState(false);
+  const [selectedTemplate, setSelectedTemplate] = React.useState<any>(null);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [templateSelectionDialog, setTemplateSelectionDialog] = React.useState(false);
 
   // State for prospects and tenants (for workflow integration)
   const [prospects, setProspects] = React.useState<any[]>([]);
   const [tenants, setTenants] = React.useState<any[]>([]);
   const [workflowLog, setWorkflowLog] = React.useState<string[]>([]);
 
-  // Initialize workflow service
+  // Initialize workflow service and load templates
   React.useEffect(() => {
     const workflowService = WorkflowService.getInstance();
     workflowService.registerCallbacks({
@@ -183,6 +190,14 @@ export default function Applications() {
         console.log('Workflow:', message);
       }
     });
+
+    // Load templates and applications from localStorage
+    const savedTemplates = LocalStorageService.getTemplates();
+    const savedApplications = LocalStorageService.getApplications();
+    setTemplates(savedTemplates);
+    if (savedApplications.length > 0) {
+      setApplications(savedApplications);
+    }
   }, []);
 
   const getApplicationsByStatus = (status: Application["status"]) => {
@@ -361,6 +376,13 @@ export default function Applications() {
           Rental Applications
         </Typography>
         <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            startIcon={<DescriptionIcon />}
+            onClick={() => setTemplateSelectionDialog(true)}
+          >
+            New Application
+          </Button>
           <Badge badgeContent={newApplications.length} color="error">
             <DescriptionIcon />
           </Badge>
@@ -671,6 +693,97 @@ export default function Applications() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Template Selection Dialog */}
+      <Dialog open={templateSelectionDialog} onClose={() => setTemplateSelectionDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Select Application Template</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Choose a template to create a new rental application form:
+          </Typography>
+
+          {templates.length === 0 ? (
+            <Alert severity="info">
+              <Typography variant="body2">
+                No application templates found. Create templates in the Templates section first.
+              </Typography>
+            </Alert>
+          ) : (
+            <Grid container spacing={2}>
+              {templates
+                .filter(template => template.type === "Rental Application")
+                .map((template) => (
+                <Grid item xs={12} sm={6} key={template.id}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": { boxShadow: 2 },
+                      ...(selectedTemplate?.id === template.id && {
+                        borderColor: "primary.main",
+                        boxShadow: 2
+                      })
+                    }}
+                    onClick={() => setSelectedTemplate(template)}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>{template.name}</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {template.formFields?.length || 0} fields
+                        {template.applicationFee && ` • $${template.applicationFee} fee`}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Created: {new Date(template.createdDate).toLocaleDateString()}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTemplateSelectionDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setTemplateSelectionDialog(false);
+              setNewApplicationDialog(true);
+            }}
+            disabled={!selectedTemplate}
+          >
+            Start Application
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Application Form Dialog */}
+      {selectedTemplate && (
+        <ApplicationFormRenderer
+          template={selectedTemplate}
+          propertyId="1" // Default property for demo
+          propertyAddress="Demo Property Address"
+          isOpen={newApplicationDialog}
+          onSubmit={(applicationData) => {
+            // Add to applications list
+            setApplications(prev => [...prev, applicationData]);
+
+            // Save to localStorage
+            const existingApplications = LocalStorageService.getApplications();
+            LocalStorageService.saveApplications([...existingApplications, applicationData]);
+
+            setNewApplicationDialog(false);
+            setSelectedTemplate(null);
+
+            // Log workflow activity
+            setWorkflowLog(prev => [...prev, `${new Date().toLocaleTimeString()}: New application submitted for ${applicationData.applicantName}`]);
+          }}
+          onCancel={() => {
+            setNewApplicationDialog(false);
+            setSelectedTemplate(null);
+          }}
+        />
       )}
     </Box>
   );

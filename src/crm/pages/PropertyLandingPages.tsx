@@ -65,6 +65,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import { quickCopy } from "../utils/clipboardUtils";
 import RichTextEditor from "../components/RichTextEditor";
 import TourScheduling from "../components/TourScheduling";
+import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 
 interface PropertyLanding {
   id: string;
@@ -259,6 +260,7 @@ export default function PropertyLandingPages() {
   const [templateEditorOpen, setTemplateEditorOpen] = React.useState(false);
   const [selectedProperty, setSelectedProperty] = React.useState<any>(null);
   const [tourSchedulingOpen, setTourSchedulingOpen] = React.useState(false);
+  const [applicationDialogOpen, setApplicationDialogOpen] = React.useState(false);
   const [customizeOptions, setCustomizeOptions] = React.useState({
     title: '',
     description: '',
@@ -1249,6 +1251,7 @@ export default function PropertyLandingPages() {
                             <Button
                               variant="outlined"
                               size="large"
+                              onClick={() => setApplicationDialogOpen(true)}
                               sx={{
                                 borderColor: "white",
                                 color: "white",
@@ -1333,6 +1336,18 @@ export default function PropertyLandingPages() {
           // In a real app, this would be added to calendar and dashboard
           console.log("Tour request:", tourRequest);
           alert(`Tour request submitted for ${tourRequest.propertyName} on ${tourRequest.requestedDate} at ${tourRequest.requestedTime}`);
+        }}
+      />
+
+      {/* Property Application Dialog */}
+      <PropertyApplicationDialog
+        property={selectedProperty}
+        isOpen={applicationDialogOpen}
+        onClose={() => setApplicationDialogOpen(false)}
+        onApplicationSubmitted={(appData) => {
+          console.log("Application submitted:", appData);
+          setApplicationDialogOpen(false);
+          alert(`Application submitted successfully! Reference: ${appData.propertyCode}`);
         }}
       />
     </Box>
