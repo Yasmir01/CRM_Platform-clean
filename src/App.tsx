@@ -41,6 +41,7 @@ import CustomerService from "./crm/pages/CustomerService";
 import AnalyticsInsights from "./crm/pages/AnalyticsInsights";
 import MarketingAutomation from "./crm/pages/MarketingAutomation";
 import IntegrationManagement from "./crm/pages/IntegrationManagement";
+import BackupManagement from "./crm/components/BackupManagement";
 
 function NotFound() {
   return (
