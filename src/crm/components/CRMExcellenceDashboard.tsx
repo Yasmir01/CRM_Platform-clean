@@ -478,13 +478,16 @@ const CRMExcellenceDashboard: React.FC = () => {
         </Stack>
       </Stack>
 
-      <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} sx={{ mb: 3 }}>
+      <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)} sx={{ mb: 3 }} variant="scrollable">
         <Tab label="Excellence Overview" icon={<ExcellenceIcon />} />
         <Tab label="AI Recommendations" icon={<AutoAwesomeIcon />} />
         <Tab label="Communication Hub" icon={<TimelineIcon />} />
         <Tab label="Lead Intelligence" icon={<PsychologyIcon />} />
         <Tab label="Workflow Automation" icon={<RouterIcon />} />
         <Tab label="Smart Routing" icon={<GroupIcon />} />
+        <Tab label="Real-Time Analytics" icon={<AnalyticsIcon />} />
+        <Tab label="AI Responses" icon={<AutoAwesomeIcon />} />
+        <Tab label="Tenant Engagement" icon={<StarIcon />} />
       </Tabs>
 
       {activeTab === 0 && renderOverviewTab()}
