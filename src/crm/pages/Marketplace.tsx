@@ -381,6 +381,7 @@ const mockMarketplaceItems: MarketplaceItem[] = [
 export default function Marketplace() {
   const theme = useTheme();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
   const [items, setItems] = React.useState<MarketplaceItem[]>(mockMarketplaceItems);
   const [addItemOpen, setAddItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MarketplaceItem | null>(null);
