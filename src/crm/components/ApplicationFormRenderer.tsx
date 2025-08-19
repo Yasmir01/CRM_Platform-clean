@@ -264,7 +264,38 @@ export default function ApplicationFormRenderer({
 
     switch (field.type) {
       case "text":
+        return (
+          <TextField
+            key={field.id}
+            fullWidth
+            label={field.label}
+            placeholder={field.placeholder}
+            required={field.required}
+            value={value}
+            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            error={!!error}
+            helperText={error || field.description}
+            margin="normal"
+          />
+        );
+
       case "email":
+        return (
+          <TextField
+            key={field.id}
+            fullWidth
+            label={field.label}
+            placeholder={field.placeholder}
+            required={field.required}
+            type="email"
+            value={value}
+            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            error={!!error}
+            helperText={error || field.description}
+            margin="normal"
+          />
+        );
+
       case "phone":
         return (
           <PhoneNumberField
