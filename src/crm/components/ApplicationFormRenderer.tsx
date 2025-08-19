@@ -700,7 +700,7 @@ export default function ApplicationFormRenderer({
   };
 
   const isLastStep = currentStep === totalSteps - 1;
-  const canProceedToNext = () => {
+  const canProceedToNext = React.useCallback(() => {
     const termsStepIndex = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0);
     const paymentStepIndex = termsStepIndex + (template.termsAndConditions?.length ? 1 : 0);
 
@@ -712,9 +712,26 @@ export default function ApplicationFormRenderer({
       return paymentCompleted;
     }
 
-    // For regular form steps, validate current step
-    return validateCurrentStep();
-  };
+    // For regular form steps, check if required fields have values (without triggering validation state update)
+    let currentFields: FormField[] = [];
+    if (currentStep < fieldsBySections.length) {
+      currentFields = fieldsBySections[currentStep].fields;
+    } else if (unSectionedFields.length > 0 && currentStep === fieldsBySections.length) {
+      currentFields = unSectionedFields;
+    }
+
+    // Check required fields without updating state
+    for (const field of currentFields) {
+      if (field.required) {
+        const value = formData[field.id];
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [currentStep, fieldsBySections, unSectionedFields, template.termsAndConditions, template.applicationFee, termsAccepted.length, paymentCompleted, formData]);
 
   return (
     <Dialog
