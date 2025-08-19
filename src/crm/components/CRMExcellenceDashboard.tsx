@@ -496,6 +496,9 @@ const CRMExcellenceDashboard: React.FC = () => {
       {activeTab === 3 && <AILeadScoringEngine />}
       {activeTab === 4 && <AdvancedWorkflowEngine />}
       {activeTab === 5 && <IntelligentLeadRouting />}
+      {activeTab === 6 && <RealTimeCommunicationAnalytics />}
+      {activeTab === 7 && <AIResponseSuggestions />}
+      {activeTab === 8 && <TenantEngagementScoring />}
     </Box>
   );
 };
