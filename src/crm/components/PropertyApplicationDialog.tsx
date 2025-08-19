@@ -34,6 +34,7 @@ import {
 } from "@mui/icons-material";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { PropertyCodeGenerator } from "../utils/propertyCodeGenerator";
+import { useNotifications } from "./GlobalNotificationProvider";
 import ApplicationFormRenderer from "./ApplicationFormRenderer";
 
 interface Property {
@@ -83,6 +84,7 @@ export default function PropertyApplicationDialog({
   const [propertyCode, setPropertyCode] = React.useState<string>("");
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
   const [applicationData, setApplicationData] = React.useState<any>(null);
+  const notifications = useNotifications();
 
   React.useEffect(() => {
     if (isOpen && property) {
@@ -169,10 +171,21 @@ export default function PropertyApplicationDialog({
 
     setApplicationData(enhancedAppData);
     setShowApplicationForm(false);
-    setShowSuccessMessage(true);
-    
+
+    // Show success notification
+    notifications.showApplicationSuccess(
+      enhancedAppData.applicantName || 'Applicant',
+      property?.name || 'Property',
+      enhancedAppData.propertyCode || propertyCode
+    );
+
     // Callback to parent component
     onApplicationSubmitted?.(enhancedAppData);
+
+    // Close dialog after short delay
+    setTimeout(() => {
+      handleClose();
+    }, 2000);
   };
 
   const handleClose = () => {
