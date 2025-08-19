@@ -48,6 +48,8 @@ import {
 import { useDropzone } from "react-dropzone";
 import ApplicationPaymentForm from "./ApplicationPaymentForm";
 import TermsAndConditions from "./TermsAndConditions";
+import PhoneNumberField, { isValidPhoneNumber } from "./PhoneNumberField";
+import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
 
 interface FormField {
@@ -185,8 +187,8 @@ export default function ApplicationFormRenderer({
         }
         
         // Phone validation
-        if (field.type === "phone" && value && !/^\(\d{3}\)\s\d{3}-\d{4}$/.test(value)) {
-          errors[field.id] = "Please enter a valid phone number (XXX) XXX-XXXX";
+        if (field.type === "phone" && value && !isValidPhoneNumber(value)) {
+          errors[field.id] = "Please enter a valid 10-digit phone number";
         }
       }
     });
@@ -263,6 +265,21 @@ export default function ApplicationFormRenderer({
       case "text":
       case "email":
       case "phone":
+        return (
+          <PhoneNumberField
+            key={field.id}
+            fullWidth
+            label={field.label}
+            placeholder={field.placeholder}
+            required={field.required}
+            value={value}
+            onChange={(newValue) => handleFieldChange(field.id, newValue)}
+            error={!!error}
+            helperText={error || field.description}
+            margin="normal"
+          />
+        );
+
       case "number":
         return (
           <TextField
@@ -271,7 +288,7 @@ export default function ApplicationFormRenderer({
             label={field.label}
             placeholder={field.placeholder}
             required={field.required}
-            type={field.type === "number" ? "number" : "text"}
+            type="number"
             value={value}
             onChange={(e) => handleFieldChange(field.id, e.target.value)}
             error={!!error}
@@ -316,6 +333,23 @@ export default function ApplicationFormRenderer({
         );
 
       case "select":
+        // Check if this is a state field
+        if (field.label.toLowerCase().includes('state') || field.id.toLowerCase().includes('state')) {
+          return (
+            <StateSelectionField
+              key={field.id}
+              fullWidth
+              label={field.label}
+              required={field.required}
+              value={value}
+              onChange={(newValue) => handleFieldChange(field.id, newValue)}
+              error={!!error}
+              helperText={error || field.description}
+              margin="normal"
+            />
+          );
+        }
+
         return (
           <FormControl key={field.id} fullWidth margin="normal" error={!!error}>
             <InputLabel>{field.label} {field.required && "*"}</InputLabel>
@@ -672,12 +706,13 @@ export default function ApplicationFormRenderer({
     if (template.termsAndConditions?.length && currentStep === termsStepIndex) {
       return termsAccepted.length > 0;
     }
-    
+
     if (template.applicationFee && currentStep === paymentStepIndex) {
       return paymentCompleted;
     }
-    
-    return true;
+
+    // For regular form steps, validate current step
+    return validateCurrentStep();
   };
 
   return (
