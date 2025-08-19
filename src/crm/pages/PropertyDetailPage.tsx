@@ -3403,6 +3403,28 @@ export default function PropertyDetailPage({
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Property Application Dialog */}
+      <PropertyApplicationDialog
+        property={property}
+        isOpen={applicationDialogOpen}
+        onClose={() => setApplicationDialogOpen(false)}
+        onApplicationSubmitted={(appData) => {
+          console.log("Application submitted:", appData);
+          setApplicationDialogOpen(false);
+
+          // Track activity
+          activityTracker.trackActivity({
+            userId: 'current-user',
+            userDisplayName: 'Current User',
+            action: 'application_submitted',
+            entityType: 'property',
+            entityId: property.id,
+            entityName: property.name,
+            details: `Application submitted by ${appData.applicantName} - Code: ${appData.propertyCode}`
+          });
+        }}
+      />
     </Box>
   );
 }
