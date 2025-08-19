@@ -757,15 +757,17 @@ export default function ApplicationFormRenderer({
     const termsStepIndex = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0);
     const paymentStepIndex = termsStepIndex + (template.termsAndConditions?.length ? 1 : 0);
 
+    // Special handling for terms step
     if (template.termsAndConditions?.length && currentStep === termsStepIndex) {
       return termsAccepted.length > 0;
     }
 
+    // Special handling for payment step
     if (template.applicationFee && currentStep === paymentStepIndex) {
       return paymentCompleted;
     }
 
-    // For regular form steps, check if required fields have values (without triggering validation state update)
+    // For regular form steps, check if required fields have values
     let currentFields: FormField[] = [];
     if (currentStep < fieldsBySections.length) {
       currentFields = fieldsBySections[currentStep].fields;
@@ -773,28 +775,50 @@ export default function ApplicationFormRenderer({
       currentFields = unSectionedFields;
     }
 
-    // Check required fields without updating state
-    for (const field of currentFields) {
-      if (field.required) {
-        const value = formData[field.id];
+    // If no fields in current step, allow proceeding
+    if (currentFields.length === 0) {
+      return true;
+    }
 
-        // Handle different field types properly
-        if (field.type === 'checkbox') {
-          // For checkboxes, required means it must be checked (true)
-          if (value !== true) {
-            return false;
-          }
-        } else {
-          // For other fields, check if value exists and is not empty
+    // Check required fields
+    const requiredFields = currentFields.filter(field => field.required);
+
+    // If no required fields, allow proceeding
+    if (requiredFields.length === 0) {
+      return true;
+    }
+
+    // Check each required field
+    for (const field of requiredFields) {
+      const value = formData[field.id];
+
+      // Handle different field types
+      switch (field.type) {
+        case 'checkbox':
+          if (value !== true) return false;
+          break;
+        case 'yesno':
+        case 'radio':
+          if (!value || value === '') return false;
+          break;
+        case 'select':
+          if (!value || value === '') return false;
+          break;
+        case 'file_upload':
+          const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
+          if (!uploadedFiles || uploadedFiles.files.length === 0) return false;
+          break;
+        default:
+          // text, email, phone, number, date, textarea, signature
           if (!value || value === '' || (typeof value === 'string' && value.trim() === '')) {
             return false;
           }
-        }
+          break;
       }
     }
 
     return true;
-  }, [currentStep, fieldsBySections, unSectionedFields, template.termsAndConditions, template.applicationFee, termsAccepted.length, paymentCompleted, formData]);
+  }, [currentStep, fieldsBySections, unSectionedFields, template.termsAndConditions, template.applicationFee, termsAccepted.length, paymentCompleted, formData, fileUploads]);
 
   return (
     <Dialog
