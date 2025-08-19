@@ -62,6 +62,7 @@ import {
   Lock as LockIcon
 } from '@mui/icons-material';
 import { BackupRestoreService, BackupMetadata, BackupFrequency, BackupSchedule, SubscriptionLevel, RestoreOptions } from '../services/BackupRestoreService';
+import SubscriptionBackupControls from './SubscriptionBackupControls';
 
 interface BackupManagementProps {
   subscriptionLevel?: SubscriptionLevel;
