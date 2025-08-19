@@ -755,9 +755,20 @@ export default function ApplicationFormRenderer({
     for (const field of currentFields) {
       if (field.required) {
         const value = formData[field.id];
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          console.log(`Field ${field.label} (${field.id}) is required but has no value:`, value);
-          return false;
+
+        // Handle different field types properly
+        if (field.type === 'checkbox') {
+          // For checkboxes, required means it must be checked (true)
+          if (value !== true) {
+            console.log(`Required checkbox ${field.label} (${field.id}) is not checked:`, value);
+            return false;
+          }
+        } else {
+          // For other fields, check if value exists and is not empty
+          if (!value || (Array.isArray(value) && value.length === 0) || value === '') {
+            console.log(`Field ${field.label} (${field.id}) is required but has no value:`, value);
+            return false;
+          }
         }
       }
     }
