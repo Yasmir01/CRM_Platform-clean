@@ -472,6 +472,28 @@ export default function ApplicationFormRenderer({
           />
         );
 
+      case "signature":
+        return (
+          <TextField
+            key={field.id}
+            fullWidth
+            label={field.label}
+            placeholder="Type your full name as electronic signature"
+            required={field.required}
+            value={value}
+            onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            error={!!error}
+            helperText={error || field.description || "By typing your name, you agree this serves as your electronic signature"}
+            margin="normal"
+            InputProps={{
+              style: {
+                fontFamily: 'cursive',
+                fontSize: '1.2rem'
+              }
+            }}
+          />
+        );
+
       default:
         return null;
     }
