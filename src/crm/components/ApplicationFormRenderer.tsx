@@ -782,16 +782,11 @@ export default function ApplicationFormRenderer({
         if (field.type === 'checkbox') {
           // For checkboxes, required means it must be checked (true)
           if (value !== true) {
-            console.log(`Required checkbox ${field.label} (${field.id}) is not checked:`, value);
             return false;
           }
         } else {
           // For other fields, check if value exists and is not empty
-          // Handle different data types properly
-          if (value === null || value === undefined || value === '' ||
-              (Array.isArray(value) && value.length === 0) ||
-              (typeof value === 'string' && value.trim() === '')) {
-            console.log(`Field ${field.label} (${field.id}) is required but has no value:`, value);
+          if (!value || value === '' || (typeof value === 'string' && value.trim() === '')) {
             return false;
           }
         }
