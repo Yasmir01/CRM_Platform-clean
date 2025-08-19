@@ -1251,6 +1251,7 @@ export default function PropertyLandingPages() {
                             <Button
                               variant="outlined"
                               size="large"
+                              onClick={() => setApplicationDialogOpen(true)}
                               sx={{
                                 borderColor: "white",
                                 color: "white",
