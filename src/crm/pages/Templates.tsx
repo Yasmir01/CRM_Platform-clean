@@ -102,6 +102,8 @@ interface Template {
   paymentMethods?: PaymentMethod[];
   termsAndConditions?: any[];
   requirePaymentBeforeSubmission?: boolean;
+  isDefault?: boolean;
+  propertyCode?: string;
 }
 
 interface FormField {
