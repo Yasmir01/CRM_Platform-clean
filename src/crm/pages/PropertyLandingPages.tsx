@@ -1338,6 +1338,18 @@ export default function PropertyLandingPages() {
           alert(`Tour request submitted for ${tourRequest.propertyName} on ${tourRequest.requestedDate} at ${tourRequest.requestedTime}`);
         }}
       />
+
+      {/* Property Application Dialog */}
+      <PropertyApplicationDialog
+        property={selectedProperty}
+        isOpen={applicationDialogOpen}
+        onClose={() => setApplicationDialogOpen(false)}
+        onApplicationSubmitted={(appData) => {
+          console.log("Application submitted:", appData);
+          setApplicationDialogOpen(false);
+          alert(`Application submitted successfully! Reference: ${appData.propertyCode}`);
+        }}
+      />
     </Box>
   );
 }
