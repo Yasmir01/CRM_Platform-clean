@@ -811,10 +811,17 @@ export default function ApplicationFormRenderer({
           <Button onClick={handlePreviousStep}>Previous</Button>
         )}
         {!isLastStep && (
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
+            color="primary"
             onClick={handleNextStep}
             disabled={!canProceedToNext()}
+            sx={{
+              '&.Mui-disabled': {
+                backgroundColor: 'action.disabledBackground',
+                color: 'action.disabled'
+              }
+            }}
           >
             Next
           </Button>
