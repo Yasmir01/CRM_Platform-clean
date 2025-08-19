@@ -1370,10 +1370,7 @@ export default function PropertyDetailPage({
                         fullWidth
                         variant="contained"
                         startIcon={<DescriptionRoundedIcon />}
-                        onClick={() => {
-                          const applicationUrl = `/crm/applications/apply?property=${property.id}&code=${property.id}`;
-                        window.open(applicationUrl, '_blank');
-                        }}
+                        onClick={() => setApplicationDialogOpen(true)}
                         sx={{
                           bgcolor: 'rgba(255,255,255,0.2)',
                           '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
