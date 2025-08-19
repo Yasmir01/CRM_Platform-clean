@@ -693,6 +693,97 @@ export default function Applications() {
           </CardContent>
         </Card>
       )}
+
+      {/* Template Selection Dialog */}
+      <Dialog open={templateSelectionDialog} onClose={() => setTemplateSelectionDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Select Application Template</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Choose a template to create a new rental application form:
+          </Typography>
+
+          {templates.length === 0 ? (
+            <Alert severity="info">
+              <Typography variant="body2">
+                No application templates found. Create templates in the Templates section first.
+              </Typography>
+            </Alert>
+          ) : (
+            <Grid container spacing={2}>
+              {templates
+                .filter(template => template.type === "Rental Application")
+                .map((template) => (
+                <Grid item xs={12} sm={6} key={template.id}>
+                  <Card
+                    variant="outlined"
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": { boxShadow: 2 },
+                      ...(selectedTemplate?.id === template.id && {
+                        borderColor: "primary.main",
+                        boxShadow: 2
+                      })
+                    }}
+                    onClick={() => setSelectedTemplate(template)}
+                  >
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom>{template.name}</Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {template.formFields?.length || 0} fields
+                        {template.applicationFee && ` • $${template.applicationFee} fee`}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Created: {new Date(template.createdDate).toLocaleDateString()}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTemplateSelectionDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setTemplateSelectionDialog(false);
+              setNewApplicationDialog(true);
+            }}
+            disabled={!selectedTemplate}
+          >
+            Start Application
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Application Form Dialog */}
+      {selectedTemplate && (
+        <ApplicationFormRenderer
+          template={selectedTemplate}
+          propertyId="1" // Default property for demo
+          propertyAddress="Demo Property Address"
+          isOpen={newApplicationDialog}
+          onSubmit={(applicationData) => {
+            // Add to applications list
+            setApplications(prev => [...prev, applicationData]);
+
+            // Save to localStorage
+            const existingApplications = LocalStorageService.getApplications();
+            LocalStorageService.saveApplications([...existingApplications, applicationData]);
+
+            setNewApplicationDialog(false);
+            setSelectedTemplate(null);
+
+            // Log workflow activity
+            setWorkflowLog(prev => [...prev, `${new Date().toLocaleTimeString()}: New application submitted for ${applicationData.applicantName}`]);
+          }}
+          onCancel={() => {
+            setNewApplicationDialog(false);
+            setSelectedTemplate(null);
+          }}
+        />
+      )}
     </Box>
   );
 }
