@@ -2206,6 +2206,37 @@ export default function Templates() {
           alert("Payment test failed: " + error);
         }}
       />
+
+      {/* Default Template Confirmation Dialog */}
+      <Dialog open={!!defaultConfirmDialog} onClose={() => setDefaultConfirmDialog(null)} maxWidth="sm" fullWidth>
+        <DialogTitle>Set Default Template</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            {defaultConfirmDialog?.isDefault
+              ? `"${defaultConfirmDialog?.name}" is currently the default rental application template.`
+              : `Are you sure you want to set "${defaultConfirmDialog?.name}" as the default rental application template?`
+            }
+          </Typography>
+          {!defaultConfirmDialog?.isDefault && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              This template will be automatically used when creating new applications from property pages.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDefaultConfirmDialog(null)}>
+            {defaultConfirmDialog?.isDefault ? "Close" : "Cancel"}
+          </Button>
+          {!defaultConfirmDialog?.isDefault && (
+            <Button
+              variant="contained"
+              onClick={() => defaultConfirmDialog && handleSetAsDefault(defaultConfirmDialog)}
+            >
+              Set as Default
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
