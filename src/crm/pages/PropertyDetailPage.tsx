@@ -90,6 +90,7 @@ import CampaignRoundedIcon from "@mui/icons-material/CampaignRounded";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
+import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
