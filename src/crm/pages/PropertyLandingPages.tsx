@@ -65,6 +65,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import { quickCopy } from "../utils/clipboardUtils";
 import RichTextEditor from "../components/RichTextEditor";
 import TourScheduling from "../components/TourScheduling";
+import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 
 interface PropertyLanding {
   id: string;
