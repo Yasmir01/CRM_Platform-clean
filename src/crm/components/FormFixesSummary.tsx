@@ -5,8 +5,8 @@ import {
   Box,
   Stack,
   Chip,
-  CheckCircleIcon,
 } from "@mui/material";
+import { CheckCircle as CheckCircleIcon } from "@mui/icons-material";
 
 export default function FormFixesSummary() {
   return (
