@@ -178,7 +178,7 @@ export default function Applications() {
   const [tenants, setTenants] = React.useState<any[]>([]);
   const [workflowLog, setWorkflowLog] = React.useState<string[]>([]);
 
-  // Initialize workflow service
+  // Initialize workflow service and load templates
   React.useEffect(() => {
     const workflowService = WorkflowService.getInstance();
     workflowService.registerCallbacks({
@@ -189,6 +189,14 @@ export default function Applications() {
         console.log('Workflow:', message);
       }
     });
+
+    // Load templates and applications from localStorage
+    const savedTemplates = LocalStorageService.getTemplates();
+    const savedApplications = LocalStorageService.getApplications();
+    setTemplates(savedTemplates);
+    if (savedApplications.length > 0) {
+      setApplications(savedApplications);
+    }
   }, []);
 
   const getApplicationsByStatus = (status: Application["status"]) => {
