@@ -58,6 +58,9 @@ import UnifiedCommunicationDashboard from './UnifiedCommunicationDashboard';
 import AILeadScoringEngine from './AILeadScoringEngine';
 import AdvancedWorkflowEngine from './AdvancedWorkflowEngine';
 import IntelligentLeadRouting from './IntelligentLeadRouting';
+import RealTimeCommunicationAnalytics from './RealTimeCommunicationAnalytics';
+import AIResponseSuggestions from './AIResponseSuggestions';
+import TenantEngagementScoring from './TenantEngagementScoring';
 
 interface ExcellenceMetric {
   id: string;
