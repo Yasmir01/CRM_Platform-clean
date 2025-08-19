@@ -103,6 +103,9 @@ const BackupManagement: React.FC<BackupManagementProps> = ({
     enabled: true
   });
 
+  // Tab state for subscription controls
+  const [activeTab, setActiveTab] = useState<'backups' | 'subscription'>('backups');
+
   // Subscription limits
   const subscriptionLimits = {
     Starter: { maxBackups: 5, features: ['Manual', 'Weekly'], dailyBackups: false },
