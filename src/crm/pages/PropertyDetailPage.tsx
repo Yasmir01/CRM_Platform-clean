@@ -1266,6 +1266,10 @@ export default function PropertyDetailPage({
             </Card>
           </Grid>
 
+          {/* Form Enhancement Summary */}
+          <Grid item xs={12}>
+            <FormFixesSummary />
+          </Grid>
 
           {/* Quick Actions */}
           <Grid item xs={12}>
