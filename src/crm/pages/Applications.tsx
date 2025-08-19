@@ -168,6 +168,10 @@ export default function Applications() {
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [selectedAppForAction, setSelectedAppForAction] = React.useState<Application | null>(null);
+  const [newApplicationDialog, setNewApplicationDialog] = React.useState(false);
+  const [selectedTemplate, setSelectedTemplate] = React.useState<any>(null);
+  const [templates, setTemplates] = React.useState<any[]>([]);
+  const [templateSelectionDialog, setTemplateSelectionDialog] = React.useState(false);
 
   // State for prospects and tenants (for workflow integration)
   const [prospects, setProspects] = React.useState<any[]>([]);
