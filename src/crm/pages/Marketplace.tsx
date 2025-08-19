@@ -992,11 +992,40 @@ export default function Marketplace() {
           variant="contained"
           startIcon={<AddRoundedIcon />}
           onClick={() => setAddItemOpen(true)}
+          disabled={mainTab === 'subscription'}
         >
           Add New Item
         </Button>
       </Stack>
 
+      {/* Main Tab Navigation */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Button
+          variant={mainTab === 'marketplace' ? 'contained' : 'text'}
+          onClick={() => setMainTab('marketplace')}
+          sx={{ mr: 1 }}
+          startIcon={<StorefrontRoundedIcon />}
+        >
+          Marketplace Items
+        </Button>
+        <Button
+          variant={mainTab === 'subscription' ? 'contained' : 'text'}
+          onClick={() => setMainTab('subscription')}
+          startIcon={<SettingsRoundedIcon />}
+        >
+          Subscription Settings
+        </Button>
+      </Box>
+
+      {mainTab === 'subscription' ? (
+        <SubscriptionBackupControls
+          currentSubscription="Professional"
+          onSubscriptionChange={(newLevel) => {
+            console.log('Marketplace: Subscription changed to:', newLevel);
+          }}
+        />
+      ) : (
+        <>
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -1436,6 +1465,8 @@ export default function Marketplace() {
           </>
         )}
       </Dialog>
+        </>
+      )}
     </Box>
   );
 }
