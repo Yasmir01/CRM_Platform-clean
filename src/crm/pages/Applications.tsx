@@ -375,6 +375,13 @@ export default function Applications() {
           Rental Applications
         </Typography>
         <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            startIcon={<DescriptionIcon />}
+            onClick={() => setTemplateSelectionDialog(true)}
+          >
+            New Application
+          </Button>
           <Badge badgeContent={newApplications.length} color="error">
             <DescriptionIcon />
           </Badge>
