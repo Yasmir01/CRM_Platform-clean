@@ -255,7 +255,10 @@ const applicationSections: ApplicationSection[] = [
     icon: <HomeRoundedIcon />,
     description: "Current living situation and housing history",
     defaultFields: [
-      { type: "text", label: "Current Address", required: true },
+      { type: "text", label: "Street Address", required: true },
+      { type: "text", label: "City", required: true },
+      { type: "select", label: "State", required: true },
+      { type: "text", label: "ZIP Code", required: true },
       { type: "date", label: "Move-in Date", required: true },
       { type: "number", label: "Monthly Rent/Mortgage", required: true },
       { type: "text", label: "Landlord/Property Manager Name" },
