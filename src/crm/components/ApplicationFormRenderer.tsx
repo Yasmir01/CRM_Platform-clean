@@ -756,6 +756,7 @@ export default function ApplicationFormRenderer({
       if (field.required) {
         const value = formData[field.id];
         if (!value || (Array.isArray(value) && value.length === 0)) {
+          console.log(`Field ${field.label} (${field.id}) is required but has no value:`, value);
           return false;
         }
       }
