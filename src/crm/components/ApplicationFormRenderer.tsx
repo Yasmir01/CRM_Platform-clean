@@ -817,13 +817,18 @@ export default function ApplicationFormRenderer({
             onClick={handleNextStep}
             disabled={!canProceedToNext()}
             sx={{
+              backgroundColor: canProceedToNext() ? 'primary.main' : 'grey.400',
+              color: canProceedToNext() ? 'white' : 'grey.600',
+              '&:hover': {
+                backgroundColor: canProceedToNext() ? 'primary.dark' : 'grey.400',
+              },
               '&.Mui-disabled': {
-                backgroundColor: 'action.disabledBackground',
-                color: 'action.disabled'
+                backgroundColor: 'grey.400 !important',
+                color: 'grey.600 !important'
               }
             }}
           >
-            Next
+            Next {!canProceedToNext() && '(Complete required fields)'}
           </Button>
         )}
       </DialogActions>
