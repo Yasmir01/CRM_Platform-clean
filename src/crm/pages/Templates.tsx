@@ -46,6 +46,8 @@ import {
 import RichTextEditor from "../components/RichTextEditor";
 import VariablesCheatSheet from "../components/VariablesCheatSheet";
 import CompanySettings, { useCompanyInfo, CompanyInfo } from "../components/CompanySettings";
+import ApplicationPaymentForm from "../components/ApplicationPaymentForm";
+import TermsAndConditions from "../components/TermsAndConditions";
 // import { useAutoSave, useAutoSaveStatus } from "../hooks/useAutoSave";
 import { quickCopy } from "../utils/clipboardUtils";
 import { LocalStorageService } from "../services/LocalStorageService";
@@ -98,11 +100,13 @@ interface Template {
   formFields?: FormField[];
   applicationFee?: number;
   paymentMethods?: PaymentMethod[];
+  termsAndConditions?: any[];
+  requirePaymentBeforeSubmission?: boolean;
 }
 
 interface FormField {
   id: string;
-  type: "text" | "number" | "email" | "phone" | "date" | "textarea" | "select" | "checkbox" | "radio" | "yesno" | "section" | "signature" | "payment";
+  type: "text" | "number" | "email" | "phone" | "date" | "textarea" | "select" | "checkbox" | "radio" | "yesno" | "section" | "signature" | "payment" | "terms" | "file_upload" | "multiselect";
   label: string;
   placeholder?: string;
   required: boolean;
@@ -111,6 +115,9 @@ interface FormField {
   section?: string;
   description?: string;
   defaultValue?: string;
+  fileTypes?: string[];
+  maxFiles?: number;
+  maxFileSize?: number;
 }
 
 interface PaymentMethod {
@@ -509,6 +516,10 @@ export default function Templates() {
   const [formPreviewOpen, setFormPreviewOpen] = React.useState(false);
   const [variablesCheatSheetOpen, setVariablesCheatSheetOpen] = React.useState(false);
   const [companySettingsOpen, setCompanySettingsOpen] = React.useState(false);
+  const [termsDialogOpen, setTermsDialogOpen] = React.useState(false);
+  const [paymentTestOpen, setPaymentTestOpen] = React.useState(false);
+  const [requirePaymentBeforeSubmission, setRequirePaymentBeforeSubmission] = React.useState(true);
+  const [termsAndConditions, setTermsAndConditions] = React.useState<any[]>([]);
   const { companyInfo, updateCompanyInfo } = useCompanyInfo();
   const [newFieldData, setNewFieldData] = React.useState<Partial<FormField>>({
     type: "text",
@@ -804,6 +815,7 @@ export default function Templates() {
             required={field.required}
             type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"}
             fullWidth
+            disabled
             helperText={field.description}
             InputLabelProps={field.type === "date" ? { shrink: true } : undefined}
           />
@@ -955,6 +967,74 @@ export default function Templates() {
               </Grid>
             </CardContent>
           </Card>
+        );
+      case "terms":
+        return (
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {field.label}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Terms and conditions component will appear here
+              </Typography>
+              <Button variant="outlined" size="small">
+                Review Terms
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      case "file_upload":
+        return (
+          <Box>
+            <Typography variant="body1" gutterBottom>
+              {field.label} {field.required && "*"}
+            </Typography>
+            <Paper
+              sx={{
+                p: 3,
+                border: "2px dashed",
+                borderColor: theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300',
+                textAlign: "center",
+                bgcolor: theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50'
+              }}
+            >
+              <Typography color="text.secondary">
+                Drag & drop files here or click to browse
+              </Typography>
+              <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                {field.fileTypes && `Accepted: ${field.fileTypes.join(", ")}`}
+                {field.maxFiles && ` • Max ${field.maxFiles} files`}
+                {field.maxFileSize && ` • Max ${field.maxFileSize}MB per file`}
+              </Typography>
+            </Paper>
+            {field.description && (
+              <Typography variant="caption" color="text.secondary">
+                {field.description}
+              </Typography>
+            )}
+          </Box>
+        );
+      case "multiselect":
+        return (
+          <FormControl fullWidth>
+            <InputLabel>{field.label} {field.required && "*"}</InputLabel>
+            <Select
+              label={field.label}
+              multiple
+              defaultValue={[]}
+              disabled
+            >
+              {field.options?.map((option, index) => (
+                <MenuItem key={index} value={option}>{option}</MenuItem>
+              ))}
+            </Select>
+            {field.description && (
+              <Typography variant="caption" color="text.secondary">
+                {field.description}
+              </Typography>
+            )}
+          </FormControl>
         );
       default:
         return null;
@@ -1273,6 +1353,20 @@ export default function Templates() {
               </Button>
               <Button
                 variant="outlined"
+                startIcon={<SecurityRoundedIcon />}
+                onClick={() => setTermsDialogOpen(true)}
+              >
+                Terms & Conditions
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<PaymentRoundedIcon />}
+                onClick={() => setPaymentTestOpen(true)}
+              >
+                Test Payment
+              </Button>
+              <Button
+                variant="outlined"
                 startIcon={<VisibilityRoundedIcon />}
                 onClick={() => setFormPreviewOpen(true)}
               >
@@ -1294,6 +1388,8 @@ export default function Templates() {
                     formFields: formFields,
                     applicationFee: applicationFee,
                     paymentMethods: paymentMethods,
+                    termsAndConditions: termsAndConditions,
+                    requirePaymentBeforeSubmission: requirePaymentBeforeSubmission,
                   };
                   updateTemplates(prev => [...prev, newTemplate]);
                   setOpenFormBuilderDialog(false);
@@ -1382,6 +1478,45 @@ export default function Templates() {
                     }}
                   >
                     Add Payment Section
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<SecurityRoundedIcon />}
+                    onClick={() => {
+                      const termsField: FormField = {
+                        id: `terms_${Date.now()}`,
+                        type: "terms",
+                        label: "Terms and Conditions",
+                        required: true,
+                        order: formFields.length,
+                      };
+                      setFormFields(prev => [...prev, termsField]);
+                    }}
+                  >
+                    Add Terms & Conditions
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<AddRoundedIcon />}
+                    onClick={() => {
+                      const fileField: FormField = {
+                        id: `file_${Date.now()}`,
+                        type: "file_upload",
+                        label: "Document Upload",
+                        required: false,
+                        order: formFields.length,
+                        fileTypes: ["pdf", "jpg", "png", "doc"],
+                        maxFiles: 5,
+                        maxFileSize: 10,
+                      };
+                      setFormFields(prev => [...prev, fileField]);
+                    }}
+                  >
+                    Add File Upload
                   </Button>
                 </Stack>
               </Paper>
