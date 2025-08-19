@@ -872,6 +872,13 @@ export default function ApplicationFormRenderer({
             color="primary"
             onClick={handleNextStep}
             disabled={!canProceedToNext()}
+            sx={{
+              minWidth: '80px',
+              '&.Mui-disabled': {
+                backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                color: 'rgba(0, 0, 0, 0.26)'
+              }
+            }}
           >
             Next
           </Button>
