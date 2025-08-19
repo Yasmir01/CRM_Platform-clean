@@ -1260,11 +1260,21 @@ export default function Templates() {
                       {template.type}
                     </Typography>
                   </Box>
-                  <Chip
-                    label={template.status}
-                    color={getStatusColor(template.status)}
-                    size="small"
-                  />
+                  <Stack direction="row" spacing={1}>
+                    <Chip
+                      label={template.status}
+                      color={getStatusColor(template.status)}
+                      size="small"
+                    />
+                    {template.isDefault && (
+                      <Chip
+                        label="Default"
+                        color="success"
+                        size="small"
+                        icon={<StarRoundedIcon />}
+                      />
+                    )}
+                  </Stack>
                 </Stack>
 
                 {template.subject && (
