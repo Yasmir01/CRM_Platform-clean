@@ -407,6 +407,7 @@ export default function PropertyDetailPage({
   });
   const [workOrderDialogOpen, setWorkOrderDialogOpen] = React.useState(false);
   const [tenantDialogOpen, setTenantDialogOpen] = React.useState(false);
+  const [applicationDialogOpen, setApplicationDialogOpen] = React.useState(false);
   const [draggedCard, setDraggedCard] = React.useState<string | null>(null);
   const [cardOrder, setCardOrder] = React.useState([
     'tenant-info',
