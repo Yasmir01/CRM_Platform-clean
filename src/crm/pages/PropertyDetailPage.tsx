@@ -91,6 +91,7 @@ import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
 import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
+import FormFixesSummary from "../components/FormFixesSummary";
 import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
@@ -3265,7 +3266,7 @@ export default function PropertyDetailPage({
                     sx={{ mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Type: {selectedDocument.type} • Size: {formatFileSize(selectedDocument.size)}
+                    Type: {selectedDocument.type} ��� Size: {formatFileSize(selectedDocument.size)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
                     Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
