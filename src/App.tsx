@@ -42,6 +42,7 @@ import CustomerService from "./crm/pages/CustomerService";
 import AnalyticsInsights from "./crm/pages/AnalyticsInsights";
 import MarketingAutomation from "./crm/pages/MarketingAutomation";
 import IntegrationManagement from "./crm/pages/IntegrationManagement";
+import BackupManagement from "./crm/components/BackupManagement";
 
 function NotFound() {
   return (
@@ -129,6 +130,7 @@ function AppRoutes() {
         <Route path="landing-pages" element={<PropertyLandingPages />} />
         <Route path="promotions" element={<Promotions />} />
         <Route path="integrations" element={<IntegrationManagement />} />
+        <Route path="backup" element={<BackupManagement />} />
         <Route path="automation" element={<MarketingAutomation />} />
         <Route path="user-roles" element={<UserRoles />} />
         <Route path="marketplace" element={<Marketplace />} />

@@ -43,6 +43,7 @@ import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import IntegrationInstructionsRoundedIcon from "@mui/icons-material/IntegrationInstructionsRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
+import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -79,6 +80,7 @@ const marketingListItems = [
 const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Automation Engine", icon: <AutorenewRoundedIcon />, path: "/crm/automation" },
+  { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },

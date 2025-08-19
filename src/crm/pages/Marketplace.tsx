@@ -55,6 +55,7 @@ import {
   formElementWidths,
   layoutSpacing
 } from "../utils/formStyles";
+import SubscriptionBackupControls from '../components/SubscriptionBackupControls';
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
@@ -380,6 +381,7 @@ const mockMarketplaceItems: MarketplaceItem[] = [
 export default function Marketplace() {
   const theme = useTheme();
   const [activeTab, setActiveTab] = React.useState(0);
+  const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
   const [items, setItems] = React.useState<MarketplaceItem[]>(mockMarketplaceItems);
   const [addItemOpen, setAddItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MarketplaceItem | null>(null);
@@ -990,11 +992,40 @@ export default function Marketplace() {
           variant="contained"
           startIcon={<AddRoundedIcon />}
           onClick={() => setAddItemOpen(true)}
+          disabled={mainTab === 'subscription'}
         >
           Add New Item
         </Button>
       </Stack>
 
+      {/* Main Tab Navigation */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Button
+          variant={mainTab === 'marketplace' ? 'contained' : 'text'}
+          onClick={() => setMainTab('marketplace')}
+          sx={{ mr: 1 }}
+          startIcon={<StorefrontRoundedIcon />}
+        >
+          Marketplace Items
+        </Button>
+        <Button
+          variant={mainTab === 'subscription' ? 'contained' : 'text'}
+          onClick={() => setMainTab('subscription')}
+          startIcon={<SettingsRoundedIcon />}
+        >
+          Subscription Settings
+        </Button>
+      </Box>
+
+      {mainTab === 'subscription' ? (
+        <SubscriptionBackupControls
+          currentSubscription="Professional"
+          onSubscriptionChange={(newLevel) => {
+            console.log('Marketplace: Subscription changed to:', newLevel);
+          }}
+        />
+      ) : (
+        <>
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -1434,6 +1465,8 @@ export default function Marketplace() {
           </>
         )}
       </Dialog>
+        </>
+      )}
     </Box>
   );
 }
