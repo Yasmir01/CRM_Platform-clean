@@ -260,6 +260,7 @@ export default function PropertyLandingPages() {
   const [templateEditorOpen, setTemplateEditorOpen] = React.useState(false);
   const [selectedProperty, setSelectedProperty] = React.useState<any>(null);
   const [tourSchedulingOpen, setTourSchedulingOpen] = React.useState(false);
+  const [applicationDialogOpen, setApplicationDialogOpen] = React.useState(false);
   const [customizeOptions, setCustomizeOptions] = React.useState({
     title: '',
     description: '',
