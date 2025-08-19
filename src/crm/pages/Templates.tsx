@@ -223,7 +223,7 @@ const applicationSections: ApplicationSection[] = [
       { type: "select", label: "ID Type", options: ["Driver's License", "Passport", "State ID", "Military ID"], required: true },
       { type: "text", label: "ID Number", required: true },
       { type: "date", label: "ID Expiration Date", required: true },
-      { type: "text", label: "Issuing State/Country", required: true },
+      { type: "select", label: "Issuing State", required: true },
     ]
   },
   {
