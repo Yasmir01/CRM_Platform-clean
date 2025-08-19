@@ -2126,6 +2126,44 @@ export default function Templates() {
         onSave={updateCompanyInfo}
         currentInfo={companyInfo}
       />
+
+      {/* Terms and Conditions Dialog */}
+      <Dialog open={termsDialogOpen} onClose={() => setTermsDialogOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>Terms and Conditions Management</DialogTitle>
+        <DialogContent>
+          <TermsAndConditions
+            showEditor={true}
+            onTermsUpdate={setTermsAndConditions}
+            customTerms={termsAndConditions}
+            applicationFee={applicationFee}
+            companyName={companyInfo.name}
+            onAccept={(accepted) => console.log("Terms accepted:", accepted)}
+            onDecline={() => console.log("Terms declined")}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setTermsDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Payment Test Dialog */}
+      <ApplicationPaymentForm
+        isOpen={paymentTestOpen}
+        onClose={() => setPaymentTestOpen(false)}
+        applicationFee={applicationFee}
+        paymentMethods={paymentMethods}
+        applicantName="Test Applicant"
+        applicationId="TEST-001"
+        onPaymentSuccess={(data) => {
+          console.log("Payment successful:", data);
+          alert("Payment test completed successfully!");
+          setPaymentTestOpen(false);
+        }}
+        onPaymentError={(error) => {
+          console.error("Payment error:", error);
+          alert("Payment test failed: " + error);
+        }}
+      />
     </Box>
   );
 }
