@@ -274,11 +274,38 @@ const BackupManagement: React.FC<BackupManagementProps> = ({
         Backup & Restore Management
       </Typography>
 
+      {/* Tab Navigation */}
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Button
+          variant={activeTab === 'backups' ? 'contained' : 'text'}
+          onClick={() => setActiveTab('backups')}
+          sx={{ mr: 1 }}
+        >
+          Backup Management
+        </Button>
+        <Button
+          variant={activeTab === 'subscription' ? 'contained' : 'text'}
+          onClick={() => setActiveTab('subscription')}
+        >
+          Subscription & Settings
+        </Button>
+      </Box>
+
+      {activeTab === 'subscription' ? (
+        <SubscriptionBackupControls
+          currentSubscription={subscriptionLevel}
+          onSubscriptionChange={(newLevel) => {
+            // Handle subscription change - in real app this would update the user's subscription
+            console.log('Subscription changed to:', newLevel);
+          }}
+        />
+      ) : (
+        <>
       {/* Subscription Info */}
       <Alert severity="info" sx={{ mb: 3 }}>
         <Typography variant="subtitle2">
-          Current Plan: <strong>{subscriptionLevel}</strong> | 
-          Backup Limit: {backups.length} / {currentLimits.maxBackups} | 
+          Current Plan: <strong>{subscriptionLevel}</strong> |
+          Backup Limit: {backups.length} / {currentLimits.maxBackups} |
           Available Features: {currentLimits.features.join(', ')}
         </Typography>
       </Alert>
@@ -777,6 +804,8 @@ const BackupManagement: React.FC<BackupManagementProps> = ({
         onClose={() => setError(null)}
         message={error}
       />
+        </>
+      )}
     </Box>
   );
 };
