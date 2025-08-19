@@ -85,6 +85,8 @@ import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 
 interface Template {
   id: string;
@@ -522,6 +524,7 @@ export default function Templates() {
   const [paymentTestOpen, setPaymentTestOpen] = React.useState(false);
   const [requirePaymentBeforeSubmission, setRequirePaymentBeforeSubmission] = React.useState(true);
   const [termsAndConditions, setTermsAndConditions] = React.useState<any[]>([]);
+  const [defaultConfirmDialog, setDefaultConfirmDialog] = React.useState<Template | null>(null);
   const { companyInfo, updateCompanyInfo } = useCompanyInfo();
   const [newFieldData, setNewFieldData] = React.useState<Partial<FormField>>({
     type: "text",
@@ -623,6 +626,23 @@ export default function Templates() {
 
   const handleDeleteTemplate = (id: string) => {
     updateTemplates(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleSetAsDefault = (template: Template) => {
+    if (template.type === "Rental Application") {
+      updateTemplates(prev =>
+        prev.map(t => ({
+          ...t,
+          isDefault: t.id === template.id && t.type === "Rental Application"
+        }))
+      );
+      setDefaultConfirmDialog(null);
+      alert(`"${template.name}" has been set as the default rental application template.`);
+    }
+  };
+
+  const getDefaultTemplate = (type: Template["type"]) => {
+    return templates.find(t => t.type === type && t.isDefault);
   };
 
   const handlePreviewTemplate = (template: Template) => {
@@ -1315,6 +1335,16 @@ export default function Templates() {
                     title="Edit"
                   >
                     <EditRoundedIcon />
+                  </IconButton>
+                )}
+                {template.type === "Rental Application" && (
+                  <IconButton
+                    size="small"
+                    color={template.isDefault ? "success" : "default"}
+                    onClick={() => setDefaultConfirmDialog(template)}
+                    title={template.isDefault ? "Default Template" : "Set as Default"}
+                  >
+                    {template.isDefault ? <StarRoundedIcon /> : <StarBorderRoundedIcon />}
                   </IconButton>
                 )}
                 {canDeleteTemplates() && (
