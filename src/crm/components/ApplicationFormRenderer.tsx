@@ -765,7 +765,10 @@ export default function ApplicationFormRenderer({
           }
         } else {
           // For other fields, check if value exists and is not empty
-          if (!value || (Array.isArray(value) && value.length === 0) || value === '') {
+          // Handle different data types properly
+          if (value === null || value === undefined || value === '' ||
+              (Array.isArray(value) && value.length === 0) ||
+              (typeof value === 'string' && value.trim() === '')) {
             console.log(`Field ${field.label} (${field.id}) is required but has no value:`, value);
             return false;
           }
