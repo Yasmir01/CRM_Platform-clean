@@ -876,6 +876,7 @@ export default function Applications() {
       {/* Action Menu */}
       {actionMenuAnchor && (
         <Menu
+          id="action-menu"
           anchorEl={actionMenuAnchor}
           open={Boolean(actionMenuAnchor)}
           onClose={handleActionMenuClose}
