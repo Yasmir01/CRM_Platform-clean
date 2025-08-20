@@ -887,19 +887,77 @@ export default function Applications() {
                               {fieldLabel}
                             </Typography>
                             {Array.isArray(files) ? files.map((file: any, index: number) => (
-                              <Chip
-                                key={index}
-                                label={file.name || `File ${index + 1}`}
-                                size="small"
-                                variant="outlined"
-                                sx={{ mr: 1, mb: 1 }}
-                              />
+                              <Card key={index} variant="outlined" sx={{ mr: 1, mb: 1, display: 'inline-block', maxWidth: 300 }}>
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                  <Stack direction="row" spacing={1} alignItems="center">
+                                    {getFileIcon(file)}
+                                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                      <Typography variant="body2" noWrap title={file.name}>
+                                        {file.name || `File ${index + 1}`}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {formatFileSize(file.size || 0)} • {file.type || 'Unknown'}
+                                      </Typography>
+                                    </Box>
+                                    <Stack direction="row" spacing={0.5}>
+                                      <Tooltip title="View File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileView(file)}
+                                          color="primary"
+                                        >
+                                          <VisibilityIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="Download File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileDownload(file)}
+                                          color="primary"
+                                        >
+                                          <DownloadIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Stack>
+                                  </Stack>
+                                </CardContent>
+                              </Card>
                             )) : (
-                              <Chip
-                                label={files.name || 'File'}
-                                size="small"
-                                variant="outlined"
-                              />
+                              <Card variant="outlined" sx={{ mr: 1, mb: 1, display: 'inline-block', maxWidth: 300 }}>
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                  <Stack direction="row" spacing={1} alignItems="center">
+                                    {getFileIcon(files)}
+                                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                      <Typography variant="body2" noWrap title={files.name}>
+                                        {files.name || 'File'}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {formatFileSize(files.size || 0)} • {files.type || 'Unknown'}
+                                      </Typography>
+                                    </Box>
+                                    <Stack direction="row" spacing={0.5}>
+                                      <Tooltip title="View File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileView(files)}
+                                          color="primary"
+                                        >
+                                          <VisibilityIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="Download File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileDownload(files)}
+                                          color="primary"
+                                        >
+                                          <DownloadIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Stack>
+                                  </Stack>
+                                </CardContent>
+                              </Card>
                             )}
                           </Grid>
                         );
