@@ -161,7 +161,16 @@ const mockApplications: Application[] = [
     submittedDate: "2024-01-19",
     monthlyIncome: 4800,
     moveInDate: "2024-02-20",
-    notes: "Payment declined - insufficient funds"
+    notes: "Payment declined - insufficient funds",
+    fileUploads: {
+      "document_upload": [
+        { name: "social_security_card.jpg", size: 89000, type: "image/jpeg", lastModified: 1690000700000 }
+      ],
+      "rental_history": [
+        { name: "previous_lease.pdf", size: 203000, type: "application/pdf", lastModified: 1690000800000 },
+        { name: "rental_references.docx", size: 45000, type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", lastModified: 1690000900000 }
+      ]
+    }
   }
 ];
 
