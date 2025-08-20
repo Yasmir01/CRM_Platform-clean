@@ -338,8 +338,12 @@ export default function Applications() {
               />
               <Tooltip title="More Actions">
                 <IconButton
+                  id="action-menu-button"
                   size="small"
                   onClick={(e) => handleActionMenuOpen(e, application)}
+                  aria-controls={actionMenuAnchor ? 'action-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={actionMenuAnchor ? 'true' : undefined}
                 >
                   <MoreVertIcon />
                 </IconButton>
