@@ -393,6 +393,28 @@ export default function Applications() {
     });
   };
 
+  // Auto-expand first file when viewing an application
+  React.useEffect(() => {
+    if (selectedApplication && inlinePreviewMode && selectedApplication.fileUploads) {
+      const fileUploadsToDisplay = Array.isArray(selectedApplication.fileUploads)
+        ? selectedApplication.fileUploads.reduce((acc: any, upload: any) => {
+            acc[upload.fieldId] = upload.files;
+            return acc;
+          }, {})
+        : selectedApplication.fileUploads;
+
+      const firstFieldId = Object.keys(fileUploadsToDisplay)[0];
+      if (firstFieldId) {
+        const firstFileId = `${firstFieldId}_0`;
+        setExpandedFiles(prev => {
+          const newSet = new Set(prev);
+          newSet.add(firstFileId);
+          return newSet;
+        });
+      }
+    }
+  }, [selectedApplication?.id, inlinePreviewMode]);
+
   const renderInlineFilePreview = (file: any, fieldId: string, index: number) => {
     const fileId = `${fieldId}_${index}`;
     const isExpanded = expandedFiles.has(fileId);
