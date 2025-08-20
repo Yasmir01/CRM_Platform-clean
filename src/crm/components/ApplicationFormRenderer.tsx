@@ -1062,6 +1062,8 @@ export default function ApplicationFormRenderer({
         paymentMethods={template.paymentMethods || []}
         applicantName={formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Applicant"}
         applicationId={`TEMP-${Date.now()}`}
+        grantorNeeded={formData["grantor_needed"] === 'yes'}
+        formData={formData}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentError={(error) => {
           console.error("Payment error:", error);
