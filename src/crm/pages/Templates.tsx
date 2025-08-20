@@ -78,6 +78,7 @@ import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
@@ -518,6 +519,22 @@ export default function Templates() {
 
   // Form Builder State
   const [formFields, setFormFields] = React.useState<FormField[]>([]);
+
+  // Helper function to check if a section has been added
+  const isSectionAdded = (sectionName: string) => {
+    return formFields.some(f =>
+      (f.type === 'section' && f.label === sectionName) ||
+      f.section === sectionName
+    );
+  };
+
+  // Helper function to count how many times a section has been added
+  const getSectionCount = (sectionName: string) => {
+    return formFields.filter(f =>
+      (f.type === 'section' && f.label === sectionName) ||
+      f.section === sectionName
+    ).length;
+  };
   const [editingField, setEditingField] = React.useState<FormField | null>(null);
   const [fieldDialogOpen, setFieldDialogOpen] = React.useState(false);
   const [paymentSettingsOpen, setPaymentSettingsOpen] = React.useState(false);
