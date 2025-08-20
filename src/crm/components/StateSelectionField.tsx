@@ -242,14 +242,17 @@ export default function StateSelectionField({
         />
       )}
       renderTags={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
-            variant="outlined"
-            label={typeof option === 'string' ? option : option.name}
-            {...getTagProps({ index })}
-            key={index}
-          />
-        ))
+        value.map((option, index) => {
+          const { key, ...tagProps } = getTagProps({ index });
+          return (
+            <Chip
+              key={key || index}
+              variant="outlined"
+              label={typeof option === 'string' ? option : option.name}
+              {...tagProps}
+            />
+          );
+        })
       }
     />
   );
