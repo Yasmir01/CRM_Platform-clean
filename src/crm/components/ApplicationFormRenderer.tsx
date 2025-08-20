@@ -241,14 +241,28 @@ export default function ApplicationFormRenderer({
     setFileUploads(prev => {
       const existing = prev.find(upload => upload.fieldId === fieldId);
       if (existing) {
-        return prev.map(upload => 
-          upload.fieldId === fieldId 
-            ? { ...upload, files }
+        // For multiple file uploads, append new files to existing ones
+        // For single file uploads, replace the existing file
+        const field = formFields.find(f => f.id === fieldId);
+        const maxFiles = field?.maxFiles || 5;
+
+        let updatedFiles = files;
+        if (maxFiles > 1) {
+          // Append new files to existing, but respect maxFiles limit
+          updatedFiles = [...existing.files, ...files].slice(0, maxFiles);
+        }
+
+        return prev.map(upload =>
+          upload.fieldId === fieldId
+            ? { ...upload, files: updatedFiles }
             : upload
         );
       }
       return [...prev, { fieldId, files }];
     });
+
+    // Mark form as having unsaved changes
+    setHasUnsavedChanges(true);
   };
 
   const validateCurrentStep = () => {
