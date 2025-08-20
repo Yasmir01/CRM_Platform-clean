@@ -620,6 +620,173 @@ export default function Applications() {
                   <Typography variant="body2">{selectedApplication.notes}</Typography>
                 </Paper>
               )}
+
+              {/* Complete Application Form Data */}
+              {selectedApplication.formData && Object.keys(selectedApplication.formData).length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Complete Application Data</Typography>
+                  <Grid container spacing={2}>
+                    {(() => {
+                      const formData = selectedApplication.formData || {};
+                      const template = templates.find(t => t.id === selectedApplication.templateId);
+
+                      if (template && template.formFields) {
+                        // Organize fields by sections
+                        const fieldsBySection: { [key: string]: any[] } = {};
+                        const unSectionedFields: any[] = [];
+
+                        template.formFields.forEach(field => {
+                          if (field.type === 'section') return; // Skip section headers
+
+                          const value = formData[field.id];
+                          if (value !== undefined && value !== null && value !== '') {
+                            const fieldWithValue = { ...field, value };
+
+                            if (field.section) {
+                              if (!fieldsBySection[field.section]) {
+                                fieldsBySection[field.section] = [];
+                              }
+                              fieldsBySection[field.section].push(fieldWithValue);
+                            } else {
+                              unSectionedFields.push(fieldWithValue);
+                            }
+                          }
+                        });
+
+                        return (
+                          <>
+                            {/* Render fields by sections */}
+                            {Object.entries(fieldsBySection).map(([sectionName, fields]) => (
+                              <Grid item xs={12} key={sectionName}>
+                                <Typography variant="subtitle1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
+                                  {sectionName}
+                                </Typography>
+                                <Grid container spacing={2}>
+                                  {fields.map((field) => (
+                                    <Grid item xs={12} sm={6} key={field.id}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {field.label}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {field.type === 'checkbox' && Array.isArray(field.value)
+                                          ? field.value.join(', ')
+                                          : field.type === 'yesno'
+                                          ? field.value ? 'Yes' : 'No'
+                                          : field.type === 'date'
+                                          ? new Date(field.value).toLocaleDateString()
+                                          : field.type === 'number'
+                                          ? typeof field.value === 'number' ? field.value.toLocaleString() : field.value
+                                          : String(field.value)
+                                        }
+                                      </Typography>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Grid>
+                            ))}
+
+                            {/* Render unsectioned fields */}
+                            {unSectionedFields.length > 0 && (
+                              <Grid item xs={12}>
+                                <Typography variant="subtitle1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
+                                  Additional Information
+                                </Typography>
+                                <Grid container spacing={2}>
+                                  {unSectionedFields.map((field) => (
+                                    <Grid item xs={12} sm={6} key={field.id}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {field.label}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {field.type === 'checkbox' && Array.isArray(field.value)
+                                          ? field.value.join(', ')
+                                          : field.type === 'yesno'
+                                          ? field.value ? 'Yes' : 'No'
+                                          : field.type === 'date'
+                                          ? new Date(field.value).toLocaleDateString()
+                                          : field.type === 'number'
+                                          ? typeof field.value === 'number' ? field.value.toLocaleString() : field.value
+                                          : String(field.value)
+                                        }
+                                      </Typography>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Grid>
+                            )}
+                          </>
+                        );
+                      } else {
+                        // Fallback: show raw form data if template not found
+                        return Object.entries(formData).map(([key, value]) => (
+                          <Grid item xs={12} sm={6} key={key}>
+                            <Typography variant="body2" color="text.secondary">
+                              {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </Typography>
+                            <Typography variant="body1">
+                              {Array.isArray(value) ? value.join(', ') : String(value)}
+                            </Typography>
+                          </Grid>
+                        ));
+                      }
+                    })()}
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* File Uploads */}
+              {selectedApplication.fileUploads && Object.keys(selectedApplication.fileUploads).length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
+                  <Grid container spacing={2}>
+                    {Object.entries(selectedApplication.fileUploads).map(([fieldId, files]) => {
+                      const template = templates.find(t => t.id === selectedApplication.templateId);
+                      const field = template?.formFields?.find(f => f.id === fieldId);
+                      const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                      return (
+                        <Grid item xs={12} key={fieldId}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            {fieldLabel}
+                          </Typography>
+                          {Array.isArray(files) ? files.map((file: any, index: number) => (
+                            <Chip
+                              key={index}
+                              label={file.name || `File ${index + 1}`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mr: 1, mb: 1 }}
+                            />
+                          )) : (
+                            <Chip
+                              label={files.name || 'File'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* Terms Accepted */}
+              {selectedApplication.termsAccepted && selectedApplication.termsAccepted.length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Terms & Conditions</Typography>
+                  <Stack spacing={1}>
+                    {selectedApplication.termsAccepted.map((term: any, index: number) => (
+                      <Stack direction="row" spacing={1} alignItems="center" key={index}>
+                        <CheckCircleIcon color="success" fontSize="small" />
+                        <Typography variant="body2">
+                          {term.title || `Term ${index + 1}`} - Accepted on {new Date(term.acceptedAt).toLocaleDateString()}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Paper>
+              )}
             </Stack>
           )}
         </DialogContent>
