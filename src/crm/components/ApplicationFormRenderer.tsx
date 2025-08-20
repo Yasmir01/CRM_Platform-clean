@@ -951,6 +951,9 @@ export default function ApplicationFormRenderer({
           const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
           if (!uploadedFiles || uploadedFiles.files.length === 0) return false;
           break;
+        case 'terms':
+          if (!value || value === '') return false;
+          break;
         default:
           // text, email, phone, number, date, textarea, signature
           if (!value || value === '' || (typeof value === 'string' && value.trim() === '')) {
