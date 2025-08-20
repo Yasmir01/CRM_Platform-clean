@@ -870,50 +870,73 @@ export default function Applications() {
       </Dialog>
 
       {/* Action Menu */}
-      <Menu
-        anchorEl={actionMenuAnchor}
-        open={Boolean(actionMenuAnchor)}
-        onClose={handleActionMenuClose}
-      >
-        {selectedAppForAction && (
-          <>
-            <MenuItem onClick={() => handleViewApplication(selectedAppForAction)}>
-              <VisibilityIcon sx={{ mr: 1 }} fontSize="small" />
-              View Details
-            </MenuItem>
-            {selectedAppForAction.status === "New" && (
-              <>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Pending")}>
-                  <PendingIcon sx={{ mr: 1 }} fontSize="small" />
-                  Move to Pending
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Denied")}>
-                  <CancelIcon sx={{ mr: 1 }} fontSize="small" />
-                  Deny Application
-                </MenuItem>
-              </>
-            )}
-            {selectedAppForAction.status === "Pending" && (
-              <>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Archived")}>
-                  <CheckCircleRoundedIcon sx={{ mr: 1 }} fontSize="small" />
-                  Approve & Archive
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Denied")}>
-                  <CancelIcon sx={{ mr: 1 }} fontSize="small" />
-                  Deny Application
-                </MenuItem>
-              </>
-            )}
-            {selectedAppForAction.status === "Denied" && (
-              <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Pending")}>
-                <PendingIcon sx={{ mr: 1 }} fontSize="small" />
-                Reconsider Application
+      {actionMenuAnchor && (
+        <Menu
+          anchorEl={actionMenuAnchor}
+          open={Boolean(actionMenuAnchor)}
+          onClose={handleActionMenuClose}
+          MenuListProps={{
+            'aria-labelledby': 'action-menu-button',
+          }}
+        >
+          {selectedAppForAction && (
+            <>
+              <MenuItem onClick={() => {
+                handleViewApplication(selectedAppForAction);
+                handleActionMenuClose();
+              }}>
+                <VisibilityIcon sx={{ mr: 1 }} fontSize="small" />
+                View Details
               </MenuItem>
-            )}
-          </>
-        )}
-      </Menu>
+              {selectedAppForAction.status === "New" && (
+                <>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Pending");
+                    handleActionMenuClose();
+                  }}>
+                    <PendingIcon sx={{ mr: 1 }} fontSize="small" />
+                    Move to Pending
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Denied");
+                    handleActionMenuClose();
+                  }}>
+                    <CancelIcon sx={{ mr: 1 }} fontSize="small" />
+                    Deny Application
+                  </MenuItem>
+                </>
+              )}
+              {selectedAppForAction.status === "Pending" && (
+                <>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Archived");
+                    handleActionMenuClose();
+                  }}>
+                    <CheckCircleRoundedIcon sx={{ mr: 1 }} fontSize="small" />
+                    Approve & Archive
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Denied");
+                    handleActionMenuClose();
+                  }}>
+                    <CancelIcon sx={{ mr: 1 }} fontSize="small" />
+                    Deny Application
+                  </MenuItem>
+                </>
+              )}
+              {selectedAppForAction.status === "Denied" && (
+                <MenuItem onClick={() => {
+                  handleStatusChange(selectedAppForAction.id, "Pending");
+                  handleActionMenuClose();
+                }}>
+                  <PendingIcon sx={{ mr: 1 }} fontSize="small" />
+                  Reconsider Application
+                </MenuItem>
+              )}
+            </>
+          )}
+        </Menu>
+      )}
 
       {/* Workflow Activity Log */}
       {workflowLog.length > 0 && (
