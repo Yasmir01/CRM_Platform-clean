@@ -95,6 +95,7 @@ interface ApplicationFormRendererProps {
   propertyAddress?: string;
   onSubmit: (applicationData: any) => void;
   onCancel: () => void;
+  onUnsavedChanges?: (hasChanges: boolean) => void;
   isOpen: boolean;
 }
 
