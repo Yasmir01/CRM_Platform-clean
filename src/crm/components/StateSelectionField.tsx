@@ -187,18 +187,21 @@ export default function StateSelectionField({
     return filtered;
   };
 
-  const renderOption = (props: any, option: StateOption) => (
-    <Box component="li" {...props}>
-      <Box>
-        <Typography variant="body1">
-          {option.name}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {option.code === 'CUSTOM' ? 'Custom entry' : option.code}
-        </Typography>
+  const renderOption = (props: any, option: StateOption) => {
+    const { key, ...otherProps } = props;
+    return (
+      <Box component="li" key={key} {...otherProps}>
+        <Box>
+          <Typography variant="body1">
+            {option.name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {option.code === 'CUSTOM' ? 'Custom entry' : option.code}
+          </Typography>
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
   return (
     <Autocomplete
@@ -239,14 +242,17 @@ export default function StateSelectionField({
         />
       )}
       renderTags={(value, getTagProps) =>
-        value.map((option, index) => (
-          <Chip
-            variant="outlined"
-            label={typeof option === 'string' ? option : option.name}
-            {...getTagProps({ index })}
-            key={index}
-          />
-        ))
+        value.map((option, index) => {
+          const { key, ...tagProps } = getTagProps({ index });
+          return (
+            <Chip
+              variant="outlined"
+              label={typeof option === 'string' ? option : option.name}
+              key={key || index}
+              {...tagProps}
+            />
+          );
+        })
       }
     />
   );

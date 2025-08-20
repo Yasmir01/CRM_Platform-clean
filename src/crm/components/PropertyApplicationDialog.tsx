@@ -84,6 +84,8 @@ export default function PropertyApplicationDialog({
   const [propertyCode, setPropertyCode] = React.useState<string>("");
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
   const [applicationData, setApplicationData] = React.useState<any>(null);
+  const [showCloseConfirmation, setShowCloseConfirmation] = React.useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const notifications = useNotifications();
 
   React.useEffect(() => {
@@ -189,10 +191,28 @@ export default function PropertyApplicationDialog({
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges && showApplicationForm) {
+      setShowCloseConfirmation(true);
+    } else {
+      setShowApplicationForm(false);
+      setShowSuccessMessage(false);
+      setApplicationData(null);
+      setHasUnsavedChanges(false);
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowCloseConfirmation(false);
     setShowApplicationForm(false);
     setShowSuccessMessage(false);
     setApplicationData(null);
+    setHasUnsavedChanges(false);
     onClose();
+  };
+
+  const handleCancelClose = () => {
+    setShowCloseConfirmation(false);
   };
 
   if (!property) return null;
@@ -381,7 +401,8 @@ export default function PropertyApplicationDialog({
           propertyAddress={property.address}
           isOpen={showApplicationForm}
           onSubmit={handleApplicationSubmit}
-          onCancel={() => setShowApplicationForm(false)}
+          onCancel={handleClose}
+          onUnsavedChanges={setHasUnsavedChanges}
         />
       )}
 
@@ -408,6 +429,32 @@ export default function PropertyApplicationDialog({
           </Typography>
         </Alert>
       </Snackbar>
+
+      {/* Unsaved Changes Confirmation Dialog */}
+      <Dialog open={showCloseConfirmation} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <InfoIcon color="warning" />
+            <Typography variant="h6">Unsaved Changes</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            You have unsaved changes in your application. If you close now, your progress will be lost.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Your form data is automatically saved as a draft every few seconds while you work.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelClose} variant="outlined">
+            Continue Editing
+          </Button>
+          <Button onClick={handleConfirmClose} color="error" variant="contained">
+            Discard & Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

@@ -78,6 +78,7 @@ import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
@@ -518,6 +519,32 @@ export default function Templates() {
 
   // Form Builder State
   const [formFields, setFormFields] = React.useState<FormField[]>([]);
+
+  // Helper function to check if a section has been added
+  const isSectionAdded = (sectionName: string) => {
+    return formFields.some(f =>
+      (f.type === 'section' && f.label === sectionName) ||
+      f.section === sectionName
+    );
+  };
+
+  // Helper function to count how many times a section has been added
+  const getSectionCount = (sectionName: string) => {
+    // Only count the actual section header fields, not the individual fields within the section
+    return formFields.filter(f =>
+      f.type === 'section' && f.label === sectionName
+    ).length;
+  };
+
+  // Helper function to count file upload fields
+  const getFileUploadCount = () => {
+    return formFields.filter(f => f.type === 'file_upload').length;
+  };
+
+  // Helper function to count terms and conditions fields
+  const getTermsCount = () => {
+    return formFields.filter(f => f.type === 'terms').length;
+  };
   const [editingField, setEditingField] = React.useState<FormField | null>(null);
   const [fieldDialogOpen, setFieldDialogOpen] = React.useState(false);
   const [paymentSettingsOpen, setPaymentSettingsOpen] = React.useState(false);
@@ -1001,14 +1028,39 @@ export default function Templates() {
           <Card variant="outlined">
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                {field.label}
+                {field.label} {field.required && "*"}
               </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Terms and conditions component will appear here
+              {field.placeholder && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {field.placeholder}
+                </Typography>
+              )}
+              {field.description && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {field.description}
+                </Typography>
+              )}
+              {field.options && field.options.length > 0 ? (
+                <Box sx={{ mt: 2 }}>
+                  {field.options.map((option, index) => (
+                    <FormControlLabel
+                      key={index}
+                      control={<Radio />}
+                      label={option}
+                      sx={{ display: 'block', mb: 1 }}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <FormControlLabel
+                  control={<Radio />}
+                  label="I / We understand and agree"
+                  sx={{ mt: 1 }}
+                />
+              )}
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                Read carefully and if agree, click on the I / We Understand and agree to proceed
               </Typography>
-              <Button variant="outlined" size="small">
-                Review Terms
-              </Button>
             </CardContent>
           </Card>
         );
@@ -1459,11 +1511,11 @@ export default function Templates() {
                 <Typography variant="h6" gutterBottom>
                   Pre-built Sections
                 </Typography>
-                
+
                 <Alert severity="info" sx={{ mb: 2 }}>
                   Click "Add Section" to include professional rental application sections with all required fields.
                 </Alert>
-                
+
                 <Stack spacing={2}>
                   {applicationSections.map((section) => (
                     <Card key={section.id} variant="outlined">
@@ -1473,11 +1525,41 @@ export default function Templates() {
                             {section.icon}
                           </Avatar>
                           <Box sx={{ flexGrow: 1 }}>
-                            <Typography variant="subtitle2" fontWeight="bold">
-                              {section.name}
-                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                              <Typography variant="subtitle2" fontWeight="bold">
+                                {section.name}
+                              </Typography>
+                              {isSectionAdded(section.name) && (
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                  <CheckCircleIcon
+                                    color="success"
+                                    fontSize="small"
+                                    sx={{ fontSize: 16 }}
+                                  />
+                                  {getSectionCount(section.name) > 1 && (
+                                    <CheckCircleIcon
+                                      color="success"
+                                      fontSize="small"
+                                      sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                    />
+                                  )}
+                                </Box>
+                              )}
+                            </Stack>
                             <Typography variant="caption" color="text.secondary">
                               {section.defaultFields.length} fields
+                              {isSectionAdded(section.name) && (
+                                <Chip
+                                  size="small"
+                                  label={getSectionCount(section.name) > 1 ?
+                                    `Added ${getSectionCount(section.name)}x` :
+                                    'Added'
+                                  }
+                                  color="success"
+                                  variant="outlined"
+                                  sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                                />
+                              )}
                             </Typography>
                           </Box>
                         </Stack>
@@ -1531,7 +1613,26 @@ export default function Templates() {
                   <Button
                     variant="outlined"
                     fullWidth
-                    startIcon={<SecurityRoundedIcon />}
+                    startIcon={
+                      getTermsCount() > 0 ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircleIcon
+                            color="success"
+                            fontSize="small"
+                            sx={{ fontSize: 16 }}
+                          />
+                          {getTermsCount() > 1 && (
+                            <CheckCircleIcon
+                              color="success"
+                              fontSize="small"
+                              sx={{ fontSize: 16, marginLeft: -0.5 }}
+                            />
+                          )}
+                        </Box>
+                      ) : (
+                        <SecurityRoundedIcon />
+                      )
+                    }
                     onClick={() => {
                       const termsField: FormField = {
                         id: `terms_${Date.now()}`,
@@ -1544,12 +1645,43 @@ export default function Templates() {
                     }}
                   >
                     Add Terms & Conditions
+                    {getTermsCount() > 0 && (
+                      <Chip
+                        size="small"
+                        label={getTermsCount() > 1 ?
+                          `Added ${getTermsCount()}x` :
+                          'Added'
+                        }
+                        color="success"
+                        variant="outlined"
+                        sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
                   </Button>
 
                   <Button
                     variant="outlined"
                     fullWidth
-                    startIcon={<AddRoundedIcon />}
+                    startIcon={
+                      getFileUploadCount() > 0 ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircleIcon
+                            color="success"
+                            fontSize="small"
+                            sx={{ fontSize: 16 }}
+                          />
+                          {getFileUploadCount() > 1 && (
+                            <CheckCircleIcon
+                              color="success"
+                              fontSize="small"
+                              sx={{ fontSize: 16, marginLeft: -0.5 }}
+                            />
+                          )}
+                        </Box>
+                      ) : (
+                        <AddRoundedIcon />
+                      )
+                    }
                     onClick={() => {
                       const fileField: FormField = {
                         id: `file_${Date.now()}`,
@@ -1565,6 +1697,18 @@ export default function Templates() {
                     }}
                   >
                     Add File Upload
+                    {getFileUploadCount() > 0 && (
+                      <Chip
+                        size="small"
+                        label={getFileUploadCount() > 1 ?
+                          `Added ${getFileUploadCount()}x` :
+                          'Added'
+                        }
+                        color="success"
+                        variant="outlined"
+                        sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
                   </Button>
                 </Stack>
               </Paper>
@@ -1773,6 +1917,7 @@ export default function Templates() {
                     <MenuItem value="checkbox">Checkbox</MenuItem>
                     <MenuItem value="radio">Radio Buttons</MenuItem>
                     <MenuItem value="yesno">Yes/No</MenuItem>
+                    <MenuItem value="terms">Terms & Conditions</MenuItem>
                     <MenuItem value="signature">Signature</MenuItem>
                   </Select>
                 </FormControl>
@@ -1816,19 +1961,19 @@ export default function Templates() {
               placeholder="Additional information to help users fill out this field"
             />
 
-            {(newFieldData.type === "select" || newFieldData.type === "radio") && (
+            {(newFieldData.type === "select" || newFieldData.type === "radio" || newFieldData.type === "terms") && (
               <TextField
-                label="Options (one per line)"
+                label={newFieldData.type === "terms" ? "Agreement Options (one per line)" : "Options (one per line)"}
                 fullWidth
                 multiline
                 rows={4}
                 value={newFieldData.options?.join("\n") || ""}
-                onChange={(e) => setNewFieldData({ 
-                  ...newFieldData, 
-                  options: e.target.value.split("\n").filter(option => option.trim()) 
+                onChange={(e) => setNewFieldData({
+                  ...newFieldData,
+                  options: e.target.value.split("\n").filter(option => option.trim())
                 })}
-                placeholder="Option 1&#10;Option 2&#10;Option 3"
-                helperText="Enter each option on a new line"
+                placeholder={newFieldData.type === "terms" ? "I / We understand and agree&#10;I accept the terms and conditions" : "Option 1&#10;Option 2&#10;Option 3"}
+                helperText={newFieldData.type === "terms" ? "Enter agreement options for terms and conditions" : "Enter each option on a new line"}
               />
             )}
           </Stack>
@@ -1924,11 +2069,41 @@ export default function Templates() {
                                 {section.icon}
                               </Avatar>
                               <Box sx={{ flexGrow: 1 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                  {section.name}
-                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Typography variant="subtitle2" fontWeight="bold">
+                                    {section.name}
+                                  </Typography>
+                                  {isSectionAdded(section.name) && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                      <CheckCircleIcon
+                                        color="success"
+                                        fontSize="small"
+                                        sx={{ fontSize: 16 }}
+                                      />
+                                      {getSectionCount(section.name) > 1 && (
+                                        <CheckCircleIcon
+                                          color="success"
+                                          fontSize="small"
+                                          sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                        />
+                                      )}
+                                    </Box>
+                                  )}
+                                </Stack>
                                 <Typography variant="caption" color="text.secondary">
                                   {section.defaultFields.length} fields
+                                  {isSectionAdded(section.name) && (
+                                    <Chip
+                                      size="small"
+                                      label={getSectionCount(section.name) > 1 ?
+                                        `Added ${getSectionCount(section.name)}x` :
+                                        'Added'
+                                      }
+                                      color="success"
+                                      variant="outlined"
+                                      sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                                    />
+                                  )}
                                 </Typography>
                               </Box>
                             </Stack>

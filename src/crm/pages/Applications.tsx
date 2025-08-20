@@ -196,7 +196,36 @@ export default function Applications() {
     const savedApplications = LocalStorageService.getApplications();
     setTemplates(savedTemplates);
     if (savedApplications.length > 0) {
-      setApplications(savedApplications);
+      // Normalize applications to ensure consistent data structure
+      const normalizeApp = (app: any) => {
+        const applicantName =
+          app.applicantName ||
+          app.formData?.applicant_name ||
+          ((app.formData?.first_name || app.formData?.last_name)
+            ? `${app.formData?.first_name || ''} ${app.formData?.last_name || ''}`.trim()
+            : undefined) ||
+          'Unknown Applicant';
+
+        const applicantEmail =
+          app.applicantEmail ||
+          app.formData?.email ||
+          app.formData?.applicant_email ||
+          '';
+
+        const applicantPhone =
+          app.applicantPhone ||
+          app.formData?.phone ||
+          app.formData?.applicant_phone ||
+          '';
+
+        return { ...app, applicantName, applicantEmail, applicantPhone };
+      };
+
+      const normalized = savedApplications.map(normalizeApp);
+      setApplications(normalized);
+
+      // Save the normalized data back to localStorage to prevent future issues
+      LocalStorageService.saveApplications(normalized);
     }
   }, []);
 
@@ -206,7 +235,7 @@ export default function Applications() {
       const propertyName = property ? property.name : (app.propertyName || '');
 
       return app.status === status &&
-        (app.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ((app.applicantName || 'Unknown Applicant').toLowerCase().includes(searchTerm.toLowerCase()) ||
          propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
          app.applicantEmail.toLowerCase().includes(searchTerm.toLowerCase()));
     });
@@ -286,7 +315,7 @@ export default function Applications() {
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
               <Typography variant="h6" fontWeight="medium">
-                {application.applicantName}
+                {application.applicantName || 'Unknown Applicant'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {(() => {
@@ -302,7 +331,7 @@ export default function Applications() {
             </Box>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
-                label={`$${application.applicationFee}`}
+                label={`$${application.applicationFee || 0}`}
                 size="small"
                 color={getPaymentStatusColor(application.paymentStatus)}
                 variant="outlined"
@@ -328,7 +357,7 @@ export default function Applications() {
             <Stack direction="row" spacing={1} alignItems="center">
               <PersonIcon fontSize="small" color="action" />
               <Typography variant="body2">
-                Income: ${application.monthlyIncome.toLocaleString()}
+                Income: ${(application.monthlyIncome || 0).toLocaleString()}
               </Typography>
             </Stack>
           </Stack>
@@ -485,7 +514,7 @@ export default function Applications() {
               <Alert
                 severity={selectedApplication.paymentStatus === "Paid" ? "success" : selectedApplication.paymentStatus === "Pending" ? "warning" : "error"}
               >
-                Application fee ${selectedApplication.applicationFee} - {selectedApplication.paymentStatus} via {selectedApplication.paymentMethod}
+                Application fee ${selectedApplication.applicationFee || 0} - {selectedApplication.paymentStatus} via {selectedApplication.paymentMethod}
               </Alert>
 
               {/* Applicant Information */}
@@ -495,7 +524,7 @@ export default function Applications() {
                   <Grid item xs={12} sm={6}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <PersonIcon fontSize="small" />
-                      <Typography>{selectedApplication.applicantName}</Typography>
+                      <Typography>{selectedApplication.applicantName || 'Unknown Applicant'}</Typography>
                     </Stack>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -550,7 +579,7 @@ export default function Applications() {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Monthly Income</Typography>
-                    <Typography variant="h6">${selectedApplication.monthlyIncome.toLocaleString()}</Typography>
+                    <Typography variant="h6">${(selectedApplication.monthlyIncome || 0).toLocaleString()}</Typography>
                   </Grid>
                   {selectedApplication.creditScore && (
                     <Grid item xs={12} sm={6}>
@@ -561,17 +590,45 @@ export default function Applications() {
                 </Grid>
               </Paper>
 
-              {/* Background Checks */}
+              {/* TransUnion Integration & Background Checks */}
               <Paper sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>Background Checks</Typography>
+                <Typography variant="h6" gutterBottom>TransUnion Screening</Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Credit Report</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        label={selectedApplication.creditScore ? `Score: ${selectedApplication.creditScore}` : "Not Requested"}
+                        size="small"
+                        color={selectedApplication.creditScore ? "success" : "default"}
+                      />
+                      {selectedApplication.paymentStatus === "Paid" && !selectedApplication.creditScore && (
+                        <Chip
+                          label="Available"
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Background Check</Typography>
-                    <Chip
-                      label={selectedApplication.backgroundCheck || "Not Started"}
-                      size="small"
-                      color={selectedApplication.backgroundCheck === "Approved" ? "success" : selectedApplication.backgroundCheck === "Failed" ? "error" : "warning"}
-                    />
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        label={selectedApplication.backgroundCheck || "Not Started"}
+                        size="small"
+                        color={selectedApplication.backgroundCheck === "Approved" ? "success" : selectedApplication.backgroundCheck === "Failed" ? "error" : "warning"}
+                      />
+                      {selectedApplication.paymentStatus === "Paid" && !selectedApplication.backgroundCheck && (
+                        <Chip
+                          label="Available"
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Employment Verification</Typography>
@@ -581,7 +638,27 @@ export default function Applications() {
                       color={selectedApplication.employmentVerification === "Verified" ? "success" : selectedApplication.employmentVerification === "Failed" ? "error" : "warning"}
                     />
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Integration Status</Typography>
+                    <Chip
+                      label={selectedApplication.paymentStatus === "Paid" ? "Active" : "Pending Payment"}
+                      size="small"
+                      color={selectedApplication.paymentStatus === "Paid" ? "success" : "warning"}
+                    />
+                  </Grid>
                 </Grid>
+
+                {selectedApplication.paymentStatus === "Paid" && (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    TransUnion integration is active. Credit reports and background checks will be automatically requested when the application moves to pending status with proper consent.
+                  </Alert>
+                )}
+
+                {selectedApplication.paymentStatus !== "Paid" && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    TransUnion integration will activate once the application fee is paid.
+                  </Alert>
+                )}
               </Paper>
 
               {/* Notes */}
@@ -589,6 +666,173 @@ export default function Applications() {
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Notes</Typography>
                   <Typography variant="body2">{selectedApplication.notes}</Typography>
+                </Paper>
+              )}
+
+              {/* Complete Application Form Data */}
+              {selectedApplication.formData && Object.keys(selectedApplication.formData).length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Complete Application Data</Typography>
+                  <Grid container spacing={2}>
+                    {(() => {
+                      const formData = selectedApplication.formData || {};
+                      const template = templates.find(t => t.id === selectedApplication.templateId);
+
+                      if (template && template.formFields) {
+                        // Organize fields by sections
+                        const fieldsBySection: { [key: string]: any[] } = {};
+                        const unSectionedFields: any[] = [];
+
+                        template.formFields.forEach(field => {
+                          if (field.type === 'section') return; // Skip section headers
+
+                          const value = formData[field.id];
+                          if (value !== undefined && value !== null && value !== '') {
+                            const fieldWithValue = { ...field, value };
+
+                            if (field.section) {
+                              if (!fieldsBySection[field.section]) {
+                                fieldsBySection[field.section] = [];
+                              }
+                              fieldsBySection[field.section].push(fieldWithValue);
+                            } else {
+                              unSectionedFields.push(fieldWithValue);
+                            }
+                          }
+                        });
+
+                        return (
+                          <>
+                            {/* Render fields by sections */}
+                            {Object.entries(fieldsBySection).map(([sectionName, fields]) => (
+                              <Grid item xs={12} key={sectionName}>
+                                <Typography variant="subtitle1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
+                                  {sectionName}
+                                </Typography>
+                                <Grid container spacing={2}>
+                                  {fields.map((field) => (
+                                    <Grid item xs={12} sm={6} key={field.id}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {field.label}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {field.type === 'checkbox' && Array.isArray(field.value)
+                                          ? field.value.join(', ')
+                                          : field.type === 'yesno'
+                                          ? field.value ? 'Yes' : 'No'
+                                          : field.type === 'date'
+                                          ? new Date(field.value).toLocaleDateString()
+                                          : field.type === 'number'
+                                          ? typeof field.value === 'number' ? field.value.toLocaleString() : field.value
+                                          : String(field.value)
+                                        }
+                                      </Typography>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Grid>
+                            ))}
+
+                            {/* Render unsectioned fields */}
+                            {unSectionedFields.length > 0 && (
+                              <Grid item xs={12}>
+                                <Typography variant="subtitle1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
+                                  Additional Information
+                                </Typography>
+                                <Grid container spacing={2}>
+                                  {unSectionedFields.map((field) => (
+                                    <Grid item xs={12} sm={6} key={field.id}>
+                                      <Typography variant="body2" color="text.secondary">
+                                        {field.label}
+                                      </Typography>
+                                      <Typography variant="body1">
+                                        {field.type === 'checkbox' && Array.isArray(field.value)
+                                          ? field.value.join(', ')
+                                          : field.type === 'yesno'
+                                          ? field.value ? 'Yes' : 'No'
+                                          : field.type === 'date'
+                                          ? new Date(field.value).toLocaleDateString()
+                                          : field.type === 'number'
+                                          ? typeof field.value === 'number' ? field.value.toLocaleString() : field.value
+                                          : String(field.value)
+                                        }
+                                      </Typography>
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Grid>
+                            )}
+                          </>
+                        );
+                      } else {
+                        // Fallback: show raw form data if template not found
+                        return Object.entries(formData).map(([key, value]) => (
+                          <Grid item xs={12} sm={6} key={key}>
+                            <Typography variant="body2" color="text.secondary">
+                              {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </Typography>
+                            <Typography variant="body1">
+                              {Array.isArray(value) ? value.join(', ') : String(value)}
+                            </Typography>
+                          </Grid>
+                        ));
+                      }
+                    })()}
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* File Uploads */}
+              {selectedApplication.fileUploads && Object.keys(selectedApplication.fileUploads).length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
+                  <Grid container spacing={2}>
+                    {Object.entries(selectedApplication.fileUploads).map(([fieldId, files]) => {
+                      const template = templates.find(t => t.id === selectedApplication.templateId);
+                      const field = template?.formFields?.find(f => f.id === fieldId);
+                      const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                      return (
+                        <Grid item xs={12} key={fieldId}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                            {fieldLabel}
+                          </Typography>
+                          {Array.isArray(files) ? files.map((file: any, index: number) => (
+                            <Chip
+                              key={index}
+                              label={file.name || `File ${index + 1}`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mr: 1, mb: 1 }}
+                            />
+                          )) : (
+                            <Chip
+                              label={files.name || 'File'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Paper>
+              )}
+
+              {/* Terms Accepted */}
+              {selectedApplication.termsAccepted && selectedApplication.termsAccepted.length > 0 && (
+                <Paper sx={{ p: 2 }}>
+                  <Typography variant="h6" gutterBottom>Terms & Conditions</Typography>
+                  <Stack spacing={1}>
+                    {selectedApplication.termsAccepted.map((term: any, index: number) => (
+                      <Stack direction="row" spacing={1} alignItems="center" key={index}>
+                        <CheckCircleIcon color="success" fontSize="small" />
+                        <Typography variant="body2">
+                          {term.title || `Term ${index + 1}`} - Accepted on {new Date(term.acceptedAt).toLocaleDateString()}
+                        </Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
                 </Paper>
               )}
             </Stack>

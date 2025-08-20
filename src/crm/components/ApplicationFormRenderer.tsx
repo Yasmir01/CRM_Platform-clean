@@ -52,6 +52,7 @@ import TermsAndConditions from "./TermsAndConditions";
 import PhoneNumberField, { isValidPhoneNumber } from "./PhoneNumberField";
 import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { useAutoSave } from "../hooks/useAutoSave";
 
 interface FormField {
   id: string;
@@ -94,6 +95,7 @@ interface ApplicationFormRendererProps {
   propertyAddress?: string;
   onSubmit: (applicationData: any) => void;
   onCancel: () => void;
+  onUnsavedChanges?: (hasChanges: boolean) => void;
   isOpen: boolean;
 }
 
@@ -108,6 +110,7 @@ export default function ApplicationFormRenderer({
   propertyAddress,
   onSubmit,
   onCancel,
+  onUnsavedChanges,
   isOpen
 }: ApplicationFormRendererProps) {
   const [currentStep, setCurrentStep] = React.useState(0);
@@ -120,6 +123,27 @@ export default function ApplicationFormRenderer({
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
   const [showTermsDialog, setShowTermsDialog] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+
+  // Create a unique draft key for this form
+  const draftKey = `app_draft_${template.id}_${propertyId || 'new'}_${Date.now()}`;
+
+  // Auto-save draft data
+  const draftData = React.useMemo(() => ({
+    formData,
+    fileUploads,
+    termsAccepted,
+    paymentCompleted,
+    paymentData,
+    currentStep,
+    timestamp: Date.now()
+  }), [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
+
+  // Use auto-save hook for draft management and beforeunload protection
+  const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
+    delay: 2000, // Save every 2 seconds
+    enabled: hasUnsavedChanges && isOpen
+  });
 
   const formFields = template.formFields || [];
   const sections = [...new Set(formFields.map(field => field.section).filter(Boolean))];
@@ -131,9 +155,71 @@ export default function ApplicationFormRenderer({
     fields: formFields.filter(field => field.section === sectionName && field.type !== "section")
   }));
 
-  const totalSteps = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0) + 
-                   (template.termsAndConditions?.length ? 1 : 0) + 
+  const totalSteps = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0) +
+                   (template.termsAndConditions?.length ? 1 : 0) +
                    (template.applicationFee ? 1 : 0) + 1; // +1 for review step
+
+  // Restore draft data on mount
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const savedDrafts = LocalStorageService.getFormData();
+    const matchingDrafts = Object.entries(savedDrafts)
+      .filter(([key]) => key.startsWith(`app_draft_${template.id}_${propertyId || 'new'}`))
+      .sort(([, a], [, b]) => (b as any).timestamp - (a as any).timestamp); // Most recent first
+
+    if (matchingDrafts.length > 0) {
+      const [, mostRecentDraft] = matchingDrafts[0];
+      const draft = mostRecentDraft as any;
+
+      // Only restore if the draft is less than 24 hours old
+      const draftAge = Date.now() - (draft.timestamp || 0);
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (draftAge < maxAge) {
+        setFormData(draft.formData || {});
+        setFileUploads(draft.fileUploads || []);
+        setTermsAccepted(draft.termsAccepted || []);
+        setPaymentCompleted(draft.paymentCompleted || false);
+        setPaymentData(draft.paymentData || null);
+        setCurrentStep(draft.currentStep || 0);
+        console.log('Restored application draft from', new Date(draft.timestamp).toLocaleString());
+      }
+    }
+  }, [isOpen, template.id, propertyId]);
+
+  // Track changes to mark as unsaved
+  React.useEffect(() => {
+    const hasData = Object.keys(formData).length > 0 ||
+                   fileUploads.length > 0 ||
+                   termsAccepted.length > 0 ||
+                   paymentCompleted;
+    const newHasUnsavedChanges = hasData && !isSubmitting;
+    setHasUnsavedChanges(newHasUnsavedChanges);
+
+    // Notify parent component about unsaved changes
+    if (onUnsavedChanges) {
+      onUnsavedChanges(newHasUnsavedChanges);
+    }
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, onUnsavedChanges]);
+
+  // Clean up old drafts periodically
+  React.useEffect(() => {
+    const cleanupOldDrafts = () => {
+      const savedDrafts = LocalStorageService.getFormData();
+      const now = Date.now();
+      const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+      Object.entries(savedDrafts).forEach(([key, draft]) => {
+        const draftAge = now - ((draft as any).timestamp || 0);
+        if (draftAge > maxAge) {
+          LocalStorageService.clearFormData(key);
+        }
+      });
+    };
+
+    cleanupOldDrafts();
+  }, []);
 
   const handleFieldChange = (fieldId: string, value: any) => {
     setFormData(prev => ({
@@ -178,15 +264,25 @@ export default function ApplicationFormRenderer({
     currentFields.forEach(field => {
       if (field.required) {
         const value = formData[field.id];
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          errors[field.id] = `${field.label} is required`;
+
+        // Handle file upload validation differently
+        if (field.type === "file_upload") {
+          const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
+          if (!uploadedFiles || uploadedFiles.files.length === 0) {
+            errors[field.id] = `${field.label} is required`;
+          }
+        } else {
+          // Standard validation for other field types
+          if (!value || (Array.isArray(value) && value.length === 0)) {
+            errors[field.id] = `${field.label} is required`;
+          }
         }
-        
+
         // Email validation
         if (field.type === "email" && value && !/\S+@\S+\.\S+/.test(value)) {
           errors[field.id] = "Please enter a valid email address";
         }
-        
+
         // Phone validation
         if (field.type === "phone" && value && !isValidPhoneNumber(value)) {
           errors[field.id] = "Please enter a valid 10-digit phone number";
@@ -249,6 +345,15 @@ export default function ApplicationFormRenderer({
       const existingApplications = LocalStorageService.getApplications();
       LocalStorageService.saveApplications([...existingApplications, applicationData]);
 
+      // Clear all drafts for this form since it was successfully submitted
+      const savedDrafts = LocalStorageService.getFormData();
+      Object.keys(savedDrafts).forEach(key => {
+        if (key.startsWith(`app_draft_${template.id}_${propertyId || 'new'}`)) {
+          LocalStorageService.clearFormData(key);
+        }
+      });
+
+      setHasUnsavedChanges(false);
       onSubmit(applicationData);
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -472,6 +577,44 @@ export default function ApplicationFormRenderer({
           />
         );
 
+      case "terms":
+        return (
+          <FormControl key={field.id} component="fieldset" margin="normal" error={!!error}>
+            <FormLabel component="legend">{field.label} {field.required && "*"}</FormLabel>
+            {field.placeholder && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {field.placeholder}
+              </Typography>
+            )}
+            <RadioGroup
+              value={value}
+              onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            >
+              {field.options && field.options.length > 0 ? (
+                field.options.map((option, index) => (
+                  <FormControlLabel
+                    key={index}
+                    value={option}
+                    control={<Radio />}
+                    label={option}
+                  />
+                ))
+              ) : (
+                <FormControlLabel
+                  value="I / We understand and agree"
+                  control={<Radio />}
+                  label="I / We understand and agree"
+                />
+              )}
+            </RadioGroup>
+            {(error || field.description) && (
+              <Typography variant="caption" color={error ? "error" : "text.secondary"}>
+                {error || field.description || "Read carefully and if agree, click on the I / We Understand and agree to proceed"}
+              </Typography>
+            )}
+          </FormControl>
+        );
+
       case "signature":
         return (
           <TextField
@@ -507,7 +650,9 @@ export default function ApplicationFormRenderer({
       }, {} as any) : undefined,
       maxFiles: field.maxFiles || 5,
       maxSize: (field.maxFileSize || 10) * 1024 * 1024, // Convert MB to bytes
-      onDrop: onFilesChange
+      onDrop: (files) => {
+        onFilesChange(files);
+      }
     });
 
     return (
@@ -807,6 +952,9 @@ export default function ApplicationFormRenderer({
         case 'file_upload':
           const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
           if (!uploadedFiles || uploadedFiles.files.length === 0) return false;
+          break;
+        case 'terms':
+          if (!value || value === '') return false;
           break;
         default:
           // text, email, phone, number, date, textarea, signature
