@@ -539,7 +539,7 @@ export default function Applications() {
                   const property = properties.find(p => p.id === application.propertyId);
                   const propertyCode = application.propertyCode || application.propertyId;
                   return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ���� Code: ${propertyCode}` : ''}`;
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ��� Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -1131,6 +1131,7 @@ export default function Applications() {
                                     </Stack>
                                   </Stack>
                                 </CardContent>
+                                {renderInlineFilePreview(files, fieldId, 0)}
                               </Card>
                             )}
                           </Grid>
