@@ -199,6 +199,8 @@ export default function Applications() {
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [selectedAppForAction, setSelectedAppForAction] = React.useState<Application | null>(null);
+  const [filePreviewOpen, setFilePreviewOpen] = React.useState(false);
+  const [selectedFile, setSelectedFile] = React.useState<any>(null);
   const [newApplicationDialog, setNewApplicationDialog] = React.useState(false);
   const [selectedTemplate, setSelectedTemplate] = React.useState<any>(null);
   const [templates, setTemplates] = React.useState<any[]>([]);
@@ -352,7 +354,7 @@ export default function Applications() {
                   const property = properties.find(p => p.id === application.propertyId);
                   const propertyCode = application.propertyCode || application.propertyId;
                   return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` • Code: ${propertyCode}` : ''}`;
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ��� Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
