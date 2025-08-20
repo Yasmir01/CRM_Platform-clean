@@ -84,6 +84,8 @@ export default function PropertyApplicationDialog({
   const [propertyCode, setPropertyCode] = React.useState<string>("");
   const [showSuccessMessage, setShowSuccessMessage] = React.useState(false);
   const [applicationData, setApplicationData] = React.useState<any>(null);
+  const [showCloseConfirmation, setShowCloseConfirmation] = React.useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
   const notifications = useNotifications();
 
   React.useEffect(() => {
