@@ -194,8 +194,14 @@ export default function ApplicationFormRenderer({
                    fileUploads.length > 0 ||
                    termsAccepted.length > 0 ||
                    paymentCompleted;
-    setHasUnsavedChanges(hasData && !isSubmitting);
-  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting]);
+    const newHasUnsavedChanges = hasData && !isSubmitting;
+    setHasUnsavedChanges(newHasUnsavedChanges);
+
+    // Notify parent component about unsaved changes
+    if (onUnsavedChanges) {
+      onUnsavedChanges(newHasUnsavedChanges);
+    }
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, onUnsavedChanges]);
 
   // Clean up old drafts periodically
   React.useEffect(() => {
