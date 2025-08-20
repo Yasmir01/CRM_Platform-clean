@@ -52,6 +52,7 @@ import TermsAndConditions from "./TermsAndConditions";
 import PhoneNumberField, { isValidPhoneNumber } from "./PhoneNumberField";
 import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
+import TransUnionService, { CreditCheckRequest } from "../services/TransUnionService";
 
 interface FormField {
   id: string;
@@ -120,6 +121,8 @@ export default function ApplicationFormRenderer({
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
   const [showTermsDialog, setShowTermsDialog] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [creditCheckInProgress, setCreditCheckInProgress] = React.useState(false);
+  const [creditCheckResults, setCreditCheckResults] = React.useState<any>(null);
 
   const formFields = template.formFields || [];
   const sections = [...new Set(formFields.map(field => field.section).filter(Boolean))];
@@ -247,10 +250,58 @@ export default function ApplicationFormRenderer({
     handleNextStep();
   };
 
+  const performCreditCheck = async () => {
+    setCreditCheckInProgress(true);
+    const transUnionService = TransUnionService.getInstance();
+
+    if (!transUnionService.isServiceConnected()) {
+      setCreditCheckInProgress(false);
+      return null;
+    }
+
+    try {
+      const creditCheckRequest: CreditCheckRequest = {
+        firstName: formData["first_name"] || formData["applicant_name"]?.split(' ')[0] || '',
+        lastName: formData["last_name"] || formData["applicant_name"]?.split(' ').slice(1).join(' ') || '',
+        ssn: formData["ssn"] || '',
+        dateOfBirth: formData["date_of_birth"] || formData["birth_date"] || '',
+        address: {
+          street: formData["address"] || formData["street_address"] || '',
+          city: formData["city"] || '',
+          state: formData["state"] || '',
+          zipCode: formData["zip_code"] || formData["postal_code"] || ''
+        },
+        email: formData["email"] || formData["applicant_email"] || '',
+        phone: formData["phone"] || formData["applicant_phone"] || '',
+        grantorInfo: formData["grantor_needed"] === 'yes' ? {
+          firstName: formData["grantor_name"]?.split(' ')[0] || '',
+          lastName: formData["grantor_name"]?.split(' ').slice(1).join(' ') || '',
+          ssn: formData["grantor_ssn"] || '',
+          email: formData["grantor_email"] || '',
+          phone: formData["grantor_phone"] || '',
+          address: formData["grantor_address"] || ''
+        } : undefined
+      };
+
+      const creditCheckResult = await transUnionService.performCreditCheck(creditCheckRequest);
+      setCreditCheckResults(creditCheckResult);
+      return creditCheckResult;
+    } catch (error) {
+      console.error('Credit check failed:', error);
+      // Don't block submission if credit check fails
+      return null;
+    } finally {
+      setCreditCheckInProgress(false);
+    }
+  };
+
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
+      // Perform credit check if TransUnion is connected
+      const creditResults = await performCreditCheck();
+
       const applicationData = {
         id: `APP-${Date.now()}`,
         templateId: template.id,
@@ -266,9 +317,13 @@ export default function ApplicationFormRenderer({
         applicantName: formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Unknown Applicant",
         applicantEmail: formData["email"] || formData["applicant_email"] || "",
         applicantPhone: formData["phone"] || formData["applicant_phone"] || "",
-        applicationFee: template.applicationFee || 0,
+        applicationFee: (template.applicationFee || 0) * (formData["grantor_needed"] === 'yes' ? 2 : 1),
         paymentStatus: paymentCompleted ? "Paid" : "Pending",
         paymentMethod: paymentData?.method || "Pending",
+        creditCheckResults: creditResults,
+        creditScore: creditResults?.applicant?.creditScore,
+        grantorCreditScore: creditResults?.grantor?.creditScore,
+        grantorNeeded: formData["grantor_needed"] === 'yes'
       };
 
       // Save to localStorage for demo purposes
@@ -871,15 +926,43 @@ export default function ApplicationFormRenderer({
           )}
         </Grid>
 
+        {/* Credit Check Status */}
+        {creditCheckInProgress && (
+          <Alert severity="info" sx={{ mt: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <CircularProgress size={20} />
+              <Typography variant="body2">
+                Performing credit check with TransUnion...
+              </Typography>
+            </Stack>
+          </Alert>
+        )}
+
+        {creditCheckResults && (
+          <Alert severity="success" sx={{ mt: 3 }}>
+            <Typography variant="body2" gutterBottom>
+              <strong>Credit Check Completed</strong>
+            </Typography>
+            <Typography variant="body2">
+              Applicant Credit Score: {creditCheckResults.applicant.creditScore} ({creditCheckResults.applicant.creditRating})
+            </Typography>
+            {creditCheckResults.grantor && (
+              <Typography variant="body2">
+                Grantor Credit Score: {creditCheckResults.grantor.creditScore} ({creditCheckResults.grantor.creditRating})
+              </Typography>
+            )}
+          </Alert>
+        )}
+
         <Box sx={{ mt: 3, textAlign: "center" }}>
           <Button
             variant="contained"
             size="large"
             onClick={handleFinalSubmit}
-            disabled={isSubmitting}
-            startIcon={isSubmitting ? <CircularProgress size={20} /> : <SendIcon />}
+            disabled={isSubmitting || creditCheckInProgress}
+            startIcon={(isSubmitting || creditCheckInProgress) ? <CircularProgress size={20} /> : <SendIcon />}
           >
-            {isSubmitting ? "Submitting..." : "Submit Application"}
+            {isSubmitting ? "Submitting..." : creditCheckInProgress ? "Processing Credit Check..." : "Submit Application"}
           </Button>
         </Box>
       </Box>
