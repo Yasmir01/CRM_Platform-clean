@@ -258,7 +258,43 @@ export default function Applications() {
           app.formData?.applicant_phone ||
           '';
 
-        return { ...app, applicantName, applicantEmail, applicantPhone };
+        // Normalize file upload data to ensure proper format
+        let normalizedFileUploads = app.fileUploads;
+        if (app.fileUploads) {
+          if (Array.isArray(app.fileUploads)) {
+            // Legacy array format - convert to object and normalize files
+            normalizedFileUploads = app.fileUploads.reduce((acc: any, upload: any) => {
+              acc[upload.fieldId] = upload.files.map((file: any) => ({
+                name: file.name || 'Unknown File',
+                size: file.size || 0,
+                type: file.type || 'application/octet-stream',
+                lastModified: file.lastModified || Date.now()
+              }));
+              return acc;
+            }, {});
+          } else {
+            // Object format - normalize file properties
+            normalizedFileUploads = Object.keys(app.fileUploads).reduce((acc: any, fieldId) => {
+              const files = app.fileUploads[fieldId];
+              acc[fieldId] = Array.isArray(files)
+                ? files.map((file: any) => ({
+                    name: file.name || 'Unknown File',
+                    size: file.size || 0,
+                    type: file.type || 'application/octet-stream',
+                    lastModified: file.lastModified || Date.now()
+                  }))
+                : [{
+                    name: files.name || 'Unknown File',
+                    size: files.size || 0,
+                    type: files.type || 'application/octet-stream',
+                    lastModified: files.lastModified || Date.now()
+                  }];
+              return acc;
+            }, {});
+          }
+        }
+
+        return { ...app, applicantName, applicantEmail, applicantPhone, fileUploads: normalizedFileUploads };
       };
 
       const normalized = savedApplications.map(normalizeApp);
