@@ -577,6 +577,44 @@ export default function ApplicationFormRenderer({
           />
         );
 
+      case "terms":
+        return (
+          <FormControl key={field.id} component="fieldset" margin="normal" error={!!error}>
+            <FormLabel component="legend">{field.label} {field.required && "*"}</FormLabel>
+            {field.placeholder && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {field.placeholder}
+              </Typography>
+            )}
+            <RadioGroup
+              value={value}
+              onChange={(e) => handleFieldChange(field.id, e.target.value)}
+            >
+              {field.options && field.options.length > 0 ? (
+                field.options.map((option, index) => (
+                  <FormControlLabel
+                    key={index}
+                    value={option}
+                    control={<Radio />}
+                    label={option}
+                  />
+                ))
+              ) : (
+                <FormControlLabel
+                  value="I / We understand and agree"
+                  control={<Radio />}
+                  label="I / We understand and agree"
+                />
+              )}
+            </RadioGroup>
+            {(error || field.description) && (
+              <Typography variant="caption" color={error ? "error" : "text.secondary"}>
+                {error || field.description || "Read carefully and if agree, click on the I / We Understand and agree to proceed"}
+              </Typography>
+            )}
+          </FormControl>
+        );
+
       case "signature":
         return (
           <TextField
