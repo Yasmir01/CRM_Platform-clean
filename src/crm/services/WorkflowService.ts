@@ -125,6 +125,9 @@ export class WorkflowService {
       if (newStatus === "Pending" && oldStatus === "New") {
         await this.createOrUpdateProspectFromApplication(application, "Applied");
         this.callbacks.logActivity(`Application ${application.id} moved to pending review - prospect status updated to Applied`);
+
+        // Trigger TransUnion integration if payment is completed
+        await this.handleTransUnionIntegration(application);
       }
 
       // When application is "Archived" (approved) - progress prospect to tenant
