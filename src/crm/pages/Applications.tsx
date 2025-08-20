@@ -106,7 +106,7 @@ const mockApplications: Application[] = [
     backgroundCheck: "Pending",
     employmentVerification: "Pending",
     fileUploads: {
-      "id_proof": [
+      "document_upload": [
         { name: "passport.pdf", size: 245760, type: "application/pdf", lastModified: 1690000000000 },
         { name: "drivers_license.jpg", size: 125000, type: "image/jpeg", lastModified: 1690000100000 }
       ],
