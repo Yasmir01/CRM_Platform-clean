@@ -524,7 +524,7 @@ export default function Applications() {
                   <Grid item xs={12} sm={6}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <PersonIcon fontSize="small" />
-                      <Typography>{selectedApplication.applicantName}</Typography>
+                      <Typography>{selectedApplication.applicantName || 'Unknown Applicant'}</Typography>
                     </Stack>
                   </Grid>
                   <Grid item xs={12} sm={6}>
