@@ -181,16 +181,42 @@ export default function ApplicationFormRenderer({
         if (!value || (Array.isArray(value) && value.length === 0)) {
           errors[field.id] = `${field.label} is required`;
         }
-        
+
         // Email validation
         if (field.type === "email" && value && !/\S+@\S+\.\S+/.test(value)) {
           errors[field.id] = "Please enter a valid email address";
         }
-        
+
         // Phone validation
         if (field.type === "phone" && value && !isValidPhoneNumber(value)) {
           errors[field.id] = "Please enter a valid 10-digit phone number";
         }
+      }
+
+      // Validate grantor fields when grantor is needed
+      if (field.id === 'grantor_needed' && formData[field.id] === 'yes') {
+        const grantorFields = [
+          { id: 'grantor_ssn', label: 'Grantor SSN', pattern: /^\d{3}-\d{2}-\d{4}$/ },
+          { id: 'grantor_name', label: 'Grantor Name' },
+          { id: 'grantor_email', label: 'Grantor Email', pattern: /\S+@\S+\.\S+/ },
+          { id: 'grantor_phone', label: 'Grantor Phone', pattern: /^\(\d{3}\) \d{3}-\d{4}$/ },
+          { id: 'grantor_address', label: 'Grantor Address' }
+        ];
+
+        grantorFields.forEach(grantorField => {
+          const grantorValue = formData[grantorField.id];
+          if (!grantorValue || grantorValue.trim() === '') {
+            errors[grantorField.id] = `${grantorField.label} is required when grantor is needed`;
+          } else if (grantorField.pattern && !grantorField.pattern.test(grantorValue)) {
+            if (grantorField.id === 'grantor_ssn') {
+              errors[grantorField.id] = 'Please enter a valid SSN (XXX-XX-XXXX)';
+            } else if (grantorField.id === 'grantor_email') {
+              errors[grantorField.id] = 'Please enter a valid email address';
+            } else if (grantorField.id === 'grantor_phone') {
+              errors[grantorField.id] = 'Please enter a valid phone number';
+            }
+          }
+        });
       }
     });
 
@@ -423,21 +449,129 @@ export default function ApplicationFormRenderer({
             <FormLabel component="legend">{field.label} {field.required && "*"}</FormLabel>
             <RadioGroup
               value={value}
-              onChange={(e) => handleFieldChange(field.id, e.target.value)}
+              onChange={(e) => {
+                handleFieldChange(field.id, e.target.value);
+                // Handle grantor selection for fee calculation
+                if (field.id === 'grantor_needed' && field.label.toLowerCase().includes('grantor')) {
+                  setFormData(prev => ({ ...prev, grantor_needed: e.target.value }));
+                }
+              }}
             >
-              {field.options?.map((option, index) => (
-                <FormControlLabel
-                  key={index}
-                  value={option}
-                  control={<Radio />}
-                  label={option}
-                />
-              ))}
+              {field.options?.map((option, index) => {
+                // Support multiple description lines for each option
+                const optionDescriptions = field.description ? field.description.split('\n') : [];
+                const optionDescription = optionDescriptions[index] || '';
+
+                return (
+                  <Box key={index} sx={{ mb: 1 }}>
+                    <FormControlLabel
+                      value={option}
+                      control={<Radio />}
+                      label={option}
+                    />
+                    {optionDescription && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: 'block',
+                          ml: 4,
+                          mt: 0.5,
+                          whiteSpace: 'pre-wrap'
+                        }}
+                      >
+                        {optionDescription}
+                      </Typography>
+                    )}
+                  </Box>
+                );
+              })}
             </RadioGroup>
-            {(error || field.description) && (
-              <Typography variant="caption" color={error ? "error" : "text.secondary"}>
-                {error || field.description}
+            {error && (
+              <Typography variant="caption" color="error">
+                {error}
               </Typography>
+            )}
+
+            {/* Conditional SSN field for grantor */}
+            {field.id === 'grantor_needed' && value === 'yes' && (
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Grantor Information Required
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Grantor Social Security Number"
+                  placeholder="XXX-XX-XXXX"
+                  required
+                  value={formData['grantor_ssn'] || ''}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 4) {
+                      value = value.slice(0, 3) + '-' + value.slice(3);
+                    }
+                    if (value.length >= 7) {
+                      value = value.slice(0, 6) + '-' + value.slice(6, 10);
+                    }
+                    handleFieldChange('grantor_ssn', value);
+                  }}
+                  error={!!validationErrors['grantor_ssn']}
+                  helperText={validationErrors['grantor_ssn'] || "Required for credit check and background verification"}
+                  margin="normal"
+                  inputProps={{ maxLength: 11 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Grantor Full Name"
+                  required
+                  value={formData['grantor_name'] || ''}
+                  onChange={(e) => handleFieldChange('grantor_name', e.target.value)}
+                  error={!!validationErrors['grantor_name']}
+                  helperText={validationErrors['grantor_name']}
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  label="Grantor Email"
+                  type="email"
+                  required
+                  value={formData['grantor_email'] || ''}
+                  onChange={(e) => handleFieldChange('grantor_email', e.target.value)}
+                  error={!!validationErrors['grantor_email']}
+                  helperText={validationErrors['grantor_email']}
+                  margin="normal"
+                />
+                <TextField
+                  fullWidth
+                  label="Grantor Phone Number"
+                  required
+                  value={formData['grantor_phone'] || ''}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 4) {
+                      value = '(' + value.slice(0, 3) + ') ' + value.slice(3);
+                    }
+                    if (value.length >= 10) {
+                      value = value.slice(0, 9) + '-' + value.slice(9, 13);
+                    }
+                    handleFieldChange('grantor_phone', value);
+                  }}
+                  error={!!validationErrors['grantor_phone']}
+                  helperText={validationErrors['grantor_phone']}
+                  margin="normal"
+                  inputProps={{ maxLength: 14 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Grantor Address"
+                  required
+                  value={formData['grantor_address'] || ''}
+                  onChange={(e) => handleFieldChange('grantor_address', e.target.value)}
+                  error={!!validationErrors['grantor_address']}
+                  helperText={validationErrors['grantor_address']}
+                  margin="normal"
+                />
+              </Box>
             )}
           </FormControl>
         );
@@ -800,6 +934,28 @@ export default function ApplicationFormRenderer({
         case 'yesno':
         case 'radio':
           if (!value || value === '') return false;
+
+          // Check grantor fields if grantor is needed
+          if (field.id === 'grantor_needed' && value === 'yes') {
+            const grantorFields = ['grantor_ssn', 'grantor_name', 'grantor_email', 'grantor_phone', 'grantor_address'];
+            for (const grantorFieldId of grantorFields) {
+              const grantorValue = formData[grantorFieldId];
+              if (!grantorValue || grantorValue.trim() === '') {
+                return false;
+              }
+
+              // Additional validation for specific fields
+              if (grantorFieldId === 'grantor_ssn' && !/^\d{3}-\d{2}-\d{4}$/.test(grantorValue)) {
+                return false;
+              }
+              if (grantorFieldId === 'grantor_email' && !/\S+@\S+\.\S+/.test(grantorValue)) {
+                return false;
+              }
+              if (grantorFieldId === 'grantor_phone' && !/^\(\d{3}\) \d{3}-\d{4}$/.test(grantorValue)) {
+                return false;
+              }
+            }
+          }
           break;
         case 'select':
           if (!value || value === '') return false;
