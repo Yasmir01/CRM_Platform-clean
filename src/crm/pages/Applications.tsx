@@ -378,6 +378,150 @@ export default function Applications() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const toggleFileExpansion = (fileId: string) => {
+    setExpandedFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderInlineFilePreview = (file: any, fieldId: string, index: number) => {
+    const fileId = `${fieldId}_${index}`;
+    const isExpanded = expandedFiles.has(fileId);
+
+    if (!isExpanded) return null;
+
+    return (
+      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+        {file.type?.includes('image') ? (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              Image Preview
+            </Typography>
+            <Box
+              sx={{
+                width: '100%',
+                maxWidth: 400,
+                height: 200,
+                border: '2px dashed',
+                borderColor: 'grey.300',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'white',
+                margin: '0 auto'
+              }}
+            >
+              <Stack spacing={1} alignItems="center">
+                <ImageIcon sx={{ fontSize: 32, color: 'grey.400' }} />
+                <Typography variant="body2" color="text.secondary">
+                  {file.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Image content would be displayed here
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        ) : file.type?.includes('pdf') ? (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              PDF Document Preview
+            </Typography>
+            <Box
+              sx={{
+                width: '100%',
+                height: 300,
+                border: '2px dashed',
+                borderColor: 'grey.300',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'white'
+              }}
+            >
+              <Stack spacing={1} alignItems="center">
+                <PictureAsPdfIcon sx={{ fontSize: 32, color: 'error.main' }} />
+                <Typography variant="body2" color="text.secondary">
+                  {file.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  PDF content would be embedded here
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  ({formatFileSize(file.size || 0)})
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        ) : file.type?.includes('text') ? (
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              Text File Preview
+            </Typography>
+            <Box
+              sx={
+                {
+                  p: 2,
+                  bgcolor: 'white',
+                  border: '1px solid',
+                  borderColor: 'grey.300',
+                  borderRadius: 1,
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                  maxHeight: 200,
+                  overflow: 'auto'
+                }
+              }
+            >
+              <Typography variant="body2" color="text.secondary" style={{ fontFamily: 'monospace' }}>
+                Sample text content would be displayed here...
+                <br />File: {file.name}
+                <br />Size: {formatFileSize(file.size || 0)}
+                <br />Type: {file.type}
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              File Information
+            </Typography>
+            <Box
+              sx={
+                {
+                  p: 2,
+                  bgcolor: 'white',
+                  border: '1px solid',
+                  borderColor: 'grey.300',
+                  borderRadius: 1
+                }
+              }
+            >
+              <Stack spacing={1} alignItems="center">
+                {getFileIcon(file)}
+                <Typography variant="body2">{file.name}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatFileSize(file.size || 0)} • {file.type || 'Unknown type'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Preview not available - use download to view
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
   const renderApplicationCard = (application: Application) => (
     <Card key={application.id} sx={{ mb: 2 }}>
       <CardContent>
