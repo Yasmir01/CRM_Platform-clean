@@ -196,7 +196,36 @@ export default function Applications() {
     const savedApplications = LocalStorageService.getApplications();
     setTemplates(savedTemplates);
     if (savedApplications.length > 0) {
-      setApplications(savedApplications);
+      // Normalize applications to ensure consistent data structure
+      const normalizeApp = (app: any) => {
+        const applicantName =
+          app.applicantName ||
+          app.formData?.applicant_name ||
+          ((app.formData?.first_name || app.formData?.last_name)
+            ? `${app.formData?.first_name || ''} ${app.formData?.last_name || ''}`.trim()
+            : undefined) ||
+          'Unknown Applicant';
+
+        const applicantEmail =
+          app.applicantEmail ||
+          app.formData?.email ||
+          app.formData?.applicant_email ||
+          '';
+
+        const applicantPhone =
+          app.applicantPhone ||
+          app.formData?.phone ||
+          app.formData?.applicant_phone ||
+          '';
+
+        return { ...app, applicantName, applicantEmail, applicantPhone };
+      };
+
+      const normalized = savedApplications.map(normalizeApp);
+      setApplications(normalized);
+
+      // Save the normalized data back to localStorage to prevent future issues
+      LocalStorageService.saveApplications(normalized);
     }
   }, []);
 
@@ -206,7 +235,7 @@ export default function Applications() {
       const propertyName = property ? property.name : (app.propertyName || '');
 
       return app.status === status &&
-        (app.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ((app.applicantName || 'Unknown Applicant').toLowerCase().includes(searchTerm.toLowerCase()) ||
          propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
          app.applicantEmail.toLowerCase().includes(searchTerm.toLowerCase()));
     });
@@ -286,7 +315,7 @@ export default function Applications() {
           <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
               <Typography variant="h6" fontWeight="medium">
-                {application.applicantName}
+                {application.applicantName || 'Unknown Applicant'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {(() => {
