@@ -135,21 +135,15 @@ const mockApplications: Application[] = [
     creditScore: 680,
     backgroundCheck: "Approved",
     employmentVerification: "Verified",
-    fileUploads: [
-      {
-        fieldId: "employment_letter",
-        files: [
-          { name: "employment_verification.pdf", size: 178000, type: "application/pdf", lastModified: 1690000400000 }
-        ]
-      },
-      {
-        fieldId: "references",
-        files: [
-          { name: "reference_letter_1.pdf", size: 98000, type: "application/pdf", lastModified: 1690000500000 },
-          { name: "reference_letter_2.pdf", size: 87000, type: "application/pdf", lastModified: 1690000600000 }
-        ]
-      }
-    ]
+    fileUploads: {
+      "employment_letter": [
+        { name: "employment_verification.pdf", size: 178000, type: "application/pdf", lastModified: 1690000400000 }
+      ],
+      "references": [
+        { name: "reference_letter_1.pdf", size: 98000, type: "application/pdf", lastModified: 1690000500000 },
+        { name: "reference_letter_2.pdf", size: 87000, type: "application/pdf", lastModified: 1690000600000 }
+      ]
+    }
   },
   {
     id: "APP-003",
