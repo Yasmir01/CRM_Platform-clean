@@ -1028,14 +1028,39 @@ export default function Templates() {
           <Card variant="outlined">
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                {field.label}
+                {field.label} {field.required && "*"}
               </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Terms and conditions component will appear here
+              {field.placeholder && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {field.placeholder}
+                </Typography>
+              )}
+              {field.description && (
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {field.description}
+                </Typography>
+              )}
+              {field.options && field.options.length > 0 ? (
+                <Box sx={{ mt: 2 }}>
+                  {field.options.map((option, index) => (
+                    <FormControlLabel
+                      key={index}
+                      control={<Radio />}
+                      label={option}
+                      sx={{ display: 'block', mb: 1 }}
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <FormControlLabel
+                  control={<Radio />}
+                  label="I / We understand and agree"
+                  sx={{ mt: 1 }}
+                />
+              )}
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+                Read carefully and if agree, click on the I / We Understand and agree to proceed
               </Typography>
-              <Button variant="outlined" size="small">
-                Review Terms
-              </Button>
             </CardContent>
           </Card>
         );
