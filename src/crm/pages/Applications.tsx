@@ -590,17 +590,45 @@ export default function Applications() {
                 </Grid>
               </Paper>
 
-              {/* Background Checks */}
+              {/* TransUnion Integration & Background Checks */}
               <Paper sx={{ p: 2 }}>
-                <Typography variant="h6" gutterBottom>Background Checks</Typography>
+                <Typography variant="h6" gutterBottom>TransUnion Screening</Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Credit Report</Typography>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        label={selectedApplication.creditScore ? `Score: ${selectedApplication.creditScore}` : "Not Requested"}
+                        size="small"
+                        color={selectedApplication.creditScore ? "success" : "default"}
+                      />
+                      {selectedApplication.paymentStatus === "Paid" && !selectedApplication.creditScore && (
+                        <Chip
+                          label="Available"
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Background Check</Typography>
-                    <Chip
-                      label={selectedApplication.backgroundCheck || "Not Started"}
-                      size="small"
-                      color={selectedApplication.backgroundCheck === "Approved" ? "success" : selectedApplication.backgroundCheck === "Failed" ? "error" : "warning"}
-                    />
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        label={selectedApplication.backgroundCheck || "Not Started"}
+                        size="small"
+                        color={selectedApplication.backgroundCheck === "Approved" ? "success" : selectedApplication.backgroundCheck === "Failed" ? "error" : "warning"}
+                      />
+                      {selectedApplication.paymentStatus === "Paid" && !selectedApplication.backgroundCheck && (
+                        <Chip
+                          label="Available"
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Employment Verification</Typography>
@@ -610,7 +638,27 @@ export default function Applications() {
                       color={selectedApplication.employmentVerification === "Verified" ? "success" : selectedApplication.employmentVerification === "Failed" ? "error" : "warning"}
                     />
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Integration Status</Typography>
+                    <Chip
+                      label={selectedApplication.paymentStatus === "Paid" ? "Active" : "Pending Payment"}
+                      size="small"
+                      color={selectedApplication.paymentStatus === "Paid" ? "success" : "warning"}
+                    />
+                  </Grid>
                 </Grid>
+
+                {selectedApplication.paymentStatus === "Paid" && (
+                  <Alert severity="info" sx={{ mt: 2 }}>
+                    TransUnion integration is active. Credit reports and background checks will be automatically requested when the application moves to pending status with proper consent.
+                  </Alert>
+                )}
+
+                {selectedApplication.paymentStatus !== "Paid" && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    TransUnion integration will activate once the application fee is paid.
+                  </Alert>
+                )}
               </Paper>
 
               {/* Notes */}
