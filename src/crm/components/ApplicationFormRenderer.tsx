@@ -186,7 +186,24 @@ export default function ApplicationFormRenderer({
 
       if (draftAge < maxAge) {
         setFormData(draft.formData || {});
-        setFileUploads(draft.fileUploads || []);
+
+        // Handle both legacy array format and new object format for fileUploads
+        if (draft.fileUploads) {
+          if (Array.isArray(draft.fileUploads)) {
+            // Legacy array format: [{fieldId, files}, ...]
+            setFileUploads(draft.fileUploads);
+          } else {
+            // New object format: {fieldId: files, ...} - convert back to array for internal state
+            const fileUploadsArray = Object.entries(draft.fileUploads).map(([fieldId, files]) => ({
+              fieldId,
+              files: Array.isArray(files) ? files : [files]
+            }));
+            setFileUploads(fileUploadsArray);
+          }
+        } else {
+          setFileUploads([]);
+        }
+
         setTermsAccepted(draft.termsAccepted || []);
         setPaymentCompleted(draft.paymentCompleted || false);
         setPaymentData(draft.paymentData || null);
