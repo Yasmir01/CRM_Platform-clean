@@ -191,10 +191,28 @@ export default function PropertyApplicationDialog({
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges && showApplicationForm) {
+      setShowCloseConfirmation(true);
+    } else {
+      setShowApplicationForm(false);
+      setShowSuccessMessage(false);
+      setApplicationData(null);
+      setHasUnsavedChanges(false);
+      onClose();
+    }
+  };
+
+  const handleConfirmClose = () => {
+    setShowCloseConfirmation(false);
     setShowApplicationForm(false);
     setShowSuccessMessage(false);
     setApplicationData(null);
+    setHasUnsavedChanges(false);
     onClose();
+  };
+
+  const handleCancelClose = () => {
+    setShowCloseConfirmation(false);
   };
 
   if (!property) return null;
