@@ -401,7 +401,8 @@ export default function PropertyApplicationDialog({
           propertyAddress={property.address}
           isOpen={showApplicationForm}
           onSubmit={handleApplicationSubmit}
-          onCancel={() => setShowApplicationForm(false)}
+          onCancel={handleClose}
+          onUnsavedChanges={setHasUnsavedChanges}
         />
       )}
 
