@@ -1049,7 +1049,19 @@ export default function Applications() {
                                       </Typography>
                                     </Box>
                                     <Stack direction="row" spacing={0.5}>
-                                      <Tooltip title="View File">
+                                      <Tooltip title={expandedFiles.has(`${fieldId}_${index}`) ? "Collapse Preview" : "Expand Preview"}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => toggleFileExpansion(`${fieldId}_${index}`)}
+                                          color="primary"
+                                        >
+                                          {expandedFiles.has(`${fieldId}_${index}`) ?
+                                            <ExpandLessIcon fontSize="small" /> :
+                                            <ExpandMoreIcon fontSize="small" />
+                                          }
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="View in Modal">
                                         <IconButton
                                           size="small"
                                           onClick={() => handleFileView(file)}
