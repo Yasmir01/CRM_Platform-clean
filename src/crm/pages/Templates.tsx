@@ -1960,19 +1960,19 @@ export default function Templates() {
               placeholder="Additional information to help users fill out this field"
             />
 
-            {(newFieldData.type === "select" || newFieldData.type === "radio") && (
+            {(newFieldData.type === "select" || newFieldData.type === "radio" || newFieldData.type === "terms") && (
               <TextField
-                label="Options (one per line)"
+                label={newFieldData.type === "terms" ? "Agreement Options (one per line)" : "Options (one per line)"}
                 fullWidth
                 multiline
                 rows={4}
                 value={newFieldData.options?.join("\n") || ""}
-                onChange={(e) => setNewFieldData({ 
-                  ...newFieldData, 
-                  options: e.target.value.split("\n").filter(option => option.trim()) 
+                onChange={(e) => setNewFieldData({
+                  ...newFieldData,
+                  options: e.target.value.split("\n").filter(option => option.trim())
                 })}
-                placeholder="Option 1&#10;Option 2&#10;Option 3"
-                helperText="Enter each option on a new line"
+                placeholder={newFieldData.type === "terms" ? "I / We understand and agree&#10;I accept the terms and conditions" : "Option 1&#10;Option 2&#10;Option 3"}
+                helperText={newFieldData.type === "terms" ? "Enter agreement options for terms and conditions" : "Enter each option on a new line"}
               />
             )}
           </Stack>
