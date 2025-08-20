@@ -121,6 +121,27 @@ export default function ApplicationFormRenderer({
   const [showPaymentDialog, setShowPaymentDialog] = React.useState(false);
   const [showTermsDialog, setShowTermsDialog] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+
+  // Create a unique draft key for this form
+  const draftKey = `app_draft_${template.id}_${propertyId || 'new'}_${Date.now()}`;
+
+  // Auto-save draft data
+  const draftData = React.useMemo(() => ({
+    formData,
+    fileUploads,
+    termsAccepted,
+    paymentCompleted,
+    paymentData,
+    currentStep,
+    timestamp: Date.now()
+  }), [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
+
+  // Use auto-save hook for draft management and beforeunload protection
+  const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
+    delay: 2000, // Save every 2 seconds
+    enabled: hasUnsavedChanges && isOpen
+  });
 
   const formFields = template.formFields || [];
   const sections = [...new Set(formFields.map(field => field.section).filter(Boolean))];
