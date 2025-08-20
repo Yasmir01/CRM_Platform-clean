@@ -264,15 +264,25 @@ export default function ApplicationFormRenderer({
     currentFields.forEach(field => {
       if (field.required) {
         const value = formData[field.id];
-        if (!value || (Array.isArray(value) && value.length === 0)) {
-          errors[field.id] = `${field.label} is required`;
+
+        // Handle file upload validation differently
+        if (field.type === "file_upload") {
+          const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
+          if (!uploadedFiles || uploadedFiles.files.length === 0) {
+            errors[field.id] = `${field.label} is required`;
+          }
+        } else {
+          // Standard validation for other field types
+          if (!value || (Array.isArray(value) && value.length === 0)) {
+            errors[field.id] = `${field.label} is required`;
+          }
         }
-        
+
         // Email validation
         if (field.type === "email" && value && !/\S+@\S+\.\S+/.test(value)) {
           errors[field.id] = "Please enter a valid email address";
         }
-        
+
         // Phone validation
         if (field.type === "phone" && value && !isValidPhoneNumber(value)) {
           errors[field.id] = "Please enter a valid 10-digit phone number";
