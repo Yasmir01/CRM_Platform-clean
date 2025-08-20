@@ -302,7 +302,7 @@ export default function Applications() {
             </Box>
             <Stack direction="row" spacing={1} alignItems="center">
               <Chip
-                label={`$${application.applicationFee}`}
+                label={`$${application.applicationFee || 0}`}
                 size="small"
                 color={getPaymentStatusColor(application.paymentStatus)}
                 variant="outlined"
@@ -328,7 +328,7 @@ export default function Applications() {
             <Stack direction="row" spacing={1} alignItems="center">
               <PersonIcon fontSize="small" color="action" />
               <Typography variant="body2">
-                Income: ${application.monthlyIncome.toLocaleString()}
+                Income: ${(application.monthlyIncome || 0).toLocaleString()}
               </Typography>
             </Stack>
           </Stack>
