@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -108,8 +109,36 @@ export default function CrmMenuContent() {
   const location = useLocation();
   const { isTenantMode, isManagementMode } = useMode();
 
-  // Mock new applications count - in real app this would come from context/state
-  const newApplicationsCount = 3;
+  // Get actual new applications count from localStorage
+  const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const updateApplicationCount = () => {
+      const applications = LocalStorageService.getApplications();
+      const newAppsCount = applications.filter((app: any) => app.status === 'New').length;
+      setNewApplicationsCount(newAppsCount);
+    };
+
+    // Initial load
+    updateApplicationCount();
+
+    // Set up an interval to check for updates every 5 seconds
+    const interval = setInterval(updateApplicationCount, 5000);
+
+    // Also listen for storage events (when localStorage is updated in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'crm_applications') {
+        updateApplicationCount();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
 
 
