@@ -1060,18 +1060,20 @@ export default function Applications() {
                                       </Typography>
                                     </Box>
                                     <Stack direction="row" spacing={0.5}>
-                                      <Tooltip title={expandedFiles.has(`${fieldId}_${index}`) ? "Collapse Preview" : "Expand Preview"}>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => toggleFileExpansion(`${fieldId}_${index}`)}
-                                          color="primary"
-                                        >
-                                          {expandedFiles.has(`${fieldId}_${index}`) ?
-                                            <ExpandLessIcon fontSize="small" /> :
-                                            <ExpandMoreIcon fontSize="small" />
-                                          }
-                                        </IconButton>
-                                      </Tooltip>
+                                      {inlinePreviewMode && (
+                                        <Tooltip title={expandedFiles.has(`${fieldId}_${index}`) ? "Collapse Preview" : "Expand Preview"}>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => toggleFileExpansion(`${fieldId}_${index}`)}
+                                            color="primary"
+                                          >
+                                            {expandedFiles.has(`${fieldId}_${index}`) ?
+                                              <ExpandLessIcon fontSize="small" /> :
+                                              <ExpandMoreIcon fontSize="small" />
+                                            }
+                                          </IconButton>
+                                        </Tooltip>
+                                      )}
                                       <Tooltip title="View in Modal">
                                         <IconButton
                                           size="small"
@@ -1109,18 +1111,20 @@ export default function Applications() {
                                       </Typography>
                                     </Box>
                                     <Stack direction="row" spacing={0.5}>
-                                      <Tooltip title={expandedFiles.has(`${fieldId}_0`) ? "Collapse Preview" : "Expand Preview"}>
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => toggleFileExpansion(`${fieldId}_0`)}
-                                          color="primary"
-                                        >
-                                          {expandedFiles.has(`${fieldId}_0`) ?
-                                            <ExpandLessIcon fontSize="small" /> :
-                                            <ExpandMoreIcon fontSize="small" />
-                                          }
-                                        </IconButton>
-                                      </Tooltip>
+                                      {inlinePreviewMode && (
+                                        <Tooltip title={expandedFiles.has(`${fieldId}_0`) ? "Collapse Preview" : "Expand Preview"}>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => toggleFileExpansion(`${fieldId}_0`)}
+                                            color="primary"
+                                          >
+                                            {expandedFiles.has(`${fieldId}_0`) ?
+                                              <ExpandLessIcon fontSize="small" /> :
+                                              <ExpandMoreIcon fontSize="small" />
+                                            }
+                                          </IconButton>
+                                        </Tooltip>
+                                      )}
                                       <Tooltip title="View in Modal">
                                         <IconButton
                                           size="small"
