@@ -110,6 +110,7 @@ export default function ApplicationFormRenderer({
   propertyAddress,
   onSubmit,
   onCancel,
+  onUnsavedChanges,
   isOpen
 }: ApplicationFormRendererProps) {
   const [currentStep, setCurrentStep] = React.useState(0);
