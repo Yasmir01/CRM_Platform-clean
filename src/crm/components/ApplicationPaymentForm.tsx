@@ -61,6 +61,8 @@ interface ApplicationPaymentFormProps {
   applicationId: string;
   isOpen: boolean;
   onClose: () => void;
+  grantorNeeded?: boolean;
+  formData?: Record<string, any>;
 }
 
 const defaultPaymentMethods: PaymentMethod[] = [
@@ -146,7 +148,9 @@ export default function ApplicationPaymentForm({
   applicantName,
   applicationId,
   isOpen,
-  onClose
+  onClose,
+  grantorNeeded = false,
+  formData = {}
 }: ApplicationPaymentFormProps) {
   const [selectedMethod, setSelectedMethod] = React.useState<string>("");
   const [activeStep, setActiveStep] = React.useState(0);
@@ -169,7 +173,13 @@ export default function ApplicationPaymentForm({
   const enabledMethods = paymentMethods.filter(method => method.enabled);
   const selectedPaymentMethod = enabledMethods.find(method => method.id === selectedMethod);
   const processingFee = selectedPaymentMethod?.processingFee || 0;
-  const totalAmount = applicationFee + (applicationFee * (processingFee / 100));
+
+  // Check if grantor is needed from form data
+  const isGrantorNeeded = grantorNeeded || formData['grantor_needed'] === 'yes';
+
+  // Double the application fee if grantor is needed
+  const adjustedApplicationFee = isGrantorNeeded ? applicationFee * 2 : applicationFee;
+  const totalAmount = adjustedApplicationFee + (adjustedApplicationFee * (processingFee / 100));
 
   const handleMethodSelect = (methodId: string) => {
     setSelectedMethod(methodId);
@@ -383,11 +393,17 @@ export default function ApplicationPaymentForm({
               <Typography variant="h6" gutterBottom>Payment Details</Typography>
               <Stack spacing={1}>
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Application Fee:</Typography>
+                  <Typography>Base Application Fee:</Typography>
                   <Typography fontWeight="medium">${applicationFee.toFixed(2)}</Typography>
                 </Stack>
+                {isGrantorNeeded && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography>Grantor Processing Fee:</Typography>
+                    <Typography fontWeight="medium">${applicationFee.toFixed(2)}</Typography>
+                  </Stack>
+                )}
                 <Stack direction="row" justifyContent="space-between">
-                  <Typography>Processing Fee:</Typography>
+                  <Typography>Payment Processing Fee:</Typography>
                   <Typography fontWeight="medium">$0.00</Typography>
                 </Stack>
                 <Divider />
@@ -428,8 +444,15 @@ export default function ApplicationPaymentForm({
       label: "Select Payment Method",
       content: (
         <Box>
+          {isGrantorNeeded && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2" gutterBottom>
+                <strong>Grantor Application:</strong> The application fee has been doubled to ${adjustedApplicationFee} to cover processing for both applicant and grantor.
+              </Typography>
+            </Alert>
+          )}
           <Typography variant="body1" gutterBottom>
-            Choose your preferred payment method for the ${applicationFee} application fee:
+            Choose your preferred payment method for the ${adjustedApplicationFee} application fee:
           </Typography>
           
           <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -520,6 +543,12 @@ export default function ApplicationPaymentForm({
                   <Typography>Amount:</Typography>
                   <Typography fontWeight="medium">${totalAmount.toFixed(2)}</Typography>
                 </Stack>
+                {isGrantorNeeded && (
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography>Grantor Required:</Typography>
+                    <Typography fontWeight="medium">Yes (Fee Doubled)</Typography>
+                  </Stack>
+                )}
                 {paymentData.transactionId && (
                   <Stack direction="row" justifyContent="space-between">
                     <Typography>Transaction ID:</Typography>
