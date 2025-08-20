@@ -1971,11 +1971,41 @@ export default function Templates() {
                                 {section.icon}
                               </Avatar>
                               <Box sx={{ flexGrow: 1 }}>
-                                <Typography variant="subtitle2" fontWeight="bold">
-                                  {section.name}
-                                </Typography>
+                                <Stack direction="row" alignItems="center" spacing={1}>
+                                  <Typography variant="subtitle2" fontWeight="bold">
+                                    {section.name}
+                                  </Typography>
+                                  {isSectionAdded(section.name) && (
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                      <CheckCircleIcon
+                                        color="success"
+                                        fontSize="small"
+                                        sx={{ fontSize: 16 }}
+                                      />
+                                      {getSectionCount(section.name) > 1 && (
+                                        <CheckCircleIcon
+                                          color="success"
+                                          fontSize="small"
+                                          sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                        />
+                                      )}
+                                    </Box>
+                                  )}
+                                </Stack>
                                 <Typography variant="caption" color="text.secondary">
                                   {section.defaultFields.length} fields
+                                  {isSectionAdded(section.name) && (
+                                    <Chip
+                                      size="small"
+                                      label={getSectionCount(section.name) > 1 ?
+                                        `Added ${getSectionCount(section.name)}x` :
+                                        'Added'
+                                      }
+                                      color="success"
+                                      variant="outlined"
+                                      sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                                    />
+                                  )}
                                 </Typography>
                               </Box>
                             </Stack>
