@@ -485,7 +485,7 @@ export default function Applications() {
               <Alert
                 severity={selectedApplication.paymentStatus === "Paid" ? "success" : selectedApplication.paymentStatus === "Pending" ? "warning" : "error"}
               >
-                Application fee ${selectedApplication.applicationFee} - {selectedApplication.paymentStatus} via {selectedApplication.paymentMethod}
+                Application fee ${selectedApplication.applicationFee || 0} - {selectedApplication.paymentStatus} via {selectedApplication.paymentMethod}
               </Alert>
 
               {/* Applicant Information */}
@@ -550,7 +550,7 @@ export default function Applications() {
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="text.secondary">Monthly Income</Typography>
-                    <Typography variant="h6">${selectedApplication.monthlyIncome.toLocaleString()}</Typography>
+                    <Typography variant="h6">${(selectedApplication.monthlyIncome || 0).toLocaleString()}</Typography>
                   </Grid>
                   {selectedApplication.creditScore && (
                     <Grid item xs={12} sm={6}>
