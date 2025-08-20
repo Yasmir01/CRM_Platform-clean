@@ -96,7 +96,17 @@ const mockApplications: Application[] = [
     moveInDate: "2024-02-15",
     creditScore: 750,
     backgroundCheck: "Pending",
-    employmentVerification: "Pending"
+    employmentVerification: "Pending",
+    fileUploads: {
+      "id_proof": [
+        { name: "passport.pdf", size: 245760, type: "application/pdf", lastModified: 1690000000000 },
+        { name: "drivers_license.jpg", size: 125000, type: "image/jpeg", lastModified: 1690000100000 }
+      ],
+      "income_verification": [
+        { name: "paystub_january.pdf", size: 156000, type: "application/pdf", lastModified: 1690000200000 },
+        { name: "bank_statement.pdf", size: 234000, type: "application/pdf", lastModified: 1690000300000 }
+      ]
+    }
   },
   {
     id: "APP-002",
