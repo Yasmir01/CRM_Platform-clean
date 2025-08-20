@@ -333,8 +333,14 @@ export default function ApplicationFormRenderer({
 
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
+      // Convert fileUploads array to object format expected by Applications view
+      const fileUploadsObject = fileUploads.reduce((acc, upload) => {
+        acc[upload.fieldId] = upload.files;
+        return acc;
+      }, {} as Record<string, File[]>);
+
       const applicationData = {
         id: `APP-${Date.now()}`,
         templateId: template.id,
@@ -342,7 +348,7 @@ export default function ApplicationFormRenderer({
         propertyId,
         propertyAddress,
         formData,
-        fileUploads,
+        fileUploads: fileUploadsObject,
         termsAccepted,
         paymentData,
         status: "New",
