@@ -153,9 +153,65 @@ export default function ApplicationFormRenderer({
     fields: formFields.filter(field => field.section === sectionName && field.type !== "section")
   }));
 
-  const totalSteps = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0) + 
-                   (template.termsAndConditions?.length ? 1 : 0) + 
+  const totalSteps = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0) +
+                   (template.termsAndConditions?.length ? 1 : 0) +
                    (template.applicationFee ? 1 : 0) + 1; // +1 for review step
+
+  // Restore draft data on mount
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const savedDrafts = LocalStorageService.getFormData();
+    const matchingDrafts = Object.entries(savedDrafts)
+      .filter(([key]) => key.startsWith(`app_draft_${template.id}_${propertyId || 'new'}`))
+      .sort(([, a], [, b]) => (b as any).timestamp - (a as any).timestamp); // Most recent first
+
+    if (matchingDrafts.length > 0) {
+      const [, mostRecentDraft] = matchingDrafts[0];
+      const draft = mostRecentDraft as any;
+
+      // Only restore if the draft is less than 24 hours old
+      const draftAge = Date.now() - (draft.timestamp || 0);
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (draftAge < maxAge) {
+        setFormData(draft.formData || {});
+        setFileUploads(draft.fileUploads || []);
+        setTermsAccepted(draft.termsAccepted || []);
+        setPaymentCompleted(draft.paymentCompleted || false);
+        setPaymentData(draft.paymentData || null);
+        setCurrentStep(draft.currentStep || 0);
+        console.log('Restored application draft from', new Date(draft.timestamp).toLocaleString());
+      }
+    }
+  }, [isOpen, template.id, propertyId]);
+
+  // Track changes to mark as unsaved
+  React.useEffect(() => {
+    const hasData = Object.keys(formData).length > 0 ||
+                   fileUploads.length > 0 ||
+                   termsAccepted.length > 0 ||
+                   paymentCompleted;
+    setHasUnsavedChanges(hasData && !isSubmitting);
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting]);
+
+  // Clean up old drafts periodically
+  React.useEffect(() => {
+    const cleanupOldDrafts = () => {
+      const savedDrafts = LocalStorageService.getFormData();
+      const now = Date.now();
+      const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+      Object.entries(savedDrafts).forEach(([key, draft]) => {
+        const draftAge = now - ((draft as any).timestamp || 0);
+        if (draftAge > maxAge) {
+          LocalStorageService.clearFormData(key);
+        }
+      });
+    };
+
+    cleanupOldDrafts();
+  }, []);
 
   const handleFieldChange = (fieldId: string, value: any) => {
     setFormData(prev => ({
