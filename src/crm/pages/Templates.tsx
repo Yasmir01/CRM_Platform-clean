@@ -530,9 +530,9 @@ export default function Templates() {
 
   // Helper function to count how many times a section has been added
   const getSectionCount = (sectionName: string) => {
+    // Only count the actual section header fields, not the individual fields within the section
     return formFields.filter(f =>
-      (f.type === 'section' && f.label === sectionName) ||
-      f.section === sectionName
+      f.type === 'section' && f.label === sectionName
     ).length;
   };
   const [editingField, setEditingField] = React.useState<FormField | null>(null);
