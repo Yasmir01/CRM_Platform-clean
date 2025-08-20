@@ -650,7 +650,9 @@ export default function ApplicationFormRenderer({
       }, {} as any) : undefined,
       maxFiles: field.maxFiles || 5,
       maxSize: (field.maxFileSize || 10) * 1024 * 1024, // Convert MB to bytes
-      onDrop: onFilesChange
+      onDrop: (files) => {
+        onFilesChange(files);
+      }
     });
 
     return (
