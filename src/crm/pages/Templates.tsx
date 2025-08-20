@@ -1588,7 +1588,26 @@ export default function Templates() {
                   <Button
                     variant="outlined"
                     fullWidth
-                    startIcon={<SecurityRoundedIcon />}
+                    startIcon={
+                      getTermsCount() > 0 ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircleIcon
+                            color="success"
+                            fontSize="small"
+                            sx={{ fontSize: 16 }}
+                          />
+                          {getTermsCount() > 1 && (
+                            <CheckCircleIcon
+                              color="success"
+                              fontSize="small"
+                              sx={{ fontSize: 16, marginLeft: -0.5 }}
+                            />
+                          )}
+                        </Box>
+                      ) : (
+                        <SecurityRoundedIcon />
+                      )
+                    }
                     onClick={() => {
                       const termsField: FormField = {
                         id: `terms_${Date.now()}`,
@@ -1601,12 +1620,43 @@ export default function Templates() {
                     }}
                   >
                     Add Terms & Conditions
+                    {getTermsCount() > 0 && (
+                      <Chip
+                        size="small"
+                        label={getTermsCount() > 1 ?
+                          `Added ${getTermsCount()}x` :
+                          'Added'
+                        }
+                        color="success"
+                        variant="outlined"
+                        sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
                   </Button>
 
                   <Button
                     variant="outlined"
                     fullWidth
-                    startIcon={<AddRoundedIcon />}
+                    startIcon={
+                      getFileUploadCount() > 0 ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <CheckCircleIcon
+                            color="success"
+                            fontSize="small"
+                            sx={{ fontSize: 16 }}
+                          />
+                          {getFileUploadCount() > 1 && (
+                            <CheckCircleIcon
+                              color="success"
+                              fontSize="small"
+                              sx={{ fontSize: 16, marginLeft: -0.5 }}
+                            />
+                          )}
+                        </Box>
+                      ) : (
+                        <AddRoundedIcon />
+                      )
+                    }
                     onClick={() => {
                       const fileField: FormField = {
                         id: `file_${Date.now()}`,
@@ -1622,6 +1672,18 @@ export default function Templates() {
                     }}
                   >
                     Add File Upload
+                    {getFileUploadCount() > 0 && (
+                      <Chip
+                        size="small"
+                        label={getFileUploadCount() > 1 ?
+                          `Added ${getFileUploadCount()}x` :
+                          'Added'
+                        }
+                        color="success"
+                        variant="outlined"
+                        sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                      />
+                    )}
                   </Button>
                 </Stack>
               </Paper>
