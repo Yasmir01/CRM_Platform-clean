@@ -49,6 +49,14 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import DownloadIcon from "@mui/icons-material/Download";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import ArticleIcon from "@mui/icons-material/Article";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ViewColumnIcon from "@mui/icons-material/ViewColumn";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
 import HomeIcon from "@mui/icons-material/Home";
@@ -96,7 +104,17 @@ const mockApplications: Application[] = [
     moveInDate: "2024-02-15",
     creditScore: 750,
     backgroundCheck: "Pending",
-    employmentVerification: "Pending"
+    employmentVerification: "Pending",
+    fileUploads: {
+      "document_upload": [
+        { name: "passport.pdf", size: 245760, type: "application/pdf", lastModified: 1690000000000 },
+        { name: "drivers_license.jpg", size: 125000, type: "image/jpeg", lastModified: 1690000100000 }
+      ],
+      "income_verification": [
+        { name: "paystub_january.pdf", size: 156000, type: "application/pdf", lastModified: 1690000200000 },
+        { name: "bank_statement.pdf", size: 234000, type: "application/pdf", lastModified: 1690000300000 }
+      ]
+    }
   },
   {
     id: "APP-002",
@@ -116,7 +134,16 @@ const mockApplications: Application[] = [
     moveInDate: "2024-03-01",
     creditScore: 680,
     backgroundCheck: "Approved",
-    employmentVerification: "Verified"
+    employmentVerification: "Verified",
+    fileUploads: {
+      "employment_letter": [
+        { name: "employment_verification.pdf", size: 178000, type: "application/pdf", lastModified: 1690000400000 }
+      ],
+      "references": [
+        { name: "reference_letter_1.pdf", size: 98000, type: "application/pdf", lastModified: 1690000500000 },
+        { name: "reference_letter_2.pdf", size: 87000, type: "application/pdf", lastModified: 1690000600000 }
+      ]
+    }
   },
   {
     id: "APP-003",
@@ -134,7 +161,16 @@ const mockApplications: Application[] = [
     submittedDate: "2024-01-19",
     monthlyIncome: 4800,
     moveInDate: "2024-02-20",
-    notes: "Payment declined - insufficient funds"
+    notes: "Payment declined - insufficient funds",
+    fileUploads: {
+      "document_upload": [
+        { name: "social_security_card.jpg", size: 89000, type: "image/jpeg", lastModified: 1690000700000 }
+      ],
+      "rental_history": [
+        { name: "previous_lease.pdf", size: 203000, type: "application/pdf", lastModified: 1690000800000 },
+        { name: "rental_references.docx", size: 45000, type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", lastModified: 1690000900000 }
+      ]
+    }
   }
 ];
 
@@ -169,6 +205,10 @@ export default function Applications() {
   const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [actionMenuAnchor, setActionMenuAnchor] = React.useState<null | HTMLElement>(null);
   const [selectedAppForAction, setSelectedAppForAction] = React.useState<Application | null>(null);
+  const [filePreviewOpen, setFilePreviewOpen] = React.useState(false);
+  const [selectedFile, setSelectedFile] = React.useState<any>(null);
+  const [expandedFiles, setExpandedFiles] = React.useState<Set<string>>(new Set());
+  const [inlinePreviewMode, setInlinePreviewMode] = React.useState(true);
   const [newApplicationDialog, setNewApplicationDialog] = React.useState(false);
   const [selectedTemplate, setSelectedTemplate] = React.useState<any>(null);
   const [templates, setTemplates] = React.useState<any[]>([]);
@@ -218,14 +258,53 @@ export default function Applications() {
           app.formData?.applicant_phone ||
           '';
 
-        return { ...app, applicantName, applicantEmail, applicantPhone };
+        // Normalize file upload data to ensure proper format
+        let normalizedFileUploads = app.fileUploads;
+        if (app.fileUploads) {
+          if (Array.isArray(app.fileUploads)) {
+            // Legacy array format - convert to object and normalize files
+            normalizedFileUploads = app.fileUploads.reduce((acc: any, upload: any) => {
+              acc[upload.fieldId] = upload.files.map((file: any) => ({
+                name: file.name || 'Unknown File',
+                size: file.size || 0,
+                type: file.type || 'application/octet-stream',
+                lastModified: file.lastModified || Date.now()
+              }));
+              return acc;
+            }, {});
+          } else {
+            // Object format - normalize file properties
+            normalizedFileUploads = Object.keys(app.fileUploads).reduce((acc: any, fieldId) => {
+              const files = app.fileUploads[fieldId];
+              acc[fieldId] = Array.isArray(files)
+                ? files.map((file: any) => ({
+                    name: file.name || 'Unknown File',
+                    size: file.size || 0,
+                    type: file.type || 'application/octet-stream',
+                    lastModified: file.lastModified || Date.now()
+                  }))
+                : [{
+                    name: files.name || 'Unknown File',
+                    size: files.size || 0,
+                    type: files.type || 'application/octet-stream',
+                    lastModified: files.lastModified || Date.now()
+                  }];
+              return acc;
+            }, {});
+          }
+        }
+
+        return { ...app, applicantName, applicantEmail, applicantPhone, fileUploads: normalizedFileUploads };
       };
 
       const normalized = savedApplications.map(normalizeApp);
-      setApplications(normalized);
+      setApplications([...mockApplications, ...normalized]);
 
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
+    } else {
+      // No saved applications, use mock data
+      setApplications(mockApplications);
     }
   }, []);
 
@@ -308,6 +387,208 @@ export default function Applications() {
     setSelectedAppForAction(null);
   };
 
+  const getFileIcon = (file: any) => {
+    if (!file.type) return <AttachFileIcon />;
+
+    if (file.type.includes('pdf')) return <PictureAsPdfIcon />;
+    if (file.type.includes('image')) return <ImageIcon />;
+    if (file.type.includes('document') || file.type.includes('text')) return <ArticleIcon />;
+    return <AttachFileIcon />;
+  };
+
+  const handleFileView = (file: any) => {
+    setSelectedFile(file);
+    setFilePreviewOpen(true);
+  };
+
+  const handleFileDownload = (file: any) => {
+    // Create a mock download since we don't have actual file data
+    // In a real application, this would download the actual file
+    const link = document.createElement('a');
+    link.href = '#';
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Show a notification that this is a demo
+    alert(`Download initiated for: ${file.name}\n\nNote: This is a demo - no actual file will be downloaded.`);
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const toggleFileExpansion = (fileId: string) => {
+    setExpandedFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
+
+  // Auto-expand first file when viewing an application
+  React.useEffect(() => {
+    if (selectedApplication && inlinePreviewMode && selectedApplication.fileUploads) {
+      const fileUploadsToDisplay = Array.isArray(selectedApplication.fileUploads)
+        ? selectedApplication.fileUploads.reduce((acc: any, upload: any) => {
+            acc[upload.fieldId] = upload.files;
+            return acc;
+          }, {})
+        : selectedApplication.fileUploads;
+
+      const firstFieldId = Object.keys(fileUploadsToDisplay)[0];
+      if (firstFieldId) {
+        const firstFileId = `${firstFieldId}_0`;
+        setExpandedFiles(prev => {
+          const newSet = new Set(prev);
+          newSet.add(firstFileId);
+          return newSet;
+        });
+      }
+    }
+  }, [selectedApplication?.id, inlinePreviewMode]);
+
+  const renderInlineFilePreview = (file: any, fieldId: string, index: number) => {
+    const fileId = `${fieldId}_${index}`;
+    const isExpanded = expandedFiles.has(fileId);
+
+    if (!isExpanded) return null;
+
+    return (
+      <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+        {file.type?.includes('image') ? (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              Image Preview
+            </Typography>
+            <Box
+              sx={{
+                width: '100%',
+                maxWidth: 400,
+                height: 200,
+                border: '2px dashed',
+                borderColor: 'grey.300',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'white',
+                margin: '0 auto'
+              }}
+            >
+              <Stack spacing={1} alignItems="center">
+                <ImageIcon sx={{ fontSize: 32, color: 'grey.400' }} />
+                <Typography variant="body2" color="text.secondary">
+                  {file.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Image content would be displayed here
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        ) : file.type?.includes('pdf') ? (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              PDF Document Preview
+            </Typography>
+            <Box
+              sx={{
+                width: '100%',
+                height: 300,
+                border: '2px dashed',
+                borderColor: 'grey.300',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'white'
+              }}
+            >
+              <Stack spacing={1} alignItems="center">
+                <PictureAsPdfIcon sx={{ fontSize: 32, color: 'error.main' }} />
+                <Typography variant="body2" color="text.secondary">
+                  {file.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  PDF content would be embedded here
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  ({formatFileSize(file.size || 0)})
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        ) : file.type?.includes('text') ? (
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              Text File Preview
+            </Typography>
+            <Box
+              sx={
+                {
+                  p: 2,
+                  bgcolor: 'white',
+                  border: '1px solid',
+                  borderColor: 'grey.300',
+                  borderRadius: 1,
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                  maxHeight: 200,
+                  overflow: 'auto'
+                }
+              }
+            >
+              <Typography variant="body2" color="text.secondary" style={{ fontFamily: 'monospace' }}>
+                Sample text content would be displayed here...
+                <br />File: {file.name}
+                <br />Size: {formatFileSize(file.size || 0)}
+                <br />Type: {file.type}
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+              File Information
+            </Typography>
+            <Box
+              sx={
+                {
+                  p: 2,
+                  bgcolor: 'white',
+                  border: '1px solid',
+                  borderColor: 'grey.300',
+                  borderRadius: 1
+                }
+              }
+            >
+              <Stack spacing={1} alignItems="center">
+                {getFileIcon(file)}
+                <Typography variant="body2">{file.name}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatFileSize(file.size || 0)} • {file.type || 'Unknown type'}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Preview not available - use download to view
+                </Typography>
+              </Stack>
+            </Box>
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
   const renderApplicationCard = (application: Application) => (
     <Card key={application.id} sx={{ mb: 2 }}>
       <CardContent>
@@ -322,7 +603,7 @@ export default function Applications() {
                   const property = properties.find(p => p.id === application.propertyId);
                   const propertyCode = application.propertyCode || application.propertyId;
                   return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` • Code: ${propertyCode}` : ''}`;
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ��� Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -338,8 +619,12 @@ export default function Applications() {
               />
               <Tooltip title="More Actions">
                 <IconButton
+                  id="action-menu-button"
                   size="small"
                   onClick={(e) => handleActionMenuOpen(e, application)}
+                  aria-controls={actionMenuAnchor ? 'action-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={actionMenuAnchor ? 'true' : undefined}
                 >
                   <MoreVertIcon />
                 </IconButton>
@@ -783,41 +1068,158 @@ export default function Applications() {
               )}
 
               {/* File Uploads */}
-              {selectedApplication.fileUploads && Object.keys(selectedApplication.fileUploads).length > 0 && (
-                <Paper sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
-                  <Grid container spacing={2}>
-                    {Object.entries(selectedApplication.fileUploads).map(([fieldId, files]) => {
-                      const template = templates.find(t => t.id === selectedApplication.templateId);
-                      const field = template?.formFields?.find(f => f.id === fieldId);
-                      const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              {(() => {
+                // Handle both legacy array format and new object format
+                let fileUploadsToDisplay = {};
 
-                      return (
-                        <Grid item xs={12} key={fieldId}>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {fieldLabel}
-                          </Typography>
-                          {Array.isArray(files) ? files.map((file: any, index: number) => (
-                            <Chip
-                              key={index}
-                              label={file.name || `File ${index + 1}`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ mr: 1, mb: 1 }}
-                            />
-                          )) : (
-                            <Chip
-                              label={files.name || 'File'}
-                              size="small"
-                              variant="outlined"
-                            />
-                          )}
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
-                </Paper>
-              )}
+                if (selectedApplication.fileUploads) {
+                  if (Array.isArray(selectedApplication.fileUploads)) {
+                    // Legacy array format: [{fieldId, files}, ...] - convert to object
+                    fileUploadsToDisplay = selectedApplication.fileUploads.reduce((acc: any, upload: any) => {
+                      acc[upload.fieldId] = upload.files;
+                      return acc;
+                    }, {});
+                  } else {
+                    // New object format: {fieldId: files, ...}
+                    fileUploadsToDisplay = selectedApplication.fileUploads;
+                  }
+                }
+
+                return Object.keys(fileUploadsToDisplay).length > 0 && (
+                  <Paper sx={{ p: 2 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                      <Typography variant="h6">Uploaded Files</Typography>
+                      <Tooltip title="Toggle inline preview mode">
+                        <IconButton
+                          size="small"
+                          onClick={() => setInlinePreviewMode(!inlinePreviewMode)}
+                          color={inlinePreviewMode ? "primary" : "default"}
+                        >
+                          <ViewColumnIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                    <Grid container spacing={2}>
+                      {Object.entries(fileUploadsToDisplay).map(([fieldId, files]) => {
+                        const template = templates.find(t => t.id === selectedApplication.templateId);
+                        const field = template?.formFields?.find(f => f.id === fieldId);
+                        const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                        return (
+                          <Grid item xs={12} key={fieldId}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                              {fieldLabel}
+                            </Typography>
+                            {Array.isArray(files) ? files.map((file: any, index: number) => (
+                              <Card key={index} variant="outlined" sx={{ mr: 1, mb: 1, display: 'inline-block', maxWidth: 300 }}>
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                  <Stack direction="row" spacing={1} alignItems="center">
+                                    {getFileIcon(file)}
+                                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                      <Typography variant="body2" noWrap title={file.name}>
+                                        {file.name || `File ${index + 1}`}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {formatFileSize(file.size || 0)} • {file.type || 'Unknown'}
+                                      </Typography>
+                                    </Box>
+                                    <Stack direction="row" spacing={0.5}>
+                                      {inlinePreviewMode && (
+                                        <Tooltip title={expandedFiles.has(`${fieldId}_${index}`) ? "Collapse Preview" : "Expand Preview"}>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => toggleFileExpansion(`${fieldId}_${index}`)}
+                                            color="primary"
+                                          >
+                                            {expandedFiles.has(`${fieldId}_${index}`) ?
+                                              <ExpandLessIcon fontSize="small" /> :
+                                              <ExpandMoreIcon fontSize="small" />
+                                            }
+                                          </IconButton>
+                                        </Tooltip>
+                                      )}
+                                      <Tooltip title="View in Modal">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileView(file)}
+                                          color="primary"
+                                        >
+                                          <VisibilityIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="Download File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileDownload(file)}
+                                          color="primary"
+                                        >
+                                          <DownloadIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Stack>
+                                  </Stack>
+                                </CardContent>
+                                {inlinePreviewMode && renderInlineFilePreview(file, fieldId, index)}
+                              </Card>
+                            )) : (
+                              <Card variant="outlined" sx={{ mr: 1, mb: 1, display: 'inline-block', maxWidth: 300 }}>
+                                <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                                  <Stack direction="row" spacing={1} alignItems="center">
+                                    {getFileIcon(files)}
+                                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                                      <Typography variant="body2" noWrap title={files.name}>
+                                        {files.name || 'File'}
+                                      </Typography>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {formatFileSize(files.size || 0)} • {files.type || 'Unknown'}
+                                      </Typography>
+                                    </Box>
+                                    <Stack direction="row" spacing={0.5}>
+                                      {inlinePreviewMode && (
+                                        <Tooltip title={expandedFiles.has(`${fieldId}_0`) ? "Collapse Preview" : "Expand Preview"}>
+                                          <IconButton
+                                            size="small"
+                                            onClick={() => toggleFileExpansion(`${fieldId}_0`)}
+                                            color="primary"
+                                          >
+                                            {expandedFiles.has(`${fieldId}_0`) ?
+                                              <ExpandLessIcon fontSize="small" /> :
+                                              <ExpandMoreIcon fontSize="small" />
+                                            }
+                                          </IconButton>
+                                        </Tooltip>
+                                      )}
+                                      <Tooltip title="View in Modal">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileView(files)}
+                                          color="primary"
+                                        >
+                                          <VisibilityIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="Download File">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleFileDownload(files)}
+                                          color="primary"
+                                        >
+                                          <DownloadIcon fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    </Stack>
+                                  </Stack>
+                                </CardContent>
+                                {inlinePreviewMode && renderInlineFilePreview(files, fieldId, 0)}
+                              </Card>
+                            )}
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  </Paper>
+                );
+              })()}
 
               {/* Terms Accepted */}
               {selectedApplication.termsAccepted && selectedApplication.termsAccepted.length > 0 && (
@@ -869,51 +1271,206 @@ export default function Applications() {
         </DialogActions>
       </Dialog>
 
-      {/* Action Menu */}
-      <Menu
-        anchorEl={actionMenuAnchor}
-        open={Boolean(actionMenuAnchor)}
-        onClose={handleActionMenuClose}
+      {/* File Preview Dialog */}
+      <Dialog
+        open={filePreviewOpen}
+        onClose={() => setFilePreviewOpen(false)}
+        maxWidth="md"
+        fullWidth
       >
-        {selectedAppForAction && (
-          <>
-            <MenuItem onClick={() => handleViewApplication(selectedAppForAction)}>
-              <VisibilityIcon sx={{ mr: 1 }} fontSize="small" />
-              View Details
-            </MenuItem>
-            {selectedAppForAction.status === "New" && (
-              <>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Pending")}>
-                  <PendingIcon sx={{ mr: 1 }} fontSize="small" />
-                  Move to Pending
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Denied")}>
-                  <CancelIcon sx={{ mr: 1 }} fontSize="small" />
-                  Deny Application
-                </MenuItem>
-              </>
-            )}
-            {selectedAppForAction.status === "Pending" && (
-              <>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Archived")}>
-                  <CheckCircleRoundedIcon sx={{ mr: 1 }} fontSize="small" />
-                  Approve & Archive
-                </MenuItem>
-                <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Denied")}>
-                  <CancelIcon sx={{ mr: 1 }} fontSize="small" />
-                  Deny Application
-                </MenuItem>
-              </>
-            )}
-            {selectedAppForAction.status === "Denied" && (
-              <MenuItem onClick={() => handleStatusChange(selectedAppForAction.id, "Pending")}>
-                <PendingIcon sx={{ mr: 1 }} fontSize="small" />
-                Reconsider Application
+        <DialogTitle>
+          <Stack direction="row" spacing={1} alignItems="center">
+            {selectedFile && getFileIcon(selectedFile)}
+            <Box>
+              <Typography variant="h6">{selectedFile?.name || 'File Preview'}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {selectedFile && (
+                  `${formatFileSize(selectedFile.size || 0)} • ${selectedFile.type || 'Unknown type'}`
+                )}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          {selectedFile && (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              {selectedFile.type?.includes('image') ? (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Image Preview
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 400,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+                      <Typography color="text.secondary">
+                        Image preview would be displayed here
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        In a real application, the actual image would be loaded from storage
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : selectedFile.type?.includes('pdf') ? (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    PDF Document
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 400,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      <PictureAsPdfIcon sx={{ fontSize: 64, color: 'error.main' }} />
+                      <Typography color="text.secondary">
+                        PDF viewer would be embedded here
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        In a real application, a PDF viewer would display the document content
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    File Information
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 200,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      {getFileIcon(selectedFile)}
+                      <Typography color="text.secondary">
+                        Preview not available for this file type
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        File can be downloaded for viewing
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFilePreviewOpen(false)}>Close</Button>
+          {selectedFile && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={() => {
+                handleFileDownload(selectedFile);
+                setFilePreviewOpen(false);
+              }}
+            >
+              Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
+      {/* Action Menu */}
+      {actionMenuAnchor && (
+        <Menu
+          id="action-menu"
+          anchorEl={actionMenuAnchor}
+          open={Boolean(actionMenuAnchor)}
+          onClose={handleActionMenuClose}
+          MenuListProps={{
+            'aria-labelledby': 'action-menu-button',
+          }}
+        >
+          {selectedAppForAction && (
+            <>
+              <MenuItem onClick={() => {
+                handleViewApplication(selectedAppForAction);
+                handleActionMenuClose();
+              }}>
+                <VisibilityIcon sx={{ mr: 1 }} fontSize="small" />
+                View Details
               </MenuItem>
-            )}
-          </>
-        )}
-      </Menu>
+              {selectedAppForAction.status === "New" && (
+                <>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Pending");
+                    handleActionMenuClose();
+                  }}>
+                    <PendingIcon sx={{ mr: 1 }} fontSize="small" />
+                    Move to Pending
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Denied");
+                    handleActionMenuClose();
+                  }}>
+                    <CancelIcon sx={{ mr: 1 }} fontSize="small" />
+                    Deny Application
+                  </MenuItem>
+                </>
+              )}
+              {selectedAppForAction.status === "Pending" && (
+                <>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Archived");
+                    handleActionMenuClose();
+                  }}>
+                    <CheckCircleRoundedIcon sx={{ mr: 1 }} fontSize="small" />
+                    Approve & Archive
+                  </MenuItem>
+                  <MenuItem onClick={() => {
+                    handleStatusChange(selectedAppForAction.id, "Denied");
+                    handleActionMenuClose();
+                  }}>
+                    <CancelIcon sx={{ mr: 1 }} fontSize="small" />
+                    Deny Application
+                  </MenuItem>
+                </>
+              )}
+              {selectedAppForAction.status === "Denied" && (
+                <MenuItem onClick={() => {
+                  handleStatusChange(selectedAppForAction.id, "Pending");
+                  handleActionMenuClose();
+                }}>
+                  <PendingIcon sx={{ mr: 1 }} fontSize="small" />
+                  Reconsider Application
+                </MenuItem>
+              )}
+            </>
+          )}
+        </Menu>
+      )}
 
       {/* Workflow Activity Log */}
       {workflowLog.length > 0 && (

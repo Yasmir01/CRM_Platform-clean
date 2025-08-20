@@ -821,46 +821,48 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       </Dialog>
 
       {/* Action Menu */}
-      <Menu
-        anchorEl={actionMenuAnchor}
-        open={Boolean(actionMenuAnchor)}
-        onClose={() => setActionMenuAnchor(null)}
-      >
-        <MenuList>
-          <ListItemButton onClick={() => {
-            setOpenShareDialog(true);
-            setActionMenuAnchor(null);
-          }}>
-            <ListItemIcon><ShareIcon /></ListItemIcon>
-            <ListItemText>Share Document</ListItemText>
-          </ListItemButton>
-          <ListItemButton onClick={() => {
-            setOpenPermissionsDialog(true);
-            setActionMenuAnchor(null);
-          }}>
-            <ListItemIcon><AdminPanelSettingsIcon /></ListItemIcon>
-            <ListItemText>Manage Permissions</ListItemText>
-          </ListItemButton>
-          <ListItemButton onClick={() => {
-            if (selectedDocument) handleViewAccessLog(selectedDocument);
-            setActionMenuAnchor(null);
-          }}>
-            <ListItemIcon><AssessmentIcon /></ListItemIcon>
-            <ListItemText>View Audit Log</ListItemText>
-          </ListItemButton>
-          <Divider />
-          <ListItemButton 
-            onClick={() => {
-              if (selectedDocument) handleDeleteDocument(selectedDocument);
+      {actionMenuAnchor && (
+        <Menu
+          anchorEl={actionMenuAnchor}
+          open={Boolean(actionMenuAnchor)}
+          onClose={() => setActionMenuAnchor(null)}
+        >
+          <MenuList>
+            <ListItemButton onClick={() => {
+              setOpenShareDialog(true);
               setActionMenuAnchor(null);
-            }}
-            sx={{ color: 'error.main' }}
-          >
-            <ListItemIcon><DeleteIcon color="error" /></ListItemIcon>
-            <ListItemText>Delete Document</ListItemText>
-          </ListItemButton>
-        </MenuList>
-      </Menu>
+            }}>
+              <ListItemIcon><ShareIcon /></ListItemIcon>
+              <ListItemText>Share Document</ListItemText>
+            </ListItemButton>
+            <ListItemButton onClick={() => {
+              setOpenPermissionsDialog(true);
+              setActionMenuAnchor(null);
+            }}>
+              <ListItemIcon><AdminPanelSettingsIcon /></ListItemIcon>
+              <ListItemText>Manage Permissions</ListItemText>
+            </ListItemButton>
+            <ListItemButton onClick={() => {
+              if (selectedDocument) handleViewAccessLog(selectedDocument);
+              setActionMenuAnchor(null);
+            }}>
+              <ListItemIcon><AssessmentIcon /></ListItemIcon>
+              <ListItemText>View Audit Log</ListItemText>
+            </ListItemButton>
+            <Divider />
+            <ListItemButton
+              onClick={() => {
+                if (selectedDocument) handleDeleteDocument(selectedDocument);
+                setActionMenuAnchor(null);
+              }}
+              sx={{ color: 'error.main' }}
+            >
+              <ListItemIcon><DeleteIcon color="error" /></ListItemIcon>
+              <ListItemText>Delete Document</ListItemText>
+            </ListItemButton>
+          </MenuList>
+        </Menu>
+      )}
 
       {/* Other dialogs would go here - Share, Permissions, Audit, etc. */}
       {/* For brevity, I'm including just the basic structure */}

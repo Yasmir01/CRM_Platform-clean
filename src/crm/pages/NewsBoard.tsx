@@ -1260,49 +1260,51 @@ export default function NewsBoard() {
         </Dialog>
 
         {/* Action Menu */}
-        <Menu
-          anchorEl={actionMenuAnchor}
-          open={Boolean(actionMenuAnchor)}
-          onClose={handleActionMenuClose}
-        >
-          {selectedPostForAction && (
-            <List dense>
-              <ListItem component="button" onClick={() => { handleEditPost(selectedPostForAction); handleActionMenuClose(); }}>
-                <ListItemIcon>
-                  <EditRoundedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText primary="Edit Announcement" />
-              </ListItem>
-              <ListItem component="button" onClick={() => {
-                setPosts(prev => prev.map(p =>
-                  p.id === selectedPostForAction.id
-                    ? {...p, isPinned: !p.isPinned}
-                    : p
-                ));
-                handleActionMenuClose();
-              }}>
-                <ListItemIcon>
-                  <PushPinRoundedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText primary={selectedPostForAction.isPinned ? "Unpin" : "Pin to Top"} />
-              </ListItem>
-              <Divider />
-              <ListItem
-                component="button"
-                onClick={() => {
-                  handleDeletePost(selectedPostForAction.id);
+        {actionMenuAnchor && (
+          <Menu
+            anchorEl={actionMenuAnchor}
+            open={Boolean(actionMenuAnchor)}
+            onClose={handleActionMenuClose}
+          >
+            {selectedPostForAction && (
+              <List dense>
+                <ListItem component="button" onClick={() => { handleEditPost(selectedPostForAction); handleActionMenuClose(); }}>
+                  <ListItemIcon>
+                    <EditRoundedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary="Edit Announcement" />
+                </ListItem>
+                <ListItem component="button" onClick={() => {
+                  setPosts(prev => prev.map(p =>
+                    p.id === selectedPostForAction.id
+                      ? {...p, isPinned: !p.isPinned}
+                      : p
+                  ));
                   handleActionMenuClose();
-                }}
-                sx={{ color: 'error.main' }}
-              >
-                <ListItemIcon>
-                  <DeleteRoundedIcon fontSize="small" color="error" />
-                </ListItemIcon>
-                <ListItemText primary="Delete Announcement" />
-              </ListItem>
-            </List>
-          )}
-        </Menu>
+                }}>
+                  <ListItemIcon>
+                    <PushPinRoundedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={selectedPostForAction.isPinned ? "Unpin" : "Pin to Top"} />
+                </ListItem>
+                <Divider />
+                <ListItem
+                  component="button"
+                  onClick={() => {
+                    handleDeletePost(selectedPostForAction.id);
+                    handleActionMenuClose();
+                  }}
+                  sx={{ color: 'error.main' }}
+                >
+                  <ListItemIcon>
+                    <DeleteRoundedIcon fontSize="small" color="error" />
+                  </ListItemIcon>
+                  <ListItemText primary="Delete Announcement" />
+                </ListItem>
+              </List>
+            )}
+          </Menu>
+        )}
 
         {/* Save Selection Dialog */}
         <Dialog open={saveSelectionDialogOpen} onClose={() => setSaveSelectionDialogOpen(false)} maxWidth="sm" fullWidth>

@@ -129,15 +129,23 @@ export default function ApplicationFormRenderer({
   const draftKey = `app_draft_${template.id}_${propertyId || 'new'}_${Date.now()}`;
 
   // Auto-save draft data
-  const draftData = React.useMemo(() => ({
-    formData,
-    fileUploads,
-    termsAccepted,
-    paymentCompleted,
-    paymentData,
-    currentStep,
-    timestamp: Date.now()
-  }), [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
+  const draftData = React.useMemo(() => {
+    // Convert fileUploads to object format for consistency
+    const fileUploadsObject = fileUploads.reduce((acc, upload) => {
+      acc[upload.fieldId] = upload.files;
+      return acc;
+    }, {} as Record<string, File[]>);
+
+    return {
+      formData,
+      fileUploads: fileUploadsObject,
+      termsAccepted,
+      paymentCompleted,
+      paymentData,
+      currentStep,
+      timestamp: Date.now()
+    };
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
 
   // Use auto-save hook for draft management and beforeunload protection
   const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
@@ -178,7 +186,24 @@ export default function ApplicationFormRenderer({
 
       if (draftAge < maxAge) {
         setFormData(draft.formData || {});
-        setFileUploads(draft.fileUploads || []);
+
+        // Handle both legacy array format and new object format for fileUploads
+        if (draft.fileUploads) {
+          if (Array.isArray(draft.fileUploads)) {
+            // Legacy array format: [{fieldId, files}, ...]
+            setFileUploads(draft.fileUploads);
+          } else {
+            // New object format: {fieldId: files, ...} - convert back to array for internal state
+            const fileUploadsArray = Object.entries(draft.fileUploads).map(([fieldId, files]) => ({
+              fieldId,
+              files: Array.isArray(files) ? files : [files]
+            }));
+            setFileUploads(fileUploadsArray);
+          }
+        } else {
+          setFileUploads([]);
+        }
+
         setTermsAccepted(draft.termsAccepted || []);
         setPaymentCompleted(draft.paymentCompleted || false);
         setPaymentData(draft.paymentData || null);
@@ -241,14 +266,28 @@ export default function ApplicationFormRenderer({
     setFileUploads(prev => {
       const existing = prev.find(upload => upload.fieldId === fieldId);
       if (existing) {
-        return prev.map(upload => 
-          upload.fieldId === fieldId 
-            ? { ...upload, files }
+        // For multiple file uploads, append new files to existing ones
+        // For single file uploads, replace the existing file
+        const field = formFields.find(f => f.id === fieldId);
+        const maxFiles = field?.maxFiles || 5;
+
+        let updatedFiles = files;
+        if (maxFiles > 1) {
+          // Append new files to existing, but respect maxFiles limit
+          updatedFiles = [...existing.files, ...files].slice(0, maxFiles);
+        }
+
+        return prev.map(upload =>
+          upload.fieldId === fieldId
+            ? { ...upload, files: updatedFiles }
             : upload
         );
       }
       return [...prev, { fieldId, files }];
     });
+
+    // Mark form as having unsaved changes
+    setHasUnsavedChanges(true);
   };
 
   const validateCurrentStep = () => {
@@ -319,8 +358,14 @@ export default function ApplicationFormRenderer({
 
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
-    
+
     try {
+      // Convert fileUploads array to object format expected by Applications view
+      const fileUploadsObject = fileUploads.reduce((acc, upload) => {
+        acc[upload.fieldId] = upload.files;
+        return acc;
+      }, {} as Record<string, File[]>);
+
       const applicationData = {
         id: `APP-${Date.now()}`,
         templateId: template.id,
@@ -328,7 +373,7 @@ export default function ApplicationFormRenderer({
         propertyId,
         propertyAddress,
         formData,
-        fileUploads,
+        fileUploads: fileUploadsObject,
         termsAccepted,
         paymentData,
         status: "New",
@@ -643,7 +688,7 @@ export default function ApplicationFormRenderer({
   };
 
   const FileUploadField = ({ field, onFilesChange, error }: { field: FormField, onFilesChange: (files: File[]) => void, error?: string }) => {
-    const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
       accept: field.fileTypes ? field.fileTypes.reduce((acc, type) => {
         acc[`.${type}`] = [];
         return acc;
@@ -655,12 +700,15 @@ export default function ApplicationFormRenderer({
       }
     });
 
+    // Get the current saved files for this field from fileUploads state
+    const currentFiles = fileUploads.find(upload => upload.fieldId === field.id)?.files || [];
+
     return (
       <Box key={field.id} sx={{ my: 2 }}>
         <Typography variant="body1" gutterBottom>
           {field.label} {field.required && "*"}
         </Typography>
-        
+
         <Paper
           {...getRootProps()}
           sx={{
@@ -685,16 +733,21 @@ export default function ApplicationFormRenderer({
           </Typography>
         </Paper>
 
-        {acceptedFiles.length > 0 && (
+        {currentFiles.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2" gutterBottom>Uploaded Files:</Typography>
-            {acceptedFiles.map((file, index) => (
+            {currentFiles.map((file, index) => (
               <Chip
                 key={index}
                 icon={<AttachFileIcon />}
                 label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`}
                 variant="outlined"
                 sx={{ mr: 1, mb: 1 }}
+                onDelete={() => {
+                  // Remove this file from the uploaded files
+                  const updatedFiles = currentFiles.filter((_, i) => i !== index);
+                  onFilesChange(updatedFiles);
+                }}
               />
             ))}
           </Box>

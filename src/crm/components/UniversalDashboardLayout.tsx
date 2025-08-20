@@ -398,24 +398,26 @@ const UniversalDashboardLayout: React.FC<UniversalDashboardLayoutProps> = ({
         </Fab>
 
         {/* Settings Menu */}
-        <Menu
-          anchorEl={settingsAnchor}
-          open={Boolean(settingsAnchor)}
-          onClose={() => setSettingsAnchor(null)}
-        >
-          <MenuItem onClick={handleLoadLayout}>
-            <RestoreIcon sx={{ mr: 1 }} />
-            Load Saved Layout
-          </MenuItem>
-          <MenuItem onClick={handleResetLayout}>
-            <RestoreIcon sx={{ mr: 1 }} />
-            Reset to Default
-          </MenuItem>
-          <MenuItem onClick={() => { setSaveDialogOpen(true); setSettingsAnchor(null); }}>
-            <SaveIcon sx={{ mr: 1 }} />
-            Save Current Layout
-          </MenuItem>
-        </Menu>
+        {settingsAnchor && (
+          <Menu
+            anchorEl={settingsAnchor}
+            open={Boolean(settingsAnchor)}
+            onClose={() => setSettingsAnchor(null)}
+          >
+            <MenuItem onClick={handleLoadLayout}>
+              <RestoreIcon sx={{ mr: 1 }} />
+              Load Saved Layout
+            </MenuItem>
+            <MenuItem onClick={handleResetLayout}>
+              <RestoreIcon sx={{ mr: 1 }} />
+              Reset to Default
+            </MenuItem>
+            <MenuItem onClick={() => { setSaveDialogOpen(true); setSettingsAnchor(null); }}>
+              <SaveIcon sx={{ mr: 1 }} />
+              Save Current Layout
+            </MenuItem>
+          </Menu>
+        )}
 
         {/* Save Dialog */}
         <Dialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)}>
