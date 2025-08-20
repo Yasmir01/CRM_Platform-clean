@@ -327,6 +327,15 @@ export default function ApplicationFormRenderer({
       const existingApplications = LocalStorageService.getApplications();
       LocalStorageService.saveApplications([...existingApplications, applicationData]);
 
+      // Clear all drafts for this form since it was successfully submitted
+      const savedDrafts = LocalStorageService.getFormData();
+      Object.keys(savedDrafts).forEach(key => {
+        if (key.startsWith(`app_draft_${template.id}_${propertyId || 'new'}`)) {
+          LocalStorageService.clearFormData(key);
+        }
+      });
+
+      setHasUnsavedChanges(false);
       onSubmit(applicationData);
     } catch (error) {
       console.error("Error submitting application:", error);
