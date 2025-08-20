@@ -643,7 +643,7 @@ export default function ApplicationFormRenderer({
   };
 
   const FileUploadField = ({ field, onFilesChange, error }: { field: FormField, onFilesChange: (files: File[]) => void, error?: string }) => {
-    const { getRootProps, getInputProps, isDragActive, acceptedFiles } = useDropzone({
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
       accept: field.fileTypes ? field.fileTypes.reduce((acc, type) => {
         acc[`.${type}`] = [];
         return acc;
@@ -655,12 +655,15 @@ export default function ApplicationFormRenderer({
       }
     });
 
+    // Get the current saved files for this field from fileUploads state
+    const currentFiles = fileUploads.find(upload => upload.fieldId === field.id)?.files || [];
+
     return (
       <Box key={field.id} sx={{ my: 2 }}>
         <Typography variant="body1" gutterBottom>
           {field.label} {field.required && "*"}
         </Typography>
-        
+
         <Paper
           {...getRootProps()}
           sx={{
@@ -685,16 +688,21 @@ export default function ApplicationFormRenderer({
           </Typography>
         </Paper>
 
-        {acceptedFiles.length > 0 && (
+        {currentFiles.length > 0 && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle2" gutterBottom>Uploaded Files:</Typography>
-            {acceptedFiles.map((file, index) => (
+            {currentFiles.map((file, index) => (
               <Chip
                 key={index}
                 icon={<AttachFileIcon />}
                 label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`}
                 variant="outlined"
                 sx={{ mr: 1, mb: 1 }}
+                onDelete={() => {
+                  // Remove this file from the uploaded files
+                  const updatedFiles = currentFiles.filter((_, i) => i !== index);
+                  onFilesChange(updatedFiles);
+                }}
               />
             ))}
           </Box>
