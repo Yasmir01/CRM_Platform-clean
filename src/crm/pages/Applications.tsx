@@ -787,41 +787,59 @@ export default function Applications() {
               )}
 
               {/* File Uploads */}
-              {selectedApplication.fileUploads && Object.keys(selectedApplication.fileUploads).length > 0 && (
-                <Paper sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
-                  <Grid container spacing={2}>
-                    {Object.entries(selectedApplication.fileUploads).map(([fieldId, files]) => {
-                      const template = templates.find(t => t.id === selectedApplication.templateId);
-                      const field = template?.formFields?.find(f => f.id === fieldId);
-                      const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+              {(() => {
+                // Handle both legacy array format and new object format
+                let fileUploadsToDisplay = {};
 
-                      return (
-                        <Grid item xs={12} key={fieldId}>
-                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {fieldLabel}
-                          </Typography>
-                          {Array.isArray(files) ? files.map((file: any, index: number) => (
-                            <Chip
-                              key={index}
-                              label={file.name || `File ${index + 1}`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ mr: 1, mb: 1 }}
-                            />
-                          )) : (
-                            <Chip
-                              label={files.name || 'File'}
-                              size="small"
-                              variant="outlined"
-                            />
-                          )}
-                        </Grid>
-                      );
-                    })}
-                  </Grid>
-                </Paper>
-              )}
+                if (selectedApplication.fileUploads) {
+                  if (Array.isArray(selectedApplication.fileUploads)) {
+                    // Legacy array format: [{fieldId, files}, ...] - convert to object
+                    fileUploadsToDisplay = selectedApplication.fileUploads.reduce((acc: any, upload: any) => {
+                      acc[upload.fieldId] = upload.files;
+                      return acc;
+                    }, {});
+                  } else {
+                    // New object format: {fieldId: files, ...}
+                    fileUploadsToDisplay = selectedApplication.fileUploads;
+                  }
+                }
+
+                return Object.keys(fileUploadsToDisplay).length > 0 && (
+                  <Paper sx={{ p: 2 }}>
+                    <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
+                    <Grid container spacing={2}>
+                      {Object.entries(fileUploadsToDisplay).map(([fieldId, files]) => {
+                        const template = templates.find(t => t.id === selectedApplication.templateId);
+                        const field = template?.formFields?.find(f => f.id === fieldId);
+                        const fieldLabel = field?.label || fieldId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                        return (
+                          <Grid item xs={12} key={fieldId}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                              {fieldLabel}
+                            </Typography>
+                            {Array.isArray(files) ? files.map((file: any, index: number) => (
+                              <Chip
+                                key={index}
+                                label={file.name || `File ${index + 1}`}
+                                size="small"
+                                variant="outlined"
+                                sx={{ mr: 1, mb: 1 }}
+                              />
+                            )) : (
+                              <Chip
+                                label={files.name || 'File'}
+                                size="small"
+                                variant="outlined"
+                              />
+                            )}
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  </Paper>
+                );
+              })()}
 
               {/* Terms Accepted */}
               {selectedApplication.termsAccepted && selectedApplication.termsAccepted.length > 0 && (
