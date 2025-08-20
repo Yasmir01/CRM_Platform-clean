@@ -201,6 +201,8 @@ export default function Applications() {
   const [selectedAppForAction, setSelectedAppForAction] = React.useState<Application | null>(null);
   const [filePreviewOpen, setFilePreviewOpen] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState<any>(null);
+  const [expandedFiles, setExpandedFiles] = React.useState<Set<string>>(new Set());
+  const [inlinePreviewMode, setInlinePreviewMode] = React.useState(true);
   const [newApplicationDialog, setNewApplicationDialog] = React.useState(false);
   const [selectedTemplate, setSelectedTemplate] = React.useState<any>(null);
   const [templates, setTemplates] = React.useState<any[]>([]);
