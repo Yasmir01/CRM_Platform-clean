@@ -535,6 +535,16 @@ export default function Templates() {
       f.type === 'section' && f.label === sectionName
     ).length;
   };
+
+  // Helper function to count file upload fields
+  const getFileUploadCount = () => {
+    return formFields.filter(f => f.type === 'file_upload').length;
+  };
+
+  // Helper function to count terms and conditions fields
+  const getTermsCount = () => {
+    return formFields.filter(f => f.type === 'terms').length;
+  };
   const [editingField, setEditingField] = React.useState<FormField | null>(null);
   const [fieldDialogOpen, setFieldDialogOpen] = React.useState(false);
   const [paymentSettingsOpen, setPaymentSettingsOpen] = React.useState(false);
