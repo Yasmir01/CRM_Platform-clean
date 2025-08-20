@@ -1917,6 +1917,7 @@ export default function Templates() {
                     <MenuItem value="checkbox">Checkbox</MenuItem>
                     <MenuItem value="radio">Radio Buttons</MenuItem>
                     <MenuItem value="yesno">Yes/No</MenuItem>
+                    <MenuItem value="terms">Terms & Conditions</MenuItem>
                     <MenuItem value="signature">Signature</MenuItem>
                   </Select>
                 </FormControl>
