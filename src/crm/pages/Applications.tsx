@@ -1082,6 +1082,7 @@ export default function Applications() {
                                     </Stack>
                                   </Stack>
                                 </CardContent>
+                                {renderInlineFilePreview(file, fieldId, index)}
                               </Card>
                             )) : (
                               <Card variant="outlined" sx={{ mr: 1, mb: 1, display: 'inline-block', maxWidth: 300 }}>
