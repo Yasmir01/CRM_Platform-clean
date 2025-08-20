@@ -129,15 +129,23 @@ export default function ApplicationFormRenderer({
   const draftKey = `app_draft_${template.id}_${propertyId || 'new'}_${Date.now()}`;
 
   // Auto-save draft data
-  const draftData = React.useMemo(() => ({
-    formData,
-    fileUploads,
-    termsAccepted,
-    paymentCompleted,
-    paymentData,
-    currentStep,
-    timestamp: Date.now()
-  }), [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
+  const draftData = React.useMemo(() => {
+    // Convert fileUploads to object format for consistency
+    const fileUploadsObject = fileUploads.reduce((acc, upload) => {
+      acc[upload.fieldId] = upload.files;
+      return acc;
+    }, {} as Record<string, File[]>);
+
+    return {
+      formData,
+      fileUploads: fileUploadsObject,
+      termsAccepted,
+      paymentCompleted,
+      paymentData,
+      currentStep,
+      timestamp: Date.now()
+    };
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, paymentData, currentStep]);
 
   // Use auto-save hook for draft management and beforeunload protection
   const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
