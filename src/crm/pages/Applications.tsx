@@ -1017,6 +1017,137 @@ export default function Applications() {
         </DialogActions>
       </Dialog>
 
+      {/* File Preview Dialog */}
+      <Dialog
+        open={filePreviewOpen}
+        onClose={() => setFilePreviewOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" spacing={1} alignItems="center">
+            {selectedFile && getFileIcon(selectedFile)}
+            <Box>
+              <Typography variant="h6">{selectedFile?.name || 'File Preview'}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {selectedFile && (
+                  `${formatFileSize(selectedFile.size || 0)} • ${selectedFile.type || 'Unknown type'}`
+                )}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          {selectedFile && (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              {selectedFile.type?.includes('image') ? (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Image Preview
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 400,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+                      <Typography color="text.secondary">
+                        Image preview would be displayed here
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        In a real application, the actual image would be loaded from storage
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : selectedFile.type?.includes('pdf') ? (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    PDF Document
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 400,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      <PictureAsPdfIcon sx={{ fontSize: 64, color: 'error.main' }} />
+                      <Typography color="text.secondary">
+                        PDF viewer would be embedded here
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        In a real application, a PDF viewer would display the document content
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    File Information
+                  </Typography>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 200,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center">
+                      {getFileIcon(selectedFile)}
+                      <Typography color="text.secondary">
+                        Preview not available for this file type
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        File can be downloaded for viewing
+                      </Typography>
+                    </Stack>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setFilePreviewOpen(false)}>Close</Button>
+          {selectedFile && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={() => {
+                handleFileDownload(selectedFile);
+                setFilePreviewOpen(false);
+              }}
+            >
+              Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+
       {/* Action Menu */}
       {actionMenuAnchor && (
         <Menu
