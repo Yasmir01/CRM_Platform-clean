@@ -1,3 +1,5 @@
+import TransUnionService, { CreditReportRequest, BackgroundCheckRequest } from './TransUnionService';
+
 interface Application {
   id: string;
   applicantName: string;
