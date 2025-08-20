@@ -429,6 +429,32 @@ export default function PropertyApplicationDialog({
           </Typography>
         </Alert>
       </Snackbar>
+
+      {/* Unsaved Changes Confirmation Dialog */}
+      <Dialog open={showCloseConfirmation} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <InfoIcon color="warning" />
+            <Typography variant="h6">Unsaved Changes</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            You have unsaved changes in your application. If you close now, your progress will be lost.
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Your form data is automatically saved as a draft every few seconds while you work.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelClose} variant="outlined">
+            Continue Editing
+          </Button>
+          <Button onClick={handleConfirmClose} color="error" variant="contained">
+            Discard & Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
