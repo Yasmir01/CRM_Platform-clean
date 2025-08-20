@@ -332,6 +332,174 @@ export class WorkflowService {
   }
 
   /**
+   * Handle TransUnion integration for credit and background checks
+   */
+  private async handleTransUnionIntegration(application: Application) {
+    if (!this.callbacks) return;
+
+    // Only proceed if payment is completed
+    if (application.paymentStatus !== "Paid") {
+      this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - payment not completed`);
+      return;
+    }
+
+    // Check if we have the necessary applicant data
+    if (!application.applicantName || !application.applicantEmail) {
+      this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - missing applicant information`);
+      return;
+    }
+
+    try {
+      // Parse applicant name
+      const [firstName, ...lastNameParts] = application.applicantName.split(' ');
+      const lastName = lastNameParts.join(' ') || '';
+
+      // Get additional data from form data if available
+      const formData = (application as any).formData || {};
+      const dateOfBirth = formData.date_of_birth || formData.birth_date || '';
+      const socialSecurityNumber = formData.social_security_number || formData.ssn || '';
+      const creditCheckConsent = formData.creditCheckConsent || formData.credit_check_consent || false;
+      const backgroundCheckConsent = formData.backgroundCheckConsent || formData.background_check_consent || false;
+
+      // Parse address (try to extract from property address or form data)
+      const addressData = this.parseAddress(
+        formData.current_address ||
+        formData.address ||
+        application.propertyAddress ||
+        ''
+      );
+
+      // Request credit report if consent is given and we have required data
+      if (creditCheckConsent && socialSecurityNumber && dateOfBirth) {
+        this.callbacks.logActivity(`Requesting credit report for application ${application.id}...`);
+
+        const creditRequest: CreditReportRequest = {
+          firstName,
+          lastName,
+          dateOfBirth,
+          socialSecurityNumber,
+          currentAddress: addressData,
+          email: application.applicantEmail,
+          phone: application.applicantPhone || formData.phone || '',
+          permissiblePurpose: 'Tenant Screening'
+        };
+
+        try {
+          const creditResult = await TransUnionService.requestCreditReport(creditRequest);
+
+          if (creditResult.status === 'completed' && creditResult.creditScore) {
+            // Update application with credit score
+            this.callbacks.updateApplications((applications) =>
+              applications.map(app =>
+                app.id === application.id
+                  ? { ...app, creditScore: creditResult.creditScore }
+                  : app
+              )
+            );
+
+            this.callbacks.logActivity(
+              `Credit report completed for application ${application.id} - Score: ${creditResult.creditScore}`
+            );
+          } else if (creditResult.status === 'pending') {
+            this.callbacks.logActivity(
+              `Credit report requested for application ${application.id} - Report ID: ${creditResult.reportId}`
+            );
+          } else {
+            this.callbacks.logActivity(
+              `Credit report failed for application ${application.id} - ${creditResult.errorMessage || 'Unknown error'}`
+            );
+          }
+        } catch (error) {
+          this.callbacks.logActivity(
+            `Credit report error for application ${application.id} - ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      } else {
+        this.callbacks.logActivity(
+          `Credit report skipped for application ${application.id} - ${!creditCheckConsent ? 'no consent' : 'missing required data'}`
+        );
+      }
+
+      // Request background check if consent is given and we have required data
+      if (backgroundCheckConsent && socialSecurityNumber && dateOfBirth) {
+        this.callbacks.logActivity(`Requesting background check for application ${application.id}...`);
+
+        const backgroundRequest: BackgroundCheckRequest = {
+          firstName,
+          lastName,
+          dateOfBirth,
+          socialSecurityNumber,
+          currentAddress: addressData,
+          email: application.applicantEmail,
+          phone: application.applicantPhone || formData.phone || '',
+          searchType: 'standard'
+        };
+
+        try {
+          const backgroundResult = await TransUnionService.requestBackgroundCheck(backgroundRequest);
+
+          if (backgroundResult.status === 'completed' && backgroundResult.result) {
+            // Update application with background check result
+            const backgroundStatus = backgroundResult.result === 'clear'
+              ? 'Approved'
+              : backgroundResult.result === 'failed'
+              ? 'Failed'
+              : 'Pending';
+
+            this.callbacks.updateApplications((applications) =>
+              applications.map(app =>
+                app.id === application.id
+                  ? { ...app, backgroundCheck: backgroundStatus as "Pending" | "Approved" | "Failed" }
+                  : app
+              )
+            );
+
+            this.callbacks.logActivity(
+              `Background check completed for application ${application.id} - Result: ${backgroundResult.result}`
+            );
+          } else if (backgroundResult.status === 'pending') {
+            this.callbacks.logActivity(
+              `Background check requested for application ${application.id} - Report ID: ${backgroundResult.reportId}`
+            );
+          } else {
+            this.callbacks.logActivity(
+              `Background check failed for application ${application.id} - ${backgroundResult.errorMessage || 'Unknown error'}`
+            );
+          }
+        } catch (error) {
+          this.callbacks.logActivity(
+            `Background check error for application ${application.id} - ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      } else {
+        this.callbacks.logActivity(
+          `Background check skipped for application ${application.id} - ${!backgroundCheckConsent ? 'no consent' : 'missing required data'}`
+        );
+      }
+
+    } catch (error) {
+      this.callbacks.logActivity(
+        `TransUnion integration error for application ${application.id} - ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  /**
+   * Parse address string into structured format
+   */
+  private parseAddress(addressString: string) {
+    // Simple address parsing - in production, use a proper address parsing service
+    const parts = addressString.split(',').map(part => part.trim());
+
+    return {
+      street: parts[0] || '',
+      city: parts[1] || '',
+      state: parts[2] ? parts[2].split(' ')[0] : '',
+      zipCode: parts[2] ? parts[2].split(' ').slice(-1)[0] : ''
+    };
+  }
+
+  /**
    * Utility: Extract unit number from property address
    */
   private extractUnitFromAddress(address: string): string {
