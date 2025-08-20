@@ -539,7 +539,7 @@ export default function Applications() {
                   const property = properties.find(p => p.id === application.propertyId);
                   const propertyCode = application.propertyCode || application.propertyId;
                   return property ? `${property.name} • ${property.address}${propertyCode ? ` • Code: ${propertyCode}` : ''}` :
-                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ��� Code: ${propertyCode}` : ''}`;
+                         `${application.propertyName || 'Unknown Property'} • ${application.propertyAddress || ''}${propertyCode ? ` ���� Code: ${propertyCode}` : ''}`;
                 })()}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -1098,7 +1098,19 @@ export default function Applications() {
                                       </Typography>
                                     </Box>
                                     <Stack direction="row" spacing={0.5}>
-                                      <Tooltip title="View File">
+                                      <Tooltip title={expandedFiles.has(`${fieldId}_0`) ? "Collapse Preview" : "Expand Preview"}>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => toggleFileExpansion(`${fieldId}_0`)}
+                                          color="primary"
+                                        >
+                                          {expandedFiles.has(`${fieldId}_0`) ?
+                                            <ExpandLessIcon fontSize="small" /> :
+                                            <ExpandMoreIcon fontSize="small" />
+                                          }
+                                        </IconButton>
+                                      </Tooltip>
+                                      <Tooltip title="View in Modal">
                                         <IconButton
                                           size="small"
                                           onClick={() => handleFileView(files)}
