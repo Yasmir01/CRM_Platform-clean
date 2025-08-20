@@ -1023,7 +1023,18 @@ export default function Applications() {
 
                 return Object.keys(fileUploadsToDisplay).length > 0 && (
                   <Paper sx={{ p: 2 }}>
-                    <Typography variant="h6" gutterBottom>Uploaded Files</Typography>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                      <Typography variant="h6">Uploaded Files</Typography>
+                      <Tooltip title="Toggle inline preview mode">
+                        <IconButton
+                          size="small"
+                          onClick={() => setInlinePreviewMode(!inlinePreviewMode)}
+                          color={inlinePreviewMode ? "primary" : "default"}
+                        >
+                          <ViewColumnIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
                     <Grid container spacing={2}>
                       {Object.entries(fileUploadsToDisplay).map(([fieldId, files]) => {
                         const template = templates.find(t => t.id === selectedApplication.templateId);
