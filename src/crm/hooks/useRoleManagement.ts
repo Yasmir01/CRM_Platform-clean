@@ -61,19 +61,37 @@ export const useRoleManagement = () => {
   const canDeleteUsers = () => canManageUsers();
   const canViewAllUsers = () => canManageUsers();
 
-  // Role assignment (only super admin can assign admin and super admin roles)
+  // Role assignment based on hierarchy (can only assign roles with lower or equal authority)
   const canAssignRole = (targetRole: string) => {
     if (!canManageUsers()) return false;
-    
-    if (targetRole === 'Super Admin') {
-      return isSuperAdmin();
+
+    // Super Admin can assign any role
+    if (isSuperAdmin()) return true;
+
+    // Admin can assign Manager and below, but not Super Admin or Admin
+    if (isAdmin() && user?.role === 'Admin') {
+      return !['Super Admin', 'Admin'].includes(targetRole);
     }
-    
-    if (targetRole === 'Admin') {
-      return isSuperAdmin();
+
+    // Manager can assign Property Manager and below
+    if (isManager() && user?.role === 'Manager') {
+      return !['Super Admin', 'Admin', 'Manager'].includes(targetRole);
     }
-    
-    return true; // Can assign other roles if has manage_users permission
+
+    // Property Manager can assign User, Tenant, Service Provider
+    if (isPropertyManager() && user?.role === 'Property Manager') {
+      return ['User', 'Tenant', 'Service Provider'].includes(targetRole);
+    }
+
+    return false;
+  };
+
+  // Check if user can manage/edit another user based on role hierarchy
+  const canManageUser = (targetUserRole: string) => {
+    if (!canManageUsers()) return false;
+
+    // Can only manage users with lower authority
+    return hasHigherAuthorityThan(targetUserRole);
   };
 
   // Feature access based on role
