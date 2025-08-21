@@ -477,7 +477,7 @@ export default function IntegrationManagement() {
           lastError: "Test connection failed due to network error."
         } : i
       ));
-      alert(`Test Failed: Unable to connect to ${integration.name}. Please check your internet connection.`);
+      showNotification(`Test Failed: Unable to connect to ${integration.name}. Please check your internet connection.`, 'error');
     } finally {
       // Clear loading state
       setTestingIntegrations(prev => {
