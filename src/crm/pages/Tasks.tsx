@@ -406,7 +406,7 @@ export default function Tasks() {
       case "Property": return "🏠";
       case "Maintenance": return "🔧";
       case "Follow-up": return "🔄";
-      default: return "��";
+      default: return "📋";
     }
   };
 
@@ -801,6 +801,12 @@ export default function Tasks() {
                   value={formData.dueDate}
                   onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'left',
+                      paddingLeft: '14px'
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -811,6 +817,12 @@ export default function Tasks() {
                   value={formData.dueTime}
                   onChange={(e) => setFormData({ ...formData, dueTime: e.target.value })}
                   InputLabelProps={{ shrink: true }}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'left',
+                      paddingLeft: '14px'
+                    }
+                  }}
                 />
               </Grid>
             </Grid>
