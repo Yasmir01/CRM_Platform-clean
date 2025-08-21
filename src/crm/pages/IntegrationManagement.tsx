@@ -809,10 +809,25 @@ export default function IntegrationManagement() {
                     </Box>
                   </Stack>
 
-                  {/* Error Message */}
-                  {integration.status === "Error" && integration.lastError && (
+                  {/* Status Messages */}
+                  {testingIntegrations.has(integration.id) && (
+                    <Alert severity="info" size="small">
+                      Testing connection to {integration.name}...
+                    </Alert>
+                  )}
+                  {syncingIntegrations.has(integration.id) && (
+                    <Alert severity="info" size="small">
+                      Synchronizing data with {integration.name}...
+                    </Alert>
+                  )}
+                  {integration.status === "Error" && integration.lastError && !testingIntegrations.has(integration.id) && !syncingIntegrations.has(integration.id) && (
                     <Alert severity="error" size="small">
                       {integration.lastError}
+                    </Alert>
+                  )}
+                  {integration.status === "Connected" && !integration.lastError && !testingIntegrations.has(integration.id) && !syncingIntegrations.has(integration.id) && integration.lastSync && (
+                    <Alert severity="success" size="small">
+                      Last sync: {new Date(integration.lastSync).toLocaleString()}
                     </Alert>
                   )}
 
