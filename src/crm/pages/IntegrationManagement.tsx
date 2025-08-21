@@ -878,6 +878,63 @@ export default function IntegrationManagement() {
                 </Stack>
               )}
 
+              {selectedIntegration.name === "Encharge.io" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Encharge.io integration for advanced email automation.
+                  </Alert>
+                  <TextField
+                    label="API Key"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.apiKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Encharge.io API key"
+                    helperText="You can find your API key in your Encharge.io account settings under API & Webhooks"
+                  />
+                  <TextField
+                    label="Account ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.accountId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, accountId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Encharge.io account ID"
+                    helperText="Your unique Encharge.io account identifier"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Sync Frequency</InputLabel>
+                    <Select
+                      value={selectedIntegration.syncFrequency}
+                      label="Sync Frequency"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          syncFrequency: e.target.value as Integration['syncFrequency']
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="Real-time">Real-time</MenuItem>
+                      <MenuItem value="Hourly">Hourly</MenuItem>
+                      <MenuItem value="Daily">Daily</MenuItem>
+                      <MenuItem value="Weekly">Weekly</MenuItem>
+                      <MenuItem value="Manual">Manual</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              )}
+
               <Box sx={{ mt: 3 }}>
                 <FormControlLabel
                   control={
