@@ -1003,11 +1003,17 @@ export default function UserRoles() {
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={getRoleName(user.roleId)}
-                      variant="outlined"
-                      size="small"
-                    />
+                    <Stack spacing={1}>
+                      <Chip
+                        label={getRoleName(user.roleId)}
+                        color={getHierarchyColor(roles.find(r => r.id === user.roleId)?.hierarchy || 0) as any}
+                        variant="filled"
+                        size="small"
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {getHierarchyLabel(roles.find(r => r.id === user.roleId)?.hierarchy || 0)}
+                      </Typography>
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <Chip
