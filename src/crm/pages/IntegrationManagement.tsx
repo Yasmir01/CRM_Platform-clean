@@ -1169,8 +1169,53 @@ export default function IntegrationManagement() {
                       {apiKey.expiresAt ? new Date(apiKey.expiresAt).toLocaleDateString() : "Never"}
                     </TableCell>
                     <TableCell>
-                      <IconButton size="small"><EditRoundedIcon /></IconButton>
-                      <IconButton size="small"><DeleteRoundedIcon /></IconButton>
+                      <Tooltip title="Edit API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newName = prompt("Enter API key name:", apiKey.name);
+                            if (newName) {
+                              setAPIKeys(prev => prev.map(key =>
+                                key.id === apiKey.id
+                                  ? { ...key, name: newName }
+                                  : key
+                              ));
+                            }
+                          }}
+                        >
+                          <EditRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Revoke API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to revoke API key "${apiKey.name}"?\nThis action cannot be undone.`)) {
+                              setAPIKeys(prev => prev.map(key =>
+                                key.id === apiKey.id
+                                  ? { ...key, status: "Revoked" as APIKey['status'] }
+                                  : key
+                              ));
+                            }
+                          }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Copy API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(apiKey.key).then(() => {
+                              alert('API key copied to clipboard!');
+                            }).catch(() => {
+                              alert(`API Key: ${apiKey.key}`);
+                            });
+                          }}
+                        >
+                          <LinkRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
