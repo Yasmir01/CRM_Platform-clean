@@ -975,7 +975,7 @@ function crmReducer(state: CrmState, action: CrmAction): CrmState {
 }
 
 // Context
-const CrmDataContext = createContext<{
+export const CrmDataContext = createContext<{
   state: CrmState;
   dispatch: React.Dispatch<CrmAction>;
   // Helper functions
