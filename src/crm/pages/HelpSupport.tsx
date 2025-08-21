@@ -237,6 +237,64 @@ const mockFAQs: FAQItem[] = [
     isAdvanced: true
   },
   {
+    id: "mailchimp-integration-setup",
+    question: "How do I set up Mailchimp integration for email marketing?",
+    answer: "Setting up Mailchimp integration: 1) Go to Integration Management from the admin menu, 2) Click 'Add Integration' and select 'Mailchimp - Email Marketing', 3) Get your API key from Mailchimp: Account → Extras → API keys, 4) Enter your API key and default List ID, 5) Choose sync frequency (Real-time, Hourly, Daily, Weekly, or Manual), 6) Click 'Add Integration' to connect, 7) Test the connection using the sync button. Once connected, tenant contacts will automatically sync with your Mailchimp lists, and you can create targeted email campaigns directly from the CRM.",
+    category: "Integrations",
+    tags: ["mailchimp", "email", "marketing", "api", "sync", "contacts"],
+    helpful: 88
+  },
+  {
+    id: "stripe-payment-integration",
+    question: "How do I configure Stripe payment processing integration?",
+    answer: "Stripe integration setup: 1) Navigate to Integration Management, 2) Click 'Add Integration' → 'Stripe - Payment Processing', 3) From your Stripe Dashboard, get: Publishable key (pk_live_...), Secret key (sk_live_...), and Webhook secret, 4) Enter these credentials in the configuration form, 5) Set up webhook endpoints in Stripe Dashboard pointing to your CRM webhook URL, 6) Test the integration with a small transaction, 7) Configure payment methods and fees. This enables automatic payment processing, subscription billing, and real-time payment notifications in your CRM.",
+    category: "Integrations",
+    tags: ["stripe", "payments", "billing", "webhooks", "transactions"],
+    helpful: 92
+  },
+  {
+    id: "encharge-email-automation",
+    question: "How do I set up Encharge.io for advanced email automation?",
+    answer: "Encharge.io integration for lifecycle marketing: 1) Go to Integration Management and add 'Encharge.io - Email Automation', 2) Get your API key from Encharge.io → Settings → API & Webhooks, 3) Enter your API key and Account ID in the configuration, 4) Set sync frequency based on your campaign needs, 5) Map tenant lifecycle events to Encharge automation triggers, 6) Configure customer journey workflows in Encharge, 7) Test with sample data. This enables sophisticated email automation based on tenant behavior, lease status, and payment history.",
+    category: "Integrations",
+    tags: ["encharge", "automation", "lifecycle", "journey", "campaigns"],
+    helpful: 86
+  },
+  {
+    id: "webhook-management-guide",
+    question: "How do I manage webhooks for real-time integrations?",
+    answer: "Webhook management for real-time data sync: 1) Access Webhooks from Integration Management, 2) Click 'Add Webhook' and configure: Name, URL endpoint, Events to monitor (property.created, payment.success, etc.), 3) Set webhook secret for security, 4) Configure headers for authentication, 5) Test webhooks using the test button, 6) Monitor success rates and troubleshoot failures, 7) Use webhook logs to debug issues. Common events include tenant actions, payment updates, work order changes, and application submissions. Webhooks enable instant data sharing with external systems.",
+    category: "Integrations",
+    tags: ["webhooks", "realtime", "events", "monitoring", "endpoints"],
+    helpful: 89
+  },
+  {
+    id: "api-key-security-management",
+    question: "How do I securely manage API keys and access permissions?",
+    answer: "API key security best practices: 1) Generate API keys from Integration Management → API Keys, 2) Set specific permissions (read, write, admin) for each key, 3) Use different keys for different integrations/purposes, 4) Set expiration dates for enhanced security, 5) Monitor usage counts and activity, 6) Rotate keys regularly (quarterly recommended), 7) Revoke compromised keys immediately, 8) Never expose keys in frontend code or public repositories, 9) Use environment variables for key storage, 10) Monitor for unusual API activity. Each key includes usage tracking and can be revoked instantly if needed.",
+    category: "Integrations",
+    tags: ["api", "security", "keys", "permissions", "monitoring", "rotation"],
+    helpful: 94,
+    isAdvanced: true
+  },
+  {
+    id: "google-drive-document-storage",
+    question: "How do I configure Google Drive integration for document storage?",
+    answer: "Google Drive integration setup: 1) In Integration Management, add 'Google Drive - Cloud Storage', 2) Create a Google Service Account in Google Cloud Console, 3) Download the service account JSON file, 4) Enter the Service Account Email and target Folder ID, 5) Share the Google Drive folder with the service account email, 6) Test the connection by uploading a document, 7) Configure automatic document categorization. This enables automatic backup of tenant documents, lease agreements, and work order attachments to Google Drive with organized folder structures.",
+    category: "Integrations",
+    tags: ["google", "drive", "storage", "documents", "backup", "oauth"],
+    helpful: 87
+  },
+  {
+    id: "integration-troubleshooting",
+    question: "How do I troubleshoot common integration issues and errors?",
+    answer: "Integration troubleshooting steps: 1) Check integration status in Integration Management - look for 'Error' status, 2) Review error messages and logs, 3) Verify API credentials haven't expired, 4) Test webhook endpoints manually, 5) Check network connectivity and firewall settings, 6) Validate data formats match expected schemas, 7) Monitor rate limits and quotas, 8) Use test/sandbox modes before production, 9) Review integration documentation for recent API changes, 10) Contact support with specific error codes. Common issues: expired credentials, webhook URL changes, rate limiting, and data validation errors.",
+    category: "Integrations",
+    tags: ["troubleshooting", "errors", "debugging", "support", "maintenance"],
+    helpful: 91,
+    isAdvanced: true
+  },
+  {
     id: "tenant-communication",
     question: "How do I manage tenant communication and activity tracking?",
     answer: "All tenant interactions are automatically tracked in the Activity Timeline: 1) Text Communication - Check if tenant has accepted text communication and send invites if needed, 2) Call Logs - Add call logs through notes with specific call types (Incoming, Outgoing, Missed) and duration, 3) Messages - Send SMS/Email directly from tenant page, all messages appear in timeline, 4) Notes - Add categorized notes (General, Payment, Maintenance, Communication, Legal), 5) Work Orders - All work orders created by tenant appear in activity timeline, 6) Applications - When tenant applications are approved and moved to property, info updates automatically in tenant page.",
