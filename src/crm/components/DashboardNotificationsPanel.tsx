@@ -41,6 +41,7 @@ import {
   Close as CloseIcon,
   MarkEmailRead as MarkEmailReadIcon,
   ClearAll as ClearAllIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useNotifications, Notification } from '../contexts/NotificationsContext';
 
