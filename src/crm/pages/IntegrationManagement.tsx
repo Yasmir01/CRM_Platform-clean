@@ -1066,9 +1066,95 @@ export default function IntegrationManagement() {
                 setIntegrations(prev => prev.map(integration =>
                   integration.id === selectedIntegration.id ? selectedIntegration : integration
                 ));
+              } else if (newIntegrationType) {
+                // Add new integration
+                const newId = (integrations.length + 1).toString();
+
+                const integrationTemplates: Record<string, Partial<Integration>> = {
+                  mailchimp: {
+                    name: "Mailchimp",
+                    description: "Email marketing and automation platform",
+                    category: "Email",
+                    provider: "Mailchimp",
+                    type: "API",
+                    icon: "📧",
+                    setupComplexity: "Easy",
+                    pricing: "$10/month",
+                    features: ["Email Campaigns", "Automation", "Analytics", "Segmentation"]
+                  },
+                  stripe: {
+                    name: "Stripe",
+                    description: "Payment processing and billing",
+                    category: "Payments",
+                    provider: "Stripe",
+                    type: "API",
+                    icon: "💳",
+                    setupComplexity: "Medium",
+                    pricing: "2.9% + 30¢",
+                    features: ["Payment Processing", "Subscriptions", "Invoicing", "Reporting"]
+                  },
+                  encharge: {
+                    name: "Encharge.io",
+                    description: "Email marketing automation and customer lifecycle management",
+                    category: "Email",
+                    provider: "Encharge",
+                    type: "API",
+                    icon: "📧",
+                    setupComplexity: "Medium",
+                    pricing: "$49/month",
+                    features: ["Email Automation", "Customer Journey", "Segmentation", "Analytics", "A/B Testing"]
+                  },
+                  slack: {
+                    name: "Slack",
+                    description: "Team communication and notifications",
+                    category: "Communication",
+                    provider: "Slack",
+                    type: "Webhook",
+                    icon: "💬",
+                    setupComplexity: "Easy",
+                    pricing: "Free",
+                    features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"]
+                  }
+                };
+
+                const template = integrationTemplates[newIntegrationType] || {
+                  name: newIntegrationType.charAt(0).toUpperCase() + newIntegrationType.slice(1),
+                  description: "Custom integration",
+                  category: "CRM",
+                  provider: newIntegrationType,
+                  type: "API",
+                  icon: "🔗",
+                  setupComplexity: "Medium",
+                  pricing: "Custom",
+                  features: ["Custom Integration"]
+                };
+
+                const newIntegration: Integration = {
+                  id: newId,
+                  ...template,
+                  status: "Connected",
+                  isActive: true,
+                  lastSync: new Date().toISOString(),
+                  syncFrequency: "Hourly",
+                  configuration: newIntegrationConfig,
+                  metrics: {
+                    totalRequests: 0,
+                    successfulRequests: 0,
+                    failedRequests: 0,
+                    avgResponseTime: 0,
+                    dataTransferred: 0,
+                    uptime: 100
+                  },
+                  dateConnected: new Date().toISOString().split('T')[0]
+                } as Integration;
+
+                setIntegrations(prev => [...prev, newIntegration]);
+                alert(`${template.name} integration added successfully!`);
               }
               setOpenIntegrationDialog(false);
               setSelectedIntegration(null);
+              setNewIntegrationType("");
+              setNewIntegrationConfig({});
             }}
           >
             {selectedIntegration ? "Update Configuration" : "Add Integration"}
