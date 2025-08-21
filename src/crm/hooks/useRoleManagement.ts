@@ -171,9 +171,16 @@ export const useRoleManagement = () => {
     // Role checkers
     isSuperAdmin,
     isAdmin,
+    isManager,
     isPropertyManager,
+    isUser,
     isTenant,
     isServiceProvider,
+
+    // Hierarchy functions
+    getRoleLevel,
+    hasHigherAuthorityThan,
+    canManageUser,
 
     // Permission checkers
     canManageUsers,
