@@ -738,8 +738,14 @@ export default function Tasks() {
               fullWidth
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              sx={{
+                '& .MuiInputBase-input': {
+                  textAlign: 'left',
+                  paddingLeft: '14px'
+                }
+              }}
             />
-            
+
             <TextField
               label="Description"
               fullWidth
@@ -747,6 +753,12 @@ export default function Tasks() {
               rows={3}
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              sx={{
+                '& .MuiInputBase-input': {
+                  textAlign: 'left',
+                  paddingLeft: '14px'
+                }
+              }}
             />
 
             <Grid container spacing={2}>
