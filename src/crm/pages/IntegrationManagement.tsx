@@ -572,6 +572,13 @@ export default function IntegrationManagement() {
         } : i
       ));
       alert(`Sync Failed: Unable to synchronize with ${integration.name}. Please try again later.`);
+    } finally {
+      // Clear loading state
+      setSyncingIntegrations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 
