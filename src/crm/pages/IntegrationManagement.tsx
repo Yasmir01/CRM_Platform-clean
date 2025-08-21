@@ -247,6 +247,32 @@ const mockIntegrations: Integration[] = [
     features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"],
     dateConnected: "2024-01-05",
     lastError: "Webhook URL is invalid or expired"
+  },
+  {
+    id: "5",
+    name: "Encharge.io",
+    description: "Email marketing automation and customer lifecycle management",
+    category: "Email",
+    provider: "Encharge",
+    type: "API",
+    status: "Disconnected",
+    isActive: false,
+    lastSync: "Never",
+    syncFrequency: "Hourly",
+    configuration: { apiKey: "", accountId: "" },
+    metrics: {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      avgResponseTime: 0,
+      dataTransferred: 0,
+      uptime: 0
+    },
+    icon: "📧",
+    setupComplexity: "Medium",
+    pricing: "$49/month",
+    features: ["Email Automation", "Customer Journey", "Segmentation", "Analytics", "A/B Testing"],
+    dateConnected: undefined
   }
 ];
 
