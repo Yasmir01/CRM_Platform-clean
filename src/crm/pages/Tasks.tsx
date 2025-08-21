@@ -296,6 +296,7 @@ export default function Tasks() {
       category: "Other",
       customCategory: "",
       property: "",
+      propertyId: "",
       client: "",
       reminder: false,
       workOrderId: "",
