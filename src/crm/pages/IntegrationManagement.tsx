@@ -399,14 +399,165 @@ export default function IntegrationManagement() {
     ));
   };
 
-  const handleTestIntegration = (id: string) => {
-    console.log(`Testing integration ${id}...`);
-    // In real app, this would make an API call to test the integration
+  const handleTestIntegration = async (id: string) => {
+    const integration = integrations.find(i => i.id === id);
+    if (!integration) return;
+
+    // Update integration status to show testing in progress
+    setIntegrations(prev => prev.map(i =>
+      i.id === id ? { ...i, status: "Pending" as Integration['status'] } : i
+    ));
+
+    try {
+      // Simulate API test call with different outcomes based on integration
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+
+      // Simulate different test results based on integration configuration
+      let testResult: { success: boolean; message: string };
+
+      if (integration.name === "Slack" && integration.lastError) {
+        // Simulate fixing the error
+        testResult = { success: true, message: "Connection restored! Webhook URL updated successfully." };
+      } else if (!integration.configuration || Object.keys(integration.configuration).length === 0) {
+        testResult = { success: false, message: "Missing configuration. Please configure the integration first." };
+      } else if (integration.name === "Mailchimp" && !integration.configuration.apiKey) {
+        testResult = { success: false, message: "Invalid API key. Please check your Mailchimp API credentials." };
+      } else if (integration.name === "Stripe" && !integration.configuration.secretKey) {
+        testResult = { success: false, message: "Missing secret key. Please add your Stripe secret key." };
+      } else {
+        // Successful test
+        testResult = { success: true, message: "Connection successful! All systems operational." };
+      }
+
+      // Update integration based on test result
+      const updatedIntegration: Partial<Integration> = {
+        status: testResult.success ? "Connected" : "Error",
+        lastSync: testResult.success ? new Date().toISOString() : integration.lastSync,
+        lastError: testResult.success ? undefined : testResult.message,
+        metrics: testResult.success ? {
+          ...integration.metrics,
+          totalRequests: integration.metrics.totalRequests + 1,
+          successfulRequests: integration.metrics.successfulRequests + 1,
+          uptime: Math.min(100, integration.metrics.uptime + 0.1)
+        } : {
+          ...integration.metrics,
+          totalRequests: integration.metrics.totalRequests + 1,
+          failedRequests: integration.metrics.failedRequests + 1,
+          uptime: Math.max(0, integration.metrics.uptime - 1)
+        }
+      };
+
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? { ...i, ...updatedIntegration } : i
+      ));
+
+      // Show result to user
+      alert(`Test ${testResult.success ? 'Successful' : 'Failed'}: ${testResult.message}`);
+
+    } catch (error) {
+      // Handle test failure
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          status: "Error" as Integration['status'],
+          lastError: "Test connection failed due to network error."
+        } : i
+      ));
+      alert(`Test Failed: Unable to connect to ${integration.name}. Please check your internet connection.`);
+    }
   };
 
-  const handleSyncIntegration = (id: string) => {
-    console.log(`Syncing integration ${id}...`);
-    // In real app, this would trigger a sync
+  const handleSyncIntegration = async (id: string) => {
+    const integration = integrations.find(i => i.id === id);
+    if (!integration) return;
+
+    if (integration.status !== "Connected") {
+      alert("Cannot sync: Integration is not connected. Please test the connection first.");
+      return;
+    }
+
+    // Show sync in progress
+    const originalSyncFreq = integration.syncFrequency;
+    setIntegrations(prev => prev.map(i =>
+      i.id === id ? { ...i, syncFrequency: "Syncing..." as Integration['syncFrequency'] } : i
+    ));
+
+    try {
+      // Simulate sync operation
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay
+
+      // Simulate data sync based on integration type
+      let syncResult: { success: boolean; recordsProcessed: number; message: string };
+
+      switch (integration.name) {
+        case "Mailchimp":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 50) + 25,
+            message: "Contacts synchronized successfully with Mailchimp."
+          };
+          break;
+        case "Stripe":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 20) + 10,
+            message: "Payment records synchronized with Stripe."
+          };
+          break;
+        case "Google Drive":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 15) + 5,
+            message: "Documents backed up to Google Drive."
+          };
+          break;
+        case "Encharge.io":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 30) + 15,
+            message: "Customer journey data synchronized with Encharge.io."
+          };
+          break;
+        default:
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 25) + 10,
+            message: `Data synchronized successfully with ${integration.name}.`
+          };
+      }
+
+      // Update integration with sync results
+      const updatedMetrics = {
+        ...integration.metrics,
+        totalRequests: integration.metrics.totalRequests + syncResult.recordsProcessed,
+        successfulRequests: integration.metrics.successfulRequests + syncResult.recordsProcessed,
+        dataTransferred: integration.metrics.dataTransferred + (syncResult.recordsProcessed * 0.1),
+        uptime: Math.min(100, integration.metrics.uptime + 0.2)
+      };
+
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          lastSync: new Date().toISOString(),
+          syncFrequency: originalSyncFreq,
+          metrics: updatedMetrics,
+          lastError: undefined
+        } : i
+      ));
+
+      alert(`Sync Completed Successfully!\n\n${syncResult.message}\nRecords processed: ${syncResult.recordsProcessed}`);
+
+    } catch (error) {
+      // Handle sync failure
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          syncFrequency: originalSyncFreq,
+          lastError: "Sync failed due to network error."
+        } : i
+      ));
+      alert(`Sync Failed: Unable to synchronize with ${integration.name}. Please try again later.`);
+    }
   };
 
   return (
