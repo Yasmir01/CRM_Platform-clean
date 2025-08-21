@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { useCrmData } from './CrmDataContext';
+import { useCrmData, CrmDataContext } from './CrmDataContext';
 
 export interface Notification {
   id: string;
@@ -47,7 +47,8 @@ interface NotificationsProviderProps {
 
 const generateRealNotifications = (crmData: any): Notification[] => {
   const notifications: Notification[] = [];
-  const { properties = [], tenants = [] } = crmData || {};
+  const { properties = [], tenants = [], workOrders = [] } = crmData || {};
+  const now = new Date();
 
   // Only show the real 590 Hawkins Store Rd rental notification
   const hawkinsProperty = properties.find((p: any) => p.address?.includes("590") && p.address?.includes("Hawkins"));
@@ -73,11 +74,91 @@ const generateRealNotifications = (crmData: any): Notification[] => {
     }
   }
 
-  return notifications; // Return only the real notification
+  // Add task notifications from work orders
+  workOrders.forEach((workOrder: any) => {
+    const createdDate = new Date(workOrder.createdAt || workOrder.dateCreated || now);
+    const hoursSinceCreated = (now.getTime() - createdDate.getTime()) / (1000 * 60 * 60);
+
+    // Show notifications for new work orders created in the last 24 hours
+    if (hoursSinceCreated <= 24 && (workOrder.status === 'Open' || workOrder.status === 'In Progress')) {
+      const property = properties.find((p: any) => p.id === workOrder.propertyId);
+
+      notifications.push({
+        id: `task-wo-${workOrder.id}`,
+        type: 'task',
+        title: 'New Task Created',
+        message: `Work order "${workOrder.title}" needs attention${property ? ` at ${property.name || property.address}` : ''}`,
+        priority: workOrder.priority === 'High' ? 'high' : workOrder.priority === 'Medium' ? 'medium' : 'low',
+        read: false,
+        createdAt: createdDate,
+        actionUrl: '/crm/tasks',
+        actionLabel: 'View Task',
+        relatedEntity: {
+          type: 'workOrder',
+          id: workOrder.id,
+          name: workOrder.title
+        }
+      });
+    }
+  });
+
+  // Add lease renewal task notifications
+  tenants.forEach((tenant: any) => {
+    if (tenant.leaseEndDate && tenant.status === 'Active') {
+      const leaseEnd = new Date(tenant.leaseEndDate);
+      const daysUntilExpiry = Math.ceil((leaseEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Show notification for leases expiring in 30 days or less
+      if (daysUntilExpiry <= 30 && daysUntilExpiry > 0) {
+        const property = properties.find((p: any) => p.id === tenant.propertyId);
+
+        notifications.push({
+          id: `task-lease-${tenant.id}`,
+          type: 'reminder',
+          title: 'Lease Renewal Required',
+          message: `Lease for ${tenant.firstName} ${tenant.lastName} expires in ${daysUntilExpiry} days${property ? ` at ${property.name || property.address}` : ''}`,
+          priority: daysUntilExpiry <= 7 ? 'high' : daysUntilExpiry <= 14 ? 'medium' : 'low',
+          read: false,
+          createdAt: new Date(now.getTime() - 1 * 60 * 60 * 1000), // 1 hour ago
+          actionUrl: '/crm/tasks',
+          actionLabel: 'Schedule Renewal',
+          relatedEntity: {
+            type: 'tenant',
+            id: tenant.id,
+            name: `${tenant.firstName} ${tenant.lastName}`
+          }
+        });
+      }
+    }
+  });
+
+  // Add a demo task notification to show the new features
+  if (workOrders.length > 0 || tenants.length > 0) {
+    notifications.push({
+      id: 'demo-task-notification',
+      type: 'task',
+      title: 'New Maintenance Task',
+      message: 'HVAC inspection required for Sunset Apartments - Schedule maintenance visit',
+      priority: 'medium',
+      read: false,
+      createdAt: new Date(now.getTime() - 30 * 60 * 1000), // 30 minutes ago
+      actionUrl: '/crm/tasks',
+      actionLabel: 'View Task',
+      relatedEntity: {
+        type: 'workOrder',
+        id: 'demo-task-1',
+        name: 'HVAC Inspection'
+      }
+    });
+  }
+
+  return notifications;
 };
 
 export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ children }) => {
-  const { state } = useCrmData();
+  // Safely get CRM data - it might not be available during initial render
+  const crmContext = useContext(CrmDataContext);
+  const state = crmContext?.state;
   const [manualNotifications, setManualNotifications] = useState<Notification[]>([]);
 
   const notifications = useMemo(() => {

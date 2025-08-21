@@ -108,6 +108,14 @@ export class LocalStorageService {
     return this.getItem('applications', []);
   }
 
+  static saveTasks(tasks: any[]): void {
+    this.setItem('tasks', tasks);
+  }
+
+  static getTasks(): any[] {
+    return this.getItem('tasks', []);
+  }
+
   static saveProspects(prospects: any[]): void {
     this.setItem('prospects', prospects);
   }
@@ -195,14 +203,6 @@ export class LocalStorageService {
     return this.getItem(key, defaultValue);
   }
 
-  static saveWorkOrders(workOrders: any[]): void {
-    this.setItem('workOrders', workOrders);
-  }
-
-  static getWorkOrders(): any[] {
-    return this.getItem('workOrders', []);
-  }
-
   static saveUserPreferences(preferences: any): void {
     this.setItem('userPreferences', preferences);
   }
@@ -258,6 +258,7 @@ export class LocalStorageService {
       if (crmData.contacts) this.saveContacts(crmData.contacts);
       if (crmData.applications) this.saveApplications(crmData.applications);
       if (crmData.prospects) this.saveProspects(crmData.prospects);
+      if (crmData.tasks) this.saveTasks(crmData.tasks);
       if (crmData.serviceProviders) this.saveServiceProviders(crmData.serviceProviders);
       if (crmData.propertyGroups) this.savePropertyGroups(crmData.propertyGroups);
     } catch (error) {
@@ -277,6 +278,7 @@ export class LocalStorageService {
       contacts: this.getContacts(),
       applications: this.getApplications(),
       prospects: this.getProspects(),
+      tasks: this.getTasks(),
       serviceProviders: this.getServiceProviders(),
       propertyGroups: this.getPropertyGroups(),
       userPreferences: this.getUserPreferences()

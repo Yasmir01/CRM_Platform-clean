@@ -41,6 +41,7 @@ import {
 } from "../utils/formStyles";
 import TaskDetailPage from "./TaskDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -247,12 +248,34 @@ export default function Tasks() {
     return generateRealTasks(state);
   }, [state]);
 
-  const [tasks, setTasks] = React.useState<Task[]>(realTasks);
+  // Load saved tasks from localStorage and combine with generated tasks
+  const [savedTasks, setSavedTasks] = React.useState<Task[]>([]);
+  const [tasks, setTasks] = React.useState<Task[]>([]);
 
-  // Update tasks when CRM data changes
+  // Load saved tasks on component mount
   React.useEffect(() => {
-    setTasks(realTasks);
-  }, [realTasks]);
+    const loadedTasks = LocalStorageService.getTasks();
+    setSavedTasks(loadedTasks);
+  }, []);
+
+  // Combine real tasks and saved tasks
+  React.useEffect(() => {
+    // Merge real tasks with saved tasks, avoiding duplicates
+    const allTasks = [...realTasks];
+    savedTasks.forEach(savedTask => {
+      if (!allTasks.find(task => task.id === savedTask.id)) {
+        allTasks.push(savedTask);
+      }
+    });
+    setTasks(allTasks);
+  }, [realTasks, savedTasks]);
+
+  // Save tasks to localStorage whenever savedTasks changes
+  React.useEffect(() => {
+    if (savedTasks.length > 0) {
+      LocalStorageService.saveTasks(savedTasks);
+    }
+  }, [savedTasks]);
 
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState<string>("All");

@@ -41,6 +41,7 @@ import {
   Close as CloseIcon,
   MarkEmailRead as MarkEmailReadIcon,
   ClearAll as ClearAllIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { useNotifications, Notification } from '../contexts/NotificationsContext';
 
@@ -126,6 +127,19 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
     markAsRead(notification.id);
   };
 
+  const handleCompleteTask = () => {
+    // For task notifications, mark as completed and remove
+    markAsRead(notification.id);
+    removeNotification(notification.id);
+    // You could also call a task completion API here
+  };
+
+  const handleEditTask = () => {
+    // Navigate to tasks page with edit mode
+    navigate(`/crm/tasks?edit=${notification.relatedEntity?.id}`);
+    markAsRead(notification.id);
+  };
+
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -186,11 +200,34 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
               </Typography>
             )}
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-              {notification.actionUrl && (
-                <Button size="small" variant="outlined" onClick={handleAction}>
-                  {notification.actionLabel || 'View Details'}
-                </Button>
+              {notification.type === 'task' && notification.relatedEntity?.type === 'workOrder' ? (
+                // Task-specific actions
+                <>
+                  <Button size="small" variant="outlined" onClick={handleAction}>
+                    View Task
+                  </Button>
+                  <Button size="small" variant="text" onClick={handleEditTask} startIcon={<EditIcon />}>
+                    Edit
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    onClick={handleCompleteTask}
+                    startIcon={<CheckCircleIcon />}
+                  >
+                    Complete
+                  </Button>
+                </>
+              ) : (
+                // Default action
+                notification.actionUrl && (
+                  <Button size="small" variant="outlined" onClick={handleAction}>
+                    {notification.actionLabel || 'View Details'}
+                  </Button>
+                )
               )}
+
               {!notification.read && (
                 <Button
                   size="small"

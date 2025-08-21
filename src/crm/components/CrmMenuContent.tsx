@@ -65,7 +65,7 @@ const mainListItems = [
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
   { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks" },
+  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
   { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
   { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
 ];
@@ -111,6 +111,7 @@ export default function CrmMenuContent() {
 
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
+  const [newTasksCount, setNewTasksCount] = React.useState(0);
 
   React.useEffect(() => {
     const updateApplicationCount = () => {
@@ -119,16 +120,57 @@ export default function CrmMenuContent() {
       setNewApplicationsCount(newAppsCount);
     };
 
+    const updateTaskCount = () => {
+      // Get tasks that are new or pending in the last 24 hours
+      const crmData = LocalStorageService.loadAllData();
+      const now = new Date();
+      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+      let newTasksCount = 0;
+
+      // Count tasks from work orders
+      if (crmData.workOrders) {
+        crmData.workOrders.forEach((workOrder: any) => {
+          const createdDate = new Date(workOrder.createdAt || workOrder.dateCreated || now);
+          if (createdDate >= oneDayAgo && (workOrder.status === 'Open' || workOrder.status === 'In Progress')) {
+            newTasksCount++;
+          }
+        });
+      }
+
+      // Count lease renewal tasks
+      if (crmData.tenants) {
+        crmData.tenants.forEach((tenant: any) => {
+          if (tenant.leaseEndDate) {
+            const leaseEnd = new Date(tenant.leaseEndDate);
+            const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+            if (leaseEnd <= thirtyDaysFromNow && leaseEnd >= now) {
+              newTasksCount++;
+            }
+          }
+        });
+      }
+
+      setNewTasksCount(newTasksCount);
+    };
+
     // Initial load
     updateApplicationCount();
+    updateTaskCount();
 
     // Set up an interval to check for updates every 5 seconds
-    const interval = setInterval(updateApplicationCount, 5000);
+    const interval = setInterval(() => {
+      updateApplicationCount();
+      updateTaskCount();
+    }, 5000);
 
     // Also listen for storage events (when localStorage is updated in another tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'crm_applications') {
         updateApplicationCount();
+      }
+      if (e.key === 'crm_work_orders' || e.key === 'crm_tenants') {
+        updateTaskCount();
       }
     };
 
@@ -159,6 +201,10 @@ export default function CrmMenuContent() {
                 <ListItemIcon>
                   {item.badge && item.text === "Applications" ? (
                     <Badge badgeContent={newApplicationsCount} color="error">
+                      {item.icon}
+                    </Badge>
+                  ) : item.badge && item.text === "Tasks" ? (
+                    <Badge badgeContent={newTasksCount} color="warning">
                       {item.icon}
                     </Badge>
                   ) : (

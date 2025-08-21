@@ -19,10 +19,12 @@ import DashboardReminders from "./DashboardReminders";
 import DashboardNotificationsPanel from "./DashboardNotificationsPanel";
 import { usePerformanceMonitor } from "../hooks/usePerformanceMonitor";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function CrmMainDashboard() {
   const navigate = useNavigate();
   const { state } = useCrmData();
+  const { user } = useAuth();
   const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
 
   // Monitor performance to prevent blank screens
@@ -186,7 +188,7 @@ export default function CrmMainDashboard() {
           >
             <Box>
               <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 1 }}>
-                Welcome Back, Alex 👋
+                Welcome Back, {user?.firstName || 'User'} 👋
               </Typography>
               <Typography variant="h6" sx={{ opacity: 0.9, fontWeight: 400 }}>
                 Here's what's happening with your properties today
