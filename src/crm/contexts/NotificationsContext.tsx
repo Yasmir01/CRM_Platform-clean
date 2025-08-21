@@ -132,6 +132,26 @@ const generateRealNotifications = (crmData: any): Notification[] => {
     }
   });
 
+  // Add a demo task notification to show the new features
+  if (workOrders.length > 0 || tenants.length > 0) {
+    notifications.push({
+      id: 'demo-task-notification',
+      type: 'task',
+      title: 'New Maintenance Task',
+      message: 'HVAC inspection required for Sunset Apartments - Schedule maintenance visit',
+      priority: 'medium',
+      read: false,
+      createdAt: new Date(now.getTime() - 30 * 60 * 1000), // 30 minutes ago
+      actionUrl: '/crm/tasks',
+      actionLabel: 'View Task',
+      relatedEntity: {
+        type: 'workOrder',
+        id: 'demo-task-1',
+        name: 'HVAC Inspection'
+      }
+    });
+  }
+
   return notifications;
 };
 
