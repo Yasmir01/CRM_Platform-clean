@@ -210,9 +210,48 @@ const mockRoles: Role[] = [
     updatedDate: "2024-01-20",
   },
   {
-    id: "3",
+    id: "5",
+    name: "User",
+    description: "Standard user access for viewing and basic operations",
+    permissions: [
+      "prop_view", "tenant_view", "reports_view", "marketing_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 2,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "6",
+    name: "Tenant",
+    description: "Basic tenant access to own information",
+    permissions: [
+      "tenant_view_own", "tenant_payments", "wo_create"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 1,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "7",
+    name: "Service Provider",
+    description: "External service provider access for work orders",
+    permissions: [
+      "wo_view", "wo_edit", "reports_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 1,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "8",
     name: "Maintenance Coordinator",
-    description: "Manage work orders and vendor relationships",
+    description: "Specialized role for work order management",
     permissions: [
       "wo_view", "wo_create", "wo_assign", "wo_edit",
       "prop_view", "manager_view",
@@ -220,11 +259,12 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 2,
+    hierarchy: 3,
     createdDate: "2024-01-15",
     updatedDate: "2024-01-15",
   },
   {
-    id: "4",
+    id: "9",
     name: "Accountant",
     description: "Financial management and reporting access",
     permissions: [
@@ -235,6 +275,7 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 1,
+    hierarchy: 3,
     createdDate: "2024-01-20",
     updatedDate: "2024-01-25",
   },
