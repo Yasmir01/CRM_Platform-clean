@@ -1001,10 +1001,35 @@ export default function IntegrationManagement() {
       </Dialog>
 
       <Dialog open={openWebhookDialog} onClose={() => setOpenWebhookDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Webhook Management</DialogTitle>
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">Webhook Management</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => {
+                const newWebhook: Webhook = {
+                  id: (webhooks.length + 1).toString(),
+                  name: "New Webhook",
+                  url: "",
+                  events: [],
+                  status: "Inactive",
+                  secret: `whsec_${Math.random().toString(36).substring(2, 15)}`,
+                  lastTriggered: "Never",
+                  successCount: 0,
+                  failureCount: 0,
+                  headers: { "Content-Type": "application/json" }
+                };
+                setWebhooks(prev => [...prev, newWebhook]);
+              }}
+            >
+              Add Webhook
+            </Button>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Webhook management interface would include creation, testing, and monitoring capabilities.
+            Manage your webhook endpoints for real-time event notifications. Webhooks allow external systems to receive instant updates when events occur in your CRM.
           </Alert>
           <TableContainer component={Paper} variant="outlined">
             <Table>
