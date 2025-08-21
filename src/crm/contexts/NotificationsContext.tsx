@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
-import { useCrmData } from './CrmDataContext';
+import { useCrmData, CrmDataContext } from './CrmDataContext';
 
 export interface Notification {
   id: string;
