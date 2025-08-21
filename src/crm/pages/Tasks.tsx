@@ -271,6 +271,7 @@ export default function Tasks() {
     category: "Other" as Task["category"],
     customCategory: "",
     property: "",
+    propertyId: "",
     client: "",
     reminder: false,
     workOrderId: "",
