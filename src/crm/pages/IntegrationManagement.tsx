@@ -669,14 +669,250 @@ export default function IntegrationManagement() {
           {selectedIntegration ? `Configure ${selectedIntegration.name}` : "Add New Integration"}
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Integration configuration interface would be implemented here with provider-specific settings.
-          </Alert>
+          {selectedIntegration ? (
+            <Box sx={{ mt: 2 }}>
+              {/* Provider-specific configuration */}
+              {selectedIntegration.name === "Mailchimp" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Mailchimp integration settings below.
+                  </Alert>
+                  <TextField
+                    label="API Key"
+                    fullWidth
+                    value={selectedIntegration.configuration.apiKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Mailchimp API key"
+                    helperText="You can find your API key in your Mailchimp account settings"
+                  />
+                  <TextField
+                    label="List ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.listId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, listId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your default Mailchimp list ID"
+                    helperText="The default list to sync contacts with"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Sync Frequency</InputLabel>
+                    <Select
+                      value={selectedIntegration.syncFrequency}
+                      label="Sync Frequency"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          syncFrequency: e.target.value as Integration['syncFrequency']
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="Real-time">Real-time</MenuItem>
+                      <MenuItem value="Hourly">Hourly</MenuItem>
+                      <MenuItem value="Daily">Daily</MenuItem>
+                      <MenuItem value="Weekly">Weekly</MenuItem>
+                      <MenuItem value="Manual">Manual</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Stripe" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Stripe payment processing settings.
+                  </Alert>
+                  <TextField
+                    label="Publishable Key"
+                    fullWidth
+                    value={selectedIntegration.configuration.publicKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, publicKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="pk_live_..."
+                    helperText="Your Stripe publishable key (safe to expose in frontend)"
+                  />
+                  <TextField
+                    label="Secret Key"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.secretKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, secretKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="sk_live_..."
+                    helperText="Your Stripe secret key (keep this secure)"
+                  />
+                  <TextField
+                    label="Webhook Secret"
+                    fullWidth
+                    value={selectedIntegration.configuration.webhookSecret || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, webhookSecret: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="whsec_..."
+                    helperText="Webhook endpoint secret for verification"
+                  />
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Google Drive" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Google Drive integration for document storage.
+                  </Alert>
+                  <TextField
+                    label="Folder ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.folderId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, folderId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+                    helperText="The Google Drive folder ID where documents will be stored"
+                  />
+                  <TextField
+                    label="Service Account Email"
+                    fullWidth
+                    value={selectedIntegration.configuration.serviceAccountEmail || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, serviceAccountEmail: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="service-account@project.iam.gserviceaccount.com"
+                    helperText="Google Service Account email for API access"
+                  />
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Slack" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Slack integration for team notifications.
+                  </Alert>
+                  <TextField
+                    label="Bot Token"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.botToken || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, botToken: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="xoxb-..."
+                    helperText="Your Slack bot token for sending messages"
+                  />
+                  <TextField
+                    label="Default Channel"
+                    fullWidth
+                    value={selectedIntegration.configuration.defaultChannel || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, defaultChannel: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="#general"
+                    helperText="Default channel for CRM notifications"
+                  />
+                </Stack>
+              )}
+
+              <Box sx={{ mt: 3 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedIntegration.isActive}
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          isActive: e.target.checked
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    />
+                  }
+                  label="Enable Integration"
+                />
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ mt: 2 }}>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Select an integration type to add to your CRM system.
+              </Alert>
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel>Integration Type</InputLabel>
+                <Select
+                  value=""
+                  label="Integration Type"
+                  onChange={(e) => {
+                    // Handle new integration selection
+                    console.log('Selected integration:', e.target.value);
+                  }}
+                >
+                  <MenuItem value="mailchimp">Mailchimp - Email Marketing</MenuItem>
+                  <MenuItem value="stripe">Stripe - Payment Processing</MenuItem>
+                  <MenuItem value="google-drive">Google Drive - Cloud Storage</MenuItem>
+                  <MenuItem value="slack">Slack - Team Communication</MenuItem>
+                  <MenuItem value="encharge">Encharge.io - Email Automation</MenuItem>
+                  <MenuItem value="zapier">Zapier - Workflow Automation</MenuItem>
+                  <MenuItem value="hubspot">HubSpot - CRM Integration</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenIntegrationDialog(false)}>Cancel</Button>
-          <Button variant="contained">
-            {selectedIntegration ? "Update" : "Connect"}
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (selectedIntegration) {
+                // Update existing integration
+                setIntegrations(prev => prev.map(integration =>
+                  integration.id === selectedIntegration.id ? selectedIntegration : integration
+                ));
+              }
+              setOpenIntegrationDialog(false);
+              setSelectedIntegration(null);
+            }}
+          >
+            {selectedIntegration ? "Update Configuration" : "Add Integration"}
           </Button>
         </DialogActions>
       </Dialog>
