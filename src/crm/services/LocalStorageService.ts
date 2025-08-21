@@ -195,14 +195,6 @@ export class LocalStorageService {
     return this.getItem(key, defaultValue);
   }
 
-  static saveWorkOrders(workOrders: any[]): void {
-    this.setItem('workOrders', workOrders);
-  }
-
-  static getWorkOrders(): any[] {
-    return this.getItem('workOrders', []);
-  }
-
   static saveUserPreferences(preferences: any): void {
     this.setItem('userPreferences', preferences);
   }
