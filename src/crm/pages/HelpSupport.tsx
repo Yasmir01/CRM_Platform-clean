@@ -56,7 +56,7 @@ interface FAQItem {
   id: string;
   question: string;
   answer: string;
-  category: "General" | "Properties" | "Tenants" | "Payments" | "Maintenance" | "Reports" | "Security";
+  category: "General" | "Properties" | "Tenants" | "Payments" | "Maintenance" | "Reports" | "Security" | "Integrations";
   tags: string[];
   helpful: number;
   planRequired?: "Basic" | "Professional" | "Enterprise" | "Custom";
