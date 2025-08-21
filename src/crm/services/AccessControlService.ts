@@ -982,6 +982,24 @@ export class AccessControlService {
         createdBy: 'system'
       });
 
+      // Service Provider Role (External Access - Level 1)
+      this.roles.set('service_provider', {
+        id: 'service_provider',
+        name: 'Service Provider',
+        description: 'External service provider access for work orders',
+        type: 'system',
+        permissions: [
+          { id: 'view_work_orders', resource: 'workorders', action: 'read', scope: 'assigned' },
+          { id: 'update_work_status', resource: 'workorders', action: 'update', scope: 'assigned' },
+          { id: 'submit_invoices', resource: 'invoices', action: 'create', scope: 'own' }
+        ],
+        hierarchy: 1,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
       this.saveData();
     }
   }
