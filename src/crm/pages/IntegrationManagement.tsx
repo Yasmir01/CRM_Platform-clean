@@ -580,7 +580,7 @@ export default function IntegrationManagement() {
           lastError: "Sync failed due to network error."
         } : i
       ));
-      alert(`Sync Failed: Unable to synchronize with ${integration.name}. Please try again later.`);
+      showNotification(`Sync Failed: Unable to synchronize with ${integration.name}. Please try again later.`, 'error');
     } finally {
       // Clear loading state
       setSyncingIntegrations(prev => {
