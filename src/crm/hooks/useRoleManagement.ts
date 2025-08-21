@@ -155,7 +155,7 @@ export const useRoleManagement = () => {
       items.push({ label: 'User Management', path: '/users', icon: 'people' });
     }
 
-    if (isAdmin()) {
+    if (isSuperAdmin() || isAdmin()) {
       items.push({ label: 'Settings', path: '/settings', icon: 'settings' });
     }
 
