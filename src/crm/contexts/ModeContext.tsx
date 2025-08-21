@@ -33,7 +33,7 @@ export function ModeProvider({ children }: ModeProviderProps) {
       } else {
         // For non-tenant users, load from localStorage or default to management
         const savedMode = localStorage.getItem('userMode');
-        if (savedMode === 'tenant' && (user.role === 'Admin' || user.role === 'Property Manager')) {
+        if (savedMode === 'tenant' && (user.role === 'Super Admin' || user.role === 'Admin' || user.role === 'Manager' || user.role === 'Property Manager')) {
           setCurrentMode('tenant');
         } else {
           setCurrentMode('management');
