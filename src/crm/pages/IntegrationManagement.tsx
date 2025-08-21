@@ -493,7 +493,7 @@ export default function IntegrationManagement() {
     if (!integration) return;
 
     if (integration.status !== "Connected") {
-      alert("Cannot sync: Integration is not connected. Please test the connection first.");
+      showNotification("Cannot sync: Integration is not connected. Please test the connection first.", 'error');
       return;
     }
 
