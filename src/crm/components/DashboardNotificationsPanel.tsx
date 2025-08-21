@@ -199,11 +199,34 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
               </Typography>
             )}
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-              {notification.actionUrl && (
-                <Button size="small" variant="outlined" onClick={handleAction}>
-                  {notification.actionLabel || 'View Details'}
-                </Button>
+              {notification.type === 'task' && notification.relatedEntity?.type === 'workOrder' ? (
+                // Task-specific actions
+                <>
+                  <Button size="small" variant="outlined" onClick={handleAction}>
+                    View Task
+                  </Button>
+                  <Button size="small" variant="text" onClick={handleEditTask} startIcon={<EditIcon />}>
+                    Edit
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    onClick={handleCompleteTask}
+                    startIcon={<CheckCircleIcon />}
+                  >
+                    Complete
+                  </Button>
+                </>
+              ) : (
+                // Default action
+                notification.actionUrl && (
+                  <Button size="small" variant="outlined" onClick={handleAction}>
+                    {notification.actionLabel || 'View Details'}
+                  </Button>
+                )
               )}
+
               {!notification.read && (
                 <Button
                   size="small"
