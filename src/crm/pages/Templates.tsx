@@ -2155,6 +2155,107 @@ export default function Templates() {
                       >
                         Payment Settings
                       </Button>
+
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={
+                          getTermsCount() > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <CheckCircleIcon
+                                color="success"
+                                fontSize="small"
+                                sx={{ fontSize: 16 }}
+                              />
+                              {getTermsCount() > 1 && (
+                                <CheckCircleIcon
+                                  color="success"
+                                  fontSize="small"
+                                  sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                />
+                              )}
+                            </Box>
+                          ) : (
+                            <SecurityRoundedIcon />
+                          )
+                        }
+                        onClick={() => {
+                          const termsField: FormField = {
+                            id: `terms_${Date.now()}`,
+                            type: "terms",
+                            label: "Terms and Conditions",
+                            required: true,
+                            order: formFields.length,
+                          };
+                          setFormFields(prev => [...prev, termsField]);
+                        }}
+                      >
+                        Add Terms & Conditions
+                        {getTermsCount() > 0 && (
+                          <Chip
+                            size="small"
+                            label={getTermsCount() > 1 ?
+                              `Added ${getTermsCount()}x` :
+                              'Added'
+                            }
+                            color="success"
+                            variant="outlined"
+                            sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                          />
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={
+                          getFileUploadCount() > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <CheckCircleIcon
+                                color="success"
+                                fontSize="small"
+                                sx={{ fontSize: 16 }}
+                              />
+                              {getFileUploadCount() > 1 && (
+                                <CheckCircleIcon
+                                  color="success"
+                                  fontSize="small"
+                                  sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                />
+                              )}
+                            </Box>
+                          ) : (
+                            <AddRoundedIcon />
+                          )
+                        }
+                        onClick={() => {
+                          const fileField: FormField = {
+                            id: `file_${Date.now()}`,
+                            type: "file_upload",
+                            label: "Document Upload",
+                            required: false,
+                            order: formFields.length,
+                            fileTypes: ["pdf", "jpg", "png", "doc"],
+                            maxFiles: 5,
+                            maxFileSize: 10,
+                          };
+                          setFormFields(prev => [...prev, fileField]);
+                        }}
+                      >
+                        Add File Upload
+                        {getFileUploadCount() > 0 && (
+                          <Chip
+                            size="small"
+                            label={getFileUploadCount() > 1 ?
+                              `Added ${getFileUploadCount()}x` :
+                              'Added'
+                            }
+                            color="success"
+                            variant="outlined"
+                            sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                          />
+                        )}
+                      </Button>
                     </Stack>
                   </Paper>
                 </Grid>
