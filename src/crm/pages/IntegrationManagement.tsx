@@ -1056,8 +1056,48 @@ export default function IntegrationManagement() {
                       {((webhook.successCount / (webhook.successCount + webhook.failureCount)) * 100).toFixed(1)}%
                     </TableCell>
                     <TableCell>
-                      <IconButton size="small"><EditRoundedIcon /></IconButton>
-                      <IconButton size="small"><DeleteRoundedIcon /></IconButton>
+                      <Tooltip title="Test Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            console.log(`Testing webhook ${webhook.id}...`);
+                            // Simulate webhook test
+                            alert(`Testing webhook: ${webhook.name}\nSending test payload to: ${webhook.url}`);
+                          }}
+                        >
+                          <PlayArrowRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Edit Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newName = prompt("Enter webhook name:", webhook.name);
+                            const newUrl = prompt("Enter webhook URL:", webhook.url);
+                            if (newName && newUrl) {
+                              setWebhooks(prev => prev.map(w =>
+                                w.id === webhook.id
+                                  ? { ...w, name: newName, url: newUrl }
+                                  : w
+                              ));
+                            }
+                          }}
+                        >
+                          <EditRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete webhook "${webhook.name}"?`)) {
+                              setWebhooks(prev => prev.filter(w => w.id !== webhook.id));
+                            }
+                          }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
