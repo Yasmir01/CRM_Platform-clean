@@ -379,6 +379,7 @@ export default function IntegrationManagement() {
   const [newIntegrationConfig, setNewIntegrationConfig] = React.useState<Record<string, any>>({});
   const [testingIntegrations, setTestingIntegrations] = React.useState<Set<string>>(new Set());
   const [syncingIntegrations, setSyncingIntegrations] = React.useState<Set<string>>(new Set());
+  const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' as 'success' | 'error' | 'info' });
 
   const filteredIntegrations = integrations.filter(integration => {
     const matchesSearch = integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
