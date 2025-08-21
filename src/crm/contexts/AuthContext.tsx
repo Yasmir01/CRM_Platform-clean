@@ -94,7 +94,18 @@ const mockUsers: User[] = [
     createdAt: '2024-01-04T00:00:00Z',
   },
   {
-    id: '4',
+    id: '5',
+    firstName: 'Lisa',
+    lastName: 'Chen',
+    email: 'lisa.chen@propcrm.com',
+    phone: '(555) 444-5555',
+    role: 'User',
+    status: 'Active',
+    permissions: ['view_properties', 'view_tenants', 'view_reports', 'send_communications'],
+    createdAt: '2024-01-05T00:00:00Z',
+  },
+  {
+    id: '6',
     firstName: 'Sarah',
     lastName: 'Johnson',
     email: 'sarah.johnson@email.com',
@@ -103,10 +114,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
-    createdAt: '2024-01-04T00:00:00Z',
+    createdAt: '2024-01-06T00:00:00Z',
   },
   {
-    id: '5',
+    id: '7',
     firstName: 'Mike',
     lastName: 'Wilson',
     email: 'mike@handyservices.com',
@@ -115,7 +126,7 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
-    createdAt: '2024-01-05T00:00:00Z',
+    createdAt: '2024-01-07T00:00:00Z',
   },
 ];
 
