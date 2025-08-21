@@ -823,6 +823,7 @@ export default function HelpSupport() {
                 <MenuItem value="Maintenance">Maintenance</MenuItem>
                 <MenuItem value="Reports">Reports</MenuItem>
                 <MenuItem value="Security">Security</MenuItem>
+                <MenuItem value="Integrations">Integrations</MenuItem>
               </Select>
             </FormControl>
           </Grid>
