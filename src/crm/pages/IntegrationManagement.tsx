@@ -569,7 +569,7 @@ export default function IntegrationManagement() {
         } : i
       ));
 
-      alert(`Sync Completed Successfully!\n\n${syncResult.message}\nRecords processed: ${syncResult.recordsProcessed}`);
+      showNotification(`Sync Completed! ${syncResult.message} Records processed: ${syncResult.recordsProcessed}`, 'success');
 
     } catch (error) {
       // Handle sync failure
