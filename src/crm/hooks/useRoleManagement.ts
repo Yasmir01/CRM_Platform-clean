@@ -44,14 +44,14 @@ export const useRoleManagement = () => {
   const canCreateTemplates = () => canManageTemplates();
   const canEditTemplates = () => canManageTemplates();
   const canDeleteTemplates = () => canManageTemplates();
-  const canAccessTemplateLibrary = () => isAdmin() || isPropertyManager();
+  const canAccessTemplateLibrary = () => isSuperAdmin() || isAdmin() || isPropertyManager();
 
   // Company settings access
   const canEditCompanySettings = () => canManageCompany();
-  const canViewCompanySettings = () => isAdmin() || isPropertyManager();
+  const canViewCompanySettings = () => isSuperAdmin() || isAdmin() || isPropertyManager();
 
   // Power tools access
-  const canAccessPowerTools = () => isAdmin() || isPropertyManager();
+  const canAccessPowerTools = () => isSuperAdmin() || isAdmin() || isPropertyManager();
   const canCreateQRCodes = () => canAccessPowerTools();
   const canManageContests = () => canAccessPowerTools();
 
