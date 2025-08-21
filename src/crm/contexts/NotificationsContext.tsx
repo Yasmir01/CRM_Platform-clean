@@ -77,7 +77,9 @@ const generateRealNotifications = (crmData: any): Notification[] => {
 };
 
 export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ children }) => {
-  const { state } = useCrmData();
+  // Safely get CRM data - it might not be available during initial render
+  const crmContext = useContext(CrmDataContext);
+  const state = crmContext?.state;
   const [manualNotifications, setManualNotifications] = useState<Notification[]>([]);
 
   const notifications = useMemo(() => {
