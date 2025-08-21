@@ -318,6 +318,7 @@ export default function Tasks() {
       category: task.category,
       customCategory: task.customCategory || "",
       property: task.property || "",
+      propertyId: task.propertyId || "",
       client: task.client || "",
       reminder: task.reminder,
       workOrderId: task.workOrderId || "",
