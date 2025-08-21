@@ -1112,10 +1112,35 @@ export default function IntegrationManagement() {
       </Dialog>
 
       <Dialog open={openAPIKeyDialog} onClose={() => setOpenAPIKeyDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>API Key Management</DialogTitle>
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">API Key Management</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => {
+                const newKey = `sk_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
+                const newAPIKey: APIKey = {
+                  id: (apiKeys.length + 1).toString(),
+                  name: "New API Key",
+                  key: newKey,
+                  permissions: ["read"],
+                  status: "Active",
+                  usageCount: 0,
+                  expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+                  createdAt: new Date().toISOString()
+                };
+                setAPIKeys(prev => [...prev, newAPIKey]);
+                alert(`New API Key generated:\n${newKey}\n\nPlease copy this key now as it won't be shown again!`);
+              }}
+            >
+              Generate API Key
+            </Button>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <Alert severity="info" sx={{ mb: 2 }}>
-            API key management interface for creating, monitoring, and revoking access keys.
+            Manage your API keys for secure access to CRM data. Keep your keys secure and rotate them regularly.
           </Alert>
           <TableContainer component={Paper} variant="outlined">
             <Table>
