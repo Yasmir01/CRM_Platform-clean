@@ -3,12 +3,34 @@ import { useAuth } from '../contexts/AuthContext';
 export const useRoleManagement = () => {
   const { user, hasPermission } = useAuth();
 
-  // Role checkers
+  // Role checkers with hierarchy
   const isSuperAdmin = () => user?.role === 'Super Admin';
   const isAdmin = () => user?.role === 'Admin' || isSuperAdmin();
-  const isPropertyManager = () => user?.role === 'Property Manager';
+  const isManager = () => user?.role === 'Manager' || isAdmin();
+  const isPropertyManager = () => user?.role === 'Property Manager' || isManager();
+  const isUser = () => user?.role === 'User' || isPropertyManager();
   const isTenant = () => user?.role === 'Tenant';
   const isServiceProvider = () => user?.role === 'Service Provider';
+
+  // Get role hierarchy level (higher number = more authority)
+  const getRoleLevel = (role?: string) => {
+    const roleToCheck = role || user?.role;
+    switch (roleToCheck) {
+      case 'Super Admin': return 10;
+      case 'Admin': return 8;
+      case 'Manager': return 6;
+      case 'Property Manager': return 4;
+      case 'User': return 2;
+      case 'Tenant': return 1;
+      case 'Service Provider': return 1;
+      default: return 0;
+    }
+  };
+
+  // Check if current user has higher authority than target role
+  const hasHigherAuthorityThan = (targetRole: string) => {
+    return getRoleLevel() > getRoleLevel(targetRole);
+  };
 
   // Permission checkers
   const canManageUsers = () => hasPermission('manage_users') || isSuperAdmin();
