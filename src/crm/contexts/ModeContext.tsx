@@ -51,8 +51,8 @@ export function ModeProvider({ children }: ModeProviderProps) {
   const isManagementMode = currentMode === 'management';
 
   // Access control logic
-  const canSwitchToTenantMode = user?.role === 'Admin' || user?.role === 'Property Manager' || user?.role === 'Tenant';
-  const canSwitchToManagementMode = user?.role === 'Admin' || user?.role === 'Property Manager';
+  const canSwitchToTenantMode = user?.role === 'Super Admin' || user?.role === 'Admin' || user?.role === 'Manager' || user?.role === 'Property Manager' || user?.role === 'Tenant';
+  const canSwitchToManagementMode = user?.role === 'Super Admin' || user?.role === 'Admin' || user?.role === 'Manager' || user?.role === 'Property Manager';
 
   // Determine effective user role for UI purposes
   const effectiveUserRole = isTenantMode ? 'Tenant' : (user?.role || 'Admin');
