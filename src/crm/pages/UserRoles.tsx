@@ -893,6 +893,19 @@ export default function UserRoles() {
                     </Stack>
                   </TableCell>
                   <TableCell>
+                    <Stack direction="column" alignItems="center" spacing={1}>
+                      <Chip
+                        label={`Level ${role.hierarchy}`}
+                        size="small"
+                        color={getHierarchyColor(role.hierarchy) as any}
+                        variant="filled"
+                      />
+                      <Typography variant="caption" color="text.secondary" textAlign="center">
+                        {getHierarchyLabel(role.hierarchy)}
+                      </Typography>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
                     <Typography variant="h6">
                       {role.userCount}
                     </Typography>
