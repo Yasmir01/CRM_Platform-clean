@@ -668,10 +668,12 @@ export default function UserRoles() {
     alert("Role duplicated successfully");
   };
 
-  const filteredRoles = roles.filter(role =>
-    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRoles = roles
+    .filter(role =>
+      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => b.hierarchy - a.hierarchy); // Sort by hierarchy (highest authority first)
 
   const filteredUsers = users.filter(user =>
     `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
