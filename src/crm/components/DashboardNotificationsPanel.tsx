@@ -126,6 +126,19 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
     markAsRead(notification.id);
   };
 
+  const handleCompleteTask = () => {
+    // For task notifications, mark as completed and remove
+    markAsRead(notification.id);
+    removeNotification(notification.id);
+    // You could also call a task completion API here
+  };
+
+  const handleEditTask = () => {
+    // Navigate to tasks page with edit mode
+    navigate(`/crm/tasks?edit=${notification.relatedEntity?.id}`);
+    markAsRead(notification.id);
+  };
+
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
