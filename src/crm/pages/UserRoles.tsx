@@ -152,15 +152,49 @@ const mockRoles: Role[] = [
   {
     id: "1",
     name: "Super Admin",
-    description: "Full system access with all permissions",
+    description: "Full system access with all permissions - Highest Authority",
     permissions: allPermissions.map(p => p.id),
     isSystem: true,
     userCount: 1,
+    hierarchy: 10,
     createdDate: "2024-01-01",
     updatedDate: "2024-01-01",
   },
   {
     id: "2",
+    name: "Admin",
+    description: "High level access to manage company operations",
+    permissions: [
+      "prop_view", "prop_edit", "prop_create", "prop_delete", "prop_pictures",
+      "tenant_view", "tenant_create", "tenant_edit", "tenant_delete",
+      "wo_view", "wo_create", "wo_assign", "wo_edit", "wo_delete",
+      "reports_view", "reports_custom", "marketing_view", "marketing_edit",
+      "financial_view", "financial_edit", "settings_company", "settings_users"
+    ],
+    isSystem: true,
+    userCount: 2,
+    hierarchy: 8,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "3",
+    name: "Manager",
+    description: "Regional or departmental management access",
+    permissions: [
+      "prop_view", "prop_edit", "prop_pictures",
+      "tenant_view", "tenant_create", "tenant_edit",
+      "wo_view", "wo_create", "wo_assign", "wo_edit",
+      "reports_view", "marketing_view", "financial_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 6,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "4",
     name: "Property Manager",
     description: "Manage properties, tenants, and work orders",
     permissions: [
@@ -171,6 +205,7 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 3,
+    hierarchy: 4,
     createdDate: "2024-01-15",
     updatedDate: "2024-01-20",
   },
