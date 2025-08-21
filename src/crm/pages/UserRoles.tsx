@@ -838,6 +838,7 @@ export default function UserRoles() {
             <TableHead>
               <TableRow>
                 <TableCell>Role</TableCell>
+                <TableCell>Authority Level</TableCell>
                 <TableCell>Users</TableCell>
                 <TableCell>Permissions</TableCell>
                 <TableCell>Created</TableCell>
