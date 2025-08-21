@@ -406,7 +406,7 @@ export default function Tasks() {
       case "Property": return "🏠";
       case "Maintenance": return "🔧";
       case "Follow-up": return "🔄";
-      default: return "📋";
+      default: return "��";
     }
   };
 
@@ -768,6 +768,12 @@ export default function Tasks() {
                   fullWidth
                   value={formData.assignedTo}
                   onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      textAlign: 'left',
+                      paddingLeft: '14px'
+                    }
+                  }}
                 />
               </Grid>
               <Grid item xs={6}>
