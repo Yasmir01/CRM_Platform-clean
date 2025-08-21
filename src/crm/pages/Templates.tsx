@@ -1507,6 +1507,17 @@ export default function Templates() {
           </Stack>
         </DialogTitle>
         <DialogContent>
+          {/* Template Name Field for Form Builder */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              label="Application/Template Name"
+              fullWidth
+              value={formBuilderTemplateName}
+              onChange={(e) => setFormBuilderTemplateName(e.target.value)}
+              placeholder="Enter a name for this rental application template"
+              required
+            />
+          </Box>
           <Grid container spacing={3} sx={{ height: "70vh" }}>
             {/* Left Panel - Pre-built Sections */}
             <Grid item xs={12} md={4}>
