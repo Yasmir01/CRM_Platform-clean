@@ -1481,7 +1481,7 @@ export default function Templates() {
                 onClick={() => {
                   const newTemplate: Template = {
                     id: Date.now().toString(),
-                    name: `Custom Rental Application - ${new Date().toLocaleDateString()}`,
+                    name: formBuilderTemplateName || `Custom Rental Application - ${new Date().toLocaleDateString()}`,
                     type: "Rental Application",
                     content: "Dynamic form created with form builder",
                     variables: [],
