@@ -108,6 +108,14 @@ export class LocalStorageService {
     return this.getItem('applications', []);
   }
 
+  static saveTasks(tasks: any[]): void {
+    this.setItem('tasks', tasks);
+  }
+
+  static getTasks(): any[] {
+    return this.getItem('tasks', []);
+  }
+
   static saveProspects(prospects: any[]): void {
     this.setItem('prospects', prospects);
   }
