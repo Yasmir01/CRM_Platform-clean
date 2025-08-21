@@ -1060,6 +1060,7 @@ export default function IntegrationManagement() {
           <Button onClick={() => setOpenIntegrationDialog(false)}>Cancel</Button>
           <Button
             variant="contained"
+            disabled={!selectedIntegration && !newIntegrationType}
             onClick={() => {
               if (selectedIntegration) {
                 // Update existing integration
