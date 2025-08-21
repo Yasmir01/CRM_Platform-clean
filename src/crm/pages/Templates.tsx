@@ -688,10 +688,13 @@ export default function Templates() {
   };
 
   // Form Builder Functions
+  const [formBuilderTemplateName, setFormBuilderTemplateName] = React.useState('');
+
   const handleOpenFormBuilder = () => {
     setFormFields([]);
     setApplicationFee(50);
     setPaymentMethods(defaultPaymentMethods);
+    setFormBuilderTemplateName('');
     setOpenFormBuilderDialog(true);
   };
 
