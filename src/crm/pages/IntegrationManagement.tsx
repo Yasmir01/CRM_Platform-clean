@@ -1225,7 +1225,6 @@ export default function IntegrationManagement() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAPIKeyDialog(false)}>Close</Button>
-          <Button variant="contained">Generate API Key</Button>
         </DialogActions>
       </Dialog>
     </Box>
