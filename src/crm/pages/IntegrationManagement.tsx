@@ -374,6 +374,8 @@ export default function IntegrationManagement() {
   const [openWebhookDialog, setOpenWebhookDialog] = React.useState(false);
   const [openAPIKeyDialog, setOpenAPIKeyDialog] = React.useState(false);
   const [selectedIntegration, setSelectedIntegration] = React.useState<Integration | null>(null);
+  const [newIntegrationType, setNewIntegrationType] = React.useState("");
+  const [newIntegrationConfig, setNewIntegrationConfig] = React.useState<Record<string, any>>({});
 
   const filteredIntegrations = integrations.filter(integration => {
     const matchesSearch = integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
