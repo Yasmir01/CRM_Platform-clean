@@ -945,7 +945,26 @@ export class AccessControlService {
         createdBy: 'system'
       });
 
-      // Tenant Role
+      // User Role (Standard Authority - Level 2)
+      this.roles.set('user', {
+        id: 'user',
+        name: 'User',
+        description: 'Standard user access for viewing and basic operations',
+        type: 'system',
+        permissions: [
+          { id: 'view_properties', resource: 'properties', action: 'read', scope: 'assigned' },
+          { id: 'view_tenants', resource: 'tenants', action: 'read', scope: 'assigned' },
+          { id: 'view_reports', resource: 'reports', action: 'read', scope: 'basic' },
+          { id: 'send_communications', resource: 'communications', action: 'create', scope: 'basic' }
+        ],
+        hierarchy: 2,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Tenant Role (Limited Authority - Level 1)
       this.roles.set('tenant', {
         id: 'tenant',
         name: 'Tenant',
