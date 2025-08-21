@@ -73,6 +73,7 @@ interface Role {
   permissions: string[];
   isSystem: boolean;
   userCount: number;
+  hierarchy: number; // Authority level (higher = more authority)
   createdDate: string;
   updatedDate: string;
 }
