@@ -463,7 +463,10 @@ export default function IntegrationManagement() {
       ));
 
       // Show result to user
-      alert(`Test ${testResult.success ? 'Successful' : 'Failed'}: ${testResult.message}`);
+      showNotification(
+        `Test ${testResult.success ? 'Successful' : 'Failed'}: ${testResult.message}`,
+        testResult.success ? 'success' : 'error'
+      );
 
     } catch (error) {
       // Handle test failure
