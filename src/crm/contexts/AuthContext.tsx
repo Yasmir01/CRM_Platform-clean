@@ -108,33 +108,61 @@ const mockUsers: User[] = [
 ];
 
 const rolePermissions: Record<UserRole, string[]> = {
-  'Super Admin': ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings', 'view_all_accounts', 'manage_subscriptions', 'activate_deactivate_accounts', 'manage_user_roles', 'view_system_analytics', 'manage_billing', 'system_configuration'],
-  'Admin': ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_finances', 'manage_documents', 'delete_charges', 'add_credits', 'view_financial_ledger'],
+  // HIGHEST AUTHORITY - Super Admin (Level 10)
+  'Super Admin': [
+    'all', // Full system access
+    'manage_users', 'manage_user_roles', 'assign_admin_roles',
+    'manage_company', 'manage_subscriptions', 'manage_billing',
+    'system_settings', 'system_configuration', 'activate_deactivate_accounts',
+    'view_all_accounts', 'view_system_analytics', 'manage_security',
+    'manage_templates', 'view_analytics', 'manage_properties',
+    'manage_tenants', 'manage_leases', 'view_reports', 'send_communications',
+    'manage_maintenance', 'manage_finances', 'manage_documents',
+    'delete_charges', 'add_credits', 'view_financial_ledger'
+  ],
+
+  // HIGH AUTHORITY - Admin (Level 8)
+  'Admin': [
+    'manage_templates', 'manage_company', 'view_analytics',
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'delete_charges',
+    'add_credits', 'view_financial_ledger', 'manage_lower_users',
+    'assign_manager_roles', 'view_company_analytics'
+  ],
+
+  // MEDIUM-HIGH AUTHORITY - Manager (Level 6)
+  'Manager': [
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'add_credits',
+    'view_financial_ledger', 'manage_staff', 'assign_property_manager_roles'
+  ],
+
+  // MEDIUM AUTHORITY - Property Manager (Level 4)
   'Property Manager': [
-    'manage_properties',
-    'manage_tenants',
-    'manage_leases',
-    'view_reports',
-    'send_communications',
-    'manage_maintenance',
-    'manage_finances',
-    'manage_documents',
-    'delete_charges',
-    'add_credits',
-    'view_financial_ledger',
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'add_credits',
+    'view_financial_ledger'
   ],
+
+  // STANDARD AUTHORITY - User (Level 2)
+  'User': [
+    'view_properties', 'view_tenants', 'view_reports',
+    'send_communications', 'view_maintenance', 'view_documents'
+  ],
+
+  // LIMITED AUTHORITY - Tenant (Level 1)
   'Tenant': [
-    'view_profile',
-    'view_lease',
-    'pay_rent',
-    'submit_maintenance',
-    'view_communications',
+    'view_profile', 'view_lease', 'pay_rent',
+    'submit_maintenance', 'view_communications'
   ],
+
+  // EXTERNAL ACCESS - Service Provider (Level 1)
   'Service Provider': [
-    'view_work_orders',
-    'update_work_status',
-    'submit_invoices',
-    'view_communications',
+    'view_work_orders', 'update_work_status',
+    'submit_invoices', 'view_communications'
   ],
 };
 
