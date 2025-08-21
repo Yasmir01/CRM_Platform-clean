@@ -931,6 +931,12 @@ export default function Tasks() {
                     value={formData.workOrderId}
                     onChange={(e) => setFormData({ ...formData, workOrderId: e.target.value })}
                     placeholder="e.g., WO-001"
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        textAlign: 'left',
+                        paddingLeft: '14px'
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={6}>
@@ -943,6 +949,12 @@ export default function Tasks() {
                     InputProps={{
                       startAdornment: <InputAdornment position="start">$</InputAdornment>,
                     }}
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        textAlign: 'left',
+                        paddingLeft: '40px'
+                      }
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -952,6 +964,12 @@ export default function Tasks() {
                     value={formData.vendor}
                     onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
                     placeholder="Service provider handling this work order"
+                    sx={{
+                      '& .MuiInputBase-input': {
+                        textAlign: 'left',
+                        paddingLeft: '14px'
+                      }
+                    }}
                   />
                 </Grid>
               </Grid>
