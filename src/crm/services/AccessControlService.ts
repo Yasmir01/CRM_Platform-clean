@@ -938,7 +938,7 @@ export class AccessControlService {
           { id: 'manage_maintenance', resource: 'workorders', action: 'manage', scope: 'assigned' },
           { id: 'view_reports', resource: 'reports', action: 'read', scope: 'assigned' }
         ],
-        hierarchy: 7,
+        hierarchy: 4,
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
