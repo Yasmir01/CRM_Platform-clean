@@ -258,6 +258,7 @@ export class LocalStorageService {
       if (crmData.contacts) this.saveContacts(crmData.contacts);
       if (crmData.applications) this.saveApplications(crmData.applications);
       if (crmData.prospects) this.saveProspects(crmData.prospects);
+      if (crmData.tasks) this.saveTasks(crmData.tasks);
       if (crmData.serviceProviders) this.saveServiceProviders(crmData.serviceProviders);
       if (crmData.propertyGroups) this.savePropertyGroups(crmData.propertyGroups);
     } catch (error) {
@@ -277,6 +278,7 @@ export class LocalStorageService {
       contacts: this.getContacts(),
       applications: this.getApplications(),
       prospects: this.getProspects(),
+      tasks: this.getTasks(),
       serviceProviders: this.getServiceProviders(),
       propertyGroups: this.getPropertyGroups(),
       userPreferences: this.getUserPreferences()
