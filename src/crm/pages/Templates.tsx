@@ -1499,7 +1499,7 @@ export default function Templates() {
                   // Auto-save functionality disabled to prevent infinite loops
                   alert("Template saved successfully!");
                 }}
-                disabled={formFields.length === 0}
+                disabled={formFields.length === 0 || !formBuilderTemplateName.trim()}
               >
                 Save Template
               </Button>
