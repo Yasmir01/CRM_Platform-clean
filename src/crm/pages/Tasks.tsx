@@ -872,13 +872,48 @@ export default function Tasks() {
                         property: selectedProperty ? `${selectedProperty.name} - ${selectedProperty.address}` : ""
                       });
                     }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          maxHeight: 400,
+                          width: 450,
+                          '& .MuiMenuItem-root': {
+                            whiteSpace: 'normal',
+                            minHeight: 60,
+                            padding: 2,
+                            alignItems: 'flex-start'
+                          }
+                        }
+                      }
+                    }}
+                    sx={{
+                      '& .MuiSelect-select': {
+                        textAlign: 'left',
+                        paddingLeft: '14px'
+                      }
+                    }}
                   >
-                    <MenuItem value="">
-                      <em>Select a property (optional)</em>
+                    <MenuItem value="" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                      Select a property (optional)
                     </MenuItem>
                     {properties.map((property) => (
                       <MenuItem key={property.id} value={property.id}>
-                        {property.name} - {property.address}
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                            {property.name}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                              mt: 0.5,
+                              lineHeight: 1.3,
+                              wordBreak: 'break-word'
+                            }}
+                          >
+                            {property.address}
+                          </Typography>
+                        </Box>
                       </MenuItem>
                     ))}
                   </Select>
