@@ -469,6 +469,13 @@ export default function IntegrationManagement() {
         } : i
       ));
       alert(`Test Failed: Unable to connect to ${integration.name}. Please check your internet connection.`);
+    } finally {
+      // Clear loading state
+      setTestingIntegrations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
     }
   };
 
