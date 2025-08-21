@@ -488,6 +488,9 @@ export default function IntegrationManagement() {
       return;
     }
 
+    // Set loading state
+    setSyncingIntegrations(prev => new Set(prev).add(id));
+
     // Show sync in progress
     const originalSyncFreq = integration.syncFrequency;
     setIntegrations(prev => prev.map(i =>
