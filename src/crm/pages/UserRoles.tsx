@@ -73,6 +73,7 @@ interface Role {
   permissions: string[];
   isSystem: boolean;
   userCount: number;
+  hierarchy: number; // Authority level (higher = more authority)
   createdDate: string;
   updatedDate: string;
 }
@@ -151,15 +152,49 @@ const mockRoles: Role[] = [
   {
     id: "1",
     name: "Super Admin",
-    description: "Full system access with all permissions",
+    description: "Full system access with all permissions - Highest Authority",
     permissions: allPermissions.map(p => p.id),
     isSystem: true,
     userCount: 1,
+    hierarchy: 10,
     createdDate: "2024-01-01",
     updatedDate: "2024-01-01",
   },
   {
     id: "2",
+    name: "Admin",
+    description: "High level access to manage company operations",
+    permissions: [
+      "prop_view", "prop_edit", "prop_create", "prop_delete", "prop_pictures",
+      "tenant_view", "tenant_create", "tenant_edit", "tenant_delete",
+      "wo_view", "wo_create", "wo_assign", "wo_edit", "wo_delete",
+      "reports_view", "reports_custom", "marketing_view", "marketing_edit",
+      "financial_view", "financial_edit", "settings_company", "settings_users"
+    ],
+    isSystem: true,
+    userCount: 2,
+    hierarchy: 8,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "3",
+    name: "Manager",
+    description: "Regional or departmental management access",
+    permissions: [
+      "prop_view", "prop_edit", "prop_pictures",
+      "tenant_view", "tenant_create", "tenant_edit",
+      "wo_view", "wo_create", "wo_assign", "wo_edit",
+      "reports_view", "marketing_view", "financial_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 6,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "4",
     name: "Property Manager",
     description: "Manage properties, tenants, and work orders",
     permissions: [
@@ -170,13 +205,53 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 3,
+    hierarchy: 4,
     createdDate: "2024-01-15",
     updatedDate: "2024-01-20",
   },
   {
-    id: "3",
+    id: "5",
+    name: "User",
+    description: "Standard user access for viewing and basic operations",
+    permissions: [
+      "prop_view", "tenant_view", "reports_view", "marketing_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 2,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "6",
+    name: "Tenant",
+    description: "Basic tenant access to own information",
+    permissions: [
+      "tenant_view_own", "tenant_payments", "wo_create"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 1,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "7",
+    name: "Service Provider",
+    description: "External service provider access for work orders",
+    permissions: [
+      "wo_view", "wo_edit", "reports_view"
+    ],
+    isSystem: true,
+    userCount: 1,
+    hierarchy: 1,
+    createdDate: "2024-01-01",
+    updatedDate: "2024-01-01",
+  },
+  {
+    id: "8",
     name: "Maintenance Coordinator",
-    description: "Manage work orders and vendor relationships",
+    description: "Specialized role for work order management",
     permissions: [
       "wo_view", "wo_create", "wo_assign", "wo_edit",
       "prop_view", "manager_view",
@@ -184,11 +259,12 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 2,
+    hierarchy: 3,
     createdDate: "2024-01-15",
     updatedDate: "2024-01-15",
   },
   {
-    id: "4",
+    id: "9",
     name: "Accountant",
     description: "Financial management and reporting access",
     permissions: [
@@ -199,6 +275,7 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 1,
+    hierarchy: 3,
     createdDate: "2024-01-20",
     updatedDate: "2024-01-25",
   },
@@ -517,6 +594,27 @@ export default function UserRoles() {
     }
   };
 
+  const getHierarchyLabel = (hierarchy: number) => {
+    switch (hierarchy) {
+      case 10: return "Supreme Authority";
+      case 8: return "High Authority";
+      case 6: return "Medium-High Authority";
+      case 4: return "Medium Authority";
+      case 3: return "Limited Authority";
+      case 2: return "Standard Authority";
+      case 1: return "Basic Authority";
+      default: return "Unknown Level";
+    }
+  };
+
+  const getHierarchyColor = (hierarchy: number) => {
+    if (hierarchy >= 8) return "error"; // Red for highest levels
+    if (hierarchy >= 6) return "warning"; // Orange for high levels
+    if (hierarchy >= 4) return "primary"; // Blue for medium levels
+    if (hierarchy >= 2) return "info"; // Light blue for standard
+    return "default"; // Grey for basic
+  };
+
   // Bulk Role Assignment Functions
   const handleBulkAssign = () => {
     if (bulkAssignUsers.length === 0 || !bulkAssignRole) {
@@ -570,10 +668,12 @@ export default function UserRoles() {
     alert("Role duplicated successfully");
   };
 
-  const filteredRoles = roles.filter(role =>
-    role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    role.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRoles = roles
+    .filter(role =>
+      role.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => b.hierarchy - a.hierarchy); // Sort by hierarchy (highest authority first)
 
   const filteredUsers = users.filter(user =>
     `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -761,6 +861,7 @@ export default function UserRoles() {
             <TableHead>
               <TableRow>
                 <TableCell>Role</TableCell>
+                <TableCell>Authority Level</TableCell>
                 <TableCell>Users</TableCell>
                 <TableCell>Permissions</TableCell>
                 <TableCell>Created</TableCell>
@@ -791,6 +892,19 @@ export default function UserRoles() {
                           {role.description}
                         </Typography>
                       </Box>
+                    </Stack>
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="column" alignItems="center" spacing={1}>
+                      <Chip
+                        label={`Level ${role.hierarchy}`}
+                        size="small"
+                        color={getHierarchyColor(role.hierarchy) as any}
+                        variant="filled"
+                      />
+                      <Typography variant="caption" color="text.secondary" textAlign="center">
+                        {getHierarchyLabel(role.hierarchy)}
+                      </Typography>
                     </Stack>
                   </TableCell>
                   <TableCell>
@@ -889,11 +1003,17 @@ export default function UserRoles() {
                     </Stack>
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={getRoleName(user.roleId)}
-                      variant="outlined"
-                      size="small"
-                    />
+                    <Stack spacing={1}>
+                      <Chip
+                        label={getRoleName(user.roleId)}
+                        color={getHierarchyColor(roles.find(r => r.id === user.roleId)?.hierarchy || 0) as any}
+                        variant="filled"
+                        size="small"
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        {getHierarchyLabel(roles.find(r => r.id === user.roleId)?.hierarchy || 0)}
+                      </Typography>
+                    </Stack>
                   </TableCell>
                   <TableCell>
                     <Chip

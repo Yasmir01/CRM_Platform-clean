@@ -688,10 +688,13 @@ export default function Templates() {
   };
 
   // Form Builder Functions
+  const [formBuilderTemplateName, setFormBuilderTemplateName] = React.useState('');
+
   const handleOpenFormBuilder = () => {
     setFormFields([]);
     setApplicationFee(50);
     setPaymentMethods(defaultPaymentMethods);
+    setFormBuilderTemplateName('');
     setOpenFormBuilderDialog(true);
   };
 
@@ -1478,7 +1481,7 @@ export default function Templates() {
                 onClick={() => {
                   const newTemplate: Template = {
                     id: Date.now().toString(),
-                    name: `Custom Rental Application - ${new Date().toLocaleDateString()}`,
+                    name: formBuilderTemplateName || `Custom Rental Application - ${new Date().toLocaleDateString()}`,
                     type: "Rental Application",
                     content: "Dynamic form created with form builder",
                     variables: [],
@@ -1496,7 +1499,7 @@ export default function Templates() {
                   // Auto-save functionality disabled to prevent infinite loops
                   alert("Template saved successfully!");
                 }}
-                disabled={formFields.length === 0}
+                disabled={formFields.length === 0 || !formBuilderTemplateName.trim()}
               >
                 Save Template
               </Button>
@@ -1504,6 +1507,17 @@ export default function Templates() {
           </Stack>
         </DialogTitle>
         <DialogContent>
+          {/* Template Name Field for Form Builder */}
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              label="Application/Template Name"
+              fullWidth
+              value={formBuilderTemplateName}
+              onChange={(e) => setFormBuilderTemplateName(e.target.value)}
+              placeholder="Enter a name for this rental application template"
+              required
+            />
+          </Box>
           <Grid container spacing={3} sx={{ height: "70vh" }}>
             {/* Left Panel - Pre-built Sections */}
             <Grid item xs={12} md={4}>
@@ -2140,6 +2154,107 @@ export default function Templates() {
                         onClick={() => setPaymentSettingsOpen(true)}
                       >
                         Payment Settings
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={
+                          getTermsCount() > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <CheckCircleIcon
+                                color="success"
+                                fontSize="small"
+                                sx={{ fontSize: 16 }}
+                              />
+                              {getTermsCount() > 1 && (
+                                <CheckCircleIcon
+                                  color="success"
+                                  fontSize="small"
+                                  sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                />
+                              )}
+                            </Box>
+                          ) : (
+                            <SecurityRoundedIcon />
+                          )
+                        }
+                        onClick={() => {
+                          const termsField: FormField = {
+                            id: `terms_${Date.now()}`,
+                            type: "terms",
+                            label: "Terms and Conditions",
+                            required: true,
+                            order: formFields.length,
+                          };
+                          setFormFields(prev => [...prev, termsField]);
+                        }}
+                      >
+                        Add Terms & Conditions
+                        {getTermsCount() > 0 && (
+                          <Chip
+                            size="small"
+                            label={getTermsCount() > 1 ?
+                              `Added ${getTermsCount()}x` :
+                              'Added'
+                            }
+                            color="success"
+                            variant="outlined"
+                            sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                          />
+                        )}
+                      </Button>
+
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        startIcon={
+                          getFileUploadCount() > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <CheckCircleIcon
+                                color="success"
+                                fontSize="small"
+                                sx={{ fontSize: 16 }}
+                              />
+                              {getFileUploadCount() > 1 && (
+                                <CheckCircleIcon
+                                  color="success"
+                                  fontSize="small"
+                                  sx={{ fontSize: 16, marginLeft: -0.5 }}
+                                />
+                              )}
+                            </Box>
+                          ) : (
+                            <AddRoundedIcon />
+                          )
+                        }
+                        onClick={() => {
+                          const fileField: FormField = {
+                            id: `file_${Date.now()}`,
+                            type: "file_upload",
+                            label: "Document Upload",
+                            required: false,
+                            order: formFields.length,
+                            fileTypes: ["pdf", "jpg", "png", "doc"],
+                            maxFiles: 5,
+                            maxFileSize: 10,
+                          };
+                          setFormFields(prev => [...prev, fileField]);
+                        }}
+                      >
+                        Add File Upload
+                        {getFileUploadCount() > 0 && (
+                          <Chip
+                            size="small"
+                            label={getFileUploadCount() > 1 ?
+                              `Added ${getFileUploadCount()}x` :
+                              'Added'
+                            }
+                            color="success"
+                            variant="outlined"
+                            sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
+                          />
+                        )}
                       </Button>
                     </Stack>
                   </Paper>

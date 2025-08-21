@@ -871,7 +871,7 @@ export class AccessControlService {
 
   private initializeDefaultRoles(): void {
     if (this.roles.size === 0) {
-      // Super Admin Role
+      // Super Admin Role (Highest Authority - Level 10)
       this.roles.set('super_admin', {
         id: 'super_admin',
         name: 'Super Administrator',
@@ -887,7 +887,46 @@ export class AccessControlService {
         createdBy: 'system'
       });
 
-      // Property Manager Role
+      // Admin Role (High Authority - Level 8)
+      this.roles.set('admin', {
+        id: 'admin',
+        name: 'Administrator',
+        description: 'High level access to manage company operations',
+        type: 'system',
+        permissions: [
+          { id: 'manage_company', resource: 'company', action: 'manage', scope: 'all' },
+          { id: 'manage_templates', resource: 'templates', action: 'manage', scope: 'all' },
+          { id: 'manage_properties', resource: 'properties', action: 'manage', scope: 'all' },
+          { id: 'manage_tenants', resource: 'tenants', action: 'manage', scope: 'all' },
+          { id: 'view_analytics', resource: 'analytics', action: 'read', scope: 'all' }
+        ],
+        hierarchy: 8,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Manager Role (Medium-High Authority - Level 6)
+      this.roles.set('manager', {
+        id: 'manager',
+        name: 'Manager',
+        description: 'Regional or departmental management access',
+        type: 'system',
+        permissions: [
+          { id: 'manage_properties', resource: 'properties', action: 'manage', scope: 'assigned' },
+          { id: 'manage_tenants', resource: 'tenants', action: 'manage', scope: 'assigned' },
+          { id: 'manage_staff', resource: 'users', action: 'manage', scope: 'subordinates' },
+          { id: 'view_reports', resource: 'reports', action: 'read', scope: 'assigned' }
+        ],
+        hierarchy: 6,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Property Manager Role (Medium Authority - Level 4)
       this.roles.set('property_manager', {
         id: 'property_manager',
         name: 'Property Manager',
@@ -899,14 +938,33 @@ export class AccessControlService {
           { id: 'manage_maintenance', resource: 'workorders', action: 'manage', scope: 'assigned' },
           { id: 'view_reports', resource: 'reports', action: 'read', scope: 'assigned' }
         ],
-        hierarchy: 7,
+        hierarchy: 4,
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: 'system'
       });
 
-      // Tenant Role
+      // User Role (Standard Authority - Level 2)
+      this.roles.set('user', {
+        id: 'user',
+        name: 'User',
+        description: 'Standard user access for viewing and basic operations',
+        type: 'system',
+        permissions: [
+          { id: 'view_properties', resource: 'properties', action: 'read', scope: 'assigned' },
+          { id: 'view_tenants', resource: 'tenants', action: 'read', scope: 'assigned' },
+          { id: 'view_reports', resource: 'reports', action: 'read', scope: 'basic' },
+          { id: 'send_communications', resource: 'communications', action: 'create', scope: 'basic' }
+        ],
+        hierarchy: 2,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Tenant Role (Limited Authority - Level 1)
       this.roles.set('tenant', {
         id: 'tenant',
         name: 'Tenant',
@@ -916,6 +974,24 @@ export class AccessControlService {
           { id: 'view_own_lease', resource: 'leases', action: 'read', scope: 'own' },
           { id: 'create_maintenance', resource: 'workorders', action: 'create', scope: 'own' },
           { id: 'view_own_payments', resource: 'payments', action: 'read', scope: 'own' }
+        ],
+        hierarchy: 1,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Service Provider Role (External Access - Level 1)
+      this.roles.set('service_provider', {
+        id: 'service_provider',
+        name: 'Service Provider',
+        description: 'External service provider access for work orders',
+        type: 'system',
+        permissions: [
+          { id: 'view_work_orders', resource: 'workorders', action: 'read', scope: 'assigned' },
+          { id: 'update_work_status', resource: 'workorders', action: 'update', scope: 'assigned' },
+          { id: 'submit_invoices', resource: 'invoices', action: 'create', scope: 'own' }
         ],
         hierarchy: 1,
         isActive: true,

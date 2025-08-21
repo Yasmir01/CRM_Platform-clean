@@ -3,12 +3,34 @@ import { useAuth } from '../contexts/AuthContext';
 export const useRoleManagement = () => {
   const { user, hasPermission } = useAuth();
 
-  // Role checkers
+  // Role checkers with hierarchy
   const isSuperAdmin = () => user?.role === 'Super Admin';
   const isAdmin = () => user?.role === 'Admin' || isSuperAdmin();
-  const isPropertyManager = () => user?.role === 'Property Manager';
+  const isManager = () => user?.role === 'Manager' || isAdmin();
+  const isPropertyManager = () => user?.role === 'Property Manager' || isManager();
+  const isUser = () => user?.role === 'User' || isPropertyManager();
   const isTenant = () => user?.role === 'Tenant';
   const isServiceProvider = () => user?.role === 'Service Provider';
+
+  // Get role hierarchy level (higher number = more authority)
+  const getRoleLevel = (role?: string) => {
+    const roleToCheck = role || user?.role;
+    switch (roleToCheck) {
+      case 'Super Admin': return 10;
+      case 'Admin': return 8;
+      case 'Manager': return 6;
+      case 'Property Manager': return 4;
+      case 'User': return 2;
+      case 'Tenant': return 1;
+      case 'Service Provider': return 1;
+      default: return 0;
+    }
+  };
+
+  // Check if current user has higher authority than target role
+  const hasHigherAuthorityThan = (targetRole: string) => {
+    return getRoleLevel() > getRoleLevel(targetRole);
+  };
 
   // Permission checkers
   const canManageUsers = () => hasPermission('manage_users') || isSuperAdmin();
@@ -22,14 +44,14 @@ export const useRoleManagement = () => {
   const canCreateTemplates = () => canManageTemplates();
   const canEditTemplates = () => canManageTemplates();
   const canDeleteTemplates = () => canManageTemplates();
-  const canAccessTemplateLibrary = () => isAdmin() || isPropertyManager();
+  const canAccessTemplateLibrary = () => isSuperAdmin() || isAdmin() || isPropertyManager();
 
   // Company settings access
   const canEditCompanySettings = () => canManageCompany();
-  const canViewCompanySettings = () => isAdmin() || isPropertyManager();
+  const canViewCompanySettings = () => isSuperAdmin() || isAdmin() || isPropertyManager();
 
   // Power tools access
-  const canAccessPowerTools = () => isAdmin() || isPropertyManager();
+  const canAccessPowerTools = () => isSuperAdmin() || isAdmin() || isPropertyManager();
   const canCreateQRCodes = () => canAccessPowerTools();
   const canManageContests = () => canAccessPowerTools();
 
@@ -39,19 +61,37 @@ export const useRoleManagement = () => {
   const canDeleteUsers = () => canManageUsers();
   const canViewAllUsers = () => canManageUsers();
 
-  // Role assignment (only super admin can assign admin and super admin roles)
+  // Role assignment based on hierarchy (can only assign roles with lower or equal authority)
   const canAssignRole = (targetRole: string) => {
     if (!canManageUsers()) return false;
-    
-    if (targetRole === 'Super Admin') {
-      return isSuperAdmin();
+
+    // Super Admin can assign any role
+    if (isSuperAdmin()) return true;
+
+    // Admin can assign Manager and below, but not Super Admin or Admin
+    if (isAdmin() && user?.role === 'Admin') {
+      return !['Super Admin', 'Admin'].includes(targetRole);
     }
-    
-    if (targetRole === 'Admin') {
-      return isSuperAdmin();
+
+    // Manager can assign Property Manager and below
+    if (isManager() && user?.role === 'Manager') {
+      return !['Super Admin', 'Admin', 'Manager'].includes(targetRole);
     }
-    
-    return true; // Can assign other roles if has manage_users permission
+
+    // Property Manager can assign User, Tenant, Service Provider
+    if (isPropertyManager() && user?.role === 'Property Manager') {
+      return ['User', 'Tenant', 'Service Provider'].includes(targetRole);
+    }
+
+    return false;
+  };
+
+  // Check if user can manage/edit another user based on role hierarchy
+  const canManageUser = (targetUserRole: string) => {
+    if (!canManageUsers()) return false;
+
+    // Can only manage users with lower authority
+    return hasHigherAuthorityThan(targetUserRole);
   };
 
   // Feature access based on role
@@ -115,7 +155,7 @@ export const useRoleManagement = () => {
       items.push({ label: 'User Management', path: '/users', icon: 'people' });
     }
 
-    if (isAdmin()) {
+    if (isSuperAdmin() || isAdmin()) {
       items.push({ label: 'Settings', path: '/settings', icon: 'settings' });
     }
 
@@ -131,9 +171,16 @@ export const useRoleManagement = () => {
     // Role checkers
     isSuperAdmin,
     isAdmin,
+    isManager,
     isPropertyManager,
+    isUser,
     isTenant,
     isServiceProvider,
+
+    // Hierarchy functions
+    getRoleLevel,
+    hasHigherAuthorityThan,
+    canManageUser,
 
     // Permission checkers
     canManageUsers,

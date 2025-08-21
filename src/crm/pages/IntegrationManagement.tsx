@@ -39,6 +39,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Snackbar,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
@@ -247,6 +248,32 @@ const mockIntegrations: Integration[] = [
     features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"],
     dateConnected: "2024-01-05",
     lastError: "Webhook URL is invalid or expired"
+  },
+  {
+    id: "5",
+    name: "Encharge.io",
+    description: "Email marketing automation and customer lifecycle management",
+    category: "Email",
+    provider: "Encharge",
+    type: "API",
+    status: "Disconnected",
+    isActive: false,
+    lastSync: "Never",
+    syncFrequency: "Hourly",
+    configuration: { apiKey: "", accountId: "" },
+    metrics: {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      avgResponseTime: 0,
+      dataTransferred: 0,
+      uptime: 0
+    },
+    icon: "📧",
+    setupComplexity: "Medium",
+    pricing: "$49/month",
+    features: ["Email Automation", "Customer Journey", "Segmentation", "Analytics", "A/B Testing"],
+    dateConnected: undefined
   }
 ];
 
@@ -348,6 +375,15 @@ export default function IntegrationManagement() {
   const [openWebhookDialog, setOpenWebhookDialog] = React.useState(false);
   const [openAPIKeyDialog, setOpenAPIKeyDialog] = React.useState(false);
   const [selectedIntegration, setSelectedIntegration] = React.useState<Integration | null>(null);
+  const [newIntegrationType, setNewIntegrationType] = React.useState("");
+  const [newIntegrationConfig, setNewIntegrationConfig] = React.useState<Record<string, any>>({});
+  const [testingIntegrations, setTestingIntegrations] = React.useState<Set<string>>(new Set());
+  const [syncingIntegrations, setSyncingIntegrations] = React.useState<Set<string>>(new Set());
+  const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' as 'success' | 'error' | 'info' });
+
+  const showNotification = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
 
   const filteredIntegrations = integrations.filter(integration => {
     const matchesSearch = integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -371,14 +407,188 @@ export default function IntegrationManagement() {
     ));
   };
 
-  const handleTestIntegration = (id: string) => {
-    console.log(`Testing integration ${id}...`);
-    // In real app, this would make an API call to test the integration
+  const handleTestIntegration = async (id: string) => {
+    const integration = integrations.find(i => i.id === id);
+    if (!integration) return;
+
+    // Set loading state
+    setTestingIntegrations(prev => new Set(prev).add(id));
+
+    // Update integration status to show testing in progress
+    setIntegrations(prev => prev.map(i =>
+      i.id === id ? { ...i, status: "Pending" as Integration['status'] } : i
+    ));
+
+    try {
+      // Simulate API test call with different outcomes based on integration
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+
+      // Simulate different test results based on integration configuration
+      let testResult: { success: boolean; message: string };
+
+      if (integration.name === "Slack" && integration.lastError) {
+        // Simulate fixing the error
+        testResult = { success: true, message: "Connection restored! Webhook URL updated successfully." };
+      } else if (!integration.configuration || Object.keys(integration.configuration).length === 0) {
+        testResult = { success: false, message: "Missing configuration. Please configure the integration first." };
+      } else if (integration.name === "Mailchimp" && !integration.configuration.apiKey) {
+        testResult = { success: false, message: "Invalid API key. Please check your Mailchimp API credentials." };
+      } else if (integration.name === "Stripe" && !integration.configuration.secretKey) {
+        testResult = { success: false, message: "Missing secret key. Please add your Stripe secret key." };
+      } else {
+        // Successful test
+        testResult = { success: true, message: "Connection successful! All systems operational." };
+      }
+
+      // Update integration based on test result
+      const updatedIntegration: Partial<Integration> = {
+        status: testResult.success ? "Connected" : "Error",
+        lastSync: testResult.success ? new Date().toISOString() : integration.lastSync,
+        lastError: testResult.success ? undefined : testResult.message,
+        metrics: testResult.success ? {
+          ...integration.metrics,
+          totalRequests: integration.metrics.totalRequests + 1,
+          successfulRequests: integration.metrics.successfulRequests + 1,
+          uptime: Math.min(100, integration.metrics.uptime + 0.1)
+        } : {
+          ...integration.metrics,
+          totalRequests: integration.metrics.totalRequests + 1,
+          failedRequests: integration.metrics.failedRequests + 1,
+          uptime: Math.max(0, integration.metrics.uptime - 1)
+        }
+      };
+
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? { ...i, ...updatedIntegration } : i
+      ));
+
+      // Show result to user
+      showNotification(
+        `Test ${testResult.success ? 'Successful' : 'Failed'}: ${testResult.message}`,
+        testResult.success ? 'success' : 'error'
+      );
+
+    } catch (error) {
+      // Handle test failure
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          status: "Error" as Integration['status'],
+          lastError: "Test connection failed due to network error."
+        } : i
+      ));
+      showNotification(`Test Failed: Unable to connect to ${integration.name}. Please check your internet connection.`, 'error');
+    } finally {
+      // Clear loading state
+      setTestingIntegrations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
-  const handleSyncIntegration = (id: string) => {
-    console.log(`Syncing integration ${id}...`);
-    // In real app, this would trigger a sync
+  const handleSyncIntegration = async (id: string) => {
+    const integration = integrations.find(i => i.id === id);
+    if (!integration) return;
+
+    if (integration.status !== "Connected") {
+      showNotification("Cannot sync: Integration is not connected. Please test the connection first.", 'error');
+      return;
+    }
+
+    // Set loading state
+    setSyncingIntegrations(prev => new Set(prev).add(id));
+
+    // Show sync in progress
+    const originalSyncFreq = integration.syncFrequency;
+    setIntegrations(prev => prev.map(i =>
+      i.id === id ? { ...i, syncFrequency: "Syncing..." as Integration['syncFrequency'] } : i
+    ));
+
+    try {
+      // Simulate sync operation
+      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay
+
+      // Simulate data sync based on integration type
+      let syncResult: { success: boolean; recordsProcessed: number; message: string };
+
+      switch (integration.name) {
+        case "Mailchimp":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 50) + 25,
+            message: "Contacts synchronized successfully with Mailchimp."
+          };
+          break;
+        case "Stripe":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 20) + 10,
+            message: "Payment records synchronized with Stripe."
+          };
+          break;
+        case "Google Drive":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 15) + 5,
+            message: "Documents backed up to Google Drive."
+          };
+          break;
+        case "Encharge.io":
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 30) + 15,
+            message: "Customer journey data synchronized with Encharge.io."
+          };
+          break;
+        default:
+          syncResult = {
+            success: true,
+            recordsProcessed: Math.floor(Math.random() * 25) + 10,
+            message: `Data synchronized successfully with ${integration.name}.`
+          };
+      }
+
+      // Update integration with sync results
+      const updatedMetrics = {
+        ...integration.metrics,
+        totalRequests: integration.metrics.totalRequests + syncResult.recordsProcessed,
+        successfulRequests: integration.metrics.successfulRequests + syncResult.recordsProcessed,
+        dataTransferred: integration.metrics.dataTransferred + (syncResult.recordsProcessed * 0.1),
+        uptime: Math.min(100, integration.metrics.uptime + 0.2)
+      };
+
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          lastSync: new Date().toISOString(),
+          syncFrequency: originalSyncFreq,
+          metrics: updatedMetrics,
+          lastError: undefined
+        } : i
+      ));
+
+      showNotification(`Sync Completed! ${syncResult.message} Records processed: ${syncResult.recordsProcessed}`, 'success');
+
+    } catch (error) {
+      // Handle sync failure
+      setIntegrations(prev => prev.map(i =>
+        i.id === id ? {
+          ...i,
+          syncFrequency: originalSyncFreq,
+          lastError: "Sync failed due to network error."
+        } : i
+      ));
+      showNotification(`Sync Failed: Unable to synchronize with ${integration.name}. Please try again later.`, 'error');
+    } finally {
+      // Clear loading state
+      setSyncingIntegrations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }
   };
 
   return (
@@ -608,10 +818,25 @@ export default function IntegrationManagement() {
                     </Box>
                   </Stack>
 
-                  {/* Error Message */}
-                  {integration.status === "Error" && integration.lastError && (
+                  {/* Status Messages */}
+                  {testingIntegrations.has(integration.id) && (
+                    <Alert severity="info" size="small">
+                      Testing connection to {integration.name}...
+                    </Alert>
+                  )}
+                  {syncingIntegrations.has(integration.id) && (
+                    <Alert severity="info" size="small">
+                      Synchronizing data with {integration.name}...
+                    </Alert>
+                  )}
+                  {integration.status === "Error" && integration.lastError && !testingIntegrations.has(integration.id) && !syncingIntegrations.has(integration.id) && (
                     <Alert severity="error" size="small">
                       {integration.lastError}
+                    </Alert>
+                  )}
+                  {integration.status === "Connected" && !integration.lastError && !testingIntegrations.has(integration.id) && !syncingIntegrations.has(integration.id) && integration.lastSync && (
+                    <Alert severity="success" size="small">
+                      Last sync: {new Date(integration.lastSync).toLocaleString()}
                     </Alert>
                   )}
 
@@ -628,18 +853,39 @@ export default function IntegrationManagement() {
                       label="Active"
                     />
                     <Box flex={1} />
-                    <Tooltip title="Test Connection">
+                    <Tooltip title={testingIntegrations.has(integration.id) ? "Testing connection..." : "Test Connection"}>
                       <IconButton
                         size="small"
+                        disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id)}
                         onClick={() => handleTestIntegration(integration.id)}
+                        sx={{
+                          ...(testingIntegrations.has(integration.id) && {
+                            animation: 'pulse 1s infinite',
+                            '@keyframes pulse': {
+                              '0%': { opacity: 1 },
+                              '50%': { opacity: 0.5 },
+                              '100%': { opacity: 1 }
+                            }
+                          })
+                        }}
                       >
-                        <BugReportRoundedIcon />
+                        {testingIntegrations.has(integration.id) ? <RefreshRoundedIcon /> : <BugReportRoundedIcon />}
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Sync Now">
+                    <Tooltip title={syncingIntegrations.has(integration.id) ? "Syncing data..." : "Sync Now"}>
                       <IconButton
                         size="small"
+                        disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id) || integration.status !== "Connected"}
                         onClick={() => handleSyncIntegration(integration.id)}
+                        sx={{
+                          ...(syncingIntegrations.has(integration.id) && {
+                            animation: 'spin 2s linear infinite',
+                            '@keyframes spin': {
+                              '0%': { transform: 'rotate(0deg)' },
+                              '100%': { transform: 'rotate(360deg)' }
+                            }
+                          })
+                        }}
                       >
                         <SyncRoundedIcon />
                       </IconButton>
@@ -669,23 +915,502 @@ export default function IntegrationManagement() {
           {selectedIntegration ? `Configure ${selectedIntegration.name}` : "Add New Integration"}
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Integration configuration interface would be implemented here with provider-specific settings.
-          </Alert>
+          {selectedIntegration ? (
+            <Box sx={{ mt: 2 }}>
+              {/* Provider-specific configuration */}
+              {selectedIntegration.name === "Mailchimp" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Mailchimp integration settings below.
+                  </Alert>
+                  <TextField
+                    label="API Key"
+                    fullWidth
+                    value={selectedIntegration.configuration.apiKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Mailchimp API key"
+                    helperText="You can find your API key in your Mailchimp account settings"
+                  />
+                  <TextField
+                    label="List ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.listId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, listId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your default Mailchimp list ID"
+                    helperText="The default list to sync contacts with"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Sync Frequency</InputLabel>
+                    <Select
+                      value={selectedIntegration.syncFrequency}
+                      label="Sync Frequency"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          syncFrequency: e.target.value as Integration['syncFrequency']
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="Real-time">Real-time</MenuItem>
+                      <MenuItem value="Hourly">Hourly</MenuItem>
+                      <MenuItem value="Daily">Daily</MenuItem>
+                      <MenuItem value="Weekly">Weekly</MenuItem>
+                      <MenuItem value="Manual">Manual</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Stripe" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Stripe payment processing settings.
+                  </Alert>
+                  <TextField
+                    label="Publishable Key"
+                    fullWidth
+                    value={selectedIntegration.configuration.publicKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, publicKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="pk_live_..."
+                    helperText="Your Stripe publishable key (safe to expose in frontend)"
+                  />
+                  <TextField
+                    label="Secret Key"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.secretKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, secretKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="sk_live_..."
+                    helperText="Your Stripe secret key (keep this secure)"
+                  />
+                  <TextField
+                    label="Webhook Secret"
+                    fullWidth
+                    value={selectedIntegration.configuration.webhookSecret || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, webhookSecret: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="whsec_..."
+                    helperText="Webhook endpoint secret for verification"
+                  />
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Google Drive" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Google Drive integration for document storage.
+                  </Alert>
+                  <TextField
+                    label="Folder ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.folderId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, folderId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+                    helperText="The Google Drive folder ID where documents will be stored"
+                  />
+                  <TextField
+                    label="Service Account Email"
+                    fullWidth
+                    value={selectedIntegration.configuration.serviceAccountEmail || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, serviceAccountEmail: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="service-account@project.iam.gserviceaccount.com"
+                    helperText="Google Service Account email for API access"
+                  />
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Slack" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Slack integration for team notifications.
+                  </Alert>
+                  <TextField
+                    label="Bot Token"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.botToken || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, botToken: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="xoxb-..."
+                    helperText="Your Slack bot token for sending messages"
+                  />
+                  <TextField
+                    label="Default Channel"
+                    fullWidth
+                    value={selectedIntegration.configuration.defaultChannel || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, defaultChannel: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="#general"
+                    helperText="Default channel for CRM notifications"
+                  />
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Encharge.io" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Encharge.io integration for advanced email automation.
+                  </Alert>
+                  <TextField
+                    label="API Key"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.apiKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Encharge.io API key"
+                    helperText="You can find your API key in your Encharge.io account settings under API & Webhooks"
+                  />
+                  <TextField
+                    label="Account ID"
+                    fullWidth
+                    value={selectedIntegration.configuration.accountId || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, accountId: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Encharge.io account ID"
+                    helperText="Your unique Encharge.io account identifier"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Sync Frequency</InputLabel>
+                    <Select
+                      value={selectedIntegration.syncFrequency}
+                      label="Sync Frequency"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          syncFrequency: e.target.value as Integration['syncFrequency']
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="Real-time">Real-time</MenuItem>
+                      <MenuItem value="Hourly">Hourly</MenuItem>
+                      <MenuItem value="Daily">Daily</MenuItem>
+                      <MenuItem value="Weekly">Weekly</MenuItem>
+                      <MenuItem value="Manual">Manual</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Stack>
+              )}
+
+              <Box sx={{ mt: 3 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={selectedIntegration.isActive}
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          isActive: e.target.checked
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    />
+                  }
+                  label="Enable Integration"
+                />
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ mt: 2 }}>
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Select an integration type to add to your CRM system.
+              </Alert>
+              <FormControl fullWidth sx={{ mb: 3 }}>
+                <InputLabel>Integration Type</InputLabel>
+                <Select
+                  value={newIntegrationType}
+                  label="Integration Type"
+                  onChange={(e) => {
+                    setNewIntegrationType(e.target.value);
+                    setNewIntegrationConfig({});
+                  }}
+                >
+                  <MenuItem value="mailchimp">Mailchimp - Email Marketing</MenuItem>
+                  <MenuItem value="stripe">Stripe - Payment Processing</MenuItem>
+                  <MenuItem value="google-drive">Google Drive - Cloud Storage</MenuItem>
+                  <MenuItem value="slack">Slack - Team Communication</MenuItem>
+                  <MenuItem value="encharge">Encharge.io - Email Automation</MenuItem>
+                  <MenuItem value="zapier">Zapier - Workflow Automation</MenuItem>
+                  <MenuItem value="hubspot">HubSpot - CRM Integration</MenuItem>
+                </Select>
+              </FormControl>
+
+              {newIntegrationType && (
+                <Box sx={{ mt: 3, p: 3, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Configuration for {newIntegrationType.charAt(0).toUpperCase() + newIntegrationType.slice(1)}
+                  </Typography>
+
+                  {newIntegrationType === "mailchimp" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="API Key"
+                        fullWidth
+                        value={newIntegrationConfig.apiKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiKey: e.target.value}))}
+                        placeholder="Enter your Mailchimp API key"
+                        helperText="Find your API key in Mailchimp account settings"
+                      />
+                      <TextField
+                        label="List ID"
+                        fullWidth
+                        value={newIntegrationConfig.listId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, listId: e.target.value}))}
+                        placeholder="Enter your default list ID"
+                      />
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "stripe" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="Publishable Key"
+                        fullWidth
+                        value={newIntegrationConfig.publicKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, publicKey: e.target.value}))}
+                        placeholder="pk_live_..."
+                      />
+                      <TextField
+                        label="Secret Key"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.secretKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, secretKey: e.target.value}))}
+                        placeholder="sk_live_..."
+                      />
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "encharge" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="API Key"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.apiKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiKey: e.target.value}))}
+                        placeholder="Enter your Encharge.io API key"
+                      />
+                      <TextField
+                        label="Account ID"
+                        fullWidth
+                        value={newIntegrationConfig.accountId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, accountId: e.target.value}))}
+                        placeholder="Enter your account ID"
+                      />
+                    </Stack>
+                  )}
+
+                  {(newIntegrationType === "slack" || newIntegrationType === "google-drive" || newIntegrationType === "zapier" || newIntegrationType === "hubspot") && (
+                    <Alert severity="info">
+                      This integration requires OAuth authentication. Click "Add Integration" to begin the OAuth flow.
+                    </Alert>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenIntegrationDialog(false)}>Cancel</Button>
-          <Button variant="contained">
-            {selectedIntegration ? "Update" : "Connect"}
+          <Button
+            variant="contained"
+            disabled={!selectedIntegration && !newIntegrationType}
+            onClick={() => {
+              if (selectedIntegration) {
+                // Update existing integration
+                setIntegrations(prev => prev.map(integration =>
+                  integration.id === selectedIntegration.id ? selectedIntegration : integration
+                ));
+              } else if (newIntegrationType) {
+                // Add new integration
+                const newId = (integrations.length + 1).toString();
+
+                const integrationTemplates: Record<string, Partial<Integration>> = {
+                  mailchimp: {
+                    name: "Mailchimp",
+                    description: "Email marketing and automation platform",
+                    category: "Email",
+                    provider: "Mailchimp",
+                    type: "API",
+                    icon: "📧",
+                    setupComplexity: "Easy",
+                    pricing: "$10/month",
+                    features: ["Email Campaigns", "Automation", "Analytics", "Segmentation"]
+                  },
+                  stripe: {
+                    name: "Stripe",
+                    description: "Payment processing and billing",
+                    category: "Payments",
+                    provider: "Stripe",
+                    type: "API",
+                    icon: "💳",
+                    setupComplexity: "Medium",
+                    pricing: "2.9% + 30¢",
+                    features: ["Payment Processing", "Subscriptions", "Invoicing", "Reporting"]
+                  },
+                  encharge: {
+                    name: "Encharge.io",
+                    description: "Email marketing automation and customer lifecycle management",
+                    category: "Email",
+                    provider: "Encharge",
+                    type: "API",
+                    icon: "📧",
+                    setupComplexity: "Medium",
+                    pricing: "$49/month",
+                    features: ["Email Automation", "Customer Journey", "Segmentation", "Analytics", "A/B Testing"]
+                  },
+                  slack: {
+                    name: "Slack",
+                    description: "Team communication and notifications",
+                    category: "Communication",
+                    provider: "Slack",
+                    type: "Webhook",
+                    icon: "💬",
+                    setupComplexity: "Easy",
+                    pricing: "Free",
+                    features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"]
+                  }
+                };
+
+                const template = integrationTemplates[newIntegrationType] || {
+                  name: newIntegrationType.charAt(0).toUpperCase() + newIntegrationType.slice(1),
+                  description: "Custom integration",
+                  category: "CRM",
+                  provider: newIntegrationType,
+                  type: "API",
+                  icon: "🔗",
+                  setupComplexity: "Medium",
+                  pricing: "Custom",
+                  features: ["Custom Integration"]
+                };
+
+                const newIntegration: Integration = {
+                  id: newId,
+                  ...template,
+                  status: "Connected",
+                  isActive: true,
+                  lastSync: new Date().toISOString(),
+                  syncFrequency: "Hourly",
+                  configuration: newIntegrationConfig,
+                  metrics: {
+                    totalRequests: 0,
+                    successfulRequests: 0,
+                    failedRequests: 0,
+                    avgResponseTime: 0,
+                    dataTransferred: 0,
+                    uptime: 100
+                  },
+                  dateConnected: new Date().toISOString().split('T')[0]
+                } as Integration;
+
+                setIntegrations(prev => [...prev, newIntegration]);
+                alert(`${template.name} integration added successfully!`);
+              }
+              setOpenIntegrationDialog(false);
+              setSelectedIntegration(null);
+              setNewIntegrationType("");
+              setNewIntegrationConfig({});
+            }}
+          >
+            {selectedIntegration ? "Update Configuration" : "Add Integration"}
           </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={openWebhookDialog} onClose={() => setOpenWebhookDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Webhook Management</DialogTitle>
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">Webhook Management</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => {
+                const newWebhook: Webhook = {
+                  id: (webhooks.length + 1).toString(),
+                  name: "New Webhook",
+                  url: "",
+                  events: [],
+                  status: "Inactive",
+                  secret: `whsec_${Math.random().toString(36).substring(2, 15)}`,
+                  lastTriggered: "Never",
+                  successCount: 0,
+                  failureCount: 0,
+                  headers: { "Content-Type": "application/json" }
+                };
+                setWebhooks(prev => [...prev, newWebhook]);
+              }}
+            >
+              Add Webhook
+            </Button>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <Alert severity="info" sx={{ mb: 2 }}>
-            Webhook management interface would include creation, testing, and monitoring capabilities.
+            Manage your webhook endpoints for real-time event notifications. Webhooks allow external systems to receive instant updates when events occur in your CRM.
           </Alert>
           <TableContainer component={Paper} variant="outlined">
             <Table>
@@ -712,8 +1437,48 @@ export default function IntegrationManagement() {
                       {((webhook.successCount / (webhook.successCount + webhook.failureCount)) * 100).toFixed(1)}%
                     </TableCell>
                     <TableCell>
-                      <IconButton size="small"><EditRoundedIcon /></IconButton>
-                      <IconButton size="small"><DeleteRoundedIcon /></IconButton>
+                      <Tooltip title="Test Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            console.log(`Testing webhook ${webhook.id}...`);
+                            // Simulate webhook test
+                            alert(`Testing webhook: ${webhook.name}\nSending test payload to: ${webhook.url}`);
+                          }}
+                        >
+                          <PlayArrowRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Edit Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newName = prompt("Enter webhook name:", webhook.name);
+                            const newUrl = prompt("Enter webhook URL:", webhook.url);
+                            if (newName && newUrl) {
+                              setWebhooks(prev => prev.map(w =>
+                                w.id === webhook.id
+                                  ? { ...w, name: newName, url: newUrl }
+                                  : w
+                              ));
+                            }
+                          }}
+                        >
+                          <EditRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Webhook">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete webhook "${webhook.name}"?`)) {
+                              setWebhooks(prev => prev.filter(w => w.id !== webhook.id));
+                            }
+                          }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -728,10 +1493,35 @@ export default function IntegrationManagement() {
       </Dialog>
 
       <Dialog open={openAPIKeyDialog} onClose={() => setOpenAPIKeyDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>API Key Management</DialogTitle>
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">API Key Management</Typography>
+            <Button
+              variant="contained"
+              startIcon={<AddRoundedIcon />}
+              onClick={() => {
+                const newKey = `sk_${Math.random().toString(36).substring(2, 15)}_${Math.random().toString(36).substring(2, 15)}`;
+                const newAPIKey: APIKey = {
+                  id: (apiKeys.length + 1).toString(),
+                  name: "New API Key",
+                  key: newKey,
+                  permissions: ["read"],
+                  status: "Active",
+                  usageCount: 0,
+                  expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+                  createdAt: new Date().toISOString()
+                };
+                setAPIKeys(prev => [...prev, newAPIKey]);
+                alert(`New API Key generated:\n${newKey}\n\nPlease copy this key now as it won't be shown again!`);
+              }}
+            >
+              Generate API Key
+            </Button>
+          </Stack>
+        </DialogTitle>
         <DialogContent>
           <Alert severity="info" sx={{ mb: 2 }}>
-            API key management interface for creating, monitoring, and revoking access keys.
+            Manage your API keys for secure access to CRM data. Keep your keys secure and rotate them regularly.
           </Alert>
           <TableContainer component={Paper} variant="outlined">
             <Table>
@@ -760,8 +1550,53 @@ export default function IntegrationManagement() {
                       {apiKey.expiresAt ? new Date(apiKey.expiresAt).toLocaleDateString() : "Never"}
                     </TableCell>
                     <TableCell>
-                      <IconButton size="small"><EditRoundedIcon /></IconButton>
-                      <IconButton size="small"><DeleteRoundedIcon /></IconButton>
+                      <Tooltip title="Edit API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            const newName = prompt("Enter API key name:", apiKey.name);
+                            if (newName) {
+                              setAPIKeys(prev => prev.map(key =>
+                                key.id === apiKey.id
+                                  ? { ...key, name: newName }
+                                  : key
+                              ));
+                            }
+                          }}
+                        >
+                          <EditRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Revoke API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to revoke API key "${apiKey.name}"?\nThis action cannot be undone.`)) {
+                              setAPIKeys(prev => prev.map(key =>
+                                key.id === apiKey.id
+                                  ? { ...key, status: "Revoked" as APIKey['status'] }
+                                  : key
+                              ));
+                            }
+                          }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Copy API Key">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            navigator.clipboard.writeText(apiKey.key).then(() => {
+                              alert('API key copied to clipboard!');
+                            }).catch(() => {
+                              alert(`API Key: ${apiKey.key}`);
+                            });
+                          }}
+                        >
+                          <LinkRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -771,9 +1606,24 @@ export default function IntegrationManagement() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAPIKeyDialog(false)}>Close</Button>
-          <Button variant="contained">Generate API Key</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

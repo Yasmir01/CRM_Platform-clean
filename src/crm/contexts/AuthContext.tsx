@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type UserRole = 'Super Admin' | 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
+export type UserRole = 'Super Admin' | 'Admin' | 'Manager' | 'Property Manager' | 'User' | 'Tenant' | 'Service Provider';
 
 export interface User {
   id: string;
@@ -71,18 +71,41 @@ const mockUsers: User[] = [
   },
   {
     id: '3',
-    firstName: 'John',
-    lastName: 'Smith',
-    email: 'john.smith@propcrm.com',
+    firstName: 'Robert',
+    lastName: 'Johnson',
+    email: 'robert.johnson@propcrm.com',
     phone: '(555) 111-2222',
-    role: 'Property Manager',
+    role: 'Manager',
     status: 'Active',
-    permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
-    properties: ['Sunset Apartments', 'Ocean View Villa'],
+    permissions: ['manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_staff'],
+    properties: ['Regional Portfolio'],
     createdAt: '2024-01-03T00:00:00Z',
   },
   {
     id: '4',
+    firstName: 'John',
+    lastName: 'Smith',
+    email: 'john.smith@propcrm.com',
+    phone: '(555) 222-3333',
+    role: 'Property Manager',
+    status: 'Active',
+    permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
+    properties: ['Sunset Apartments', 'Ocean View Villa'],
+    createdAt: '2024-01-04T00:00:00Z',
+  },
+  {
+    id: '5',
+    firstName: 'Lisa',
+    lastName: 'Chen',
+    email: 'lisa.chen@propcrm.com',
+    phone: '(555) 444-5555',
+    role: 'User',
+    status: 'Active',
+    permissions: ['view_properties', 'view_tenants', 'view_reports', 'send_communications'],
+    createdAt: '2024-01-05T00:00:00Z',
+  },
+  {
+    id: '6',
     firstName: 'Sarah',
     lastName: 'Johnson',
     email: 'sarah.johnson@email.com',
@@ -91,10 +114,10 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
-    createdAt: '2024-01-04T00:00:00Z',
+    createdAt: '2024-01-06T00:00:00Z',
   },
   {
-    id: '5',
+    id: '7',
     firstName: 'Mike',
     lastName: 'Wilson',
     email: 'mike@handyservices.com',
@@ -103,38 +126,66 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
-    createdAt: '2024-01-05T00:00:00Z',
+    createdAt: '2024-01-07T00:00:00Z',
   },
 ];
 
 const rolePermissions: Record<UserRole, string[]> = {
-  'Super Admin': ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings', 'view_all_accounts', 'manage_subscriptions', 'activate_deactivate_accounts', 'manage_user_roles', 'view_system_analytics', 'manage_billing', 'system_configuration'],
-  'Admin': ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_finances', 'manage_documents', 'delete_charges', 'add_credits', 'view_financial_ledger'],
+  // HIGHEST AUTHORITY - Super Admin (Level 10)
+  'Super Admin': [
+    'all', // Full system access
+    'manage_users', 'manage_user_roles', 'assign_admin_roles',
+    'manage_company', 'manage_subscriptions', 'manage_billing',
+    'system_settings', 'system_configuration', 'activate_deactivate_accounts',
+    'view_all_accounts', 'view_system_analytics', 'manage_security',
+    'manage_templates', 'view_analytics', 'manage_properties',
+    'manage_tenants', 'manage_leases', 'view_reports', 'send_communications',
+    'manage_maintenance', 'manage_finances', 'manage_documents',
+    'delete_charges', 'add_credits', 'view_financial_ledger'
+  ],
+
+  // HIGH AUTHORITY - Admin (Level 8)
+  'Admin': [
+    'manage_templates', 'manage_company', 'view_analytics',
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'delete_charges',
+    'add_credits', 'view_financial_ledger', 'manage_lower_users',
+    'assign_manager_roles', 'view_company_analytics'
+  ],
+
+  // MEDIUM-HIGH AUTHORITY - Manager (Level 6)
+  'Manager': [
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'add_credits',
+    'view_financial_ledger', 'manage_staff', 'assign_property_manager_roles'
+  ],
+
+  // MEDIUM AUTHORITY - Property Manager (Level 4)
   'Property Manager': [
-    'manage_properties',
-    'manage_tenants',
-    'manage_leases',
-    'view_reports',
-    'send_communications',
-    'manage_maintenance',
-    'manage_finances',
-    'manage_documents',
-    'delete_charges',
-    'add_credits',
-    'view_financial_ledger',
+    'manage_properties', 'manage_tenants', 'manage_leases',
+    'view_reports', 'send_communications', 'manage_maintenance',
+    'manage_finances', 'manage_documents', 'add_credits',
+    'view_financial_ledger'
   ],
+
+  // STANDARD AUTHORITY - User (Level 2)
+  'User': [
+    'view_properties', 'view_tenants', 'view_reports',
+    'send_communications', 'view_maintenance', 'view_documents'
+  ],
+
+  // LIMITED AUTHORITY - Tenant (Level 1)
   'Tenant': [
-    'view_profile',
-    'view_lease',
-    'pay_rent',
-    'submit_maintenance',
-    'view_communications',
+    'view_profile', 'view_lease', 'pay_rent',
+    'submit_maintenance', 'view_communications'
   ],
+
+  // EXTERNAL ACCESS - Service Provider (Level 1)
   'Service Provider': [
-    'view_work_orders',
-    'update_work_status',
-    'submit_invoices',
-    'view_communications',
+    'view_work_orders', 'update_work_status',
+    'submit_invoices', 'view_communications'
   ],
 };
 

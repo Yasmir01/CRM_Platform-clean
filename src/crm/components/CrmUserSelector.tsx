@@ -17,10 +17,13 @@ import { useAuth } from "../contexts/AuthContext";
 
 const getRoleColor = (role: string) => {
   switch (role) {
-    case 'Admin': return 'error';
-    case 'Property Manager': return 'primary';
-    case 'Tenant': return 'info';
-    case 'Service Provider': return 'warning';
+    case 'Super Admin': return 'success'; // Highest authority - green
+    case 'Admin': return 'error'; // High authority - red
+    case 'Manager': return 'secondary'; // Medium-high authority - purple
+    case 'Property Manager': return 'primary'; // Medium authority - blue
+    case 'User': return 'default'; // Standard user - grey
+    case 'Tenant': return 'info'; // Lower authority - light blue
+    case 'Service Provider': return 'warning'; // External - yellow
     default: return 'default';
   }
 };

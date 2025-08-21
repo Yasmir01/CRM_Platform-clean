@@ -86,7 +86,7 @@ export default function CrmHeader() {
 
       <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
         {/* Tenant Selector - Show when in tenant mode for management users */}
-        {isTenantMode && (user?.role === 'Admin' || user?.role === 'Property Manager') && (
+        {isTenantMode && (user?.role === 'Super Admin' || user?.role === 'Admin' || user?.role === 'Manager' || user?.role === 'Property Manager') && (
           <FormControl size="small" sx={{ minWidth: 250, mr: 1 }}>
             <InputLabel>Select Tenant</InputLabel>
             <Select
