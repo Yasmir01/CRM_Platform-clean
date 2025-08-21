@@ -594,6 +594,27 @@ export default function UserRoles() {
     }
   };
 
+  const getHierarchyLabel = (hierarchy: number) => {
+    switch (hierarchy) {
+      case 10: return "Supreme Authority";
+      case 8: return "High Authority";
+      case 6: return "Medium-High Authority";
+      case 4: return "Medium Authority";
+      case 3: return "Limited Authority";
+      case 2: return "Standard Authority";
+      case 1: return "Basic Authority";
+      default: return "Unknown Level";
+    }
+  };
+
+  const getHierarchyColor = (hierarchy: number) => {
+    if (hierarchy >= 8) return "error"; // Red for highest levels
+    if (hierarchy >= 6) return "warning"; // Orange for high levels
+    if (hierarchy >= 4) return "primary"; // Blue for medium levels
+    if (hierarchy >= 2) return "info"; // Light blue for standard
+    return "default"; // Grey for basic
+  };
+
   // Bulk Role Assignment Functions
   const handleBulkAssign = () => {
     if (bulkAssignUsers.length === 0 || !bulkAssignRole) {
