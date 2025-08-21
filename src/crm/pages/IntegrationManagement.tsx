@@ -963,11 +963,11 @@ export default function IntegrationManagement() {
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel>Integration Type</InputLabel>
                 <Select
-                  value=""
+                  value={newIntegrationType}
                   label="Integration Type"
                   onChange={(e) => {
-                    // Handle new integration selection
-                    console.log('Selected integration:', e.target.value);
+                    setNewIntegrationType(e.target.value);
+                    setNewIntegrationConfig({});
                   }}
                 >
                   <MenuItem value="mailchimp">Mailchimp - Email Marketing</MenuItem>
@@ -979,6 +979,80 @@ export default function IntegrationManagement() {
                   <MenuItem value="hubspot">HubSpot - CRM Integration</MenuItem>
                 </Select>
               </FormControl>
+
+              {newIntegrationType && (
+                <Box sx={{ mt: 3, p: 3, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                  <Typography variant="h6" sx={{ mb: 2 }}>
+                    Configuration for {newIntegrationType.charAt(0).toUpperCase() + newIntegrationType.slice(1)}
+                  </Typography>
+
+                  {newIntegrationType === "mailchimp" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="API Key"
+                        fullWidth
+                        value={newIntegrationConfig.apiKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiKey: e.target.value}))}
+                        placeholder="Enter your Mailchimp API key"
+                        helperText="Find your API key in Mailchimp account settings"
+                      />
+                      <TextField
+                        label="List ID"
+                        fullWidth
+                        value={newIntegrationConfig.listId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, listId: e.target.value}))}
+                        placeholder="Enter your default list ID"
+                      />
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "stripe" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="Publishable Key"
+                        fullWidth
+                        value={newIntegrationConfig.publicKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, publicKey: e.target.value}))}
+                        placeholder="pk_live_..."
+                      />
+                      <TextField
+                        label="Secret Key"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.secretKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, secretKey: e.target.value}))}
+                        placeholder="sk_live_..."
+                      />
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "encharge" && (
+                    <Stack spacing={2}>
+                      <TextField
+                        label="API Key"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.apiKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiKey: e.target.value}))}
+                        placeholder="Enter your Encharge.io API key"
+                      />
+                      <TextField
+                        label="Account ID"
+                        fullWidth
+                        value={newIntegrationConfig.accountId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, accountId: e.target.value}))}
+                        placeholder="Enter your account ID"
+                      />
+                    </Stack>
+                  )}
+
+                  {(newIntegrationType === "slack" || newIntegrationType === "google-drive" || newIntegrationType === "zapier" || newIntegrationType === "hubspot") && (
+                    <Alert severity="info">
+                      This integration requires OAuth authentication. Click "Add Integration" to begin the OAuth flow.
+                    </Alert>
+                  )}
+                </Box>
+              )}
             </Box>
           )}
         </DialogContent>
