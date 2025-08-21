@@ -92,18 +92,48 @@ const generateRealReminders = (crmData: any): Reminder[] => {
       const daysSinceCreated = Math.ceil((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
       const property = properties.find((p: any) => p.id === workOrder.propertyId);
 
-      // Only show if work order is actually overdue
-      if (daysSinceCreated > 3) {
+      // Show if work order is due today or overdue
+      const dueDate = new Date(workOrder.dueDate || workOrder.createdAt);
+      const isToday = dueDate.toDateString() === today.toDateString();
+      const isOverdue = daysSinceCreated > 7 || (workOrder.dueDate && dueDate < today);
+
+      if (isToday || isOverdue || daysSinceCreated > 3) {
         reminders.push({
           id: `maintenance-${workOrder.id}`,
-          title: `Follow up on ${workOrder.type} - ${workOrder.description}`,
+          title: isToday ? `Due Today: ${workOrder.title || workOrder.type}` : `Follow up on ${workOrder.type} - ${workOrder.description}`,
           type: "Task",
-          time: "10:00 AM",
-          priority: workOrder.priority === "Urgent" ? "High" : "Medium",
-          isOverdue: daysSinceCreated > 7,
+          time: isToday ? "9:00 AM" : "10:00 AM",
+          priority: (workOrder.priority === "Urgent" || isToday) ? "High" : "Medium",
+          isOverdue: isOverdue,
           property: property?.name || "Unknown Property",
+          actionLink: "/crm/tasks"
         });
       }
+    }
+  });
+
+  // Add today's scheduled tasks from task system
+  const today = new Date();
+  const todayStr = today.toDateString();
+
+  // Generate inspection tasks for today
+  properties.forEach((property: any, index: number) => {
+    const lastInspection = new Date(property.lastInspection || new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000));
+    const daysSinceInspection = Math.ceil((today.getTime() - lastInspection.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Schedule quarterly inspections (every 90 days)
+    if (daysSinceInspection >= 90) {
+      const inspectionTime = index % 2 === 0 ? "2:00 PM" : "10:00 AM";
+      reminders.push({
+        id: `inspection-today-${property.id}`,
+        title: `Quarterly inspection for ${property.name || property.address}`,
+        type: "Task",
+        time: inspectionTime,
+        priority: "Medium",
+        isOverdue: false,
+        property: property.name || property.address,
+        actionLink: "/crm/tasks"
+      });
     }
   });
 
