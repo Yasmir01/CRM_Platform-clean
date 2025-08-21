@@ -405,6 +405,9 @@ export default function IntegrationManagement() {
     const integration = integrations.find(i => i.id === id);
     if (!integration) return;
 
+    // Set loading state
+    setTestingIntegrations(prev => new Set(prev).add(id));
+
     // Update integration status to show testing in progress
     setIntegrations(prev => prev.map(i =>
       i.id === id ? { ...i, status: "Pending" as Integration['status'] } : i
