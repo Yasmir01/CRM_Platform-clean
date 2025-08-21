@@ -995,31 +995,81 @@ export default function Tasks() {
       </Dialog>
 
       {/* Custom Category Description Dialog */}
-      <Dialog open={categoryDialogOpen} onClose={() => setCategoryDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Custom Task Category</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <Alert severity="info">
-              Please describe the custom category for this task. This will help categorize similar tasks in the future.
+      <Dialog
+        open={categoryDialogOpen}
+        onClose={() => setCategoryDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            minHeight: 400,
+            borderRadius: 2
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <TaskRoundedIcon color="primary" />
+            <Typography variant="h6">Custom Task Category</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Stack spacing={3}>
+            <Alert severity="info" sx={{ borderRadius: 2 }}>
+              <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                Please specify the custom category when 'Other' is selected.
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                This will help categorize similar tasks in the future and make your task management more organized.
+              </Typography>
             </Alert>
+
             <TextField
-              label="Custom Category Description"
+              label="Custom Category Name"
               fullWidth
               required
-              multiline
-              rows={3}
               value={formData.customCategory}
               onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })}
-              placeholder="e.g., Legal Review, Insurance Claim, Marketing Event, etc."
-              helperText="Be specific to help with future categorization"
+              placeholder="e.g., Legal Review, Insurance Claim, Marketing Event, Client Meeting"
+              helperText="Enter a specific category name (2-50 characters)"
+              inputProps={{ maxLength: 50 }}
+              sx={{
+                '& .MuiInputBase-input': {
+                  textAlign: 'left',
+                  paddingLeft: '14px',
+                  fontSize: '16px'
+                }
+              }}
             />
+
+            <Box sx={{
+              p: 2,
+              bgcolor: 'grey.50',
+              borderRadius: 1,
+              border: 1,
+              borderColor: 'grey.200'
+            }}>
+              <Typography variant="subtitle2" color="primary" sx={{ mb: 1 }}>
+                Examples of good custom categories:
+              </Typography>
+              <Stack spacing={0.5}>
+                <Typography variant="body2" color="text.secondary">• Legal Documentation</Typography>
+                <Typography variant="body2" color="text.secondary">• Insurance Processing</Typography>
+                <Typography variant="body2" color="text.secondary">• Marketing Campaign</Typography>
+                <Typography variant="body2" color="text.secondary">• Client Consultation</Typography>
+                <Typography variant="body2" color="text.secondary">• Financial Review</Typography>
+              </Stack>
+            </Box>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setCategoryDialogOpen(false);
-            setFormData({ ...formData, category: "Follow-up", customCategory: "" });
-          }}>
+        <DialogActions sx={{ p: 3, pt: 2 }}>
+          <Button
+            onClick={() => {
+              setCategoryDialogOpen(false);
+              setFormData({ ...formData, category: "Follow-up", customCategory: "" });
+            }}
+            sx={{ minWidth: 100 }}
+          >
             Cancel
           </Button>
           <Button
@@ -1030,9 +1080,10 @@ export default function Tasks() {
                 setCategoryDialogOpen(false);
               }
             }}
-            disabled={!formData.customCategory.trim()}
+            disabled={!formData.customCategory.trim() || formData.customCategory.trim().length < 2}
+            sx={{ minWidth: 150 }}
           >
-            Save Custom Category
+            Use This Category
           </Button>
         </DialogActions>
       </Dialog>
