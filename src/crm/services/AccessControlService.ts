@@ -871,7 +871,7 @@ export class AccessControlService {
 
   private initializeDefaultRoles(): void {
     if (this.roles.size === 0) {
-      // Super Admin Role
+      // Super Admin Role (Highest Authority - Level 10)
       this.roles.set('super_admin', {
         id: 'super_admin',
         name: 'Super Administrator',
@@ -887,7 +887,46 @@ export class AccessControlService {
         createdBy: 'system'
       });
 
-      // Property Manager Role
+      // Admin Role (High Authority - Level 8)
+      this.roles.set('admin', {
+        id: 'admin',
+        name: 'Administrator',
+        description: 'High level access to manage company operations',
+        type: 'system',
+        permissions: [
+          { id: 'manage_company', resource: 'company', action: 'manage', scope: 'all' },
+          { id: 'manage_templates', resource: 'templates', action: 'manage', scope: 'all' },
+          { id: 'manage_properties', resource: 'properties', action: 'manage', scope: 'all' },
+          { id: 'manage_tenants', resource: 'tenants', action: 'manage', scope: 'all' },
+          { id: 'view_analytics', resource: 'analytics', action: 'read', scope: 'all' }
+        ],
+        hierarchy: 8,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Manager Role (Medium-High Authority - Level 6)
+      this.roles.set('manager', {
+        id: 'manager',
+        name: 'Manager',
+        description: 'Regional or departmental management access',
+        type: 'system',
+        permissions: [
+          { id: 'manage_properties', resource: 'properties', action: 'manage', scope: 'assigned' },
+          { id: 'manage_tenants', resource: 'tenants', action: 'manage', scope: 'assigned' },
+          { id: 'manage_staff', resource: 'users', action: 'manage', scope: 'subordinates' },
+          { id: 'view_reports', resource: 'reports', action: 'read', scope: 'assigned' }
+        ],
+        hierarchy: 6,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'system'
+      });
+
+      // Property Manager Role (Medium Authority - Level 4)
       this.roles.set('property_manager', {
         id: 'property_manager',
         name: 'Property Manager',
