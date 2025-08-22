@@ -125,41 +125,181 @@ function AppRoutes() {
           <CrmDashboard />
         </ProtectedRoute>
       }>
-        <Route index element={<CrmMainDashboard />} />
-        <Route path="calendar" element={<Calendar />} />
-        <Route path="contacts" element={<ContactManagement />} />
-        <Route path="sales" element={<SalesAutomation />} />
-        <Route path="marketing" element={<MarketingAutomation />} />
-        <Route path="properties" element={<Properties />} />
-        <Route path="tenants" element={<Tenants />} />
-        <Route path="prospects" element={<Prospects />} />
-        <Route path="applications" element={<Applications />} />
-        <Route path="applications/apply" element={<RentalApplicationForm />} />
-        <Route path="managers" element={<PropertyManagers />} />
-        <Route path="service-providers" element={<ServiceProviders />} />
-        <Route path="rent-collection" element={<RentCollection />} />
-        <Route path="work-orders" element={<WorkOrders />} />
-        <Route path="customer-service" element={<CustomerService />} />
-        <Route path="communications" element={<Communications />} />
-        <Route path="news" element={<NewsBoard />} />
-        <Route path="power-tools" element={<PowerTools />} />
-        <Route path="ai-tools" element={<AITools />} />
-        <Route path="tasks" element={<Tasks />} />
-        <Route path="analytics" element={<AnalyticsInsights />} />
-        <Route path="reports" element={<Reports />} />
-        <Route path="email-marketing" element={<EmailMarketing />} />
-        <Route path="sms-marketing" element={<SmsMarketing />} />
-        <Route path="templates" element={<Templates />} />
-        <Route path="landing-pages" element={<PropertyLandingPages />} />
-        <Route path="promotions" element={<Promotions />} />
-        <Route path="integrations" element={<IntegrationManagement />} />
-        <Route path="backup" element={<BackupManagement />} />
-        <Route path="automation" element={<MarketingAutomation />} />
-        <Route path="user-roles" element={<UserRoles />} />
-        <Route path="marketplace" element={<Marketplace />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="help" element={<HelpSupport />} />
-        <Route path="profile" element={<Profile />} />
+        <Route index element={
+          <React.Suspense fallback={<PageLoader />}>
+            <CrmMainDashboard />
+          </React.Suspense>
+        } />
+        <Route path="calendar" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Calendar />
+          </React.Suspense>
+        } />
+        <Route path="contacts" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <ContactManagement />
+          </React.Suspense>
+        } />
+        <Route path="sales" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SalesAutomation />
+          </React.Suspense>
+        } />
+        <Route path="marketing" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MarketingAutomation />
+          </React.Suspense>
+        } />
+        <Route path="properties" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Properties />
+          </React.Suspense>
+        } />
+        <Route path="tenants" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Tenants />
+          </React.Suspense>
+        } />
+        <Route path="prospects" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Prospects />
+          </React.Suspense>
+        } />
+        <Route path="applications" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Applications />
+          </React.Suspense>
+        } />
+        <Route path="applications/apply" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <RentalApplicationForm />
+          </React.Suspense>
+        } />
+        <Route path="managers" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PropertyManagers />
+          </React.Suspense>
+        } />
+        <Route path="service-providers" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <ServiceProviders />
+          </React.Suspense>
+        } />
+        <Route path="rent-collection" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <RentCollection />
+          </React.Suspense>
+        } />
+        <Route path="work-orders" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <WorkOrders />
+          </React.Suspense>
+        } />
+        <Route path="customer-service" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <CustomerService />
+          </React.Suspense>
+        } />
+        <Route path="communications" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Communications />
+          </React.Suspense>
+        } />
+        <Route path="news" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <NewsBoard />
+          </React.Suspense>
+        } />
+        <Route path="power-tools" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PowerTools />
+          </React.Suspense>
+        } />
+        <Route path="ai-tools" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AITools />
+          </React.Suspense>
+        } />
+        <Route path="tasks" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Tasks />
+          </React.Suspense>
+        } />
+        <Route path="analytics" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AnalyticsInsights />
+          </React.Suspense>
+        } />
+        <Route path="reports" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Reports />
+          </React.Suspense>
+        } />
+        <Route path="email-marketing" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EmailMarketing />
+          </React.Suspense>
+        } />
+        <Route path="sms-marketing" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SmsMarketing />
+          </React.Suspense>
+        } />
+        <Route path="templates" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Templates />
+          </React.Suspense>
+        } />
+        <Route path="landing-pages" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PropertyLandingPages />
+          </React.Suspense>
+        } />
+        <Route path="promotions" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Promotions />
+          </React.Suspense>
+        } />
+        <Route path="integrations" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <IntegrationManagement />
+          </React.Suspense>
+        } />
+        <Route path="backup" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <BackupManagement />
+          </React.Suspense>
+        } />
+        <Route path="automation" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MarketingAutomation />
+          </React.Suspense>
+        } />
+        <Route path="user-roles" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <UserRoles />
+          </React.Suspense>
+        } />
+        <Route path="marketplace" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Marketplace />
+          </React.Suspense>
+        } />
+        <Route path="settings" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Settings />
+          </React.Suspense>
+        } />
+        <Route path="help" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <HelpSupport />
+          </React.Suspense>
+        } />
+        <Route path="profile" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Profile />
+          </React.Suspense>
+        } />
       </Route>
       <Route path="/" element={
         isAuthenticated ? (
