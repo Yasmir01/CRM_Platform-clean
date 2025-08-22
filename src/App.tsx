@@ -11,7 +11,8 @@ import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
 
 // Lazy load CRM components for better performance
-const CrmMainDashboard = React.lazy(() => import("./crm/components/CrmMainDashboard"));
+import CrmMainDashboard from "./crm/components/CrmMainDashboard";
+// const CrmMainDashboard = React.lazy(() => import("./crm/components/CrmMainDashboard"));
 const Calendar = React.lazy(() => import("./crm/pages/Calendar"));
 const Properties = React.lazy(() => import("./crm/pages/Properties"));
 const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
