@@ -69,30 +69,26 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
-  // Get activities based on entity type (memoized)
-  const rawActivities = React.useMemo(() => {
-    return entityType === 'all'
-      ? getActivities()
-      : entityId
-        ? getEntityActivities(entityType, entityId)
-        : [];
-  }, [entityType, entityId, getActivities, getEntityActivities]);
+  // Get activities based on entity type
+  const rawActivities = entityType === 'all'
+    ? getActivities()
+    : entityId
+      ? getEntityActivities(entityType, entityId)
+      : [];
 
-  // Apply filters (memoized)
-  const filteredActivities = React.useMemo(() => {
-    return rawActivities.filter(activity => {
-      const matchesSearch = searchTerm === '' ||
-        activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.entityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        activity.userDisplayName.toLowerCase().includes(searchTerm.toLowerCase());
+  // Apply filters
+  const filteredActivities = rawActivities.filter(activity => {
+    const matchesSearch = searchTerm === '' ||
+      activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.entityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      activity.userDisplayName.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesSeverity = selectedSeverity === 'all' || activity.severity === selectedSeverity;
-      const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
-      const matchesAction = selectedAction === 'all' || activity.action === selectedAction;
+    const matchesSeverity = selectedSeverity === 'all' || activity.severity === selectedSeverity;
+    const matchesCategory = selectedCategory === 'all' || activity.category === selectedCategory;
+    const matchesAction = selectedAction === 'all' || activity.action === selectedAction;
 
-      return matchesSearch && matchesSeverity && matchesCategory && matchesAction;
-    }).slice(0, maxItems);
-  }, [rawActivities, searchTerm, selectedSeverity, selectedCategory, selectedAction, maxItems]);
+    return matchesSearch && matchesSeverity && matchesCategory && matchesAction;
+  }).slice(0, maxItems);
 
   const handleExpandItem = (itemId: string) => {
     setExpandedItems(prev => {
