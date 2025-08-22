@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
 import ArrowDownwardRoundedIcon from "@mui/icons-material/ArrowDownwardRounded";
-import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
+import { SparkLineChart } from "./LazyCharts";
 import { areaElementClasses } from "@mui/x-charts/LineChart";
 
 export type CrmStatCardProps = {
