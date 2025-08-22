@@ -346,7 +346,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                                         <span style={{ textDecoration: 'line-through', color: 'gray' }}>
                                           {change.oldValue || 'None'}
                                         </span>
-                                        {' → '}
+                                        {' �� '}
                                         <span style={{ color: 'green' }}>
                                           {change.newValue || 'None'}
                                         </span>
@@ -411,4 +411,4 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
   );
 };
 
-export default React.memo(ActivityTimeline);
+export default ActivityTimeline;
