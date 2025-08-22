@@ -1,30 +1,28 @@
 import * as React from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Stack,
-  Chip,
-  Paper,
-  Divider,
-  Tabs,
-  Tab,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Avatar,
-  LinearProgress,
-  CircularProgress,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Chip from "@mui/material/Chip";
+import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Alert from "@mui/material/Alert";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import Avatar from "@mui/material/Avatar";
+import LinearProgress from "@mui/material/LinearProgress";
+import CircularProgress from "@mui/material/CircularProgress";
 import {
   LineChart,
   Line,
