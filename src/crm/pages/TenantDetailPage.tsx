@@ -50,6 +50,7 @@ import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import { LocalStorageService } from "../services/LocalStorageService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
