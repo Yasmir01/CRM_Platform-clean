@@ -1,15 +1,13 @@
 import * as React from "react";
-import {
-  Snackbar,
-  Alert,
-  AlertTitle,
-  Button,
-  Stack,
-  Portal,
-  Slide,
-  Box,
-  IconButton,
-} from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Portal from "@mui/material/Portal";
+import Slide from "@mui/material/Slide";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import {
   CheckCircle as SuccessIcon,
   Error as ErrorIcon,
