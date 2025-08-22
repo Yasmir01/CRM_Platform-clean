@@ -196,7 +196,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Applications() {
-  const { state } = useCrmData();
+  const { state, addTenant, addActivity } = useCrmData();
   const { properties } = state;
   const [applications, setApplications] = React.useState<Application[]>(mockApplications);
   const [searchTerm, setSearchTerm] = React.useState("");
