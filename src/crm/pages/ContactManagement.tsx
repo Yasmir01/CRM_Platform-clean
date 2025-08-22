@@ -664,6 +664,7 @@ export default function ContactManagement() {
               <TableCell>Status & Score</TableCell>
               <TableCell>Last Contact</TableCell>
               <TableCell>Tags</TableCell>
+              <TableCell>Application Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
