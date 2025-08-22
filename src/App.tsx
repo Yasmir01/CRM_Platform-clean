@@ -126,11 +126,7 @@ function AppRoutes() {
           <CrmDashboard />
         </ProtectedRoute>
       }>
-        <Route index element={
-          <React.Suspense fallback={<PageLoader />}>
-            <CrmMainDashboard />
-          </React.Suspense>
-        } />
+        <Route index element={<CrmMainDashboard />} />
         <Route path="calendar" element={
           <React.Suspense fallback={<PageLoader />}>
             <Calendar />
