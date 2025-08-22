@@ -1049,12 +1049,8 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
       <WorkOrderDialog
         open={openWorkOrderDialog}
         onClose={() => setOpenWorkOrderDialog(false)}
+        assignedTo={`${provider.companyName} (${provider.contactName})`}
         onWorkOrderCreated={(workOrder) => {
-          // Pre-fill the assignedTo field with service provider info
-          workOrder.assignedTo = `${provider.companyName} (${provider.contactName})`;
-          workOrder.category = provider.category as any;
-          workOrder.notes = `Assigned to ${provider.companyName}\nContact: ${provider.contactName}\nPhone: ${provider.phone}\nEmail: ${provider.email}`;
-
           // Refresh activities to show the new work order in real-time
           refreshActivities();
 
