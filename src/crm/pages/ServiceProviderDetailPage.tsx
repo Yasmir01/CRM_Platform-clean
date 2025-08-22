@@ -722,10 +722,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
                   fullWidth
                   variant="outlined"
                   startIcon={<BuildRoundedIcon />}
-                  onClick={() => {
-                    // Create work order with this service provider pre-selected
-                    alert(`Creating work order for ${provider.companyName}...\n\nRedirecting to work order creation form with:\n- Service Provider: ${provider.companyName}\n- Contact: ${provider.contactName}\n- Service Type: ${provider.category}`);
-                  }}
+                  onClick={() => setOpenWorkOrderDialog(true)}
                 >
                   Create Work Order
                 </Button>
@@ -751,10 +748,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
             <Button
               variant="contained"
               startIcon={<BuildRoundedIcon />}
-              onClick={() => {
-                // Navigate to work order creation with service provider context
-                alert(`Creating new work order...\n\nOpening work order form with:\n- Assigned to: ${provider.companyName}\n- Service Category: ${provider.category}\n- Provider Contact: ${provider.contactName}\n- Phone: ${provider.phone}`);
-              }}
+              onClick={() => setOpenWorkOrderDialog(true)}
             >
               Create Work Order
             </Button>
