@@ -70,15 +70,15 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   // Get activities based on entity type
-  const rawActivities = entityType === 'all' 
+  const rawActivities = entityType === 'all'
     ? getActivities()
-    : entityId 
+    : entityId
       ? getEntityActivities(entityType, entityId)
       : [];
 
   // Apply filters
   const filteredActivities = rawActivities.filter(activity => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       activity.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       activity.entityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       activity.userDisplayName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -201,7 +201,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
               </Tooltip>
             )}
             <Tooltip title="Refresh">
-              <IconButton size="small" onClick={() => window.location.reload()}>
+              <IconButton size="small" onClick={refreshActivities}>
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
@@ -346,7 +346,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
                                         <span style={{ textDecoration: 'line-through', color: 'gray' }}>
                                           {change.oldValue || 'None'}
                                         </span>
-                                        {' → '}
+                                        {' �� '}
                                         <span style={{ color: 'green' }}>
                                           {change.newValue || 'None'}
                                         </span>

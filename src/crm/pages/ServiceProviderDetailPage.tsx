@@ -35,6 +35,9 @@ import {
   LinearProgress,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import WorkOrderDialog from "../components/WorkOrderDialog";
+import { useCrmData } from "../contexts/CrmDataContext";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -149,6 +152,9 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const [openMessageDialog, setOpenMessageDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [openWorkOrderDialog, setOpenWorkOrderDialog] = React.useState(false);
+
+  const { refreshActivities } = useActivityTracking();
 
   // Mock service provider data
   const provider = {
@@ -716,10 +722,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
                   fullWidth
                   variant="outlined"
                   startIcon={<BuildRoundedIcon />}
-                  onClick={() => {
-                    // Create work order with this service provider pre-selected
-                    alert(`Creating work order for ${provider.companyName}...\n\nRedirecting to work order creation form with:\n- Service Provider: ${provider.companyName}\n- Contact: ${provider.contactName}\n- Service Type: ${provider.category}`);
-                  }}
+                  onClick={() => setOpenWorkOrderDialog(true)}
                 >
                   Create Work Order
                 </Button>
@@ -745,10 +748,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
             <Button
               variant="contained"
               startIcon={<BuildRoundedIcon />}
-              onClick={() => {
-                // Navigate to work order creation with service provider context
-                alert(`Creating new work order...\n\nOpening work order form with:\n- Assigned to: ${provider.companyName}\n- Service Category: ${provider.category}\n- Provider Contact: ${provider.contactName}\n- Phone: ${provider.phone}`);
-              }}
+              onClick={() => setOpenWorkOrderDialog(true)}
             >
               Create Work Order
             </Button>
@@ -1044,6 +1044,21 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Work Order Dialog */}
+      <WorkOrderDialog
+        open={openWorkOrderDialog}
+        onClose={() => setOpenWorkOrderDialog(false)}
+        assignedTo={`${provider.companyName} (${provider.contactName})`}
+        onWorkOrderCreated={(workOrder) => {
+          // Refresh activities to show the new work order in real-time
+          refreshActivities();
+
+          // Force re-render to update work orders list
+          setCurrentTab(currentTab === 1 ? 0 : 1);
+          setTimeout(() => setCurrentTab(1), 100);
+        }}
+      />
     </Box>
   );
 }

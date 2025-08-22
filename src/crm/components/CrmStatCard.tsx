@@ -20,7 +20,7 @@ export type CrmStatCardProps = {
   data: number[];
 };
 
-function AreaGradient({ color, id }: { color: string; id: string }) {
+const AreaGradient = React.memo(function AreaGradient({ color, id }: { color: string; id: string }) {
   return (
     <defs>
       <linearGradient id={id} x1="50%" y1="0%" x2="50%" y2="100%">
@@ -29,9 +29,9 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
       </linearGradient>
     </defs>
   );
-}
+});
 
-export default function CrmStatCard({
+function CrmStatCard({
   title,
   value,
   interval,
@@ -179,3 +179,6 @@ export default function CrmStatCard({
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(CrmStatCard);
