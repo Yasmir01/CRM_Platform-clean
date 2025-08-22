@@ -201,7 +201,7 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
               </Tooltip>
             )}
             <Tooltip title="Refresh">
-              <IconButton size="small" onClick={() => window.location.reload()}>
+              <IconButton size="small" onClick={refreshActivities}>
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
