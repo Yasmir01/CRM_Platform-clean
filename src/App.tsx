@@ -4,45 +4,68 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
 import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
-// Import CRM components
-import CrmMainDashboard from "./crm/components/CrmMainDashboard";
-import Calendar from "./crm/pages/Calendar";
-import Properties from "./crm/pages/Properties";
-import Tenants from "./crm/pages/Tenants";
-import PropertyManagers from "./crm/pages/PropertyManagers";
-import ContactManagement from "./crm/pages/ContactManagement";
-import SalesAutomation from "./crm/pages/SalesAutomation";
-import Templates from "./crm/pages/Templates";
-import Settings from "./crm/pages/Settings";
-import Reports from "./crm/pages/Reports";
-import WorkOrders from "./crm/pages/WorkOrders";
-import Applications from "./crm/pages/Applications";
-import RentalApplicationForm from "./crm/pages/RentalApplicationForm";
-import Prospects from "./crm/pages/Prospects";
-import ServiceProviders from "./crm/pages/ServiceProviders";
-import Communications from "./crm/pages/Communications";
-import EmailMarketing from "./crm/pages/EmailMarketing";
-import SmsMarketing from "./crm/pages/SmsMarketing";
-import PropertyLandingPages from "./crm/pages/PropertyLandingPages";
-import Promotions from "./crm/pages/Promotions";
-import Marketplace from "./crm/pages/Marketplace";
-import UserRoles from "./crm/pages/UserRoles";
-import HelpSupport from "./crm/pages/HelpSupport";
-import Tasks from "./crm/pages/Tasks";
-import Profile from "./crm/pages/Profile";
-import NewsBoard from "./crm/pages/NewsBoard";
-import PowerTools from "./crm/pages/PowerTools";
-import AITools from "./crm/pages/AITools";
-import RentCollection from "./crm/pages/RentCollection";
-import CustomerService from "./crm/pages/CustomerService";
-import AnalyticsInsights from "./crm/pages/AnalyticsInsights";
-import MarketingAutomation from "./crm/pages/MarketingAutomation";
-import IntegrationManagement from "./crm/pages/IntegrationManagement";
-import BackupManagement from "./crm/components/BackupManagement";
+
+// Lazy load CRM components for better performance
+const CrmMainDashboard = React.lazy(() => import("./crm/components/CrmMainDashboard"));
+const Calendar = React.lazy(() => import("./crm/pages/Calendar"));
+const Properties = React.lazy(() => import("./crm/pages/Properties"));
+const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
+const PropertyManagers = React.lazy(() => import("./crm/pages/PropertyManagers"));
+const ContactManagement = React.lazy(() => import("./crm/pages/ContactManagement"));
+const SalesAutomation = React.lazy(() => import("./crm/pages/SalesAutomation"));
+const Templates = React.lazy(() => import("./crm/pages/Templates"));
+const Settings = React.lazy(() => import("./crm/pages/Settings"));
+const Reports = React.lazy(() => import("./crm/pages/Reports"));
+const WorkOrders = React.lazy(() => import("./crm/pages/WorkOrders"));
+const Applications = React.lazy(() => import("./crm/pages/Applications"));
+const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
+const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
+const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
+const Communications = React.lazy(() => import("./crm/pages/Communications"));
+const EmailMarketing = React.lazy(() => import("./crm/pages/EmailMarketing"));
+const SmsMarketing = React.lazy(() => import("./crm/pages/SmsMarketing"));
+const PropertyLandingPages = React.lazy(() => import("./crm/pages/PropertyLandingPages"));
+const Promotions = React.lazy(() => import("./crm/pages/Promotions"));
+const Marketplace = React.lazy(() => import("./crm/pages/Marketplace"));
+const UserRoles = React.lazy(() => import("./crm/pages/UserRoles"));
+const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
+const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
+const Profile = React.lazy(() => import("./crm/pages/Profile"));
+const NewsBoard = React.lazy(() => import("./crm/pages/NewsBoard"));
+const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
+const AITools = React.lazy(() => import("./crm/pages/AITools"));
+const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
+const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
+const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
+const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
+const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
+const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
+
+// Loading component
+function PageLoader() {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "50vh",
+        flexDirection: "column",
+        gap: 2
+      }}
+    >
+      <CircularProgress />
+      <Typography variant="body2" color="text.secondary">
+        Loading...
+      </Typography>
+    </Box>
+  );
+}
 
 function NotFound() {
   return (
