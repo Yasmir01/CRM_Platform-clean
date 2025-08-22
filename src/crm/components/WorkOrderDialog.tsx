@@ -51,6 +51,7 @@ interface WorkOrderDialogProps {
   onClose: () => void;
   propertyId?: string;
   propertyName?: string;
+  assignedTo?: string;
   onWorkOrderCreated?: (workOrder: WorkOrder) => void;
 }
 
@@ -59,6 +60,7 @@ export default function WorkOrderDialog({
   onClose,
   propertyId,
   propertyName,
+  assignedTo,
   onWorkOrderCreated
 }: WorkOrderDialogProps) {
   const { state, addWorkOrder } = useCrmData();
@@ -85,7 +87,7 @@ export default function WorkOrderDialog({
     category: "General Maintenance" as WorkOrder["category"],
     customCategory: "",
     priority: "Medium" as WorkOrder["priority"],
-    assignedTo: "",
+    assignedTo: assignedTo || "",
     dueDate: "",
     estimatedCost: "",
     notes: "",
@@ -94,14 +96,15 @@ export default function WorkOrderDialog({
 
   // Reset form when dialog opens with property info
   React.useEffect(() => {
-    if (open && propertyId && propertyName) {
+    if (open && (propertyId || assignedTo)) {
       setFormData(prev => ({
         ...prev,
-        propertyId,
-        property: propertyName
+        propertyId: propertyId || prev.propertyId,
+        property: propertyName || prev.property,
+        assignedTo: assignedTo || prev.assignedTo
       }));
     }
-  }, [open, propertyId, propertyName]);
+  }, [open, propertyId, propertyName, assignedTo]);
 
   // Auto-populate tenant information for tenant users
   React.useEffect(() => {
