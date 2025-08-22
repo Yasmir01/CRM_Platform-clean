@@ -73,6 +73,7 @@ import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 // Using unified Contact interface from CrmDataContext
 
