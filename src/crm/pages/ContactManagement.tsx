@@ -760,6 +760,50 @@ export default function ContactManagement() {
                   </Stack>
                 </TableCell>
                 <TableCell>
+                  {(() => {
+                    // Get applications for this contact
+                    const contactApplications = LocalStorageService.getApplications().filter(app =>
+                      app.applicantEmail === contact.email ||
+                      (app.formData?.email && app.formData.email === contact.email) ||
+                      (app.formData?.applicant_email && app.formData.applicant_email === contact.email)
+                    );
+
+                    if (contactApplications.length === 0) {
+                      return (
+                        <Typography variant="caption" color="text.secondary">
+                          No applications
+                        </Typography>
+                      );
+                    }
+
+                    // Get the latest application
+                    const latestApplication = contactApplications.sort((a, b) =>
+                      new Date(b.submittedDate || b.createdAt || '').getTime() -
+                      new Date(a.submittedDate || a.createdAt || '').getTime()
+                    )[0];
+
+                    return (
+                      <Stack spacing={0.5}>
+                        <Chip
+                          label={latestApplication.status}
+                          size="small"
+                          color={
+                            latestApplication.status === 'Denied' ? 'error' :
+                            latestApplication.status === 'Archived' ? 'success' :
+                            latestApplication.status === 'Pending' ? 'warning' : 'default'
+                          }
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {contactApplications.length} application{contactApplications.length > 1 ? 's' : ''}
+                        </Typography>
+                        {latestApplication.paymentStatus === 'Paid' && (
+                          <Chip label="Paid" size="small" color="success" variant="outlined" />
+                        )}
+                      </Stack>
+                    );
+                  })()}
+                </TableCell>
+                <TableCell>
                   <Stack direction="row" spacing={0.5}>
                     <Tooltip title="Edit Contact">
                       <IconButton
