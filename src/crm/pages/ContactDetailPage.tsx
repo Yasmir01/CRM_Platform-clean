@@ -68,6 +68,7 @@ import { useState, useEffect } from "react";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import CommunicationDialog from "../components/CommunicationDialog";
 import RichTextEditor from "../components/RichTextEditor";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 interface ContactDetailPageProps {
   contact: Contact;
@@ -404,9 +405,109 @@ const ContactDetailPage: React.FC<ContactDetailPageProps> = ({ contact, onBack }
           <Typography variant="h6" gutterBottom>
             Activity Timeline
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Activity timeline will be displayed here.
-          </Typography>
+
+          {/* Real-time Application Activities */}
+          {(() => {
+            const contactApplications = LocalStorageService.getApplications().filter(app =>
+              app.applicantEmail === contact.email ||
+              (app.formData?.email && app.formData.email === contact.email) ||
+              (app.formData?.applicant_email && app.formData.applicant_email === contact.email)
+            );
+
+            if (contactApplications.length === 0) {
+              return (
+                <Typography variant="body2" color="text.secondary">
+                  No application activity found for this contact.
+                </Typography>
+              );
+            }
+
+            const applicationActivities = contactApplications.flatMap(app => [
+              {
+                id: `app-submitted-${app.id}`,
+                type: 'Application Submitted',
+                date: app.submittedDate || app.createdAt || new Date().toISOString(),
+                content: `Application ${app.id} submitted for ${app.propertyName || app.propertyCode || 'property'}`,
+                status: app.status,
+                paymentStatus: app.paymentStatus,
+                applicationFee: app.applicationFee
+              },
+              ...(app.status !== 'New' ? [{
+                id: `app-status-${app.id}`,
+                type: 'Status Update',
+                date: app.updatedAt || new Date().toISOString(),
+                content: `Application ${app.id} status changed to ${app.status}`,
+                status: app.status,
+                paymentStatus: app.paymentStatus
+              }] : []),
+              ...(app.paymentStatus === 'Paid' ? [{
+                id: `app-payment-${app.id}`,
+                type: 'Payment Received',
+                date: app.paymentDate || app.updatedAt || new Date().toISOString(),
+                content: `Payment of $${app.applicationFee} received for application ${app.id}`,
+                status: app.status,
+                paymentStatus: app.paymentStatus,
+                amount: app.applicationFee
+              }] : [])
+            ]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+            return (
+              <Stack spacing={2}>
+                {applicationActivities.map((activity) => (
+                  <Card key={activity.id} variant="outlined">
+                    <CardContent sx={{ py: 2 }}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                        <Box>
+                          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                            <Chip
+                              label={activity.type}
+                              size="small"
+                              color={
+                                activity.type === 'Application Submitted' ? 'primary' :
+                                activity.type === 'Status Update' ? 'secondary' :
+                                activity.type === 'Payment Received' ? 'success' : 'default'
+                              }
+                            />
+                            {activity.status && (
+                              <Chip
+                                label={activity.status}
+                                size="small"
+                                variant="outlined"
+                                color={
+                                  activity.status === 'Denied' ? 'error' :
+                                  activity.status === 'Archived' ? 'success' :
+                                  activity.status === 'Pending' ? 'warning' : 'default'
+                                }
+                              />
+                            )}
+                            {activity.paymentStatus && (
+                              <Chip
+                                label={`Payment ${activity.paymentStatus}`}
+                                size="small"
+                                variant="outlined"
+                                color={activity.paymentStatus === 'Paid' ? 'success' : 'warning'}
+                              />
+                            )}
+                          </Stack>
+                          <Typography variant="body1" sx={{ mb: 1 }}>
+                            {activity.content}
+                          </Typography>
+                          {activity.amount && (
+                            <Typography variant="body2" color="success.main" fontWeight="bold">
+                              Amount: ${activity.amount.toLocaleString()}
+                            </Typography>
+                          )}
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          {new Date(activity.date).toLocaleDateString()} {new Date(activity.date).toLocaleTimeString()}
+                        </Typography>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            );
+          })()}
         </TabPanel>
       </Paper>
 
