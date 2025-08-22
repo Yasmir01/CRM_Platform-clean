@@ -129,10 +129,19 @@ export default defineConfig({
     include: [
       'react',
       'react-dom',
+      'react-router-dom',
       '@mui/material',
-      '@mui/icons-material',
-      'recharts',
-      'react-router-dom'
+      '@emotion/react',
+      '@emotion/styled',
+      'dayjs',
+      'crypto-js'
+    ],
+    exclude: [
+      // Exclude heavy components that should be lazy loaded
+      '@mui/x-charts',
+      '@mui/x-data-grid',
+      '@mui/x-date-pickers',
+      'recharts'
     ]
   }
 });
