@@ -415,4 +415,4 @@ const ActivityTimeline: React.FC<ActivityTimelineProps> = ({
   );
 };
 
-export default ActivityTimeline;
+export default React.memo(ActivityTimeline);
