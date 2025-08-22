@@ -196,7 +196,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Applications() {
-  const { state } = useCrmData();
+  const { state, addTenant, addActivity } = useCrmData();
   const { properties } = state;
   const [applications, setApplications] = React.useState<Application[]>(mockApplications);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -224,10 +224,25 @@ export default function Applications() {
     const workflowService = WorkflowService.getInstance();
     workflowService.registerCallbacks({
       updateProspects: setProspects,
-      addTenant: (tenant) => setTenants(prev => [...prev, tenant]),
+      addTenant: (tenant) => {
+        // Add to local state for immediate UI update
+        setTenants(prev => [...prev, tenant]);
+        // Add to global CrmDataContext for real-time sync to tenant/contact pages
+        addTenant(tenant);
+      },
       logActivity: (message) => {
         setWorkflowLog(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
         console.log('Workflow:', message);
+        // Also add to global activity log
+        addActivity({
+          id: Date.now().toString(),
+          type: 'system',
+          description: message,
+          timestamp: new Date().toISOString(),
+          entityType: 'Application',
+          entityId: '',
+          userId: 'system'
+        });
       }
     });
 

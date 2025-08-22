@@ -50,6 +50,7 @@ import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import { LocalStorageService } from "../services/LocalStorageService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -717,12 +718,83 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   // Get real activities from the activity tracking system
   const tenantActivities = getEntityActivities('tenant', tenant.id);
 
+  // Get real-time application data for this tenant
+  const tenantApplications = React.useMemo(() => {
+    const applications = LocalStorageService.getApplications();
+    return applications.filter(app =>
+      app.applicantEmail === tenant.email ||
+      (app.formData?.email && app.formData.email === tenant.email) ||
+      (app.formData?.applicant_email && app.formData.applicant_email === tenant.email)
+    );
+  }, [tenant.email]);
+
+  // Generate application activity logs
+  const applicationActivityLogs = React.useMemo(() => {
+    return tenantApplications.flatMap(app => {
+      const logs = [];
+
+      // Application submitted
+      logs.push({
+        id: `app-submitted-${app.id}`,
+        logType: 'application' as const,
+        date: app.submittedDate || app.createdAt || new Date().toISOString(),
+        content: `Application ${app.id} submitted for ${app.propertyName || app.propertyCode || 'property'}`,
+        createdBy: 'System',
+        type: 'Application Submitted',
+        metadata: {
+          applicationId: app.id,
+          status: app.status,
+          paymentStatus: app.paymentStatus,
+          applicationFee: app.applicationFee
+        }
+      });
+
+      // Status changes
+      if (app.status !== 'New') {
+        logs.push({
+          id: `app-status-${app.id}`,
+          logType: 'application' as const,
+          date: app.updatedAt || new Date().toISOString(),
+          content: `Application ${app.id} status changed to ${app.status}`,
+          createdBy: 'System',
+          type: 'Status Update',
+          metadata: {
+            applicationId: app.id,
+            status: app.status,
+            paymentStatus: app.paymentStatus
+          }
+        });
+      }
+
+      // Payment status updates
+      if (app.paymentStatus === 'Paid') {
+        logs.push({
+          id: `app-payment-${app.id}`,
+          logType: 'application' as const,
+          date: app.paymentDate || app.updatedAt || new Date().toISOString(),
+          content: `Payment of $${app.applicationFee} received for application ${app.id}`,
+          createdBy: 'System',
+          type: 'Payment Received',
+          metadata: {
+            applicationId: app.id,
+            amount: app.applicationFee,
+            paymentMethod: app.paymentMethod,
+            paymentStatus: app.paymentStatus
+          }
+        });
+      }
+
+      return logs;
+    });
+  }, [tenantApplications]);
+
   const allLogs = [
     ...callLogs.map(log => ({ ...log, logType: 'call' as const })),
     ...messageLogs.map(log => ({ ...log, logType: 'message' as const })),
     ...notes.map(note => ({ ...note, logType: 'note' as const })),
     ...workOrders.map(wo => ({ ...wo, logType: 'workorder' as const, date: wo.createdDate, content: wo.description })),
-    ...applicationUpdates.map(app => ({ ...app, logType: 'application' as const, content: app.details, createdBy: app.updatedBy })),
+    // Use real-time application data instead of static applicationUpdates
+    ...applicationActivityLogs,
     // Add real activities from the activity tracking service
     ...tenantActivities.map(activity => ({
       id: activity.id,
