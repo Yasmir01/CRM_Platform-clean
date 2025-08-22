@@ -179,3 +179,6 @@ function CrmStatCard({
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(CrmStatCard);
