@@ -35,6 +35,9 @@ import {
   LinearProgress,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import WorkOrderDialog from "../components/WorkOrderDialog";
+import { useCrmData } from "../contexts/CrmDataContext";
+import { useActivityTracking } from "../hooks/useActivityTracking";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -149,6 +152,9 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const [openMessageDialog, setOpenMessageDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [openWorkOrderDialog, setOpenWorkOrderDialog] = React.useState(false);
+
+  const { refreshActivities } = useActivityTracking();
 
   // Mock service provider data
   const provider = {
