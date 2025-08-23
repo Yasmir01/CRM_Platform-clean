@@ -361,7 +361,14 @@ export default function Applications() {
       LocalStorageService.saveApplications(normalized);
     } else {
       // No saved applications, use mock data including test
-      setApplications([...mockApplications, testApplication]);
+      // Create a temporary normalizeApp function since savedTemplates is available here
+      const tempNormalizeApp = (app: any) => {
+        const template = savedTemplates.find(t => t.id === app.templateId);
+        const applicantName = normalizeApplicantName(app.applicantName, app.formData, "Unknown Applicant", template?.formFields);
+        return { ...app, applicantName };
+      };
+      const normalizedTestApp = tempNormalizeApp(testApplication);
+      setApplications([...mockApplications, normalizedTestApp]);
     }
   }, []);
 
