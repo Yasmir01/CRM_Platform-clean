@@ -1106,7 +1106,7 @@ export default function ApplicationFormRenderer({
         onClose={() => setShowPaymentDialog(false)}
         applicationFee={template.applicationFee || 0}
         paymentMethods={template.paymentMethods || []}
-        applicantName={getDisplayApplicantName(formData, "Applicant")}
+        applicantName={getDisplayApplicantName(formData, "Applicant", template.formFields)}
         applicationId={`TEMP-${Date.now()}`}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentError={(error) => {
