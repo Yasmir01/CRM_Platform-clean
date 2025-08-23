@@ -350,9 +350,30 @@ export class WorkflowService {
     }
 
     try {
-      // Parse applicant name
-      const [firstName, ...lastNameParts] = application.applicantName.split(' ');
+      // Parse applicant name with safety checks
+    const safeName = (application.applicantName || '').trim();
+
+    // Handle invalid names like "undefined undefined" or empty names
+    if (!safeName || safeName.toLowerCase().includes('undefined') || safeName === 'Unknown Applicant') {
+      // Try to reconstruct from form data
+      const formData = (application as any).formData || {};
+      const reconstructedName = [
+        formData.first_name || formData.firstName,
+        formData.last_name || formData.lastName
+      ].filter(Boolean).join(' ').trim();
+
+      if (reconstructedName) {
+        this.callbacks.logActivity(`Application ${application.id}: Reconstructed name from form data: ${reconstructedName}`);
+        const [firstName, ...lastNameParts] = reconstructedName.split(' ');
+        const lastName = lastNameParts.join(' ') || '';
+      } else {
+        this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - invalid or missing applicant name`);
+        return;
+      }
+    } else {
+      const [firstName, ...lastNameParts] = safeName.split(' ');
       const lastName = lastNameParts.join(' ') || '';
+    }
 
       // Get additional data from form data if available
       const formData = (application as any).formData || {};
