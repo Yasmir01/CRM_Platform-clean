@@ -282,6 +282,10 @@ export default function Applications() {
       const testTemplate = {
         id: "test-template-id",
         name: "Test Template",
+        content: "This is a test template to verify the name extraction fix works with generated field IDs.",
+        variables: ["APPLICANT_NAME", "PROPERTY_ADDRESS", "APPLICATION_FEE"],
+        usageCount: 1,
+        lastUsed: new Date().toISOString(),
         formFields: [
           { id: "field_1700000000000_1_abc", label: "First Name", type: "text", required: true },
           { id: "field_1700000000000_2_def", label: "Last Name", type: "text", required: true },
