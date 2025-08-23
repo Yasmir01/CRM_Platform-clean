@@ -275,6 +275,24 @@ export default function Applications() {
     // Load templates and applications from localStorage
     const savedTemplates = LocalStorageService.getTemplates();
     const savedApplications = LocalStorageService.getApplications();
+
+    // Add test template if it doesn't exist (to support test application)
+    const testTemplateExists = savedTemplates.some(t => t.id === "test-template-id");
+    if (!testTemplateExists) {
+      const testTemplate = {
+        id: "test-template-id",
+        name: "Test Template",
+        formFields: [
+          { id: "field_1700000000000_1_abc", label: "First Name", type: "text", required: true },
+          { id: "field_1700000000000_2_def", label: "Last Name", type: "text", required: true },
+          { id: "field_1700000000000_3_ghi", label: "Email", type: "email", required: true },
+          { id: "field_1700000000000_4_jkl", label: "Phone", type: "phone", required: true }
+        ]
+      };
+      savedTemplates.push(testTemplate);
+      LocalStorageService.saveTemplates(savedTemplates);
+    }
+
     setTemplates(savedTemplates);
     if (savedApplications.length > 0) {
       // Normalize applications to ensure consistent data structure
