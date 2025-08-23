@@ -9,10 +9,12 @@ export const initializeErrorHandling = () => {
 
     // Enhanced MetaMask error detection patterns
     const isMetaMaskError = (
-      // Direct MetaMask references
+      // Direct MetaMask references (including prefixed variants)
       errorMessage.includes('Failed to connect to MetaMask') ||
       errorMessage.includes('MetaMask') ||
       errorMessage.includes('metamask') ||
+      /s:\s*Failed to connect to MetaMask/i.test(errorMessage) || // Handles "s: Failed to connect to MetaMask"
+      /[a-z]:\s*.*MetaMask/i.test(errorMessage) || // Handles any "x: ...MetaMask" pattern
       // Web3/Ethereum references
       errorMessage.includes('ethereum') ||
       errorMessage.includes('web3') ||
@@ -21,6 +23,7 @@ export const initializeErrorHandling = () => {
       errorMessage.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
       errorStack.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
       errorStack.includes('/scripts/inpage.js') ||
+      errorStack.includes('/scripts/contentscript.js') ||
       // Error codes
       event.reason?.code === 4001 || // User rejected request
       event.reason?.code === -32002 || // Request pending
@@ -33,7 +36,10 @@ export const initializeErrorHandling = () => {
       errorMessage.includes('provider') ||
       errorMessage.includes('injected') ||
       errorMessage.includes('wallet_') ||
-      errorMessage.includes('eth_')
+      errorMessage.includes('eth_') ||
+      // Additional MetaMask specific patterns
+      errorMessage.includes('connect') && errorMessage.includes('wallet') ||
+      errorMessage.includes('Object.connect') && errorStack.includes('chrome-extension')
     );
 
     if (isMetaMaskError) {
