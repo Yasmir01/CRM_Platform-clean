@@ -321,9 +321,7 @@ export default function Applications() {
 
       // Combine and deduplicate applications by ID to prevent duplicate keys
       const allApplications = [...mockApplications, ...normalized];
-      const uniqueApplications = allApplications.filter((app, index, self) =>
-        index === self.findIndex(a => a.id === app.id)
-      );
+      const uniqueApplications = deduplicateApplications(allApplications);
 
       setApplications(uniqueApplications);
 
