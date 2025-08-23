@@ -110,9 +110,10 @@ export const initializeErrorHandling = () => {
     }
   });
 
-  // Enhanced MetaMask provider disabling
+  // Ultimate MetaMask provider disabling
   const disableMetaMaskProvider = () => {
     if (typeof window !== 'undefined' && window.ethereum) {
+      console.info('[CRM] Disabling MetaMask provider to prevent connection attempts');
       try {
         // Disable auto-refresh and auto-connection features
         window.ethereum.autoRefreshOnNetworkChange = false;
@@ -128,22 +129,49 @@ export const initializeErrorHandling = () => {
           window.ethereum._metamask.isConnected = () => false;
         }
 
-        // Override request method to prevent connection attempts
+        // Override ALL methods that could trigger connections
         const originalRequest = window.ethereum.request;
         if (originalRequest) {
           window.ethereum.request = async (args: any) => {
-            // Block wallet connection requests
+            console.warn('[CRM] Blocked MetaMask request:', args.method);
+            // Block ALL wallet connection requests
             if (args.method === 'eth_requestAccounts' ||
                 args.method === 'wallet_requestPermissions' ||
-                args.method === 'eth_accounts') {
-              throw new Error('Wallet connection disabled for this application');
+                args.method === 'eth_accounts' ||
+                args.method === 'wallet_enable' ||
+                args.method === 'eth_enable' ||
+                args.method.startsWith('eth_') ||
+                args.method.startsWith('wallet_')) {
+              const error = new Error('Wallet connection disabled for this application');
+              error.code = 4100; // Use MetaMask error code
+              throw error;
             }
             return originalRequest.call(window.ethereum, args);
           };
         }
 
+        // Override connect method if it exists
+        if (window.ethereum.connect) {
+          window.ethereum.connect = async () => {
+            console.warn('[CRM] Blocked MetaMask connect() call');
+            const error = new Error('Wallet connection disabled for this application');
+            error.code = 4100;
+            throw error;
+          };
+        }
+
+        // Disable enable method if it exists
+        if (window.ethereum.enable) {
+          window.ethereum.enable = async () => {
+            console.warn('[CRM] Blocked MetaMask enable() call');
+            const error = new Error('Wallet connection disabled for this application');
+            error.code = 4100;
+            throw error;
+          };
+        }
+
       } catch (error) {
-        // Silently ignore any errors when disabling MetaMask features
+        console.debug('[CRM] Error while disabling MetaMask provider:', error);
       }
     }
   };
