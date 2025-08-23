@@ -353,7 +353,7 @@ export default function Applications() {
       };
 
       const normalized = savedApplications.map(normalizeApp);
-      setApplications([...mockApplications, ...normalized]);
+      setApplications([...mockApplications, testApplication, ...normalized]);
 
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
