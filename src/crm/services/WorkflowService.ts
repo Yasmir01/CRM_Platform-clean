@@ -352,6 +352,8 @@ export class WorkflowService {
     try {
       // Parse applicant name with safety checks
     const safeName = (application.applicantName || '').trim();
+    let firstName = '';
+    let lastName = '';
 
     // Handle invalid names like "undefined undefined" or empty names
     if (!safeName || safeName.toLowerCase().includes('undefined') || safeName === 'Unknown Applicant') {
@@ -364,15 +366,17 @@ export class WorkflowService {
 
       if (reconstructedName) {
         this.callbacks.logActivity(`Application ${application.id}: Reconstructed name from form data: ${reconstructedName}`);
-        const [firstName, ...lastNameParts] = reconstructedName.split(' ');
-        const lastName = lastNameParts.join(' ') || '';
+        const nameParts = reconstructedName.split(' ');
+        firstName = nameParts[0] || '';
+        lastName = nameParts.slice(1).join(' ') || '';
       } else {
         this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - invalid or missing applicant name`);
         return;
       }
     } else {
-      const [firstName, ...lastNameParts] = safeName.split(' ');
-      const lastName = lastNameParts.join(' ') || '';
+      const nameParts = safeName.split(' ');
+      firstName = nameParts[0] || '';
+      lastName = nameParts.slice(1).join(' ') || '';
     }
 
       // Get additional data from form data if available
