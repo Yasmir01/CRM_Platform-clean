@@ -254,7 +254,9 @@ export default function Applications() {
     if (savedApplications.length > 0) {
       // Normalize applications to ensure consistent data structure
       const normalizeApp = (app: any) => {
-        const applicantName = normalizeApplicantName(app.applicantName, app.formData);
+        // Find template to get form fields for better name extraction
+        const template = savedTemplates.find(t => t.id === app.templateId);
+        const applicantName = normalizeApplicantName(app.applicantName, app.formData, "Unknown Applicant", template?.formFields);
 
         const applicantEmail =
           app.applicantEmail ||
