@@ -184,6 +184,7 @@ export const initializeErrorHandling = () => {
   Object.defineProperty(window, 'ethereum', {
     get: () => ethProvider,
     set: (value) => {
+      console.warn('[CRM] MetaMask provider injection detected and will be disabled');
       ethProvider = value;
       if (value) {
         // Small delay to allow the provider to initialize before disabling
@@ -192,6 +193,46 @@ export const initializeErrorHandling = () => {
     },
     configurable: true
   });
+
+  // Proactive Promise monitoring to catch MetaMask connection attempts
+  const originalPromiseConstructor = Promise;
+  const originalThen = Promise.prototype.then;
+  const originalCatch = Promise.prototype.catch;
+
+  Promise.prototype.then = function(onFulfilled, onRejected) {
+    const wrappedRejected = onRejected ? function(reason: any) {
+      // Check if this is a MetaMask error we should handle
+      const message = (reason && (reason.message || reason.toString())) || '';
+      if (typeof message === 'string' && (
+        message.includes('Failed to connect to MetaMask') ||
+        message.includes('MetaMask') ||
+        message.match(/^s:\s*Failed to connect to MetaMask/i)
+      )) {
+        console.warn('[CRM] Intercepted MetaMask promise rejection:', message.substring(0, 80));
+        return Promise.resolve(); // Convert rejection to resolution
+      }
+      return onRejected ? onRejected(reason) : Promise.reject(reason);
+    } : undefined;
+
+    return originalThen.call(this, onFulfilled, wrappedRejected);
+  };
+
+  Promise.prototype.catch = function(onRejected) {
+    const wrappedRejected = function(reason: any) {
+      const message = (reason && (reason.message || reason.toString())) || '';
+      if (typeof message === 'string' && (
+        message.includes('Failed to connect to MetaMask') ||
+        message.includes('MetaMask') ||
+        message.match(/^s:\s*Failed to connect to MetaMask/i)
+      )) {
+        console.warn('[CRM] Intercepted MetaMask promise catch:', message.substring(0, 80));
+        return Promise.resolve(); // Convert rejection to resolution
+      }
+      return onRejected ? onRejected(reason) : Promise.reject(reason);
+    };
+
+    return originalCatch.call(this, wrappedRejected);
+  };
 };
 
 // Type declaration for TypeScript
