@@ -254,13 +254,7 @@ export default function Applications() {
     if (savedApplications.length > 0) {
       // Normalize applications to ensure consistent data structure
       const normalizeApp = (app: any) => {
-        const applicantName =
-          app.applicantName ||
-          app.formData?.applicant_name ||
-          ((app.formData?.first_name || app.formData?.last_name)
-            ? `${app.formData?.first_name || ''} ${app.formData?.last_name || ''}`.trim()
-            : undefined) ||
-          'Unknown Applicant';
+        const applicantName = normalizeApplicantName(app.applicantName, app.formData);
 
         const applicantEmail =
           app.applicantEmail ||

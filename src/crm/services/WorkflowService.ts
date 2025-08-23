@@ -350,34 +350,19 @@ export class WorkflowService {
     }
 
     try {
-      // Parse applicant name with safety checks
-    const safeName = (application.applicantName || '').trim();
-    let firstName = '';
-    let lastName = '';
+      // Get normalized applicant name using centralized utility
+    const normalizedName = normalizeApplicantName(application.applicantName, (application as any).formData);
 
-    // Handle invalid names like "undefined undefined" or empty names
-    if (!safeName || safeName.toLowerCase().includes('undefined') || safeName === 'Unknown Applicant') {
-      // Try to reconstruct from form data
-      const formData = (application as any).formData || {};
-      const reconstructedName = [
-        formData.first_name || formData.firstName,
-        formData.last_name || formData.lastName
-      ].filter(Boolean).join(' ').trim();
-
-      if (reconstructedName) {
-        this.callbacks.logActivity(`Application ${application.id}: Reconstructed name from form data: ${reconstructedName}`);
-        const nameParts = reconstructedName.split(' ');
-        firstName = nameParts[0] || '';
-        lastName = nameParts.slice(1).join(' ') || '';
-      } else {
-        this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - invalid or missing applicant name`);
-        return;
-      }
-    } else {
-      const nameParts = safeName.split(' ');
-      firstName = nameParts[0] || '';
-      lastName = nameParts.slice(1).join(' ') || '';
+    // Skip if we still can't get a valid name
+    if (!normalizedName || normalizedName === 'Unknown Applicant') {
+      this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - missing or invalid applicant name`);
+      return;
     }
+
+    // Parse the normalized name
+    const nameParts = normalizedName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
 
       // Get additional data from form data if available
       const formData = (application as any).formData || {};
