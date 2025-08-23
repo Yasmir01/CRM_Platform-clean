@@ -52,7 +52,10 @@ import TermsAndConditions from "./TermsAndConditions";
 import PhoneNumberField, { isValidPhoneNumber } from "./PhoneNumberField";
 import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { getDisplayApplicantName } from "../utils/nameUtils";
 import { useAutoSave } from "../hooks/useAutoSave";
+import EnhancedFileUploadField from "./EnhancedFileUploadField";
+import { StoredFile } from "../services/FileStorageService";
 
 interface FormField {
   id: string;
@@ -101,7 +104,7 @@ interface ApplicationFormRendererProps {
 
 interface FileUpload {
   fieldId: string;
-  files: File[];
+  files: StoredFile[];
 }
 
 export default function ApplicationFormRenderer({
@@ -262,24 +265,13 @@ export default function ApplicationFormRenderer({
     }
   };
 
-  const handleFileUpload = (fieldId: string, files: File[]) => {
+  const handleFileUpload = (fieldId: string, files: StoredFile[]) => {
     setFileUploads(prev => {
       const existing = prev.find(upload => upload.fieldId === fieldId);
       if (existing) {
-        // For multiple file uploads, append new files to existing ones
-        // For single file uploads, replace the existing file
-        const field = formFields.find(f => f.id === fieldId);
-        const maxFiles = field?.maxFiles || 5;
-
-        let updatedFiles = files;
-        if (maxFiles > 1) {
-          // Append new files to existing, but respect maxFiles limit
-          updatedFiles = [...existing.files, ...files].slice(0, maxFiles);
-        }
-
         return prev.map(upload =>
           upload.fieldId === fieldId
-            ? { ...upload, files: updatedFiles }
+            ? { ...upload, files }
             : upload
         );
       }
@@ -378,7 +370,7 @@ export default function ApplicationFormRenderer({
         paymentData,
         status: "New",
         submittedDate: new Date().toISOString(),
-        applicantName: formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Unknown Applicant",
+        applicantName: getDisplayApplicantName(formData, "Unknown Applicant", template.formFields),
         applicantEmail: formData["email"] || formData["applicant_email"] || "",
         applicantPhone: formData["phone"] || formData["applicant_phone"] || "",
         applicationFee: template.applicationFee || 0,
@@ -388,7 +380,13 @@ export default function ApplicationFormRenderer({
 
       // Save to localStorage for demo purposes
       const existingApplications = LocalStorageService.getApplications();
-      LocalStorageService.saveApplications([...existingApplications, applicationData]);
+
+      // Filter out mock applications to prevent duplicates (mock apps have IDs starting with "APP-00")
+      const nonMockApplications = existingApplications.filter(app =>
+        !app.id.startsWith("APP-00")
+      );
+
+      LocalStorageService.saveApplications([...nonMockApplications, applicationData]);
 
       // Clear all drafts for this form since it was successfully submitted
       const savedDrafts = LocalStorageService.getFormData();
@@ -613,10 +611,12 @@ export default function ApplicationFormRenderer({
         );
 
       case "file_upload":
+        const currentFiles = fileUploads.find(upload => upload.fieldId === field.id)?.files || [];
         return (
-          <FileUploadField
+          <EnhancedFileUploadField
             key={field.id}
             field={field}
+            currentFiles={currentFiles}
             onFilesChange={(files) => handleFileUpload(field.id, files)}
             error={error}
           />
@@ -687,80 +687,7 @@ export default function ApplicationFormRenderer({
     }
   };
 
-  const FileUploadField = ({ field, onFilesChange, error }: { field: FormField, onFilesChange: (files: File[]) => void, error?: string }) => {
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-      accept: field.fileTypes ? field.fileTypes.reduce((acc, type) => {
-        acc[`.${type}`] = [];
-        return acc;
-      }, {} as any) : undefined,
-      maxFiles: field.maxFiles || 5,
-      maxSize: (field.maxFileSize || 10) * 1024 * 1024, // Convert MB to bytes
-      onDrop: (files) => {
-        onFilesChange(files);
-      }
-    });
-
-    // Get the current saved files for this field from fileUploads state
-    const currentFiles = fileUploads.find(upload => upload.fieldId === field.id)?.files || [];
-
-    return (
-      <Box key={field.id} sx={{ my: 2 }}>
-        <Typography variant="body1" gutterBottom>
-          {field.label} {field.required && "*"}
-        </Typography>
-
-        <Paper
-          {...getRootProps()}
-          sx={{
-            p: 3,
-            border: "2px dashed",
-            borderColor: error ? "error.main" : isDragActive ? "primary.main" : "grey.300",
-            textAlign: "center",
-            cursor: "pointer",
-            bgcolor: isDragActive ? "action.hover" : "background.paper",
-            "&:hover": { bgcolor: "action.hover" }
-          }}
-        >
-          <input {...getInputProps()} />
-          <UploadIcon sx={{ fontSize: 48, color: "text.secondary", mb: 1 }} />
-          <Typography color="text.secondary">
-            {isDragActive ? "Drop files here..." : "Drag & drop files here or click to browse"}
-          </Typography>
-          <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-            {field.fileTypes && `Accepted: ${field.fileTypes.join(", ")}`}
-            {field.maxFiles && ` • Max ${field.maxFiles} files`}
-            {field.maxFileSize && ` • Max ${field.maxFileSize}MB per file`}
-          </Typography>
-        </Paper>
-
-        {currentFiles.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2" gutterBottom>Uploaded Files:</Typography>
-            {currentFiles.map((file, index) => (
-              <Chip
-                key={index}
-                icon={<AttachFileIcon />}
-                label={`${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`}
-                variant="outlined"
-                sx={{ mr: 1, mb: 1 }}
-                onDelete={() => {
-                  // Remove this file from the uploaded files
-                  const updatedFiles = currentFiles.filter((_, i) => i !== index);
-                  onFilesChange(updatedFiles);
-                }}
-              />
-            ))}
-          </Box>
-        )}
-
-        {(error || field.description) && (
-          <Typography variant="caption" color={error ? "error" : "text.secondary"} sx={{ mt: 1, display: "block" }}>
-            {error || field.description}
-          </Typography>
-        )}
-      </Box>
-    );
-  };
+  // FileUploadField component replaced by EnhancedFileUploadField
 
   const getCurrentStepContent = () => {
     if (currentStep < fieldsBySections.length) {
@@ -1105,7 +1032,7 @@ export default function ApplicationFormRenderer({
         onClose={() => setShowPaymentDialog(false)}
         applicationFee={template.applicationFee || 0}
         paymentMethods={template.paymentMethods || []}
-        applicantName={formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Applicant"}
+        applicantName={getDisplayApplicantName(formData, "Applicant", template.formFields)}
         applicationId={`TEMP-${Date.now()}`}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentError={(error) => {

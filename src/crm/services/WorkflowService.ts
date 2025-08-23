@@ -1,4 +1,5 @@
 import TransUnionService, { CreditReportRequest, BackgroundCheckRequest } from './TransUnionService';
+import { normalizeApplicantName } from '../utils/nameUtils';
 
 interface Application {
   id: string;
@@ -350,9 +351,37 @@ export class WorkflowService {
     }
 
     try {
-      // Parse applicant name
-      const [firstName, ...lastNameParts] = application.applicantName.split(' ');
-      const lastName = lastNameParts.join(' ') || '';
+      // Get template for better name extraction if available
+      const templateId = (application as any).templateId;
+      let template = null;
+      if (templateId) {
+        try {
+          const { LocalStorageService } = await import('./LocalStorageService');
+          const templates = LocalStorageService.getTemplates();
+          template = templates.find(t => t.id === templateId);
+        } catch (error) {
+          console.warn('Could not load template for name extraction:', error);
+        }
+      }
+
+      // Get normalized applicant name using centralized utility
+      const normalizedName = normalizeApplicantName(
+        application.applicantName,
+        (application as any).formData,
+        'Unknown Applicant',
+        template?.formFields
+      );
+
+    // Skip if we still can't get a valid name
+    if (!normalizedName || normalizedName === 'Unknown Applicant') {
+      this.callbacks.logActivity(`TransUnion integration skipped for application ${application.id} - missing or invalid applicant name`);
+      return;
+    }
+
+    // Parse the normalized name
+    const nameParts = normalizedName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
 
       // Get additional data from form data if available
       const formData = (application as any).formData || {};

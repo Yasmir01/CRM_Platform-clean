@@ -1150,7 +1150,7 @@ export default function Templates() {
 
   const totalTemplates = templates.length;
   const activeTemplates = templates.filter(t => t.status === "Active").length;
-  const totalUsage = templates.reduce((sum, t) => sum + t.usageCount, 0);
+  const totalUsage = templates.reduce((sum, t) => sum + (t.usageCount || 0), 0);
   const avgUsage = Math.round(totalUsage / templates.length) || 0;
 
   return (
@@ -1351,30 +1351,41 @@ export default function Templates() {
                 )}
 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {template.content.substring(0, 100)}...
+                  {template.content ? template.content.substring(0, 100) + '...' : 'No content available'}
                 </Typography>
 
                 <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {template.variables.slice(0, 3).map((variable) => (
+                  {template.variables && template.variables.length > 0 ? (
+                    <>
+                      {template.variables.slice(0, 3).map((variable) => (
+                        <Chip
+                          key={variable}
+                          label={`{${variable}}`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      ))}
+                      {template.variables.length > 3 && (
+                        <Chip
+                          label={`+${template.variables.length - 3} more`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </>
+                  ) : (
                     <Chip
-                      key={variable}
-                      label={`{${variable}}`}
+                      label="No variables"
                       size="small"
                       variant="outlined"
-                    />
-                  ))}
-                  {template.variables.length > 3 && (
-                    <Chip
-                      label={`+${template.variables.length - 3} more`}
-                      size="small"
-                      variant="outlined"
+                      color="default"
                     />
                   )}
                 </Stack>
 
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="caption" color="text.secondary">
-                    Used {template.usageCount} times
+                    Used {template.usageCount || 0} times
                   </Typography>
                   {template.lastUsed && (
                     <Typography variant="caption" color="text.secondary" display="block">

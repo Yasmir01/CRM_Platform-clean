@@ -3,6 +3,8 @@ import WorkflowService from "../services/WorkflowService";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
 import ApplicationFormRenderer from "../components/ApplicationFormRenderer";
+import { normalizeApplicantName } from "../utils/nameUtils";
+import { FileStorageService, StoredFile } from "../services/FileStorageService";
 import {
   Box,
   Typography,
@@ -195,6 +197,13 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+// Utility function to deduplicate applications by ID
+const deduplicateApplications = (applications: Application[]): Application[] => {
+  return applications.filter((app, index, self) =>
+    index === self.findIndex(a => a.id === app.id)
+  );
+};
+
 export default function Applications() {
   const { state, addTenant, addActivity } = useCrmData();
   const { properties } = state;
@@ -253,13 +262,9 @@ export default function Applications() {
     if (savedApplications.length > 0) {
       // Normalize applications to ensure consistent data structure
       const normalizeApp = (app: any) => {
-        const applicantName =
-          app.applicantName ||
-          app.formData?.applicant_name ||
-          ((app.formData?.first_name || app.formData?.last_name)
-            ? `${app.formData?.first_name || ''} ${app.formData?.last_name || ''}`.trim()
-            : undefined) ||
-          'Unknown Applicant';
+        // Find template to get form fields for better name extraction
+        const template = savedTemplates.find(t => t.id === app.templateId);
+        const applicantName = normalizeApplicantName(app.applicantName, app.formData, "Unknown Applicant", template?.formFields);
 
         const applicantEmail =
           app.applicantEmail ||
@@ -313,13 +318,20 @@ export default function Applications() {
       };
 
       const normalized = savedApplications.map(normalizeApp);
-      setApplications([...mockApplications, ...normalized]);
+
+      // Combine and deduplicate applications by ID to prevent duplicate keys
+      const allApplications = [...mockApplications, ...normalized];
+      const uniqueApplications = deduplicateApplications(allApplications);
+
+      setApplications(uniqueApplications);
 
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
     } else {
       // No saved applications, use mock data
-      setApplications(mockApplications);
+      // Deduplicate in case there are any duplicate IDs in mock data
+      const uniqueMockApplications = deduplicateApplications(mockApplications);
+      setApplications(uniqueMockApplications);
     }
   }, []);
 
@@ -402,10 +414,10 @@ export default function Applications() {
     setSelectedAppForAction(null);
   };
 
-  const getFileIcon = (file: any) => {
+  const getFileIcon = (file: StoredFile | any) => {
     if (!file.type) return <AttachFileIcon />;
 
-    if (file.type.includes('pdf')) return <PictureAsPdfIcon />;
+    if (FileStorageService.isPdfFile(file.type)) return <PictureAsPdfIcon />;
     if (file.type.includes('image')) return <ImageIcon />;
     if (file.type.includes('document') || file.type.includes('text')) return <ArticleIcon />;
     return <AttachFileIcon />;
@@ -416,26 +428,24 @@ export default function Applications() {
     setFilePreviewOpen(true);
   };
 
-  const handleFileDownload = (file: any) => {
-    // Create a mock download since we don't have actual file data
-    // In a real application, this would download the actual file
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Show a notification that this is a demo
-    alert(`Download initiated for: ${file.name}\n\nNote: This is a demo - no actual file will be downloaded.`);
+  const handleFileDownload = (file: StoredFile | any) => {
+    // Use FileStorageService if it's a StoredFile, otherwise fallback to mock
+    if (file.dataUrl) {
+      FileStorageService.downloadFile(file as StoredFile);
+    } else {
+      // Fallback for legacy file format
+      const link = document.createElement('a');
+      link.href = '#';
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      alert(`Download initiated for: ${file.name}\n\nNote: This is a demo - no actual file will be downloaded.`);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return FileStorageService.formatFileSize(bytes);
   };
 
   const toggleFileExpansion = (fileId: string) => {
@@ -485,31 +495,50 @@ export default function Applications() {
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
               Image Preview
             </Typography>
-            <Box
-              sx={{
-                width: '100%',
-                maxWidth: 400,
-                height: 200,
-                border: '2px dashed',
-                borderColor: 'grey.300',
-                borderRadius: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'white',
-                margin: '0 auto'
-              }}
-            >
-              <Stack spacing={1} alignItems="center">
-                <ImageIcon sx={{ fontSize: 32, color: 'grey.400' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {file.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Image content would be displayed here
-                </Typography>
-              </Stack>
-            </Box>
+            {file.dataUrl ? (
+              // Show actual image if we have the dataUrl (StoredFile format)
+              <Box
+                component="img"
+                src={file.dataUrl}
+                alt={file.name}
+                sx={{
+                  maxWidth: '100%',
+                  maxHeight: 300,
+                  objectFit: 'contain',
+                  borderRadius: 1,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'white'
+                }}
+              />
+            ) : (
+              // Fallback for legacy format
+              <Box
+                sx={{
+                  width: '100%',
+                  maxWidth: 400,
+                  height: 200,
+                  border: '2px dashed',
+                  borderColor: 'grey.300',
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  bgcolor: 'white',
+                  margin: '0 auto'
+                }}
+              >
+                <Stack spacing={1} alignItems="center">
+                  <ImageIcon sx={{ fontSize: 32, color: 'grey.400' }} />
+                  <Typography variant="body2" color="text.secondary">
+                    {file.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Image content would be displayed here
+                  </Typography>
+                </Stack>
+              </Box>
+            )}
           </Box>
         ) : file.type?.includes('pdf') ? (
           <Box sx={{ textAlign: 'center' }}>
@@ -1314,29 +1343,47 @@ export default function Applications() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Image Preview
                   </Typography>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: 400,
-                      border: '2px dashed',
-                      borderColor: 'grey.300',
-                      borderRadius: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'grey.50'
-                    }}
-                  >
-                    <Stack spacing={2} alignItems="center">
-                      <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
-                      <Typography color="text.secondary">
-                        Image preview would be displayed here
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        In a real application, the actual image would be loaded from storage
-                      </Typography>
-                    </Stack>
-                  </Box>
+                  {selectedFile.dataUrl ? (
+                    // Show actual image if we have the dataUrl (StoredFile format)
+                    <Box
+                      component="img"
+                      src={selectedFile.dataUrl}
+                      alt={selectedFile.name}
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: '70vh',
+                        objectFit: 'contain',
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider'
+                      }}
+                    />
+                  ) : (
+                    // Fallback for legacy format
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: 400,
+                        border: '2px dashed',
+                        borderColor: 'grey.300',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'grey.50'
+                      }}
+                    >
+                      <Stack spacing={2} alignItems="center">
+                        <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+                        <Typography color="text.secondary">
+                          Image preview would be displayed here
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          In a real application, the actual image would be loaded from storage
+                        </Typography>
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
               ) : selectedFile.type?.includes('pdf') ? (
                 <Box>
@@ -1582,8 +1629,8 @@ export default function Applications() {
           propertyAddress="Demo Property Address"
           isOpen={newApplicationDialog}
           onSubmit={(applicationData) => {
-            // Add to applications list
-            setApplications(prev => [...prev, applicationData]);
+            // Add to applications list with deduplication
+            setApplications(prev => deduplicateApplications([...prev, applicationData]));
 
             // Save to localStorage
             const existingApplications = LocalStorageService.getApplications();
