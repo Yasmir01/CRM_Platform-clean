@@ -380,7 +380,13 @@ export default function ApplicationFormRenderer({
 
       // Save to localStorage for demo purposes
       const existingApplications = LocalStorageService.getApplications();
-      LocalStorageService.saveApplications([...existingApplications, applicationData]);
+
+      // Filter out mock applications to prevent duplicates (mock apps have IDs starting with "APP-00")
+      const nonMockApplications = existingApplications.filter(app =>
+        !app.id.startsWith("APP-00")
+      );
+
+      LocalStorageService.saveApplications([...nonMockApplications, applicationData]);
 
       // Clear all drafts for this form since it was successfully submitted
       const savedDrafts = LocalStorageService.getFormData();
