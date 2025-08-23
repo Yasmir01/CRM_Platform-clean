@@ -49,8 +49,18 @@ export const initializeErrorHandling = () => {
       // Optionally log a friendlier message for development
       if (process.env.NODE_ENV === 'development') {
         console.warn('[CRM System] Web3/MetaMask extension activity suppressed - not needed for this application.');
+        console.debug('Suppressed error pattern:', errorMessage.substring(0, 100));
       }
       return;
+    }
+
+    // Debug logging for potential missed MetaMask errors
+    if (process.env.NODE_ENV === 'development') {
+      if (errorMessage.toLowerCase().includes('connect') ||
+          errorMessage.toLowerCase().includes('metamask') ||
+          errorStack.includes('chrome-extension')) {
+        console.warn('[CRM System] Potential unhandled MetaMask error:', errorMessage.substring(0, 100));
+      }
     }
 
     // Allow other unhandled rejections to proceed normally
