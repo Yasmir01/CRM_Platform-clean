@@ -31,3 +31,26 @@ input, textarea, select {
 .draggable-widget.dragging * {
   pointer-events: none;
 }
+
+/* Hide MetaMask and other Web3 wallet UI elements that might be injected */
+[data-testid*="metamask"],
+[id*="metamask"],
+[class*="metamask"],
+[data-testid*="wallet"],
+iframe[src*="chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn"],
+iframe[src*="metamask"],
+.metamask-modal,
+.web3-modal,
+.wallet-connect-modal {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Prevent any floating wallet widgets from appearing */
+body > div[style*="position: fixed"][style*="z-index"],
+body > div[data-testid*="wallet"],
+body > div[class*="metamask"] {
+  display: none !important;
+}
