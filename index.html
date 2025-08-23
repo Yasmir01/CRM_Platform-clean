@@ -5,6 +5,71 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Material UI + TS + Tailwind CSS</title>
+    <!-- Ultra-early MetaMask error prevention - MUST be first script -->
+    <script>
+      (function() {
+        'use strict';
+
+        // Immediately prevent any unhandled rejections
+        const originalAddEventListener = window.addEventListener;
+        const handleError = function(event) {
+          if (event.type === 'unhandledrejection') {
+            const error = event.reason;
+            const message = (error && (error.message || error.toString())) || '';
+
+            // Check for any MetaMask-related patterns
+            if (typeof message === 'string' && (
+              message.includes('MetaMask') ||
+              message.includes('Failed to connect to MetaMask') ||
+              message.match(/^[a-z]:\s*.*Failed to connect to MetaMask/i) ||
+              message.match(/^s:\s*Failed to connect to MetaMask/i) ||
+              message.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+              (error && (error.code === 4001 || error.code === -32002))
+            )) {
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              console.warn('[CRM] MetaMask error blocked early:', message.substring(0, 80));
+              return false;
+            }
+          }
+        };
+
+        // Override addEventListener to catch early handlers
+        window.addEventListener = function(type, listener, options) {
+          if (type === 'unhandledrejection') {
+            const wrappedListener = function(event) {
+              handleError(event);
+              if (typeof listener === 'function') {
+                return listener.call(this, event);
+              }
+            };
+            return originalAddEventListener.call(this, type, wrappedListener, options);
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+
+        // Set up immediate handler
+        window.addEventListener('unhandledrejection', handleError);
+
+        // Also prevent any early MetaMask provider injection
+        Object.defineProperty(window, 'ethereum', {
+          get: function() { return this._ethereum; },
+          set: function(value) {
+            if (value && typeof value === 'object') {
+              console.warn('[CRM] MetaMask provider injection blocked');
+              try {
+                value.autoRefreshOnNetworkChange = false;
+                if (value.removeAllListeners) value.removeAllListeners();
+                if (value._metamask) value._metamask.isUnlocked = () => Promise.resolve(false);
+              } catch (e) {}
+            }
+            this._ethereum = value;
+          },
+          configurable: true
+        });
+      })();
+    </script>
     <!-- Fonts to support Material Design -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
