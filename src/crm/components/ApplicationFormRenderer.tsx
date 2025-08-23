@@ -54,6 +54,8 @@ import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { getDisplayApplicantName } from "../utils/nameUtils";
 import { useAutoSave } from "../hooks/useAutoSave";
+import EnhancedFileUploadField from "./EnhancedFileUploadField";
+import { StoredFile } from "../services/FileStorageService";
 
 interface FormField {
   id: string;
