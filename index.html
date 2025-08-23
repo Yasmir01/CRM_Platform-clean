@@ -19,10 +19,12 @@
         const error = event.reason;
         const message = (error && error.message) || error || '';
 
-        // Catch all MetaMask-related errors
+        // Catch all MetaMask-related errors including prefixed variants
         if (typeof message === 'string' && (
           message.includes('MetaMask') ||
           message.includes('Failed to connect to MetaMask') ||
+          /s:\s*Failed to connect to MetaMask/i.test(message) || // "s: Failed to connect to MetaMask"
+          /[a-z]:\s*.*MetaMask/i.test(message) || // Any "x: ...MetaMask" pattern
           message.includes('ethereum') ||
           message.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
           (error && error.code === 4001) || // User rejected
