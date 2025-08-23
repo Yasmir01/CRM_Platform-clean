@@ -5,22 +5,44 @@ export const initializeErrorHandling = () => {
   window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
     const error = event.reason;
     const errorMessage = error?.message || error?.toString() || '';
+    const errorStack = error?.stack || '';
 
-    // Check if this is a MetaMask-related error
-    if (
+    // Enhanced MetaMask error detection patterns
+    const isMetaMaskError = (
+      // Direct MetaMask references
       errorMessage.includes('Failed to connect to MetaMask') ||
       errorMessage.includes('MetaMask') ||
+      errorMessage.includes('metamask') ||
+      // Web3/Ethereum references
       errorMessage.includes('ethereum') ||
+      errorMessage.includes('web3') ||
+      errorMessage.includes('wallet') ||
+      // Chrome extension references
+      errorMessage.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+      errorStack.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+      errorStack.includes('/scripts/inpage.js') ||
+      // Error codes
       event.reason?.code === 4001 || // User rejected request
       event.reason?.code === -32002 || // Request pending
-      errorMessage.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn')
-    ) {
+      event.reason?.code === -32603 || // Internal error
+      event.reason?.code === 4100 || // Unauthorized
+      event.reason?.code === 4200 || // Unsupported method
+      event.reason?.code === 4900 || // Disconnected
+      event.reason?.code === 4901 || // Chain disconnected
+      // Generic wallet connection errors
+      errorMessage.includes('provider') ||
+      errorMessage.includes('injected') ||
+      errorMessage.includes('wallet_') ||
+      errorMessage.includes('eth_')
+    );
+
+    if (isMetaMaskError) {
       // Prevent the unhandled rejection from showing in console
       event.preventDefault();
-      
+
       // Optionally log a friendlier message for development
       if (process.env.NODE_ENV === 'development') {
-        console.warn('[CRM System] MetaMask extension detected but not needed for this application.');
+        console.warn('[CRM System] Web3/MetaMask extension activity suppressed - not needed for this application.');
       }
       return;
     }
