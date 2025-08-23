@@ -197,6 +197,13 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+// Utility function to deduplicate applications by ID
+const deduplicateApplications = (applications: Application[]): Application[] => {
+  return applications.filter((app, index, self) =>
+    index === self.findIndex(a => a.id === app.id)
+  );
+};
+
 export default function Applications() {
   const { state, addTenant, addActivity } = useCrmData();
   const { properties } = state;
