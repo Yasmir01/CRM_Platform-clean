@@ -1150,7 +1150,7 @@ export default function Templates() {
 
   const totalTemplates = templates.length;
   const activeTemplates = templates.filter(t => t.status === "Active").length;
-  const totalUsage = templates.reduce((sum, t) => sum + t.usageCount, 0);
+  const totalUsage = templates.reduce((sum, t) => sum + (t.usageCount || 0), 0);
   const avgUsage = Math.round(totalUsage / templates.length) || 0;
 
   return (
@@ -1385,7 +1385,7 @@ export default function Templates() {
 
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="caption" color="text.secondary">
-                    Used {template.usageCount} times
+                    Used {template.usageCount || 0} times
                   </Typography>
                   {template.lastUsed && (
                     <Typography variant="caption" color="text.secondary" display="block">
