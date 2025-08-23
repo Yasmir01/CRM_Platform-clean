@@ -605,10 +605,12 @@ export default function ApplicationFormRenderer({
         );
 
       case "file_upload":
+        const currentFiles = fileUploads.find(upload => upload.fieldId === field.id)?.files || [];
         return (
-          <FileUploadField
+          <EnhancedFileUploadField
             key={field.id}
             field={field}
+            currentFiles={currentFiles}
             onFilesChange={(files) => handleFileUpload(field.id, files)}
             error={error}
           />
