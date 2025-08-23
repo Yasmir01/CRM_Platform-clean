@@ -1,11 +1,23 @@
 // Global error handling for preventing MetaMask connection errors in non-Web3 applications
 
 export const initializeErrorHandling = () => {
+  // Log initialization for debugging
+  console.info('[CRM] Initializing enhanced MetaMask error handling...');
+
   // Handle unhandled promise rejections (like MetaMask connection failures)
   window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
     const error = event.reason;
     const errorMessage = error?.message || error?.toString() || '';
     const errorStack = error?.stack || '';
+
+    // Log all unhandled rejections in development for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('[CRM] Unhandled rejection detected:', {
+        message: errorMessage.substring(0, 100),
+        hasStack: !!errorStack,
+        stackPreview: errorStack.substring(0, 100)
+      });
+    }
 
     // Enhanced MetaMask error detection patterns
     const isMetaMaskError = (
