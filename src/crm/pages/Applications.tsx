@@ -1329,29 +1329,47 @@ export default function Applications() {
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Image Preview
                   </Typography>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: 400,
-                      border: '2px dashed',
-                      borderColor: 'grey.300',
-                      borderRadius: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      bgcolor: 'grey.50'
-                    }}
-                  >
-                    <Stack spacing={2} alignItems="center">
-                      <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
-                      <Typography color="text.secondary">
-                        Image preview would be displayed here
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        In a real application, the actual image would be loaded from storage
-                      </Typography>
-                    </Stack>
-                  </Box>
+                  {selectedFile.dataUrl ? (
+                    // Show actual image if we have the dataUrl (StoredFile format)
+                    <Box
+                      component="img"
+                      src={selectedFile.dataUrl}
+                      alt={selectedFile.name}
+                      sx={{
+                        maxWidth: '100%',
+                        maxHeight: '70vh',
+                        objectFit: 'contain',
+                        borderRadius: 1,
+                        border: '1px solid',
+                        borderColor: 'divider'
+                      }}
+                    />
+                  ) : (
+                    // Fallback for legacy format
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: 400,
+                        border: '2px dashed',
+                        borderColor: 'grey.300',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'grey.50'
+                      }}
+                    >
+                      <Stack spacing={2} alignItems="center">
+                        <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
+                        <Typography color="text.secondary">
+                          Image preview would be displayed here
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          In a real application, the actual image would be loaded from storage
+                        </Typography>
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
               ) : selectedFile.type?.includes('pdf') ? (
                 <Box>
