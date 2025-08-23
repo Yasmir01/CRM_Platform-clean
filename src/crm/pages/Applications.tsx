@@ -358,8 +358,8 @@ export default function Applications() {
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
     } else {
-      // No saved applications, use mock data
-      setApplications(mockApplications);
+      // No saved applications, use mock data including test
+      setApplications([...mockApplications, testApplication]);
     }
   }, []);
 
