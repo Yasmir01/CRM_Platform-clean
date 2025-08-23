@@ -324,7 +324,11 @@ export default function Applications() {
       LocalStorageService.saveApplications(normalized);
     } else {
       // No saved applications, use mock data
-      setApplications(mockApplications);
+      // Deduplicate in case there are any duplicate IDs in mock data
+      const uniqueMockApplications = mockApplications.filter((app, index, self) =>
+        index === self.findIndex(a => a.id === app.id)
+      );
+      setApplications(uniqueMockApplications);
     }
   }, []);
 
