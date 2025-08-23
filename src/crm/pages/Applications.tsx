@@ -311,7 +311,14 @@ export default function Applications() {
       };
 
       const normalized = savedApplications.map(normalizeApp);
-      setApplications([...mockApplications, ...normalized]);
+
+      // Combine and deduplicate applications by ID to prevent duplicate keys
+      const allApplications = [...mockApplications, ...normalized];
+      const uniqueApplications = allApplications.filter((app, index, self) =>
+        index === self.findIndex(a => a.id === app.id)
+      );
+
+      setApplications(uniqueApplications);
 
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
