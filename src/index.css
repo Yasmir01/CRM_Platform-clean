@@ -37,20 +37,58 @@ input, textarea, select {
 [id*="metamask"],
 [class*="metamask"],
 [data-testid*="wallet"],
+[id*="wallet"],
+[class*="wallet"],
+[data-testid*="web3"],
+[id*="web3"],
+[class*="web3"],
 iframe[src*="chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn"],
 iframe[src*="metamask"],
+iframe[src*="wallet"],
 .metamask-modal,
 .web3-modal,
-.wallet-connect-modal {
+.wallet-connect-modal,
+.wallet-adapter-modal,
+.ethereum-provider,
+.web3-provider,
+*[class*="WalletConnect"],
+*[id*="WalletConnect"],
+*[data-testid*="WalletConnect"] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Prevent any floating wallet widgets from appearing */
 body > div[style*="position: fixed"][style*="z-index"],
 body > div[data-testid*="wallet"],
-body > div[class*="metamask"] {
+body > div[class*="metamask"],
+body > div[class*="wallet"],
+body > div[id*="wallet"],
+body > div[id*="metamask"],
+body > div[class*="web3"],
+body > div[id*="web3"],
+body > iframe[src*="chrome-extension"],
+body > iframe[src*="wallet"],
+body > iframe[src*="metamask"] {
   display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Additional protection against injected elements */
+*[style*="z-index: 999999"],
+*[style*="z-index: 2147483647"],
+*[class*="injected"],
+*[id*="injected"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
