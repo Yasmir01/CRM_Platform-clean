@@ -52,6 +52,7 @@ import TermsAndConditions from "./TermsAndConditions";
 import PhoneNumberField, { isValidPhoneNumber } from "./PhoneNumberField";
 import StateSelectionField from "./StateSelectionField";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { getDisplayApplicantName } from "../utils/nameUtils";
 import { useAutoSave } from "../hooks/useAutoSave";
 
 interface FormField {
@@ -1105,7 +1106,7 @@ export default function ApplicationFormRenderer({
         onClose={() => setShowPaymentDialog(false)}
         applicationFee={template.applicationFee || 0}
         paymentMethods={template.paymentMethods || []}
-        applicantName={formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Applicant"}
+        applicantName={getDisplayApplicantName(formData, "Applicant")}
         applicationId={`TEMP-${Date.now()}`}
         onPaymentSuccess={handlePaymentSuccess}
         onPaymentError={(error) => {

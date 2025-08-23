@@ -3,6 +3,7 @@ import WorkflowService from "../services/WorkflowService";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
 import ApplicationFormRenderer from "../components/ApplicationFormRenderer";
+import { normalizeApplicantName } from "../utils/nameUtils";
 import {
   Box,
   Typography,
