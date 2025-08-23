@@ -104,7 +104,7 @@ interface ApplicationFormRendererProps {
 
 interface FileUpload {
   fieldId: string;
-  files: File[];
+  files: StoredFile[];
 }
 
 export default function ApplicationFormRenderer({
