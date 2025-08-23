@@ -400,10 +400,10 @@ export default function Applications() {
     setSelectedAppForAction(null);
   };
 
-  const getFileIcon = (file: any) => {
+  const getFileIcon = (file: StoredFile | any) => {
     if (!file.type) return <AttachFileIcon />;
 
-    if (file.type.includes('pdf')) return <PictureAsPdfIcon />;
+    if (FileStorageService.isPdfFile(file.type)) return <PictureAsPdfIcon />;
     if (file.type.includes('image')) return <ImageIcon />;
     if (file.type.includes('document') || file.type.includes('text')) return <ArticleIcon />;
     return <AttachFileIcon />;
@@ -414,26 +414,24 @@ export default function Applications() {
     setFilePreviewOpen(true);
   };
 
-  const handleFileDownload = (file: any) => {
-    // Create a mock download since we don't have actual file data
-    // In a real application, this would download the actual file
-    const link = document.createElement('a');
-    link.href = '#';
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Show a notification that this is a demo
-    alert(`Download initiated for: ${file.name}\n\nNote: This is a demo - no actual file will be downloaded.`);
+  const handleFileDownload = (file: StoredFile | any) => {
+    // Use FileStorageService if it's a StoredFile, otherwise fallback to mock
+    if (file.dataUrl) {
+      FileStorageService.downloadFile(file as StoredFile);
+    } else {
+      // Fallback for legacy file format
+      const link = document.createElement('a');
+      link.href = '#';
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      alert(`Download initiated for: ${file.name}\n\nNote: This is a demo - no actual file will be downloaded.`);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return FileStorageService.formatFileSize(bytes);
   };
 
   const toggleFileExpansion = (fileId: string) => {
