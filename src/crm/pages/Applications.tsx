@@ -1629,8 +1629,8 @@ export default function Applications() {
           propertyAddress="Demo Property Address"
           isOpen={newApplicationDialog}
           onSubmit={(applicationData) => {
-            // Add to applications list
-            setApplications(prev => [...prev, applicationData]);
+            // Add to applications list with deduplication
+            setApplications(prev => deduplicateApplications([...prev, applicationData]));
 
             // Save to localStorage
             const existingApplications = LocalStorageService.getApplications();
