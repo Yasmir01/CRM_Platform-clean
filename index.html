@@ -12,6 +12,47 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
     />
+    <!-- Immediate MetaMask Error Prevention -->
+    <script>
+      // Set up early error handling before any other scripts load
+      window.addEventListener('unhandledrejection', function(event) {
+        const error = event.reason;
+        const message = (error && error.message) || error || '';
+
+        // Catch all MetaMask-related errors
+        if (typeof message === 'string' && (
+          message.includes('MetaMask') ||
+          message.includes('Failed to connect to MetaMask') ||
+          message.includes('ethereum') ||
+          message.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+          (error && error.code === 4001) || // User rejected
+          (error && error.code === -32002) // Request pending
+        )) {
+          event.preventDefault();
+          console.warn('[CRM] MetaMask extension detected but not needed for this application');
+          return;
+        }
+      });
+
+      // Disable MetaMask as soon as window.ethereum becomes available
+      Object.defineProperty(window, 'ethereum', {
+        get: function() { return this._ethereum; },
+        set: function(value) {
+          if (value && typeof value === 'object') {
+            try {
+              // Disable auto-detection and connection features
+              value.autoRefreshOnNetworkChange = false;
+              if (value.removeAllListeners) value.removeAllListeners();
+              if (value._metamask) value._metamask.isUnlocked = () => Promise.resolve(false);
+            } catch (e) {
+              // Silently ignore any errors when disabling MetaMask
+            }
+          }
+          this._ethereum = value;
+        },
+        configurable: true
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
