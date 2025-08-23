@@ -378,7 +378,11 @@ export default function ApplicationFormRenderer({
         paymentData,
         status: "New",
         submittedDate: new Date().toISOString(),
-        applicantName: formData["applicant_name"] || formData["first_name"] + " " + formData["last_name"] || "Unknown Applicant",
+        applicantName: (() => {
+          const candidateName = formData["applicant_name"] ||
+            [formData["first_name"], formData["last_name"]].filter(Boolean).join(' ').trim();
+          return candidateName && candidateName.length > 0 ? candidateName : "Unknown Applicant";
+        })(),
         applicantEmail: formData["email"] || formData["applicant_email"] || "",
         applicantPhone: formData["phone"] || formData["applicant_phone"] || "",
         applicationFee: template.applicationFee || 0,
