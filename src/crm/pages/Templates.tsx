@@ -1351,23 +1351,34 @@ export default function Templates() {
                 )}
 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {template.content.substring(0, 100)}...
+                  {template.content ? template.content.substring(0, 100) + '...' : 'No content available'}
                 </Typography>
 
                 <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {template.variables.slice(0, 3).map((variable) => (
+                  {template.variables && template.variables.length > 0 ? (
+                    <>
+                      {template.variables.slice(0, 3).map((variable) => (
+                        <Chip
+                          key={variable}
+                          label={`{${variable}}`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      ))}
+                      {template.variables.length > 3 && (
+                        <Chip
+                          label={`+${template.variables.length - 3} more`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </>
+                  ) : (
                     <Chip
-                      key={variable}
-                      label={`{${variable}}`}
+                      label="No variables"
                       size="small"
                       variant="outlined"
-                    />
-                  ))}
-                  {template.variables.length > 3 && (
-                    <Chip
-                      label={`+${template.variables.length - 3} more`}
-                      size="small"
-                      variant="outlined"
+                      color="default"
                     />
                   )}
                 </Stack>
