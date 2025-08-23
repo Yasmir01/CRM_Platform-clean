@@ -379,7 +379,7 @@ export default function ApplicationFormRenderer({
         paymentData,
         status: "New",
         submittedDate: new Date().toISOString(),
-        applicantName: getDisplayApplicantName(formData),
+        applicantName: getDisplayApplicantName(formData, "Unknown Applicant", template.formFields),
         applicantEmail: formData["email"] || formData["applicant_email"] || "",
         applicantPhone: formData["phone"] || formData["applicant_phone"] || "",
         applicationFee: template.applicationFee || 0,
