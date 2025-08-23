@@ -330,9 +330,7 @@ export default function Applications() {
     } else {
       // No saved applications, use mock data
       // Deduplicate in case there are any duplicate IDs in mock data
-      const uniqueMockApplications = mockApplications.filter((app, index, self) =>
-        index === self.findIndex(a => a.id === app.id)
-      );
+      const uniqueMockApplications = deduplicateApplications(mockApplications);
       setApplications(uniqueMockApplications);
     }
   }, []);
