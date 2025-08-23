@@ -53,11 +53,21 @@ export const initializeErrorHandling = () => {
   // Handle general errors
   window.addEventListener('error', (event: ErrorEvent) => {
     const errorMessage = event.message || '';
-    
+    const filename = event.filename || '';
+
+    // Enhanced error detection for Web3/MetaMask related errors
     if (
       errorMessage.includes('MetaMask') ||
+      errorMessage.includes('metamask') ||
+      errorMessage.includes('ethereum') ||
+      errorMessage.includes('web3') ||
+      errorMessage.includes('wallet') ||
       errorMessage.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
-      event.filename?.includes('chrome-extension')
+      filename.includes('chrome-extension') ||
+      filename.includes('inpage.js') ||
+      filename.includes('content-script') ||
+      errorMessage.includes('provider') ||
+      errorMessage.includes('injected')
     ) {
       // Prevent MetaMask extension errors from cluttering console
       event.preventDefault();
@@ -65,20 +75,60 @@ export const initializeErrorHandling = () => {
     }
   });
 
-  // Disable MetaMask provider if present (since this app doesn't use Web3)
-  if (typeof window !== 'undefined' && window.ethereum) {
-    try {
-      // Disable auto-refresh and auto-connection features
-      window.ethereum.autoRefreshOnNetworkChange = false;
-      
-      // Remove event listeners that might trigger connection attempts
-      if (window.ethereum.removeAllListeners) {
-        window.ethereum.removeAllListeners();
+  // Enhanced MetaMask provider disabling
+  const disableMetaMaskProvider = () => {
+    if (typeof window !== 'undefined' && window.ethereum) {
+      try {
+        // Disable auto-refresh and auto-connection features
+        window.ethereum.autoRefreshOnNetworkChange = false;
+
+        // Remove event listeners that might trigger connection attempts
+        if (window.ethereum.removeAllListeners) {
+          window.ethereum.removeAllListeners();
+        }
+
+        // Disable additional MetaMask features
+        if (window.ethereum._metamask) {
+          window.ethereum._metamask.isUnlocked = () => Promise.resolve(false);
+          window.ethereum._metamask.isConnected = () => false;
+        }
+
+        // Override request method to prevent connection attempts
+        const originalRequest = window.ethereum.request;
+        if (originalRequest) {
+          window.ethereum.request = async (args: any) => {
+            // Block wallet connection requests
+            if (args.method === 'eth_requestAccounts' ||
+                args.method === 'wallet_requestPermissions' ||
+                args.method === 'eth_accounts') {
+              throw new Error('Wallet connection disabled for this application');
+            }
+            return originalRequest.call(window.ethereum, args);
+          };
+        }
+
+      } catch (error) {
+        // Silently ignore any errors when disabling MetaMask features
       }
-    } catch (error) {
-      // Silently ignore any errors when disabling MetaMask features
     }
-  }
+  };
+
+  // Disable immediately if present
+  disableMetaMaskProvider();
+
+  // Also disable when window.ethereum is set later
+  let ethProvider: any = null;
+  Object.defineProperty(window, 'ethereum', {
+    get: () => ethProvider,
+    set: (value) => {
+      ethProvider = value;
+      if (value) {
+        // Small delay to allow the provider to initialize before disabling
+        setTimeout(disableMetaMaskProvider, 0);
+      }
+    },
+    configurable: true
+  });
 };
 
 // Type declaration for TypeScript
