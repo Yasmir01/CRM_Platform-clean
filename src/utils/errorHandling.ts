@@ -21,21 +21,26 @@ export const initializeErrorHandling = () => {
 
     // Enhanced MetaMask error detection patterns
     const isMetaMaskError = (
+      // Exact pattern for the reported error
+      errorMessage === 's: Failed to connect to MetaMask' ||
+      errorMessage === 'Failed to connect to MetaMask' ||
       // Direct MetaMask references (including prefixed variants)
       errorMessage.includes('Failed to connect to MetaMask') ||
       errorMessage.includes('MetaMask') ||
       errorMessage.includes('metamask') ||
-      /s:\s*Failed to connect to MetaMask/i.test(errorMessage) || // Handles "s: Failed to connect to MetaMask"
-      /[a-z]:\s*.*MetaMask/i.test(errorMessage) || // Handles any "x: ...MetaMask" pattern
+      /^s:\s*Failed to connect to MetaMask/i.test(errorMessage) || // Exact "s: Failed to connect to MetaMask"
+      /^[a-z]:\s*.*Failed to connect to MetaMask/i.test(errorMessage) || // Any "x: Failed to connect to MetaMask"
+      /^[a-z]:\s*.*MetaMask/i.test(errorMessage) || // Any "x: ...MetaMask" pattern
       // Web3/Ethereum references
       errorMessage.includes('ethereum') ||
       errorMessage.includes('web3') ||
       errorMessage.includes('wallet') ||
-      // Chrome extension references
+      // Chrome extension references (check both message and stack)
       errorMessage.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
       errorStack.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
       errorStack.includes('/scripts/inpage.js') ||
       errorStack.includes('/scripts/contentscript.js') ||
+      errorStack.includes('Object.connect') ||
       // Error codes
       event.reason?.code === 4001 || // User rejected request
       event.reason?.code === -32002 || // Request pending
@@ -50,8 +55,10 @@ export const initializeErrorHandling = () => {
       errorMessage.includes('wallet_') ||
       errorMessage.includes('eth_') ||
       // Additional MetaMask specific patterns
-      errorMessage.includes('connect') && errorMessage.includes('wallet') ||
-      errorMessage.includes('Object.connect') && errorStack.includes('chrome-extension')
+      (errorMessage.includes('connect') && errorMessage.includes('wallet')) ||
+      (errorMessage.includes('Object.connect') && errorStack.includes('chrome-extension')) ||
+      // Catch any error from MetaMask extension files
+      errorStack.includes('nkbihfbeogaeaoehlefnkodbefgpgknn')
     );
 
     if (isMetaMaskError) {
