@@ -5,6 +5,71 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + Material UI + TS + Tailwind CSS</title>
+    <!-- Ultra-early MetaMask error prevention - MUST be first script -->
+    <script>
+      (function() {
+        'use strict';
+
+        // Immediately prevent any unhandled rejections
+        const originalAddEventListener = window.addEventListener;
+        const handleError = function(event) {
+          if (event.type === 'unhandledrejection') {
+            const error = event.reason;
+            const message = (error && (error.message || error.toString())) || '';
+
+            // Check for any MetaMask-related patterns
+            if (typeof message === 'string' && (
+              message.includes('MetaMask') ||
+              message.includes('Failed to connect to MetaMask') ||
+              message.match(/^[a-z]:\s*.*Failed to connect to MetaMask/i) ||
+              message.match(/^s:\s*Failed to connect to MetaMask/i) ||
+              message.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+              (error && (error.code === 4001 || error.code === -32002))
+            )) {
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              console.warn('[CRM] MetaMask error blocked early:', message.substring(0, 80));
+              return false;
+            }
+          }
+        };
+
+        // Override addEventListener to catch early handlers
+        window.addEventListener = function(type, listener, options) {
+          if (type === 'unhandledrejection') {
+            const wrappedListener = function(event) {
+              handleError(event);
+              if (typeof listener === 'function') {
+                return listener.call(this, event);
+              }
+            };
+            return originalAddEventListener.call(this, type, wrappedListener, options);
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+
+        // Set up immediate handler
+        window.addEventListener('unhandledrejection', handleError);
+
+        // Also prevent any early MetaMask provider injection
+        Object.defineProperty(window, 'ethereum', {
+          get: function() { return this._ethereum; },
+          set: function(value) {
+            if (value && typeof value === 'object') {
+              console.warn('[CRM] MetaMask provider injection blocked');
+              try {
+                value.autoRefreshOnNetworkChange = false;
+                if (value.removeAllListeners) value.removeAllListeners();
+                if (value._metamask) value._metamask.isUnlocked = () => Promise.resolve(false);
+              } catch (e) {}
+            }
+            this._ethereum = value;
+          },
+          configurable: true
+        });
+      })();
+    </script>
     <!-- Fonts to support Material Design -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,6 +77,49 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
     />
+    <!-- Immediate MetaMask Error Prevention -->
+    <script>
+      // Set up early error handling before any other scripts load
+      window.addEventListener('unhandledrejection', function(event) {
+        const error = event.reason;
+        const message = (error && error.message) || error || '';
+
+        // Catch all MetaMask-related errors including prefixed variants
+        if (typeof message === 'string' && (
+          message.includes('MetaMask') ||
+          message.includes('Failed to connect to MetaMask') ||
+          /s:\s*Failed to connect to MetaMask/i.test(message) || // "s: Failed to connect to MetaMask"
+          /[a-z]:\s*.*MetaMask/i.test(message) || // Any "x: ...MetaMask" pattern
+          message.includes('ethereum') ||
+          message.includes('chrome-extension://nkbihfbeogaeaoehlefnkodbefgpgknn') ||
+          (error && error.code === 4001) || // User rejected
+          (error && error.code === -32002) // Request pending
+        )) {
+          event.preventDefault();
+          console.warn('[CRM] MetaMask extension detected but not needed for this application');
+          return;
+        }
+      });
+
+      // Disable MetaMask as soon as window.ethereum becomes available
+      Object.defineProperty(window, 'ethereum', {
+        get: function() { return this._ethereum; },
+        set: function(value) {
+          if (value && typeof value === 'object') {
+            try {
+              // Disable auto-detection and connection features
+              value.autoRefreshOnNetworkChange = false;
+              if (value.removeAllListeners) value.removeAllListeners();
+              if (value._metamask) value._metamask.isUnlocked = () => Promise.resolve(false);
+            } catch (e) {
+              // Silently ignore any errors when disabling MetaMask
+            }
+          }
+          this._ethereum = value;
+        },
+        configurable: true
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
