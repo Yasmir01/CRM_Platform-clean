@@ -86,6 +86,31 @@ interface Application {
   employmentVerification?: "Pending" | "Verified" | "Failed";
 }
 
+// Test application with generated field IDs (like form builder creates)
+const testApplication: Application = {
+  id: "APP-TEST",
+  applicantName: "Unknown Applicant", // This should be fixed by name extraction
+  applicantEmail: "john.doe@test.com",
+  applicantPhone: "(555) 000-0000",
+  propertyId: "1",
+  propertyCode: "TEST-001",
+  applicationFee: 50,
+  paymentStatus: "Paid",
+  paymentMethod: "Credit Card",
+  status: "New",
+  submittedDate: "2024-01-21",
+  monthlyIncome: 6000,
+  moveInDate: "2024-02-01",
+  // Simulate form data with generated field IDs but proper field labels in template
+  formData: {
+    "field_1700000000000_1_abc": "John", // First Name field with generated ID
+    "field_1700000000000_2_def": "Doe",  // Last Name field with generated ID
+    "field_1700000000000_3_ghi": "john.doe@test.com",
+    "field_1700000000000_4_jkl": "(555) 000-0000"
+  },
+  templateId: "test-template-id" // Will need a corresponding template
+};
+
 const mockApplications: Application[] = [
   {
     id: "APP-001",
