@@ -351,8 +351,26 @@ export class WorkflowService {
     }
 
     try {
+      // Get template for better name extraction if available
+      const templateId = (application as any).templateId;
+      let template = null;
+      if (templateId) {
+        try {
+          const { LocalStorageService } = await import('./LocalStorageService');
+          const templates = LocalStorageService.getTemplates();
+          template = templates.find(t => t.id === templateId);
+        } catch (error) {
+          console.warn('Could not load template for name extraction:', error);
+        }
+      }
+
       // Get normalized applicant name using centralized utility
-    const normalizedName = normalizeApplicantName(application.applicantName, (application as any).formData);
+      const normalizedName = normalizeApplicantName(
+        application.applicantName,
+        (application as any).formData,
+        'Unknown Applicant',
+        template?.formFields
+      );
 
     // Skip if we still can't get a valid name
     if (!normalizedName || normalizedName === 'Unknown Applicant') {
