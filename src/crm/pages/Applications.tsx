@@ -310,22 +310,13 @@ export default function Applications() {
       };
 
       const normalized = savedApplications.map(normalizeApp);
-      // Also normalize the test application to demonstrate the fix
-      const normalizedTestApp = normalizeApp(testApplication);
-      setApplications([...mockApplications, normalizedTestApp, ...normalized]);
+      setApplications([...mockApplications, ...normalized]);
 
       // Save the normalized data back to localStorage to prevent future issues
       LocalStorageService.saveApplications(normalized);
     } else {
-      // No saved applications, use mock data including test
-      // Create a temporary normalizeApp function since savedTemplates is available here
-      const tempNormalizeApp = (app: any) => {
-        const template = savedTemplates.find(t => t.id === app.templateId);
-        const applicantName = normalizeApplicantName(app.applicantName, app.formData, "Unknown Applicant", template?.formFields);
-        return { ...app, applicantName };
-      };
-      const normalizedTestApp = tempNormalizeApp(testApplication);
-      setApplications([...mockApplications, normalizedTestApp]);
+      // No saved applications, use mock data
+      setApplications(mockApplications);
     }
   }, []);
 
