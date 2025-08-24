@@ -752,12 +752,15 @@ export default function HelpSupport() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Store isSuperAdmin result to avoid function calls in dependency array
+  const isUserSuperAdmin = React.useMemo(() => isSuperAdmin(), []);
+
   // Update search results in real-time
   React.useEffect(() => {
     const updateSearchResults = () => {
       const filtered = mockFAQs.filter(faq => {
         // Only show TransUnion integration FAQ to super admins
-        if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
+        if (faq.id === "transunion-integration-setup" && !isUserSuperAdmin) {
           return false;
         }
 
@@ -787,7 +790,7 @@ export default function HelpSupport() {
     };
 
     updateSearchResults();
-  }, [debouncedSearchTerm, selectedCategory, isSuperAdmin]);
+  }, [debouncedSearchTerm, selectedCategory, isUserSuperAdmin]);
 
   // Real-time search status updates
   React.useEffect(() => {
@@ -820,11 +823,11 @@ export default function HelpSupport() {
 
   // Debug logging for super admin role
   React.useEffect(() => {
-    console.log('Current user role check:', { isSuperAdmin: isSuperAdmin() });
+    console.log('Current user role check:', { isSuperAdmin: isUserSuperAdmin });
     console.log('TransUnion FAQ in mockFAQs:', mockFAQs.find(faq => faq.id === "transunion-integration-setup"));
     console.log('Filtered FAQs count:', filteredFAQs.length);
     console.log('TransUnion FAQ in filtered list:', filteredFAQs.find(faq => faq.id === "transunion-integration-setup"));
-  }, [filteredFAQs, isSuperAdmin]);
+  }, [filteredFAQs, isUserSuperAdmin]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -1150,7 +1153,7 @@ export default function HelpSupport() {
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
               Showing {filteredFAQs.length} of {mockFAQs.filter(faq =>
-                faq.id !== "transunion-integration-setup" || isSuperAdmin()
+                faq.id !== "transunion-integration-setup" || isUserSuperAdmin
               ).length} available FAQs
               {searchTerm && " • Real-time search active"}
               {selectedCategory !== "All" && ` • Filtered by ${selectedCategory}`}
