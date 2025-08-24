@@ -38,6 +38,7 @@ import SalesAutomation from '../pages/SalesAutomation';
 import MarketingAutomation from '../pages/MarketingAutomation';
 import AnalyticsInsights from '../pages/AnalyticsInsights';
 import IntegrationManagement from '../pages/IntegrationManagement';
+import EmailManagement from './EmailManagement';
 import CustomerService from '../pages/CustomerService';
 import BackupManagement from './BackupManagement';
 import { Alert, Box, Button } from '@mui/material';
@@ -111,6 +112,7 @@ export default function ModeAwareContent() {
       <Route path="service-providers" element={<ServiceProviders />} />
       <Route path="customer-service" element={<CustomerService />} />
       <Route path="integrations" element={<IntegrationManagement />} />
+      <Route path="email-management" element={<EmailManagement />} />
       <Route path="backup" element={<BackupManagement />} />
       <Route path="communications" element={<Communications />} />
       <Route path="power-tools" element={<PowerTools />} />

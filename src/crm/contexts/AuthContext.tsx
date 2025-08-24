@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { EmailService } from '../services/EmailService';
 
 export type UserRole = 'Super Admin' | 'Admin' | 'Manager' | 'Property Manager' | 'User' | 'Tenant' | 'Service Provider';
 
@@ -341,7 +342,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // In a real app, you'd update the user's password in the database
       // For demo purposes, we'll just trigger the email
-      sendPasswordEmail(email, tempPassword);
+      await sendPasswordEmail(email, tempPassword);
 
       return {
         success: true,
@@ -355,15 +356,93 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const sendPasswordEmail = (email: string, tempPassword: string) => {
-    const subject = encodeURIComponent('PropCRM - Password Reset');
-    const body = encodeURIComponent(`Your temporary password is: ${tempPassword}\n\nPlease log in and change your password immediately.\n\nIf you did not request this password reset, please contact support.`);
+  const sendPasswordEmail = async (email: string, tempPassword: string) => {
+    try {
+      // Get the active email accounts
+      const emailAccounts = EmailService.getAccounts().filter(account =>
+        account.isActive && account.status === 'connected'
+      );
 
-    // Create mailto link that will open user's default email client
-    const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+      if (emailAccounts.length === 0) {
+        // Fallback to mailto if no email accounts configured
+        console.warn('No email accounts configured, falling back to mailto');
+        const subject = encodeURIComponent('PropCRM - Password Reset');
+        const body = encodeURIComponent(`Your temporary password is: ${tempPassword}\n\nPlease log in and change your password immediately.\n\nIf you did not request this password reset, please contact support.`);
+        const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+        window.open(mailtoLink, '_blank');
+        return;
+      }
 
-    // Open the default email client
-    window.open(mailtoLink, '_blank');
+      // Use the first available email account
+      const primaryAccount = emailAccounts[0];
+
+      // Get the password reset template
+      const templates = EmailService.getTemplates();
+      const passwordResetTemplate = templates.find(t =>
+        t.name === 'Password Reset' && t.isActive
+      );
+
+      if (passwordResetTemplate) {
+        // Send using template
+        await EmailService.sendEmail({
+          from: primaryAccount.email,
+          to: [email],
+          subject: passwordResetTemplate.subject,
+          htmlBody: passwordResetTemplate.htmlBody,
+          textBody: passwordResetTemplate.textBody,
+          templateId: passwordResetTemplate.id,
+          variables: {
+            userName: email.split('@')[0], // Simple username extraction
+            tempPassword: tempPassword,
+            appName: 'PropCRM'
+          },
+          providerId: primaryAccount.providerId,
+          accountId: primaryAccount.id
+        });
+      } else {
+        // Send without template
+        await EmailService.sendEmail({
+          from: primaryAccount.email,
+          to: [email],
+          subject: 'PropCRM - Password Reset',
+          htmlBody: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">Password Reset Request</h2>
+              <p>Hello,</p>
+              <p>You have requested to reset your password. Your temporary password is:</p>
+              <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px; font-family: monospace; font-size: 18px; font-weight: bold; text-align: center;">
+                ${tempPassword}
+              </div>
+              <p>Please log in using this temporary password and change it immediately for security reasons.</p>
+              <p>If you did not request this password reset, please contact our support team.</p>
+              <p>Best regards,<br>PropCRM Team</p>
+            </div>
+          `,
+          textBody: `Hello,
+
+You have requested to reset your password. Your temporary password is: ${tempPassword}
+
+Please log in using this temporary password and change it immediately for security reasons.
+
+If you did not request this password reset, please contact our support team.
+
+Best regards,
+PropCRM Team`,
+          providerId: primaryAccount.providerId,
+          accountId: primaryAccount.id
+        });
+      }
+
+      console.log('Password reset email sent successfully via EmailService');
+    } catch (error) {
+      console.error('Failed to send password reset email:', error);
+
+      // Fallback to mailto on error
+      const subject = encodeURIComponent('PropCRM - Password Reset');
+      const body = encodeURIComponent(`Your temporary password is: ${tempPassword}\n\nPlease log in and change your password immediately.\n\nIf you did not request this password reset, please contact support.`);
+      const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+      window.open(mailtoLink, '_blank');
+    }
   };
 
   const value: AuthContextType = {

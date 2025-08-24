@@ -87,6 +87,98 @@ interface SupportTicket {
 
 const mockFAQs: FAQItem[] = [
   {
+    id: "email-integration-overview",
+    question: "How do I set up email integration for sending automated emails and password resets?",
+    answer: "**Email Integration Overview**: The CRM now supports comprehensive email integration with multiple providers for automated email sending, password resets, and marketing campaigns. **🔧 Supported Email Providers**: **Gmail** - OAuth authentication for secure access, SMTP: smtp.gmail.com:587 (TLS), IMAP: imap.gmail.com:993 (SSL), Requires OAuth setup for enhanced security. **Microsoft Outlook** - OAuth authentication with Office 365 support, SMTP: smtp-mail.outlook.com:587 (TLS), IMAP: outlook.office365.com:993 (SSL), Full integration with Microsoft Graph API. **Yahoo Mail** - App password authentication (recommended), SMTP: smtp.mail.yahoo.com:587 (TLS), IMAP: imap.mail.yahoo.com:993 (SSL), POP: pop.mail.yahoo.com:995 (SSL), Requires app password generation. **Hotmail/Live** - Password authentication, SMTP: smtp.live.com:587 (TLS), IMAP: imap-mail.outlook.com:993 (SSL), POP: pop3.live.com:995 (SSL). **Custom SMTP** - Configure any SMTP server, Custom host and port settings, Support for TLS/SSL encryption, Flexible authentication options. **🚀 Quick Setup**: 1) Go to **Integrations** → **Add Integration**, 2) Select your email provider (Gmail, Outlook, Yahoo, etc.), 3) Follow provider-specific setup instructions, 4) Test connection and start sending emails, 5) Access **Email Management** for testing and monitoring. **📧 Features**: Automated password reset emails, Professional email templates, Real-time sending status, Connection testing, Email statistics and monitoring, Template management with variables.",
+    category: "Integrations",
+    tags: ["email", "integration", "gmail", "outlook", "yahoo", "hotmail", "smtp", "oauth", "automation", "setup"],
+    helpful: 98,
+    planRequired: "Basic"
+  },
+  {
+    id: "gmail-integration-setup",
+    question: "How do I set up Gmail integration with OAuth authentication?",
+    answer: "**Gmail Integration Setup**: Gmail uses OAuth for secure authentication without storing passwords. **📋 Step-by-Step Setup**: **Step 1: Add Gmail Integration** - Go to **CRM** → **Integrations**, Click **Add Integration**, Select **Gmail - Email Provider**, Enter your Gmail address (e.g., your.email@gmail.com), Add display name (your name or company name). **Step 2: OAuth Configuration (Optional)** - For custom OAuth apps, enter your Google Client ID, Most users can skip this and use default OAuth, Advanced users can create custom Google Cloud projects. **Step 3: Complete Setup** - Click **Add Integration**, The system will mark Gmail as added but disconnected, OAuth authentication will be required when sending first email. **🔧 Server Configuration**: **SMTP Settings**: Host: smtp.gmail.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap.gmail.com, Port: 993, Security: SSL. **⚠️ Important Notes**: OAuth authentication provides enhanced security, No passwords stored in the system, Requires Google account permissions, Two-factor authentication compatible. **🧪 Testing**: Go to **Email Management** to test the connection, Send test emails to verify functionality, Monitor connection status and email statistics.",
+    category: "Integrations",
+    tags: ["gmail", "oauth", "authentication", "google", "email", "setup", "smtp", "imap", "security"],
+    helpful: 95,
+    planRequired: "Basic"
+  },
+  {
+    id: "outlook-integration-setup",
+    question: "How do I configure Microsoft Outlook email integration?",
+    answer: "**Microsoft Outlook Integration**: Set up Outlook with OAuth for Office 365 and Exchange support. **📋 Setup Process**: **Step 1: Integration Setup** - Navigate to **Integrations** → **Add Integration**, Select **Microsoft Outlook - Email Provider**, Enter your Outlook email (e.g., user@company.com), Provide display name for sender identification. **Step 2: OAuth Configuration** - For custom apps, enter Microsoft App Client ID, Standard users can use default OAuth settings, Enterprise users may need custom Azure app registration. **Step 3: Authentication** - Complete OAuth flow when sending first email, Grant necessary permissions for email sending, System will handle token refresh automatically. **🔧 Technical Details**: **SMTP Configuration**: Host: smtp-mail.outlook.com, Port: 587, Security: TLS, **IMAP Configuration**: Host: outlook.office365.com, Port: 993, Security: SSL. **🏢 Enterprise Features**: Full Office 365 integration, Exchange server support, Advanced security compliance, Shared mailbox support (with proper permissions). **✅ Verification**: Test connection in **Email Management**, Send sample emails to verify setup, Monitor delivery status and statistics.",
+    category: "Integrations",
+    tags: ["outlook", "microsoft", "office365", "oauth", "exchange", "email", "integration", "smtp", "enterprise"],
+    helpful: 93,
+    planRequired: "Basic"
+  },
+  {
+    id: "yahoo-integration-setup",
+    question: "How do I set up Yahoo Mail with app password authentication?",
+    answer: "**Yahoo Mail Integration**: Yahoo requires app passwords for enhanced security instead of your regular password. **📋 Setup Instructions**: **Step 1: Generate App Password** - Log into your Yahoo account, Go to **Account Security** → **App Passwords**, Click **Generate app password**, Select **Other** and name it 'CRM Integration', Copy the 16-character app password. **Step 2: Add to CRM** - Go to **Integrations** → **Add Integration**, Select **Yahoo Mail - Email Provider**, Enter your Yahoo email address, Add your display name, **Paste the app password** (not your regular password). **Step 3: Complete Setup** - Click **Add Integration**, System will test connection automatically, Verify status shows 'Connected'. **🔧 Server Settings**: **SMTP Configuration**: Host: smtp.mail.yahoo.com, Port: 587, Security: TLS, **IMAP Configuration**: Host: imap.mail.yahoo.com, Port: 993, Security: SSL, **POP Configuration**: Host: pop.mail.yahoo.com, Port: 995, Security: SSL. **🔒 Security Notes**: App passwords are more secure than regular passwords, Each app should have its own unique app password, You can revoke app passwords anytime in Yahoo settings, Two-factor authentication must be enabled for app passwords. **🧪 Testing**: Use **Email Management** to send test emails, Verify delivery and connection status, Monitor email statistics and performance.",
+    category: "Integrations",
+    tags: ["yahoo", "app-password", "authentication", "security", "email", "smtp", "imap", "setup", "yahoo-mail"],
+    helpful: 91,
+    planRequired: "Basic"
+  },
+  {
+    id: "hotmail-integration-setup",
+    question: "How do I configure Hotmail/Live email integration?",
+    answer: "**Hotmail/Live Integration**: Set up Microsoft Hotmail or Live email accounts with password authentication. **📋 Configuration Steps**: **Step 1: Add Integration** - Navigate to **Integrations** → **Add Integration**, Select **Hotmail/Live - Email Provider**, Enter your Hotmail/Live email address, Provide display name for identification. **Step 2: Authentication** - Enter your account password (not an app password), System will verify credentials automatically, Connection will be tested immediately. **Step 3: Verification** - Confirm status shows 'Connected', Test email sending functionality. **🔧 Technical Configuration**: **SMTP Settings**: Host: smtp.live.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap-mail.outlook.com, Port: 993, Security: SSL, **POP Settings**: Host: pop3.live.com, Port: 995, Security: SSL. **⚠️ Security Considerations**: Regular password authentication (less secure than OAuth), Ensure account has strong password, Monitor for any suspicious activity, Consider using Outlook integration for enhanced security if available. **📧 Features Available**: Send automated emails, Password reset functionality, Template-based messaging, Real-time delivery monitoring. **🧪 Testing & Monitoring**: Access **Email Management** for testing, Send test emails to verify functionality, Monitor connection status and statistics, Troubleshoot any delivery issues.",
+    category: "Integrations",
+    tags: ["hotmail", "live", "microsoft", "password", "authentication", "email", "smtp", "imap", "setup"],
+    helpful: 88,
+    planRequired: "Basic"
+  },
+  {
+    id: "custom-smtp-integration",
+    question: "How do I configure custom SMTP server integration for any email provider?",
+    answer: "**Custom SMTP Integration**: Configure any email provider or custom mail server that supports SMTP. **📋 Setup Process**: **Step 1: Gather Server Information** - SMTP server hostname (e.g., smtp.yourcompany.com), Port number (usually 587 for TLS, 465 for SSL, 25 for plain), Security type (TLS, SSL, or None), Username and password for authentication, Optional: IMAP settings for receiving emails. **Step 2: Add Integration** - Go to **Integrations** → **Add Integration**, Select **Custom SMTP - Email Provider**, Enter your email address, Provide display name. **Step 3: Configure SMTP Settings** - **SMTP Host**: Enter server hostname, **SMTP Port**: Enter port number (default: 587), **Username**: Usually your email address, **Password**: Your email account password, **Security**: Select TLS, SSL, or None. **Step 4: Optional IMAP Configuration** - **IMAP Host**: For receiving emails, **IMAP Port**: Usually 993 for SSL, 143 for plain. **🔧 Common Configurations**: **Google Workspace**: smtp.gmail.com:587 (TLS), **Microsoft 365**: smtp.office365.com:587 (TLS), **GoDaddy**: smtpout.secureserver.net:25, **Zoho**: smtp.zoho.com:587 (TLS), **AWS SES**: email-smtp.region.amazonaws.com:587. **✅ Testing & Verification**: Click **Test Connection** after setup, Send test email to verify functionality, Monitor connection status in **Email Management**, Troubleshoot any authentication or connectivity issues. **�� Security Best Practices**: Use TLS/SSL encryption when available, Store credentials securely, Use app-specific passwords when supported, Monitor for unusual activity.",
+    category: "Integrations",
+    tags: ["custom", "smtp", "server", "configuration", "email", "hosting", "security", "tls", "ssl", "setup"],
+    helpful: 89,
+    planRequired: "Professional",
+    isAdvanced: true
+  },
+  {
+    id: "email-management-dashboard",
+    question: "How do I use the Email Management dashboard to monitor and test email functionality?",
+    answer: "**Email Management Dashboard**: Comprehensive tool for monitoring, testing, and managing your email integrations. **📊 Dashboard Overview**: Access via **CRM** → **Email Management**, View all configured email accounts, Monitor connection status and statistics, Test email functionality and troubleshoot issues. **📧 Email Accounts Tab**: **Account Status Monitoring** - Connection status (Connected, Disconnected, Error), Last sync time and frequency settings, Provider information and authentication type, Error messages and troubleshooting info. **Account Management** - Test connections with one click, Delete accounts that are no longer needed, View account details and settings. **🧪 Send Test Email**: Click **Send Test Email** button, Select email account to send from, Enter recipient email address, Customize subject and message, Send and monitor delivery status. **📝 Templates Tab**: **Template Management** - View all email templates (Password Reset, Welcome, etc.), Create new custom templates, Edit existing templates with variables, Preview templates before using. **Template Features** - Variable support ({{userName}}, {{tempPassword}}, etc.), Category organization (Transactional, Marketing, System), Active/inactive status management. **📈 Email Statistics**: **Performance Metrics** - Total emails sent and delivery rates, Open rates and click rates (when supported), Bounce rates and error statistics, Account-specific performance data. **Real-time Monitoring** - Live delivery status updates, Connection health monitoring, Error alerts and notifications. **🔧 Troubleshooting Tools**: Connection testing for each account, Detailed error messages and solutions, Email sending logs and history, Support for debugging delivery issues.",
+    category: "Integrations",
+    tags: ["email-management", "dashboard", "monitoring", "testing", "statistics", "templates", "troubleshooting", "status"],
+    helpful: 96,
+    planRequired: "Basic"
+  },
+  {
+    id: "email-templates-variables",
+    question: "How do I create and use email templates with dynamic variables?",
+    answer: "**Email Templates with Variables**: Create dynamic email templates that automatically populate with user and system data. **📝 Template Creation**: **Access Templates** - Go to **Email Management** → **Templates** tab, Click **New Template** to create custom templates, Choose category: Transactional, Marketing, or System. **Template Builder** - **Template Name**: Descriptive name for identification, **Subject Line**: Use variables for dynamic subjects, **Content**: HTML and text versions supported, **Variables**: Insert dynamic placeholders. **🔧 Available Variables**: **User/Tenant Variables** - {{userName}} - User's display name, {{userEmail}} - User's email address, {{firstName}} - User's first name, {{lastName}} - User's last name. **System Variables** - {{appName}} - Application name (PropCRM), {{currentDate}} - Current date, {{currentTime}} - Current time, {{tempPassword}} - Temporary password (for resets). **Property Variables** - {{propertyName}} - Property name, {{propertyAddress}} - Property address, {{monthlyRent}} - Rental amount, {{leaseStart}} - Lease start date. **📧 Built-in Templates**: **Password Reset Template** - Subject: 'Reset Your Password - {{appName}}', Variables: {{userName}}, {{tempPassword}}, {{appName}}, Professional styling with security warnings. **Welcome Email Template** - Subject: 'Welcome to {{appName}}!', Variables: {{userName}}, {{userEmail}}, {{appName}}, Branded welcome message with getting started info. **🎨 Template Features**: **Rich Text Editing** - HTML and plain text versions, Professional styling and formatting, Mobile-responsive design, Brand customization options. **Variable Preview** - See how variables will appear, Test with sample data, Preview before sending. **Template Management** - Active/inactive status control, Usage tracking and analytics, Duplicate templates for customization, Export/import for backup. **💡 Best Practices**: Use descriptive template names, Test templates with real data before production use, Keep both HTML and text versions, Use appropriate variables for personalization, Follow email best practices for deliverability.",
+    category: "Integrations",
+    tags: ["templates", "variables", "dynamic", "personalization", "email", "automation", "password-reset", "welcome"],
+    helpful: 94,
+    planRequired: "Basic"
+  },
+  {
+    id: "password-reset-email-automation",
+    question: "How does the automated password reset email system work?",
+    answer: "**Automated Password Reset System**: The CRM now sends professional password reset emails automatically instead of opening mailto links. **🔄 How It Works**: **Automatic Detection** - When user requests password reset, system checks for configured email accounts, If email accounts available, sends professional email automatically, If no accounts configured, falls back to mailto link as backup. **Email Account Selection** - Uses first active and connected email account, Prioritizes accounts with 'connected' status, Automatically handles authentication and sending. **📧 Email Content**: **Professional Template** - Uses built-in 'Password Reset' template, Professional HTML styling with security warnings, Mobile-responsive design, Clear instructions for next steps. **Dynamic Variables** - {{userName}} - Extracted from email address, {{tempPassword}} - Randomly generated secure password, {{appName}} - PropCRM branding, Customizable template content. **🔒 Security Features**: **Secure Password Generation** - Random 8-character passwords, Includes letters and numbers, Immediate replacement recommended, Temporary validity. **Professional Messaging** - Clear security warnings, Instructions to change password immediately, Contact information for suspicious activity, Branded company information. **📋 Setup Requirements**: **Email Integration Required** - At least one email provider configured (Gmail, Outlook, Yahoo, etc.), Active connection status, Proper authentication (OAuth, app password, etc.). **Template Customization** - Edit password reset template in **Email Management**, Customize branding and messaging, Add company-specific information. **🧪 Testing Password Reset**: **Test Process** - Go to login page and click 'Forgot Password', Enter email address of configured user, Check email delivery and formatting, Verify temporary password works. **Troubleshooting** - If emails not sending, check email account connection status, Verify email provider configuration, Check **Email Management** for error messages, Ensure user email exists in system. **⚙️ Configuration Options**: Access email settings via **Integrations** → Email Providers, Monitor email delivery in **Email Management**, Customize templates for company branding, Set up multiple email accounts for redundancy.",
+    category: "Integrations",
+    tags: ["password-reset", "automation", "email", "security", "templates", "integration", "authentication", "forgot-password"],
+    helpful: 97,
+    planRequired: "Basic"
+  },
+  {
+    id: "email-integration-troubleshooting",
+    question: "How do I troubleshoot common email integration issues and connection problems?",
+    answer: "**Email Integration Troubleshooting**: Comprehensive guide to diagnosing and fixing email integration issues. **🔍 Common Issues & Solutions**: **Connection Problems** - **Symptoms**: Status shows 'Disconnected' or 'Error', **Solutions**: Verify credentials are correct, Check if account password changed, Ensure two-factor authentication is properly configured, Test network connectivity. **Authentication Failures** - **OAuth Issues**: Re-authorize OAuth permissions, Check if OAuth app credentials expired, Verify redirect URLs are configured, Clear browser cache and cookies. **Password Authentication**: Verify password is correct, For Yahoo: ensure app password is used (not regular password), Check if account is locked or suspended. **📧 Email Sending Failures**: **SMTP Errors** - Verify SMTP server settings (host, port, security), Check authentication credentials, Ensure TLS/SSL settings match provider requirements, Test with different port numbers if needed. **Rate Limiting** - Some providers limit sending frequency, Wait and retry sending, Consider multiple email accounts for higher volume, Check provider-specific limits. **🔧 Diagnostic Steps**: **Step 1: Check Integration Status** - Go to **Email Management** → **Email Accounts**, Review connection status for each account, Look for error messages or last sync times. **Step 2: Test Connection** - Click **Test Connection** for problematic accounts, Review detailed error messages, Follow provider-specific troubleshooting steps. **Step 3: Verify Credentials** - Double-check email addresses and passwords, Ensure OAuth permissions are granted, Verify app passwords for Yahoo accounts. **Step 4: Check Provider Settings** - Confirm SMTP/IMAP server settings, Verify port numbers and security settings, Check for provider-specific requirements. **🛠️ Provider-Specific Troubleshooting**: **Gmail Issues** - Ensure 'Less secure app access' is enabled (if not using OAuth), Check Google account security settings, Verify OAuth app permissions. **Outlook/Hotmail** - Verify Microsoft account security settings, Check for account verification requirements, Ensure modern authentication is enabled. **Yahoo Issues** - Must use app passwords (not regular password), Verify two-factor authentication is enabled, Check app password generation settings. **Custom SMTP** - Verify server hostname and port, Check authentication method requirements, Test with email client first (like Outlook). **📊 Monitoring & Maintenance**: **Regular Monitoring** - Check **Email Management** dashboard regularly, Monitor delivery rates and error statistics, Set up alerts for connection failures. **Credential Management** - Rotate passwords regularly, Update OAuth tokens when expired, Monitor for suspicious account activity. **🆘 When to Contact Support**: Persistent connection failures after following troubleshooting steps, Provider-specific authentication issues, Need help with custom SMTP configuration, Questions about enterprise email setup. **Support Information** - Access via **Help & Support** → **Contact Support**, Provide specific error messages and account details, Include steps already attempted, Mention email provider and authentication method used.",
+    category: "Integrations",
+    tags: ["troubleshooting", "email", "connection", "authentication", "oauth", "smtp", "errors", "debugging", "support"],
+    helpful: 92,
+    planRequired: "Basic",
+    isAdvanced: true
+  },
+  {
     id: "transunion-integration-setup",
     question: "How do I configure and use the TransUnion integration for tenant screening? (Super Admin Only)",
     answer: "**TransUnion Integration Overview**: TransUnion integration is now visible in the Integration Management page, but only for Super Admins. **Key Features**: • **Super Admin Only Access** - The TransUnion integration only appears for users with the 'Super Admin' role • **Configuration UI** - Added a complete configuration interface for TransUnion API credentials • **Real-time Status** - Shows connection status based on whether valid credentials are configured • **Security Warnings** - Includes appropriate warnings about handling sensitive financial data. **🔧 Configuration Options**: **Option 1: Integration Management Page** - Go to CRM → Integrations (you should see this in the left menu) - Look for the TransUnion integration card with a 🔍 icon - Click the Settings (gear) icon on the TransUnion card - Enter your TransUnion credentials: API Key (Your TransUnion API key), API Secret (Your TransUnion API secret), Environment (Choose 'Sandbox' for testing or 'Production' for live), Base URL (TransUnion API endpoint URL). **Option 2: Environment Variables (Recommended for Production)** - Set these environment variables in your deployment: VITE_TRANSUNION_API_KEY (Your API key), VITE_TRANSUNION_API_SECRET (Your API secret), VITE_TRANSUNION_ENV ('sandbox' or 'production'), VITE_TRANSUNION_BASE_URL (API base URL). **🔒 Security Features**: • **Super Admin Only**: Regular admins and other users cannot see or access TransUnion settings • **Sensitive Data Handling**: API secrets are password-masked in the UI • **Environment Warnings**: Clear warnings about production vs development usage • **Status Indicators**: Shows if the integration is properly configured and connected. **📊 Integration Status**: The TransUnion integration will show: Connected status when valid credentials are configured, Disconnected status when credentials are missing or invalid, Usage metrics for credit reports and background checks, Last sync information. **Important**: In production, API credentials should be stored on your secure backend server, not in the frontend application.",
@@ -632,14 +724,77 @@ export default function HelpSupport() {
   const [userPlan] = React.useState<"Basic" | "Professional" | "Enterprise" | "Custom">("Professional");
   const { isSuperAdmin } = useRoleManagement();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [newTicketOpen, setNewTicketOpen] = React.useState(false);
+  const [searchResults, setSearchResults] = React.useState<FAQItem[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = React.useState<string>("");
+  const [showUpdateNotification, setShowUpdateNotification] = React.useState(false);
   const [ticketForm, setTicketForm] = React.useState({
     subject: "",
     priority: "Medium" as SupportTicket["priority"],
     description: ""
   });
+
+  // Debounce search term for better performance
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 300);
+
+    if (searchTerm) {
+      setIsSearching(true);
+    }
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update search results in real-time
+  React.useEffect(() => {
+    const updateSearchResults = () => {
+      const filtered = mockFAQs.filter(faq => {
+        // Only show TransUnion integration FAQ to super admins
+        if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
+          return false;
+        }
+
+        const searchLower = debouncedSearchTerm.toLowerCase();
+        const matchesSearch = !debouncedSearchTerm ||
+          faq.question.toLowerCase().includes(searchLower) ||
+          faq.answer.toLowerCase().includes(searchLower) ||
+          faq.tags.some(tag => tag.toLowerCase().includes(searchLower));
+
+        const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
+        const matchesPlan = isPlanEligible(faq.planRequired);
+
+        return matchesSearch && matchesCategory && matchesPlan;
+      });
+
+      setSearchResults(filtered);
+
+      // Update timestamp and show notification for real-time updates
+      const currentTime = new Date().toLocaleTimeString();
+      setLastUpdateTime(currentTime);
+
+      if (debouncedSearchTerm) {
+        setShowUpdateNotification(true);
+        // Hide notification after 2 seconds
+        setTimeout(() => setShowUpdateNotification(false), 2000);
+      }
+    };
+
+    updateSearchResults();
+  }, [debouncedSearchTerm, selectedCategory, isSuperAdmin]);
+
+  // Real-time search status updates
+  React.useEffect(() => {
+    if (searchTerm) {
+      console.log(`Real-time search: "${searchTerm}" - Found ${searchResults.length} results at ${lastUpdateTime}`);
+    }
+  }, [searchTerm, searchResults.length, lastUpdateTime]);
 
   const isPlanEligible = (requiredPlan?: string) => {
     if (!requiredPlan) return true;
@@ -647,22 +802,21 @@ export default function HelpSupport() {
     return planHierarchy[userPlan] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
 
-  const filteredFAQs = mockFAQs.filter(faq => {
-    // Only show TransUnion integration FAQ to super admins
-    if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
-      return false;
-    }
+  // Helper function to highlight search terms
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
 
-    const matchesSearch =
-      faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
 
-    const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
-    const matchesPlan = isPlanEligible(faq.planRequired);
+    return parts.map((part, index) =>
+      regex.test(part) ?
+        `**${part}**` : part
+    ).join('');
+  };
 
-    return matchesSearch && matchesCategory && matchesPlan;
-  });
+  // Use searchResults instead of inline filtering
+  const filteredFAQs = searchResults;
 
   // Debug logging for super admin role
   React.useEffect(() => {
@@ -820,19 +974,31 @@ export default function HelpSupport() {
           <Grid item xs={12} md={8}>
             <TextField
               fullWidth
-              placeholder="Search frequently asked questions..."
+              placeholder="Search frequently asked questions, answers, and tags..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchRoundedIcon />
+                    <SearchRoundedIcon color={isSearching ? "primary" : "inherit"} />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <Typography variant="caption" color="text.secondary">
+                      {isSearching ? "Searching..." : `${filteredFAQs.length} result${filteredFAQs.length !== 1 ? 's' : ''}`}
+                    </Typography>
                   </InputAdornment>
                 ),
               }}
+              helperText={
+                searchTerm ?
+                  `Real-time search active - ${filteredFAQs.length} FAQ${filteredFAQs.length !== 1 ? 's' : ''} found` :
+                  "Search questions, answers, tags, or categories for instant results"
+              }
             />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
@@ -852,7 +1018,182 @@ export default function HelpSupport() {
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={12} md={1}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("All");
+              }}
+              disabled={!searchTerm && selectedCategory === "All"}
+              sx={{ height: '56px' }}
+            >
+              Clear
+            </Button>
+          </Grid>
         </Grid>
+
+        {/* Search Results Summary */}
+        {(searchTerm || selectedCategory !== "All") && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              {searchTerm ? `Search Results for "${searchTerm}"` : `${selectedCategory} Category`}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Found {filteredFAQs.length} FAQ{filteredFAQs.length !== 1 ? 's' : ''}
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {searchTerm && ` matching "${searchTerm}"`}
+              {filteredFAQs.length === 0 && " - try different search terms or browse all categories"}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Dynamic Integration Topics */}
+        {(!searchTerm ||
+          searchTerm.toLowerCase().includes('email') ||
+          searchTerm.toLowerCase().includes('integration') ||
+          searchTerm.toLowerCase().includes('gmail') ||
+          searchTerm.toLowerCase().includes('outlook') ||
+          searchTerm.toLowerCase().includes('yahoo') ||
+          searchTerm.toLowerCase().includes('smtp') ||
+          searchTerm.toLowerCase().includes('password')) && (
+          <Card sx={{ mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                📧 Email Integration Quick Start
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {searchTerm ?
+                  `Showing integration help for "${searchTerm}". Quick access to related topics:` :
+                  "New to email integration? Start with these essential guides:"
+                }
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email integration overview")}
+                >
+                  Setup Overview
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("gmail integration")}
+                >
+                  Gmail Setup
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("outlook integration")}
+                >
+                  Outlook Setup
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("password reset email")}
+                >
+                  Password Reset
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email management dashboard")}
+                >
+                  Email Dashboard
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email troubleshooting")}
+                >
+                  Troubleshooting
+                </Button>
+              </Stack>
+              {!searchTerm && (
+                <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="caption" color="text.secondary">
+                    💡 <strong>Quick Tip:</strong> Email integration is available in your Integrations page.
+                    Set up Gmail, Outlook, Yahoo, or custom SMTP to enable automated password resets and professional email sending.
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Real-time Update Notification */}
+        {showUpdateNotification && searchTerm && (
+          <Box sx={{ mb: 2 }}>
+            <Chip
+              icon={<CheckCircleRoundedIcon />}
+              label={`Search updated at ${lastUpdateTime} - ${filteredFAQs.length} results found`}
+              color="success"
+              variant="outlined"
+              size="small"
+              sx={{
+                animation: 'fadeIn 0.3s ease-in',
+                '@keyframes fadeIn': {
+                  from: { opacity: 0, transform: 'translateY(-10px)' },
+                  to: { opacity: 1, transform: 'translateY(0)' }
+                }
+              }}
+            />
+          </Box>
+        )}
+
+        {/* Search Statistics */}
+        {filteredFAQs.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {filteredFAQs.length} of {mockFAQs.filter(faq =>
+                faq.id !== "transunion-integration-setup" || isSuperAdmin()
+              ).length} available FAQs
+              {searchTerm && " • Real-time search active"}
+              {selectedCategory !== "All" && ` • Filtered by ${selectedCategory}`}
+              {lastUpdateTime && searchTerm && ` • Last updated: ${lastUpdateTime}`}
+            </Typography>
+          </Box>
+        )}
+
+        {/* No Results Message */}
+        {filteredFAQs.length === 0 && (searchTerm || selectedCategory !== "All") && (
+          <Card sx={{ textAlign: 'center', py: 4 }}>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No Results Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {searchTerm ?
+                  `No FAQs found matching "${searchTerm}"` :
+                  `No FAQs found in ${selectedCategory} category`
+                }
+              </Typography>
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button
+                  variant="outlined"
+                  onClick={() => setSearchTerm("")}
+                  disabled={!searchTerm}
+                >
+                  Clear Search
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setSelectedCategory("All")}
+                  disabled={selectedCategory === "All"}
+                >
+                  Show All Categories
+                </Button>
+              </Stack>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+                Try searching for: "email integration", "password reset", "gmail setup", "troubleshooting"
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
 
         {/* FAQ Items */}
         <Stack spacing={2}>
