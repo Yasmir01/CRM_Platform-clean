@@ -67,6 +67,7 @@ import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import BugReportRoundedIcon from "@mui/icons-material/BugReportRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { TransUnionService } from "../services/TransUnionService";
+import { EmailService } from "../services/EmailService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 
 interface Integration {
