@@ -1417,6 +1417,317 @@ export default function IntegrationManagement() {
                 </Stack>
               )}
 
+              {selectedIntegration.name === "Gmail" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Gmail integration using OAuth authentication for secure access.
+                  </Alert>
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    type="email"
+                    value={selectedIntegration.configuration.email || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, email: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="your.email@gmail.com"
+                    helperText="The Gmail address you want to use for sending emails"
+                  />
+                  <TextField
+                    label="Display Name"
+                    fullWidth
+                    value={selectedIntegration.configuration.displayName || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, displayName: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Your Name or Company Name"
+                    helperText="Name that will appear as the sender"
+                  />
+                  <Alert severity="warning">
+                    Gmail integration requires OAuth setup. Use the "Test Connection" button to authenticate with Google.
+                  </Alert>
+                  <Alert severity="info">
+                    <strong>Note:</strong> For production use, you'll need to set up OAuth credentials in the Google Cloud Console.
+                  </Alert>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Yahoo Mail" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Yahoo Mail integration using App Password authentication for enhanced security.
+                  </Alert>
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    type="email"
+                    value={selectedIntegration.configuration.email || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, email: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="your.email@yahoo.com"
+                    helperText="Your Yahoo Mail email address"
+                  />
+                  <TextField
+                    label="Display Name"
+                    fullWidth
+                    value={selectedIntegration.configuration.displayName || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, displayName: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Your Name or Company Name"
+                    helperText="Name that will appear as the sender"
+                  />
+                  <TextField
+                    label="App Password"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.appPassword || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, appPassword: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your Yahoo App Password"
+                    helperText="Generate an App Password in your Yahoo Account Security settings"
+                  />
+                  <Alert severity="warning">
+                    <strong>Important:</strong> You must enable 2-factor authentication and create an App Password in your Yahoo account settings.
+                  </Alert>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Microsoft Outlook" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Microsoft Outlook integration using OAuth authentication.
+                  </Alert>
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    type="email"
+                    value={selectedIntegration.configuration.email || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, email: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="your.email@outlook.com or your.email@company.com"
+                    helperText="Your Outlook or Office 365 email address"
+                  />
+                  <TextField
+                    label="Display Name"
+                    fullWidth
+                    value={selectedIntegration.configuration.displayName || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, displayName: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Your Name or Company Name"
+                    helperText="Name that will appear as the sender"
+                  />
+                  <Alert severity="warning">
+                    Microsoft Outlook integration requires OAuth setup. Use the "Test Connection" button to authenticate with Microsoft.
+                  </Alert>
+                  <Alert severity="info">
+                    <strong>Note:</strong> For production use, you'll need to register an application in the Microsoft Azure portal.
+                  </Alert>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Hotmail/Live" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your Hotmail/Live email integration using password authentication.
+                  </Alert>
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    type="email"
+                    value={selectedIntegration.configuration.email || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, email: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="your.email@hotmail.com or your.email@live.com"
+                    helperText="Your Hotmail or Live email address"
+                  />
+                  <TextField
+                    label="Display Name"
+                    fullWidth
+                    value={selectedIntegration.configuration.displayName || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, displayName: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Your Name or Company Name"
+                    helperText="Name that will appear as the sender"
+                  />
+                  <TextField
+                    label="Password"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.password || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, password: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your email password"
+                    helperText="Your Hotmail/Live account password"
+                  />
+                  <Alert severity="warning">
+                    <strong>Security Note:</strong> Consider using a dedicated email account for automated sending rather than your personal account.
+                  </Alert>
+                </Stack>
+              )}
+
+              {selectedIntegration.name === "Custom SMTP" && (
+                <Stack spacing={3}>
+                  <Alert severity="info">
+                    Configure your custom SMTP server for any email provider.
+                  </Alert>
+                  <TextField
+                    label="Email Address"
+                    fullWidth
+                    type="email"
+                    value={selectedIntegration.configuration.email || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, email: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="your.email@yourdomain.com"
+                    helperText="The email address to send from"
+                  />
+                  <TextField
+                    label="Display Name"
+                    fullWidth
+                    value={selectedIntegration.configuration.displayName || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, displayName: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Your Name or Company Name"
+                    helperText="Name that will appear as the sender"
+                  />
+                  <TextField
+                    label="SMTP Host"
+                    fullWidth
+                    value={selectedIntegration.configuration.smtpHost || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, smtpHost: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="smtp.yourdomain.com"
+                    helperText="SMTP server hostname"
+                  />
+                  <TextField
+                    label="SMTP Port"
+                    fullWidth
+                    type="number"
+                    value={selectedIntegration.configuration.smtpPort || 587}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, smtpPort: parseInt(e.target.value) }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    helperText="Common ports: 587 (TLS), 465 (SSL), 25 (unsecured)"
+                  />
+                  <TextField
+                    label="Username"
+                    fullWidth
+                    value={selectedIntegration.configuration.username || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, username: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Usually your email address"
+                    helperText="SMTP authentication username"
+                  />
+                  <TextField
+                    label="Password"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.password || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, password: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your SMTP password"
+                    helperText="SMTP authentication password"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Security</InputLabel>
+                    <Select
+                      value={selectedIntegration.configuration.security || "STARTTLS"}
+                      label="Security"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          configuration: { ...selectedIntegration.configuration, security: e.target.value }
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="STARTTLS">STARTTLS (Recommended)</MenuItem>
+                      <MenuItem value="SSL/TLS">SSL/TLS</MenuItem>
+                      <MenuItem value="None">None (Not Recommended)</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <Alert severity="info">
+                    <strong>Tip:</strong> Contact your email provider or IT administrator for SMTP configuration details.
+                  </Alert>
+                </Stack>
+              )}
+
               <Box sx={{ mt: 3 }}>
                 <FormControlLabel
                   control={
