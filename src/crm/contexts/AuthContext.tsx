@@ -236,17 +236,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string): Promise<{ success: boolean; message: string }> => {
     // Simulate API call
     const foundUser = users.find(u => u.email === email && u.status === 'Active');
-    
+
     if (foundUser) {
-      const updatedUser = { ...foundUser, lastLogin: new Date().toISOString() };
-      setUser(updatedUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-      
-      // Update user in the list
-      setUsers(prev => prev.map(u => u.id === foundUser.id ? updatedUser : u));
-      
-      return { success: true, message: 'Login successful' };
+      // In demo/development mode, allow demo password
+      const isDemoMode = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
+      const isValidPassword = isDemoMode ? (password === 'demo123') : false; // In production, implement real password validation here
+
+      if (!isDemoMode) {
+        // TODO: Implement real password validation for production
+        // Example: const isValidPassword = await bcrypt.compare(password, foundUser.hashedPassword);
+        return { success: false, message: 'Password validation not implemented for production. Please contact administrator.' };
+      }
+
+      if (isValidPassword) {
+        const updatedUser = { ...foundUser, lastLogin: new Date().toISOString() };
+        setUser(updatedUser);
+        setIsAuthenticated(true);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+        // Update user in the list
+        setUsers(prev => prev.map(u => u.id === foundUser.id ? updatedUser : u));
+
+        return { success: true, message: 'Login successful' };
+      } else {
+        return { success: false, message: 'Invalid password' };
+      }
     } else {
       return { success: false, message: 'Invalid credentials or inactive account' };
     }

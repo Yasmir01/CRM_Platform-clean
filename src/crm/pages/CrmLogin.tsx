@@ -229,48 +229,57 @@ export default function CrmLogin() {
             </Typography>
           </Divider>
 
-          <DemoUsersSection>
-            <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
-              Demo Users - Quick Login
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: "center" }}>
-              Click any user below to log in instantly (password: demo123)
-            </Typography>
-            <Stack spacing={1}>
-              {users.map((user) => (
-                <Button
-                  key={user.id}
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => handleQuickLogin(user.email)}
-                  sx={{
-                    justifyContent: "flex-start",
-                    py: 1.5,
-                    textTransform: "none",
-                  }}
-                >
-                  <Stack direction="row" alignItems="center" spacing={2} sx={{ width: "100%" }}>
-                    <Box>
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {user.firstName} {user.lastName}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {user.email}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ ml: "auto" }}>
-                      <Chip
-                        label={user.role}
-                        size="small"
-                        color={getRoleColor(user.role) as any}
-                        variant="outlined"
-                      />
-                    </Box>
-                  </Stack>
-                </Button>
-              ))}
-            </Stack>
-          </DemoUsersSection>
+          {/* Only show demo login in development environment */}
+          {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true') && (
+            <DemoUsersSection>
+              <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+                Demo Users - Quick Login
+              </Typography>
+              <Alert severity="warning" sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Development Mode:</strong> Quick login is enabled for testing.
+                  This will be disabled in production.
+                </Typography>
+              </Alert>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: "center" }}>
+                Click any user below to log in instantly (password: demo123)
+              </Typography>
+              <Stack spacing={1}>
+                {users.map((user) => (
+                  <Button
+                    key={user.id}
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => handleQuickLogin(user.email)}
+                    sx={{
+                      justifyContent: "flex-start",
+                      py: 1.5,
+                      textTransform: "none",
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ width: "100%" }}>
+                      <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                          {user.firstName} {user.lastName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {user.email}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ ml: "auto" }}>
+                        <Chip
+                          label={user.role}
+                          size="small"
+                          color={getRoleColor(user.role) as any}
+                          variant="outlined"
+                        />
+                      </Box>
+                    </Stack>
+                  </Button>
+                ))}
+              </Stack>
+            </DemoUsersSection>
+          )}
         </CardContent>
       </LoginCard>
 
