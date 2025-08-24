@@ -350,16 +350,28 @@ export default function EmailManagement() {
                       <Stack spacing={2}>
                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                           <Box>
-                            <Typography variant="h6" fontWeight="medium">
-                              {account.displayName}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {account.email}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {EmailService.getProvider(account.providerId)?.displayName}
-                            </Typography>
-                          </Box>
+                  <Typography variant="h6" fontWeight="medium">
+                    {account.displayName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {account.email}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {EmailService.getProvider(account.providerId)?.displayName}
+                  </Typography>
+                  {(() => {
+                    const provider = EmailService.getProvider(account.providerId);
+                    if (provider) {
+                      return (
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                          SMTP: {provider.smtpConfig.host}:{provider.smtpConfig.port}
+                          {provider.imapConfig && ` | IMAP: ${provider.imapConfig.host}:${provider.imapConfig.port}`}
+                        </Typography>
+                      );
+                    }
+                    return null;
+                  })()}
+                </Box>
                           <Stack direction="row" spacing={1} alignItems="center">
                             <Chip
                               icon={getStatusIcon(account.status)}
