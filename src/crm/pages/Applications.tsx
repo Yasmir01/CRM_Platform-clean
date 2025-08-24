@@ -584,7 +584,7 @@ export default function Applications() {
                     {file.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Image content would be displayed here
+                    Image preview unavailable
                   </Typography>
                 </Stack>
               </Box>
