@@ -219,7 +219,7 @@ const mockIntegrations: Integration[] = [
       dataTransferred: 12.8,
       uptime: 99.4
     },
-    icon: "���",
+    icon: "📁",
     setupComplexity: "Easy",
     pricing: "Free",
     features: ["File Storage", "Backup", "Sharing", "Collaboration"],
@@ -1829,7 +1829,7 @@ export default function IntegrationManagement() {
               {selectedIntegration.name === "Gmail" && (
                 <Stack spacing={3}>
                   <Alert severity="info">
-                    Configure your Gmail integration using OAuth authentication for secure access.
+                    Configure your Gmail integration using OAuth authentication or manual setup with app password.
                   </Alert>
 
                   <Box sx={{ p: 2, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 1 }}>
@@ -1854,11 +1854,34 @@ export default function IntegrationManagement() {
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Typography variant="body2" color="text.secondary">
-                          <strong>Authentication:</strong> OAuth 2.0
+                          <strong>Authentication:</strong> OAuth 2.0 or App Password
                         </Typography>
                       </Grid>
                     </Grid>
                   </Box>
+
+                  <FormControl fullWidth>
+                    <InputLabel>Authentication Method</InputLabel>
+                    <Select
+                      value={selectedIntegration.configuration.authMethod || "oauth"}
+                      label="Authentication Method"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          configuration: {
+                            ...selectedIntegration.configuration,
+                            authMethod: e.target.value,
+                            // Clear other method's credentials when switching
+                            ...(e.target.value === 'oauth' ? { appPassword: '' } : { accessToken: '', refreshToken: '' })
+                          }
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="oauth">OAuth 2.0 (Recommended)</MenuItem>
+                      <MenuItem value="app-password">App Password (Manual Setup)</MenuItem>
+                    </Select>
+                  </FormControl>
 
                   <TextField
                     label="Email Address"
@@ -1875,6 +1898,7 @@ export default function IntegrationManagement() {
                     placeholder="your.email@gmail.com"
                     helperText="The Gmail address you want to use for sending emails"
                   />
+
                   <TextField
                     label="Display Name"
                     fullWidth
@@ -1889,12 +1913,48 @@ export default function IntegrationManagement() {
                     placeholder="Your Name or Company Name"
                     helperText="Name that will appear as the sender"
                   />
-                  <Alert severity="warning">
-                    Gmail integration requires OAuth setup. Use the "Test Connection" button to authenticate with Google.
-                  </Alert>
-                  <Alert severity="info">
-                    <strong>Note:</strong> For production use, you'll need to set up OAuth credentials in the Google Cloud Console.
-                  </Alert>
+
+                  {selectedIntegration.configuration.authMethod === "app-password" && (
+                    <TextField
+                      label="App Password"
+                      fullWidth
+                      type="password"
+                      value={selectedIntegration.configuration.appPassword || ""}
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          configuration: { ...selectedIntegration.configuration, appPassword: e.target.value }
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                      placeholder="Enter your Gmail App Password"
+                      helperText="Generate an App Password in your Google Account Security settings"
+                    />
+                  )}
+
+                  {selectedIntegration.configuration.authMethod === "oauth" ? (
+                    <Stack spacing={2}>
+                      <Alert severity="warning">
+                        OAuth authentication requires proper Google Cloud Console setup. Use the "Test Connection" button to start the OAuth flow.
+                      </Alert>
+                      <Alert severity="info">
+                        <strong>Note:</strong> For production use, you'll need to set up OAuth credentials in the Google Cloud Console.
+                      </Alert>
+                    </Stack>
+                  ) : (
+                    <Stack spacing={2}>
+                      <Alert severity="warning">
+                        <strong>App Password Setup Required:</strong>
+                        <br />1. Enable 2-factor authentication on your Gmail account
+                        <br />2. Go to Google Account Security settings
+                        <br />3. Generate an App Password for "Mail"
+                        <br />4. Use that password here (not your regular Gmail password)
+                      </Alert>
+                      <Alert severity="info">
+                        <strong>Note:</strong> App passwords provide secure access without sharing your main password.
+                      </Alert>
+                    </Stack>
+                  )}
                 </Stack>
               )}
 
