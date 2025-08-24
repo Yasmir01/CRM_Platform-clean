@@ -1309,6 +1309,11 @@ export default function IntegrationManagement() {
                   <MenuItem value="encharge">Encharge.io - Email Automation</MenuItem>
                   <MenuItem value="zapier">Zapier - Workflow Automation</MenuItem>
                   <MenuItem value="hubspot">HubSpot - CRM Integration</MenuItem>
+                  <MenuItem value="gmail">Gmail - Email Provider</MenuItem>
+                  <MenuItem value="outlook">Microsoft Outlook - Email Provider</MenuItem>
+                  <MenuItem value="yahoo">Yahoo Mail - Email Provider</MenuItem>
+                  <MenuItem value="hotmail">Hotmail/Live - Email Provider</MenuItem>
+                  <MenuItem value="custom-smtp">Custom SMTP - Email Provider</MenuItem>
                   {isSuperAdmin() && (
                     <MenuItem value="transunion">TransUnion - Credit Reports & Background Checks</MenuItem>
                   )}
