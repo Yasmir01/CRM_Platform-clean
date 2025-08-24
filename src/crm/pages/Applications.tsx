@@ -335,10 +335,13 @@ export default function Applications() {
             // Legacy array format - convert to object and normalize files
             normalizedFileUploads = app.fileUploads.reduce((acc: any, upload: any) => {
               acc[upload.fieldId] = upload.files.map((file: any) => ({
+                id: file.id || `legacy_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
                 name: file.name || 'Unknown File',
                 size: file.size || 0,
                 type: file.type || 'application/octet-stream',
-                lastModified: file.lastModified || Date.now()
+                lastModified: file.lastModified || Date.now(),
+                dataUrl: file.dataUrl, // Preserve image data
+                preview: file.preview  // Preserve thumbnail data
               }));
               return acc;
             }, {});
@@ -348,16 +351,22 @@ export default function Applications() {
               const files = app.fileUploads[fieldId];
               acc[fieldId] = Array.isArray(files)
                 ? files.map((file: any) => ({
+                    id: file.id || `legacy_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
                     name: file.name || 'Unknown File',
                     size: file.size || 0,
                     type: file.type || 'application/octet-stream',
-                    lastModified: file.lastModified || Date.now()
+                    lastModified: file.lastModified || Date.now(),
+                    dataUrl: file.dataUrl, // Preserve image data
+                    preview: file.preview  // Preserve thumbnail data
                   }))
                 : [{
+                    id: files.id || `legacy_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
                     name: files.name || 'Unknown File',
                     size: files.size || 0,
                     type: files.type || 'application/octet-stream',
-                    lastModified: files.lastModified || Date.now()
+                    lastModified: files.lastModified || Date.now(),
+                    dataUrl: files.dataUrl, // Preserve image data
+                    preview: files.preview  // Preserve thumbnail data
                   }];
               return acc;
             }, {});
