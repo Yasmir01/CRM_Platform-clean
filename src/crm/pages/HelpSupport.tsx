@@ -724,14 +724,65 @@ export default function HelpSupport() {
   const [userPlan] = React.useState<"Basic" | "Professional" | "Enterprise" | "Custom">("Professional");
   const { isSuperAdmin } = useRoleManagement();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [newTicketOpen, setNewTicketOpen] = React.useState(false);
+  const [searchResults, setSearchResults] = React.useState<FAQItem[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
   const [ticketForm, setTicketForm] = React.useState({
     subject: "",
     priority: "Medium" as SupportTicket["priority"],
     description: ""
   });
+
+  // Debounce search term for better performance
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 300);
+
+    if (searchTerm) {
+      setIsSearching(true);
+    }
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Update search results in real-time
+  React.useEffect(() => {
+    const updateSearchResults = () => {
+      const filtered = mockFAQs.filter(faq => {
+        // Only show TransUnion integration FAQ to super admins
+        if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
+          return false;
+        }
+
+        const searchLower = debouncedSearchTerm.toLowerCase();
+        const matchesSearch = !debouncedSearchTerm ||
+          faq.question.toLowerCase().includes(searchLower) ||
+          faq.answer.toLowerCase().includes(searchLower) ||
+          faq.tags.some(tag => tag.toLowerCase().includes(searchLower));
+
+        const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
+        const matchesPlan = isPlanEligible(faq.planRequired);
+
+        return matchesSearch && matchesCategory && matchesPlan;
+      });
+
+      setSearchResults(filtered);
+    };
+
+    updateSearchResults();
+  }, [debouncedSearchTerm, selectedCategory, isSuperAdmin]);
+
+  // Real-time search status updates
+  React.useEffect(() => {
+    if (searchTerm) {
+      console.log(`Real-time search: "${searchTerm}" - Found ${searchResults.length} results`);
+    }
+  }, [searchTerm, searchResults.length]);
 
   const isPlanEligible = (requiredPlan?: string) => {
     if (!requiredPlan) return true;
