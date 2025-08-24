@@ -752,12 +752,15 @@ export default function HelpSupport() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Store isSuperAdmin result to avoid function calls in dependency array
+  const isUserSuperAdmin = React.useMemo(() => isSuperAdmin(), []);
+
   // Update search results in real-time
   React.useEffect(() => {
     const updateSearchResults = () => {
       const filtered = mockFAQs.filter(faq => {
         // Only show TransUnion integration FAQ to super admins
-        if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
+        if (faq.id === "transunion-integration-setup" && !isUserSuperAdmin) {
           return false;
         }
 
@@ -787,7 +790,7 @@ export default function HelpSupport() {
     };
 
     updateSearchResults();
-  }, [debouncedSearchTerm, selectedCategory, isSuperAdmin]);
+  }, [debouncedSearchTerm, selectedCategory, isUserSuperAdmin]);
 
   // Real-time search status updates
   React.useEffect(() => {
