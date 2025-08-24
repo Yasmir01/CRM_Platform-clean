@@ -116,7 +116,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "yahoo-integration-setup",
     question: "How do I set up Yahoo Mail with app password authentication?",
-    answer: "**Yahoo Mail Integration**: Yahoo requires app passwords for enhanced security instead of your regular password. **📋 Setup Instructions**: **Step 1: Generate App Password** - Log into your Yahoo account, Go to **Account Security** → **App Passwords**, Click **Generate app password**, Select **Other** and name it 'CRM Integration', Copy the 16-character app password. **Step 2: Add to CRM** - Go to **Integrations** → **Add Integration**, Select **Yahoo Mail - Email Provider**, Enter your Yahoo email address, Add your display name, **Paste the app password** (not your regular password). **Step 3: Complete Setup** - Click **Add Integration**, System will test connection automatically, Verify status shows 'Connected'. **🔧 Server Settings**: **SMTP Configuration**: Host: smtp.mail.yahoo.com, Port: 587, Security: TLS, **IMAP Configuration**: Host: imap.mail.yahoo.com, Port: 993, Security: SSL, **POP Configuration**: Host: pop.mail.yahoo.com, Port: 995, Security: SSL. **🔒 Security Notes**: App passwords are more secure than regular passwords, Each app should have its own unique app password, You can revoke app passwords anytime in Yahoo settings, Two-factor authentication must be enabled for app passwords. **🧪 Testing**: Use **Email Management** to send test emails, Verify delivery and connection status, Monitor email statistics and performance.",
+    answer: "**Yahoo Mail Integration**: Yahoo requires app passwords for enhanced security instead of your regular password. **📋 Setup Instructions**: **Step 1: Generate App Password** - Log into your Yahoo account, Go to **Account Security** → **App Passwords**, Click **Generate app password**, Select **Other** and name it 'CRM Integration', Copy the 16-character app password. **Step 2: Add to CRM** - Go to **Integrations** → **Add Integration**, Select **Yahoo Mail - Email Provider**, Enter your Yahoo email address, Add your display name, **Paste the app password** (not your regular password). **Step 3: Complete Setup** - Click **Add Integration**, System will test connection automatically, Verify status shows 'Connected'. **🔧 Server Settings**: **SMTP Configuration**: Host: smtp.mail.yahoo.com, Port: 587, Security: TLS, **IMAP Configuration**: Host: imap.mail.yahoo.com, Port: 993, Security: SSL, **POP Configuration**: Host: pop.mail.yahoo.com, Port: 995, Security: SSL. **🔒 Security Notes**: App passwords are more secure than regular passwords, Each app should have its own unique app password, You can revoke app passwords anytime in Yahoo settings, Two-factor authentication must be enabled for app passwords. **���� Testing**: Use **Email Management** to send test emails, Verify delivery and connection status, Monitor email statistics and performance.",
     category: "Integrations",
     tags: ["yahoo", "app-password", "authentication", "security", "email", "smtp", "imap", "setup", "yahoo-mail"],
     helpful: 91,
@@ -125,7 +125,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "hotmail-integration-setup",
     question: "How do I configure Hotmail/Live email integration?",
-    answer: "**Hotmail/Live Integration**: Set up Microsoft Hotmail or Live email accounts with password authentication. **📋 Configuration Steps**: **Step 1: Add Integration** - Navigate to **Integrations** → **Add Integration**, Select **Hotmail/Live - Email Provider**, Enter your Hotmail/Live email address, Provide display name for identification. **Step 2: Authentication** - Enter your account password (not an app password), System will verify credentials automatically, Connection will be tested immediately. **Step 3: Verification** - Confirm status shows 'Connected', Test email sending functionality. **🔧 Technical Configuration**: **SMTP Settings**: Host: smtp.live.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap-mail.outlook.com, Port: 993, Security: SSL, **POP Settings**: Host: pop3.live.com, Port: 995, Security: SSL. **⚠️ Security Considerations**: Regular password authentication (less secure than OAuth), Ensure account has strong password, Monitor for any suspicious activity, Consider using Outlook integration for enhanced security if available. **📧 Features Available**: Send automated emails, Password reset functionality, Template-based messaging, Real-time delivery monitoring. **🧪 Testing & Monitoring**: Access **Email Management** for testing, Send test emails to verify functionality, Monitor connection status and statistics, Troubleshoot any delivery issues.",
+    answer: "**Hotmail/Live Integration**: Set up Microsoft Hotmail or Live email accounts with password authentication. **📋 Configuration Steps**: **Step 1: Add Integration** - Navigate to **Integrations** → **Add Integration**, Select **Hotmail/Live - Email Provider**, Enter your Hotmail/Live email address, Provide display name for identification. **Step 2: Authentication** - Enter your account password (not an app password), System will verify credentials automatically, Connection will be tested immediately. **Step 3: Verification** - Confirm status shows 'Connected', Test email sending functionality. **🔧 Technical Configuration**: **SMTP Settings**: Host: smtp.live.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap-mail.outlook.com, Port: 993, Security: SSL, **POP Settings**: Host: pop3.live.com, Port: 995, Security: SSL. **⚠�� Security Considerations**: Regular password authentication (less secure than OAuth), Ensure account has strong password, Monitor for any suspicious activity, Consider using Outlook integration for enhanced security if available. **📧 Features Available**: Send automated emails, Password reset functionality, Template-based messaging, Real-time delivery monitoring. **🧪 Testing & Monitoring**: Access **Email Management** for testing, Send test emails to verify functionality, Monitor connection status and statistics, Troubleshoot any delivery issues.",
     category: "Integrations",
     tags: ["hotmail", "live", "microsoft", "password", "authentication", "email", "smtp", "imap", "setup"],
     helpful: 88,
@@ -790,22 +790,21 @@ export default function HelpSupport() {
     return planHierarchy[userPlan] >= planHierarchy[requiredPlan as keyof typeof planHierarchy];
   };
 
-  const filteredFAQs = mockFAQs.filter(faq => {
-    // Only show TransUnion integration FAQ to super admins
-    if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
-      return false;
-    }
+  // Helper function to highlight search terms
+  const highlightSearchTerm = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
 
-    const matchesSearch =
-      faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
 
-    const matchesCategory = selectedCategory === "All" || faq.category === selectedCategory;
-    const matchesPlan = isPlanEligible(faq.planRequired);
+    return parts.map((part, index) =>
+      regex.test(part) ?
+        `**${part}**` : part
+    ).join('');
+  };
 
-    return matchesSearch && matchesCategory && matchesPlan;
-  });
+  // Use searchResults instead of inline filtering
+  const filteredFAQs = searchResults;
 
   // Debug logging for super admin role
   React.useEffect(() => {
