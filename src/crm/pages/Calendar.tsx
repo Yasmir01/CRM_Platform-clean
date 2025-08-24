@@ -691,49 +691,67 @@ export default function Calendar() {
       </Card>
 
       {/* Calendar Grid and Events Layout */}
-      <Grid container spacing={3}>
-        {/* Calendar Grid Widget */}
-        <Grid item xs={12} lg={4}>
-          {useEnhancedCalendar ? (
-            <EnhancedCalendarGrid
-              currentDate={currentDate}
-              onDateChange={(date) => setCurrentDate(date)}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                setCurrentDate(date);
-              }}
-              events={filteredEvents}
-              selectedDate={selectedDate}
-              view={view}
-              onViewChange={(newView) => setView(newView)}
-              onEventClick={(event) => setSelectedEvent(event)}
-              onAddEvent={(date) => {
-                if (date) {
+      {showDragDropCalendar ? (
+        /* Drag & Drop Calendar - Full Width */
+        <DragDropCalendar
+          events={filteredEvents}
+          onEventMove={(eventId, newDate, newTime) => {
+            setEvents(prev => prev.map(event =>
+              event.id === eventId
+                ? { ...event, date: newDate, time: newTime }
+                : event
+            ));
+          }}
+          onEventClick={(event) => setSelectedEvent(event)}
+          currentDate={currentDate}
+          onDateChange={setCurrentDate}
+          view={view === "day" ? "day" : "week"}
+        />
+      ) : (
+        <Grid container spacing={3}>
+          {/* Calendar Grid Widget */}
+          <Grid item xs={12} lg={4}>
+            {useEnhancedCalendar ? (
+              <EnhancedCalendarGrid
+                currentDate={currentDate}
+                onDateChange={(date) => setCurrentDate(date)}
+                onDateSelect={(date) => {
                   setSelectedDate(date);
                   setCurrentDate(date);
-                }
-                setEnhancedFormOpen(true);
-              }}
-            />
-          ) : (
-            <CalendarGrid
-              currentDate={currentDate}
-              onDateChange={(date) => setCurrentDate(date)}
-              onDateSelect={(date) => {
-                setSelectedDate(date);
-                setCurrentDate(date);
-              }}
-              events={filteredEvents}
-              selectedDate={selectedDate}
-            />
-          )}
-        </Grid>
+                }}
+                events={filteredEvents}
+                selectedDate={selectedDate}
+                view={view}
+                onViewChange={(newView) => setView(newView)}
+                onEventClick={(event) => setSelectedEvent(event)}
+                onAddEvent={(date) => {
+                  if (date) {
+                    setSelectedDate(date);
+                    setCurrentDate(date);
+                  }
+                  setEnhancedFormOpen(true);
+                }}
+              />
+            ) : (
+              <CalendarGrid
+                currentDate={currentDate}
+                onDateChange={(date) => setCurrentDate(date)}
+                onDateSelect={(date) => {
+                  setSelectedDate(date);
+                  setCurrentDate(date);
+                }}
+                events={filteredEvents}
+                selectedDate={selectedDate}
+              />
+            )}
+          </Grid>
 
-        {/* Events Grid */}
-        <Grid item xs={12} lg={8}>
-          {renderEvents()}
+          {/* Events Grid */}
+          <Grid item xs={12} lg={8}>
+            {renderEvents()}
+          </Grid>
         </Grid>
-      </Grid>
+      )}
 
       {/* Filter Dialog */}
       <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} maxWidth="sm" fullWidth>
