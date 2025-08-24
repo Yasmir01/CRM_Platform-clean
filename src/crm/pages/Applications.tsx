@@ -1459,7 +1459,7 @@ export default function Applications() {
                         PDF viewer would be embedded here
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        In a real application, a PDF viewer would display the document content
+                        PDF content preview unavailable
                       </Typography>
                     </Stack>
                   </Box>
