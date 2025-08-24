@@ -112,6 +112,7 @@ export default function ModeAwareContent() {
       <Route path="service-providers" element={<ServiceProviders />} />
       <Route path="customer-service" element={<CustomerService />} />
       <Route path="integrations" element={<IntegrationManagement />} />
+      <Route path="email-management" element={<EmailManagement />} />
       <Route path="backup" element={<BackupManagement />} />
       <Route path="communications" element={<Communications />} />
       <Route path="power-tools" element={<PowerTools />} />
