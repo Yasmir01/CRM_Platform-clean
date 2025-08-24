@@ -358,7 +358,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "encharge-email-automation",
     question: "How do I set up Encharge.io for advanced email automation?",
-    answer: "Encharge.io integration for lifecycle marketing: 1) Go to Integration Management and add 'Encharge.io - Email Automation', 2) Get your API key from Encharge.io → Settings �� API & Webhooks, 3) Enter your API key and Account ID in the configuration, 4) Set sync frequency based on your campaign needs, 5) Map tenant lifecycle events to Encharge automation triggers, 6) Configure customer journey workflows in Encharge, 7) Test with sample data. This enables sophisticated email automation based on tenant behavior, lease status, and payment history.",
+    answer: "Encharge.io integration for lifecycle marketing: 1) Go to Integration Management and add 'Encharge.io - Email Automation', 2) Get your API key from Encharge.io → Settings → API & Webhooks, 3) Enter your API key and Account ID in the configuration, 4) Set sync frequency based on your campaign needs, 5) Map tenant lifecycle events to Encharge automation triggers, 6) Configure customer journey workflows in Encharge, 7) Test with sample data. This enables sophisticated email automation based on tenant behavior, lease status, and payment history.",
     category: "Integrations",
     tags: ["encharge", "automation", "lifecycle", "journey", "campaigns"],
     helpful: 86
@@ -1049,8 +1049,15 @@ export default function HelpSupport() {
           </Box>
         )}
 
-        {/* Quick Access for Email Integration */}
-        {(!searchTerm || searchTerm.toLowerCase().includes('email') || searchTerm.toLowerCase().includes('integration')) && (
+        {/* Dynamic Integration Topics */}
+        {(!searchTerm ||
+          searchTerm.toLowerCase().includes('email') ||
+          searchTerm.toLowerCase().includes('integration') ||
+          searchTerm.toLowerCase().includes('gmail') ||
+          searchTerm.toLowerCase().includes('outlook') ||
+          searchTerm.toLowerCase().includes('yahoo') ||
+          searchTerm.toLowerCase().includes('smtp') ||
+          searchTerm.toLowerCase().includes('password')) && (
           <Card sx={{ mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
