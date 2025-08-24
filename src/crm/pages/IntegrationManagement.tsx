@@ -219,7 +219,7 @@ const mockIntegrations: Integration[] = [
       dataTransferred: 12.8,
       uptime: 99.4
     },
-    icon: "📁",
+    icon: "���",
     setupComplexity: "Easy",
     pricing: "Free",
     features: ["File Storage", "Backup", "Sharing", "Collaboration"],
@@ -2141,8 +2141,24 @@ export default function IntegrationManagement() {
               {selectedIntegration.name === "Custom SMTP" && (
                 <Stack spacing={3}>
                   <Alert severity="info">
-                    Configure your custom SMTP server for any email provider.
+                    Configure your custom SMTP server for any email provider. Enter your specific server details below.
                   </Alert>
+
+                  <Box sx={{ p: 2, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom color="primary">
+                      Custom SMTP Server Configuration
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Configure your own mail server settings. Common configurations:
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" component="div">
+                      • <strong>Port 587:</strong> STARTTLS (recommended for most providers)<br/>
+                      • <strong>Port 465:</strong> SSL/TLS (legacy but still used)<br/>
+                      • <strong>Port 25:</strong> Unencrypted (not recommended)<br/>
+                      • <strong>IMAP Port 993:</strong> SSL (for receiving emails)<br/>
+                      • <strong>POP Port 995:</strong> SSL (for receiving emails)
+                    </Typography>
+                  </Box>
                   <TextField
                     label="Email Address"
                     fullWidth
