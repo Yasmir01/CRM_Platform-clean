@@ -238,6 +238,11 @@ function AppRoutes() {
             <EmailMarketing />
           </React.Suspense>
         } />
+        <Route path="email-management" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EmailManagement />
+          </React.Suspense>
+        } />
         <Route path="sms-marketing" element={
           <React.Suspense fallback={<PageLoader />}>
             <SmsMarketing />
