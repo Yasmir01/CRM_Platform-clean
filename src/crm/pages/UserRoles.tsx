@@ -280,7 +280,7 @@ const mockRoles: Role[] = [
     updatedDate: "2024-01-25",
   },
   {
-    id: "5",
+    id: "10",
     name: "Marketing Specialist",
     description: "Marketing campaigns and tenant communication",
     permissions: [
@@ -290,12 +290,13 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 1,
+    hierarchy: 3,
     createdDate: "2024-01-25",
     updatedDate: "2024-01-25",
   },
   {
-    id: "6",
-    name: "Tenant",
+    id: "11",
+    name: "Tenant Portal",
     description: "Limited access to own property data and communications",
     permissions: [
       "tenant_own_view", "tenant_own_wo", "tenant_own_communication",
@@ -303,6 +304,7 @@ const mockRoles: Role[] = [
     ],
     isSystem: false,
     userCount: 0,
+    hierarchy: 1,
     createdDate: "2024-01-30",
     updatedDate: "2024-01-30",
   },
