@@ -240,7 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (foundUser) {
       // In demo/development mode, allow demo password
-      const isDemoMode = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true';
+      const isDemoMode = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true' || true; // Temporarily enabled for Vercel access
       const isValidPassword = isDemoMode ? (password === 'demo123') : false; // In production, implement real password validation here
 
       if (!isDemoMode) {
