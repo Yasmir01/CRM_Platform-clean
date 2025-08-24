@@ -66,6 +66,8 @@ import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import PauseRoundedIcon from "@mui/icons-material/PauseRounded";
 import BugReportRoundedIcon from "@mui/icons-material/BugReportRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
+import { TransUnionService } from "../services/TransUnionService";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 
 interface Integration {
   id: string;
@@ -251,6 +253,37 @@ const mockIntegrations: Integration[] = [
   },
   {
     id: "5",
+    name: "TransUnion",
+    description: "Credit reporting and background check services for tenant screening",
+    category: "Finance",
+    provider: "TransUnion",
+    type: "API",
+    status: TransUnionService.isConfigured() ? "Connected" : "Disconnected",
+    isActive: TransUnionService.isConfigured(),
+    lastSync: TransUnionService.isConfigured() ? "2024-01-18T09:30:00Z" : "Never",
+    syncFrequency: "Manual",
+    configuration: {
+      apiKey: import.meta.env.VITE_TRANSUNION_API_KEY || "",
+      environment: import.meta.env.VITE_TRANSUNION_ENV || "sandbox",
+      baseUrl: import.meta.env.VITE_TRANSUNION_BASE_URL || ""
+    },
+    metrics: {
+      totalRequests: TransUnionService.isConfigured() ? 45 : 0,
+      successfulRequests: TransUnionService.isConfigured() ? 42 : 0,
+      failedRequests: TransUnionService.isConfigured() ? 3 : 0,
+      avgResponseTime: 1250,
+      dataTransferred: 0.8,
+      uptime: TransUnionService.isConfigured() ? 93.3 : 0
+    },
+    icon: "🔍",
+    setupComplexity: "Advanced",
+    pricing: "Per Report",
+    features: ["Credit Reports", "Background Checks", "Identity Verification", "Criminal Records"],
+    dateConnected: TransUnionService.isConfigured() ? "2024-01-01" : undefined,
+    lastError: TransUnionService.isConfigured() ? undefined : "API credentials not configured"
+  },
+  {
+    id: "6",
     name: "Encharge.io",
     description: "Email marketing automation and customer lifecycle management",
     category: "Email",
@@ -364,6 +397,7 @@ const getCategoryIcon = (category: Integration["category"]) => {
 };
 
 export default function IntegrationManagement() {
+  const { isSuperAdmin } = useRoleManagement();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [integrations, setIntegrations] = React.useState<Integration[]>(mockIntegrations);
   const [webhooks, setWebhooks] = React.useState<Webhook[]>(mockWebhooks);
@@ -386,11 +420,16 @@ export default function IntegrationManagement() {
   };
 
   const filteredIntegrations = integrations.filter(integration => {
+    // Only show TransUnion to super admins
+    if (integration.name === "TransUnion" && !isSuperAdmin()) {
+      return false;
+    }
+
     const matchesSearch = integration.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          integration.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "All" || integration.category === filterCategory;
     const matchesStatus = filterStatus === "All" || integration.status === filterStatus;
-    
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -1098,6 +1137,81 @@ export default function IntegrationManagement() {
                 </Stack>
               )}
 
+              {selectedIntegration.name === "TransUnion" && (
+                <Stack spacing={3}>
+                  <Alert severity="warning">
+                    <strong>Super Admin Only:</strong> TransUnion integration provides credit reporting and background check services for tenant screening. This integration requires special API credentials and handles sensitive financial data.
+                  </Alert>
+                  <Alert severity="info">
+                    Configure your TransUnion API credentials. These settings are stored securely and only accessible to super administrators.
+                  </Alert>
+                  <TextField
+                    label="API Key"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.apiKey || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiKey: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your TransUnion API key"
+                    helperText="Your TransUnion API key provided by TransUnion for credit reporting services"
+                  />
+                  <TextField
+                    label="API Secret"
+                    fullWidth
+                    type="password"
+                    value={selectedIntegration.configuration.apiSecret || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, apiSecret: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="Enter your TransUnion API secret"
+                    helperText="Your TransUnion API secret - keep this secure and never share it"
+                  />
+                  <FormControl fullWidth>
+                    <InputLabel>Environment</InputLabel>
+                    <Select
+                      value={selectedIntegration.configuration.environment || "sandbox"}
+                      label="Environment"
+                      onChange={(e) => {
+                        const updatedIntegration = {
+                          ...selectedIntegration,
+                          configuration: { ...selectedIntegration.configuration, environment: e.target.value }
+                        };
+                        setSelectedIntegration(updatedIntegration);
+                      }}
+                    >
+                      <MenuItem value="sandbox">Sandbox (Testing)</MenuItem>
+                      <MenuItem value="production">Production (Live)</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    label="Base URL"
+                    fullWidth
+                    value={selectedIntegration.configuration.baseUrl || ""}
+                    onChange={(e) => {
+                      const updatedIntegration = {
+                        ...selectedIntegration,
+                        configuration: { ...selectedIntegration.configuration, baseUrl: e.target.value }
+                      };
+                      setSelectedIntegration(updatedIntegration);
+                    }}
+                    placeholder="https://api.transunion.com"
+                    helperText="TransUnion API base URL (use sandbox URL for testing)"
+                  />
+                  <Alert severity="warning">
+                    <strong>Important:</strong> In production, API credentials should be stored on your secure backend server, not in the frontend application. This configuration is for development and testing purposes.
+                  </Alert>
+                </Stack>
+              )}
+
               {selectedIntegration.name === "Encharge.io" && (
                 <Stack spacing={3}>
                   <Alert severity="info">
@@ -1195,6 +1309,9 @@ export default function IntegrationManagement() {
                   <MenuItem value="encharge">Encharge.io - Email Automation</MenuItem>
                   <MenuItem value="zapier">Zapier - Workflow Automation</MenuItem>
                   <MenuItem value="hubspot">HubSpot - CRM Integration</MenuItem>
+                  {isSuperAdmin() && (
+                    <MenuItem value="transunion">TransUnion - Credit Reports & Background Checks</MenuItem>
+                  )}
                 </Select>
               </FormControl>
 
@@ -1264,6 +1381,40 @@ export default function IntegrationManagement() {
                     </Stack>
                   )}
 
+                  {newIntegrationType === "transunion" && (
+                    <Stack spacing={2}>
+                      <Alert severity="warning">
+                        <strong>Super Admin Only:</strong> This integration handles sensitive financial data and requires special credentials.
+                      </Alert>
+                      <TextField
+                        label="API Key"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.apiKey || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiKey: e.target.value}))}
+                        placeholder="Enter your TransUnion API key"
+                      />
+                      <TextField
+                        label="API Secret"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.apiSecret || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({...prev, apiSecret: e.target.value}))}
+                        placeholder="Enter your TransUnion API secret"
+                      />
+                      <FormControl fullWidth>
+                        <InputLabel>Environment</InputLabel>
+                        <Select
+                          value={newIntegrationConfig.environment || "sandbox"}
+                          onChange={(e) => setNewIntegrationConfig(prev => ({...prev, environment: e.target.value}))}
+                        >
+                          <MenuItem value="sandbox">Sandbox (Testing)</MenuItem>
+                          <MenuItem value="production">Production (Live)</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Stack>
+                  )}
+
                   {(newIntegrationType === "slack" || newIntegrationType === "google-drive" || newIntegrationType === "zapier" || newIntegrationType === "hubspot") && (
                     <Alert severity="info">
                       This integration requires OAuth authentication. Click "Add Integration" to begin the OAuth flow.
@@ -1282,9 +1433,36 @@ export default function IntegrationManagement() {
             onClick={() => {
               if (selectedIntegration) {
                 // Update existing integration
-                setIntegrations(prev => prev.map(integration =>
-                  integration.id === selectedIntegration.id ? selectedIntegration : integration
-                ));
+                if (selectedIntegration.name === "TransUnion") {
+                  // Update TransUnion service configuration
+                  TransUnionService.initialize({
+                    apiKey: selectedIntegration.configuration.apiKey,
+                    apiSecret: selectedIntegration.configuration.apiSecret,
+                    environment: selectedIntegration.configuration.environment,
+                    baseUrl: selectedIntegration.configuration.baseUrl
+                  });
+
+                  // Update integration status based on configuration
+                  const updatedIntegration = {
+                    ...selectedIntegration,
+                    status: TransUnionService.isConfigured() ? "Connected" : "Disconnected" as Integration['status'],
+                    isActive: TransUnionService.isConfigured()
+                  };
+                  setSelectedIntegration(updatedIntegration);
+                  setIntegrations(prev => prev.map(integration =>
+                    integration.id === updatedIntegration.id ? updatedIntegration : integration
+                  ));
+                  showNotification(
+                    TransUnionService.isConfigured()
+                      ? "TransUnion integration updated and connected successfully!"
+                      : "TransUnion configuration saved. Please verify your credentials.",
+                    TransUnionService.isConfigured() ? 'success' : 'info'
+                  );
+                } else {
+                  setIntegrations(prev => prev.map(integration =>
+                    integration.id === selectedIntegration.id ? selectedIntegration : integration
+                  ));
+                }
               } else if (newIntegrationType) {
                 // Add new integration
                 const newId = (integrations.length + 1).toString();
@@ -1333,6 +1511,17 @@ export default function IntegrationManagement() {
                     setupComplexity: "Easy",
                     pricing: "Free",
                     features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"]
+                  },
+                  transunion: {
+                    name: "TransUnion",
+                    description: "Credit reporting and background check services for tenant screening",
+                    category: "Finance",
+                    provider: "TransUnion",
+                    type: "API",
+                    icon: "🔍",
+                    setupComplexity: "Advanced",
+                    pricing: "Per Report",
+                    features: ["Credit Reports", "Background Checks", "Identity Verification", "Criminal Records"]
                   }
                 };
 
