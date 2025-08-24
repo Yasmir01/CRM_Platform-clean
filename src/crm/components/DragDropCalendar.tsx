@@ -1,2 +1,523 @@
 import * as React from "react";
-import {\n  Box,\n  Typography,\n  Card,\n  CardContent,\n  Stack,\n  Chip,\n  IconButton,\n  useTheme,\n  alpha,\n  Tooltip,\n  Dialog,\n  DialogTitle,\n  DialogContent,\n  DialogActions,\n  Button,\n  Alert,\n} from "@mui/material";\nimport DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";\nimport CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";\nimport AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";\nimport PersonRoundedIcon from "@mui/icons-material/PersonRounded";\nimport LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";\nimport CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";\nimport WarningRoundedIcon from "@mui/icons-material/WarningRounded";\nimport PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";\nimport EmailRoundedIcon from "@mui/icons-material/EmailRounded";\nimport TaskRoundedIcon from "@mui/icons-material/TaskRounded";\nimport EventRoundedIcon from "@mui/icons-material/EventRounded";\n\ninterface CalendarEvent {\n  id: string;\n  title: string;\n  date: string;\n  time: string;\n  endTime?: string;\n  type: string;\n  priority: "High" | "Medium" | "Low";\n  status: "Pending" | "Completed" | "In Progress" | "Overdue";\n  description?: string;\n  location?: string;\n  attendees?: string[];\n  client?: string;\n  property?: string;\n  assignedTo?: string;\n}\n\ninterface DragDropCalendarProps {\n  events: CalendarEvent[];\n  onEventMove: (eventId: string, newDate: string, newTime: string) => void;\n  onEventClick?: (event: CalendarEvent) => void;\n  currentDate: Date;\n  onDateChange: (date: Date) => void;\n  view: "week" | "day";\n}\n\nconst DragDropCalendar: React.FC<DragDropCalendarProps> = ({\n  events,\n  onEventMove,\n  onEventClick,\n  currentDate,\n  onDateChange,\n  view,\n}) => {\n  const theme = useTheme();\n  const [draggedEvent, setDraggedEvent] = React.useState<CalendarEvent | null>(null);\n  const [dragOverSlot, setDragOverSlot] = React.useState<string | null>(null);\n  const [confirmDialog, setConfirmDialog] = React.useState<{\n    open: boolean;\n    event?: CalendarEvent;\n    oldDateTime?: string;\n    newDateTime?: string;\n  }>({ open: false });\n\n  // Generate time slots (24 hours in 30-minute intervals)\n  const timeSlots = React.useMemo(() => {\n    const slots = [];\n    for (let hour = 0; hour < 24; hour++) {\n      for (let minute = 0; minute < 60; minute += 30) {\n        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;\n        slots.push(timeString);\n      }\n    }\n    return slots;\n  }, []);\n\n  // Get days to display based on view\n  const displayDays = React.useMemo(() => {\n    if (view === 'day') {\n      return [new Date(currentDate)];\n    } else {\n      // Week view\n      const startOfWeek = new Date(currentDate);\n      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());\n      return Array.from({ length: 7 }, (_, i) => {\n        const date = new Date(startOfWeek);\n        date.setDate(startOfWeek.getDate() + i);\n        return date;\n      });\n    }\n  }, [currentDate, view]);\n\n  const getSlotId = (date: Date, time: string) => {\n    return `${date.toISOString().split('T')[0]}_${time}`;\n  };\n\n  const getEventTypeIcon = (type: string) => {\n    switch (type) {\n      case 'Call': return <PhoneRoundedIcon />;\n      case 'Email': return <EmailRoundedIcon />;\n      case 'Task': return <TaskRoundedIcon />;\n      case 'Appointment': return <EventRoundedIcon />;\n      case 'Inspection': return <LocationOnRoundedIcon />;\n      case 'Meeting': return <EventRoundedIcon />;\n      default: return <EventRoundedIcon />;\n    }\n  };\n\n  const getEventPriorityColor = (priority: string) => {\n    switch (priority) {\n      case 'High': return theme.palette.error.main;\n      case 'Medium': return theme.palette.warning.main;\n      case 'Low': return theme.palette.info.main;\n      default: return theme.palette.grey[500];\n    }\n  };\n\n  const handleDragStart = (e: React.DragEvent, event: CalendarEvent) => {\n    setDraggedEvent(event);\n    e.dataTransfer.setData('text/plain', event.id);\n    e.dataTransfer.effectAllowed = 'move';\n  };\n\n  const handleDragOver = (e: React.DragEvent, slotId: string) => {\n    e.preventDefault();\n    e.dataTransfer.dropEffect = 'move';\n    setDragOverSlot(slotId);\n  };\n\n  const handleDragLeave = () => {\n    setDragOverSlot(null);\n  };\n\n  const handleDrop = (e: React.DragEvent, date: Date, time: string) => {\n    e.preventDefault();\n    setDragOverSlot(null);\n    \n    if (!draggedEvent) return;\n    \n    const newDate = date.toISOString().split('T')[0];\n    const oldDateTime = `${draggedEvent.date} ${draggedEvent.time}`;\n    const newDateTime = `${newDate} ${time}`;\n    \n    if (oldDateTime === newDateTime) {\n      setDraggedEvent(null);\n      return;\n    }\n    \n    // Show confirmation dialog\n    setConfirmDialog({\n      open: true,\n      event: draggedEvent,\n      oldDateTime,\n      newDateTime,\n    });\n  };\n\n  const handleConfirmMove = () => {\n    if (confirmDialog.event && confirmDialog.newDateTime) {\n      const [newDate, newTime] = confirmDialog.newDateTime.split(' ');\n      onEventMove(confirmDialog.event.id, newDate, newTime);\n    }\n    setConfirmDialog({ open: false });\n    setDraggedEvent(null);\n  };\n\n  const formatTimeDisplay = (time: string) => {\n    const [hours, minutes] = time.split(':');\n    const hour24 = parseInt(hours);\n    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;\n    const ampm = hour24 >= 12 ? 'PM' : 'AM';\n    return `${hour12}:${minutes} ${ampm}`;\n  };\n\n  const getEventsForSlot = (date: Date, time: string) => {\n    const dateString = date.toISOString().split('T')[0];\n    return events.filter(event => {\n      if (event.date !== dateString) return false;\n      \n      // Check if event overlaps with this time slot\n      const eventStart = event.time;\n      const eventEnd = event.endTime || event.time;\n      \n      return eventStart <= time && time < eventEnd;\n    });\n  };\n\n  // Only show time slots during business hours for better UX\n  const businessHours = timeSlots.filter(time => {\n    const hour = parseInt(time.split(':')[0]);\n    return hour >= 6 && hour <= 22; // 6 AM to 10 PM\n  });\n\n  return (\n    <Box>\n      {/* Header */}\n      <Stack direction=\"row\" justifyContent=\"space-between\" alignItems=\"center\" sx={{ mb: 2 }}>\n        <Typography variant=\"h6\" sx={{ fontWeight: 600 }}>\n          Drag & Drop Calendar - {view === 'day' ? 'Day View' : 'Week View'}\n        </Typography>\n        <Stack direction=\"row\" spacing={1}>\n          <IconButton\n            size=\"small\"\n            onClick={() => {\n              const newDate = new Date(currentDate);\n              newDate.setDate(newDate.getDate() - (view === 'day' ? 1 : 7));\n              onDateChange(newDate);\n            }}\n          >\n            ←\n          </IconButton>\n          <IconButton\n            size=\"small\"\n            onClick={() => onDateChange(new Date())}\n          >\n            <CalendarTodayRoundedIcon />\n          </IconButton>\n          <IconButton\n            size=\"small\"\n            onClick={() => {\n              const newDate = new Date(currentDate);\n              newDate.setDate(newDate.getDate() + (view === 'day' ? 1 : 7));\n              onDateChange(newDate);\n            }}\n          >\n            →\n          </IconButton>\n        </Stack>\n      </Stack>\n\n      {/* Instructions */}\n      <Alert severity=\"info\" sx={{ mb: 2 }}>\n        <Typography variant=\"body2\">\n          Drag and drop events to reschedule them. Hold and drag any event to move it to a different time or date.\n        </Typography>\n      </Alert>\n\n      {/* Calendar Grid */}\n      <Card>\n        <CardContent sx={{ p: 1 }}>\n          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 600 }}>\n            {/* Day Headers */}\n            <Box sx={{ display: 'flex', borderBottom: `1px solid ${theme.palette.divider}` }}>\n              <Box sx={{ width: 80, flexShrink: 0, p: 1 }}>\n                <Typography variant=\"caption\" color=\"text.secondary\">\n                  Time\n                </Typography>\n              </Box>\n              {displayDays.map((date, index) => {\n                const isToday = date.toDateString() === new Date().toDateString();\n                return (\n                  <Box\n                    key={index}\n                    sx={{\n                      flex: 1,\n                      p: 1,\n                      textAlign: 'center',\n                      borderLeft: index > 0 ? `1px solid ${theme.palette.divider}` : 'none',\n                      bgcolor: isToday ? alpha(theme.palette.primary.main, 0.05) : 'transparent',\n                    }}\n                  >\n                    <Typography\n                      variant=\"subtitle2\"\n                      sx={{\n                        fontWeight: isToday ? 600 : 400,\n                        color: isToday ? 'primary.main' : 'text.primary',\n                      }}\n                    >\n                      {date.toLocaleDateString('en-US', {\n                        weekday: view === 'week' ? 'short' : 'long',\n                        month: 'short',\n                        day: 'numeric',\n                      })}\n                    </Typography>\n                  </Box>\n                );\n              })}\n            </Box>\n\n            {/* Time Slots */}\n            <Box sx={{ flex: 1, overflowY: 'auto' }}>\n              {businessHours.map((time) => (\n                <Box\n                  key={time}\n                  sx={{\n                    display: 'flex',\n                    minHeight: 60,\n                    borderBottom: `1px solid ${theme.palette.divider}`,\n                  }}\n                >\n                  {/* Time Label */}\n                  <Box\n                    sx={{\n                      width: 80,\n                      flexShrink: 0,\n                      p: 1,\n                      borderRight: `1px solid ${theme.palette.divider}`,\n                      display: 'flex',\n                      alignItems: 'center',\n                    }}\n                  >\n                    <Typography variant=\"caption\" color=\"text.secondary\">\n                      {formatTimeDisplay(time)}\n                    </Typography>\n                  </Box>\n\n                  {/* Day Slots */}\n                  {displayDays.map((date, dayIndex) => {\n                    const slotId = getSlotId(date, time);\n                    const slotEvents = getEventsForSlot(date, time);\n                    const isDragOver = dragOverSlot === slotId;\n\n                    return (\n                      <Box\n                        key={dayIndex}\n                        sx={{\n                          flex: 1,\n                          position: 'relative',\n                          minHeight: 60,\n                          borderLeft: dayIndex > 0 ? `1px solid ${theme.palette.divider}` : 'none',\n                          bgcolor: isDragOver\n                            ? alpha(theme.palette.primary.main, 0.1)\n                            : 'transparent',\n                          transition: 'background-color 0.2s ease',\n                        }}\n                        onDragOver={(e) => handleDragOver(e, slotId)}\n                        onDragLeave={handleDragLeave}\n                        onDrop={(e) => handleDrop(e, date, time)}\n                      >\n                        {slotEvents.map((event, eventIndex) => {\n                          const isDragging = draggedEvent?.id === event.id;\n                          \n                          return (\n                            <Card\n                              key={event.id}\n                              draggable\n                              onDragStart={(e) => handleDragStart(e, event)}\n                              onClick={() => onEventClick?.(event)}\n                              sx={{\n                                position: 'absolute',\n                                top: 4,\n                                left: 4 + (eventIndex * 8), // Offset overlapping events\n                                right: 4,\n                                zIndex: isDragging ? 1000 : 1 + eventIndex,\n                                cursor: 'grab',\n                                opacity: isDragging ? 0.5 : 1,\n                                transform: isDragging ? 'rotate(5deg)' : 'none',\n                                transition: 'all 0.2s ease',\n                                '&:hover': {\n                                  transform: 'scale(1.02)',\n                                  boxShadow: theme.shadows[4],\n                                },\n                                '&:active': {\n                                  cursor: 'grabbing',\n                                },\n                                border: `2px solid ${getEventPriorityColor(event.priority)}`,\n                                bgcolor: alpha(getEventPriorityColor(event.priority), 0.1),\n                              }}\n                            >\n                              <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>\n                                <Stack direction=\"row\" spacing={1} alignItems=\"center\">\n                                  <DragIndicatorRoundedIcon\n                                    sx={{ fontSize: 12, color: 'text.secondary' }}\n                                  />\n                                  {getEventTypeIcon(event.type)}\n                                  <Box sx={{ flex: 1, minWidth: 0 }}>\n                                    <Typography\n                                      variant=\"caption\"\n                                      sx={{\n                                        fontWeight: 600,\n                                        display: 'block',\n                                        overflow: 'hidden',\n                                        textOverflow: 'ellipsis',\n                                        whiteSpace: 'nowrap',\n                                      }}\n                                    >\n                                      {event.title}\n                                    </Typography>\n                                    <Stack direction=\"row\" spacing={0.5} alignItems=\"center\">\n                                      <AccessTimeRoundedIcon sx={{ fontSize: 10 }} />\n                                      <Typography variant=\"caption\" color=\"text.secondary\">\n                                        {formatTimeDisplay(event.time)}\n                                        {event.endTime && ` - ${formatTimeDisplay(event.endTime)}`}\n                                      </Typography>\n                                    </Stack>\n                                    {(event.client || event.location) && (\n                                      <Stack direction=\"row\" spacing={0.5} alignItems=\"center\">\n                                        {event.client && (\n                                          <>\n                                            <PersonRoundedIcon sx={{ fontSize: 10 }} />\n                                            <Typography variant=\"caption\" color=\"text.secondary\">\n                                              {event.client}\n                                            </Typography>\n                                          </>\n                                        )}\n                                        {event.location && (\n                                          <>\n                                            <LocationOnRoundedIcon sx={{ fontSize: 10 }} />\n                                            <Typography variant=\"caption\" color=\"text.secondary\">\n                                              {event.location}\n                                            </Typography>\n                                          </>\n                                        )}\n                                      </Stack>\n                                    )}\n                                  </Box>\n                                </Stack>\n                              </CardContent>\n                            </Card>\n                          );\n                        })}\n\n                        {/* Drop zone indicator */}\n                        {isDragOver && (\n                          <Box\n                            sx={{\n                              position: 'absolute',\n                              top: 0,\n                              left: 0,\n                              right: 0,\n                              bottom: 0,\n                              border: `2px dashed ${theme.palette.primary.main}`,\n                              borderRadius: 1,\n                              display: 'flex',\n                              alignItems: 'center',\n                              justifyContent: 'center',\n                              bgcolor: alpha(theme.palette.primary.main, 0.05),\n                              zIndex: 999,\n                            }}\n                          >\n                            <Typography variant=\"caption\" color=\"primary.main\" sx={{ fontWeight: 600 }}>\n                              Drop here to reschedule\n                            </Typography>\n                          </Box>\n                        )}\n                      </Box>\n                    );\n                  })}\n                </Box>\n              ))}\n            </Box>\n          </Box>\n        </CardContent>\n      </Card>\n\n      {/* Confirmation Dialog */}\n      <Dialog\n        open={confirmDialog.open}\n        onClose={() => setConfirmDialog({ open: false })}\n        maxWidth=\"sm\"\n        fullWidth\n      >\n        <DialogTitle>\n          <Stack direction=\"row\" alignItems=\"center\" spacing={2}>\n            <WarningRoundedIcon color=\"warning\" />\n            <Typography variant=\"h6\">Confirm Event Move</Typography>\n          </Stack>\n        </DialogTitle>\n        <DialogContent>\n          {confirmDialog.event && (\n            <Stack spacing={2}>\n              <Typography variant=\"body1\">\n                Are you sure you want to move this event?\n              </Typography>\n              \n              <Card sx={{ bgcolor: alpha(theme.palette.info.main, 0.05) }}>\n                <CardContent>\n                  <Typography variant=\"subtitle1\" sx={{ fontWeight: 600 }}>\n                    {confirmDialog.event.title}\n                  </Typography>\n                  <Stack spacing={1} sx={{ mt: 1 }}>\n                    <Stack direction=\"row\" alignItems=\"center\" spacing={1}>\n                      <CalendarTodayRoundedIcon fontSize=\"small\" />\n                      <Typography variant=\"body2\">\n                        <strong>From:</strong> {new Date(confirmDialog.oldDateTime || '').toLocaleString()}\n                      </Typography>\n                    </Stack>\n                    <Stack direction=\"row\" alignItems=\"center\" spacing={1}>\n                      <CalendarTodayRoundedIcon fontSize=\"small\" color=\"primary\" />\n                      <Typography variant=\"body2\" color=\"primary.main\">\n                        <strong>To:</strong> {new Date(confirmDialog.newDateTime || '').toLocaleString()}\n                      </Typography>\n                    </Stack>\n                  </Stack>\n                </CardContent>\n              </Card>\n            </Stack>\n          )}\n        </DialogContent>\n        <DialogActions>\n          <Button\n            onClick={() => {\n              setConfirmDialog({ open: false });\n              setDraggedEvent(null);\n            }}\n          >\n            Cancel\n          </Button>\n          <Button\n            variant=\"contained\"\n            onClick={handleConfirmMove}\n            startIcon={<CheckCircleRoundedIcon />}\n          >\n            Confirm Move\n          </Button>\n        </DialogActions>\n      </Dialog>\n    </Box>\n  );\n};\n\nexport default DragDropCalendar;\n
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  IconButton,
+  useTheme,
+  alpha,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Alert,
+} from "@mui/material";
+import DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";
+import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
+import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
+import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
+import EventRoundedIcon from "@mui/icons-material/EventRounded";
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  endTime?: string;
+  type: string;
+  priority: "High" | "Medium" | "Low";
+  status: "Pending" | "Completed" | "In Progress" | "Overdue";
+  description?: string;
+  location?: string;
+  attendees?: string[];
+  client?: string;
+  property?: string;
+  assignedTo?: string;
+}
+
+interface DragDropCalendarProps {
+  events: CalendarEvent[];
+  onEventMove: (eventId: string, newDate: string, newTime: string) => void;
+  onEventClick?: (event: CalendarEvent) => void;
+  currentDate: Date;
+  onDateChange: (date: Date) => void;
+  view: "week" | "day";
+}
+
+const DragDropCalendar: React.FC<DragDropCalendarProps> = ({
+  events,
+  onEventMove,
+  onEventClick,
+  currentDate,
+  onDateChange,
+  view,
+}) => {
+  const theme = useTheme();
+  const [draggedEvent, setDraggedEvent] = React.useState<CalendarEvent | null>(null);
+  const [dragOverSlot, setDragOverSlot] = React.useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = React.useState<{
+    open: boolean;
+    event?: CalendarEvent;
+    oldDateTime?: string;
+    newDateTime?: string;
+  }>({ open: false });
+
+  // Generate time slots (24 hours in 30-minute intervals)
+  const timeSlots = React.useMemo(() => {
+    const slots = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        slots.push(timeString);
+      }
+    }
+    return slots;
+  }, []);
+
+  // Get days to display based on view
+  const displayDays = React.useMemo(() => {
+    if (view === 'day') {
+      return [new Date(currentDate)];
+    } else {
+      // Week view
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+      return Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(startOfWeek);
+        date.setDate(startOfWeek.getDate() + i);
+        return date;
+      });
+    }
+  }, [currentDate, view]);
+
+  const getSlotId = (date: Date, time: string) => {
+    return `${date.toISOString().split('T')[0]}_${time}`;
+  };
+
+  const getEventTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Call': return <PhoneRoundedIcon />;
+      case 'Email': return <EmailRoundedIcon />;
+      case 'Task': return <TaskRoundedIcon />;
+      case 'Appointment': return <EventRoundedIcon />;
+      case 'Inspection': return <LocationOnRoundedIcon />;
+      case 'Meeting': return <EventRoundedIcon />;
+      default: return <EventRoundedIcon />;
+    }
+  };
+
+  const getEventPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High': return theme.palette.error.main;
+      case 'Medium': return theme.palette.warning.main;
+      case 'Low': return theme.palette.info.main;
+      default: return theme.palette.grey[500];
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, event: CalendarEvent) => {
+    setDraggedEvent(event);
+    e.dataTransfer.setData('text/plain', event.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, slotId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverSlot(slotId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverSlot(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, date: Date, time: string) => {
+    e.preventDefault();
+    setDragOverSlot(null);
+    
+    if (!draggedEvent) return;
+    
+    const newDate = date.toISOString().split('T')[0];
+    const oldDateTime = `${draggedEvent.date} ${draggedEvent.time}`;
+    const newDateTime = `${newDate} ${time}`;
+    
+    if (oldDateTime === newDateTime) {
+      setDraggedEvent(null);
+      return;
+    }
+    
+    // Show confirmation dialog
+    setConfirmDialog({
+      open: true,
+      event: draggedEvent,
+      oldDateTime,
+      newDateTime,
+    });
+  };
+
+  const handleConfirmMove = () => {
+    if (confirmDialog.event && confirmDialog.newDateTime) {
+      const [newDate, newTime] = confirmDialog.newDateTime.split(' ');
+      onEventMove(confirmDialog.event.id, newDate, newTime);
+    }
+    setConfirmDialog({ open: false });
+    setDraggedEvent(null);
+  };
+
+  const formatTimeDisplay = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const hour24 = parseInt(hours);
+    const hour12 = hour24 === 0 ? 12 : hour24 > 12 ? hour24 - 12 : hour24;
+    const ampm = hour24 >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
+  const getEventsForSlot = (date: Date, time: string) => {
+    const dateString = date.toISOString().split('T')[0];
+    return events.filter(event => {
+      if (event.date !== dateString) return false;
+      
+      // Check if event overlaps with this time slot
+      const eventStart = event.time;
+      const eventEnd = event.endTime || event.time;
+      
+      return eventStart <= time && time < eventEnd;
+    });
+  };
+
+  // Only show time slots during business hours for better UX
+  const businessHours = timeSlots.filter(time => {
+    const hour = parseInt(time.split(':')[0]);
+    return hour >= 6 && hour <= 22; // 6 AM to 10 PM
+  });
+
+  return (
+    <Box>
+      {/* Header */}
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          Drag & Drop Calendar - {view === 'day' ? 'Day View' : 'Week View'}
+        </Typography>
+        <Stack direction="row" spacing={1}>
+          <IconButton
+            size="small"
+            onClick={() => {
+              const newDate = new Date(currentDate);
+              newDate.setDate(newDate.getDate() - (view === 'day' ? 1 : 7));
+              onDateChange(newDate);
+            }}
+          >
+            ←
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => onDateChange(new Date())}
+          >
+            <CalendarTodayRoundedIcon />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => {
+              const newDate = new Date(currentDate);
+              newDate.setDate(newDate.getDate() + (view === 'day' ? 1 : 7));
+              onDateChange(newDate);
+            }}
+          >
+            →
+          </IconButton>
+        </Stack>
+      </Stack>
+
+      {/* Instructions */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        <Typography variant="body2">
+          Drag and drop events to reschedule them. Hold and drag any event to move it to a different time or date.
+        </Typography>
+      </Alert>
+
+      {/* Calendar Grid */}
+      <Card>
+        <CardContent sx={{ p: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 600 }}>
+            {/* Day Headers */}
+            <Box sx={{ display: 'flex', borderBottom: `1px solid ${theme.palette.divider}` }}>
+              <Box sx={{ width: 80, flexShrink: 0, p: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Time
+                </Typography>
+              </Box>
+              {displayDays.map((date, index) => {
+                const isToday = date.toDateString() === new Date().toDateString();
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      flex: 1,
+                      p: 1,
+                      textAlign: 'center',
+                      borderLeft: index > 0 ? `1px solid ${theme.palette.divider}` : 'none',
+                      bgcolor: isToday ? alpha(theme.palette.primary.main, 0.05) : 'transparent',
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: isToday ? 600 : 400,
+                        color: isToday ? 'primary.main' : 'text.primary',
+                      }}
+                    >
+                      {date.toLocaleDateString('en-US', {
+                        weekday: view === 'week' ? 'short' : 'long',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+
+            {/* Time Slots */}
+            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+              {businessHours.map((time) => (
+                <Box
+                  key={time}
+                  sx={{
+                    display: 'flex',
+                    minHeight: 60,
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  {/* Time Label */}
+                  <Box
+                    sx={{
+                      width: 80,
+                      flexShrink: 0,
+                      p: 1,
+                      borderRight: `1px solid ${theme.palette.divider}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary">
+                      {formatTimeDisplay(time)}
+                    </Typography>
+                  </Box>
+
+                  {/* Day Slots */}
+                  {displayDays.map((date, dayIndex) => {
+                    const slotId = getSlotId(date, time);
+                    const slotEvents = getEventsForSlot(date, time);
+                    const isDragOver = dragOverSlot === slotId;
+
+                    return (
+                      <Box
+                        key={dayIndex}
+                        sx={{
+                          flex: 1,
+                          position: 'relative',
+                          minHeight: 60,
+                          borderLeft: dayIndex > 0 ? `1px solid ${theme.palette.divider}` : 'none',
+                          bgcolor: isDragOver
+                            ? alpha(theme.palette.primary.main, 0.1)
+                            : 'transparent',
+                          transition: 'background-color 0.2s ease',
+                        }}
+                        onDragOver={(e) => handleDragOver(e, slotId)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, date, time)}
+                      >
+                        {slotEvents.map((event, eventIndex) => {
+                          const isDragging = draggedEvent?.id === event.id;
+                          
+                          return (
+                            <Card
+                              key={event.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, event)}
+                              onClick={() => onEventClick?.(event)}
+                              sx={{
+                                position: 'absolute',
+                                top: 4,
+                                left: 4 + (eventIndex * 8), // Offset overlapping events
+                                right: 4,
+                                zIndex: isDragging ? 1000 : 1 + eventIndex,
+                                cursor: 'grab',
+                                opacity: isDragging ? 0.5 : 1,
+                                transform: isDragging ? 'rotate(5deg)' : 'none',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                  transform: 'scale(1.02)',
+                                  boxShadow: theme.shadows[4],
+                                },
+                                '&:active': {
+                                  cursor: 'grabbing',
+                                },
+                                border: `2px solid ${getEventPriorityColor(event.priority)}`,
+                                bgcolor: alpha(getEventPriorityColor(event.priority), 0.1),
+                              }}
+                            >
+                              <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                  <DragIndicatorRoundedIcon
+                                    sx={{ fontSize: 12, color: 'text.secondary' }}
+                                  />
+                                  {getEventTypeIcon(event.type)}
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography
+                                      variant="caption"
+                                      sx={{
+                                        fontWeight: 600,
+                                        display: 'block',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                      }}
+                                    >
+                                      {event.title}
+                                    </Typography>
+                                    <Stack direction="row" spacing={0.5} alignItems="center">
+                                      <AccessTimeRoundedIcon sx={{ fontSize: 10 }} />
+                                      <Typography variant="caption" color="text.secondary">
+                                        {formatTimeDisplay(event.time)}
+                                        {event.endTime && ` - ${formatTimeDisplay(event.endTime)}`}
+                                      </Typography>
+                                    </Stack>
+                                    {(event.client || event.location) && (
+                                      <Stack direction="row" spacing={0.5} alignItems="center">
+                                        {event.client && (
+                                          <>
+                                            <PersonRoundedIcon sx={{ fontSize: 10 }} />
+                                            <Typography variant="caption" color="text.secondary">
+                                              {event.client}
+                                            </Typography>
+                                          </>
+                                        )}
+                                        {event.location && (
+                                          <>
+                                            <LocationOnRoundedIcon sx={{ fontSize: 10 }} />
+                                            <Typography variant="caption" color="text.secondary">
+                                              {event.location}
+                                            </Typography>
+                                          </>
+                                        )}
+                                      </Stack>
+                                    )}
+                                  </Box>
+                                </Stack>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+
+                        {/* Drop zone indicator */}
+                        {isDragOver && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              border: `2px dashed ${theme.palette.primary.main}`,
+                              borderRadius: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: alpha(theme.palette.primary.main, 0.05),
+                              zIndex: 999,
+                            }}
+                          >
+                            <Typography variant="caption" color="primary.main" sx={{ fontWeight: 600 }}>
+                              Drop here to reschedule
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDialog.open}
+        onClose={() => setConfirmDialog({ open: false })}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <WarningRoundedIcon color="warning" />
+            <Typography variant="h6">Confirm Event Move</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          {confirmDialog.event && (
+            <Stack spacing={2}>
+              <Typography variant="body1">
+                Are you sure you want to move this event?
+              </Typography>
+              
+              <Card sx={{ bgcolor: alpha(theme.palette.info.main, 0.05) }}>
+                <CardContent>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    {confirmDialog.event.title}
+                  </Typography>
+                  <Stack spacing={1} sx={{ mt: 1 }}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <CalendarTodayRoundedIcon fontSize="small" />
+                      <Typography variant="body2">
+                        <strong>From:</strong> {new Date(confirmDialog.oldDateTime || '').toLocaleString()}
+                      </Typography>
+                    </Stack>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <CalendarTodayRoundedIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" color="primary.main">
+                        <strong>To:</strong> {new Date(confirmDialog.newDateTime || '').toLocaleString()}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setConfirmDialog({ open: false });
+              setDraggedEvent(null);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleConfirmMove}
+            startIcon={<CheckCircleRoundedIcon />}
+          >
+            Confirm Move
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default DragDropCalendar;
