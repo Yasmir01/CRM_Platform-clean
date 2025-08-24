@@ -98,7 +98,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "gmail-integration-setup",
     question: "How do I set up Gmail integration with OAuth authentication?",
-    answer: "**Gmail Integration Setup**: Gmail uses OAuth for secure authentication without storing passwords. **📋 Step-by-Step Setup**: **Step 1: Add Gmail Integration** - Go to **CRM** → **Integrations**, Click **Add Integration**, Select **Gmail - Email Provider**, Enter your Gmail address (e.g., your.email@gmail.com), Add display name (your name or company name). **Step 2: OAuth Configuration (Optional)** - For custom OAuth apps, enter your Google Client ID, Most users can skip this and use default OAuth, Advanced users can create custom Google Cloud projects. **Step 3: Complete Setup** - Click **Add Integration**, The system will mark Gmail as added but disconnected, OAuth authentication will be required when sending first email. **🔧 Server Configuration**: **SMTP Settings**: Host: smtp.gmail.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap.gmail.com, Port: 993, Security: SSL. **⚠️ Important Notes**: OAuth authentication provides enhanced security, No passwords stored in the system, Requires Google account permissions, Two-factor authentication compatible. **��� Testing**: Go to **Email Management** to test the connection, Send test emails to verify functionality, Monitor connection status and email statistics.",
+    answer: "**Gmail Integration Setup**: Gmail uses OAuth for secure authentication without storing passwords. **📋 Step-by-Step Setup**: **Step 1: Add Gmail Integration** - Go to **CRM** → **Integrations**, Click **Add Integration**, Select **Gmail - Email Provider**, Enter your Gmail address (e.g., your.email@gmail.com), Add display name (your name or company name). **Step 2: OAuth Configuration (Optional)** - For custom OAuth apps, enter your Google Client ID, Most users can skip this and use default OAuth, Advanced users can create custom Google Cloud projects. **Step 3: Complete Setup** - Click **Add Integration**, The system will mark Gmail as added but disconnected, OAuth authentication will be required when sending first email. **🔧 Server Configuration**: **SMTP Settings**: Host: smtp.gmail.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap.gmail.com, Port: 993, Security: SSL. **⚠️ Important Notes**: OAuth authentication provides enhanced security, No passwords stored in the system, Requires Google account permissions, Two-factor authentication compatible. **🧪 Testing**: Go to **Email Management** to test the connection, Send test emails to verify functionality, Monitor connection status and email statistics.",
     category: "Integrations",
     tags: ["gmail", "oauth", "authentication", "google", "email", "setup", "smtp", "imap", "security"],
     helpful: 95,
@@ -730,6 +730,8 @@ export default function HelpSupport() {
   const [newTicketOpen, setNewTicketOpen] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState<FAQItem[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = React.useState<string>("");
+  const [showUpdateNotification, setShowUpdateNotification] = React.useState(false);
   const [ticketForm, setTicketForm] = React.useState({
     subject: "",
     priority: "Medium" as SupportTicket["priority"],
