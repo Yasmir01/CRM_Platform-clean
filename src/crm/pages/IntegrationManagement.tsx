@@ -2030,6 +2030,35 @@ export default function IntegrationManagement() {
                   <Alert severity="info">
                     Configure your Hotmail/Live email integration using password authentication.
                   </Alert>
+
+                  <Box sx={{ p: 2, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom color="primary">
+                      Hotmail/Live Server Configuration
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Outgoing (SMTP):</strong> smtp.live.com:587 (TLS)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Incoming (IMAP):</strong> imap-mail.outlook.com:993 (SSL)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Incoming (POP):</strong> pop3.live.com:995 (SSL)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Authentication:</strong> Password
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
                   <TextField
                     label="Email Address"
                     fullWidth
