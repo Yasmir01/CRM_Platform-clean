@@ -51,6 +51,7 @@ import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 
 interface FAQItem {
   id: string;
@@ -85,6 +86,16 @@ interface SupportTicket {
 }
 
 const mockFAQs: FAQItem[] = [
+  {
+    id: "transunion-integration-setup",
+    question: "How do I configure and use the TransUnion integration for tenant screening? (Super Admin Only)",
+    answer: "**TransUnion Integration Overview**: TransUnion integration is now visible in the Integration Management page, but only for Super Admins. **Key Features**: • **Super Admin Only Access** - The TransUnion integration only appears for users with the 'Super Admin' role • **Configuration UI** - Added a complete configuration interface for TransUnion API credentials • **Real-time Status** - Shows connection status based on whether valid credentials are configured • **Security Warnings** - Includes appropriate warnings about handling sensitive financial data. **🔧 Configuration Options**: **Option 1: Integration Management Page** - Go to CRM → Integrations (you should see this in the left menu) - Look for the TransUnion integration card with a 🔍 icon - Click the Settings (gear) icon on the TransUnion card - Enter your TransUnion credentials: API Key (Your TransUnion API key), API Secret (Your TransUnion API secret), Environment (Choose 'Sandbox' for testing or 'Production' for live), Base URL (TransUnion API endpoint URL). **Option 2: Environment Variables (Recommended for Production)** - Set these environment variables in your deployment: VITE_TRANSUNION_API_KEY (Your API key), VITE_TRANSUNION_API_SECRET (Your API secret), VITE_TRANSUNION_ENV ('sandbox' or 'production'), VITE_TRANSUNION_BASE_URL (API base URL). **🔒 Security Features**: • **Super Admin Only**: Regular admins and other users cannot see or access TransUnion settings • **Sensitive Data Handling**: API secrets are password-masked in the UI • **Environment Warnings**: Clear warnings about production vs development usage • **Status Indicators**: Shows if the integration is properly configured and connected. **📊 Integration Status**: The TransUnion integration will show: Connected status when valid credentials are configured, Disconnected status when credentials are missing or invalid, Usage metrics for credit reports and background checks, Last sync information. **Important**: In production, API credentials should be stored on your secure backend server, not in the frontend application.",
+    category: "Security",
+    tags: ["transunion", "integration", "super-admin", "credit-reports", "background-checks", "api", "security", "tenant-screening"],
+    helpful: 100,
+    planRequired: "Enterprise",
+    isAdvanced: true
+  },
   {
     id: "document-deletion-permissions",
     question: "How do I delete uploaded documents and what permissions are required?",
@@ -619,6 +630,7 @@ function TabPanel(props: TabPanelProps) {
 export default function HelpSupport() {
   // Mock user plan - in real app, get from auth context
   const [userPlan] = React.useState<"Basic" | "Professional" | "Enterprise" | "Custom">("Professional");
+  const { isSuperAdmin } = useRoleManagement();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState("All");
   const [currentTab, setCurrentTab] = React.useState(0);
@@ -636,6 +648,11 @@ export default function HelpSupport() {
   };
 
   const filteredFAQs = mockFAQs.filter(faq => {
+    // Only show TransUnion integration FAQ to super admins
+    if (faq.id === "transunion-integration-setup" && !isSuperAdmin()) {
+      return false;
+    }
+
     const matchesSearch =
       faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
       faq.answer.toLowerCase().includes(searchTerm.toLowerCase()) ||
