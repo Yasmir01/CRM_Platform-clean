@@ -38,6 +38,7 @@ import SalesAutomation from '../pages/SalesAutomation';
 import MarketingAutomation from '../pages/MarketingAutomation';
 import AnalyticsInsights from '../pages/AnalyticsInsights';
 import IntegrationManagement from '../pages/IntegrationManagement';
+import EmailManagement from './EmailManagement';
 import CustomerService from '../pages/CustomerService';
 import BackupManagement from './BackupManagement';
 import { Alert, Box, Button } from '@mui/material';
