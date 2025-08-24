@@ -774,6 +774,16 @@ export default function HelpSupport() {
       });
 
       setSearchResults(filtered);
+
+      // Update timestamp and show notification for real-time updates
+      const currentTime = new Date().toLocaleTimeString();
+      setLastUpdateTime(currentTime);
+
+      if (debouncedSearchTerm) {
+        setShowUpdateNotification(true);
+        // Hide notification after 2 seconds
+        setTimeout(() => setShowUpdateNotification(false), 2000);
+      }
     };
 
     updateSearchResults();
@@ -782,9 +792,9 @@ export default function HelpSupport() {
   // Real-time search status updates
   React.useEffect(() => {
     if (searchTerm) {
-      console.log(`Real-time search: "${searchTerm}" - Found ${searchResults.length} results`);
+      console.log(`Real-time search: "${searchTerm}" - Found ${searchResults.length} results at ${lastUpdateTime}`);
     }
-  }, [searchTerm, searchResults.length]);
+  }, [searchTerm, searchResults.length, lastUpdateTime]);
 
   const isPlanEligible = (requiredPlan?: string) => {
     if (!requiredPlan) return true;
