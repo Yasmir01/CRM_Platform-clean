@@ -62,6 +62,7 @@ import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import DragIndicatorRoundedIcon from "@mui/icons-material/DragIndicatorRounded";
 import CalendarGrid from "../components/CalendarGrid";
 import EnhancedCalendarGrid from "../components/EnhancedCalendarGrid";
 import AISchedulingAssistant from "../components/AISchedulingAssistant";
