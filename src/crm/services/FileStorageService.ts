@@ -36,6 +36,8 @@ export class FileStorageService {
       const processedFiles: StoredFile[] = [];
 
       for (const file of files) {
+        console.log('Processing file:', file.name, file.type, file.size);
+
         // Validate file size
         if (file.size > this.MAX_FILE_SIZE) {
           return {
@@ -54,11 +56,18 @@ export class FileStorageService {
 
         // Convert file to base64
         const dataUrl = await this.fileToDataUrl(file);
-        
-        // Generate preview for images
+        console.log('Generated dataUrl for', file.name, ':', dataUrl.substring(0, 50) + '...');
+
+        // Generate preview for images (use dataUrl as fallback)
         let preview: string | undefined;
         if (this.isImageFile(file.type)) {
-          preview = await this.generateImagePreview(file);
+          try {
+            preview = await this.generateImagePreview(file);
+            console.log('Generated preview for', file.name, ':', preview.substring(0, 50) + '...');
+          } catch (previewError) {
+            console.warn('Failed to generate preview for', file.name, ', using dataUrl as fallback:', previewError);
+            preview = dataUrl; // Use the full dataUrl as fallback
+          }
         }
 
         const storedFile: StoredFile = {
@@ -71,6 +80,7 @@ export class FileStorageService {
           preview
         };
 
+        console.log('Created stored file:', storedFile.name, 'with dataUrl length:', storedFile.dataUrl.length);
         processedFiles.push(storedFile);
       }
 
