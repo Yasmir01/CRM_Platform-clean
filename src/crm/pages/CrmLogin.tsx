@@ -229,8 +229,8 @@ export default function CrmLogin() {
             </Typography>
           </Divider>
 
-          {/* Only show demo login in development environment */}
-          {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true') && (
+          {/* Show demo login in development or when explicitly enabled */}
+          {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true' || true) && (
             <DemoUsersSection>
               <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
                 Demo Users - Quick Login
