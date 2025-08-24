@@ -1153,7 +1153,7 @@ export default function HelpSupport() {
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
               Showing {filteredFAQs.length} of {mockFAQs.filter(faq =>
-                faq.id !== "transunion-integration-setup" || isSuperAdmin()
+                faq.id !== "transunion-integration-setup" || isUserSuperAdmin
               ).length} available FAQs
               {searchTerm && " • Real-time search active"}
               {selectedCategory !== "All" && ` • Filtered by ${selectedCategory}`}
