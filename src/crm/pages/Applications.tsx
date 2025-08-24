@@ -257,7 +257,7 @@ const deduplicateApplications = (applications: Application[]): Application[] => 
 export default function Applications() {
   const { state, addTenant, addActivity } = useCrmData();
   const { properties } = state;
-  const [applications, setApplications] = React.useState<Application[]>(mockApplications);
+  const [applications, setApplications] = React.useState<Application[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [currentTab, setCurrentTab] = React.useState(0);
   const [selectedApplication, setSelectedApplication] = React.useState<Application | null>(null);
