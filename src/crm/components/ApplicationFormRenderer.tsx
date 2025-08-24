@@ -353,10 +353,11 @@ export default function ApplicationFormRenderer({
 
     try {
       // Convert fileUploads array to object format expected by Applications view
+      // Preserve StoredFile format to maintain dataUrl for image previews
       const fileUploadsObject = fileUploads.reduce((acc, upload) => {
         acc[upload.fieldId] = upload.files;
         return acc;
-      }, {} as Record<string, File[]>);
+      }, {} as Record<string, StoredFile[]>);
 
       const applicationData = {
         id: `APP-${Date.now()}`,
