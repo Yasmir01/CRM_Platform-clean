@@ -1527,6 +1527,61 @@ export default function IntegrationManagement() {
                     setupComplexity: "Advanced",
                     pricing: "Per Report",
                     features: ["Credit Reports", "Background Checks", "Identity Verification", "Criminal Records"]
+                  },
+                  gmail: {
+                    name: "Gmail",
+                    description: "Google Gmail email integration for sending and receiving emails",
+                    category: "Email",
+                    provider: "Google",
+                    type: "OAuth",
+                    icon: "📧",
+                    setupComplexity: "Medium",
+                    pricing: "Free",
+                    features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "OAuth Authentication"]
+                  },
+                  outlook: {
+                    name: "Outlook",
+                    description: "Microsoft Outlook email integration with Office 365 support",
+                    category: "Email",
+                    provider: "Microsoft",
+                    type: "OAuth",
+                    icon: "📮",
+                    setupComplexity: "Medium",
+                    pricing: "Free",
+                    features: ["Email Sending", "Email Receiving", "Exchange Integration", "OAuth Authentication"]
+                  },
+                  yahoo: {
+                    name: "Yahoo Mail",
+                    description: "Yahoo Mail email integration with app password authentication",
+                    category: "Email",
+                    provider: "Yahoo",
+                    type: "API",
+                    icon: "📬",
+                    setupComplexity: "Easy",
+                    pricing: "Free",
+                    features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "App Password Auth"]
+                  },
+                  hotmail: {
+                    name: "Hotmail/Live",
+                    description: "Microsoft Hotmail/Live email integration",
+                    category: "Email",
+                    provider: "Microsoft",
+                    type: "API",
+                    icon: "📫",
+                    setupComplexity: "Easy",
+                    pricing: "Free",
+                    features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "Password Authentication"]
+                  },
+                  "custom-smtp": {
+                    name: "Custom SMTP",
+                    description: "Custom SMTP server configuration for any email provider",
+                    category: "Email",
+                    provider: "Custom",
+                    type: "API",
+                    icon: "⚙️",
+                    setupComplexity: "Advanced",
+                    pricing: "Varies",
+                    features: ["Email Sending", "Custom SMTP", "IMAP Support", "Flexible Configuration"]
                   }
                 };
 
