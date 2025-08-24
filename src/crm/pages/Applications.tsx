@@ -554,11 +554,11 @@ export default function Applications() {
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
               Image Preview
             </Typography>
-            {file.dataUrl ? (
-              // Show actual image if we have the dataUrl (StoredFile format)
+            {(file.preview || file.dataUrl) ? (
+              // Show thumbnail for inline preview, fallback to full image if no thumbnail
               <Box
                 component="img"
-                src={file.dataUrl}
+                src={file.preview || file.dataUrl}
                 alt={file.name}
                 sx={{
                   maxWidth: '100%',
