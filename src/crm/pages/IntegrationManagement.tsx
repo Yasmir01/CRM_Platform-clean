@@ -1672,7 +1672,7 @@ export default function IntegrationManagement() {
           <Button
             variant="contained"
             disabled={!selectedIntegration && !newIntegrationType}
-            onClick={() => {
+            onClick={async () => {
               if (selectedIntegration) {
                 // Update existing integration
                 if (selectedIntegration.name === "TransUnion") {
