@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { EmailService } from '../services/EmailService';
 
 export type UserRole = 'Super Admin' | 'Admin' | 'Manager' | 'Property Manager' | 'User' | 'Tenant' | 'Service Provider';
 
