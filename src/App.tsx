@@ -29,6 +29,7 @@ const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
 const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
 const Communications = React.lazy(() => import("./crm/pages/Communications"));
 const EmailMarketing = React.lazy(() => import("./crm/pages/EmailMarketing"));
+const EmailManagement = React.lazy(() => import("./crm/components/EmailManagement"));
 const SmsMarketing = React.lazy(() => import("./crm/pages/SmsMarketing"));
 const PropertyLandingPages = React.lazy(() => import("./crm/pages/PropertyLandingPages"));
 const Promotions = React.lazy(() => import("./crm/pages/Promotions"));
