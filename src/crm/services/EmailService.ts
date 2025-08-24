@@ -335,8 +335,14 @@ class EmailServiceClass {
 
       // In a real implementation, this would test the actual SMTP/IMAP connection
       // For now, we'll simulate the test
-      if (account.authType === 'oauth' && !account.credentials.accessToken) {
-        return { success: false, error: 'OAuth access token required' };
+      // Check credentials based on auth type and provider
+      if (account.authType === 'oauth' && !account.credentials.accessToken && !account.credentials.appPassword) {
+        // For OAuth providers that also support app password (Gmail, Outlook)
+        if ((provider.id === 'gmail' || provider.id === 'outlook') && account.credentials.appPassword) {
+          // App password is available, continue with that
+        } else {
+          return { success: false, error: 'OAuth access token or App password required' };
+        }
       }
 
       if (account.authType === 'password' && !account.credentials.password) {
