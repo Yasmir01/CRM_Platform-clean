@@ -98,7 +98,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "gmail-integration-setup",
     question: "How do I set up Gmail integration with OAuth authentication?",
-    answer: "**Gmail Integration Setup**: Gmail uses OAuth for secure authentication without storing passwords. **📋 Step-by-Step Setup**: **Step 1: Add Gmail Integration** - Go to **CRM** → **Integrations**, Click **Add Integration**, Select **Gmail - Email Provider**, Enter your Gmail address (e.g., your.email@gmail.com), Add display name (your name or company name). **Step 2: OAuth Configuration (Optional)** - For custom OAuth apps, enter your Google Client ID, Most users can skip this and use default OAuth, Advanced users can create custom Google Cloud projects. **Step 3: Complete Setup** - Click **Add Integration**, The system will mark Gmail as added but disconnected, OAuth authentication will be required when sending first email. **🔧 Server Configuration**: **SMTP Settings**: Host: smtp.gmail.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap.gmail.com, Port: 993, Security: SSL. **⚠️ Important Notes**: OAuth authentication provides enhanced security, No passwords stored in the system, Requires Google account permissions, Two-factor authentication compatible. **🧪 Testing**: Go to **Email Management** to test the connection, Send test emails to verify functionality, Monitor connection status and email statistics.",
+    answer: "**Gmail Integration Setup**: Gmail uses OAuth for secure authentication without storing passwords. **📋 Step-by-Step Setup**: **Step 1: Add Gmail Integration** - Go to **CRM** → **Integrations**, Click **Add Integration**, Select **Gmail - Email Provider**, Enter your Gmail address (e.g., your.email@gmail.com), Add display name (your name or company name). **Step 2: OAuth Configuration (Optional)** - For custom OAuth apps, enter your Google Client ID, Most users can skip this and use default OAuth, Advanced users can create custom Google Cloud projects. **Step 3: Complete Setup** - Click **Add Integration**, The system will mark Gmail as added but disconnected, OAuth authentication will be required when sending first email. **🔧 Server Configuration**: **SMTP Settings**: Host: smtp.gmail.com, Port: 587, Security: TLS, **IMAP Settings**: Host: imap.gmail.com, Port: 993, Security: SSL. **⚠️ Important Notes**: OAuth authentication provides enhanced security, No passwords stored in the system, Requires Google account permissions, Two-factor authentication compatible. **��� Testing**: Go to **Email Management** to test the connection, Send test emails to verify functionality, Monitor connection status and email statistics.",
     category: "Integrations",
     tags: ["gmail", "oauth", "authentication", "google", "email", "setup", "smtp", "imap", "security"],
     helpful: 95,
@@ -1091,6 +1091,55 @@ export default function HelpSupport() {
                   Troubleshooting
                 </Button>
               </Stack>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Search Statistics */}
+        {filteredFAQs.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Showing {filteredFAQs.length} of {mockFAQs.filter(faq =>
+                faq.id !== "transunion-integration-setup" || isSuperAdmin()
+              ).length} available FAQs
+              {searchTerm && " • Real-time search results"}
+              {selectedCategory !== "All" && ` • Filtered by ${selectedCategory}`}
+            </Typography>
+          </Box>
+        )}
+
+        {/* No Results Message */}
+        {filteredFAQs.length === 0 && (searchTerm || selectedCategory !== "All") && (
+          <Card sx={{ textAlign: 'center', py: 4 }}>
+            <CardContent>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                No Results Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {searchTerm ?
+                  `No FAQs found matching "${searchTerm}"` :
+                  `No FAQs found in ${selectedCategory} category`
+                }
+              </Typography>
+              <Stack direction="row" spacing={2} justifyContent="center">
+                <Button
+                  variant="outlined"
+                  onClick={() => setSearchTerm("")}
+                  disabled={!searchTerm}
+                >
+                  Clear Search
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setSelectedCategory("All")}
+                  disabled={selectedCategory === "All"}
+                >
+                  Show All Categories
+                </Button>
+              </Stack>
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+                Try searching for: "email integration", "password reset", "gmail setup", "troubleshooting"
+              </Typography>
             </CardContent>
           </Card>
         )}
