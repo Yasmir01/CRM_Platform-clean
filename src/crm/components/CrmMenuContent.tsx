@@ -80,6 +80,7 @@ const marketingListItems = [
 
 const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
+  { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
   { text: "Automation Engine", icon: <AutorenewRoundedIcon />, path: "/crm/automation" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
