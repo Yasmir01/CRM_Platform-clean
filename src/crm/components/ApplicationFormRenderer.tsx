@@ -222,14 +222,20 @@ export default function ApplicationFormRenderer({
                    fileUploads.length > 0 ||
                    termsAccepted.length > 0 ||
                    paymentCompleted;
-    const newHasUnsavedChanges = hasData && !isSubmitting;
+
+    // Don't consider it "unsaved" if we're submitting or if we're on the final review step
+    // and all required fields/payments are complete
+    const isOnReviewStep = currentStep === totalSteps - 1;
+    const isReadyToSubmit = isOnReviewStep && canProceedToNext();
+
+    const newHasUnsavedChanges = hasData && !isSubmitting && !isReadyToSubmit;
     setHasUnsavedChanges(newHasUnsavedChanges);
 
     // Notify parent component about unsaved changes
     if (onUnsavedChanges) {
       onUnsavedChanges(newHasUnsavedChanges);
     }
-  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, onUnsavedChanges]);
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, currentStep, totalSteps, canProceedToNext, onUnsavedChanges]);
 
   // Clean up old drafts periodically
   React.useEffect(() => {
