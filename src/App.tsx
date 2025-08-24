@@ -29,6 +29,7 @@ const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
 const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
 const Communications = React.lazy(() => import("./crm/pages/Communications"));
 const EmailMarketing = React.lazy(() => import("./crm/pages/EmailMarketing"));
+const EmailManagement = React.lazy(() => import("./crm/components/EmailManagement"));
 const SmsMarketing = React.lazy(() => import("./crm/pages/SmsMarketing"));
 const PropertyLandingPages = React.lazy(() => import("./crm/pages/PropertyLandingPages"));
 const Promotions = React.lazy(() => import("./crm/pages/Promotions"));
@@ -95,6 +96,7 @@ function NotFound() {
         <Button variant="outlined" href="/crm/tenants">Tenants</Button>
         <Button variant="outlined" href="/crm/contacts">Contacts</Button>
         <Button variant="outlined" href="/crm/sales">Sales</Button>
+        <Button variant="outlined" href="/crm/email-management">Email Management</Button>
         <Button variant="outlined" href="/crm/settings">Settings</Button>
         <Button variant="outlined" href="/crm/tasks">Tasks</Button>
         <Button variant="outlined" href="/crm/reports">Reports</Button>
@@ -235,6 +237,11 @@ function AppRoutes() {
         <Route path="email-marketing" element={
           <React.Suspense fallback={<PageLoader />}>
             <EmailMarketing />
+          </React.Suspense>
+        } />
+        <Route path="email-management" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EmailManagement />
           </React.Suspense>
         } />
         <Route path="sms-marketing" element={

@@ -71,7 +71,6 @@ export default function EmailManagement() {
   
   // Dialog states
   const [openTestDialog, setOpenTestDialog] = useState(false);
-  const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
   
   // Test email form
   const [testForm, setTestForm] = useState({
@@ -81,14 +80,6 @@ export default function EmailManagement() {
     body: 'This is a test email sent from your CRM system to verify email functionality is working correctly.'
   });
   
-  // Template form
-  const [templateForm, setTemplateForm] = useState({
-    name: '',
-    subject: '',
-    htmlBody: '',
-    textBody: '',
-    category: 'transactional' as 'transactional' | 'marketing' | 'system'
-  });
 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -174,37 +165,6 @@ export default function EmailManagement() {
     }
   };
 
-  const handleCreateTemplate = () => {
-    if (!templateForm.name || !templateForm.subject) {
-      showNotification('Please enter template name and subject', 'error');
-      return;
-    }
-
-    try {
-      EmailService.createTemplate({
-        name: templateForm.name,
-        subject: templateForm.subject,
-        htmlBody: templateForm.htmlBody || templateForm.textBody,
-        textBody: templateForm.textBody,
-        variables: [],
-        category: templateForm.category,
-        isActive: true
-      });
-
-      showNotification('Template created successfully!', 'success');
-      setOpenTemplateDialog(false);
-      setTemplateForm({
-        name: '',
-        subject: '',
-        htmlBody: '',
-        textBody: '',
-        category: 'transactional'
-      });
-      loadData();
-    } catch (error) {
-      showNotification(`Failed to create template: ${error}`, 'error');
-    }
-  };
 
   const handleDeleteAccount = async (accountId: string) => {
     if (confirm('Are you sure you want to delete this email account?')) {
@@ -278,7 +238,8 @@ export default function EmailManagement() {
           <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTemplateDialog(true)}
+            component="a"
+            href="/crm/templates"
           >
             New Template
           </Button>
@@ -389,16 +350,28 @@ export default function EmailManagement() {
                       <Stack spacing={2}>
                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                           <Box>
-                            <Typography variant="h6" fontWeight="medium">
-                              {account.displayName}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {account.email}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {EmailService.getProvider(account.providerId)?.displayName}
-                            </Typography>
-                          </Box>
+                  <Typography variant="h6" fontWeight="medium">
+                    {account.displayName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {account.email}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {EmailService.getProvider(account.providerId)?.displayName}
+                  </Typography>
+                  {(() => {
+                    const provider = EmailService.getProvider(account.providerId);
+                    if (provider) {
+                      return (
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                          SMTP: {provider.smtpConfig.host}:{provider.smtpConfig.port}
+                          {provider.imapConfig && ` | IMAP: ${provider.imapConfig.host}:${provider.imapConfig.port}`}
+                        </Typography>
+                      );
+                    }
+                    return null;
+                  })()}
+                </Box>
                           <Stack direction="row" spacing={1} alignItems="center">
                             <Chip
                               icon={getStatusIcon(account.status)}
@@ -558,61 +531,6 @@ export default function EmailManagement() {
         </DialogActions>
       </Dialog>
 
-      {/* Template Dialog */}
-      <Dialog open={openTemplateDialog} onClose={() => setOpenTemplateDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Create Email Template</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Template Name"
-              fullWidth
-              value={templateForm.name}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, name: e.target.value }))}
-            />
-            
-            <TextField
-              label="Subject"
-              fullWidth
-              value={templateForm.subject}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, subject: e.target.value }))}
-              helperText="Use {{variableName}} for dynamic content"
-            />
-            
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={templateForm.category}
-                label="Category"
-                onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as any }))}
-              >
-                <MenuItem value="transactional">Transactional</MenuItem>
-                <MenuItem value="marketing">Marketing</MenuItem>
-                <MenuItem value="system">System</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <TextField
-              label="Template Content"
-              multiline
-              rows={6}
-              fullWidth
-              value={templateForm.textBody}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, textBody: e.target.value }))}
-              helperText="Use {{variableName}} for dynamic content. This will be used for both HTML and text content."
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenTemplateDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreateTemplate}
-            disabled={!templateForm.name || !templateForm.subject}
-          >
-            Create Template
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
