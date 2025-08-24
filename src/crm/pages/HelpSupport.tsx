@@ -1006,6 +1006,20 @@ export default function HelpSupport() {
               </Select>
             </FormControl>
           </Grid>
+          <Grid item xs={12} md={1}>
+            <Button
+              fullWidth
+              variant="outlined"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("All");
+              }}
+              disabled={!searchTerm && selectedCategory === "All"}
+              sx={{ height: '56px' }}
+            >
+              Clear
+            </Button>
+          </Grid>
         </Grid>
 
         {/* Search Results Summary */}
