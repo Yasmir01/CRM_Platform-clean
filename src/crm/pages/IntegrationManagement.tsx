@@ -1096,10 +1096,10 @@ export default function IntegrationManagement() {
             }
           };
 
-          // For now, we'll add the account without testing connection for OAuth providers
-          // since they need authentication flow
-          if (newIntegrationType === 'gmail' || newIntegrationType === 'outlook') {
-            // Add without testing for OAuth providers
+          // Handle different authentication methods
+          if ((newIntegrationType === 'gmail' || newIntegrationType === 'outlook') &&
+              newIntegrationConfig.authMethod === 'oauth') {
+            // Add without testing for OAuth providers since they need authentication flow
             const account = await EmailService.addAccount(
               emailAccount.providerId,
               emailAccount.email,
