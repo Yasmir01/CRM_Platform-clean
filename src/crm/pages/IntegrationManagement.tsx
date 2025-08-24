@@ -308,6 +308,153 @@ const mockIntegrations: Integration[] = [
     pricing: "$49/month",
     features: ["Email Automation", "Customer Journey", "Segmentation", "Analytics", "A/B Testing"],
     dateConnected: undefined
+  },
+  {
+    id: "7",
+    name: "Gmail",
+    description: "Google Gmail email service for sending and receiving emails",
+    category: "Email",
+    provider: "Google",
+    type: "OAuth",
+    status: EmailService.getAccounts().some(a => a.providerId === 'gmail') ? "Connected" : "Disconnected",
+    isActive: EmailService.getAccounts().some(a => a.providerId === 'gmail' && a.isActive),
+    lastSync: EmailService.getAccounts().find(a => a.providerId === 'gmail')?.lastSync || "Never",
+    syncFrequency: "Real-time",
+    configuration: {
+      email: EmailService.getAccounts().find(a => a.providerId === 'gmail')?.email || "",
+      displayName: EmailService.getAccounts().find(a => a.providerId === 'gmail')?.displayName || ""
+    },
+    metrics: {
+      totalRequests: EmailService.getAccounts().find(a => a.providerId === 'gmail') ? 150 : 0,
+      successfulRequests: EmailService.getAccounts().find(a => a.providerId === 'gmail') ? 148 : 0,
+      failedRequests: EmailService.getAccounts().find(a => a.providerId === 'gmail') ? 2 : 0,
+      avgResponseTime: 890,
+      dataTransferred: 2.1,
+      uptime: EmailService.getAccounts().find(a => a.providerId === 'gmail') ? 98.7 : 0
+    },
+    icon: "📧",
+    setupComplexity: "Easy",
+    pricing: "Free",
+    features: ["Email Sending", "IMAP/POP3", "OAuth Authentication", "Rich Text Support"],
+    dateConnected: EmailService.getAccounts().find(a => a.providerId === 'gmail')?.dateAdded
+  },
+  {
+    id: "8",
+    name: "Yahoo Mail",
+    description: "Yahoo Mail email service with app password authentication",
+    category: "Email",
+    provider: "Yahoo",
+    type: "API",
+    status: EmailService.getAccounts().some(a => a.providerId === 'yahoo') ? "Connected" : "Disconnected",
+    isActive: EmailService.getAccounts().some(a => a.providerId === 'yahoo' && a.isActive),
+    lastSync: EmailService.getAccounts().find(a => a.providerId === 'yahoo')?.lastSync || "Never",
+    syncFrequency: "Hourly",
+    configuration: {
+      email: EmailService.getAccounts().find(a => a.providerId === 'yahoo')?.email || "",
+      displayName: EmailService.getAccounts().find(a => a.providerId === 'yahoo')?.displayName || ""
+    },
+    metrics: {
+      totalRequests: EmailService.getAccounts().find(a => a.providerId === 'yahoo') ? 89 : 0,
+      successfulRequests: EmailService.getAccounts().find(a => a.providerId === 'yahoo') ? 87 : 0,
+      failedRequests: EmailService.getAccounts().find(a => a.providerId === 'yahoo') ? 2 : 0,
+      avgResponseTime: 1250,
+      dataTransferred: 1.3,
+      uptime: EmailService.getAccounts().find(a => a.providerId === 'yahoo') ? 97.8 : 0
+    },
+    icon: "📬",
+    setupComplexity: "Medium",
+    pricing: "Free",
+    features: ["Email Sending", "IMAP/POP3", "App Password Auth", "Secure SMTP"],
+    dateConnected: EmailService.getAccounts().find(a => a.providerId === 'yahoo')?.dateAdded
+  },
+  {
+    id: "9",
+    name: "Microsoft Outlook",
+    description: "Microsoft Outlook/Office 365 email integration with OAuth",
+    category: "Email",
+    provider: "Microsoft",
+    type: "OAuth",
+    status: EmailService.getAccounts().some(a => a.providerId === 'outlook') ? "Connected" : "Disconnected",
+    isActive: EmailService.getAccounts().some(a => a.providerId === 'outlook' && a.isActive),
+    lastSync: EmailService.getAccounts().find(a => a.providerId === 'outlook')?.lastSync || "Never",
+    syncFrequency: "Real-time",
+    configuration: {
+      email: EmailService.getAccounts().find(a => a.providerId === 'outlook')?.email || "",
+      displayName: EmailService.getAccounts().find(a => a.providerId === 'outlook')?.displayName || ""
+    },
+    metrics: {
+      totalRequests: EmailService.getAccounts().find(a => a.providerId === 'outlook') ? 203 : 0,
+      successfulRequests: EmailService.getAccounts().find(a => a.providerId === 'outlook') ? 201 : 0,
+      failedRequests: EmailService.getAccounts().find(a => a.providerId === 'outlook') ? 2 : 0,
+      avgResponseTime: 750,
+      dataTransferred: 3.2,
+      uptime: EmailService.getAccounts().find(a => a.providerId === 'outlook') ? 99.0 : 0
+    },
+    icon: "📮",
+    setupComplexity: "Easy",
+    pricing: "Free",
+    features: ["Email Sending", "Calendar Integration", "OAuth Authentication", "Office 365 Integration"],
+    dateConnected: EmailService.getAccounts().find(a => a.providerId === 'outlook')?.dateAdded
+  },
+  {
+    id: "10",
+    name: "Hotmail/Live",
+    description: "Microsoft Hotmail and Live email service",
+    category: "Email",
+    provider: "Microsoft",
+    type: "API",
+    status: EmailService.getAccounts().some(a => a.providerId === 'hotmail') ? "Connected" : "Disconnected",
+    isActive: EmailService.getAccounts().some(a => a.providerId === 'hotmail' && a.isActive),
+    lastSync: EmailService.getAccounts().find(a => a.providerId === 'hotmail')?.lastSync || "Never",
+    syncFrequency: "Hourly",
+    configuration: {
+      email: EmailService.getAccounts().find(a => a.providerId === 'hotmail')?.email || "",
+      displayName: EmailService.getAccounts().find(a => a.providerId === 'hotmail')?.displayName || ""
+    },
+    metrics: {
+      totalRequests: EmailService.getAccounts().find(a => a.providerId === 'hotmail') ? 67 : 0,
+      successfulRequests: EmailService.getAccounts().find(a => a.providerId === 'hotmail') ? 65 : 0,
+      failedRequests: EmailService.getAccounts().find(a => a.providerId === 'hotmail') ? 2 : 0,
+      avgResponseTime: 980,
+      dataTransferred: 0.9,
+      uptime: EmailService.getAccounts().find(a => a.providerId === 'hotmail') ? 97.0 : 0
+    },
+    icon: "📫",
+    setupComplexity: "Medium",
+    pricing: "Free",
+    features: ["Email Sending", "IMAP/POP3", "Password Authentication", "Legacy Support"],
+    dateConnected: EmailService.getAccounts().find(a => a.providerId === 'hotmail')?.dateAdded
+  },
+  {
+    id: "11",
+    name: "Custom SMTP",
+    description: "Custom SMTP server configuration for any email provider",
+    category: "Email",
+    provider: "Custom",
+    type: "API",
+    status: EmailService.getAccounts().some(a => a.providerId === 'custom-smtp') ? "Connected" : "Disconnected",
+    isActive: EmailService.getAccounts().some(a => a.providerId === 'custom-smtp' && a.isActive),
+    lastSync: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp')?.lastSync || "Never",
+    syncFrequency: "Manual",
+    configuration: {
+      email: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp')?.email || "",
+      displayName: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp')?.displayName || "",
+      smtpHost: "",
+      smtpPort: 587
+    },
+    metrics: {
+      totalRequests: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp') ? 45 : 0,
+      successfulRequests: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp') ? 43 : 0,
+      failedRequests: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp') ? 2 : 0,
+      avgResponseTime: 1500,
+      dataTransferred: 0.7,
+      uptime: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp') ? 95.6 : 0
+    },
+    icon: "⚙️",
+    setupComplexity: "Advanced",
+    pricing: "Variable",
+    features: ["Custom SMTP", "Flexible Configuration", "Any Email Provider", "Advanced Settings"],
+    dateConnected: EmailService.getAccounts().find(a => a.providerId === 'custom-smtp')?.dateAdded
   }
 ];
 
