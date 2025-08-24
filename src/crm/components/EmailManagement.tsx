@@ -71,7 +71,6 @@ export default function EmailManagement() {
   
   // Dialog states
   const [openTestDialog, setOpenTestDialog] = useState(false);
-  const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
   
   // Test email form
   const [testForm, setTestForm] = useState({
