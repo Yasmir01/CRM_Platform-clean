@@ -58,7 +58,16 @@ import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import PendingRoundedIcon from "@mui/icons-material/PendingRounded";
 import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
+import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
+import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import CalendarGrid from "../components/CalendarGrid";
+import EnhancedCalendarGrid from "../components/EnhancedCalendarGrid";
+import AISchedulingAssistant from "../components/AISchedulingAssistant";
+import CalendarIntegrations from "../components/CalendarIntegrations";
+import EnhancedEventForm from "../components/EnhancedEventForm";
+import ConflictDetection from "../components/ConflictDetection";
 
 type EventType = "Task" | "Call" | "Email" | "SMS" | "Appointment" | "Inspection" | "Meeting";
 type CalendarView = "month" | "week" | "day";
@@ -184,6 +193,10 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
   const [events, setEvents] = React.useState<CalendarEvent[]>(mockEvents);
   const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [enhancedFormOpen, setEnhancedFormOpen] = React.useState(false);
+  const [aiAssistantOpen, setAiAssistantOpen] = React.useState(false);
+  const [integrationsOpen, setIntegrationsOpen] = React.useState(false);
+  const [useEnhancedCalendar, setUseEnhancedCalendar] = React.useState(true);
   const [filterDialogOpen, setFilterDialogOpen] = React.useState(false);
   const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
   const [filters, setFilters] = React.useState({
@@ -507,13 +520,33 @@ export default function Calendar() {
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Calendar & Tasks
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={() => setDialogOpen(true)}
-        >
-          Add Event
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<SmartToyRoundedIcon />}
+            onClick={() => setAiAssistantOpen(true)}
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
+            AI Assistant
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<SyncRoundedIcon />}
+            onClick={() => setIntegrationsOpen(true)}
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
+            Integrations
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={() => setEnhancedFormOpen(true)}
+          >
+            Add Event
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Controls */}
@@ -577,14 +610,25 @@ export default function Calendar() {
                   startAdornment: <SearchRoundedIcon sx={{ mr: 1, color: "text.secondary" }} />
                 }}
               />
-              <Button
-                variant="outlined"
-                startIcon={<FilterListRoundedIcon />}
-                onClick={() => setFilterDialogOpen(true)}
-                size="small"
-              >
-                Filters
-              </Button>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterListRoundedIcon />}
+                  onClick={() => setFilterDialogOpen(true)}
+                  size="small"
+                >
+                  Filters
+                </Button>
+                <Tooltip title="Toggle Enhanced Calendar">
+                  <IconButton
+                    size="small"
+                    onClick={() => setUseEnhancedCalendar(!useEnhancedCalendar)}
+                    sx={{ bgcolor: useEnhancedCalendar ? alpha(theme.palette.primary.main, 0.1) : 'transparent' }}
+                  >
+                    <AutoAwesomeRoundedIcon />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
             </Stack>
 
             {/* Stats */}
@@ -638,16 +682,39 @@ export default function Calendar() {
       <Grid container spacing={3}>
         {/* Calendar Grid Widget */}
         <Grid item xs={12} lg={4}>
-          <CalendarGrid
-            currentDate={currentDate}
-            onDateChange={(date) => setCurrentDate(date)}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              setCurrentDate(date);
-            }}
-            events={filteredEvents}
-            selectedDate={selectedDate}
-          />
+          {useEnhancedCalendar ? (
+            <EnhancedCalendarGrid
+              currentDate={currentDate}
+              onDateChange={(date) => setCurrentDate(date)}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                setCurrentDate(date);
+              }}
+              events={filteredEvents}
+              selectedDate={selectedDate}
+              view={view}
+              onViewChange={(newView) => setView(newView)}
+              onEventClick={(event) => setSelectedEvent(event)}
+              onAddEvent={(date) => {
+                if (date) {
+                  setSelectedDate(date);
+                  setCurrentDate(date);
+                }
+                setEnhancedFormOpen(true);
+              }}
+            />
+          ) : (
+            <CalendarGrid
+              currentDate={currentDate}
+              onDateChange={(date) => setCurrentDate(date)}
+              onDateSelect={(date) => {
+                setSelectedDate(date);
+                setCurrentDate(date);
+              }}
+              events={filteredEvents}
+              selectedDate={selectedDate}
+            />
+          )}
         </Grid>
 
         {/* Events Grid */}
@@ -802,7 +869,54 @@ export default function Calendar() {
         )}
       </Dialog>
 
-      {/* Add Event Dialog Placeholder */}
+      {/* Enhanced Event Form */}
+      <EnhancedEventForm
+        open={enhancedFormOpen}
+        onClose={() => setEnhancedFormOpen(false)}
+        onSave={(event) => {
+          // Add the new event to the events list
+          setEvents(prev => [...prev, event]);
+          setEnhancedFormOpen(false);
+        }}
+        existingEvents={events}
+        selectedDate={selectedDate}
+      />
+
+      {/* AI Scheduling Assistant */}
+      <AISchedulingAssistant
+        open={aiAssistantOpen}
+        onClose={() => setAiAssistantOpen(false)}
+        onScheduleEvent={(suggestion) => {
+          // Convert AI suggestion to event and add it
+          const newEvent = {
+            id: `ai-event-${Date.now()}`,
+            title: suggestion.title,
+            type: suggestion.type,
+            date: suggestion.suggestedDate.toISOString().split('T')[0],
+            time: suggestion.suggestedTime,
+            endTime: suggestion.suggestedTime, // Calculate end time based on duration
+            description: suggestion.reason,
+            location: suggestion.location,
+            attendees: suggestion.attendees,
+            priority: "Medium" as const,
+            status: "Pending" as const,
+            recurring: false,
+            reminder: true,
+          };
+          setEvents(prev => [...prev, newEvent]);
+          setAiAssistantOpen(false);
+        }}
+        existingEvents={events}
+        selectedDate={selectedDate}
+      />
+
+      {/* Calendar Integrations */}
+      <CalendarIntegrations
+        open={integrationsOpen}
+        onClose={() => setIntegrationsOpen(false)}
+      />
+
+      {/* Legacy Add Event Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Add New Event</DialogTitle>
         <DialogContent>
@@ -821,15 +935,30 @@ export default function Calendar() {
       {/* Floating Action Button for Mobile */}
       <Fab
         color="primary"
-        sx={{ 
-          position: "fixed", 
-          bottom: 16, 
+        sx={{
+          position: "fixed",
+          bottom: 16,
           right: 16,
           display: { xs: "flex", md: "none" }
         }}
-        onClick={() => setDialogOpen(true)}
+        onClick={() => setEnhancedFormOpen(true)}
       >
         <AddRoundedIcon />
+      </Fab>
+
+      {/* Mobile AI Assistant FAB */}
+      <Fab
+        color="secondary"
+        size="small"
+        sx={{
+          position: "fixed",
+          bottom: 80,
+          right: 16,
+          display: { xs: "flex", md: "none" }
+        }}
+        onClick={() => setAiAssistantOpen(true)}
+      >
+        <SmartToyRoundedIcon />
       </Fab>
     </Box>
   );
