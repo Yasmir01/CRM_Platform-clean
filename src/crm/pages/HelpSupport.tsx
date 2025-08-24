@@ -358,7 +358,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "encharge-email-automation",
     question: "How do I set up Encharge.io for advanced email automation?",
-    answer: "Encharge.io integration for lifecycle marketing: 1) Go to Integration Management and add 'Encharge.io - Email Automation', 2) Get your API key from Encharge.io → Settings → API & Webhooks, 3) Enter your API key and Account ID in the configuration, 4) Set sync frequency based on your campaign needs, 5) Map tenant lifecycle events to Encharge automation triggers, 6) Configure customer journey workflows in Encharge, 7) Test with sample data. This enables sophisticated email automation based on tenant behavior, lease status, and payment history.",
+    answer: "Encharge.io integration for lifecycle marketing: 1) Go to Integration Management and add 'Encharge.io - Email Automation', 2) Get your API key from Encharge.io → Settings �� API & Webhooks, 3) Enter your API key and Account ID in the configuration, 4) Set sync frequency based on your campaign needs, 5) Map tenant lifecycle events to Encharge automation triggers, 6) Configure customer journey workflows in Encharge, 7) Test with sample data. This enables sophisticated email automation based on tenant behavior, lease status, and payment history.",
     category: "Integrations",
     tags: ["encharge", "automation", "lifecycle", "journey", "campaigns"],
     helpful: 86
@@ -1107,6 +1107,26 @@ export default function HelpSupport() {
           </Card>
         )}
 
+        {/* Real-time Update Notification */}
+        {showUpdateNotification && searchTerm && (
+          <Box sx={{ mb: 2 }}>
+            <Chip
+              icon={<CheckCircleRoundedIcon />}
+              label={`Search updated at ${lastUpdateTime} - ${filteredFAQs.length} results found`}
+              color="success"
+              variant="outlined"
+              size="small"
+              sx={{
+                animation: 'fadeIn 0.3s ease-in',
+                '@keyframes fadeIn': {
+                  from: { opacity: 0, transform: 'translateY(-10px)' },
+                  to: { opacity: 1, transform: 'translateY(0)' }
+                }
+              }}
+            />
+          </Box>
+        )}
+
         {/* Search Statistics */}
         {filteredFAQs.length > 0 && (
           <Box sx={{ mb: 2 }}>
@@ -1114,8 +1134,9 @@ export default function HelpSupport() {
               Showing {filteredFAQs.length} of {mockFAQs.filter(faq =>
                 faq.id !== "transunion-integration-setup" || isSuperAdmin()
               ).length} available FAQs
-              {searchTerm && " • Real-time search results"}
+              {searchTerm && " • Real-time search active"}
               {selectedCategory !== "All" && ` • Filtered by ${selectedCategory}`}
+              {lastUpdateTime && searchTerm && ` • Last updated: ${lastUpdateTime}`}
             </Typography>
           </Box>
         )}
