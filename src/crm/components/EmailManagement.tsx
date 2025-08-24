@@ -278,7 +278,8 @@ export default function EmailManagement() {
           <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTemplateDialog(true)}
+            component="a"
+            href="/crm/templates"
           >
             New Template
           </Button>
