@@ -59,7 +59,7 @@ export default function CrmLeadsBySourceChart() {
             height={280}
             slotProps={{
               legend: {
-                position: { vertical: "middle", horizontal: "right" },
+                position: { vertical: "middle", horizontal: "end" },
                 direction: "vertical",
               },
             }}
