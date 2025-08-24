@@ -986,7 +986,7 @@ export default function HelpSupport() {
               }
             />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
