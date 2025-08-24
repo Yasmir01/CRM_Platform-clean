@@ -823,11 +823,11 @@ export default function HelpSupport() {
 
   // Debug logging for super admin role
   React.useEffect(() => {
-    console.log('Current user role check:', { isSuperAdmin: isSuperAdmin() });
+    console.log('Current user role check:', { isSuperAdmin: isUserSuperAdmin });
     console.log('TransUnion FAQ in mockFAQs:', mockFAQs.find(faq => faq.id === "transunion-integration-setup"));
     console.log('Filtered FAQs count:', filteredFAQs.length);
     console.log('TransUnion FAQ in filtered list:', filteredFAQs.find(faq => faq.id === "transunion-integration-setup"));
-  }, [filteredFAQs, isSuperAdmin]);
+  }, [filteredFAQs, isUserSuperAdmin]);
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
