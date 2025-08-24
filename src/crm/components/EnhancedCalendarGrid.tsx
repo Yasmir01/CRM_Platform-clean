@@ -34,7 +34,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
-import TaskRoundedIcon from "@mui/icons-material/TaskRoundedRounded";
+import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
 import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
