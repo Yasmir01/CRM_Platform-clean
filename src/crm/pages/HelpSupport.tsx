@@ -1064,7 +1064,10 @@ export default function HelpSupport() {
                 📧 Email Integration Quick Start
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                New to email integration? Start with these essential guides:
+                {searchTerm ?
+                  `Showing integration help for "${searchTerm}". Quick access to related topics:` :
+                  "New to email integration? Start with these essential guides:"
+                }
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
                 <Button
