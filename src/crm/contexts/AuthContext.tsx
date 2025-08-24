@@ -342,7 +342,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // In a real app, you'd update the user's password in the database
       // For demo purposes, we'll just trigger the email
-      sendPasswordEmail(email, tempPassword);
+      await sendPasswordEmail(email, tempPassword);
 
       return {
         success: true,
