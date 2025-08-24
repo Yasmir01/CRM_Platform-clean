@@ -134,14 +134,8 @@ export default defineConfig({
       '@emotion/react',
       '@emotion/styled',
       'dayjs',
-      'crypto-js'
-    ],
-    exclude: [
-      // Exclude heavy components that should be lazy loaded
-      '@mui/x-charts',
-      '@mui/x-data-grid',
-      '@mui/x-date-pickers',
-      'recharts'
+      'crypto-js',
+      'use-sync-external-store'
     ]
   }
 });
