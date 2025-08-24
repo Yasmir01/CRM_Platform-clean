@@ -5,6 +5,7 @@ interface AutoSaveOptions {
   key?: string; // localStorage key
   onSave?: (data: any) => void; // custom save function
   enabled?: boolean;
+  shouldWarnBeforeUnload?: boolean; // whether to show beforeunload warning
 }
 
 interface AutoSaveState {
@@ -14,14 +15,15 @@ interface AutoSaveState {
 }
 
 export const useAutoSave = <T>(
-  data: T, 
+  data: T,
   options: AutoSaveOptions = {}
 ) => {
   const {
     delay = 5000, // 5 seconds default
     key = 'autoSave',
     onSave,
-    enabled = true
+    enabled = true,
+    shouldWarnBeforeUnload = true
   } = options;
 
   const [state, setState] = React.useState<AutoSaveState>({
@@ -130,17 +132,19 @@ export const useAutoSave = <T>(
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasChangedRef.current) {
         forceSave();
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        if (shouldWarnBeforeUnload) {
+          e.preventDefault();
+          e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        }
       }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [enabled, forceSave]);
+  }, [enabled, forceSave, shouldWarnBeforeUnload]);
 
   return {
     ...state,
