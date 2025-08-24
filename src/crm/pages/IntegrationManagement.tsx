@@ -773,6 +773,317 @@ export default function IntegrationManagement() {
     }
   };
 
+  const handleSaveIntegration = async () => {
+    if (selectedIntegration) {
+      // Update existing integration configuration
+      try {
+        // Update the integration in the list
+        setIntegrations(prev => prev.map(i =>
+          i.id === selectedIntegration.id ? selectedIntegration : i
+        ));
+
+        // If it's an email integration, update or create the email account
+        if (selectedIntegration.category === "Email" && ["Gmail", "Yahoo Mail", "Microsoft Outlook", "Hotmail/Live", "Custom SMTP"].includes(selectedIntegration.name)) {
+          const providerMap: Record<string, string> = {
+            "Gmail": "gmail",
+            "Yahoo Mail": "yahoo",
+            "Microsoft Outlook": "outlook",
+            "Hotmail/Live": "hotmail",
+            "Custom SMTP": "custom-smtp"
+          };
+
+          const providerId = providerMap[selectedIntegration.name];
+          if (providerId && selectedIntegration.configuration.email) {
+            // Check if account already exists
+            const existingAccount = EmailService.getAccounts().find(a => a.providerId === providerId);
+
+            if (existingAccount) {
+              // Update existing account
+              await EmailService.updateAccount(existingAccount.id, {
+                email: selectedIntegration.configuration.email,
+                displayName: selectedIntegration.configuration.displayName || selectedIntegration.configuration.email,
+                isActive: selectedIntegration.isActive
+              });
+            } else {
+              // Create new account if all required fields are provided
+              let credentials: any = {};
+
+              if (selectedIntegration.name === "Yahoo Mail" && selectedIntegration.configuration.appPassword) {
+                credentials = { appPassword: selectedIntegration.configuration.appPassword };
+              } else if (selectedIntegration.name === "Hotmail/Live" && selectedIntegration.configuration.password) {
+                credentials = { password: selectedIntegration.configuration.password };
+              } else if (selectedIntegration.name === "Custom SMTP" && selectedIntegration.configuration.password) {
+                credentials = {
+                  password: selectedIntegration.configuration.password,
+                  smtpHost: selectedIntegration.configuration.smtpHost,
+                  smtpPort: selectedIntegration.configuration.smtpPort || 587,
+                  username: selectedIntegration.configuration.username,
+                  security: selectedIntegration.configuration.security || 'STARTTLS'
+                };
+              }
+
+              // Add account if credentials are available
+              if (Object.keys(credentials).length > 0) {
+                await EmailService.addAccount(
+                  providerId,
+                  selectedIntegration.configuration.email,
+                  credentials,
+                  { syncFrequency: 'hourly' }
+                );
+              }
+            }
+          }
+        }
+
+        showNotification(`${selectedIntegration.name} configuration updated successfully!`, 'success');
+        setOpenIntegrationDialog(false);
+        setSelectedIntegration(null);
+      } catch (error) {
+        showNotification(`Failed to update ${selectedIntegration.name} configuration: ${error}`, 'error');
+      }
+    } else {
+      // Add new integration logic (existing inline code)
+      if (!newIntegrationType || Object.keys(newIntegrationConfig).length === 0) {
+        showNotification("Please select an integration type and configure it.", 'error');
+        return;
+      }
+
+      const newId = (integrations.length + 1).toString();
+
+      const integrationTemplates: Record<string, Partial<Integration>> = {
+        mailchimp: {
+          name: "Mailchimp",
+          description: "Email marketing and automation platform",
+          category: "Email",
+          provider: "Mailchimp",
+          type: "API",
+          icon: "📧",
+          setupComplexity: "Easy",
+          pricing: "$10/month",
+          features: ["Email Campaigns", "Automation", "Analytics", "Segmentation"]
+        },
+        stripe: {
+          name: "Stripe",
+          description: "Payment processing and billing",
+          category: "Payments",
+          provider: "Stripe",
+          type: "API",
+          icon: "💳",
+          setupComplexity: "Medium",
+          pricing: "2.9% + 30¢",
+          features: ["Payment Processing", "Subscriptions", "Invoicing", "Reporting"]
+        },
+        "google-drive": {
+          name: "Google Drive",
+          description: "Cloud storage and file management",
+          category: "Storage",
+          provider: "Google",
+          type: "OAuth",
+          icon: "📁",
+          setupComplexity: "Easy",
+          pricing: "Free",
+          features: ["File Storage", "Backup", "Sharing", "Collaboration"]
+        },
+        slack: {
+          name: "Slack",
+          description: "Team communication and notifications",
+          category: "Communication",
+          provider: "Slack",
+          type: "Webhook",
+          icon: "💬",
+          setupComplexity: "Easy",
+          pricing: "Free",
+          features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"]
+        },
+        transunion: {
+          name: "TransUnion",
+          description: "Credit reporting and background check services for tenant screening",
+          category: "Finance",
+          provider: "TransUnion",
+          type: "API",
+          icon: "🔍",
+          setupComplexity: "Advanced",
+          pricing: "Per Report",
+          features: ["Credit Reports", "Background Checks", "Identity Verification", "Criminal Records"]
+        },
+        gmail: {
+          name: "Gmail",
+          description: "Google Gmail email integration for sending and receiving emails",
+          category: "Email",
+          provider: "Google",
+          type: "OAuth",
+          icon: "📧",
+          setupComplexity: "Medium",
+          pricing: "Free",
+          features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "OAuth Authentication"]
+        },
+        outlook: {
+          name: "Outlook",
+          description: "Microsoft Outlook email integration with Office 365 support",
+          category: "Email",
+          provider: "Microsoft",
+          type: "OAuth",
+          icon: "📮",
+          setupComplexity: "Medium",
+          pricing: "Free",
+          features: ["Email Sending", "Email Receiving", "Exchange Integration", "OAuth Authentication"]
+        },
+        yahoo: {
+          name: "Yahoo Mail",
+          description: "Yahoo Mail email integration with app password authentication",
+          category: "Email",
+          provider: "Yahoo",
+          type: "API",
+          icon: "📬",
+          setupComplexity: "Easy",
+          pricing: "Free",
+          features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "App Password Auth"]
+        },
+        hotmail: {
+          name: "Hotmail/Live",
+          description: "Microsoft Hotmail/Live email integration",
+          category: "Email",
+          provider: "Microsoft",
+          type: "API",
+          icon: "📫",
+          setupComplexity: "Easy",
+          pricing: "Free",
+          features: ["Email Sending", "Email Receiving", "SMTP/IMAP", "Password Authentication"]
+        },
+        "custom-smtp": {
+          name: "Custom SMTP",
+          description: "Custom SMTP server configuration for any email provider",
+          category: "Email",
+          provider: "Custom",
+          type: "API",
+          icon: "⚙️",
+          setupComplexity: "Advanced",
+          pricing: "Varies",
+          features: ["Email Sending", "Custom SMTP", "IMAP Support", "Flexible Configuration"]
+        }
+      };
+
+      const template = integrationTemplates[newIntegrationType] || {
+        name: newIntegrationType.charAt(0).toUpperCase() + newIntegrationType.slice(1),
+        description: "Custom integration",
+        category: "CRM",
+        provider: newIntegrationType,
+        type: "API",
+        icon: "🔗",
+        setupComplexity: "Medium",
+        pricing: "Custom",
+        features: ["Custom Integration"]
+      };
+
+      const newIntegration: Integration = {
+        id: newId,
+        ...template,
+        status: "Connected",
+        isActive: true,
+        lastSync: new Date().toISOString(),
+        syncFrequency: "Hourly",
+        configuration: newIntegrationConfig,
+        metrics: {
+          totalRequests: 0,
+          successfulRequests: 0,
+          failedRequests: 0,
+          avgResponseTime: 0,
+          dataTransferred: 0,
+          uptime: 100
+        },
+        dateConnected: new Date().toISOString().split('T')[0]
+      } as Integration;
+
+      setIntegrations(prev => [...prev, newIntegration]);
+
+      // If it's an email provider, add it to EmailService
+      if (['gmail', 'outlook', 'yahoo', 'hotmail', 'custom-smtp'].includes(newIntegrationType)) {
+        try {
+          // Prepare credentials based on provider type
+          let credentials: any = {};
+
+          if (newIntegrationType === 'gmail' || newIntegrationType === 'outlook') {
+            // OAuth providers - will need to be authenticated later
+            credentials = {
+              accessToken: '', // Will be filled after OAuth
+              refreshToken: '', // Will be filled after OAuth
+            };
+          } else if (newIntegrationType === 'yahoo') {
+            credentials = {
+              appPassword: newIntegrationConfig.appPassword || ''
+            };
+          } else if (newIntegrationType === 'hotmail') {
+            credentials = {
+              password: newIntegrationConfig.password || ''
+            };
+          } else if (newIntegrationType === 'custom-smtp') {
+            credentials = {
+              password: newIntegrationConfig.password || ''
+            };
+          }
+
+          // Add email account to EmailService
+          const emailAccount = {
+            providerId: newIntegrationType,
+            email: newIntegrationConfig.email || '',
+            credentials,
+            settings: {
+              syncFrequency: 'hourly' as const,
+              autoReply: false
+            }
+          };
+
+          // For now, we'll add the account without testing connection for OAuth providers
+          // since they need authentication flow
+          if (newIntegrationType === 'gmail' || newIntegrationType === 'outlook') {
+            // Add without testing for OAuth providers
+            const account = await EmailService.addAccount(
+              emailAccount.providerId,
+              emailAccount.email,
+              emailAccount.credentials,
+              emailAccount.settings
+            ).catch(() => {
+              // If EmailService.addAccount fails for OAuth, we'll add it manually
+              return {
+                id: `account_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                ...emailAccount,
+                displayName: newIntegrationConfig.displayName || emailAccount.email,
+                isActive: true,
+                authType: 'oauth' as const,
+                status: 'disconnected' as const,
+                dateAdded: new Date().toISOString()
+              };
+            });
+          } else {
+            // Test connection for non-OAuth providers
+            await EmailService.addAccount(
+              emailAccount.providerId,
+              emailAccount.email,
+              emailAccount.credentials,
+              emailAccount.settings
+            );
+          }
+
+          showNotification(`${template.name} integration added successfully! ${
+            newIntegrationType === 'gmail' || newIntegrationType === 'outlook'
+              ? 'Please complete OAuth authentication in the email settings.'
+              : 'Email account configured and ready to use.'
+          }`, 'success');
+        } catch (error) {
+          console.error('Failed to add email account:', error);
+          showNotification(`${template.name} integration added to the list, but email configuration failed. Please check your settings.`, 'error');
+        }
+      } else {
+        showNotification(`${template.name} integration added successfully!`, 'success');
+      }
+
+      setOpenIntegrationDialog(false);
+      setSelectedIntegration(null);
+      setNewIntegrationType("");
+      setNewIntegrationConfig({});
+    }
+  };
+
   const handleSyncIntegration = async (id: string) => {
     const integration = integrations.find(i => i.id === id);
     if (!integration) return;
