@@ -96,6 +96,7 @@ function NotFound() {
         <Button variant="outlined" href="/crm/tenants">Tenants</Button>
         <Button variant="outlined" href="/crm/contacts">Contacts</Button>
         <Button variant="outlined" href="/crm/sales">Sales</Button>
+        <Button variant="outlined" href="/crm/email-management">Email Management</Button>
         <Button variant="outlined" href="/crm/settings">Settings</Button>
         <Button variant="outlined" href="/crm/tasks">Tasks</Button>
         <Button variant="outlined" href="/crm/reports">Reports</Button>
