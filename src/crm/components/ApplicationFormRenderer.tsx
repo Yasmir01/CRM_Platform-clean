@@ -153,7 +153,8 @@ export default function ApplicationFormRenderer({
   // Use auto-save hook for draft management and beforeunload protection
   const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
     delay: 2000, // Save every 2 seconds
-    enabled: hasUnsavedChanges && isOpen
+    enabled: hasUnsavedChanges && isOpen,
+    shouldWarnBeforeUnload: hasUnsavedChanges
   });
 
   const formFields = template.formFields || [];
