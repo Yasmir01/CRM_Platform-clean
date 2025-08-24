@@ -361,7 +361,7 @@ const mockIntegrations: Integration[] = [
       dataTransferred: 1.3,
       uptime: EmailService.getAccounts().find(a => a.providerId === 'yahoo') ? 97.8 : 0
     },
-    icon: "����",
+    icon: "📬",
     setupComplexity: "Medium",
     pricing: "Free",
     features: ["Email Sending", "IMAP/POP3", "App Password Auth", "Secure SMTP"],
@@ -1045,12 +1045,32 @@ export default function IntegrationManagement() {
           // Prepare credentials based on provider type
           let credentials: any = {};
 
-          if (newIntegrationType === 'gmail' || newIntegrationType === 'outlook') {
-            // OAuth providers - will need to be authenticated later
-            credentials = {
-              accessToken: '', // Will be filled after OAuth
-              refreshToken: '', // Will be filled after OAuth
-            };
+          if (newIntegrationType === 'gmail') {
+            // Gmail supports both OAuth and App Password
+            if (newIntegrationConfig.authMethod === 'app-password') {
+              credentials = {
+                appPassword: newIntegrationConfig.appPassword || ''
+              };
+            } else {
+              // OAuth method
+              credentials = {
+                accessToken: '', // Will be filled after OAuth
+                refreshToken: '', // Will be filled after OAuth
+              };
+            }
+          } else if (newIntegrationType === 'outlook') {
+            // Outlook supports both OAuth and App Password
+            if (newIntegrationConfig.authMethod === 'app-password') {
+              credentials = {
+                appPassword: newIntegrationConfig.appPassword || ''
+              };
+            } else {
+              // OAuth method
+              credentials = {
+                accessToken: '', // Will be filled after OAuth
+                refreshToken: '', // Will be filled after OAuth
+              };
+            }
           } else if (newIntegrationType === 'yahoo') {
             credentials = {
               appPassword: newIntegrationConfig.appPassword || ''
