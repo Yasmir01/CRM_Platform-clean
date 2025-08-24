@@ -644,7 +644,30 @@ export default function IntegrationManagement() {
               // Prepare credentials based on auth type
               let credentials: any = {};
 
-              if (integration.name === "Gmail" || integration.name === "Microsoft Outlook") {
+              if (integration.name === "Gmail") {
+                // Gmail supports both OAuth and App Password
+                if (integration.configuration.authMethod === "app-password") {
+                  if (!integration.configuration.appPassword) {
+                    testResult = { success: false, message: "App Password is required for Gmail manual setup. Please generate one in your Google Account Security settings." };
+                  } else {
+                    credentials = { appPassword: integration.configuration.appPassword };
+                    try {
+                      const account = await EmailService.addAccount(
+                        providerId,
+                        integration.configuration.email,
+                        credentials,
+                        { syncFrequency: 'hourly' }
+                      );
+                      testResult = { success: true, message: "Gmail account added and tested successfully using App Password!" };
+                    } catch (error) {
+                      testResult = { success: false, message: `Failed to add Gmail account: ${error}` };
+                    }
+                  }
+                } else {
+                  // OAuth method
+                  testResult = { success: false, message: "OAuth authentication required. Please complete OAuth flow first or switch to App Password method." };
+                }
+              } else if (integration.name === "Microsoft Outlook") {
                 // OAuth providers - would need actual OAuth flow in production
                 testResult = { success: false, message: "OAuth authentication required. Please complete OAuth flow first." };
               } else if (integration.name === "Yahoo Mail") {
