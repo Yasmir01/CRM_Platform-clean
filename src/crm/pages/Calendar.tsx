@@ -543,6 +543,15 @@ export default function Calendar() {
             Integrations
           </Button>
           <Button
+            variant={showDragDropCalendar ? "contained" : "outlined"}
+            size="small"
+            startIcon={<DragIndicatorRoundedIcon />}
+            onClick={() => setShowDragDropCalendar(!showDragDropCalendar)}
+            sx={{ display: { xs: 'none', md: 'flex' } }}
+          >
+            Drag & Drop
+          </Button>
+          <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
             onClick={() => setEnhancedFormOpen(true)}
