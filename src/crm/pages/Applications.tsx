@@ -1426,10 +1426,10 @@ export default function Applications() {
                       <Stack spacing={2} alignItems="center">
                         <ImageIcon sx={{ fontSize: 64, color: 'grey.400' }} />
                         <Typography color="text.secondary">
-                          Image preview would be displayed here
+                          Image preview unavailable
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          In a real application, the actual image would be loaded from storage
+                          The image data may be corrupted or missing
                         </Typography>
                       </Stack>
                     </Box>
