@@ -1420,6 +1420,242 @@ export default function IntegrationManagement() {
                     </Stack>
                   )}
 
+                  {newIntegrationType === "gmail" && (
+                    <Stack spacing={3}>
+                      <Alert severity="info">
+                        Configure your Gmail integration using OAuth authentication for secure access.
+                      </Alert>
+                      <TextField
+                        label="Email Address"
+                        fullWidth
+                        type="email"
+                        value={newIntegrationConfig.email || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@gmail.com"
+                        helperText="The Gmail address you want to use for sending emails"
+                      />
+                      <TextField
+                        label="Display Name"
+                        fullWidth
+                        value={newIntegrationConfig.displayName || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, displayName: e.target.value }))}
+                        placeholder="Your Name or Company Name"
+                        helperText="Name that will appear as the sender"
+                      />
+                      <TextField
+                        label="OAuth Client ID (Optional)"
+                        fullWidth
+                        value={newIntegrationConfig.clientId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, clientId: e.target.value }))}
+                        placeholder="Enter your Google OAuth Client ID"
+                        helperText="If you have a custom OAuth application, enter the Client ID"
+                      />
+                      <Alert severity="warning">
+                        Gmail integration requires OAuth setup. After adding, you'll need to authenticate with Google.
+                      </Alert>
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "outlook" && (
+                    <Stack spacing={3}>
+                      <Alert severity="info">
+                        Configure your Microsoft Outlook integration using OAuth authentication.
+                      </Alert>
+                      <TextField
+                        label="Email Address"
+                        fullWidth
+                        type="email"
+                        value={newIntegrationConfig.email || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@outlook.com"
+                        helperText="The Outlook address you want to use for sending emails"
+                      />
+                      <TextField
+                        label="Display Name"
+                        fullWidth
+                        value={newIntegrationConfig.displayName || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, displayName: e.target.value }))}
+                        placeholder="Your Name or Company Name"
+                        helperText="Name that will appear as the sender"
+                      />
+                      <TextField
+                        label="OAuth Client ID (Optional)"
+                        fullWidth
+                        value={newIntegrationConfig.clientId || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, clientId: e.target.value }))}
+                        placeholder="Enter your Microsoft App Client ID"
+                        helperText="If you have a custom OAuth application, enter the Client ID"
+                      />
+                      <Alert severity="warning">
+                        Outlook integration requires OAuth setup. After adding, you'll need to authenticate with Microsoft.
+                      </Alert>
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "yahoo" && (
+                    <Stack spacing={3}>
+                      <Alert severity="info">
+                        Configure your Yahoo Mail integration using App Password authentication for enhanced security.
+                      </Alert>
+                      <TextField
+                        label="Email Address"
+                        fullWidth
+                        type="email"
+                        value={newIntegrationConfig.email || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@yahoo.com"
+                        helperText="Your Yahoo email address"
+                      />
+                      <TextField
+                        label="Display Name"
+                        fullWidth
+                        value={newIntegrationConfig.displayName || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, displayName: e.target.value }))}
+                        placeholder="Your Name or Company Name"
+                        helperText="Name that will appear as the sender"
+                      />
+                      <TextField
+                        label="App Password"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.appPassword || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, appPassword: e.target.value }))}
+                        placeholder="Enter your Yahoo App Password"
+                        helperText="Generate an App Password in your Yahoo Account Security settings"
+                      />
+                      <Alert severity="warning">
+                        For security, Yahoo requires App Passwords instead of your regular password.
+                        <br />
+                        Generate one at: Yahoo Account Security → App Passwords
+                      </Alert>
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "hotmail" && (
+                    <Stack spacing={3}>
+                      <Alert severity="info">
+                        Configure your Hotmail/Live email integration with password authentication.
+                      </Alert>
+                      <TextField
+                        label="Email Address"
+                        fullWidth
+                        type="email"
+                        value={newIntegrationConfig.email || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@hotmail.com"
+                        helperText="Your Hotmail or Live email address"
+                      />
+                      <TextField
+                        label="Display Name"
+                        fullWidth
+                        value={newIntegrationConfig.displayName || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, displayName: e.target.value }))}
+                        placeholder="Your Name or Company Name"
+                        helperText="Name that will appear as the sender"
+                      />
+                      <TextField
+                        label="Password"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.password || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, password: e.target.value }))}
+                        placeholder="Enter your account password"
+                        helperText="Your Hotmail/Live account password"
+                      />
+                      <Alert severity="warning">
+                        Store your password securely. In production, credentials should be encrypted and stored on the backend.
+                      </Alert>
+                    </Stack>
+                  )}
+
+                  {newIntegrationType === "custom-smtp" && (
+                    <Stack spacing={3}>
+                      <Alert severity="info">
+                        Configure your custom SMTP server settings for any email provider.
+                      </Alert>
+                      <TextField
+                        label="Email Address"
+                        fullWidth
+                        type="email"
+                        value={newIntegrationConfig.email || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="your.email@company.com"
+                        helperText="Your email address"
+                      />
+                      <TextField
+                        label="Display Name"
+                        fullWidth
+                        value={newIntegrationConfig.displayName || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, displayName: e.target.value }))}
+                        placeholder="Your Name or Company Name"
+                        helperText="Name that will appear as the sender"
+                      />
+                      <TextField
+                        label="SMTP Host"
+                        fullWidth
+                        value={newIntegrationConfig.smtpHost || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, smtpHost: e.target.value }))}
+                        placeholder="smtp.yourdomain.com"
+                        helperText="SMTP server hostname"
+                      />
+                      <TextField
+                        label="SMTP Port"
+                        fullWidth
+                        type="number"
+                        value={newIntegrationConfig.smtpPort || "587"}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, smtpPort: e.target.value }))}
+                        placeholder="587"
+                        helperText="SMTP port (common: 587 for TLS, 465 for SSL, 25 for plain)"
+                      />
+                      <TextField
+                        label="Username"
+                        fullWidth
+                        value={newIntegrationConfig.username || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, username: e.target.value }))}
+                        placeholder="Your SMTP username (often same as email)"
+                        helperText="SMTP authentication username"
+                      />
+                      <TextField
+                        label="Password"
+                        fullWidth
+                        type="password"
+                        value={newIntegrationConfig.password || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, password: e.target.value }))}
+                        placeholder="Your SMTP password"
+                        helperText="SMTP authentication password"
+                      />
+                      <FormControl fullWidth>
+                        <InputLabel>Security</InputLabel>
+                        <Select
+                          value={newIntegrationConfig.security || "tls"}
+                          label="Security"
+                          onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, security: e.target.value }))}
+                        >
+                          <MenuItem value="tls">TLS</MenuItem>
+                          <MenuItem value="ssl">SSL</MenuItem>
+                          <MenuItem value="none">None</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        label="IMAP Host (Optional)"
+                        fullWidth
+                        value={newIntegrationConfig.imapHost || ""}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, imapHost: e.target.value }))}
+                        placeholder="imap.yourdomain.com"
+                        helperText="IMAP server for reading emails (optional)"
+                      />
+                      <TextField
+                        label="IMAP Port (Optional)"
+                        fullWidth
+                        type="number"
+                        value={newIntegrationConfig.imapPort || "993"}
+                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, imapPort: e.target.value }))}
+                        placeholder="993"
+                        helperText="IMAP port (common: 993 for SSL, 143 for plain)"
+                      />
+                    </Stack>
+                  )}
+
                   {(newIntegrationType === "slack" || newIntegrationType === "google-drive" || newIntegrationType === "zapier" || newIntegrationType === "hubspot") && (
                     <Alert severity="info">
                       This integration requires OAuth authentication. Click "Add Integration" to begin the OAuth flow.
