@@ -1831,6 +1831,35 @@ export default function IntegrationManagement() {
                   <Alert severity="info">
                     Configure your Gmail integration using OAuth authentication for secure access.
                   </Alert>
+
+                  <Box sx={{ p: 2, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom color="primary">
+                      Gmail Server Configuration
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Outgoing (SMTP):</strong> smtp.gmail.com:587 (TLS)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Incoming (IMAP):</strong> imap.gmail.com:993 (SSL)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Incoming (POP):</strong> pop.gmail.com:995 (SSL)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Authentication:</strong> OAuth 2.0
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
                   <TextField
                     label="Email Address"
                     fullWidth
