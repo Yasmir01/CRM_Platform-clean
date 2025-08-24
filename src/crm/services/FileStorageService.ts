@@ -135,9 +135,11 @@ export class FileStorageService {
           canvas.width = newWidth;
           canvas.height = newHeight;
 
-          // Draw and convert to data URL
+          // Draw and convert to data URL (use PNG for images with transparency)
           ctx.drawImage(img, 0, 0, newWidth, newHeight);
-          const previewDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          const format = file.type === 'image/png' || file.type === 'image/webp' ? 'image/png' : 'image/jpeg';
+          const quality = format === 'image/jpeg' ? 0.8 : undefined;
+          const previewDataUrl = canvas.toDataURL(format, quality);
 
           console.log('Generated preview:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
 
@@ -178,7 +180,7 @@ export class FileStorageService {
   /**
    * Check if file is an image
    */
-  private static isImageFile(type: string): boolean {
+  static isImageFile(type: string): boolean {
     return this.SUPPORTED_TYPES.images.includes(type);
   }
 
