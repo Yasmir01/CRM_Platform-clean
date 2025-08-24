@@ -118,19 +118,53 @@ export class FileStorageService {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      img.onload = () => {
-        // Calculate dimensions maintaining aspect ratio
-        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
+      if (!ctx) {
+        reject(new Error('Canvas context not available'));
+        return;
+      }
 
-        // Draw and convert to data URL
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      img.onload = () => {
+        try {
+          console.log('Image loaded for preview:', file.name, 'Original dimensions:', img.width, 'x', img.height);
+
+          // Calculate dimensions maintaining aspect ratio
+          const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+          const newWidth = img.width * ratio;
+          const newHeight = img.height * ratio;
+
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+
+          // Draw and convert to data URL
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          const previewDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+          console.log('Generated preview:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
+
+          // Clean up
+          URL.revokeObjectURL(img.src);
+          resolve(previewDataUrl);
+        } catch (error) {
+          console.error('Error generating preview:', error);
+          URL.revokeObjectURL(img.src);
+          reject(error);
+        }
       };
 
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      img.onerror = (error) => {
+        console.error('Image failed to load for preview:', file.name, error);
+        URL.revokeObjectURL(img.src);
+        reject(new Error(`Failed to load image: ${file.name}`));
+      };
+
+      try {
+        const objectUrl = URL.createObjectURL(file);
+        console.log('Created object URL for preview:', file.name, objectUrl);
+        img.src = objectUrl;
+      } catch (error) {
+        console.error('Failed to create object URL:', error);
+        reject(error);
+      }
     });
   }
 
