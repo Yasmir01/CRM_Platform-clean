@@ -171,7 +171,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "email-integration-troubleshooting",
     question: "How do I troubleshoot common email integration issues and connection problems?",
-    answer: "**Email Integration Troubleshooting**: Comprehensive guide to diagnosing and fixing email integration issues. **🔍 Common Issues & Solutions**: **Connection Problems** - **Symptoms**: Status shows 'Disconnected' or 'Error', **Solutions**: Verify credentials are correct, Check if account password changed, Ensure two-factor authentication is properly configured, Test network connectivity. **Authentication Failures** - **OAuth Issues**: Re-authorize OAuth permissions, Check if OAuth app credentials expired, Verify redirect URLs are configured, Clear browser cache and cookies. **Password Authentication**: Verify password is correct, For Yahoo: ensure app password is used (not regular password), Check if account is locked or suspended. **📧 Email Sending Failures**: **SMTP Errors** - Verify SMTP server settings (host, port, security), Check authentication credentials, Ensure TLS/SSL settings match provider requirements, Test with different port numbers if needed. **Rate Limiting** - Some providers limit sending frequency, Wait and retry sending, Consider multiple email accounts for higher volume, Check provider-specific limits. **🔧 Diagnostic Steps**: **Step 1: Check Integration Status** - Go to **Email Management** → **Email Accounts**, Review connection status for each account, Look for error messages or last sync times. **Step 2: Test Connection** - Click **Test Connection** for problematic accounts, Review detailed error messages, Follow provider-specific troubleshooting steps. **Step 3: Verify Credentials** - Double-check email addresses and passwords, Ensure OAuth permissions are granted, Verify app passwords for Yahoo accounts. **Step 4: Check Provider Settings** - Confirm SMTP/IMAP server settings, Verify port numbers and security settings, Check for provider-specific requirements. **����️ Provider-Specific Troubleshooting**: **Gmail Issues** - Ensure 'Less secure app access' is enabled (if not using OAuth), Check Google account security settings, Verify OAuth app permissions. **Outlook/Hotmail** - Verify Microsoft account security settings, Check for account verification requirements, Ensure modern authentication is enabled. **Yahoo Issues** - Must use app passwords (not regular password), Verify two-factor authentication is enabled, Check app password generation settings. **Custom SMTP** - Verify server hostname and port, Check authentication method requirements, Test with email client first (like Outlook). **📊 Monitoring & Maintenance**: **Regular Monitoring** - Check **Email Management** dashboard regularly, Monitor delivery rates and error statistics, Set up alerts for connection failures. **Credential Management** - Rotate passwords regularly, Update OAuth tokens when expired, Monitor for suspicious account activity. **🆘 When to Contact Support**: Persistent connection failures after following troubleshooting steps, Provider-specific authentication issues, Need help with custom SMTP configuration, Questions about enterprise email setup. **Support Information** - Access via **Help & Support** → **Contact Support**, Provide specific error messages and account details, Include steps already attempted, Mention email provider and authentication method used.",
+    answer: "**Email Integration Troubleshooting**: Comprehensive guide to diagnosing and fixing email integration issues. **🔍 Common Issues & Solutions**: **Connection Problems** - **Symptoms**: Status shows 'Disconnected' or 'Error', **Solutions**: Verify credentials are correct, Check if account password changed, Ensure two-factor authentication is properly configured, Test network connectivity. **Authentication Failures** - **OAuth Issues**: Re-authorize OAuth permissions, Check if OAuth app credentials expired, Verify redirect URLs are configured, Clear browser cache and cookies. **Password Authentication**: Verify password is correct, For Yahoo: ensure app password is used (not regular password), Check if account is locked or suspended. **📧 Email Sending Failures**: **SMTP Errors** - Verify SMTP server settings (host, port, security), Check authentication credentials, Ensure TLS/SSL settings match provider requirements, Test with different port numbers if needed. **Rate Limiting** - Some providers limit sending frequency, Wait and retry sending, Consider multiple email accounts for higher volume, Check provider-specific limits. **🔧 Diagnostic Steps**: **Step 1: Check Integration Status** - Go to **Email Management** → **Email Accounts**, Review connection status for each account, Look for error messages or last sync times. **Step 2: Test Connection** - Click **Test Connection** for problematic accounts, Review detailed error messages, Follow provider-specific troubleshooting steps. **Step 3: Verify Credentials** - Double-check email addresses and passwords, Ensure OAuth permissions are granted, Verify app passwords for Yahoo accounts. **Step 4: Check Provider Settings** - Confirm SMTP/IMAP server settings, Verify port numbers and security settings, Check for provider-specific requirements. **🛠️ Provider-Specific Troubleshooting**: **Gmail Issues** - Ensure 'Less secure app access' is enabled (if not using OAuth), Check Google account security settings, Verify OAuth app permissions. **Outlook/Hotmail** - Verify Microsoft account security settings, Check for account verification requirements, Ensure modern authentication is enabled. **Yahoo Issues** - Must use app passwords (not regular password), Verify two-factor authentication is enabled, Check app password generation settings. **Custom SMTP** - Verify server hostname and port, Check authentication method requirements, Test with email client first (like Outlook). **📊 Monitoring & Maintenance**: **Regular Monitoring** - Check **Email Management** dashboard regularly, Monitor delivery rates and error statistics, Set up alerts for connection failures. **Credential Management** - Rotate passwords regularly, Update OAuth tokens when expired, Monitor for suspicious account activity. **🆘 When to Contact Support**: Persistent connection failures after following troubleshooting steps, Provider-specific authentication issues, Need help with custom SMTP configuration, Questions about enterprise email setup. **Support Information** - Access via **Help & Support** → **Contact Support**, Provide specific error messages and account details, Include steps already attempted, Mention email provider and authentication method used.",
     category: "Integrations",
     tags: ["troubleshooting", "email", "connection", "authentication", "oauth", "smtp", "errors", "debugging", "support"],
     helpful: 92,
@@ -1007,6 +1007,79 @@ export default function HelpSupport() {
             </FormControl>
           </Grid>
         </Grid>
+
+        {/* Search Results Summary */}
+        {(searchTerm || selectedCategory !== "All") && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              {searchTerm ? `Search Results for "${searchTerm}"` : `${selectedCategory} Category`}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Found {filteredFAQs.length} FAQ{filteredFAQs.length !== 1 ? 's' : ''}
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {searchTerm && ` matching "${searchTerm}"`}
+              {filteredFAQs.length === 0 && " - try different search terms or browse all categories"}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Quick Access for Email Integration */}
+        {(!searchTerm || searchTerm.toLowerCase().includes('email') || searchTerm.toLowerCase().includes('integration')) && (
+          <Card sx={{ mb: 3, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                📧 Email Integration Quick Start
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                New to email integration? Start with these essential guides:
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email integration overview")}
+                >
+                  Setup Overview
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("gmail integration")}
+                >
+                  Gmail Setup
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("outlook integration")}
+                >
+                  Outlook Setup
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("password reset email")}
+                >
+                  Password Reset
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email management dashboard")}
+                >
+                  Email Dashboard
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => setSearchTerm("email troubleshooting")}
+                >
+                  Troubleshooting
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
+        )}
 
         {/* FAQ Items */}
         <Stack spacing={2}>
