@@ -519,61 +519,6 @@ export default function EmailManagement() {
         </DialogActions>
       </Dialog>
 
-      {/* Template Dialog */}
-      <Dialog open={openTemplateDialog} onClose={() => setOpenTemplateDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Create Email Template</DialogTitle>
-        <DialogContent>
-          <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField
-              label="Template Name"
-              fullWidth
-              value={templateForm.name}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, name: e.target.value }))}
-            />
-            
-            <TextField
-              label="Subject"
-              fullWidth
-              value={templateForm.subject}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, subject: e.target.value }))}
-              helperText="Use {{variableName}} for dynamic content"
-            />
-            
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={templateForm.category}
-                label="Category"
-                onChange={(e) => setTemplateForm(prev => ({ ...prev, category: e.target.value as any }))}
-              >
-                <MenuItem value="transactional">Transactional</MenuItem>
-                <MenuItem value="marketing">Marketing</MenuItem>
-                <MenuItem value="system">System</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <TextField
-              label="Template Content"
-              multiline
-              rows={6}
-              fullWidth
-              value={templateForm.textBody}
-              onChange={(e) => setTemplateForm(prev => ({ ...prev, textBody: e.target.value }))}
-              helperText="Use {{variableName}} for dynamic content. This will be used for both HTML and text content."
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenTemplateDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreateTemplate}
-            disabled={!templateForm.name || !templateForm.subject}
-          >
-            Create Template
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
