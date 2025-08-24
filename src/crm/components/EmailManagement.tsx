@@ -80,14 +80,6 @@ export default function EmailManagement() {
     body: 'This is a test email sent from your CRM system to verify email functionality is working correctly.'
   });
   
-  // Template form
-  const [templateForm, setTemplateForm] = useState({
-    name: '',
-    subject: '',
-    htmlBody: '',
-    textBody: '',
-    category: 'transactional' as 'transactional' | 'marketing' | 'system'
-  });
 
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
