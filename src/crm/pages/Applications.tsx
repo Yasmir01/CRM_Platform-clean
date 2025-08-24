@@ -85,6 +85,7 @@ interface Application {
   creditScore?: number;
   backgroundCheck?: "Pending" | "Approved" | "Failed";
   employmentVerification?: "Pending" | "Verified" | "Failed";
+  fileUploads?: Record<string, StoredFile[]>;
 }
 
 const mockApplications: Application[] = [
