@@ -1128,7 +1128,8 @@ export default function IntegrationManagement() {
           }
 
           showNotification(`${template.name} integration added successfully! ${
-            newIntegrationType === 'gmail' || newIntegrationType === 'outlook'
+            ((newIntegrationType === 'gmail' || newIntegrationType === 'outlook') &&
+             newIntegrationConfig.authMethod === 'oauth')
               ? 'Please complete OAuth authentication in the email settings.'
               : 'Email account configured and ready to use.'
           }`, 'success');
