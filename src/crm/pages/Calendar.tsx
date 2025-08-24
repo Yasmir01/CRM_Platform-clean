@@ -68,6 +68,7 @@ import AISchedulingAssistant from "../components/AISchedulingAssistant";
 import CalendarIntegrations from "../components/CalendarIntegrations";
 import EnhancedEventForm from "../components/EnhancedEventForm";
 import ConflictDetection from "../components/ConflictDetection";
+import DragDropCalendar from "../components/DragDropCalendar";
 
 type EventType = "Task" | "Call" | "Email" | "SMS" | "Appointment" | "Inspection" | "Meeting";
 type CalendarView = "month" | "week" | "day";
