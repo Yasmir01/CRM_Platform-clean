@@ -2607,8 +2607,26 @@ export default function IntegrationManagement() {
                   {newIntegrationType === "gmail" && (
                     <Stack spacing={3}>
                       <Alert severity="info">
-                        Configure your Gmail integration using OAuth authentication for secure access.
+                        Configure your Gmail integration using OAuth authentication or manual setup with app password.
                       </Alert>
+
+                      <FormControl fullWidth>
+                        <InputLabel>Authentication Method</InputLabel>
+                        <Select
+                          value={newIntegrationConfig.authMethod || "oauth"}
+                          label="Authentication Method"
+                          onChange={(e) => setNewIntegrationConfig(prev => ({
+                            ...prev,
+                            authMethod: e.target.value,
+                            // Clear other method's credentials when switching
+                            ...(e.target.value === 'oauth' ? { appPassword: '' } : { clientId: '' })
+                          }))}
+                        >
+                          <MenuItem value="oauth">OAuth 2.0 (Recommended)</MenuItem>
+                          <MenuItem value="app-password">App Password (Manual Setup)</MenuItem>
+                        </Select>
+                      </FormControl>
+
                       <TextField
                         label="Email Address"
                         fullWidth
@@ -2618,6 +2636,7 @@ export default function IntegrationManagement() {
                         placeholder="your.email@gmail.com"
                         helperText="The Gmail address you want to use for sending emails"
                       />
+
                       <TextField
                         label="Display Name"
                         fullWidth
@@ -2626,17 +2645,37 @@ export default function IntegrationManagement() {
                         placeholder="Your Name or Company Name"
                         helperText="Name that will appear as the sender"
                       />
-                      <TextField
-                        label="OAuth Client ID (Optional)"
-                        fullWidth
-                        value={newIntegrationConfig.clientId || ""}
-                        onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, clientId: e.target.value }))}
-                        placeholder="Enter your Google OAuth Client ID"
-                        helperText="If you have a custom OAuth application, enter the Client ID"
-                      />
-                      <Alert severity="warning">
-                        Gmail integration requires OAuth setup. After adding, you'll need to authenticate with Google.
-                      </Alert>
+
+                      {newIntegrationConfig.authMethod === "oauth" ? (
+                        <Stack spacing={2}>
+                          <TextField
+                            label="OAuth Client ID (Optional)"
+                            fullWidth
+                            value={newIntegrationConfig.clientId || ""}
+                            onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, clientId: e.target.value }))}
+                            placeholder="Enter your Google OAuth Client ID"
+                            helperText="If you have a custom OAuth application, enter the Client ID"
+                          />
+                          <Alert severity="warning">
+                            Gmail integration requires OAuth setup. After adding, you'll need to authenticate with Google.
+                          </Alert>
+                        </Stack>
+                      ) : (
+                        <Stack spacing={2}>
+                          <TextField
+                            label="App Password"
+                            fullWidth
+                            type="password"
+                            value={newIntegrationConfig.appPassword || ""}
+                            onChange={(e) => setNewIntegrationConfig(prev => ({ ...prev, appPassword: e.target.value }))}
+                            placeholder="Enter your Gmail App Password"
+                            helperText="Generate an App Password in your Google Account Security settings"
+                          />
+                          <Alert severity="info">
+                            <strong>App Password Setup:</strong> Enable 2FA in Google Account, then generate an App Password for "Mail".
+                          </Alert>
+                        </Stack>
+                      )}
                     </Stack>
                   )}
 
