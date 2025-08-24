@@ -1987,6 +1987,35 @@ export default function IntegrationManagement() {
                   <Alert severity="info">
                     Configure your Microsoft Outlook integration using OAuth authentication.
                   </Alert>
+
+                  <Box sx={{ p: 2, bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" gutterBottom color="primary">
+                      Microsoft Outlook Server Configuration
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Outgoing (SMTP):</strong> smtp-mail.outlook.com:587 (TLS)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Incoming (IMAP):</strong> outlook.office365.com:993 (SSL)
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Exchange/Graph API:</strong> Supported
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Authentication:</strong> OAuth 2.0
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
                   <TextField
                     label="Email Address"
                     fullWidth
