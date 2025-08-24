@@ -137,19 +137,47 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
         <CardContent>
           <Stack direction="row" spacing={2} alignItems="center">
             {/* File Icon/Preview */}
-            <Box sx={{ width: 60, height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Box
+              sx={{
+                width: 60,
+                height: 60,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+                overflow: 'hidden',
+                bgcolor: 'grey.50'
+              }}
+            >
               {FileStorageService.isImageFile(file.type) ? (
-                <Box
-                  component="img"
-                  src={file.preview || file.dataUrl}
-                  alt={file.name}
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    borderRadius: 1
-                  }}
-                />
+                (file.preview || file.dataUrl) ? (
+                  <Box
+                    component="img"
+                    src={file.preview || file.dataUrl}
+                    alt={file.name}
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: 1
+                    }}
+                    onLoad={() => {
+                      console.log('Thumbnail loaded successfully for:', file.name);
+                    }}
+                    onError={(e) => {
+                      console.error('Thumbnail failed to load for:', file.name, 'Available sources:', {
+                        preview: !!file.preview,
+                        dataUrl: !!file.dataUrl,
+                        previewLength: file.preview?.length,
+                        dataUrlLength: file.dataUrl?.length
+                      });
+                    }}
+                  />
+                ) : (
+                  <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                )
               ) : FileStorageService.isPdfFile(file.type) ? (
                 <PdfIcon sx={{ fontSize: 40, color: 'error.main' }} />
               ) : FileStorageService.isDocumentFile(file.type) ? (
@@ -205,19 +233,55 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
           {/* Expanded Preview for Images */}
           {isExpanded && FileStorageService.isImageFile(file.type) && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Box
-                component="img"
-                src={file.dataUrl}
-                alt={file.name}
-                sx={{
-                  maxWidth: '100%',
-                  maxHeight: 300,
-                  objectFit: 'contain',
-                  borderRadius: 1,
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}
-              />
+              <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                Image Preview
+              </Typography>
+              {file.dataUrl || file.preview ? (
+                <Box
+                  component="img"
+                  src={file.dataUrl || file.preview}
+                  alt={file.name}
+                  sx={{
+                    maxWidth: '100%',
+                    maxHeight: 300,
+                    objectFit: 'contain',
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    bgcolor: 'white'
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', file);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: '100%',
+                    maxWidth: 400,
+                    height: 200,
+                    border: '2px dashed',
+                    borderColor: 'grey.300',
+                    borderRadius: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: 'grey.50',
+                    margin: '0 auto'
+                  }}
+                >
+                  <Stack spacing={1} alignItems="center">
+                    <ImageIcon sx={{ fontSize: 32, color: 'grey.400' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {file.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Image preview unavailable
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
             </Box>
           )}
         </CardContent>

@@ -283,7 +283,7 @@ export default function CrmSalesChart() {
             margin={{ top: 10, bottom: 30, left: 60, right: 10 }}
             slotProps={{
               legend: {
-                position: { vertical: "top", horizontal: "middle" },
+                position: { vertical: "top", horizontal: "center" },
               },
             }}
           />

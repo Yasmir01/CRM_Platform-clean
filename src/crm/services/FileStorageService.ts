@@ -36,6 +36,8 @@ export class FileStorageService {
       const processedFiles: StoredFile[] = [];
 
       for (const file of files) {
+        console.log('Processing file:', file.name, file.type, file.size);
+
         // Validate file size
         if (file.size > this.MAX_FILE_SIZE) {
           return {
@@ -54,11 +56,18 @@ export class FileStorageService {
 
         // Convert file to base64
         const dataUrl = await this.fileToDataUrl(file);
-        
-        // Generate preview for images
+        console.log('Generated dataUrl for', file.name, ':', dataUrl.substring(0, 50) + '...');
+
+        // Generate preview for images (use dataUrl as fallback)
         let preview: string | undefined;
         if (this.isImageFile(file.type)) {
-          preview = await this.generateImagePreview(file);
+          try {
+            preview = await this.generateImagePreview(file);
+            console.log('Generated preview for', file.name, ':', preview.substring(0, 50) + '...');
+          } catch (previewError) {
+            console.warn('Failed to generate preview for', file.name, ', using dataUrl as fallback:', previewError);
+            preview = dataUrl; // Use the full dataUrl as fallback
+          }
         }
 
         const storedFile: StoredFile = {
@@ -71,6 +80,7 @@ export class FileStorageService {
           preview
         };
 
+        console.log('Created stored file:', storedFile.name, 'with dataUrl length:', storedFile.dataUrl.length);
         processedFiles.push(storedFile);
       }
 
@@ -108,19 +118,53 @@ export class FileStorageService {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
-      img.onload = () => {
-        // Calculate dimensions maintaining aspect ratio
-        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
+      if (!ctx) {
+        reject(new Error('Canvas context not available'));
+        return;
+      }
 
-        // Draw and convert to data URL
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      img.onload = () => {
+        try {
+          console.log('Image loaded for preview:', file.name, 'Original dimensions:', img.width, 'x', img.height);
+
+          // Calculate dimensions maintaining aspect ratio
+          const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+          const newWidth = img.width * ratio;
+          const newHeight = img.height * ratio;
+
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+
+          // Draw and convert to data URL
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          const previewDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+          console.log('Generated preview:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
+
+          // Clean up
+          URL.revokeObjectURL(img.src);
+          resolve(previewDataUrl);
+        } catch (error) {
+          console.error('Error generating preview:', error);
+          URL.revokeObjectURL(img.src);
+          reject(error);
+        }
       };
 
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      img.onerror = (error) => {
+        console.error('Image failed to load for preview:', file.name, error);
+        URL.revokeObjectURL(img.src);
+        reject(new Error(`Failed to load image: ${file.name}`));
+      };
+
+      try {
+        const objectUrl = URL.createObjectURL(file);
+        console.log('Created object URL for preview:', file.name, objectUrl);
+        img.src = objectUrl;
+      } catch (error) {
+        console.error('Failed to create object URL:', error);
+        reject(error);
+      }
     });
   }
 

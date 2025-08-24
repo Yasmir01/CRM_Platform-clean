@@ -153,7 +153,8 @@ export default function ApplicationFormRenderer({
   // Use auto-save hook for draft management and beforeunload protection
   const { isSaving, lastSaved, saveData } = useAutoSave(draftData, draftKey, {
     delay: 2000, // Save every 2 seconds
-    enabled: hasUnsavedChanges && isOpen
+    enabled: hasUnsavedChanges && isOpen,
+    shouldWarnBeforeUnload: hasUnsavedChanges
   });
 
   const formFields = template.formFields || [];
@@ -216,20 +217,97 @@ export default function ApplicationFormRenderer({
     }
   }, [isOpen, template.id, propertyId]);
 
+  // Define canProceedToNext function before it's used
+  const canProceedToNext = React.useCallback(() => {
+    const termsStepIndex = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0);
+    const paymentStepIndex = termsStepIndex + (template.termsAndConditions?.length ? 1 : 0);
+
+    // Special handling for terms step
+    if (template.termsAndConditions?.length && currentStep === termsStepIndex) {
+      return termsAccepted.length > 0;
+    }
+
+    // Special handling for payment step
+    if (template.applicationFee && currentStep === paymentStepIndex) {
+      return paymentCompleted;
+    }
+
+    // For regular form steps, check if required fields have values
+    let currentFields: FormField[] = [];
+    if (currentStep < fieldsBySections.length) {
+      currentFields = fieldsBySections[currentStep].fields;
+    } else if (unSectionedFields.length > 0 && currentStep === fieldsBySections.length) {
+      currentFields = unSectionedFields;
+    }
+
+    // If no fields in current step, allow proceeding
+    if (currentFields.length === 0) {
+      return true;
+    }
+
+    // Check required fields
+    const requiredFields = currentFields.filter(field => field.required);
+
+    // If no required fields, allow proceeding
+    if (requiredFields.length === 0) {
+      return true;
+    }
+
+    // Check each required field
+    for (const field of requiredFields) {
+      const value = formData[field.id];
+
+      // Handle different field types
+      switch (field.type) {
+        case 'checkbox':
+          if (value !== true) return false;
+          break;
+        case 'yesno':
+        case 'radio':
+          if (!value || value === '') return false;
+          break;
+        case 'select':
+          if (!value || value === '') return false;
+          break;
+        case 'file_upload':
+          const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
+          if (!uploadedFiles || uploadedFiles.files.length === 0) return false;
+          break;
+        case 'terms':
+          if (!value || value === '') return false;
+          break;
+        default:
+          // text, email, phone, number, date, textarea, signature
+          if (!value || value === '' || (typeof value === 'string' && value.trim() === '')) {
+            return false;
+          }
+          break;
+      }
+    }
+
+    return true;
+  }, [currentStep, fieldsBySections, unSectionedFields, template.termsAndConditions, template.applicationFee, termsAccepted.length, paymentCompleted, formData, fileUploads]);
+
   // Track changes to mark as unsaved
   React.useEffect(() => {
     const hasData = Object.keys(formData).length > 0 ||
                    fileUploads.length > 0 ||
                    termsAccepted.length > 0 ||
                    paymentCompleted;
-    const newHasUnsavedChanges = hasData && !isSubmitting;
+
+    // Don't consider it "unsaved" if we're submitting or if we're on the final review step
+    // and all required fields/payments are complete
+    const isOnReviewStep = currentStep === totalSteps - 1;
+    const isReadyToSubmit = isOnReviewStep && canProceedToNext();
+
+    const newHasUnsavedChanges = hasData && !isSubmitting && !isReadyToSubmit;
     setHasUnsavedChanges(newHasUnsavedChanges);
 
     // Notify parent component about unsaved changes
     if (onUnsavedChanges) {
       onUnsavedChanges(newHasUnsavedChanges);
     }
-  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, onUnsavedChanges]);
+  }, [formData, fileUploads, termsAccepted, paymentCompleted, isSubmitting, currentStep, totalSteps, canProceedToNext, onUnsavedChanges]);
 
   // Clean up old drafts periodically
   React.useEffect(() => {
@@ -353,10 +431,11 @@ export default function ApplicationFormRenderer({
 
     try {
       // Convert fileUploads array to object format expected by Applications view
+      // Preserve StoredFile format to maintain dataUrl for image previews
       const fileUploadsObject = fileUploads.reduce((acc, upload) => {
         acc[upload.fieldId] = upload.files;
         return acc;
-      }, {} as Record<string, File[]>);
+      }, {} as Record<string, StoredFile[]>);
 
       const applicationData = {
         id: `APP-${Date.now()}`,
@@ -878,75 +957,6 @@ export default function ApplicationFormRenderer({
   };
 
   const isLastStep = currentStep === totalSteps - 1;
-  const canProceedToNext = React.useCallback(() => {
-    const termsStepIndex = fieldsBySections.length + (unSectionedFields.length > 0 ? 1 : 0);
-    const paymentStepIndex = termsStepIndex + (template.termsAndConditions?.length ? 1 : 0);
-
-    // Special handling for terms step
-    if (template.termsAndConditions?.length && currentStep === termsStepIndex) {
-      return termsAccepted.length > 0;
-    }
-
-    // Special handling for payment step
-    if (template.applicationFee && currentStep === paymentStepIndex) {
-      return paymentCompleted;
-    }
-
-    // For regular form steps, check if required fields have values
-    let currentFields: FormField[] = [];
-    if (currentStep < fieldsBySections.length) {
-      currentFields = fieldsBySections[currentStep].fields;
-    } else if (unSectionedFields.length > 0 && currentStep === fieldsBySections.length) {
-      currentFields = unSectionedFields;
-    }
-
-    // If no fields in current step, allow proceeding
-    if (currentFields.length === 0) {
-      return true;
-    }
-
-    // Check required fields
-    const requiredFields = currentFields.filter(field => field.required);
-
-    // If no required fields, allow proceeding
-    if (requiredFields.length === 0) {
-      return true;
-    }
-
-    // Check each required field
-    for (const field of requiredFields) {
-      const value = formData[field.id];
-
-      // Handle different field types
-      switch (field.type) {
-        case 'checkbox':
-          if (value !== true) return false;
-          break;
-        case 'yesno':
-        case 'radio':
-          if (!value || value === '') return false;
-          break;
-        case 'select':
-          if (!value || value === '') return false;
-          break;
-        case 'file_upload':
-          const uploadedFiles = fileUploads.find(upload => upload.fieldId === field.id);
-          if (!uploadedFiles || uploadedFiles.files.length === 0) return false;
-          break;
-        case 'terms':
-          if (!value || value === '') return false;
-          break;
-        default:
-          // text, email, phone, number, date, textarea, signature
-          if (!value || value === '' || (typeof value === 'string' && value.trim() === '')) {
-            return false;
-          }
-          break;
-      }
-    }
-
-    return true;
-  }, [currentStep, fieldsBySections, unSectionedFields, template.termsAndConditions, template.applicationFee, termsAccepted.length, paymentCompleted, formData, fileUploads]);
 
   return (
     <Dialog
