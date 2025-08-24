@@ -165,37 +165,6 @@ export default function EmailManagement() {
     }
   };
 
-  const handleCreateTemplate = () => {
-    if (!templateForm.name || !templateForm.subject) {
-      showNotification('Please enter template name and subject', 'error');
-      return;
-    }
-
-    try {
-      EmailService.createTemplate({
-        name: templateForm.name,
-        subject: templateForm.subject,
-        htmlBody: templateForm.htmlBody || templateForm.textBody,
-        textBody: templateForm.textBody,
-        variables: [],
-        category: templateForm.category,
-        isActive: true
-      });
-
-      showNotification('Template created successfully!', 'success');
-      setOpenTemplateDialog(false);
-      setTemplateForm({
-        name: '',
-        subject: '',
-        htmlBody: '',
-        textBody: '',
-        category: 'transactional'
-      });
-      loadData();
-    } catch (error) {
-      showNotification(`Failed to create template: ${error}`, 'error');
-    }
-  };
 
   const handleDeleteAccount = async (accountId: string) => {
     if (confirm('Are you sure you want to delete this email account?')) {
