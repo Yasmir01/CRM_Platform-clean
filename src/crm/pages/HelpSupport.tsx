@@ -134,7 +134,7 @@ const mockFAQs: FAQItem[] = [
   {
     id: "custom-smtp-integration",
     question: "How do I configure custom SMTP server integration for any email provider?",
-    answer: "**Custom SMTP Integration**: Configure any email provider or custom mail server that supports SMTP. **📋 Setup Process**: **Step 1: Gather Server Information** - SMTP server hostname (e.g., smtp.yourcompany.com), Port number (usually 587 for TLS, 465 for SSL, 25 for plain), Security type (TLS, SSL, or None), Username and password for authentication, Optional: IMAP settings for receiving emails. **Step 2: Add Integration** - Go to **Integrations** → **Add Integration**, Select **Custom SMTP - Email Provider**, Enter your email address, Provide display name. **Step 3: Configure SMTP Settings** - **SMTP Host**: Enter server hostname, **SMTP Port**: Enter port number (default: 587), **Username**: Usually your email address, **Password**: Your email account password, **Security**: Select TLS, SSL, or None. **Step 4: Optional IMAP Configuration** - **IMAP Host**: For receiving emails, **IMAP Port**: Usually 993 for SSL, 143 for plain. **🔧 Common Configurations**: **Google Workspace**: smtp.gmail.com:587 (TLS), **Microsoft 365**: smtp.office365.com:587 (TLS), **GoDaddy**: smtpout.secureserver.net:25, **Zoho**: smtp.zoho.com:587 (TLS), **AWS SES**: email-smtp.region.amazonaws.com:587. **✅ Testing & Verification**: Click **Test Connection** after setup, Send test email to verify functionality, Monitor connection status in **Email Management**, Troubleshoot any authentication or connectivity issues. **🔒 Security Best Practices**: Use TLS/SSL encryption when available, Store credentials securely, Use app-specific passwords when supported, Monitor for unusual activity.",
+    answer: "**Custom SMTP Integration**: Configure any email provider or custom mail server that supports SMTP. **📋 Setup Process**: **Step 1: Gather Server Information** - SMTP server hostname (e.g., smtp.yourcompany.com), Port number (usually 587 for TLS, 465 for SSL, 25 for plain), Security type (TLS, SSL, or None), Username and password for authentication, Optional: IMAP settings for receiving emails. **Step 2: Add Integration** - Go to **Integrations** → **Add Integration**, Select **Custom SMTP - Email Provider**, Enter your email address, Provide display name. **Step 3: Configure SMTP Settings** - **SMTP Host**: Enter server hostname, **SMTP Port**: Enter port number (default: 587), **Username**: Usually your email address, **Password**: Your email account password, **Security**: Select TLS, SSL, or None. **Step 4: Optional IMAP Configuration** - **IMAP Host**: For receiving emails, **IMAP Port**: Usually 993 for SSL, 143 for plain. **🔧 Common Configurations**: **Google Workspace**: smtp.gmail.com:587 (TLS), **Microsoft 365**: smtp.office365.com:587 (TLS), **GoDaddy**: smtpout.secureserver.net:25, **Zoho**: smtp.zoho.com:587 (TLS), **AWS SES**: email-smtp.region.amazonaws.com:587. **✅ Testing & Verification**: Click **Test Connection** after setup, Send test email to verify functionality, Monitor connection status in **Email Management**, Troubleshoot any authentication or connectivity issues. **�� Security Best Practices**: Use TLS/SSL encryption when available, Store credentials securely, Use app-specific passwords when supported, Monitor for unusual activity.",
     category: "Integrations",
     tags: ["custom", "smtp", "server", "configuration", "email", "hosting", "security", "tls", "ssl", "setup"],
     helpful: 89,
@@ -1113,6 +1113,14 @@ export default function HelpSupport() {
                   Troubleshooting
                 </Button>
               </Stack>
+              {!searchTerm && (
+                <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="caption" color="text.secondary">
+                    💡 <strong>Quick Tip:</strong> Email integration is available in your Integrations page.
+                    Set up Gmail, Outlook, Yahoo, or custom SMTP to enable automated password resets and professional email sending.
+                  </Typography>
+                </Box>
+              )}
             </CardContent>
           </Card>
         )}
