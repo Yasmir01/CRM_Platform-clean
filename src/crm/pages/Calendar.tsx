@@ -198,6 +198,7 @@ export default function Calendar() {
   const [aiAssistantOpen, setAiAssistantOpen] = React.useState(false);
   const [integrationsOpen, setIntegrationsOpen] = React.useState(false);
   const [useEnhancedCalendar, setUseEnhancedCalendar] = React.useState(true);
+  const [showDragDropCalendar, setShowDragDropCalendar] = React.useState(false);
   const [filterDialogOpen, setFilterDialogOpen] = React.useState(false);
   const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
   const [filters, setFilters] = React.useState({
