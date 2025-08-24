@@ -127,7 +127,7 @@ class EmailServiceClass {
         name: 'Gmail',
         displayName: 'Google Gmail',
         icon: '📧',
-        authType: 'oauth',
+        authType: 'oauth', // Primary auth type, but supports app-password too
         smtpConfig: {
           host: 'smtp.gmail.com',
           port: 587,
