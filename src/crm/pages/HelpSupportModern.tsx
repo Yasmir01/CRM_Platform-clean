@@ -44,7 +44,7 @@ import BookmarkRoundedIcon from "@mui/icons-material/BookmarkRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
-import BuildRoundedIcon from "@mui/icons-material/BuildRoundedIcon";
+import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import IntegrationInstructionsRoundedIcon from "@mui/icons-material/IntegrationInstructionsRounded";
