@@ -31,8 +31,8 @@ const mainListItems = [
 ];
 
 const secondaryListItems = [
-  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/settings" },
-  { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/help" },
+  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
+  { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
 interface CrmSideMenuMobileProps {
