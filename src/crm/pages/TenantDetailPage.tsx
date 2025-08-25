@@ -2103,8 +2103,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     Document: {leaseDetails.leaseDocument}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    In a real application, this would display the actual PDF content using a PDF viewer component.
-                    For demo purposes, this shows a preview placeholder.
+                    PDF Document Preview - Use the buttons below to view or download the lease agreement.
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Button
