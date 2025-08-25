@@ -244,13 +244,22 @@ export class FileStorageService {
   /**
    * Check if file is an image
    */
-  static isImageFile(type: string): boolean {
+  static isImageFile(type: string, fileName?: string): boolean {
     // Handle common variations and missing MIME types
-    if (!type) return false;
+    if (type) {
+      const normalizedType = type.toLowerCase();
+      if (this.SUPPORTED_TYPES.images.includes(normalizedType) || normalizedType.startsWith('image/')) {
+        return true;
+      }
+    }
 
-    const normalizedType = type.toLowerCase();
-    return this.SUPPORTED_TYPES.images.includes(normalizedType) ||
-           normalizedType.startsWith('image/');
+    // Fallback to file extension if MIME type is not reliable
+    if (fileName) {
+      const extension = fileName.toLowerCase().split('.').pop();
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension || '');
+    }
+
+    return false;
   }
 
   /**
