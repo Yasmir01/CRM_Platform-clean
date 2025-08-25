@@ -637,7 +637,7 @@ export default function IntegrationManagement() {
     setTestingIntegrations(prev => new Set(prev).add(id));
 
     // Update integration status to show testing in progress
-    setIntegrations(prev => prev.map(i =>
+    updateAndPersistIntegrations(prev => prev.map(i =>
       i.id === id ? { ...i, status: "Pending" as Integration['status'] } : i
     ));
 
