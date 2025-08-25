@@ -856,7 +856,7 @@ export default function IntegrationManagement() {
       // Update existing integration configuration
       try {
         // Update the integration in the list
-        setIntegrations(prev => prev.map(i =>
+        updateAndPersistIntegrations(prev => prev.map(i =>
           i.id === selectedIntegration.id ? selectedIntegration : i
         ));
 
