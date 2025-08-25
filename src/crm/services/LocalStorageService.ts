@@ -278,6 +278,7 @@ export class LocalStorageService {
       if (crmData.serviceProviders) this.saveServiceProviders(crmData.serviceProviders);
       if (crmData.propertyGroups) this.savePropertyGroups(crmData.propertyGroups);
       if (crmData.integrations) this.saveIntegrations(crmData.integrations);
+      if (crmData.documents) this.saveDocuments(crmData.documents);
     } catch (error) {
       console.error('Error syncing data to localStorage:', error);
     }
