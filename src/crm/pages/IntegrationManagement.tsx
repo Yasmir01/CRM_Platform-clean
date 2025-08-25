@@ -1254,7 +1254,7 @@ export default function IntegrationManagement() {
         uptime: Math.min(100, integration.metrics.uptime + 0.2)
       };
 
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           lastSync: new Date().toISOString(),
@@ -1268,7 +1268,7 @@ export default function IntegrationManagement() {
 
     } catch (error) {
       // Handle sync failure
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           syncFrequency: originalSyncFreq,
