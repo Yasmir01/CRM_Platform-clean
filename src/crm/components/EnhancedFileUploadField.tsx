@@ -155,7 +155,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                 (file.preview || file.dataUrl) ? (
                   <Box
                     component="img"
-                    src={file.preview || file.dataUrl}
+                    src={file.dataUrl || file.preview} // Prefer dataUrl over preview
                     alt={file.name}
                     sx={{
                       width: '100%',
@@ -167,16 +167,28 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                       console.log('Thumbnail loaded successfully for:', file.name);
                     }}
                     onError={(e) => {
-                      console.error('Thumbnail failed to load for:', file.name, 'Available sources:', {
-                        preview: !!file.preview,
-                        dataUrl: !!file.dataUrl,
-                        previewLength: file.preview?.length,
-                        dataUrlLength: file.dataUrl?.length
+                      console.warn('Thumbnail failed to load for:', file.name, {
+                        hasDataUrl: !!file.dataUrl,
+                        hasPreview: !!file.preview,
+                        fileType: file.type,
+                        fileSize: file.size
                       });
+
+                      // Replace with fallback icon
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+
+                      // Create fallback icon
+                      const parentBox = target.parentElement;
+                      if (parentBox) {
+                        parentBox.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #999;"><span style="font-size: 24px;">🖼️</span></div>';
+                      }
                     }}
                   />
                 ) : (
-                  <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                    <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                  </Box>
                 )
               ) : FileStorageService.isPdfFile(file.type) ? (
                 <PdfIcon sx={{ fontSize: 40, color: 'error.main' }} />
