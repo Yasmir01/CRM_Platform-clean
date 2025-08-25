@@ -290,6 +290,7 @@ export class LocalStorageService {
       tasks: this.getTasks(),
       serviceProviders: this.getServiceProviders(),
       propertyGroups: this.getPropertyGroups(),
+      integrations: this.getIntegrations(),
       userPreferences: this.getUserPreferences()
     };
   }
