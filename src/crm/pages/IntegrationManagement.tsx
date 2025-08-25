@@ -1072,7 +1072,7 @@ export default function IntegrationManagement() {
         dateConnected: new Date().toISOString().split('T')[0]
       } as Integration;
 
-      setIntegrations(prev => [...prev, newIntegration]);
+      updateAndPersistIntegrations(prev => [...prev, newIntegration]);
 
       // If it's an email provider, add it to EmailService
       if (['gmail', 'outlook', 'yahoo', 'hotmail', 'custom-smtp'].includes(newIntegrationType)) {
