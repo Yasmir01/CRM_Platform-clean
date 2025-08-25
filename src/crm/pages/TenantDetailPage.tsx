@@ -747,7 +747,23 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         setDocumentViewModalOpen(true);
       } catch (error) {
         console.error('Error decrypting document for preview:', error);
-        alert('Failed to preview document. You may not have permission to access this file.');
+        const errorMessage = (error as Error).message;
+
+        if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+          // This is likely a document encrypted with an old/incompatible key
+          const shouldClearDocs = window.confirm(
+            `This document appears to be encrypted with an incompatible key and cannot be opened. This may be due to a system update.\n\n` +
+            `Would you like to clear all encrypted documents from storage? (You'll need to re-upload your documents)\n\n` +
+            `Click OK to clear documents, or Cancel to keep trying.`
+          );
+
+          if (shouldClearDocs) {
+            documentSecurityService.clearAllDocuments();
+            window.location.reload(); // Refresh to clear state
+          }
+        } else {
+          alert(`Failed to preview document: ${errorMessage}\n\nYou may not have permission to access this file.`);
+        }
       }
     } else {
       // Handle non-encrypted documents (legacy)
