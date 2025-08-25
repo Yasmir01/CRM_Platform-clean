@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useCrmData, CrmDataContext } from './CrmDataContext';
+import { suggestionService } from '../services/SuggestionService';
 
 export interface Notification {
   id: string;
-  type: 'promotion' | 'task' | 'email' | 'payment' | 'maintenance' | 'lease' | 'reminder' | 'warning';
+  type: 'promotion' | 'task' | 'email' | 'payment' | 'maintenance' | 'lease' | 'reminder' | 'warning' | 'suggestion' | 'suggestion_vote' | 'suggestion_status';
   title: string;
   message: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
@@ -13,7 +14,7 @@ export interface Notification {
   actionUrl?: string;
   actionLabel?: string;
   relatedEntity?: {
-    type: 'property' | 'tenant' | 'promotion' | 'application';
+    type: 'property' | 'tenant' | 'promotion' | 'application' | 'suggestion';
     id: string;
     name: string;
   };
@@ -132,6 +133,54 @@ const generateRealNotifications = (crmData: any): Notification[] => {
     }
   });
 
+  // Add suggestion notifications
+  try {
+    const suggestionNotifications = suggestionService.getNotifications();
+    suggestionNotifications.forEach(suggestionNotif => {
+      // Only show notifications from the last 7 days
+      const daysSinceCreated = (now.getTime() - suggestionNotif.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceCreated <= 7) {
+        let notificationType: Notification['type'] = 'suggestion';
+        let priority: Notification['priority'] = 'medium';
+
+        // Map suggestion notification types to main notification types
+        switch (suggestionNotif.type) {
+          case 'new_suggestion':
+            notificationType = 'suggestion';
+            priority = 'medium';
+            break;
+          case 'new_vote':
+            notificationType = 'suggestion_vote';
+            priority = 'low';
+            break;
+          case 'status_change':
+            notificationType = 'suggestion_status';
+            priority = 'medium';
+            break;
+        }
+
+        notifications.push({
+          id: `suggestion-${suggestionNotif.id}`,
+          type: notificationType,
+          title: suggestionNotif.message.split(' - ')[0] || suggestionNotif.suggestionTitle,
+          message: suggestionNotif.message,
+          priority,
+          read: suggestionNotif.read,
+          createdAt: suggestionNotif.createdAt,
+          actionUrl: `/crm/suggestions`,
+          actionLabel: 'View Suggestion',
+          relatedEntity: {
+            type: 'suggestion',
+            id: suggestionNotif.suggestionId,
+            name: suggestionNotif.suggestionTitle
+          }
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Error loading suggestion notifications:', error);
+  }
+
   // Add a demo task notification to show the new features
   if (workOrders.length > 0 || tenants.length > 0) {
     notifications.push({
@@ -180,6 +229,12 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   };
 
   const markAsRead = (id: string) => {
+    // Handle suggestion notifications
+    if (id.startsWith('suggestion-')) {
+      const suggestionNotificationId = id.replace('suggestion-', '');
+      suggestionService.markNotificationAsRead(suggestionNotificationId);
+    }
+
     setManualNotifications(prev =>
       prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
@@ -188,6 +243,18 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   };
 
   const markAllAsRead = () => {
+    // Mark all suggestion notifications as read
+    try {
+      const suggestionNotifications = suggestionService.getNotifications();
+      suggestionNotifications.forEach(notif => {
+        if (!notif.read) {
+          suggestionService.markNotificationAsRead(notif.id);
+        }
+      });
+    } catch (error) {
+      console.error('Error marking suggestion notifications as read:', error);
+    }
+
     setManualNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
     );
