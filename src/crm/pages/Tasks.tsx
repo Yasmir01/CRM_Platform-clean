@@ -790,17 +790,12 @@ export default function Tasks() {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <TextField
-                  label="Assigned To"
-                  fullWidth
+                <AssignmentSelector
                   value={formData.assignedTo}
-                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'left',
-                      paddingLeft: '14px'
-                    }
-                  }}
+                  onChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                  label="Assigned To"
+                  includeTypes={["propertyManagers", "serviceProviders", "tenants"]}
+                  propertyId={formData.propertyId}
                 />
               </Grid>
               <Grid item xs={6}>
