@@ -272,17 +272,28 @@ export class DocumentSecurityService {
 
       // Decrypt content
       const decryptionKey = this.generateEncryptionKey();
-      const decryptedContent = this.decryptContent(version.encryptedContent, decryptionKey);
-      
+      let decryptedContent: string;
+
+      try {
+        decryptedContent = this.decryptContent(version.encryptedContent, decryptionKey);
+      } catch (decryptError) {
+        this.logAccess(documentId, 'view', userId, userEmail, {
+          action: 'Decryption failed',
+          success: false,
+          error: 'Unable to decrypt document - key mismatch or corrupted data'
+        });
+        throw new Error('Unable to decrypt document. The document may have been encrypted with an incompatible key or may be corrupted.');
+      }
+
       // Verify integrity
       const calculatedChecksum = this.calculateChecksum(decryptedContent);
       if (calculatedChecksum !== version.checksum) {
         this.logAccess(documentId, 'view', userId, userEmail, {
           action: 'Integrity check failed',
           success: false,
-          error: 'Document may be corrupted'
+          error: 'Document checksum mismatch - may be corrupted'
         });
-        throw new Error('Document integrity check failed');
+        throw new Error('Document integrity check failed - the document may be corrupted');
       }
 
       // Log successful access
