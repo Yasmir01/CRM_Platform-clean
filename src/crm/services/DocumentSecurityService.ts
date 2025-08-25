@@ -749,6 +749,26 @@ export class DocumentSecurityService {
       console.error('Error saving secure documents:', error);
     }
   }
+
+  /**
+   * Clear all secure documents from storage (use when documents are corrupted)
+   */
+  clearAllDocuments(): void {
+    this.documents.clear();
+    try {
+      LocalStorageService.removeItem('secure_documents');
+      console.log('All secure documents cleared from storage');
+    } catch (error) {
+      console.error('Error clearing secure documents:', error);
+    }
+  }
+
+  /**
+   * Get count of documents
+   */
+  getDocumentCount(): number {
+    return this.documents.size;
+  }
 }
 
 export const documentSecurityService = new DocumentSecurityService();
