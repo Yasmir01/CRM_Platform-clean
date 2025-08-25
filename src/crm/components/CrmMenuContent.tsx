@@ -162,16 +162,16 @@ export default function CrmMenuContent() {
 
     const updateSuggestionCount = () => {
       try {
-        const suggestionNotifications = suggestionService.getNotifications();
+        const suggestions = suggestionService.getAllSuggestions();
         const now = new Date();
-        const unreadNotifications = suggestionNotifications.filter(notif => {
-          // Only count notifications from the last 7 days
-          const daysSinceCreated = (now.getTime() - notif.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-          return !notif.read && daysSinceCreated <= 7;
+        // Count suggestions that are new or submitted in the last 7 days
+        const newSuggestions = suggestions.filter(suggestion => {
+          const daysSinceSubmitted = (now.getTime() - suggestion.submittedAt.getTime()) / (1000 * 60 * 60 * 24);
+          return suggestion.status === 'NEW' || (daysSinceSubmitted <= 7 && suggestion.status === 'NEW');
         });
-        setNewSuggestionsCount(unreadNotifications.length);
+        setNewSuggestionsCount(newSuggestions.length);
       } catch (error) {
-        console.error('Error counting suggestion notifications:', error);
+        console.error('Error counting new suggestions:', error);
         setNewSuggestionsCount(0);
       }
     };
@@ -235,7 +235,7 @@ export default function CrmMenuContent() {
                       {item.icon}
                     </Badge>
                   ) : item.badge && item.text === "Suggestions" ? (
-                    <Badge badgeContent={newSuggestionsCount} color="info">
+                    <Badge badgeContent={newSuggestionsCount} color="error">
                       {item.icon}
                     </Badge>
                   ) : (
