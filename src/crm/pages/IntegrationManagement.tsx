@@ -68,6 +68,7 @@ import BugReportRoundedIcon from "@mui/icons-material/BugReportRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { TransUnionService } from "../services/TransUnionService";
 import { EmailService } from "../services/EmailService";
+import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 
 interface Integration {
