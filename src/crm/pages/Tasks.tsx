@@ -344,6 +344,7 @@ export default function Tasks() {
       dueTime: task.dueTime || "",
       category: task.category,
       customCategory: task.customCategory || "",
+      customCategoryDescription: task.customCategoryDescription || "",
       property: task.property || "",
       propertyId: task.propertyId || "",
       client: task.client || "",
