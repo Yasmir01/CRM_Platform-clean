@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { suggestionService } from "../services/SuggestionService";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -63,7 +64,7 @@ const mainListItems = [
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
-  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions" },
+  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
   { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
@@ -103,7 +104,7 @@ const tenantMenuItems = [
   { text: "News & Announcements", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
-  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions" },
+  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "Profile", icon: <PersonRoundedIcon />, path: "/crm/profile" },
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
@@ -116,6 +117,7 @@ export default function CrmMenuContent() {
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
   const [newTasksCount, setNewTasksCount] = React.useState(0);
+  const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
 
   React.useEffect(() => {
     const updateApplicationCount = () => {
@@ -158,14 +160,32 @@ export default function CrmMenuContent() {
       setNewTasksCount(newTasksCount);
     };
 
+    const updateSuggestionCount = () => {
+      try {
+        const suggestionNotifications = suggestionService.getNotifications();
+        const now = new Date();
+        const unreadNotifications = suggestionNotifications.filter(notif => {
+          // Only count notifications from the last 7 days
+          const daysSinceCreated = (now.getTime() - notif.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+          return !notif.read && daysSinceCreated <= 7;
+        });
+        setNewSuggestionsCount(unreadNotifications.length);
+      } catch (error) {
+        console.error('Error counting suggestion notifications:', error);
+        setNewSuggestionsCount(0);
+      }
+    };
+
     // Initial load
     updateApplicationCount();
     updateTaskCount();
+    updateSuggestionCount();
 
     // Set up an interval to check for updates every 5 seconds
     const interval = setInterval(() => {
       updateApplicationCount();
       updateTaskCount();
+      updateSuggestionCount();
     }, 5000);
 
     // Also listen for storage events (when localStorage is updated in another tab)
@@ -175,6 +195,9 @@ export default function CrmMenuContent() {
       }
       if (e.key === 'crm_work_orders' || e.key === 'crm_tenants') {
         updateTaskCount();
+      }
+      if (e.key === 'crm_suggestion_notifications' || e.key === 'crm_suggestions') {
+        updateSuggestionCount();
       }
     };
 
@@ -209,6 +232,10 @@ export default function CrmMenuContent() {
                     </Badge>
                   ) : item.badge && item.text === "Tasks" ? (
                     <Badge badgeContent={newTasksCount} color="warning">
+                      {item.icon}
+                    </Badge>
+                  ) : item.badge && item.text === "Suggestions" ? (
+                    <Badge badgeContent={newSuggestionsCount} color="info">
                       {item.icon}
                     </Badge>
                   ) : (
