@@ -3404,7 +3404,7 @@ export default function PropertyDetailPage({
                       variant="contained"
                       startIcon={<VisibilityRoundedIcon />}
                       onClick={() => {
-                        if (selectedDocument.url) {
+                        if (selectedDocument?.url) {
                           window.open(selectedDocument.url, '_blank');
                         } else {
                           alert('Document URL not available.');
@@ -3418,12 +3418,16 @@ export default function PropertyDetailPage({
                       startIcon={<CloudUploadRoundedIcon />}
                       onClick={() => {
                         try {
-                          const link = document.createElement('a');
-                          link.href = selectedDocument.url;
-                          link.download = selectedDocument.name;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                          if (selectedDocument?.url && selectedDocument?.name) {
+                            const link = document.createElement('a');
+                            link.href = selectedDocument.url;
+                            link.download = selectedDocument.name;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          } else {
+                            alert('Document information not available for download.');
+                          }
                         } catch (error) {
                           console.error('Download failed:', error);
                           alert('Download failed. Please try opening in a new tab.');
