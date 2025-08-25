@@ -3294,8 +3294,8 @@ export default function PropertyDetailPage({
                         </Typography>
                         <Box
                           component="img"
-                          src={selectedDocument.url}
-                          alt={selectedDocument.name}
+                          src={selectedDocument?.url || ''}
+                          alt={selectedDocument?.name || 'Document preview'}
                           sx={{
                             maxWidth: '100%',
                             maxHeight: 400,
