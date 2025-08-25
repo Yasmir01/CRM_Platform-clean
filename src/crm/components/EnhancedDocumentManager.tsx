@@ -294,7 +294,16 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       loadDocuments();
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Download failed: ' + (error as Error).message);
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        alert(
+          `This document appears to be encrypted with an incompatible key and cannot be opened.\n\n` +
+          `This may be due to a system update. Please try refreshing the page or contact support if the issue persists.`
+        );
+      } else {
+        alert('Download failed: ' + errorMessage);
+      }
     }
   };
 
