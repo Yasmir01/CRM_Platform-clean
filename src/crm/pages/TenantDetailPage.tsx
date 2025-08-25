@@ -235,6 +235,10 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [communicationDialogOpen, setCommunicationDialogOpen] = React.useState(false);
   const [contractViewModalOpen, setContractViewModalOpen] = React.useState(false);
+  const [documentHistoryDialogOpen, setDocumentHistoryDialogOpen] = React.useState(false);
+  const [selectedDocumentForHistory, setSelectedDocumentForHistory] = React.useState<any>(null);
+  const [documentVersions, setDocumentVersions] = React.useState<any[]>([]);
+  const [documentAccessLog, setDocumentAccessLog] = React.useState<any[]>([]);
   const [communicationData, setCommunicationData] = React.useState({
     type: 'email' as 'email' | 'sms' | 'call',
     recipient: '',
