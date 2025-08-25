@@ -47,6 +47,27 @@ export default function Suggestions() {
   // Check if user has admin privileges (you can adjust this logic based on your auth system)
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || isManagementMode;
 
+  // Calculate tab indices dynamically
+  const tabs = [];
+  let currentIndex = 0;
+
+  // Always show "All Suggestions"
+  tabs.push({ label: "All Suggestions", index: currentIndex++ });
+
+  // Show "My Suggestions" if user is logged in
+  let myTabIndex = -1;
+  if (user) {
+    myTabIndex = currentIndex++;
+    tabs.push({ label: "My Suggestions", index: myTabIndex });
+  }
+
+  // Show "Admin Panel" if user is admin
+  let adminTabIndex = -1;
+  if (isAdmin) {
+    adminTabIndex = currentIndex++;
+    tabs.push({ label: "Admin Panel", index: adminTabIndex });
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
       {/* Header */}
@@ -78,13 +99,13 @@ export default function Suggestions() {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="suggestion tabs">
           <Tab label="All Suggestions" id="suggestion-tab-0" aria-controls="suggestion-tabpanel-0" />
           {user && (
-            <Tab label="My Suggestions" id="suggestion-tab-1" aria-controls="suggestion-tabpanel-1" />
+            <Tab label="My Suggestions" id={`suggestion-tab-${myTabIndex}`} aria-controls={`suggestion-tabpanel-${myTabIndex}`} />
           )}
           {isAdmin && (
-            <Tab 
-              label="Admin Panel" 
-              id="suggestion-tab-2" 
-              aria-controls="suggestion-tabpanel-2"
+            <Tab
+              label="Admin Panel"
+              id={`suggestion-tab-${adminTabIndex}`}
+              aria-controls={`suggestion-tabpanel-${adminTabIndex}`}
               icon={<AdminPanelSettings />}
               iconPosition="start"
             />
@@ -94,20 +115,20 @@ export default function Suggestions() {
 
       {/* Tab Panels */}
       <TabPanel value={tabValue} index={0}>
-        <SuggestionBox 
+        <SuggestionBox
           key={`all-${refreshKey}`}
           onCreateNew={() => setSubmissionFormOpen(true)}
         />
       </TabPanel>
 
-      {user && (
-        <TabPanel value={tabValue} index={1}>
+      {user && myTabIndex >= 0 && (
+        <TabPanel value={tabValue} index={myTabIndex}>
           <MySuggestions userId={user.id} refreshKey={refreshKey} />
         </TabPanel>
       )}
 
-      {isAdmin && (
-        <TabPanel value={tabValue} index={isAdmin ? (user ? 2 : 1) : -1}>
+      {isAdmin && adminTabIndex >= 0 && (
+        <TabPanel value={tabValue} index={adminTabIndex}>
           <SuggestionAdminPanel onRefresh={() => setRefreshKey(prev => prev + 1)} />
         </TabPanel>
       )}
