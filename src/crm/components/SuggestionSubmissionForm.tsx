@@ -27,7 +27,7 @@ import {
   Lightbulb,
   BugReport,
   TrendingUp,
-  Integration,
+  IntegrationInstructions,
   Speed,
   Palette,
   AutoAwesome,
