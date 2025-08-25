@@ -623,8 +623,23 @@ export class DocumentSecurityService {
       throw new Error('Document not found');
     }
 
-    if (document.permissions.owner !== userId && !this.hasPermission(document, userId, 'admin')) {
-      throw new Error('Access denied');
+    // Debug permission information
+    const isOwner = document.permissions.owner === userId;
+    const hasAdminPermission = this.hasPermission(document, userId, 'admin');
+
+    console.log('Document deletion permission check:', {
+      documentId,
+      userId,
+      userEmail,
+      documentOwner: document.permissions.owner,
+      isOwner,
+      hasAdminPermission,
+      documentAdmins: document.permissions.admins,
+      canDelete: isOwner || hasAdminPermission
+    });
+
+    if (!isOwner && !hasAdminPermission) {
+      throw new Error(`Access denied: User ${userId} is not owner (${document.permissions.owner}) and does not have admin permissions`);
     }
 
     // Log deletion
