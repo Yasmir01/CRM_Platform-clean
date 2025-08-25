@@ -70,6 +70,7 @@ export default function ModeAwareContent() {
             <Communications />
           </Box>
         } />
+        <Route path="suggestions" element={<Suggestions />} />
         <Route path="news" element={<NewsBoard />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={
