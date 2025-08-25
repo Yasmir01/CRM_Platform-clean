@@ -129,7 +129,7 @@ export default function HelpSupportModern() {
 
   const getCategoryIcon = (categoryId: string) => {
     const category = helpCategories.find(c => c.id === categoryId);
-    return category?.icon || <HelpRoundedIcon />;
+    return category ? iconMap[category.iconName] || <HelpRoundedIcon /> : <HelpRoundedIcon />;
   };
 
   const getDifficultyColor = (difficulty: string) => {
