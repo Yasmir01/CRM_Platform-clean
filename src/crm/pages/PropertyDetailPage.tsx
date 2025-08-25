@@ -3283,17 +3283,108 @@ export default function PropertyDetailPage({
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
                     Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    In a real application, this would display the actual document content using a document viewer component.
-                    For demo purposes, this shows a preview placeholder.
-                  </Typography>
-                  <Stack direction="row" spacing={2}>
+                  {/* Document Preview Based on File Type */}
+                  <Box sx={{ mt: 3, mb: 3 }}>
+                    {selectedDocument.type.toLowerCase().includes('image') ||
+                     selectedDocument.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                      // Image Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Image Preview
+                        </Typography>
+                        <Box
+                          component="img"
+                          src={selectedDocument.url}
+                          alt={selectedDocument.name}
+                          sx={{
+                            maxWidth: '100%',
+                            maxHeight: 400,
+                            objectFit: 'contain',
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'white'
+                          }}
+                          onError={(e) => {
+                            console.error('Image failed to load:', selectedDocument.name);
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </Box>
+                    ) : selectedDocument.type.toLowerCase().includes('pdf') ||
+                           selectedDocument.name.toLowerCase().endsWith('.pdf') ? (
+                      // PDF Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          PDF Document
+                        </Typography>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: 400,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <iframe
+                            src={`${selectedDocument.url}#toolbar=1&navpanes=1&scrollbar=1`}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none' }}
+                            title={`PDF Preview: ${selectedDocument.name}`}
+                          />
+                        </Box>
+                      </Box>
+                    ) : selectedDocument.type.toLowerCase().includes('text') ||
+                           selectedDocument.name.toLowerCase().match(/\.(txt|md|json|xml|csv)$/i) ? (
+                      // Text File Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Text Document Preview
+                        </Typography>
+                        <Paper
+                          sx={{
+                            p: 2,
+                            maxHeight: 300,
+                            overflow: 'auto',
+                            textAlign: 'left',
+                            fontFamily: 'monospace',
+                            fontSize: '0.875rem',
+                            bgcolor: 'grey.50'
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            Text content would be displayed here. Click "Open in New Tab" to view the full document.
+                          </Typography>
+                        </Paper>
+                      </Box>
+                    ) : (
+                      // Other Document Types
+                      <Box sx={{ textAlign: 'center', py: 3 }}>
+                        <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="body1" gutterBottom>
+                          {selectedDocument.name}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          This document type ({selectedDocument.type || 'unknown'}) doesn't support inline preview.
+                          Use the buttons below to open or download the file.
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Stack direction="row" spacing={2} justifyContent="center">
                     <Button
                       variant="contained"
                       startIcon={<VisibilityRoundedIcon />}
                       onClick={() => {
-                        // In a real app, this would open the document in a viewer
-                        window.open(selectedDocument.url, '_blank');
+                        if (selectedDocument.url) {
+                          window.open(selectedDocument.url, '_blank');
+                        } else {
+                          alert('Document URL not available.');
+                        }
                       }}
                     >
                       Open in New Tab
@@ -3302,12 +3393,17 @@ export default function PropertyDetailPage({
                       variant="outlined"
                       startIcon={<CloudUploadRoundedIcon />}
                       onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = selectedDocument.url;
-                        link.download = selectedDocument.name;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        try {
+                          const link = document.createElement('a');
+                          link.href = selectedDocument.url;
+                          link.download = selectedDocument.name;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        } catch (error) {
+                          console.error('Download failed:', error);
+                          alert('Download failed. Please try opening in a new tab.');
+                        }
                       }}
                     >
                       Download
