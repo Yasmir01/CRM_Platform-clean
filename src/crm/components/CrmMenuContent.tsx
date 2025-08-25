@@ -45,6 +45,7 @@ import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import IntegrationInstructionsRoundedIcon from "@mui/icons-material/IntegrationInstructionsRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
+import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
