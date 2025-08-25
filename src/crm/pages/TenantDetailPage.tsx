@@ -2589,11 +2589,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                 // Other Document Types
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
                   <Stack spacing={2} alignItems="center" textAlign="center">
-                    <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
-                    <Typography variant="h6">Document Preview</Typography>
+                    {selectedDocument?.isEncrypted ? (
+                      <LockIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                    ) : (
+                      <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+                    )}
+                    <Typography variant="h6">
+                      {selectedDocument?.isEncrypted ? 'Encrypted Document' : 'Document Preview'}
+                    </Typography>
                     <Typography variant="body1" color="text.secondary">
                       {selectedDocument.name}
                     </Typography>
+                    {selectedDocument?.isEncrypted && (
+                      <Chip
+                        icon={<LockIcon />}
+                        label="Securely Encrypted"
+                        color="primary"
+                        size="small"
+                      />
+                    )}
                     <Typography variant="body2" color="text.secondary">
                       Preview not available for this file type
                     </Typography>
