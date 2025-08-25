@@ -85,7 +85,7 @@ export class FileStorageService {
 
         // Generate preview for images (use dataUrl as fallback)
         let preview: string | undefined;
-        if (this.isImageFile(file.type)) {
+        if (this.isImageFile(file.type, file.name)) {
           try {
             preview = await this.generateImagePreview(file);
             console.log('Generated preview for', file.name, ':', preview ? preview.substring(0, 50) + '...' : 'null');
