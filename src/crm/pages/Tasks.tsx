@@ -1064,6 +1064,25 @@ export default function Tasks() {
               }}
             />
 
+            <TextField
+              label="Category Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={formData.customCategoryDescription || ""}
+              onChange={(e) => setFormData({ ...formData, customCategoryDescription: e.target.value })}
+              placeholder="Describe what types of tasks will use this category..."
+              helperText="Optional: Explain when this category should be used"
+              inputProps={{ maxLength: 200 }}
+              sx={{
+                '& .MuiInputBase-input': {
+                  textAlign: 'left',
+                  paddingLeft: '14px',
+                  fontSize: '16px'
+                }
+              }}
+            />
+
             <Box sx={{
               p: 2,
               bgcolor: 'grey.50',
