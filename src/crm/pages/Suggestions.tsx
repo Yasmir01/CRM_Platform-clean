@@ -36,22 +36,6 @@ export default function Suggestions() {
   const [submissionFormOpen, setSubmissionFormOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  // Reset tab value if current tab is no longer available
-  React.useEffect(() => {
-    const maxTabIndex = tabs.length - 1;
-    if (tabValue > maxTabIndex) {
-      setTabValue(0); // Reset to first tab
-    }
-  }, [user, isAdmin]); // Re-run when user or admin status changes
-
-  const handleSubmissionSuccess = () => {
-    setRefreshKey(prev => prev + 1); // Force refresh of suggestion list
-  };
-
   // Check if user has admin privileges (you can adjust this logic based on your auth system)
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || isManagementMode;
 
@@ -75,6 +59,22 @@ export default function Suggestions() {
     adminTabIndex = currentIndex++;
     tabs.push({ label: "Admin Panel", index: adminTabIndex });
   }
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  // Reset tab value if current tab is no longer available
+  React.useEffect(() => {
+    const maxTabIndex = tabs.length - 1;
+    if (tabValue > maxTabIndex) {
+      setTabValue(0); // Reset to first tab
+    }
+  }, [user, isAdmin, tabValue, tabs.length]); // Re-run when user or admin status changes
+
+  const handleSubmissionSuccess = () => {
+    setRefreshKey(prev => prev + 1); // Force refresh of suggestion list
+  };
 
   return (
     <Box sx={{ width: '100%' }}>
