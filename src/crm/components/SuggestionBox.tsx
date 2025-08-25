@@ -43,7 +43,7 @@ import {
   Lightbulb,
   BugReport,
   Speed,
-  Integration,
+  IntegrationInstructions,
   Palette,
   AutoAwesome,
   Assessment,
