@@ -623,7 +623,9 @@ export class DocumentSecurityService {
 
   private decryptContent(encryptedContent: string, key: string): string {
     const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
-    return bytes.toString(CryptoJS.enc.Utf8);
+    // Return as base64 since we encrypted base64 content originally
+    // This avoids UTF-8 conversion issues with binary data
+    return bytes.toString(CryptoJS.enc.Base64);
   }
 
   private generateEncryptionKey(): string {
