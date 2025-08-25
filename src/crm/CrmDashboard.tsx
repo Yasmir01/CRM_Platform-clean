@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import type {} from "@mui/x-date-pickers/themeAugmentation";
 import type {} from "@mui/x-charts/themeAugmentation";
 import type {} from "@mui/x-data-grid-pro/themeAugmentation";
@@ -122,7 +122,7 @@ export default function CrmDashboard() {
               }}
             >
               <CrmHeader />
-              <ModeAwareContent />
+              <Outlet />
             </Stack>
           </Box>
                 </Box>
