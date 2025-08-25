@@ -3361,8 +3361,8 @@ export default function PropertyDetailPage({
                           />
                         </Box>
                       </Box>
-                    ) : selectedDocument.type.toLowerCase().includes('text') ||
-                           selectedDocument.name.toLowerCase().match(/\.(txt|md|json|xml|csv)$/i) ? (
+                    ) : (selectedDocument?.type?.toLowerCase().includes('text') ||
+                           selectedDocument?.name?.toLowerCase().match(/\.(txt|md|json|xml|csv)$/i)) ? (
                       // Text File Preview
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
