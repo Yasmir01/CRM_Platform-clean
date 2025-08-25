@@ -865,7 +865,7 @@ export default function Tasks() {
                       if (selectedCategory === "Other") {
                         setCategoryDialogOpen(true);
                       } else {
-                        setFormData({ ...formData, category: selectedCategory, customCategory: "" });
+                        setFormData({ ...formData, category: selectedCategory, customCategory: "", customCategoryDescription: "" });
                       }
                     }}
                   >
