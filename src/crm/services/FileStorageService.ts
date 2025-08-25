@@ -38,7 +38,30 @@ export class FileStorageService {
       for (const file of files) {
         console.log('Processing file:', file.name, file.type, file.size);
 
+        // Validate file object
+        if (!file || !file.name || file.size === undefined) {
+          return {
+            success: false,
+            error: 'Invalid file object provided'
+          };
+        }
+
+        // Validate file name
+        if (file.name.trim() === '') {
+          return {
+            success: false,
+            error: 'File name cannot be empty'
+          };
+        }
+
         // Validate file size
+        if (file.size === 0) {
+          return {
+            success: false,
+            error: `File "${file.name}" is empty`
+          };
+        }
+
         if (file.size > this.MAX_FILE_SIZE) {
           return {
             success: false,
@@ -47,7 +70,9 @@ export class FileStorageService {
         }
 
         // Validate file type
-        if (!this.isValidFileType(file.type)) {
+        if (!file.type) {
+          console.warn('File type not detected for:', file.name, '- attempting to process anyway');
+        } else if (!this.isValidFileType(file.type)) {
           return {
             success: false,
             error: `File type "${file.type}" is not supported for "${file.name}"`
