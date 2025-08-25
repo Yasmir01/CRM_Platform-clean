@@ -1111,7 +1111,7 @@ export default function Tasks() {
           <Button
             onClick={() => {
               setCategoryDialogOpen(false);
-              setFormData({ ...formData, category: "Follow-up", customCategory: "" });
+              setFormData({ ...formData, category: "Follow-up", customCategory: "", customCategoryDescription: "" });
             }}
             sx={{ minWidth: 100 }}
           >
