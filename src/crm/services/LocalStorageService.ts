@@ -164,6 +164,14 @@ export class LocalStorageService {
     return this.getItem('templates', []);
   }
 
+  static saveIntegrations(integrations: any[]): void {
+    this.setItem('integrations', integrations);
+  }
+
+  static getIntegrations(): any[] {
+    return this.getItem('integrations', []);
+  }
+
   static saveCompanySettings(companySettings: any): void {
     this.setItem('companySettings', companySettings);
   }
