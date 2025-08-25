@@ -1492,6 +1492,15 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AttachFileRoundedIcon fontSize="small" />
                         <Typography variant="body2">{doc.name}</Typography>
+                        {doc.isEncrypted && (
+                          <Chip
+                            label="Encrypted"
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ fontSize: '0.6rem', height: '18px' }}
+                          />
+                        )}
                       </Stack>
                     </TableCell>
                     <TableCell>
@@ -1501,24 +1510,24 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                     <TableCell>{doc.uploadedBy}</TableCell>
                     <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          // Simulate document download
-                          const link = document.createElement('a');
-                          link.href = doc.url || '#';
-                          link.download = doc.name;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-
-                          // Show feedback to user
-                          alert(`Downloading ${doc.name}...`);
-                        }}
-                        title={`Download ${doc.name}`}
-                      >
-                        <DownloadRoundedIcon />
-                      </IconButton>
+                      <Stack direction="row" spacing={1}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDocumentDownload(doc)}
+                          title={`Download ${doc.name}`}
+                        >
+                          <DownloadRoundedIcon />
+                        </IconButton>
+                        {doc.isEncrypted && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocumentHistory(doc)}
+                            title="View Document History"
+                          >
+                            <VisibilityRoundedIcon />
+                          </IconButton>
+                        )}
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))}
