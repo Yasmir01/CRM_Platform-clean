@@ -3269,10 +3269,10 @@ export default function PropertyDetailPage({
                     Document Preview
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    {selectedDocument.name}
+                    {selectedDocument?.name || 'Unknown Document'}
                   </Typography>
                   <Chip
-                    label={selectedDocument.category}
+                    label={selectedDocument?.category || 'Other'}
                     color="primary"
                     variant="outlined"
                     sx={{ mb: 1 }}
