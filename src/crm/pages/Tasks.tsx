@@ -295,6 +295,7 @@ export default function Tasks() {
     dueTime: "",
     category: "Other" as Task["category"],
     customCategory: "",
+    customCategoryDescription: "",
     property: "",
     propertyId: "",
     client: "",
