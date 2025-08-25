@@ -3095,21 +3095,39 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             {/* Upload Section */}
             <Box>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Upload New Pictures</Typography>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<CloudUploadRoundedIcon />}
-                sx={{ mb: 2 }}
+              <Paper
+                sx={{
+                  p: 3,
+                  border: "2px dashed",
+                  borderColor: "grey.300",
+                  textAlign: "center",
+                  bgcolor: "grey.50",
+                  "&:hover": { bgcolor: "grey.100" },
+                  mb: 2
+                }}
               >
-                Upload Pictures
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </Button>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  startIcon={<CloudUploadRoundedIcon />}
+                  size="large"
+                >
+                  Upload Pictures
+                  <input
+                    type="file"
+                    hidden
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </Button>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Drag & drop images here or click to browse
+                </Typography>
+                <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Supported formats: JPG, PNG, GIF • Max 10MB per file
+                </Typography>
+              </Paper>
             </Box>
 
             <Divider />
