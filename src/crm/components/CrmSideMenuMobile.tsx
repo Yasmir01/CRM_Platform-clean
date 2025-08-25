@@ -17,6 +17,7 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import { CrmLogo } from "./CrmAppNavbar";
 
 const mainListItems = [
