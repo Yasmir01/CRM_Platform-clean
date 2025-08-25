@@ -982,11 +982,11 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
               value={newSubTask.description}
               onChange={(e) => setNewSubTask({ ...newSubTask, description: e.target.value })}
             />
-            <TextField
-              label="Assigned To"
-              fullWidth
+            <AssignmentSelector
               value={newSubTask.assignedTo}
-              onChange={(e) => setNewSubTask({ ...newSubTask, assignedTo: e.target.value })}
+              onChange={(value) => setNewSubTask({ ...newSubTask, assignedTo: value })}
+              label="Assigned To"
+              includeTypes={["propertyManagers", "serviceProviders", "tenants"]}
             />
             <TextField
               label="Due Date"
