@@ -466,7 +466,7 @@ export default function Tasks() {
           <Button
             variant="outlined"
             startIcon={<CalendarTodayRoundedIcon />}
-            onClick={() => navigate('/calendar')}
+            onClick={() => navigate('/crm/calendar')}
           >
             View Calendar
           </Button>
