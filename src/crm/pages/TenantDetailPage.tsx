@@ -806,7 +806,11 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     try {
       // If it's an encrypted document, delete from security service first
       if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
-        await documentSecurityService.deleteDocument(documentToDelete.securityDocumentId);
+        await documentSecurityService.deleteDocument(
+          documentToDelete.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
       }
 
       // Remove from CRM context
@@ -1504,7 +1508,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                               `Activity • ${(log as any).type}`
                             }
                             {log.logType === 'workorder' &&
-                              `Work Order • ${(log as any).status} • ${(log as any).title}`
+                              `Work Order • ${(log as any).status} ��� ${(log as any).title}`
                             }
                             {log.logType === 'application' &&
                               `${(log as any).type}`
