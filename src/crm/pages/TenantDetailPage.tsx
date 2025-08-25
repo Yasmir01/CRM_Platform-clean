@@ -2454,7 +2454,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
               >
                 Download
               </Button>
-              <IconButton onClick={() => setDocumentViewModalOpen(false)}>
+              <IconButton onClick={() => {
+                // Clean up blob URL if it was created for encrypted document preview
+                if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+                  URL.revokeObjectURL(selectedDocument.url);
+                }
+                setSelectedDocument(null);
+                setDocumentViewModalOpen(false);
+              }}>
                 <DeleteRoundedIcon />
               </IconButton>
             </Stack>
