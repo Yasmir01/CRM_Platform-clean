@@ -340,7 +340,7 @@ export default function SuggestionAdminPanel({ onRefresh }: SuggestionAdminPanel
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button
-            startIcon={<BulkUpdate />}
+            startIcon={<EditNote />}
             onClick={() => setBulkUpdateDialogOpen(true)}
             disabled={selectedSuggestions.length === 0}
           >
