@@ -3306,21 +3306,27 @@ export default function PropertyDetailPage({
                             bgcolor: 'white'
                           }}
                           onError={(e) => {
-                            console.error('Document image failed to load:', {
-                              name: selectedDocument.name,
-                              type: selectedDocument.type,
-                              url: selectedDocument.url?.substring(0, 100) + '...',
-                              size: selectedDocument.size
-                            });
+                            // Safe logging with null checks
+                            const documentInfo = selectedDocument ? {
+                              name: selectedDocument.name || 'Unknown document',
+                              type: selectedDocument.type || 'Unknown type',
+                              url: selectedDocument.url ? selectedDocument.url.substring(0, 100) + '...' : 'No URL',
+                              size: selectedDocument.size || 0,
+                              hasDocument: !!selectedDocument
+                            } : { error: 'selectedDocument is null or undefined' };
+
+                            console.error('Document image failed to load for:', selectedDocument?.name || 'unknown document');
+                            console.error('Document details:', JSON.stringify(documentInfo, null, 2));
 
                             // Show a user-friendly error message
                             const target = e.target as HTMLImageElement;
                             const parentBox = target.parentElement;
                             if (parentBox) {
+                              const documentName = selectedDocument?.name || 'Unknown Document';
                               parentBox.innerHTML = `
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center;">
                                   <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
-                                  <div style="font-weight: bold; margin-bottom: 8px;">${selectedDocument.name}</div>
+                                  <div style="font-weight: bold; margin-bottom: 8px;">${documentName}</div>
                                   <div style="font-size: 14px; color: #999;">Image preview not available</div>
                                   <div style="font-size: 12px; color: #999; margin-top: 4px;">Click "Open in New Tab" to view the file</div>
                                 </div>
