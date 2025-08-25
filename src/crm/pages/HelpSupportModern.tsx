@@ -53,207 +53,27 @@ import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
+import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import { helpCategories, helpArticles, quickActions, type HelpCategory, type HelpArticle } from "../data/helpArticles";
 
-interface HelpCategory {
-  id: string;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  articleCount: number;
-  popularTags: string[];
-  featured?: boolean;
-}
-
-interface HelpArticle {
-  id: string;
-  title: string;
-  summary: string;
-  content: string[];
-  category: string;
-  tags: string[];
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  readTime: string;
-  helpful: number;
-  lastUpdated: string;
-  planRequired?: "Basic" | "Professional" | "Enterprise" | "Custom";
-  superAdminOnly?: boolean;
-}
-
-const helpCategories: HelpCategory[] = [
-  {
-    id: "getting-started",
-    title: "Getting Started",
-    description: "Essential guides to help you set up and begin using your CRM",
-    icon: <HelpRoundedIcon />,
-    color: "#1976d2",
-    articleCount: 8,
-    popularTags: ["setup", "onboarding", "basics", "first-time"],
-    featured: true,
-  },
-  {
-    id: "properties",
-    title: "Property Management",
-    description: "Managing properties, listings, and property-related features",
-    icon: <HomeRoundedIcon />,
-    color: "#2e7d32",
-    articleCount: 12,
-    popularTags: ["properties", "listings", "management", "rental"],
-  },
-  {
-    id: "tenants",
-    title: "Tenant Management",
-    description: "Managing tenants, leases, communications, and relationships",
-    icon: <PersonRoundedIcon />,
-    color: "#ed6c02",
-    articleCount: 15,
-    popularTags: ["tenants", "leases", "communication", "applications"],
-  },
-  {
-    id: "payments",
-    title: "Payments & Financial",
-    description: "Payment processing, financial management, and rent collection",
-    icon: <PaymentRoundedIcon />,
-    color: "#9c27b0",
-    articleCount: 10,
-    popularTags: ["payments", "financial", "rent", "billing"],
-  },
-  {
-    id: "maintenance",
-    title: "Maintenance & Work Orders",
-    description: "Managing maintenance requests, work orders, and service providers",
-    icon: <BuildRoundedIcon />,
-    color: "#d32f2f",
-    articleCount: 8,
-    popularTags: ["maintenance", "work-orders", "repairs", "contractors"],
-  },
-  {
-    id: "integrations",
-    title: "Integrations & Email",
-    description: "Setting up email, API integrations, and external services",
-    icon: <IntegrationInstructionsRoundedIcon />,
-    color: "#0288d1",
-    articleCount: 18,
-    popularTags: ["email", "integration", "api", "oauth", "setup"],
-    featured: true,
-  },
-  {
-    id: "reports",
-    title: "Reports & Analytics",
-    description: "Generating reports, analytics, and business insights",
-    icon: <AssessmentRoundedIcon />,
-    color: "#f57c00",
-    articleCount: 6,
-    popularTags: ["reports", "analytics", "insights", "data"],
-  },
-  {
-    id: "security",
-    title: "Security & Admin",
-    description: "User roles, permissions, security settings, and advanced features",
-    icon: <SecurityRoundedIcon />,
-    color: "#7b1fa2",
-    articleCount: 9,
-    popularTags: ["security", "admin", "permissions", "roles"],
-  },
-];
-
-const sampleArticles: HelpArticle[] = [
-  {
-    id: "email-setup-overview",
-    title: "Email Integration Setup Overview",
-    summary: "Complete guide to setting up email integration for automated emails and password resets",
-    content: [
-      "Email integration enables automated password resets and professional email communication",
-      "Supported providers include Gmail, Outlook, Yahoo, Hotmail, and custom SMTP servers",
-      "OAuth authentication provides enhanced security for Gmail and Outlook",
-      "App passwords are required for Yahoo Mail integration",
-      "Configure your provider in Integrations → Add Integration → Email Provider",
-      "Test your connection in Email Management after setup",
-      "All email activity is tracked for monitoring and compliance"
-    ],
-    category: "integrations",
-    tags: ["email", "integration", "setup", "oauth", "automation"],
-    difficulty: "Beginner",
-    readTime: "5 min",
-    helpful: 98,
-    lastUpdated: "2024-01-15",
-    planRequired: "Basic"
-  },
-  {
-    id: "tenant-application-process",
-    title: "Managing Tenant Applications",
-    summary: "Step-by-step guide to processing and managing rental applications",
-    content: [
-      "Applications can be received through property landing pages and direct submissions",
-      "Review applications in the Applications section with filtering and sorting options",
-      "Verify applicant information including employment, references, and credit history",
-      "Use built-in scoring and evaluation tools to compare applicants",
-      "Approve applications and automatically convert prospects to tenants",
-      "Send automated notification emails for application status updates",
-      "Track all application communication in the activity timeline"
-    ],
-    category: "tenants",
-    tags: ["applications", "tenants", "screening", "approval", "process"],
-    difficulty: "Intermediate",
-    readTime: "7 min",
-    helpful: 94,
-    lastUpdated: "2024-01-12"
-  },
-  {
-    id: "property-financial-tracking",
-    title: "Property Financial Management",
-    summary: "Comprehensive guide to tracking property finances and generating reports",
-    content: [
-      "Track all property income including rent, fees, and additional charges",
-      "Record expenses such as maintenance, repairs, and property management costs",
-      "Generate financial reports for individual properties or portfolios",
-      "Monitor rent collection rates and identify delinquent accounts",
-      "Set up automated late fees and payment reminders",
-      "Export financial data for accounting software integration",
-      "Use analytics to identify profitable properties and improvement opportunities"
-    ],
-    category: "payments",
-    tags: ["financial", "tracking", "reports", "income", "expenses"],
-    difficulty: "Intermediate",
-    readTime: "8 min",
-    helpful: 91,
-    lastUpdated: "2024-01-10",
-    planRequired: "Professional"
-  },
-  {
-    id: "super-admin-features",
-    title: "Super Admin Advanced Features",
-    summary: "Exclusive features and capabilities available to Super Administrator users",
-    content: [
-      "Access to all system settings and global configurations",
-      "Manage user roles and permissions across the entire platform",
-      "View and manage TransUnion integration for credit reports and background checks",
-      "Configure advanced security settings and access controls",
-      "Set up white-label branding and custom domain configuration",
-      "Access detailed system analytics and user activity logs",
-      "Manage backup and restore operations for data protection",
-      "Configure enterprise integrations and API access"
-    ],
-    category: "security",
-    tags: ["super-admin", "advanced", "permissions", "security", "enterprise"],
-    difficulty: "Advanced",
-    readTime: "12 min",
-    helpful: 89,
-    lastUpdated: "2024-01-08",
-    planRequired: "Enterprise",
-    superAdminOnly: true
-  }
-];
-
-const quickActions = [
-  { label: "Getting Started", tag: "setup", color: "primary" },
-  { label: "Email Setup", tag: "email", color: "info" },
-  { label: "Property Management", tag: "properties", color: "success" },
-  { label: "Tenant Applications", tag: "applications", color: "warning" },
-  { label: "Payment Processing", tag: "payments", color: "secondary" },
-  { label: "Work Orders", tag: "work-orders", color: "error" },
-];
+// Icon mapping for the help categories
+const iconMap: Record<string, React.ReactNode> = {
+  HelpRounded: <HelpRoundedIcon />,
+  Dashboard: <DashboardRoundedIcon />,
+  HomeRounded: <HomeRoundedIcon />,
+  PersonRounded: <PersonRoundedIcon />,
+  PaymentRounded: <PaymentRoundedIcon />,
+  BuildRounded: <BuildRoundedIcon />,
+  EmailRounded: <EmailRoundedIcon />,
+  IntegrationInstructionsRounded: <IntegrationInstructionsRoundedIcon />,
+  AssessmentRounded: <AssessmentRoundedIcon />,
+  CalendarTodayRounded: <CalendarTodayRoundedIcon />,
+  SmartToy: <SmartToyRoundedIcon />,
+  SecurityRounded: <SecurityRoundedIcon />,
+};
 
 export default function HelpSupportModern() {
   const theme = useTheme();
