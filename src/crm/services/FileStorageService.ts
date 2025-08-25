@@ -97,7 +97,7 @@ export class FileStorageService {
         }
 
         // Ensure images always have a preview
-        if (this.isImageFile(file.type) && !preview) {
+        if (this.isImageFile(file.type, file.name) && !preview) {
           console.warn('No preview available for image', file.name, ', using dataUrl as preview');
           preview = dataUrl;
         }
