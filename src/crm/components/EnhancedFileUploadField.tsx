@@ -205,7 +205,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                 {file.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {FileStorageService.formatFileSize(file.size)} • {file.type}
+                {FileStorageService.formatFileSize(file.size)} �� {file.type}
               </Typography>
               <Typography variant="caption" color="text.secondary" display="block">
                 {FileStorageService.getFileTypeIcon(file.type)} {new Date(file.lastModified).toLocaleDateString()}
@@ -214,7 +214,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
 
             {/* Actions */}
             <Stack direction="row" spacing={1}>
-              {FileStorageService.isImageFile(file.type) && (
+              {FileStorageService.isImageFile(file.type, file.name) && (
                 <Tooltip title={isExpanded ? "Collapse Preview" : "Expand Preview"}>
                   <IconButton size="small" onClick={() => togglePreviewExpansion(file.id)}>
                     {isExpanded ? <CollapseIcon /> : <ExpandIcon />}
