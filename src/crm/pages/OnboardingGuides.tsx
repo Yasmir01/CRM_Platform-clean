@@ -715,7 +715,7 @@ export default function OnboardingGuides() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   5-minute interactive tour
                 </Typography>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" onClick={() => alert('Interactive dashboard tour feature coming soon!')}>
                   Start Tour
                 </Button>
               </Card>
@@ -731,7 +731,7 @@ export default function OnboardingGuides() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Configure your organization
                 </Typography>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" onClick={() => alert('Company setup wizard coming soon!')}>
                   Configure
                 </Button>
               </Card>
@@ -747,7 +747,7 @@ export default function OnboardingGuides() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Invite your team members
                 </Typography>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" onClick={() => alert('Team invitation feature coming soon!')}>
                   Invite Team
                 </Button>
               </Card>
@@ -763,7 +763,7 @@ export default function OnboardingGuides() {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Connect external tools
                 </Typography>
-                <Button size="small" variant="outlined">
+                <Button size="small" variant="outlined" onClick={() => alert('Integration explorer coming soon!')}>
                   Explore
                 </Button>
               </Card>

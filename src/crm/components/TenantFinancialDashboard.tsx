@@ -60,7 +60,8 @@ import {
   Assessment as ReportIcon,
   History as HistoryIcon,
   MonetizationOn as MoneyIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  NoteAdd as NoteAddIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
@@ -470,6 +471,13 @@ export default function TenantFinancialDashboard({
               onClick={() => onPaymentAction?.('generate_report', { tenantId })}
             >
               Generate Report
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<NoteAddIcon />}
+              onClick={() => onPaymentAction?.('add_note', { tenantId })}
+            >
+              Add Note
             </Button>
           </Stack>
         </CardContent>

@@ -68,6 +68,7 @@ import BugReportRoundedIcon from "@mui/icons-material/BugReportRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import { TransUnionService } from "../services/TransUnionService";
 import { EmailService } from "../services/EmailService";
+import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 
 interface Integration {
@@ -547,7 +548,41 @@ const getCategoryIcon = (category: Integration["category"]) => {
 export default function IntegrationManagement() {
   const { isSuperAdmin } = useRoleManagement();
   const [currentTab, setCurrentTab] = React.useState(0);
-  const [integrations, setIntegrations] = React.useState<Integration[]>(mockIntegrations);
+
+  // Initialize integrations with persisted data, merging with mock data
+  const initializeIntegrations = () => {
+    const persistedIntegrations = LocalStorageService.getIntegrations();
+    if (persistedIntegrations.length === 0) {
+      // No persisted data, use mock data
+      return mockIntegrations;
+    }
+
+    // Merge persisted data with mock data, preserving persisted configurations
+    const merged = mockIntegrations.map(mockIntegration => {
+      const persistedIntegration = persistedIntegrations.find(p => p.id === mockIntegration.id);
+      return persistedIntegration || mockIntegration;
+    });
+
+    // Add any new persisted integrations that aren't in mock data
+    persistedIntegrations.forEach(persistedIntegration => {
+      if (!merged.find(m => m.id === persistedIntegration.id)) {
+        merged.push(persistedIntegration);
+      }
+    });
+
+    return merged;
+  };
+
+  const [integrations, setIntegrations] = React.useState<Integration[]>(initializeIntegrations());
+
+  // Helper function to update and persist integrations
+  const updateAndPersistIntegrations = (updater: (prev: Integration[]) => Integration[]) => {
+    setIntegrations(prev => {
+      const updated = updater(prev);
+      LocalStorageService.saveIntegrations(updated);
+      return updated;
+    });
+  };
   const [webhooks, setWebhooks] = React.useState<Webhook[]>(mockWebhooks);
   const [apiKeys, setAPIKeys] = React.useState<APIKey[]>(mockAPIKeys);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -587,7 +622,7 @@ export default function IntegrationManagement() {
   const errorIntegrations = integrations.filter(i => i.status === "Error").length;
 
   const handleToggleIntegration = (id: string) => {
-    setIntegrations(prev => prev.map(integration =>
+    updateAndPersistIntegrations(prev => prev.map(integration =>
       integration.id === id
         ? { ...integration, isActive: !integration.isActive }
         : integration
@@ -602,7 +637,7 @@ export default function IntegrationManagement() {
     setTestingIntegrations(prev => new Set(prev).add(id));
 
     // Update integration status to show testing in progress
-    setIntegrations(prev => prev.map(i =>
+    updateAndPersistIntegrations(prev => prev.map(i =>
       i.id === id ? { ...i, status: "Pending" as Integration['status'] } : i
     ));
 
@@ -788,7 +823,7 @@ export default function IntegrationManagement() {
         }
       };
 
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? { ...i, ...updatedIntegration } : i
       ));
 
@@ -799,7 +834,7 @@ export default function IntegrationManagement() {
       );
 
     } catch (error) {
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           status: "Error" as Integration['status'],
@@ -821,7 +856,7 @@ export default function IntegrationManagement() {
       // Update existing integration configuration
       try {
         // Update the integration in the list
-        setIntegrations(prev => prev.map(i =>
+        updateAndPersistIntegrations(prev => prev.map(i =>
           i.id === selectedIntegration.id ? selectedIntegration : i
         ));
 
@@ -1037,7 +1072,7 @@ export default function IntegrationManagement() {
         dateConnected: new Date().toISOString().split('T')[0]
       } as Integration;
 
-      setIntegrations(prev => [...prev, newIntegration]);
+      updateAndPersistIntegrations(prev => [...prev, newIntegration]);
 
       // If it's an email provider, add it to EmailService
       if (['gmail', 'outlook', 'yahoo', 'hotmail', 'custom-smtp'].includes(newIntegrationType)) {
@@ -1162,7 +1197,7 @@ export default function IntegrationManagement() {
 
     // Show sync in progress
     const originalSyncFreq = integration.syncFrequency;
-    setIntegrations(prev => prev.map(i =>
+    updateAndPersistIntegrations(prev => prev.map(i =>
       i.id === id ? { ...i, syncFrequency: "Syncing..." as Integration['syncFrequency'] } : i
     ));
 
@@ -1219,7 +1254,7 @@ export default function IntegrationManagement() {
         uptime: Math.min(100, integration.metrics.uptime + 0.2)
       };
 
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           lastSync: new Date().toISOString(),
@@ -1233,7 +1268,7 @@ export default function IntegrationManagement() {
 
     } catch (error) {
       // Handle sync failure
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           syncFrequency: originalSyncFreq,

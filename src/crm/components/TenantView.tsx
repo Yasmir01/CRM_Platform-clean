@@ -314,6 +314,10 @@ export default function TenantView() {
                   fullWidth
                   startIcon={<AccountBalanceWalletRoundedIcon />}
                   sx={{ py: 1.5 }}
+                  onClick={() => {
+                    // TODO: Implement payment portal integration
+                    alert('Payment portal coming soon! Please contact management for payment options.');
+                  }}
                 >
                   Pay Rent
                 </Button>
@@ -324,6 +328,10 @@ export default function TenantView() {
                   fullWidth
                   startIcon={<BuildRoundedIcon />}
                   sx={{ py: 1.5 }}
+                  onClick={() => {
+                    // TODO: Implement work order form
+                    alert('Work order submission coming soon! Please contact management for maintenance requests.');
+                  }}
                 >
                   Submit Work Order
                 </Button>
@@ -334,6 +342,10 @@ export default function TenantView() {
                   fullWidth
                   startIcon={<EmailRoundedIcon />}
                   sx={{ py: 1.5 }}
+                  onClick={() => {
+                    // Open email client or contact form
+                    window.location.href = 'mailto:management@property.com?subject=Tenant Inquiry';
+                  }}
                 >
                   Contact Management
                 </Button>
@@ -344,6 +356,10 @@ export default function TenantView() {
                   fullWidth
                   startIcon={<PhoneRoundedIcon />}
                   sx={{ py: 1.5 }}
+                  onClick={() => {
+                    // Show emergency contact information
+                    alert('Emergency Contact: 911\nProperty Emergency: (555) 123-4567\nAfter Hours Maintenance: (555) 987-6543');
+                  }}
                 >
                   Emergency Contact
                 </Button>

@@ -49,6 +49,7 @@ import CommunicationDialog from "../components/CommunicationDialog";
 import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
+import { FileStorageService } from "../services/FileStorageService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { LocalStorageService } from "../services/LocalStorageService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -1166,6 +1167,10 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                 // Generate financial report
                 alert('Generating financial report...');
                 break;
+              case 'add_note':
+                // Open note dialog
+                setOpenNoteDialog(true);
+                break;
               default:
                 break;
             }
@@ -1281,7 +1286,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                             {' • '}
                             {new Date(log.date).toLocaleString()}
                             {log.logType === 'call' && ` • by ${(log as any).userWhoMadeCall}`}
-                            {log.logType === 'message' && (log as any).userWhoSent && ` • by ${(log as any).userWhoSent}`}
+                            {log.logType === 'message' && (log as any).userWhoSent && ` �� by ${(log as any).userWhoSent}`}
                             {log.logType === 'note' && ` • by ${(log as any).createdBy}`}
                             {log.logType === 'activity' && ` • by ${(log as any).createdBy}`}
                             {log.logType === 'workorder' && ` • Created by Tenant`}

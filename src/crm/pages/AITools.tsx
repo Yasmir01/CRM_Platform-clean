@@ -562,16 +562,36 @@ export default function AITools() {
               <CardContent>
                 <Typography variant="h6" gutterBottom>Quick Actions</Typography>
                 <Stack spacing={2}>
-                  <Button variant="outlined" fullWidth startIcon={<HelpRoundedIcon />}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<HelpRoundedIcon />}
+                    onClick={() => alert('Property Management Help: Access our comprehensive guides and documentation in the Help & Support section.')}
+                  >
                     Property Management Help
                   </Button>
-                  <Button variant="outlined" fullWidth startIcon={<AnalyticsRoundedIcon />}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<AnalyticsRoundedIcon />}
+                    onClick={() => alert('Generate Report: Use the Analytics & Insights page to create detailed reports.')}
+                  >
                     Generate Report
                   </Button>
-                  <Button variant="outlined" fullWidth startIcon={<SupportAgentRoundedIcon />}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<SupportAgentRoundedIcon />}
+                    onClick={() => alert('Draft Tenant Response: AI-powered response drafting coming soon!')}
+                  >
                     Draft Tenant Response
                   </Button>
-                  <Button variant="outlined" fullWidth startIcon={<TrendingUpRoundedIcon />}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<TrendingUpRoundedIcon />}
+                    onClick={() => alert('Market Analysis: Advanced market analysis tools coming soon!')}
+                  >
                     Market Analysis
                   </Button>
                 </Stack>

@@ -368,7 +368,7 @@ export class TenantFinancialService {
     const actions: TenantPaymentActions = {
       canProcessPayment: profile.paymentMethods.length > 0,
       canSetupAutoPay: profile.paymentMethods.length > 0 && !profile.autoPayStatus.isEnabled,
-      canSendReminder: profile.currentBalance > 0,
+      canSendReminder: true, // Always allow reminders for active tenants
       canApplyLateFee: profile.daysLate > 5 && profile.currentBalance > 0,
       canOfferPaymentPlan: profile.currentBalance > profile.monthlyRent,
       canInitiateEviction: profile.daysLate > 30 && profile.riskAssessment.level === 'critical',

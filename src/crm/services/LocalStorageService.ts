@@ -164,6 +164,22 @@ export class LocalStorageService {
     return this.getItem('templates', []);
   }
 
+  static saveIntegrations(integrations: any[]): void {
+    this.setItem('integrations', integrations);
+  }
+
+  static getIntegrations(): any[] {
+    return this.getItem('integrations', []);
+  }
+
+  static saveDocuments(documents: any[]): void {
+    this.setItem('documents', documents);
+  }
+
+  static getDocuments(): any[] {
+    return this.getItem('documents', []);
+  }
+
   static saveCompanySettings(companySettings: any): void {
     this.setItem('companySettings', companySettings);
   }
@@ -261,6 +277,8 @@ export class LocalStorageService {
       if (crmData.tasks) this.saveTasks(crmData.tasks);
       if (crmData.serviceProviders) this.saveServiceProviders(crmData.serviceProviders);
       if (crmData.propertyGroups) this.savePropertyGroups(crmData.propertyGroups);
+      if (crmData.integrations) this.saveIntegrations(crmData.integrations);
+      if (crmData.documents) this.saveDocuments(crmData.documents);
     } catch (error) {
       console.error('Error syncing data to localStorage:', error);
     }
@@ -281,6 +299,8 @@ export class LocalStorageService {
       tasks: this.getTasks(),
       serviceProviders: this.getServiceProviders(),
       propertyGroups: this.getPropertyGroups(),
+      integrations: this.getIntegrations(),
+      documents: this.getDocuments(),
       userPreferences: this.getUserPreferences()
     };
   }
