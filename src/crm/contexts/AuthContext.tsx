@@ -7,6 +7,7 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
+  name?: string; // Combined name for easy access
   email: string;
   phone?: string;
   role: UserRole;
