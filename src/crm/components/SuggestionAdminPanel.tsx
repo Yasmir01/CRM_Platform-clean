@@ -44,7 +44,7 @@ import {
   TrendingUp,
   GetApp,
   Refresh,
-  BulkUpdate,
+  EditNote,
   Analytics,
   FilterList,
   Sort
