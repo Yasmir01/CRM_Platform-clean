@@ -629,7 +629,7 @@ export class DocumentSecurityService {
   }
 
   private generateEncryptionKey(): string {
-    return this.ENCRYPTION_KEY + '_' + new Date().getTime();
+    return this.ENCRYPTION_KEY;
   }
 
   private calculateChecksum(content: string): string {
