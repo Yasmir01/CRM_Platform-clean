@@ -2419,7 +2419,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       {/* Document Preview Dialog */}
       <Dialog
         open={documentViewModalOpen}
-        onClose={() => setDocumentViewModalOpen(false)}
+        onClose={() => {
+          // Clean up blob URL if it was created for encrypted document preview
+          if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+            URL.revokeObjectURL(selectedDocument.url);
+          }
+          setSelectedDocument(null);
+          setDocumentViewModalOpen(false);
+        }}
         maxWidth="lg"
         fullWidth
         PaperProps={{
