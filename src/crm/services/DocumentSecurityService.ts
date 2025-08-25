@@ -633,8 +633,20 @@ export class DocumentSecurityService {
   }
 
   private decryptContent(encryptedContent: string, key: string): string {
-    const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
-    return bytes.toString(CryptoJS.enc.Utf8);
+    try {
+      const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
+      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+
+      // Check if decryption resulted in empty string (common with wrong key)
+      if (!decrypted) {
+        throw new Error('Decryption resulted in empty content - likely wrong key');
+      }
+
+      return decrypted;
+    } catch (error) {
+      console.error('Decryption failed:', error);
+      throw new Error(`Decryption failed: ${(error as Error).message}`);
+    }
   }
 
   private generateEncryptionKey(): string {
