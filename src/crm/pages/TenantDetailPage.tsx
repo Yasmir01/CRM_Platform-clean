@@ -777,8 +777,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           byteArray = new Uint8Array(byteNumbers);
         } catch (base64Error) {
           console.error('Base64 decoding failed:', base64Error);
-          console.log('Content sample:', decryptedDocument.content.substring(0, 100) + '...');
-          console.log('Content length:', decryptedDocument.content.length);
+          console.log('Document details:', {
+            contentLength: decryptedDocument.content.length,
+            contentSample: decryptedDocument.content.substring(0, 100) + '...',
+            mimeType: decryptedDocument.mimeType,
+            filename: decryptedDocument.filename,
+            startsWithDataUrl: decryptedDocument.content.startsWith('data:'),
+            containsBase64Chars: /^[A-Za-z0-9+/]*={0,2}$/.test(decryptedDocument.content.substring(0, 100))
+          });
 
           // Try to handle as direct binary string (fallback)
           try {
@@ -788,10 +794,10 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
               byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
             }
             byteArray = new Uint8Array(byteNumbers);
-            console.log('Successfully handled as binary string');
+            console.log('✅ Successfully handled as binary string');
           } catch (binaryError) {
-            console.error('Binary fallback failed:', binaryError);
-            throw new Error('Unable to process decrypted document content');
+            console.error('❌ Binary fallback failed:', binaryError);
+            throw new Error('Unable to process decrypted document content - both Base64 and binary handling failed');
           }
         }
 
