@@ -165,18 +165,3 @@ function MySuggestions({ userId, refreshKey }: { userId: string; refreshKey: num
     </Box>
   );
 }
-
-// Simple admin panel placeholder - you can expand this
-function AdminSuggestionPanel({ refreshKey }: { refreshKey: number }) {
-  return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Admin Panel
-      </Typography>
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Admin features coming soon: bulk status updates, priority management, analytics dashboard, and more.
-      </Alert>
-      <SuggestionBox key={`admin-${refreshKey}`} />
-    </Box>
-  );
-}
