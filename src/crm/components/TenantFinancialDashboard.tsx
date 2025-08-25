@@ -471,6 +471,13 @@ export default function TenantFinancialDashboard({
             >
               Generate Report
             </Button>
+            <Button
+              variant="outlined"
+              startIcon={<NoteAddIcon />}
+              onClick={() => onPaymentAction?.('add_note', { tenantId })}
+            >
+              Add Note
+            </Button>
           </Stack>
         </CardContent>
       </Card>
