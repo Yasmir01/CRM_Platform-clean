@@ -305,14 +305,14 @@ export default function HelpSupportModern() {
                       <CardContent sx={{ p: 3, height: "100%" }}>
                         <Stack spacing={2} height="100%">
                           <Stack direction="row" alignItems="center" spacing={2}>
-                            <Avatar 
-                              sx={{ 
+                            <Avatar
+                              sx={{
                                 bgcolor: category.color,
                                 width: 48,
                                 height: 48
                               }}
                             >
-                              {category.icon}
+                              {iconMap[category.iconName] || <HelpRoundedIcon />}
                             </Avatar>
                             {category.featured && (
                               <Chip 
