@@ -50,6 +50,7 @@ import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { FileStorageService } from "../services/FileStorageService";
+import { documentSecurityService } from "../services/DocumentSecurityService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { LocalStorageService } from "../services/LocalStorageService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -212,6 +213,13 @@ function TabPanel(props: TabPanelProps) {
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
   const { state, updateTenant, addNote, addDocument, addPayment } = useCrmData();
+
+  // User context for document security
+  const currentUser = {
+    id: 'current-user',
+    email: 'manager@crm.com',
+    displayName: 'Current User'
+  };
   const { getEntityActivities } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
