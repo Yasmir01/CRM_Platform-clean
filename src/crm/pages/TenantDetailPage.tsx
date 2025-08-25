@@ -2378,6 +2378,291 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => setDocumentViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              Document Preview - {selectedDocument?.name || 'Unknown Document'}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<FileDownloadRoundedIcon />}
+                onClick={() => {
+                  if (selectedDocument) {
+                    handleDocumentDownload(selectedDocument);
+                  }
+                }}
+              >
+                Download
+              </Button>
+              <IconButton onClick={() => setDocumentViewModalOpen(false)}>
+                <DeleteRoundedIcon />
+              </IconButton>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {selectedDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* Document Preview based on type */}
+              {selectedDocument.type?.toLowerCase().includes('image') ||
+               selectedDocument.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                // Image Preview
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                  <Box
+                    component="img"
+                    src={selectedDocument.url || ''}
+                    alt={selectedDocument.name || 'Document preview'}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: 'white'
+                    }}
+                    onError={(e) => {
+                      // Safe logging with null checks
+                      const documentInfo = selectedDocument ? {
+                        name: selectedDocument.name || 'Unknown document',
+                        type: selectedDocument.type || 'Unknown type',
+                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
+                        size: selectedDocument.size || 0,
+                        hasDocument: !!selectedDocument
+                      } : { error: 'selectedDocument is null or undefined' };
+
+                      console.warn('Document image failed to load, showing fallback:', selectedDocument?.name || 'unknown document');
+                      console.debug('Document details:', JSON.stringify(documentInfo, null, 2));
+
+                      // Show a user-friendly error message
+                      const target = e.target as HTMLImageElement;
+                      const parentBox = target.parentElement;
+                      if (parentBox) {
+                        const documentName = selectedDocument?.name || 'Unknown Document';
+                        const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
+                        parentBox.innerHTML = `
+                          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
+                            <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+                            <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                            <div style="font-size: 14px; color: #666;">Preview not available</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </Box>
+              ) : (selectedDocument.type?.toLowerCase().includes('pdf') ||
+                     selectedDocument.name?.toLowerCase().endsWith('.pdf')) ? (
+                // PDF Preview
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
+                    PDF Document Preview
+                  </Typography>
+                  <Box
+                    sx={{
+                      flex: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      bgcolor: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center" textAlign="center">
+                      <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'error.main' }} />
+                      <Typography variant="h6">PDF Document</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {selectedDocument.name}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<VisibilityRoundedIcon />}
+                        onClick={() => {
+                          if (selectedDocument.url) {
+                            window.open(selectedDocument.url, '_blank');
+                          }
+                        }}
+                      >
+                        Open in New Tab
+                      </Button>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : (
+                // Other Document Types
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+                  <Stack spacing={2} alignItems="center" textAlign="center">
+                    <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+                    <Typography variant="h6">Document Preview</Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {selectedDocument.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Preview not available for this file type
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<DownloadRoundedIcon />}
+                      onClick={() => handleDocumentDownload(selectedDocument)}
+                    >
+                      Download to View
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
+
+              {/* Document Info */}
+              <Paper sx={{ p: 2, m: 2, mt: 0 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Document Information</Typography>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      <Typography variant="body2">
+                        <strong>File Name:</strong> {selectedDocument.name}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Category:</strong> {selectedDocument.category}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Size:</strong> {formatFileSize(selectedDocument.size)}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Uploaded:</strong> {new Date(selectedDocument.uploadedAt).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Uploaded By:</strong> {selectedDocument.uploadedBy}
+                      </Typography>
+                      {selectedDocument.isEncrypted && (
+                        <Chip
+                          label="🔒 Encrypted Document"
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
+                  </Grid>
+                  {selectedDocument.description && (
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">Description</Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {selectedDocument.description}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Paper>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Document Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The selected document could not be loaded.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentViewModalOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog
+        open={deleteDocumentDialogOpen}
+        onClose={() => setDeleteDocumentDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <WarningRoundedIcon color="error" />
+            <Typography variant="h6">Delete Document</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Alert severity="warning">
+              Are you sure you want to delete this document? This action cannot be undone.
+            </Alert>
+
+            {documentToDelete && (
+              <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>Document Details:</Typography>
+                <Typography variant="body2">
+                  <strong>Name:</strong> {documentToDelete.name}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Category:</strong> {documentToDelete.category}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Size:</strong> {formatFileSize(documentToDelete.size)}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Uploaded:</strong> {new Date(documentToDelete.uploadedAt).toLocaleString()}
+                </Typography>
+                {documentToDelete.isEncrypted && (
+                  <Chip
+                    label="🔒 Encrypted Document"
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ mt: 1 }}
+                  />
+                )}
+              </Box>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteDocumentDialogOpen(false)}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDeleteDocument}
+            variant="contained"
+            color="error"
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
