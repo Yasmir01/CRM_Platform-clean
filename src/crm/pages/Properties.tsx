@@ -3153,6 +3153,20 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           height: '100%',
                           objectFit: 'cover'
                         }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', image.alt);
+                        }}
+                        onError={(e) => {
+                          console.error('Image failed to load:', image.alt, 'URL:', image.url?.substring(0, 50) + '...');
+                          // Provide fallback behavior
+                          const target = e.target as HTMLImageElement;
+                          target.style.background = '#f5f5f5';
+                          target.style.display = 'flex';
+                          target.style.alignItems = 'center';
+                          target.style.justifyContent = 'center';
+                          target.style.color = '#666';
+                          target.alt = `❌ ${image.alt} (failed to load)`;
+                        }}
                       />
 
                       <ImageListItemBar
