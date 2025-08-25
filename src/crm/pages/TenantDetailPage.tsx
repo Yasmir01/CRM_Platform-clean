@@ -212,7 +212,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
-  const { state, updateTenant, addNote, addDocument, addPayment } = useCrmData();
+  const { state, updateTenant, addNote, addDocument, addPayment, deleteDocument } = useCrmData();
 
   // User context for document security
   const currentUser = {
@@ -239,6 +239,10 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   const [selectedDocumentForHistory, setSelectedDocumentForHistory] = React.useState<any>(null);
   const [documentVersions, setDocumentVersions] = React.useState<any[]>([]);
   const [documentAccessLog, setDocumentAccessLog] = React.useState<any[]>([]);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
   const [communicationData, setCommunicationData] = React.useState({
     type: 'email' as 'email' | 'sms' | 'call',
     recipient: '',
@@ -706,6 +710,65 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     } catch (error) {
       console.error('Error viewing document history:', error);
       alert('Unable to view document history. You may not have permission to access this information.');
+    }
+  };
+
+  const handlePreviewDocument = (doc: any) => {
+    setSelectedDocument(doc);
+    setDocumentViewModalOpen(true);
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      // If it's an encrypted document, delete from security service first
+      if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
+        await documentSecurityService.deleteDocument(documentToDelete.securityDocumentId);
+      }
+
+      // Remove from CRM context
+      deleteDocument(documentToDelete.id);
+
+      // Track deletion activity
+      activityTracker.trackActivity({
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName,
+        action: 'delete',
+        entityType: 'tenant',
+        entityId: tenant.id,
+        entityName: `${tenant.firstName} ${tenant.lastName}`,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
+          }
+        ],
+        description: `Document deleted: ${documentToDelete.name}`,
+        metadata: {
+          documentId: documentToDelete.id,
+          documentName: documentToDelete.name,
+          documentCategory: documentToDelete.category,
+          wasEncrypted: documentToDelete.isEncrypted
+        },
+        severity: 'medium',
+        category: 'documentation'
+      });
+
+      alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
     }
   };
 
@@ -1580,6 +1643,13 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       <Stack direction="row" spacing={1}>
                         <IconButton
                           size="small"
+                          onClick={() => handlePreviewDocument(doc)}
+                          title={`Preview ${doc.name}`}
+                        >
+                          <VisibilityRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          size="small"
                           onClick={() => handleDocumentDownload(doc)}
                           title={`Download ${doc.name}`}
                         >
@@ -1591,9 +1661,17 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                             onClick={() => handleViewDocumentHistory(doc)}
                             title="View Document History"
                           >
-                            <VisibilityRoundedIcon />
+                            <DescriptionRoundedIcon />
                           </IconButton>
                         )}
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteDocument(doc)}
+                          title={`Delete ${doc.name}`}
+                          color="error"
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
                       </Stack>
                     </TableCell>
                   </TableRow>
