@@ -642,6 +642,65 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
+  const handleDocumentDownload = async (doc: any) => {
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Download encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Create a blob from the decrypted content
+        const byteCharacters = atob(decryptedDocument.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
+
+        // Create download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = decryptedDocument.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the blob URL
+        URL.revokeObjectURL(link.href);
+      } else {
+        // Handle non-encrypted documents (legacy)
+        const link = document.createElement('a');
+        link.href = doc.url || '#';
+        link.download = doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document. You may not have permission to access this file.');
+    }
+  };
+
+  const handleViewDocumentHistory = async (doc: any) => {
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        const versions = documentSecurityService.getVersionHistory(doc.securityDocumentId, currentUser.id);
+        const accessLog = documentSecurityService.getAccessLog(doc.securityDocumentId, currentUser.id);
+
+        // Display document history in a dialog
+        alert(`Document History for ${doc.name}:\n\nVersions: ${versions.length}\nLast Modified: ${versions[0]?.createdAt ? new Date(versions[0].createdAt).toLocaleString() : 'N/A'}\nAccess Log Entries: ${accessLog.length}`);
+      }
+    } catch (error) {
+      console.error('Error viewing document history:', error);
+      alert('Unable to view document history. You may not have permission to access this information.');
+    }
+  };
+
   const handleUploadDocument = async () => {
     if (newDocument.file) {
       try {
