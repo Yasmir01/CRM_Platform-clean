@@ -3285,8 +3285,8 @@ export default function PropertyDetailPage({
                   </Typography>
                   {/* Document Preview Based on File Type */}
                   <Box sx={{ mt: 3, mb: 3 }}>
-                    {selectedDocument.type.toLowerCase().includes('image') ||
-                     selectedDocument.name.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i) ? (
+                    {(selectedDocument?.type?.toLowerCase().includes('image') ||
+                     selectedDocument?.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) ? (
                       // Image Preview
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
