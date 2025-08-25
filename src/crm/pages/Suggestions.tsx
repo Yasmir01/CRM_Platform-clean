@@ -3,6 +3,7 @@ import { Box, Typography, Button, Tab, Tabs, Alert } from '@mui/material';
 import { Add, AdminPanelSettings } from '@mui/icons-material';
 import SuggestionBox from '../components/SuggestionBox';
 import SuggestionSubmissionForm from '../components/SuggestionSubmissionForm';
+import SuggestionAdminPanel from '../components/SuggestionAdminPanel';
 import { useAuth } from '../contexts/AuthContext';
 import { useMode } from '../contexts/ModeContext';
 
