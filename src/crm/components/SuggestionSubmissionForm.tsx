@@ -322,14 +322,18 @@ export default function SuggestionSubmissionForm({ open, onClose, onSubmit }: Su
                   }
                 }}
                 renderTags={(value, getTagProps) =>
-                  value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
-                      onDelete={() => handleRemoveTag(option)}
-                    />
-                  ))
+                  value.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key}
+                        variant="outlined"
+                        label={option}
+                        {...tagProps}
+                        onDelete={() => handleRemoveTag(option)}
+                      />
+                    );
+                  })
                 }
                 renderInput={(params) => (
                   <TextField
