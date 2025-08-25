@@ -696,8 +696,12 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         const versions = documentSecurityService.getVersionHistory(doc.securityDocumentId, currentUser.id);
         const accessLog = documentSecurityService.getAccessLog(doc.securityDocumentId, currentUser.id);
 
-        // Display document history in a dialog
-        alert(`Document History for ${doc.name}:\n\nVersions: ${versions.length}\nLast Modified: ${versions[0]?.createdAt ? new Date(versions[0].createdAt).toLocaleString() : 'N/A'}\nAccess Log Entries: ${accessLog.length}`);
+        setSelectedDocumentForHistory(doc);
+        setDocumentVersions(versions);
+        setDocumentAccessLog(accessLog);
+        setDocumentHistoryDialogOpen(true);
+      } else {
+        alert('Document history is only available for encrypted documents.');
       }
     } catch (error) {
       console.error('Error viewing document history:', error);
