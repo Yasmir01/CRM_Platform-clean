@@ -42,6 +42,7 @@ import {
 import TaskDetailPage from "./TaskDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import AssignmentSelector from "../components/AssignmentSelector";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
