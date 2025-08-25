@@ -3278,10 +3278,10 @@ export default function PropertyDetailPage({
                     sx={{ mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Type: {selectedDocument.type} ��� Size: {formatFileSize(selectedDocument.size)}
+                    Type: {selectedDocument?.type || 'Unknown'} • Size: {selectedDocument?.size ? formatFileSize(selectedDocument.size) : 'Unknown'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
+                    Uploaded: {selectedDocument?.uploadedAt ? new Date(selectedDocument.uploadedAt).toLocaleDateString() : 'Unknown'} by {selectedDocument?.uploadedBy || 'Unknown'}
                   </Typography>
                   {/* Document Preview Based on File Type */}
                   <Box sx={{ mt: 3, mb: 3 }}>
