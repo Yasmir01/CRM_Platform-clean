@@ -67,7 +67,7 @@ const categoryIcons: Record<SuggestionCategory, React.ReactNode> = {
   [SuggestionCategory.FEATURE_REQUEST]: <Lightbulb />,
   [SuggestionCategory.BUG_FIX]: <BugReport />,
   [SuggestionCategory.IMPROVEMENT]: <TrendingUp />,
-  [SuggestionCategory.INTEGRATION]: <Integration />,
+  [SuggestionCategory.INTEGRATION]: <IntegrationInstructions />,
   [SuggestionCategory.PERFORMANCE]: <Speed />,
   [SuggestionCategory.UI_UX]: <Palette />,
   [SuggestionCategory.AUTOMATION]: <AutoAwesome />,
