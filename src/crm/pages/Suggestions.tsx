@@ -108,7 +108,7 @@ export default function Suggestions() {
 
       {isAdmin && (
         <TabPanel value={tabValue} index={isAdmin ? (user ? 2 : 1) : -1}>
-          <AdminSuggestionPanel refreshKey={refreshKey} />
+          <SuggestionAdminPanel onRefresh={() => setRefreshKey(prev => prev + 1)} />
         </TabPanel>
       )}
 
