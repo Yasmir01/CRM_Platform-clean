@@ -151,11 +151,11 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                 bgcolor: 'grey.50'
               }}
             >
-              {FileStorageService.isImageFile(file.type) ? (
+              {FileStorageService.isImageFile(file.type, file.name) ? (
                 (file.preview || file.dataUrl) ? (
                   <Box
                     component="img"
-                    src={file.preview || file.dataUrl}
+                    src={file.dataUrl || file.preview} // Prefer dataUrl over preview
                     alt={file.name}
                     sx={{
                       width: '100%',
@@ -167,16 +167,28 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                       console.log('Thumbnail loaded successfully for:', file.name);
                     }}
                     onError={(e) => {
-                      console.error('Thumbnail failed to load for:', file.name, 'Available sources:', {
-                        preview: !!file.preview,
-                        dataUrl: !!file.dataUrl,
-                        previewLength: file.preview?.length,
-                        dataUrlLength: file.dataUrl?.length
+                      console.warn('Thumbnail failed to load for:', file.name, {
+                        hasDataUrl: !!file.dataUrl,
+                        hasPreview: !!file.preview,
+                        fileType: file.type,
+                        fileSize: file.size
                       });
+
+                      // Replace with fallback icon
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+
+                      // Create fallback icon
+                      const parentBox = target.parentElement;
+                      if (parentBox) {
+                        parentBox.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #999;"><span style="font-size: 24px;">🖼️</span></div>';
+                      }
                     }}
                   />
                 ) : (
-                  <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                    <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
+                  </Box>
                 )
               ) : FileStorageService.isPdfFile(file.type) ? (
                 <PdfIcon sx={{ fontSize: 40, color: 'error.main' }} />
@@ -193,7 +205,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                 {file.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {FileStorageService.formatFileSize(file.size)} • {file.type}
+                {FileStorageService.formatFileSize(file.size)} �� {file.type}
               </Typography>
               <Typography variant="caption" color="text.secondary" display="block">
                 {FileStorageService.getFileTypeIcon(file.type)} {new Date(file.lastModified).toLocaleDateString()}
@@ -202,7 +214,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
 
             {/* Actions */}
             <Stack direction="row" spacing={1}>
-              {FileStorageService.isImageFile(file.type) && (
+              {FileStorageService.isImageFile(file.type, file.name) && (
                 <Tooltip title={isExpanded ? "Collapse Preview" : "Expand Preview"}>
                   <IconButton size="small" onClick={() => togglePreviewExpansion(file.id)}>
                     {isExpanded ? <CollapseIcon /> : <ExpandIcon />}
@@ -231,7 +243,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
           </Stack>
 
           {/* Expanded Preview for Images */}
-          {isExpanded && FileStorageService.isImageFile(file.type) && (
+          {isExpanded && FileStorageService.isImageFile(file.type, file.name) && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
                 Image Preview
@@ -251,8 +263,42 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                     bgcolor: 'white'
                   }}
                   onError={(e) => {
-                    console.error('Image failed to load:', file);
-                    (e.target as HTMLImageElement).style.display = 'none';
+                    console.error('Image preview failed to load for:', file.name, {
+                      hasDataUrl: !!file.dataUrl,
+                      hasPreview: !!file.preview,
+                      dataUrlLength: file.dataUrl?.length || 0,
+                      previewLength: file.preview?.length || 0,
+                      fileType: file.type
+                    });
+
+                    // Hide the broken image and show fallback
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+
+                    // Show fallback message in parent container
+                    const parentContainer = target.parentElement;
+                    if (parentContainer) {
+                      const fallbackDiv = document.createElement('div');
+                      fallbackDiv.style.cssText = `
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 200px;
+                        background-color: #f5f5f5;
+                        border: 2px dashed #ddd;
+                        border-radius: 8px;
+                        color: #666;
+                        text-align: center;
+                        padding: 20px;
+                      `;
+                      fallbackDiv.innerHTML = `
+                        <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                        <div style="font-weight: bold; margin-bottom: 4px;">${file.name}</div>
+                        <div style="font-size: 12px;">Preview not available</div>
+                      `;
+                      parentContainer.appendChild(fallbackDiv);
+                    }
                   }}
                 />
               ) : (
@@ -379,7 +425,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
         <DialogContent>
           {previewFile && (
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              {FileStorageService.isImageFile(previewFile.type) ? (
+              {FileStorageService.isImageFile(previewFile.type, previewFile.name) ? (
                 <Box
                   component="img"
                   src={previewFile.dataUrl}

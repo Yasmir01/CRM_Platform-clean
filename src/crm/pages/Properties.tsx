@@ -1264,17 +1264,41 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     const files = event.target.files;
     if (files) {
       Array.from(files).forEach((file) => {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          alert(`File "${file.name}" is not a valid image file.`);
+          return;
+        }
+
+        // Validate file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+          alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
-          const newImage: PropertyImage = {
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-            url: e.target?.result as string,
-            alt: file.name,
-            rotation: 0,
-            isMain: propertyImages.length === 0,
-            order: propertyImages.length,
-          };
-          setPropertyImages(prev => [...prev, newImage]);
+          const result = e.target?.result;
+          if (result && typeof result === 'string') {
+            const newImage: PropertyImage = {
+              id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              url: result,
+              alt: file.name,
+              rotation: 0,
+              isMain: propertyImages.length === 0,
+              order: propertyImages.length,
+            };
+            setPropertyImages(prev => [...prev, newImage]);
+            console.log('Image uploaded successfully:', file.name, 'Size:', file.size, 'Data URL length:', result.length);
+          } else {
+            console.error('Failed to read file as data URL:', file.name);
+            alert(`Failed to process image "${file.name}". Please try again.`);
+          }
+        };
+        reader.onerror = (error) => {
+          console.error('FileReader error:', error);
+          alert(`Error reading file "${file.name}". Please try again.`);
         };
         reader.readAsDataURL(file);
       });
@@ -3071,21 +3095,39 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             {/* Upload Section */}
             <Box>
               <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Upload New Pictures</Typography>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<CloudUploadRoundedIcon />}
-                sx={{ mb: 2 }}
+              <Paper
+                sx={{
+                  p: 3,
+                  border: "2px dashed",
+                  borderColor: "grey.300",
+                  textAlign: "center",
+                  bgcolor: "grey.50",
+                  "&:hover": { bgcolor: "grey.100" },
+                  mb: 2
+                }}
               >
-                Upload Pictures
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
-              </Button>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  startIcon={<CloudUploadRoundedIcon />}
+                  size="large"
+                >
+                  Upload Pictures
+                  <input
+                    type="file"
+                    hidden
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                  />
+                </Button>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Drag & drop images here or click to browse
+                </Typography>
+                <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 0.5 }}>
+                  Supported formats: JPG, PNG, GIF • Max 10MB per file
+                </Typography>
+              </Paper>
             </Box>
 
             <Divider />
@@ -3128,6 +3170,20 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           width: '100%',
                           height: '100%',
                           objectFit: 'cover'
+                        }}
+                        onLoad={() => {
+                          console.log('Image loaded successfully:', image.alt);
+                        }}
+                        onError={(e) => {
+                          console.error('Image failed to load:', image.alt, 'URL:', image.url?.substring(0, 50) + '...');
+                          // Provide fallback behavior
+                          const target = e.target as HTMLImageElement;
+                          target.style.background = '#f5f5f5';
+                          target.style.display = 'flex';
+                          target.style.alignItems = 'center';
+                          target.style.justifyContent = 'center';
+                          target.style.color = '#666';
+                          target.alt = `❌ ${image.alt} (failed to load)`;
                         }}
                       />
 

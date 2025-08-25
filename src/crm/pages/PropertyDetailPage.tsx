@@ -475,9 +475,13 @@ export default function PropertyDetailPage({
     setUploadingDocument(true);
 
     try {
-      // In a real app, you would upload to a file storage service
-      // For demo purposes, we'll create a local blob URL
-      const fileUrl = URL.createObjectURL(documentUploadData.file);
+      // Convert file to data URL for better persistence
+      const fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(documentUploadData.file as File);
+      });
 
       const document = {
         name: documentUploadData.file.name,
@@ -3269,31 +3273,148 @@ export default function PropertyDetailPage({
                     Document Preview
                   </Typography>
                   <Typography variant="body1" color="text.secondary">
-                    {selectedDocument.name}
+                    {selectedDocument?.name || 'Unknown Document'}
                   </Typography>
                   <Chip
-                    label={selectedDocument.category}
+                    label={selectedDocument?.category || 'Other'}
                     color="primary"
                     variant="outlined"
                     sx={{ mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Type: {selectedDocument.type} ��� Size: {formatFileSize(selectedDocument.size)}
+                    Type: {selectedDocument?.type || 'Unknown'} • Size: {selectedDocument?.size ? formatFileSize(selectedDocument.size) : 'Unknown'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    Uploaded: {new Date(selectedDocument.uploadedAt).toLocaleDateString()} by {selectedDocument.uploadedBy}
+                    Uploaded: {selectedDocument?.uploadedAt ? new Date(selectedDocument.uploadedAt).toLocaleDateString() : 'Unknown'} by {selectedDocument?.uploadedBy || 'Unknown'}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    In a real application, this would display the actual document content using a document viewer component.
-                    For demo purposes, this shows a preview placeholder.
-                  </Typography>
-                  <Stack direction="row" spacing={2}>
+                  {/* Document Preview Based on File Type */}
+                  <Box sx={{ mt: 3, mb: 3 }}>
+                    {(selectedDocument?.type?.toLowerCase().includes('image') ||
+                     selectedDocument?.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) ? (
+                      // Image Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Image Preview
+                        </Typography>
+                        <Box
+                          component="img"
+                          src={selectedDocument?.url || ''}
+                          alt={selectedDocument?.name || 'Document preview'}
+                          sx={{
+                            maxWidth: '100%',
+                            maxHeight: 400,
+                            objectFit: 'contain',
+                            borderRadius: 1,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'white'
+                          }}
+                          onError={(e) => {
+                            // Safe logging with null checks
+                            const documentInfo = selectedDocument ? {
+                              name: selectedDocument.name || 'Unknown document',
+                              type: selectedDocument.type || 'Unknown type',
+                              url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
+                              size: selectedDocument.size || 0,
+                              hasDocument: !!selectedDocument
+                            } : { error: 'selectedDocument is null or undefined' };
+
+                            console.warn('Document image failed to load, showing fallback:', selectedDocument?.name || 'unknown document');
+                            console.debug('Document details:', JSON.stringify(documentInfo, null, 2));
+
+                            // Show a user-friendly error message
+                            const target = e.target as HTMLImageElement;
+                            const parentBox = target.parentElement;
+                            if (parentBox) {
+                              const documentName = selectedDocument?.name || 'Unknown Document';
+                              const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
+                              parentBox.innerHTML = `
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
+                                  <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+                                  <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
+                                  <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                                  <div style="font-size: 14px; color: #666;">Preview not available</div>
+                                  <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
+                                </div>
+                              `;
+                            }
+                          }}
+                        />
+                      </Box>
+                    ) : (selectedDocument?.type?.toLowerCase().includes('pdf') ||
+                           selectedDocument?.name?.toLowerCase().endsWith('.pdf')) ? (
+                      // PDF Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          PDF Document
+                        </Typography>
+                        <Box
+                          sx={{
+                            width: '100%',
+                            height: 400,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            borderRadius: 1,
+                            overflow: 'hidden'
+                          }}
+                        >
+                          <iframe
+                            src={`${selectedDocument.url}#toolbar=1&navpanes=1&scrollbar=1`}
+                            width="100%"
+                            height="100%"
+                            style={{ border: 'none' }}
+                            title={`PDF Preview: ${selectedDocument.name}`}
+                          />
+                        </Box>
+                      </Box>
+                    ) : (selectedDocument?.type?.toLowerCase().includes('text') ||
+                           selectedDocument?.name?.toLowerCase().match(/\.(txt|md|json|xml|csv)$/i)) ? (
+                      // Text File Preview
+                      <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          Text Document Preview
+                        </Typography>
+                        <Paper
+                          sx={{
+                            p: 2,
+                            maxHeight: 300,
+                            overflow: 'auto',
+                            textAlign: 'left',
+                            fontFamily: 'monospace',
+                            fontSize: '0.875rem',
+                            bgcolor: 'grey.50'
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            Text content would be displayed here. Click "Open in New Tab" to view the full document.
+                          </Typography>
+                        </Paper>
+                      </Box>
+                    ) : (
+                      // Other Document Types
+                      <Box sx={{ textAlign: 'center', py: 3 }}>
+                        <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="body1" gutterBottom>
+                          {selectedDocument?.name || 'Unknown Document'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          This document type ({selectedDocument?.type || 'unknown'}) doesn't support inline preview.
+                          Use the buttons below to open or download the file.
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  <Stack direction="row" spacing={2} justifyContent="center">
                     <Button
                       variant="contained"
                       startIcon={<VisibilityRoundedIcon />}
                       onClick={() => {
-                        // In a real app, this would open the document in a viewer
-                        window.open(selectedDocument.url, '_blank');
+                        if (selectedDocument?.url) {
+                          window.open(selectedDocument.url, '_blank');
+                        } else {
+                          alert('Document URL not available.');
+                        }
                       }}
                     >
                       Open in New Tab
@@ -3302,12 +3423,21 @@ export default function PropertyDetailPage({
                       variant="outlined"
                       startIcon={<CloudUploadRoundedIcon />}
                       onClick={() => {
-                        const link = document.createElement('a');
-                        link.href = selectedDocument.url;
-                        link.download = selectedDocument.name;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        try {
+                          if (selectedDocument?.url && selectedDocument?.name) {
+                            const link = document.createElement('a');
+                            link.href = selectedDocument.url;
+                            link.download = selectedDocument.name;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          } else {
+                            alert('Document information not available for download.');
+                          }
+                        } catch (error) {
+                          console.error('Download failed:', error);
+                          alert('Download failed. Please try opening in a new tab.');
+                        }
                       }}
                     >
                       Download

@@ -38,7 +38,30 @@ export class FileStorageService {
       for (const file of files) {
         console.log('Processing file:', file.name, file.type, file.size);
 
+        // Validate file object
+        if (!file || !file.name || file.size === undefined) {
+          return {
+            success: false,
+            error: 'Invalid file object provided'
+          };
+        }
+
+        // Validate file name
+        if (file.name.trim() === '') {
+          return {
+            success: false,
+            error: 'File name cannot be empty'
+          };
+        }
+
         // Validate file size
+        if (file.size === 0) {
+          return {
+            success: false,
+            error: `File "${file.name}" is empty`
+          };
+        }
+
         if (file.size > this.MAX_FILE_SIZE) {
           return {
             success: false,
@@ -47,7 +70,9 @@ export class FileStorageService {
         }
 
         // Validate file type
-        if (!this.isValidFileType(file.type)) {
+        if (!file.type) {
+          console.warn('File type not detected for:', file.name, '- attempting to process anyway');
+        } else if (!this.isValidFileType(file.type)) {
           return {
             success: false,
             error: `File type "${file.type}" is not supported for "${file.name}"`
@@ -60,14 +85,21 @@ export class FileStorageService {
 
         // Generate preview for images (use dataUrl as fallback)
         let preview: string | undefined;
-        if (this.isImageFile(file.type)) {
+        if (this.isImageFile(file.type, file.name)) {
           try {
             preview = await this.generateImagePreview(file);
-            console.log('Generated preview for', file.name, ':', preview.substring(0, 50) + '...');
+            console.log('Generated preview for', file.name, ':', preview ? preview.substring(0, 50) + '...' : 'null');
           } catch (previewError) {
             console.warn('Failed to generate preview for', file.name, ', using dataUrl as fallback:', previewError);
-            preview = dataUrl; // Use the full dataUrl as fallback
+            // For images, always ensure we have a preview - use the full dataUrl as fallback
+            preview = dataUrl;
           }
+        }
+
+        // Ensure images always have a preview
+        if (this.isImageFile(file.type, file.name) && !preview) {
+          console.warn('No preview available for image', file.name, ', using dataUrl as preview');
+          preview = dataUrl;
         }
 
         const storedFile: StoredFile = {
@@ -114,57 +146,89 @@ export class FileStorageService {
    */
   private static generateImagePreview(file: File, maxWidth = 150, maxHeight = 150): Promise<string> {
     return new Promise((resolve, reject) => {
+      // Set timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        console.warn('Image preview generation timed out for:', file.name);
+        reject(new Error(`Preview generation timed out for ${file.name}`));
+      }, 10000); // 10 second timeout
+
       const img = new Image();
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
       if (!ctx) {
+        clearTimeout(timeoutId);
         reject(new Error('Canvas context not available'));
         return;
       }
 
       img.onload = () => {
         try {
+          clearTimeout(timeoutId);
           console.log('Image loaded for preview:', file.name, 'Original dimensions:', img.width, 'x', img.height);
+
+          // Validate image dimensions
+          if (img.width === 0 || img.height === 0) {
+            throw new Error('Invalid image dimensions');
+          }
 
           // Calculate dimensions maintaining aspect ratio
           const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-          const newWidth = img.width * ratio;
-          const newHeight = img.height * ratio;
+          const newWidth = Math.max(1, Math.floor(img.width * ratio));
+          const newHeight = Math.max(1, Math.floor(img.height * ratio));
 
           canvas.width = newWidth;
           canvas.height = newHeight;
 
-          // Draw and convert to data URL (use PNG for images with transparency)
+          // Clear canvas and draw image
+          ctx.clearRect(0, 0, newWidth, newHeight);
           ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+          // Convert to data URL with error handling
           const format = file.type === 'image/png' || file.type === 'image/webp' ? 'image/png' : 'image/jpeg';
           const quality = format === 'image/jpeg' ? 0.8 : undefined;
           const previewDataUrl = canvas.toDataURL(format, quality);
 
-          console.log('Generated preview:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
+          // Validate generated data URL
+          if (!previewDataUrl || previewDataUrl === 'data:,') {
+            throw new Error('Failed to generate valid data URL');
+          }
+
+          console.log('Successfully generated preview for:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
 
           // Clean up
           URL.revokeObjectURL(img.src);
           resolve(previewDataUrl);
         } catch (error) {
-          console.error('Error generating preview:', error);
+          clearTimeout(timeoutId);
+          console.error('Error generating preview for', file.name, ':', error);
           URL.revokeObjectURL(img.src);
           reject(error);
         }
       };
 
       img.onerror = (error) => {
+        clearTimeout(timeoutId);
         console.error('Image failed to load for preview:', file.name, error);
         URL.revokeObjectURL(img.src);
-        reject(new Error(`Failed to load image: ${file.name}`));
+        reject(new Error(`Failed to load image: ${file.name} - ${error}`));
       };
 
       try {
+        // Validate file before creating object URL
+        if (!file || file.size === 0) {
+          throw new Error('Invalid file object');
+        }
+
         const objectUrl = URL.createObjectURL(file);
         console.log('Created object URL for preview:', file.name, objectUrl);
+
+        // Set crossOrigin to handle CORS issues
+        img.crossOrigin = 'anonymous';
         img.src = objectUrl;
       } catch (error) {
-        console.error('Failed to create object URL:', error);
+        clearTimeout(timeoutId);
+        console.error('Failed to create object URL for', file.name, ':', error);
         reject(error);
       }
     });
@@ -180,8 +244,22 @@ export class FileStorageService {
   /**
    * Check if file is an image
    */
-  static isImageFile(type: string): boolean {
-    return this.SUPPORTED_TYPES.images.includes(type);
+  static isImageFile(type: string, fileName?: string): boolean {
+    // Handle common variations and missing MIME types
+    if (type) {
+      const normalizedType = type.toLowerCase();
+      if (this.SUPPORTED_TYPES.images.includes(normalizedType) || normalizedType.startsWith('image/')) {
+        return true;
+      }
+    }
+
+    // Fallback to file extension if MIME type is not reliable
+    if (fileName) {
+      const extension = fileName.toLowerCase().split('.').pop();
+      return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension || '');
+    }
+
+    return false;
   }
 
   /**

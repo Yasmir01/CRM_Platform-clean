@@ -50,6 +50,7 @@ import TenantFinancialDashboard from "../components/TenantFinancialDashboard";
 import { useCrmData, Tenant } from "../contexts/CrmDataContext";
 import { activityTracker } from "../services/ActivityTrackingService";
 import { FileStorageService } from "../services/FileStorageService";
+import { documentSecurityService } from "../services/DocumentSecurityService";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { LocalStorageService } from "../services/LocalStorageService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
@@ -211,7 +212,14 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps) {
-  const { state, updateTenant, addNote, addDocument, addPayment } = useCrmData();
+  const { state, updateTenant, addNote, addDocument, addPayment, deleteDocument } = useCrmData();
+
+  // User context for document security
+  const currentUser = {
+    id: 'current-user',
+    email: 'manager@crm.com',
+    displayName: 'Current User'
+  };
   const { getEntityActivities } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -227,6 +235,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [communicationDialogOpen, setCommunicationDialogOpen] = React.useState(false);
   const [contractViewModalOpen, setContractViewModalOpen] = React.useState(false);
+  const [documentHistoryDialogOpen, setDocumentHistoryDialogOpen] = React.useState(false);
+  const [selectedDocumentForHistory, setSelectedDocumentForHistory] = React.useState<any>(null);
+  const [documentVersions, setDocumentVersions] = React.useState<any[]>([]);
+  const [documentAccessLog, setDocumentAccessLog] = React.useState<any[]>([]);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
   const [communicationData, setCommunicationData] = React.useState({
     type: 'email' as 'email' | 'sms' | 'call',
     recipient: '',
@@ -634,53 +650,196 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
-      // Create a blob URL for the file to simulate file storage
-      const fileUrl = URL.createObjectURL(newDocument.file);
+  const handleDocumentDownload = async (doc: any) => {
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Download encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
 
-      // Save document to CrmDataContext
-      const savedDocument = addDocument({
-        name: newDocument.file.name,
-        type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
-        size: newDocument.file.size,
-        url: fileUrl,
-        category: newDocument.category,
-        tenantId: tenant.id,
-        uploadedBy: "Current User",
-        description: newDocument.description,
-        tags: []
-      });
+        // Create a blob from the decrypted content
+        const byteCharacters = atob(decryptedDocument.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
 
-      // Track activity for the upload
+        // Create download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = decryptedDocument.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the blob URL
+        URL.revokeObjectURL(link.href);
+      } else {
+        // Handle non-encrypted documents (legacy)
+        const link = document.createElement('a');
+        link.href = doc.url || '#';
+        link.download = doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document. You may not have permission to access this file.');
+    }
+  };
+
+  const handleViewDocumentHistory = async (doc: any) => {
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        const versions = documentSecurityService.getVersionHistory(doc.securityDocumentId, currentUser.id);
+        const accessLog = documentSecurityService.getAccessLog(doc.securityDocumentId, currentUser.id);
+
+        setSelectedDocumentForHistory(doc);
+        setDocumentVersions(versions);
+        setDocumentAccessLog(accessLog);
+        setDocumentHistoryDialogOpen(true);
+      } else {
+        alert('Document history is only available for encrypted documents.');
+      }
+    } catch (error) {
+      console.error('Error viewing document history:', error);
+      alert('Unable to view document history. You may not have permission to access this information.');
+    }
+  };
+
+  const handlePreviewDocument = (doc: any) => {
+    setSelectedDocument(doc);
+    setDocumentViewModalOpen(true);
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      // If it's an encrypted document, delete from security service first
+      if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
+        await documentSecurityService.deleteDocument(documentToDelete.securityDocumentId);
+      }
+
+      // Remove from CRM context
+      deleteDocument(documentToDelete.id);
+
+      // Track deletion activity
       activityTracker.trackActivity({
-        userId: 'current-user',
-        userDisplayName: 'Current User',
-        action: 'create',
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName,
+        action: 'delete',
         entityType: 'tenant',
         entityId: tenant.id,
         entityName: `${tenant.firstName} ${tenant.lastName}`,
         changes: [
           {
             field: 'documents',
-            oldValue: '',
-            newValue: newDocument.file.name,
-            displayName: 'Document Uploaded'
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
           }
         ],
-        description: `Document uploaded: ${newDocument.file.name}`,
+        description: `Document deleted: ${documentToDelete.name}`,
         metadata: {
-          documentCategory: newDocument.category,
-          fileSize: newDocument.file.size,
-          fileType: newDocument.file.type
+          documentId: documentToDelete.id,
+          documentName: documentToDelete.name,
+          documentCategory: documentToDelete.category,
+          wasEncrypted: documentToDelete.isEncrypted
         },
-        severity: 'low',
+        severity: 'medium',
         category: 'documentation'
       });
 
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
-      setNewDocument({ file: null, category: "Other", description: "" });
-      setOpenDocumentDialog(false);
+      alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleUploadDocument = async () => {
+    if (newDocument.file) {
+      try {
+        // Encrypt and store document using DocumentSecurityService
+        const secureDocument = await documentSecurityService.encryptDocument(
+          newDocument.file,
+          {
+            category: newDocument.category,
+            entityId: tenant.id,
+            entityType: 'tenant',
+            tags: ['tenant-document'],
+            description: newDocument.description,
+            isConfidential: newDocument.category === 'Legal' || newDocument.category === 'Lease',
+            userId: currentUser.id,
+            userEmail: currentUser.email
+          }
+        );
+
+        // Save document reference to CrmDataContext for UI display
+        const savedDocument = addDocument({
+          name: secureDocument.name,
+          type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+          size: secureDocument.size,
+          url: secureDocument.id, // Store document ID instead of URL
+          category: newDocument.category,
+          tenantId: tenant.id,
+          uploadedBy: currentUser.displayName,
+          description: newDocument.description,
+          tags: secureDocument.metadata.tags,
+          isEncrypted: true, // Flag to indicate this is an encrypted document
+          securityDocumentId: secureDocument.id // Link to the encrypted document
+        });
+
+        // Track activity for the upload
+        activityTracker.trackActivity({
+          userId: currentUser.id,
+          userDisplayName: currentUser.displayName,
+          action: 'create',
+          entityType: 'tenant',
+          entityId: tenant.id,
+          entityName: `${tenant.firstName} ${tenant.lastName}`,
+          changes: [
+            {
+              field: 'documents',
+              oldValue: '',
+              newValue: newDocument.file.name,
+              displayName: 'Encrypted Document Uploaded'
+            }
+          ],
+          description: `Encrypted document uploaded: ${newDocument.file.name}`,
+          metadata: {
+            documentCategory: newDocument.category,
+            fileSize: newDocument.file.size,
+            fileType: newDocument.file.type,
+            isEncrypted: true,
+            securityDocumentId: secureDocument.id
+          },
+          severity: 'low',
+          category: 'documentation'
+        });
+
+        alert(`Document "${newDocument.file.name}" uploaded and encrypted successfully!`);
+        setNewDocument({ file: null, category: "Other", description: "" });
+        setOpenDocumentDialog(false);
+      } catch (error) {
+        console.error('Error uploading encrypted document:', error);
+        alert('Failed to upload document. Please try again.');
+      }
     }
   };
 
@@ -1463,6 +1622,15 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       <Stack direction="row" alignItems="center" spacing={1}>
                         <AttachFileRoundedIcon fontSize="small" />
                         <Typography variant="body2">{doc.name}</Typography>
+                        {doc.isEncrypted && (
+                          <Chip
+                            label="Encrypted"
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ fontSize: '0.6rem', height: '18px' }}
+                          />
+                        )}
                       </Stack>
                     </TableCell>
                     <TableCell>
@@ -1472,24 +1640,39 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                     <TableCell>{doc.uploadedBy}</TableCell>
                     <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          // Simulate document download
-                          const link = document.createElement('a');
-                          link.href = doc.url || '#';
-                          link.download = doc.name;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-
-                          // Show feedback to user
-                          alert(`Downloading ${doc.name}...`);
-                        }}
-                        title={`Download ${doc.name}`}
-                      >
-                        <DownloadRoundedIcon />
-                      </IconButton>
+                      <Stack direction="row" spacing={1}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handlePreviewDocument(doc)}
+                          title={`Preview ${doc.name}`}
+                        >
+                          <VisibilityRoundedIcon />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDocumentDownload(doc)}
+                          title={`Download ${doc.name}`}
+                        >
+                          <DownloadRoundedIcon />
+                        </IconButton>
+                        {doc.isEncrypted && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocumentHistory(doc)}
+                            title="View Document History"
+                          >
+                            <DescriptionRoundedIcon />
+                          </IconButton>
+                        )}
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteDocument(doc)}
+                          title={`Delete ${doc.name}`}
+                          color="error"
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1998,8 +2181,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                     Document: {leaseDetails.leaseDocument}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400 }}>
-                    In a real application, this would display the actual PDF content using a PDF viewer component.
-                    For demo purposes, this shows a preview placeholder.
+                    PDF Document Preview - Use the buttons below to view or download the lease agreement.
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Button
@@ -2075,6 +2257,409 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         <DialogActions>
           <Button onClick={() => setContractViewModalOpen(false)}>
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document History Dialog */}
+      <Dialog
+        open={documentHistoryDialogOpen}
+        onClose={() => setDocumentHistoryDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DescriptionRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document History & Security</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocumentForHistory?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>Version History</Typography>
+            {documentVersions.length > 0 ? (
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Version</TableCell>
+                      <TableCell>Created</TableCell>
+                      <TableCell>Created By</TableCell>
+                      <TableCell>Size</TableCell>
+                      <TableCell>Change Notes</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {documentVersions.map((version) => (
+                      <TableRow key={version.id}>
+                        <TableCell>{version.version}</TableCell>
+                        <TableCell>{new Date(version.createdAt).toLocaleString()}</TableCell>
+                        <TableCell>{version.createdBy}</TableCell>
+                        <TableCell>{formatFileSize(version.size)}</TableCell>
+                        <TableCell>{version.changeNotes || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={version.isActive ? 'Current' : 'Archived'}
+                            color={version.isActive ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No version history available.
+              </Typography>
+            )}
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Typography variant="h6" gutterBottom>Access Log</Typography>
+            {documentAccessLog.length > 0 ? (
+              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Action</TableCell>
+                      <TableCell>User</TableCell>
+                      <TableCell>Timestamp</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Details</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {documentAccessLog.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell>
+                          <Chip
+                            label={log.action.replace('_', ' ')}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>{log.userEmail}</TableCell>
+                        <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={log.success ? 'Success' : 'Failed'}
+                            color={log.success ? 'success' : 'error'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {log.errorMessage || 'N/A'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No access log entries available.
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentHistoryDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => setDocumentViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              Document Preview - {selectedDocument?.name || 'Unknown Document'}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<FileDownloadRoundedIcon />}
+                onClick={() => {
+                  if (selectedDocument) {
+                    handleDocumentDownload(selectedDocument);
+                  }
+                }}
+              >
+                Download
+              </Button>
+              <IconButton onClick={() => setDocumentViewModalOpen(false)}>
+                <DeleteRoundedIcon />
+              </IconButton>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {selectedDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
+              }}
+            >
+              {/* Document Preview based on type */}
+              {selectedDocument.type?.toLowerCase().includes('image') ||
+               selectedDocument.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                // Image Preview
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                  <Box
+                    component="img"
+                    src={selectedDocument.url || ''}
+                    alt={selectedDocument.name || 'Document preview'}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      bgcolor: 'white'
+                    }}
+                    onError={(e) => {
+                      // Safe logging with null checks
+                      const documentInfo = selectedDocument ? {
+                        name: selectedDocument.name || 'Unknown document',
+                        type: selectedDocument.type || 'Unknown type',
+                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
+                        size: selectedDocument.size || 0,
+                        hasDocument: !!selectedDocument
+                      } : { error: 'selectedDocument is null or undefined' };
+
+                      console.warn('Document image failed to load, showing fallback:', selectedDocument?.name || 'unknown document');
+                      console.debug('Document details:', JSON.stringify(documentInfo, null, 2));
+
+                      // Show a user-friendly error message
+                      const target = e.target as HTMLImageElement;
+                      const parentBox = target.parentElement;
+                      if (parentBox) {
+                        const documentName = selectedDocument?.name || 'Unknown Document';
+                        const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
+                        parentBox.innerHTML = `
+                          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
+                            <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+                            <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                            <div style="font-size: 14px; color: #666;">Preview not available</div>
+                            <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </Box>
+              ) : (selectedDocument.type?.toLowerCase().includes('pdf') ||
+                     selectedDocument.name?.toLowerCase().endsWith('.pdf')) ? (
+                // PDF Preview
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, textAlign: 'center' }}>
+                    PDF Document Preview
+                  </Typography>
+                  <Box
+                    sx={{
+                      flex: 1,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      borderRadius: 1,
+                      bgcolor: 'white',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Stack spacing={2} alignItems="center" textAlign="center">
+                      <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'error.main' }} />
+                      <Typography variant="h6">PDF Document</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {selectedDocument.name}
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<VisibilityRoundedIcon />}
+                        onClick={() => {
+                          if (selectedDocument.url) {
+                            window.open(selectedDocument.url, '_blank');
+                          }
+                        }}
+                      >
+                        Open in New Tab
+                      </Button>
+                    </Stack>
+                  </Box>
+                </Box>
+              ) : (
+                // Other Document Types
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+                  <Stack spacing={2} alignItems="center" textAlign="center">
+                    <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+                    <Typography variant="h6">Document Preview</Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {selectedDocument.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Preview not available for this file type
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<DownloadRoundedIcon />}
+                      onClick={() => handleDocumentDownload(selectedDocument)}
+                    >
+                      Download to View
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
+
+              {/* Document Info */}
+              <Paper sx={{ p: 2, m: 2, mt: 0 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Document Information</Typography>
+                    <Stack spacing={1} sx={{ mt: 1 }}>
+                      <Typography variant="body2">
+                        <strong>File Name:</strong> {selectedDocument.name}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Category:</strong> {selectedDocument.category}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Size:</strong> {formatFileSize(selectedDocument.size)}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Uploaded:</strong> {new Date(selectedDocument.uploadedAt).toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2">
+                        <strong>Uploaded By:</strong> {selectedDocument.uploadedBy}
+                      </Typography>
+                      {selectedDocument.isEncrypted && (
+                        <Chip
+                          label="🔒 Encrypted Document"
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      )}
+                    </Stack>
+                  </Grid>
+                  {selectedDocument.description && (
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" color="text.secondary">Description</Typography>
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {selectedDocument.description}
+                      </Typography>
+                    </Grid>
+                  )}
+                </Grid>
+              </Paper>
+            </Box>
+          ) : (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="h6" color="error">
+                Document Not Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                The selected document could not be loaded.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentViewModalOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog
+        open={deleteDocumentDialogOpen}
+        onClose={() => setDeleteDocumentDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <WarningRoundedIcon color="error" />
+            <Typography variant="h6">Delete Document</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Alert severity="warning">
+              Are you sure you want to delete this document? This action cannot be undone.
+            </Alert>
+
+            {documentToDelete && (
+              <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>Document Details:</Typography>
+                <Typography variant="body2">
+                  <strong>Name:</strong> {documentToDelete.name}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Category:</strong> {documentToDelete.category}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Size:</strong> {formatFileSize(documentToDelete.size)}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Uploaded:</strong> {new Date(documentToDelete.uploadedAt).toLocaleString()}
+                </Typography>
+                {documentToDelete.isEncrypted && (
+                  <Chip
+                    label="🔒 Encrypted Document"
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ mt: 1 }}
+                  />
+                )}
+              </Box>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteDocumentDialogOpen(false)}
+            variant="outlined"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDeleteDocument}
+            variant="contained"
+            color="error"
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
           </Button>
         </DialogActions>
       </Dialog>
