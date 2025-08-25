@@ -66,6 +66,7 @@ interface Task {
   dueTime?: string;
   category: "Call" | "Email" | "Property" | "Maintenance" | "Work Order" | "Follow-up" | "Other";
   customCategory?: string;
+  customCategoryDescription?: string;
   property?: string;
   propertyId?: string; // Add propertyId for better integration
   client?: string;
