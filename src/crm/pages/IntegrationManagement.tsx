@@ -548,7 +548,41 @@ const getCategoryIcon = (category: Integration["category"]) => {
 export default function IntegrationManagement() {
   const { isSuperAdmin } = useRoleManagement();
   const [currentTab, setCurrentTab] = React.useState(0);
-  const [integrations, setIntegrations] = React.useState<Integration[]>(mockIntegrations);
+
+  // Initialize integrations with persisted data, merging with mock data
+  const initializeIntegrations = () => {
+    const persistedIntegrations = LocalStorageService.getIntegrations();
+    if (persistedIntegrations.length === 0) {
+      // No persisted data, use mock data
+      return mockIntegrations;
+    }
+
+    // Merge persisted data with mock data, preserving persisted configurations
+    const merged = mockIntegrations.map(mockIntegration => {
+      const persistedIntegration = persistedIntegrations.find(p => p.id === mockIntegration.id);
+      return persistedIntegration || mockIntegration;
+    });
+
+    // Add any new persisted integrations that aren't in mock data
+    persistedIntegrations.forEach(persistedIntegration => {
+      if (!merged.find(m => m.id === persistedIntegration.id)) {
+        merged.push(persistedIntegration);
+      }
+    });
+
+    return merged;
+  };
+
+  const [integrations, setIntegrations] = React.useState<Integration[]>(initializeIntegrations());
+
+  // Helper function to update and persist integrations
+  const updateAndPersistIntegrations = (updater: (prev: Integration[]) => Integration[]) => {
+    setIntegrations(prev => {
+      const updated = updater(prev);
+      LocalStorageService.saveIntegrations(updated);
+      return updated;
+    });
+  };
   const [webhooks, setWebhooks] = React.useState<Webhook[]>(mockWebhooks);
   const [apiKeys, setAPIKeys] = React.useState<APIKey[]>(mockAPIKeys);
   const [searchTerm, setSearchTerm] = React.useState("");
