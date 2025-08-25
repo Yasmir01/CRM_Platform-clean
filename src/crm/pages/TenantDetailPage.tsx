@@ -846,7 +846,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
     } catch (error) {
       console.error('Error deleting document:', error);
-      alert('Failed to delete document. Please try again.');
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('Access denied')) {
+        alert(
+          `Failed to delete document: Access denied.\n\n` +
+          `This may happen if:\n` +
+          `• You don't have permission to delete this document\n` +
+          `• The document was uploaded by another user\n` +
+          `• There's a permissions configuration issue\n\n` +
+          `Please contact an administrator if you believe this is an error.`
+        );
+      } else if (errorMessage.includes('Document not found')) {
+        alert(
+          `Failed to delete document: Document not found.\n\n` +
+          `The document may have already been deleted or there may be a sync issue.`
+        );
+      } else {
+        alert(`Failed to delete document: ${errorMessage}\n\nPlease try again or contact support if the issue persists.`);
+      }
     } finally {
       setDeleteDocumentDialogOpen(false);
       setDocumentToDelete(null);
