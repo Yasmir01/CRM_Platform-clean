@@ -2558,7 +2558,13 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                         startIcon={<VisibilityRoundedIcon />}
                         onClick={() => {
                           if (selectedDocument.url) {
-                            window.open(selectedDocument.url, '_blank');
+                            if (selectedDocument.isDecryptedForPreview) {
+                              // For encrypted documents, the URL is a blob URL that can be opened directly
+                              window.open(selectedDocument.url, '_blank');
+                            } else {
+                              // For non-encrypted documents, use the original URL
+                              window.open(selectedDocument.url, '_blank');
+                            }
                           }
                         }}
                       >
