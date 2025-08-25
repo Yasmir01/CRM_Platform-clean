@@ -636,43 +636,19 @@ export class DocumentSecurityService {
     try {
       const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
 
-      // First try to decrypt as Base64 (since we encrypt Base64-encoded file content)
-      let decrypted: string;
-      try {
-        decrypted = bytes.toString(CryptoJS.enc.Base64);
+      // Since we encrypt Base64-encoded file content, we need to decrypt back to Base64
+      // NOT UTF-8, as UTF-8 conversion fails for binary data encoded as Base64
+      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
 
-        // Validate that it's valid Base64
-        if (decrypted && this.isValidBase64(decrypted)) {
-          return decrypted;
-        }
-      } catch (base64Error) {
-        console.warn('Base64 decryption failed, trying UTF-8:', base64Error);
+      // Check if decryption resulted in empty string (common with wrong key)
+      if (!decrypted) {
+        throw new Error('Decryption resulted in empty content - likely wrong key');
       }
 
-      // Fallback to UTF-8 for text content or legacy data
-      try {
-        decrypted = bytes.toString(CryptoJS.enc.Utf8);
-        if (decrypted) {
-          return decrypted;
-        }
-      } catch (utf8Error) {
-        console.warn('UTF-8 decryption failed:', utf8Error);
-      }
-
-      throw new Error('Decryption resulted in empty or invalid content - likely wrong key or corrupted data');
+      return decrypted;
     } catch (error) {
       console.error('Decryption failed:', error);
       throw new Error(`Decryption failed: ${(error as Error).message}`);
-    }
-  }
-
-  private isValidBase64(str: string): boolean {
-    try {
-      // Basic validation: check if string matches Base64 pattern and can be decoded
-      const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
-      return base64Pattern.test(str) && str.length > 0;
-    } catch {
-      return false;
     }
   }
 
