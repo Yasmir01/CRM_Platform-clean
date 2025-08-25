@@ -475,9 +475,13 @@ export default function PropertyDetailPage({
     setUploadingDocument(true);
 
     try {
-      // In a real app, you would upload to a file storage service
-      // For demo purposes, we'll create a local blob URL
-      const fileUrl = URL.createObjectURL(documentUploadData.file);
+      // Convert file to data URL for better persistence
+      const fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(documentUploadData.file as File);
+      });
 
       const document = {
         name: documentUploadData.file.name,
@@ -3310,25 +3314,27 @@ export default function PropertyDetailPage({
                             const documentInfo = selectedDocument ? {
                               name: selectedDocument.name || 'Unknown document',
                               type: selectedDocument.type || 'Unknown type',
-                              url: selectedDocument.url ? selectedDocument.url.substring(0, 100) + '...' : 'No URL',
+                              url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
                               size: selectedDocument.size || 0,
                               hasDocument: !!selectedDocument
                             } : { error: 'selectedDocument is null or undefined' };
 
-                            console.error('Document image failed to load for:', selectedDocument?.name || 'unknown document');
-                            console.error('Document details:', JSON.stringify(documentInfo, null, 2));
+                            console.warn('Document image failed to load, showing fallback:', selectedDocument?.name || 'unknown document');
+                            console.debug('Document details:', JSON.stringify(documentInfo, null, 2));
 
                             // Show a user-friendly error message
                             const target = e.target as HTMLImageElement;
                             const parentBox = target.parentElement;
                             if (parentBox) {
                               const documentName = selectedDocument?.name || 'Unknown Document';
+                              const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
                               parentBox.innerHTML = `
-                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center;">
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
                                   <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
-                                  <div style="font-weight: bold; margin-bottom: 8px;">${documentName}</div>
-                                  <div style="font-size: 14px; color: #999;">Image preview not available</div>
-                                  <div style="font-size: 12px; color: #999; margin-top: 4px;">Click "Open in New Tab" to view the file</div>
+                                  <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
+                                  <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                                  <div style="font-size: 14px; color: #666;">Preview not available</div>
+                                  <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
                                 </div>
                               `;
                             }
