@@ -212,6 +212,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // First time, save mock users to localStorage
       localStorage.setItem('users', JSON.stringify(mockUsers));
     }
+
+    // Ensure all users have name property
+    usersList = usersList.map(user => ({
+      ...user,
+      name: user.name || `${user.firstName} ${user.lastName}`
+    }));
+
     setUsers(usersList);
 
     // Load current user
