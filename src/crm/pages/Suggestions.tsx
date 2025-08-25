@@ -40,6 +40,14 @@ export default function Suggestions() {
     setTabValue(newValue);
   };
 
+  // Reset tab value if current tab is no longer available
+  React.useEffect(() => {
+    const maxTabIndex = tabs.length - 1;
+    if (tabValue > maxTabIndex) {
+      setTabValue(0); // Reset to first tab
+    }
+  }, [user, isAdmin]); // Re-run when user or admin status changes
+
   const handleSubmissionSuccess = () => {
     setRefreshKey(prev => prev + 1); // Force refresh of suggestion list
   };
