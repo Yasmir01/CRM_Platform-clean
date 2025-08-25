@@ -823,7 +823,7 @@ export default function IntegrationManagement() {
         }
       };
 
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? { ...i, ...updatedIntegration } : i
       ));
 
