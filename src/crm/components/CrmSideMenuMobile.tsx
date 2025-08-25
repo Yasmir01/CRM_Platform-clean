@@ -21,12 +21,13 @@ import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import { CrmLogo } from "./CrmAppNavbar";
 
 const mainListItems = [
-  { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/" },
-  { text: "Customers", icon: <PeopleRoundedIcon />, path: "/customers" },
-  { text: "Deals", icon: <BusinessCenterRoundedIcon />, path: "/deals" },
-  { text: "Contacts", icon: <ContactsRoundedIcon />, path: "/contacts" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/tasks" },
-  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/reports" },
+  { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
+  { text: "Customers", icon: <PeopleRoundedIcon />, path: "/crm/tenants" },
+  { text: "Deals", icon: <BusinessCenterRoundedIcon />, path: "/crm/sales" },
+  { text: "Contacts", icon: <ContactsRoundedIcon />, path: "/crm/contacts" },
+  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions" },
+  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks" },
+  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
 ];
 
 const secondaryListItems = [
