@@ -134,6 +134,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
+  const { properties, tenants } = useCrmData();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [openNoteDialog, setOpenNoteDialog] = React.useState(false);
   const [openDocumentDialog, setOpenDocumentDialog] = React.useState(false);
