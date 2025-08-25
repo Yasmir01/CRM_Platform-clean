@@ -738,7 +738,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
 
         try {
           // Validate and decode Base64 content
-          if (!this.isValidBase64(decryptedDocument.content)) {
+          if (!isValidBase64(decryptedDocument.content)) {
             throw new Error('Decrypted content is not valid Base64');
           }
 
