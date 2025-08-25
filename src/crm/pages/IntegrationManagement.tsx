@@ -1197,7 +1197,7 @@ export default function IntegrationManagement() {
 
     // Show sync in progress
     const originalSyncFreq = integration.syncFrequency;
-    setIntegrations(prev => prev.map(i =>
+    updateAndPersistIntegrations(prev => prev.map(i =>
       i.id === id ? { ...i, syncFrequency: "Syncing..." as Integration['syncFrequency'] } : i
     ));
 
