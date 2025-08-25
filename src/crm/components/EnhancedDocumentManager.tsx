@@ -304,7 +304,28 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       );
       
       // Create download link
-      const blob = new Blob([result.content], { type: result.mimeType });
+      // The result.content is Base64 encoded, need to decode it first
+      let byteArray: Uint8Array;
+
+      try {
+        const byteCharacters = atob(result.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      } catch (base64Error) {
+        console.error('Base64 decoding failed in document download:', base64Error);
+        // Try binary fallback
+        const binaryString = result.content;
+        const byteNumbers = new Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      }
+
+      const blob = new Blob([byteArray], { type: result.mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
