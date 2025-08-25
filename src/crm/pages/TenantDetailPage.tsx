@@ -845,6 +845,17 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
             handlePreviewDocument(doc);
             return;
           }
+        } else if (errorMessage.includes('Base64') || errorMessage.includes('atob') || errorMessage.includes('decoded')) {
+          // Base64 decoding issue
+          alert(
+            `Document preview failed due to encoding issues.\n\n` +
+            `This may be caused by:\n` +
+            `• Document was encrypted with a different system version\n` +
+            `• File corruption during storage\n` +
+            `• Incompatible encoding format\n\n` +
+            `Try downloading the document instead, or re-upload if the issue persists.\n\n` +
+            `Technical error: ${errorMessage}`
+          );
         } else {
           alert(`Failed to preview document: ${errorMessage}\n\nYou may not have permission to access this file.`);
         }
