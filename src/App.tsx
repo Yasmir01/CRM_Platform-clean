@@ -205,6 +205,11 @@ function AppRoutes() {
             <Communications />
           </React.Suspense>
         } />
+        <Route path="suggestions" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Suggestions />
+          </React.Suspense>
+        } />
         <Route path="news" element={
           <React.Suspense fallback={<PageLoader />}>
             <NewsBoard />
