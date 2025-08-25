@@ -66,6 +66,8 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import { useCrmData } from "../contexts/CrmDataContext";
+import AssignmentSelector from "../components/AssignmentSelector";
 
 interface TaskUpdate {
   id: string;
