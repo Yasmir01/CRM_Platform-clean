@@ -47,6 +47,7 @@ const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
 const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
+const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 
 // Loading component
 function PageLoader() {
@@ -96,6 +97,7 @@ function NotFound() {
         <Button variant="outlined" href="/crm/tenants">Tenants</Button>
         <Button variant="outlined" href="/crm/contacts">Contacts</Button>
         <Button variant="outlined" href="/crm/sales">Sales</Button>
+        <Button variant="outlined" href="/crm/suggestions">Suggestions</Button>
         <Button variant="outlined" href="/crm/email-management">Email Management</Button>
         <Button variant="outlined" href="/crm/settings">Settings</Button>
         <Button variant="outlined" href="/crm/tasks">Tasks</Button>
@@ -202,6 +204,11 @@ function AppRoutes() {
         <Route path="communications" element={
           <React.Suspense fallback={<PageLoader />}>
             <Communications />
+          </React.Suspense>
+        } />
+        <Route path="suggestions" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Suggestions />
           </React.Suspense>
         } />
         <Route path="news" element={

@@ -41,6 +41,7 @@ import IntegrationManagement from '../pages/IntegrationManagement';
 import EmailManagement from './EmailManagement';
 import CustomerService from '../pages/CustomerService';
 import BackupManagement from './BackupManagement';
+import Suggestions from '../pages/Suggestions';
 import { Alert, Box, Button } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 
@@ -69,6 +70,7 @@ export default function ModeAwareContent() {
             <Communications />
           </Box>
         } />
+        <Route path="suggestions" element={<Suggestions />} />
         <Route path="news" element={<NewsBoard />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={
@@ -115,6 +117,7 @@ export default function ModeAwareContent() {
       <Route path="email-management" element={<EmailManagement />} />
       <Route path="backup" element={<BackupManagement />} />
       <Route path="communications" element={<Communications />} />
+      <Route path="suggestions" element={<Suggestions />} />
       <Route path="power-tools" element={<PowerTools />} />
       <Route path="ai-tools" element={<AITools />} />
       <Route path="news" element={<NewsBoard />} />

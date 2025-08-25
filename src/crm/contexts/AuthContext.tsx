@@ -7,6 +7,7 @@ export interface User {
   id: string;
   firstName: string;
   lastName: string;
+  name?: string; // Combined name for easy access
   email: string;
   phone?: string;
   role: UserRole;
@@ -211,6 +212,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // First time, save mock users to localStorage
       localStorage.setItem('users', JSON.stringify(mockUsers));
     }
+
+    // Ensure all users have name property
+    usersList = usersList.map(user => ({
+      ...user,
+      name: user.name || `${user.firstName} ${user.lastName}`
+    }));
+
     setUsers(usersList);
 
     // Load current user
@@ -285,6 +293,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const newUser: User = {
       ...userData,
       id: Date.now().toString(),
+      name: userData.name || `${userData.firstName} ${userData.lastName}`,
       createdAt: new Date().toISOString(),
       permissions: rolePermissions[userData.role] || [],
     };
@@ -296,17 +305,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateUser = (userId: string, userData: Partial<User>) => {
-    const updatedUsers = users.map(u =>
-      u.id === userId
-        ? { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions }
-        : u
-    );
+    const updatedUsers = users.map(u => {
+      if (u.id === userId) {
+        const updated = { ...u, ...userData, permissions: userData.role ? rolePermissions[userData.role] : u.permissions };
+        // Recompute name if firstName or lastName changed
+        if (userData.firstName || userData.lastName) {
+          updated.name = `${updated.firstName} ${updated.lastName}`;
+        }
+        return updated;
+      }
+      return u;
+    });
     setUsers(updatedUsers);
     localStorage.setItem('users', JSON.stringify(updatedUsers));
 
     // Update current user if it's the same user
     if (user && user.id === userId) {
       const updatedUser = { ...user, ...userData };
+      if (userData.firstName || userData.lastName) {
+        updatedUser.name = `${updatedUser.firstName} ${updatedUser.lastName}`;
+      }
       setUser(updatedUser);
       localStorage.setItem('currentUser', JSON.stringify(updatedUser));
     }

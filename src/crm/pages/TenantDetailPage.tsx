@@ -83,6 +83,7 @@ import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import FileDownloadRoundedIcon from "@mui/icons-material/FileDownloadRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import LockIcon from "@mui/icons-material/Lock";
 
 interface CallLog {
   id: string;
@@ -661,12 +662,39 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         );
 
         // Create a blob from the decrypted content
-        const byteCharacters = atob(decryptedDocument.content);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        let byteArray: Uint8Array;
+
+        try {
+          // Validate and decode Base64 content
+          if (!isValidBase64(decryptedDocument.content)) {
+            throw new Error('Decrypted content is not valid Base64');
+          }
+
+          const byteCharacters = atob(decryptedDocument.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        } catch (base64Error) {
+          console.error('Base64 decoding failed in download:', base64Error);
+          console.log('Content sample:', decryptedDocument.content.substring(0, 100) + '...');
+
+          // Try to handle as direct binary string (fallback)
+          try {
+            const binaryString = decryptedDocument.content;
+            const byteNumbers = new Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+            }
+            byteArray = new Uint8Array(byteNumbers);
+            console.log('Successfully handled download as binary string');
+          } catch (binaryError) {
+            console.error('Binary fallback failed in download:', binaryError);
+            throw new Error('Unable to process decrypted document content for download');
+          }
         }
-        const byteArray = new Uint8Array(byteNumbers);
+
         const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
 
         // Create download link
@@ -690,7 +718,16 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       }
     } catch (error) {
       console.error('Error downloading document:', error);
-      alert('Failed to download document. You may not have permission to access this file.');
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        alert(
+          `This document appears to be encrypted with an incompatible key and cannot be opened.\n\n` +
+          `This may be due to a system update. Please try refreshing the page or contact support if the issue persists.`
+        );
+      } else {
+        alert(`Failed to download document: ${errorMessage}\n\nYou may not have permission to access this file.`);
+      }
     }
   };
 
@@ -713,9 +750,121 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
-  const handlePreviewDocument = (doc: any) => {
-    setSelectedDocument(doc);
-    setDocumentViewModalOpen(true);
+  const handlePreviewDocument = async (doc: any) => {
+    if (doc.isEncrypted && doc.securityDocumentId) {
+      try {
+        // Decrypt the document for preview
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Convert decrypted content to blob URL for preview
+        let byteArray: Uint8Array;
+
+        try {
+          // Validate and decode Base64 content
+          if (!isValidBase64(decryptedDocument.content)) {
+            throw new Error('Decrypted content is not valid Base64');
+          }
+
+          const byteCharacters = atob(decryptedDocument.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        } catch (base64Error) {
+          console.error('Base64 decoding failed:', base64Error);
+          console.log('Document details:', {
+            contentLength: decryptedDocument.content.length,
+            contentSample: decryptedDocument.content.substring(0, 100) + '...',
+            mimeType: decryptedDocument.mimeType,
+            filename: decryptedDocument.filename,
+            startsWithDataUrl: decryptedDocument.content.startsWith('data:'),
+            containsBase64Chars: /^[A-Za-z0-9+/]*={0,2}$/.test(decryptedDocument.content.substring(0, 100))
+          });
+
+          // Try to handle as direct binary string (fallback)
+          try {
+            const binaryString = decryptedDocument.content;
+            const byteNumbers = new Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+            }
+            byteArray = new Uint8Array(byteNumbers);
+            console.log('✅ Successfully handled as binary string');
+          } catch (binaryError) {
+            console.error('❌ Binary fallback failed:', binaryError);
+            throw new Error('Unable to process decrypted document content - both Base64 and binary handling failed');
+          }
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
+        const previewUrl = URL.createObjectURL(blob);
+
+        // Create preview-ready document object
+        const previewDocument = {
+          ...doc,
+          url: previewUrl,
+          type: decryptedDocument.mimeType,
+          name: decryptedDocument.filename,
+          isDecryptedForPreview: true
+        };
+
+        setSelectedDocument(previewDocument);
+        setDocumentViewModalOpen(true);
+      } catch (error) {
+        console.error('Error decrypting document for preview:', error);
+        const errorMessage = (error as Error).message;
+
+        if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+          // This is likely a document encrypted with an old/incompatible key
+          const shouldClearDocs = window.confirm(
+            `This document appears to be encrypted with an incompatible key and cannot be opened. This may be due to a system update.\n\n` +
+            `Would you like to clear all encrypted documents from storage? (You'll need to re-upload your documents)\n\n` +
+            `Click OK to clear documents, or Cancel to keep trying.`
+          );
+
+          if (shouldClearDocs) {
+            documentSecurityService.clearAllDocuments();
+            window.location.reload(); // Refresh to clear state
+          }
+        } else if (errorMessage.includes('integrity check failed') || errorMessage.includes('corrupted')) {
+          // Document integrity issue - likely encoding problem with existing documents
+          const shouldTryAgain = window.confirm(
+            `This document has an integrity check failure, which may be due to a system update changing how documents are encrypted.\n\n` +
+            `The document preview has been temporarily enabled despite this warning. ` +
+            `If you continue to have issues, you may need to re-upload this document.\n\n` +
+            `Click OK to try viewing anyway, or Cancel to abort.`
+          );
+
+          if (shouldTryAgain) {
+            // Try again - the integrity check is now disabled temporarily
+            handlePreviewDocument(doc);
+            return;
+          }
+        } else if (errorMessage.includes('Base64') || errorMessage.includes('atob') || errorMessage.includes('decoded')) {
+          // Base64 decoding issue
+          alert(
+            `Document preview failed due to encoding issues.\n\n` +
+            `This may be caused by:\n` +
+            `• Document was encrypted with a different system version\n` +
+            `• File corruption during storage\n` +
+            `• Incompatible encoding format\n\n` +
+            `Try downloading the document instead, or re-upload if the issue persists.\n\n` +
+            `Technical error: ${errorMessage}`
+          );
+        } else {
+          alert(`Failed to preview document: ${errorMessage}\n\nYou may not have permission to access this file.`);
+        }
+      }
+    } else {
+      // Handle non-encrypted documents (legacy)
+      setSelectedDocument(doc);
+      setDocumentViewModalOpen(true);
+    }
   };
 
   const handleDeleteDocument = (doc: any) => {
@@ -729,7 +878,11 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     try {
       // If it's an encrypted document, delete from security service first
       if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
-        await documentSecurityService.deleteDocument(documentToDelete.securityDocumentId);
+        await documentSecurityService.deleteDocument(
+          documentToDelete.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
       }
 
       // Remove from CRM context
@@ -765,7 +918,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
     } catch (error) {
       console.error('Error deleting document:', error);
-      alert('Failed to delete document. Please try again.');
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('Access denied')) {
+        alert(
+          `Failed to delete document: Access denied.\n\n` +
+          `This may happen if:\n` +
+          `• You don't have permission to delete this document\n` +
+          `• The document was uploaded by another user\n` +
+          `• There's a permissions configuration issue\n\n` +
+          `Please contact an administrator if you believe this is an error.`
+        );
+      } else if (errorMessage.includes('Document not found')) {
+        alert(
+          `Failed to delete document: Document not found.\n\n` +
+          `The document may have already been deleted or there may be a sync issue.`
+        );
+      } else {
+        alert(`Failed to delete document: ${errorMessage}\n\nPlease try again or contact support if the issue persists.`);
+      }
     } finally {
       setDeleteDocumentDialogOpen(false);
       setDocumentToDelete(null);
@@ -855,6 +1026,22 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const isValidBase64 = (str: string): boolean => {
+    try {
+      // Basic validation: check if string matches Base64 pattern
+      const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+      if (!base64Pattern.test(str) || str.length === 0) {
+        return false;
+      }
+
+      // Try to decode to verify it's actually valid Base64
+      atob(str);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const getCallIcon = (type: CallLog["type"]) => {
@@ -1427,7 +1614,7 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                               `Activity • ${(log as any).type}`
                             }
                             {log.logType === 'workorder' &&
-                              `Work Order • ${(log as any).status} • ${(log as any).title}`
+                              `Work Order • ${(log as any).status} ��� ${(log as any).title}`
                             }
                             {log.logType === 'application' &&
                               `${(log as any).type}`
@@ -2382,7 +2569,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       {/* Document Preview Dialog */}
       <Dialog
         open={documentViewModalOpen}
-        onClose={() => setDocumentViewModalOpen(false)}
+        onClose={() => {
+          // Clean up blob URL if it was created for encrypted document preview
+          if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+            URL.revokeObjectURL(selectedDocument.url);
+          }
+          setSelectedDocument(null);
+          setDocumentViewModalOpen(false);
+        }}
         maxWidth="lg"
         fullWidth
         PaperProps={{
@@ -2396,6 +2590,15 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">
               Document Preview - {selectedDocument?.name || 'Unknown Document'}
+              {selectedDocument?.isEncrypted && (
+                <Chip
+                  icon={<LockIcon />}
+                  label="Encrypted"
+                  size="small"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                />
+              )}
             </Typography>
             <Stack direction="row" spacing={1}>
               <Button
@@ -2410,7 +2613,14 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
               >
                 Download
               </Button>
-              <IconButton onClick={() => setDocumentViewModalOpen(false)}>
+              <IconButton onClick={() => {
+                // Clean up blob URL if it was created for encrypted document preview
+                if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+                  URL.revokeObjectURL(selectedDocument.url);
+                }
+                setSelectedDocument(null);
+                setDocumentViewModalOpen(false);
+              }}>
                 <DeleteRoundedIcon />
               </IconButton>
             </Stack>
@@ -2450,8 +2660,9 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       const documentInfo = selectedDocument ? {
                         name: selectedDocument.name || 'Unknown document',
                         type: selectedDocument.type || 'Unknown type',
-                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
+                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') || selectedDocument.url.startsWith('blob:') ? 'blob/data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
                         size: selectedDocument.size || 0,
+                        isEncrypted: selectedDocument.isEncrypted || false,
                         hasDocument: !!selectedDocument
                       } : { error: 'selectedDocument is null or undefined' };
 
@@ -2464,11 +2675,12 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       if (parentBox) {
                         const documentName = selectedDocument?.name || 'Unknown Document';
                         const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
+                        const isEncrypted = selectedDocument?.isEncrypted ? ' (Encrypted)' : '';
                         parentBox.innerHTML = `
                           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
-                            <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+                            <div style="font-size: 48px; margin-bottom: 12px;">${selectedDocument?.isEncrypted ? '🔒' : '📄'}</div>
                             <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
-                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document${isEncrypted}</div>
                             <div style="font-size: 14px; color: #666;">Preview not available</div>
                             <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
                           </div>
@@ -2507,7 +2719,13 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                         startIcon={<VisibilityRoundedIcon />}
                         onClick={() => {
                           if (selectedDocument.url) {
-                            window.open(selectedDocument.url, '_blank');
+                            if (selectedDocument.isDecryptedForPreview) {
+                              // For encrypted documents, the URL is a blob URL that can be opened directly
+                              window.open(selectedDocument.url, '_blank');
+                            } else {
+                              // For non-encrypted documents, use the original URL
+                              window.open(selectedDocument.url, '_blank');
+                            }
                           }
                         }}
                       >
@@ -2520,11 +2738,25 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                 // Other Document Types
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
                   <Stack spacing={2} alignItems="center" textAlign="center">
-                    <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
-                    <Typography variant="h6">Document Preview</Typography>
+                    {selectedDocument?.isEncrypted ? (
+                      <LockIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+                    ) : (
+                      <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
+                    )}
+                    <Typography variant="h6">
+                      {selectedDocument?.isEncrypted ? 'Encrypted Document' : 'Document Preview'}
+                    </Typography>
                     <Typography variant="body1" color="text.secondary">
                       {selectedDocument.name}
                     </Typography>
+                    {selectedDocument?.isEncrypted && (
+                      <Chip
+                        icon={<LockIcon />}
+                        label="Securely Encrypted"
+                        color="primary"
+                        size="small"
+                      />
+                    )}
                     <Typography variant="body2" color="text.secondary">
                       Preview not available for this file type
                     </Typography>

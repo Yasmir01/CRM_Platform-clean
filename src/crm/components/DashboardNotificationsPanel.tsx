@@ -42,6 +42,9 @@ import {
   MarkEmailRead as MarkEmailReadIcon,
   ClearAll as ClearAllIcon,
   Edit as EditIcon,
+  Lightbulb as LightbulbIcon,
+  ThumbUp as ThumbUpIcon,
+  Flag as FlagIcon,
 } from '@mui/icons-material';
 import { useNotifications, Notification } from '../contexts/NotificationsContext';
 
@@ -68,6 +71,9 @@ const NotificationIcon: React.FC<{ type: Notification['type']; priority: Notific
       case 'lease': return <HomeIcon sx={{ color: getColor() }} />;
       case 'reminder': return <ScheduleIcon sx={{ color: getColor() }} />;
       case 'warning': return <WarningIcon sx={{ color: getColor() }} />;
+      case 'suggestion': return <LightbulbIcon sx={{ color: getColor() }} />;
+      case 'suggestion_vote': return <ThumbUpIcon sx={{ color: getColor() }} />;
+      case 'suggestion_status': return <FlagIcon sx={{ color: getColor() }} />;
       default: return <InfoIcon sx={{ color: getColor() }} />;
     }
   };

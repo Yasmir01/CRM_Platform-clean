@@ -248,14 +248,50 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       );
       
       // Create blob and download/view
-      const blob = new Blob([result.content], { type: result.mimeType });
+      // The result.content is Base64 encoded, need to decode it first
+      let byteArray: Uint8Array;
+
+      try {
+        const byteCharacters = atob(result.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      } catch (base64Error) {
+        console.error('Base64 decoding failed in document view:', base64Error);
+        // Try binary fallback
+        const binaryString = result.content;
+        const byteNumbers = new Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      }
+
+      const blob = new Blob([byteArray], { type: result.mimeType });
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
       
       loadDocuments(); // Refresh to update access logs
     } catch (error) {
       console.error('Failed to view document:', error);
-      alert('Failed to view document: ' + (error as Error).message);
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        const shouldClearDocs = window.confirm(
+          `This document appears to be encrypted with an incompatible key and cannot be opened. This may be due to a system update.\n\n` +
+          `Would you like to clear all encrypted documents from storage? (You'll need to re-upload your documents)\n\n` +
+          `Click OK to clear documents, or Cancel to keep trying.`
+        );
+
+        if (shouldClearDocs) {
+          documentSecurityService.clearAllDocuments();
+          window.location.reload();
+        }
+      } else {
+        alert('Failed to view document: ' + errorMessage);
+      }
     }
   };
 
@@ -268,7 +304,28 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       );
       
       // Create download link
-      const blob = new Blob([result.content], { type: result.mimeType });
+      // The result.content is Base64 encoded, need to decode it first
+      let byteArray: Uint8Array;
+
+      try {
+        const byteCharacters = atob(result.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      } catch (base64Error) {
+        console.error('Base64 decoding failed in document download:', base64Error);
+        // Try binary fallback
+        const binaryString = result.content;
+        const byteNumbers = new Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+        }
+        byteArray = new Uint8Array(byteNumbers);
+      }
+
+      const blob = new Blob([byteArray], { type: result.mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -279,7 +336,16 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       loadDocuments();
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Download failed: ' + (error as Error).message);
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        alert(
+          `This document appears to be encrypted with an incompatible key and cannot be opened.\n\n` +
+          `This may be due to a system update. Please try refreshing the page or contact support if the issue persists.`
+        );
+      } else {
+        alert('Download failed: ' + errorMessage);
+      }
     }
   };
 

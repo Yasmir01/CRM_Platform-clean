@@ -17,20 +17,22 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import { CrmLogo } from "./CrmAppNavbar";
 
 const mainListItems = [
-  { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/" },
-  { text: "Customers", icon: <PeopleRoundedIcon />, path: "/customers" },
-  { text: "Deals", icon: <BusinessCenterRoundedIcon />, path: "/deals" },
-  { text: "Contacts", icon: <ContactsRoundedIcon />, path: "/contacts" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/tasks" },
-  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/reports" },
+  { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
+  { text: "Customers", icon: <PeopleRoundedIcon />, path: "/crm/tenants" },
+  { text: "Deals", icon: <BusinessCenterRoundedIcon />, path: "/crm/sales" },
+  { text: "Contacts", icon: <ContactsRoundedIcon />, path: "/crm/contacts" },
+  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions" },
+  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks" },
+  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
 ];
 
 const secondaryListItems = [
-  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/settings" },
-  { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/help" },
+  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
+  { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
 interface CrmSideMenuMobileProps {
