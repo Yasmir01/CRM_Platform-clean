@@ -2440,6 +2440,15 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">
               Document Preview - {selectedDocument?.name || 'Unknown Document'}
+              {selectedDocument?.isEncrypted && (
+                <Chip
+                  icon={<LockIcon />}
+                  label="Encrypted"
+                  size="small"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                />
+              )}
             </Typography>
             <Stack direction="row" spacing={1}>
               <Button
