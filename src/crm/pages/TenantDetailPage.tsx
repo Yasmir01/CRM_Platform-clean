@@ -2501,8 +2501,9 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       const documentInfo = selectedDocument ? {
                         name: selectedDocument.name || 'Unknown document',
                         type: selectedDocument.type || 'Unknown type',
-                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') ? 'data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
+                        url: selectedDocument.url ? (selectedDocument.url.startsWith('data:') || selectedDocument.url.startsWith('blob:') ? 'blob/data URL' : selectedDocument.url.substring(0, 100) + '...') : 'No URL',
                         size: selectedDocument.size || 0,
+                        isEncrypted: selectedDocument.isEncrypted || false,
                         hasDocument: !!selectedDocument
                       } : { error: 'selectedDocument is null or undefined' };
 
@@ -2515,11 +2516,12 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
                       if (parentBox) {
                         const documentName = selectedDocument?.name || 'Unknown Document';
                         const fileExtension = documentName.split('.').pop()?.toUpperCase() || 'FILE';
+                        const isEncrypted = selectedDocument?.isEncrypted ? ' (Encrypted)' : '';
                         parentBox.innerHTML = `
                           <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; color: #666; text-align: center; background: #f9f9f9; border-radius: 8px;">
-                            <div style="font-size: 48px; margin-bottom: 12px;">📄</div>
+                            <div style="font-size: 48px; margin-bottom: 12px;">${selectedDocument?.isEncrypted ? '🔒' : '📄'}</div>
                             <div style="font-weight: bold; margin-bottom: 8px; color: #333;">${documentName}</div>
-                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document</div>
+                            <div style="font-size: 12px; color: #999; margin-bottom: 4px;">${fileExtension} Document${isEncrypted}</div>
                             <div style="font-size: 14px; color: #666;">Preview not available</div>
                             <div style="font-size: 12px; color: #999; margin-top: 4px;">Use download button to view the file</div>
                           </div>
