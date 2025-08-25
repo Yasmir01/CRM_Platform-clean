@@ -121,57 +121,89 @@ export class FileStorageService {
    */
   private static generateImagePreview(file: File, maxWidth = 150, maxHeight = 150): Promise<string> {
     return new Promise((resolve, reject) => {
+      // Set timeout to prevent hanging
+      const timeoutId = setTimeout(() => {
+        console.warn('Image preview generation timed out for:', file.name);
+        reject(new Error(`Preview generation timed out for ${file.name}`));
+      }, 10000); // 10 second timeout
+
       const img = new Image();
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
       if (!ctx) {
+        clearTimeout(timeoutId);
         reject(new Error('Canvas context not available'));
         return;
       }
 
       img.onload = () => {
         try {
+          clearTimeout(timeoutId);
           console.log('Image loaded for preview:', file.name, 'Original dimensions:', img.width, 'x', img.height);
+
+          // Validate image dimensions
+          if (img.width === 0 || img.height === 0) {
+            throw new Error('Invalid image dimensions');
+          }
 
           // Calculate dimensions maintaining aspect ratio
           const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
-          const newWidth = img.width * ratio;
-          const newHeight = img.height * ratio;
+          const newWidth = Math.max(1, Math.floor(img.width * ratio));
+          const newHeight = Math.max(1, Math.floor(img.height * ratio));
 
           canvas.width = newWidth;
           canvas.height = newHeight;
 
-          // Draw and convert to data URL (use PNG for images with transparency)
+          // Clear canvas and draw image
+          ctx.clearRect(0, 0, newWidth, newHeight);
           ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+          // Convert to data URL with error handling
           const format = file.type === 'image/png' || file.type === 'image/webp' ? 'image/png' : 'image/jpeg';
           const quality = format === 'image/jpeg' ? 0.8 : undefined;
           const previewDataUrl = canvas.toDataURL(format, quality);
 
-          console.log('Generated preview:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
+          // Validate generated data URL
+          if (!previewDataUrl || previewDataUrl === 'data:,') {
+            throw new Error('Failed to generate valid data URL');
+          }
+
+          console.log('Successfully generated preview for:', file.name, 'New dimensions:', newWidth, 'x', newHeight, 'Preview length:', previewDataUrl.length);
 
           // Clean up
           URL.revokeObjectURL(img.src);
           resolve(previewDataUrl);
         } catch (error) {
-          console.error('Error generating preview:', error);
+          clearTimeout(timeoutId);
+          console.error('Error generating preview for', file.name, ':', error);
           URL.revokeObjectURL(img.src);
           reject(error);
         }
       };
 
       img.onerror = (error) => {
+        clearTimeout(timeoutId);
         console.error('Image failed to load for preview:', file.name, error);
         URL.revokeObjectURL(img.src);
-        reject(new Error(`Failed to load image: ${file.name}`));
+        reject(new Error(`Failed to load image: ${file.name} - ${error}`));
       };
 
       try {
+        // Validate file before creating object URL
+        if (!file || file.size === 0) {
+          throw new Error('Invalid file object');
+        }
+
         const objectUrl = URL.createObjectURL(file);
         console.log('Created object URL for preview:', file.name, objectUrl);
+
+        // Set crossOrigin to handle CORS issues
+        img.crossOrigin = 'anonymous';
         img.src = objectUrl;
       } catch (error) {
-        console.error('Failed to create object URL:', error);
+        clearTimeout(timeoutId);
+        console.error('Failed to create object URL for', file.name, ':', error);
         reject(error);
       }
     });
