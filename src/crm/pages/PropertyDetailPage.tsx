@@ -3335,8 +3335,8 @@ export default function PropertyDetailPage({
                           }}
                         />
                       </Box>
-                    ) : selectedDocument.type.toLowerCase().includes('pdf') ||
-                           selectedDocument.name.toLowerCase().endsWith('.pdf') ? (
+                    ) : (selectedDocument?.type?.toLowerCase().includes('pdf') ||
+                           selectedDocument?.name?.toLowerCase().endsWith('.pdf')) ? (
                       // PDF Preview
                       <Box sx={{ textAlign: 'center' }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
