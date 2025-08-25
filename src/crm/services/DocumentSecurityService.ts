@@ -134,8 +134,30 @@ export class DocumentSecurityService {
 
       if (test.success) {
         console.log('✅ Encryption integrity test passed');
+        console.log('📊 Test details:', {
+          originalLength: test.details.originalLength,
+          decryptedLength: test.details.decryptedLength,
+          dataMatch: test.details.dataMatch,
+          checksumMatch: test.details.checksumMatch
+        });
       } else {
         console.warn('⚠️ Encryption integrity test failed:', test.details);
+
+        // Additional debugging for Base64 issues
+        if (test.details.originalSample && test.details.decryptedSample) {
+          console.log('🔍 Base64 comparison:');
+          console.log('  Original:', test.details.originalSample);
+          console.log('  Decrypted:', test.details.decryptedSample);
+          console.log('  Are equal:', test.details.originalSample === test.details.decryptedSample);
+
+          // Test if decrypted content is valid Base64
+          try {
+            atob(test.details.decryptedSample);
+            console.log('  ✅ Decrypted content is valid Base64');
+          } catch {
+            console.log('  ❌ Decrypted content is NOT valid Base64');
+          }
+        }
       }
     } catch (error) {
       console.error('❌ Encryption test error:', error);
