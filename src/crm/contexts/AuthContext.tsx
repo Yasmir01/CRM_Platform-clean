@@ -293,6 +293,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const newUser: User = {
       ...userData,
       id: Date.now().toString(),
+      name: userData.name || `${userData.firstName} ${userData.lastName}`,
       createdAt: new Date().toISOString(),
       permissions: rolePermissions[userData.role] || [],
     };
