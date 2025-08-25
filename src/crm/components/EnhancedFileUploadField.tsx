@@ -243,7 +243,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
           </Stack>
 
           {/* Expanded Preview for Images */}
-          {isExpanded && FileStorageService.isImageFile(file.type) && (
+          {isExpanded && FileStorageService.isImageFile(file.type, file.name) && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
                 Image Preview
@@ -425,7 +425,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
         <DialogContent>
           {previewFile && (
             <Box sx={{ textAlign: 'center', py: 2 }}>
-              {FileStorageService.isImageFile(previewFile.type) ? (
+              {FileStorageService.isImageFile(previewFile.type, previewFile.name) ? (
                 <Box
                   component="img"
                   src={previewFile.dataUrl}
