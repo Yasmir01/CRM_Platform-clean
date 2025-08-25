@@ -51,7 +51,7 @@ class SuggestionService {
   // Create new suggestion
   createSuggestion(formData: SuggestionFormData, submittedBy: string, submittedByName: string): Suggestion {
     const suggestion: Suggestion = {
-      id: uuidv4(),
+      id: generateId(),
       title: formData.title,
       description: formData.description,
       category: formData.category,
@@ -129,7 +129,7 @@ class SuggestionService {
 
       // Add new vote
       const vote: SuggestionVote = {
-        id: uuidv4(),
+        id: generateId(),
         suggestionId,
         userId,
         userDisplayName,
@@ -320,7 +320,7 @@ class SuggestionService {
   createNotification(type: SuggestionNotification['type'], suggestionId: string, suggestionTitle: string, message: string, targetUserId?: string): void {
     const notifications = this.getNotifications();
     const notification: SuggestionNotification = {
-      id: uuidv4(),
+      id: generateId(),
       type,
       suggestionId,
       suggestionTitle,
