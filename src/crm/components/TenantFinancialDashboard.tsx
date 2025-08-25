@@ -60,7 +60,8 @@ import {
   Assessment as ReportIcon,
   History as HistoryIcon,
   MonetizationOn as MoneyIcon,
-  Error as ErrorIcon
+  Error as ErrorIcon,
+  NoteAdd as NoteAddIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import dayjs from 'dayjs';
