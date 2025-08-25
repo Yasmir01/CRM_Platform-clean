@@ -63,11 +63,18 @@ export class FileStorageService {
         if (this.isImageFile(file.type)) {
           try {
             preview = await this.generateImagePreview(file);
-            console.log('Generated preview for', file.name, ':', preview.substring(0, 50) + '...');
+            console.log('Generated preview for', file.name, ':', preview ? preview.substring(0, 50) + '...' : 'null');
           } catch (previewError) {
             console.warn('Failed to generate preview for', file.name, ', using dataUrl as fallback:', previewError);
-            preview = dataUrl; // Use the full dataUrl as fallback
+            // For images, always ensure we have a preview - use the full dataUrl as fallback
+            preview = dataUrl;
           }
+        }
+
+        // Ensure images always have a preview
+        if (this.isImageFile(file.type) && !preview) {
+          console.warn('No preview available for image', file.name, ', using dataUrl as preview');
+          preview = dataUrl;
         }
 
         const storedFile: StoredFile = {
