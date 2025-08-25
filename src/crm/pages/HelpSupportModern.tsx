@@ -89,14 +89,14 @@ export default function HelpSupportModern() {
 
   // Filter articles based on search and filters
   const filteredArticles = React.useMemo(() => {
-    return sampleArticles.filter(article => {
+    return helpArticles.filter(article => {
       // Filter out super admin only articles for non-super admins
       if (article.superAdminOnly && !isUserSuperAdmin) {
         return false;
       }
 
       // Search filter
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         article.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
         article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
