@@ -734,12 +734,40 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
         );
 
         // Convert decrypted content to blob URL for preview
-        const byteCharacters = atob(decryptedDocument.content);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        let byteArray: Uint8Array;
+
+        try {
+          // Validate and decode Base64 content
+          if (!this.isValidBase64(decryptedDocument.content)) {
+            throw new Error('Decrypted content is not valid Base64');
+          }
+
+          const byteCharacters = atob(decryptedDocument.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        } catch (base64Error) {
+          console.error('Base64 decoding failed:', base64Error);
+          console.log('Content sample:', decryptedDocument.content.substring(0, 100) + '...');
+          console.log('Content length:', decryptedDocument.content.length);
+
+          // Try to handle as direct binary string (fallback)
+          try {
+            const binaryString = decryptedDocument.content;
+            const byteNumbers = new Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              byteNumbers[i] = binaryString.charCodeAt(i) & 0xff;
+            }
+            byteArray = new Uint8Array(byteNumbers);
+            console.log('Successfully handled as binary string');
+          } catch (binaryError) {
+            console.error('Binary fallback failed:', binaryError);
+            throw new Error('Unable to process decrypted document content');
+          }
         }
-        const byteArray = new Uint8Array(byteNumbers);
+
         const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
         const previewUrl = URL.createObjectURL(blob);
 
