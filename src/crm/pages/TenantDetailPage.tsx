@@ -713,9 +713,46 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
-  const handlePreviewDocument = (doc: any) => {
-    setSelectedDocument(doc);
-    setDocumentViewModalOpen(true);
+  const handlePreviewDocument = async (doc: any) => {
+    if (doc.isEncrypted && doc.securityDocumentId) {
+      try {
+        // Decrypt the document for preview
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Convert decrypted content to blob URL for preview
+        const byteCharacters = atob(decryptedDocument.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
+        const previewUrl = URL.createObjectURL(blob);
+
+        // Create preview-ready document object
+        const previewDocument = {
+          ...doc,
+          url: previewUrl,
+          type: decryptedDocument.mimeType,
+          name: decryptedDocument.filename,
+          isDecryptedForPreview: true
+        };
+
+        setSelectedDocument(previewDocument);
+        setDocumentViewModalOpen(true);
+      } catch (error) {
+        console.error('Error decrypting document for preview:', error);
+        alert('Failed to preview document. You may not have permission to access this file.');
+      }
+    } else {
+      // Handle non-encrypted documents (legacy)
+      setSelectedDocument(doc);
+      setDocumentViewModalOpen(true);
+    }
   };
 
   const handleDeleteDocument = (doc: any) => {
