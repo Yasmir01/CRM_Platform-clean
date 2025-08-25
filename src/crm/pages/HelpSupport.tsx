@@ -1,57 +1,5 @@
-import * as React from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Stack,
-  TextField,
-  InputAdornment,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Chip,
-  Button,
-  Avatar,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Paper,
-  Divider,
-  IconButton,
-  Tab,
-  Tabs,
-} from "@mui/material";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
-import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
-import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
-import VideoLibraryRoundedIcon from "@mui/icons-material/VideoLibraryRounded";
-import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
-import ChatRoundedIcon from "@mui/icons-material/ChatRounded";
-import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
-import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
-import LaunchRoundedIcon from "@mui/icons-material/LaunchRounded";
-import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import BookmarkRoundedIcon from "@mui/icons-material/BookmarkRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
-import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
-import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
-import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import { useRoleManagement } from "../hooks/useRoleManagement";
+// Re-export the modern help page
+export { default } from "./HelpSupportModern";
 
 interface FAQItem {
   id: string;
