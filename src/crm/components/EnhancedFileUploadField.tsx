@@ -151,7 +151,7 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                 bgcolor: 'grey.50'
               }}
             >
-              {FileStorageService.isImageFile(file.type) ? (
+              {FileStorageService.isImageFile(file.type, file.name) ? (
                 (file.preview || file.dataUrl) ? (
                   <Box
                     component="img"
