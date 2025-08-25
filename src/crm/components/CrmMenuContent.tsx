@@ -63,6 +63,7 @@ const mainListItems = [
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions" },
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
   { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
