@@ -629,16 +629,17 @@ export class DocumentSecurityService {
   }
 
   private encryptContent(content: string, key: string): string {
-    return CryptoJS.AES.encrypt(content, key).toString();
+    // Encrypt the Base64 string as Latin1 to avoid UTF-8 encoding issues
+    const contentWords = CryptoJS.enc.Latin1.parse(content);
+    return CryptoJS.AES.encrypt(contentWords, key).toString();
   }
 
   private decryptContent(encryptedContent: string, key: string): string {
     try {
       const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
 
-      // Since we encrypt Base64-encoded file content, we need to decrypt back to Base64
-      // NOT UTF-8, as UTF-8 conversion fails for binary data encoded as Base64
-      const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+      // Decrypt back to Latin1 since we encrypted as Latin1
+      const decrypted = bytes.toString(CryptoJS.enc.Latin1);
 
       // Check if decryption resulted in empty string (common with wrong key)
       if (!decrypted) {
