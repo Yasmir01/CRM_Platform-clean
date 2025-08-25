@@ -321,6 +321,7 @@ export default function Tasks() {
       dueTime: "",
       category: "Other",
       customCategory: "",
+      customCategoryDescription: "",
       property: "",
       propertyId: "",
       client: "",
