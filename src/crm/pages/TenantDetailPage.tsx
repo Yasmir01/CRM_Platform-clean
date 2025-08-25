@@ -691,7 +691,16 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
       }
     } catch (error) {
       console.error('Error downloading document:', error);
-      alert('Failed to download document. You may not have permission to access this file.');
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        alert(
+          `This document appears to be encrypted with an incompatible key and cannot be opened.\n\n` +
+          `This may be due to a system update. Please try refreshing the page or contact support if the issue persists.`
+        );
+      } else {
+        alert(`Failed to download document: ${errorMessage}\n\nYou may not have permission to access this file.`);
+      }
     }
   };
 
