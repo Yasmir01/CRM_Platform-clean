@@ -3389,10 +3389,10 @@ export default function PropertyDetailPage({
                       <Box sx={{ textAlign: 'center', py: 3 }}>
                         <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
                         <Typography variant="body1" gutterBottom>
-                          {selectedDocument.name}
+                          {selectedDocument?.name || 'Unknown Document'}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          This document type ({selectedDocument.type || 'unknown'}) doesn't support inline preview.
+                          This document type ({selectedDocument?.type || 'unknown'}) doesn't support inline preview.
                           Use the buttons below to open or download the file.
                         </Typography>
                       </Box>
