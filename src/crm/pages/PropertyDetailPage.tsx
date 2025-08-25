@@ -1288,7 +1288,8 @@ export default function PropertyDetailPage({
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
                         '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                        color: 'inherit'
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
                       }}
                     >
                       Work Orders
@@ -1303,7 +1304,8 @@ export default function PropertyDetailPage({
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
                         '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                        color: 'inherit'
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
                       }}
                     >
                       Application
@@ -1318,7 +1320,8 @@ export default function PropertyDetailPage({
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
                         '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                        color: 'inherit'
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
                       }}
                     >
                       Tenant Management
@@ -1333,7 +1336,8 @@ export default function PropertyDetailPage({
                       sx={{
                         bgcolor: 'rgba(255,255,255,0.2)',
                         '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                        color: 'inherit'
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
                       }}
                     >
                       Maintenance
@@ -1361,10 +1365,11 @@ export default function PropertyDetailPage({
                           startIcon={<BuildRoundedIcon />}
                           onClick={() => setWorkOrderDialogOpen(true)}
                           sx={{
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                            color: 'inherit'
-                          }}
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
+                      }}
                         >
                           Work Orders
                         </Button>
@@ -1377,10 +1382,11 @@ export default function PropertyDetailPage({
                         startIcon={<DescriptionRoundedIcon />}
                         onClick={() => setApplicationDialogOpen(true)}
                         sx={{
-                          bgcolor: 'rgba(255,255,255,0.2)',
-                          '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                          color: 'inherit'
-                        }}
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
+                      }}
                       >
                         Application
                       </Button>
@@ -1393,10 +1399,11 @@ export default function PropertyDetailPage({
                           startIcon={<PersonRoundedIcon />}
                           onClick={() => setTenantDialogOpen(true)}
                           sx={{
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                            color: 'inherit'
-                          }}
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
+                      }}
                         >
                           Tenant Management
                         </Button>
@@ -1410,10 +1417,11 @@ export default function PropertyDetailPage({
                           startIcon={<CalendarTodayRoundedIcon />}
                           onClick={onOpenMaintenance}
                           sx={{
-                            bgcolor: 'rgba(255,255,255,0.2)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
-                            color: 'inherit'
-                          }}
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+                        color: isModal ? 'primary.contrastText' : 'secondary.contrastText',
+                        fontWeight: 600
+                      }}
                         >
                           Maintenance
                         </Button>
