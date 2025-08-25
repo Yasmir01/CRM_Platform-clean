@@ -245,7 +245,12 @@ export class FileStorageService {
    * Check if file is an image
    */
   static isImageFile(type: string): boolean {
-    return this.SUPPORTED_TYPES.images.includes(type);
+    // Handle common variations and missing MIME types
+    if (!type) return false;
+
+    const normalizedType = type.toLowerCase();
+    return this.SUPPORTED_TYPES.images.includes(normalizedType) ||
+           normalizedType.startsWith('image/');
   }
 
   /**
