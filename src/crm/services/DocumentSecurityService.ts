@@ -792,6 +792,45 @@ export class DocumentSecurityService {
   getDocumentCount(): number {
     return this.documents.size;
   }
+
+  /**
+   * Test encryption/decryption round-trip integrity
+   */
+  testEncryptionIntegrity(testData: string): { success: boolean; details: any } {
+    try {
+      const key = this.generateEncryptionKey();
+
+      // Test round-trip
+      const encrypted = this.encryptContent(testData, key);
+      const decrypted = this.decryptContent(encrypted, key);
+
+      // Calculate checksums
+      const originalChecksum = this.calculateChecksum(testData);
+      const decryptedChecksum = this.calculateChecksum(decrypted);
+
+      const isIntact = testData === decrypted;
+      const checksumMatch = originalChecksum === decryptedChecksum;
+
+      return {
+        success: isIntact && checksumMatch,
+        details: {
+          originalLength: testData.length,
+          decryptedLength: decrypted.length,
+          dataMatch: isIntact,
+          checksumMatch,
+          originalChecksum,
+          decryptedChecksum,
+          originalSample: testData.substring(0, 50),
+          decryptedSample: decrypted.substring(0, 50)
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        details: { error: (error as Error).message }
+      };
+    }
+  }
 }
 
 export const documentSecurityService = new DocumentSecurityService();
