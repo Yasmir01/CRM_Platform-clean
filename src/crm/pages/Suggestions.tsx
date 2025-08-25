@@ -37,7 +37,7 @@ export default function Suggestions() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Check if user has admin privileges (you can adjust this logic based on your auth system)
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || isManagementMode;
+  const isAdmin = user?.role === 'Admin' || user?.role === 'Super Admin' || isManagementMode;
 
   // Calculate tab indices dynamically
   const tabs = [];
