@@ -834,7 +834,7 @@ export default function IntegrationManagement() {
       );
 
     } catch (error) {
-      setIntegrations(prev => prev.map(i =>
+      updateAndPersistIntegrations(prev => prev.map(i =>
         i.id === id ? {
           ...i,
           status: "Error" as Integration['status'],
