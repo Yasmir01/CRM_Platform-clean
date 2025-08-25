@@ -251,8 +251,42 @@ const EnhancedFileUploadField: React.FC<EnhancedFileUploadFieldProps> = ({
                     bgcolor: 'white'
                   }}
                   onError={(e) => {
-                    console.error('Image failed to load:', file);
-                    (e.target as HTMLImageElement).style.display = 'none';
+                    console.error('Image preview failed to load for:', file.name, {
+                      hasDataUrl: !!file.dataUrl,
+                      hasPreview: !!file.preview,
+                      dataUrlLength: file.dataUrl?.length || 0,
+                      previewLength: file.preview?.length || 0,
+                      fileType: file.type
+                    });
+
+                    // Hide the broken image and show fallback
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+
+                    // Show fallback message in parent container
+                    const parentContainer = target.parentElement;
+                    if (parentContainer) {
+                      const fallbackDiv = document.createElement('div');
+                      fallbackDiv.style.cssText = `
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        height: 200px;
+                        background-color: #f5f5f5;
+                        border: 2px dashed #ddd;
+                        border-radius: 8px;
+                        color: #666;
+                        text-align: center;
+                        padding: 20px;
+                      `;
+                      fallbackDiv.innerHTML = `
+                        <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                        <div style="font-weight: bold; margin-bottom: 4px;">${file.name}</div>
+                        <div style="font-size: 12px;">Preview not available</div>
+                      `;
+                      parentContainer.appendChild(fallbackDiv);
+                    }
                   }}
                 />
               ) : (
