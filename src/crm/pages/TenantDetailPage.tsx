@@ -642,53 +642,74 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
     }
   };
 
-  const handleUploadDocument = () => {
+  const handleUploadDocument = async () => {
     if (newDocument.file) {
-      // Create a blob URL for the file to simulate file storage
-      const fileUrl = URL.createObjectURL(newDocument.file);
-
-      // Save document to CrmDataContext
-      const savedDocument = addDocument({
-        name: newDocument.file.name,
-        type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
-        size: newDocument.file.size,
-        url: fileUrl,
-        category: newDocument.category,
-        tenantId: tenant.id,
-        uploadedBy: "Current User",
-        description: newDocument.description,
-        tags: []
-      });
-
-      // Track activity for the upload
-      activityTracker.trackActivity({
-        userId: 'current-user',
-        userDisplayName: 'Current User',
-        action: 'create',
-        entityType: 'tenant',
-        entityId: tenant.id,
-        entityName: `${tenant.firstName} ${tenant.lastName}`,
-        changes: [
+      try {
+        // Encrypt and store document using DocumentSecurityService
+        const secureDocument = await documentSecurityService.encryptDocument(
+          newDocument.file,
           {
-            field: 'documents',
-            oldValue: '',
-            newValue: newDocument.file.name,
-            displayName: 'Document Uploaded'
+            category: newDocument.category,
+            entityId: tenant.id,
+            entityType: 'tenant',
+            tags: ['tenant-document'],
+            description: newDocument.description,
+            isConfidential: newDocument.category === 'Legal' || newDocument.category === 'Lease',
+            userId: currentUser.id,
+            userEmail: currentUser.email
           }
-        ],
-        description: `Document uploaded: ${newDocument.file.name}`,
-        metadata: {
-          documentCategory: newDocument.category,
-          fileSize: newDocument.file.size,
-          fileType: newDocument.file.type
-        },
-        severity: 'low',
-        category: 'documentation'
-      });
+        );
 
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
-      setNewDocument({ file: null, category: "Other", description: "" });
-      setOpenDocumentDialog(false);
+        // Save document reference to CrmDataContext for UI display
+        const savedDocument = addDocument({
+          name: secureDocument.name,
+          type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+          size: secureDocument.size,
+          url: secureDocument.id, // Store document ID instead of URL
+          category: newDocument.category,
+          tenantId: tenant.id,
+          uploadedBy: currentUser.displayName,
+          description: newDocument.description,
+          tags: secureDocument.metadata.tags,
+          isEncrypted: true, // Flag to indicate this is an encrypted document
+          securityDocumentId: secureDocument.id // Link to the encrypted document
+        });
+
+        // Track activity for the upload
+        activityTracker.trackActivity({
+          userId: currentUser.id,
+          userDisplayName: currentUser.displayName,
+          action: 'create',
+          entityType: 'tenant',
+          entityId: tenant.id,
+          entityName: `${tenant.firstName} ${tenant.lastName}`,
+          changes: [
+            {
+              field: 'documents',
+              oldValue: '',
+              newValue: newDocument.file.name,
+              displayName: 'Encrypted Document Uploaded'
+            }
+          ],
+          description: `Encrypted document uploaded: ${newDocument.file.name}`,
+          metadata: {
+            documentCategory: newDocument.category,
+            fileSize: newDocument.file.size,
+            fileType: newDocument.file.type,
+            isEncrypted: true,
+            securityDocumentId: secureDocument.id
+          },
+          severity: 'low',
+          category: 'documentation'
+        });
+
+        alert(`Document "${newDocument.file.name}" uploaded and encrypted successfully!`);
+        setNewDocument({ file: null, category: "Other", description: "" });
+        setOpenDocumentDialog(false);
+      } catch (error) {
+        console.error('Error uploading encrypted document:', error);
+        alert('Failed to upload document. Please try again.');
+      }
     }
   };
 
