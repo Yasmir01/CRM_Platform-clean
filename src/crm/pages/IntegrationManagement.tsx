@@ -622,7 +622,7 @@ export default function IntegrationManagement() {
   const errorIntegrations = integrations.filter(i => i.status === "Error").length;
 
   const handleToggleIntegration = (id: string) => {
-    setIntegrations(prev => prev.map(integration =>
+    updateAndPersistIntegrations(prev => prev.map(integration =>
       integration.id === id
         ? { ...integration, isActive: !integration.isActive }
         : integration
