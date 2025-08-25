@@ -2183,6 +2183,124 @@ export default function TenantDetailPage({ tenantId, onBack }: TenantDetailProps
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Document History Dialog */}
+      <Dialog
+        open={documentHistoryDialogOpen}
+        onClose={() => setDocumentHistoryDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DescriptionRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document History & Security</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocumentForHistory?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>Version History</Typography>
+            {documentVersions.length > 0 ? (
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Version</TableCell>
+                      <TableCell>Created</TableCell>
+                      <TableCell>Created By</TableCell>
+                      <TableCell>Size</TableCell>
+                      <TableCell>Change Notes</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {documentVersions.map((version) => (
+                      <TableRow key={version.id}>
+                        <TableCell>{version.version}</TableCell>
+                        <TableCell>{new Date(version.createdAt).toLocaleString()}</TableCell>
+                        <TableCell>{version.createdBy}</TableCell>
+                        <TableCell>{formatFileSize(version.size)}</TableCell>
+                        <TableCell>{version.changeNotes || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={version.isActive ? 'Current' : 'Archived'}
+                            color={version.isActive ? 'success' : 'default'}
+                            size="small"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No version history available.
+              </Typography>
+            )}
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Typography variant="h6" gutterBottom>Access Log</Typography>
+            {documentAccessLog.length > 0 ? (
+              <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 300 }}>
+                <Table size="small" stickyHeader>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Action</TableCell>
+                      <TableCell>User</TableCell>
+                      <TableCell>Timestamp</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Details</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {documentAccessLog.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell>
+                          <Chip
+                            label={log.action.replace('_', ' ')}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>{log.userEmail}</TableCell>
+                        <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={log.success ? 'Success' : 'Failed'}
+                            color={log.success ? 'success' : 'error'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {log.errorMessage || 'N/A'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No access log entries available.
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentHistoryDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
