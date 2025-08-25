@@ -121,6 +121,25 @@ export class DocumentSecurityService {
   constructor() {
     this.encryptionConfig = this.loadEncryptionConfig();
     this.loadSecureDocuments();
+
+    // Test encryption integrity on startup
+    this.runEncryptionTest();
+  }
+
+  private runEncryptionTest(): void {
+    try {
+      // Test with Base64-like content (what we typically encrypt)
+      const testBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const test = this.testEncryptionIntegrity(testBase64);
+
+      if (test.success) {
+        console.log('✅ Encryption integrity test passed');
+      } else {
+        console.warn('⚠️ Encryption integrity test failed:', test.details);
+      }
+    } catch (error) {
+      console.error('❌ Encryption test error:', error);
+    }
   }
 
   /**
