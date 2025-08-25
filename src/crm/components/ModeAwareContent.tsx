@@ -41,6 +41,7 @@ import IntegrationManagement from '../pages/IntegrationManagement';
 import EmailManagement from './EmailManagement';
 import CustomerService from '../pages/CustomerService';
 import BackupManagement from './BackupManagement';
+import Suggestions from '../pages/Suggestions';
 import { Alert, Box, Button } from '@mui/material';
 import BusinessRoundedIcon from '@mui/icons-material/BusinessRounded';
 
