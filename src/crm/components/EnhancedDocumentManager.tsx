@@ -255,7 +255,22 @@ export default function EnhancedDocumentManager({ entityId, entityType }: Enhanc
       loadDocuments(); // Refresh to update access logs
     } catch (error) {
       console.error('Failed to view document:', error);
-      alert('Failed to view document: ' + (error as Error).message);
+      const errorMessage = (error as Error).message;
+
+      if (errorMessage.includes('key mismatch') || errorMessage.includes('Malformed UTF-8') || errorMessage.includes('wrong key')) {
+        const shouldClearDocs = window.confirm(
+          `This document appears to be encrypted with an incompatible key and cannot be opened. This may be due to a system update.\n\n` +
+          `Would you like to clear all encrypted documents from storage? (You'll need to re-upload your documents)\n\n` +
+          `Click OK to clear documents, or Cancel to keep trying.`
+        );
+
+        if (shouldClearDocs) {
+          documentSecurityService.clearAllDocuments();
+          window.location.reload();
+        }
+      } else {
+        alert('Failed to view document: ' + errorMessage);
+      }
     }
   };
 
