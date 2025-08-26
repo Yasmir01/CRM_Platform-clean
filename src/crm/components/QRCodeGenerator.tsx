@@ -1383,7 +1383,11 @@ export default function QRCodeGenerator({
               color="primary"
               size="large"
               onClick={handleCreateQR}
-              disabled={!formData.title || !formData.content}
+              disabled={
+                !formData.title ||
+                !formData.content ||
+                (formData.isPasswordProtected && !formData.password)
+              }
               startIcon={<QrCodeRoundedIcon />}
               sx={{
                 minWidth: 180,
