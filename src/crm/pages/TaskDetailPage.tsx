@@ -401,18 +401,18 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     }
   };
 
-  const handleDownloadDocument = (document: Document) => {
+  const handleDownloadDocument = (doc: Document) => {
     // In a real app, this would trigger a download from the server
     const link = document.createElement('a');
-    link.href = document.url;
-    link.download = document.name;
+    link.href = doc.url;
+    link.download = doc.name;
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     // Show success message
-    alert(`Downloading ${document.name}...`);
+    alert(`Downloading ${doc.name}...`);
   };
 
   const handleViewDocument = (document: Document) => {
