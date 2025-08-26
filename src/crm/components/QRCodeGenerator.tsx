@@ -1075,8 +1075,8 @@ export default function QRCodeGenerator({
               {logoPreview && (
                 <Box
                   sx={{
-                    width: customization.logoSize * 2,
-                    height: customization.logoSize * 2,
+                    width: (customization.logoSize / 100) * 200,
+                    height: (customization.logoSize / 100) * 200,
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
