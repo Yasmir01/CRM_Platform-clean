@@ -487,30 +487,46 @@ export default function QRCodeGenerator({
   };
 
   const generateQRCode = (): string => {
-    // Ensure URLs have proper protocol
+    // Return the generated URL if available, otherwise fallback
+    if (generatedQRUrl) {
+      return generatedQRUrl;
+    }
+
+    // Fallback to external API
     let content = formData.content;
     if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
       content = "https://" + content.replace(/^(www\.)?/, "www.");
     }
 
-    // Use QR Server API with better parameter mapping
-    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
-    const params = new URLSearchParams({
-      size: "300x300",
-      data: content,
-      color: customization.foregroundColor.replace("#", ""),
-      bgcolor: customization.backgroundColor.replace("#", ""),
-      margin: "0",
-      format: "png",
-      ecc: "M"
-    });
+    return generateFallbackQRCode(content, customization);
+  };
 
-    // Add visual style indicators in the URL for user feedback
-    // Note: Visual styles are applied via CSS overlay in the preview
-    const styleId = `${customization.style}-${customization.pattern}-${customization.eyeStyle}`;
-    params.append("v", styleId); // Version/style identifier
+  const generateCanvasQR = async (): Promise<string> => {
+    if (!formData.content) return "";
 
-    return `${baseUrl}?${params.toString()}`;
+    setIsGeneratingQR(true);
+    try {
+      let content = formData.content;
+      if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
+        content = "https://" + content.replace(/^(www\.)?/, "www.");
+      }
+
+      const qrUrl = await generateCanvasQRCode(content, customization, 300);
+      setGeneratedQRUrl(qrUrl);
+      return qrUrl;
+    } catch (error) {
+      console.error('Failed to generate canvas QR code:', error);
+      // Fallback to external API
+      let content = formData.content;
+      if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
+        content = "https://" + content.replace(/^(www\.)?/, "www.");
+      }
+      const fallbackUrl = generateFallbackQRCode(content, customization);
+      setGeneratedQRUrl(fallbackUrl);
+      return fallbackUrl;
+    } finally {
+      setIsGeneratingQR(false);
+    }
   };
 
   const handleCreateQR = () => {
