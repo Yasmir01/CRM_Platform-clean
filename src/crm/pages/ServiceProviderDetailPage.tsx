@@ -339,11 +339,80 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+  const handleUploadDocument = async () => {
+    if (!newDocument.file || !currentUser) return;
+
+    setIsUploading(true);
+
+    try {
+      // Encrypt and store document using DocumentSecurityService
+      const secureDocument = await documentSecurityService.encryptDocument(
+        newDocument.file,
+        {
+          category: newDocument.category,
+          entityId: providerId,
+          entityType: 'serviceProvider',
+          tags: ['service-provider-document'],
+          description: newDocument.description,
+          isConfidential: newDocument.category === 'License' || newDocument.category === 'Insurance' || newDocument.category === 'Contract',
+          userId: currentUser.id,
+          userEmail: currentUser.email
+        }
+      );
+
+      // Save document reference to CrmDataContext for UI display
+      const savedDocument = addDocument({
+        name: secureDocument.name,
+        type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        size: secureDocument.size,
+        url: secureDocument.id, // Store document ID instead of URL
+        category: newDocument.category,
+        serviceProviderId: providerId,
+        entityId: providerId,
+        uploadedBy: currentUser.displayName || currentUser.email,
+        description: newDocument.description,
+        tags: secureDocument.metadata.tags,
+        isEncrypted: true, // Flag to indicate this is an encrypted document
+        securityDocumentId: secureDocument.id // Link to the encrypted document
+      });
+
+      // Track activity for the upload
+      activityTracker.trackActivity({
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName || currentUser.email,
+        action: 'create',
+        entityType: 'serviceProvider',
+        entityId: providerId,
+        entityName: provider.companyName,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        description: `Document uploaded: ${newDocument.file.name}`,
+        metadata: {
+          category: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type,
+          isEncrypted: true
+        }
+      });
+
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+      // Show success message
+      alert(`Document "${secureDocument.name}" uploaded and encrypted successfully!`);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
 
