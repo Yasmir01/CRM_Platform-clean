@@ -240,7 +240,12 @@ const generateRealTasks = (crmData: any): Task[] => {
   return tasks;
 };
 
-export default function Tasks() {
+interface TasksProps {
+  propertyId?: string;
+  tenantId?: string;
+}
+
+export default function Tasks({ propertyId, tenantId }: TasksProps = {}) {
   const navigate = useNavigate();
   const { state } = useCrmData();
   const { properties, tenants } = state;
