@@ -25,6 +25,7 @@ interface TwoStepAssignmentSelectorProps {
   fullWidth?: boolean;
   propertyId?: string; // For context-aware tenant filtering
   tenantId?: string; // For context-aware tenant pre-selection
+  excludeCategories?: AssignmentCategory[]; // Categories to exclude from selection
 }
 
 type AssignmentCategory = "tenant" | "manager" | "serviceProvider" | "";
@@ -36,6 +37,7 @@ export default function TwoStepAssignmentSelector({
   fullWidth = true,
   propertyId,
   tenantId,
+  excludeCategories = [],
 }: TwoStepAssignmentSelectorProps) {
   const { state } = useCrmData();
   const { propertyManagers, tenants, contacts } = state;
@@ -190,24 +192,30 @@ export default function TwoStepAssignmentSelector({
               }
             }}
           >
-            <MenuItem value="tenant">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <TenantIcon sx={{ fontSize: 20, color: "success.main" }} />
-                <Typography>Tenant</Typography>
-              </Stack>
-            </MenuItem>
-            <MenuItem value="manager">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <PersonIcon sx={{ fontSize: 20, color: "primary.main" }} />
-                <Typography>Property Manager</Typography>
-              </Stack>
-            </MenuItem>
-            <MenuItem value="serviceProvider">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <BusinessIcon sx={{ fontSize: 20, color: "warning.main" }} />
-                <Typography>Service Provider</Typography>
-              </Stack>
-            </MenuItem>
+            {!excludeCategories.includes("tenant") && (
+              <MenuItem value="tenant">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <TenantIcon sx={{ fontSize: 20, color: "success.main" }} />
+                  <Typography>Tenant</Typography>
+                </Stack>
+              </MenuItem>
+            )}
+            {!excludeCategories.includes("manager") && (
+              <MenuItem value="manager">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <PersonIcon sx={{ fontSize: 20, color: "primary.main" }} />
+                  <Typography>Property Manager</Typography>
+                </Stack>
+              </MenuItem>
+            )}
+            {!excludeCategories.includes("serviceProvider") && (
+              <MenuItem value="serviceProvider">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <BusinessIcon sx={{ fontSize: 20, color: "warning.main" }} />
+                  <Typography>Service Provider</Typography>
+                </Stack>
+              </MenuItem>
+            )}
           </Select>
         </FormControl>
       </Grid>
