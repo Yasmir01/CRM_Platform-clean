@@ -155,12 +155,10 @@ export default function TwoStepAssignmentSelector({
     }
   };
 
-  const getSelectedPersonInfo = () => {
+  const selectedPersonInfo = React.useMemo(() => {
     const people = getPeopleForCategory();
     return people.find(person => person.id === selectedPerson);
-  };
-
-  const selectedPersonInfo = getSelectedPersonInfo();
+  }, [getPeopleForCategory, selectedPerson]);
 
   return (
     <Grid container spacing={2}>
