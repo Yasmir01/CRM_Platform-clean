@@ -165,12 +165,12 @@ export default function TwoStepAssignmentSelector({
   return (
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
-      <Grid item xs={12} sm={6} md={6}>
+      <Grid item xs={12} sm={6}>
         <FormControl
           fullWidth={fullWidth}
           sx={{
             '& .MuiInputBase-root': {
-              minWidth: '180px',
+              minWidth: '200px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
