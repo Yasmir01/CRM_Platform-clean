@@ -38,64 +38,9 @@ import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
 import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 
-interface PropertyManager {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  properties: string[];
-  status: "Active" | "Inactive" | "On Leave";
-  hireDate: string;
-  experience: number; // years
-  certifications: string[];
-  profilePicture?: string;
-}
-
-const mockManagers: PropertyManager[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@company.com",
-    phone: "(555) 111-2222",
-    properties: ["Sunset Apartments", "Ocean View Villa"],
-    status: "Active",
-    hireDate: "2022-01-15",
-    experience: 5,
-    certifications: ["CPM", "RPA"],
-    profilePicture: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
-  },
-  {
-    id: "2",
-    firstName: "Emily",
-    lastName: "Davis",
-    email: "emily.davis@company.com",
-    phone: "(555) 333-4444",
-    properties: ["Downtown Lofts"],
-    status: "Active",
-    hireDate: "2023-03-20",
-    experience: 3,
-    certifications: ["ARM"],
-    profilePicture: "https://images.unsplash.com/photo-1494790108755-2616b612c94c?w=150",
-  },
-  {
-    id: "3",
-    firstName: "Mike",
-    lastName: "Wilson",
-    email: "mike.wilson@company.com",
-    phone: "(555) 555-6666",
-    properties: ["Business Center", "Retail Plaza"],
-    status: "On Leave",
-    hireDate: "2021-08-10",
-    experience: 7,
-    certifications: ["CPM", "RPA", "CCIM"],
-    profilePicture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
-  },
-];
-
 export default function PropertyManagers() {
-  const [managers, setManagers] = React.useState<PropertyManager[]>(mockManagers);
+  const { state, addPropertyManager, updatePropertyManager } = useCrmData();
+  const { propertyManagers: managers } = state;
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedManager, setSelectedManager] = React.useState<PropertyManager | null>(null);
