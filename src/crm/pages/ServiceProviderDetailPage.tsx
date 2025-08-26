@@ -160,7 +160,18 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
   const [openWorkOrderDialog, setOpenWorkOrderDialog] = React.useState(false);
 
-  const { refreshActivities } = useActivityTracking();
+  // Document management state
+  const [previewDocument, setPreviewDocument] = React.useState<any>(null);
+  const [openPreviewDialog, setOpenPreviewDialog] = React.useState(false);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  // Context hooks
+  const { state, addDocument, deleteDocument: deleteDocumentFromContext } = useCrmData();
+  const { user: currentUser } = useAuth();
+  const { refreshActivities, trackActivity: activityTracker } = useActivityTracking();
+  const { canDeleteDocuments } = useRoleManagement();
 
   // Mock service provider data
   const provider = {
