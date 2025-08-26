@@ -445,9 +445,66 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     alert(`Downloading ${doc.name}...`);
   };
 
-  const handleViewDocument = (document: Document) => {
-    setSelectedDocument(document);
-    setOpenDocumentPreview(true);
+  const handleViewDocument = async (doc: Document) => {
+    // Mock current user for now
+    const currentUser = { id: "user1", email: "user@example.com" };
+
+    if (doc.isEncrypted && doc.securityDocumentId) {
+      try {
+        // Decrypt the document for preview
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Convert decrypted content to blob URL for preview
+        let byteArray: Uint8Array;
+
+        try {
+          // Validate and decode Base64 content
+          if (!isValidBase64(decryptedDocument.content)) {
+            throw new Error('Decrypted content is not valid Base64');
+          }
+
+          const byteCharacters = atob(decryptedDocument.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        } catch (base64Error) {
+          console.error('Base64 decoding failed:', base64Error);
+          // Fallback: treat as binary string
+          const byteNumbers = new Array(decryptedDocument.content.length);
+          for (let i = 0; i < decryptedDocument.content.length; i++) {
+            byteNumbers[i] = decryptedDocument.content.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
+        const url = URL.createObjectURL(blob);
+
+        const previewDocument: Document = {
+          ...doc,
+          url,
+          name: decryptedDocument.filename,
+          type: decryptedDocument.mimeType,
+          isDecryptedForPreview: true
+        };
+
+        setSelectedDocument(previewDocument);
+        setOpenDocumentPreview(true);
+      } catch (error) {
+        console.error('Failed to decrypt document for preview:', error);
+        alert('Failed to decrypt document for preview. Please check your permissions or contact support.');
+      }
+    } else {
+      // Non-encrypted document
+      setSelectedDocument(doc);
+      setOpenDocumentPreview(true);
+    }
   };
 
   const handleViewDocumentHistory = (document: Document) => {
