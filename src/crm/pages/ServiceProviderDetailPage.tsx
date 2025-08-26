@@ -1069,7 +1069,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
                         )}
                       </Stack>
                     }
-                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.uploadDate).toLocaleDateString()}`}
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.uploadDate || Date.now()).toLocaleDateString()}`}
                   />
                   <ListItemSecondaryAction>
                     <Stack direction="row" spacing={1}>
