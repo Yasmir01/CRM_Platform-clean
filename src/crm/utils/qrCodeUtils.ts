@@ -45,7 +45,7 @@ export const generateCanvasQRCode = async (
         // Clear canvas
         ctx.clearRect(0, 0, size, size);
 
-        if (customization.gradientEnabled && customization.gradientColors.length >= 2) {
+        if (customization.gradientEnabled && customization.gradientColors && customization.gradientColors.length >= 2) {
           // Create gradient background
           const gradient = ctx.createLinearGradient(0, 0, size, size);
           gradient.addColorStop(0, customization.gradientColors[0] || customization.foregroundColor);
