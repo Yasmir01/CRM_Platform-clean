@@ -66,6 +66,9 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { useCrmData } from "../contexts/CrmDataContext";
 import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 
