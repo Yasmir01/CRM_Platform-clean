@@ -164,12 +164,31 @@ export default function TwoStepAssignmentSelector({
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
       <Grid item xs={12} sm={5} md={4}>
-        <FormControl fullWidth={fullWidth}>
+        <FormControl
+          fullWidth={fullWidth}
+          sx={{
+            '& .MuiInputBase-root': {
+              minHeight: '56px',
+              fontSize: '1rem'
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '1rem',
+              fontWeight: 500
+            }
+          }}
+        >
           <InputLabel>Assignment Type</InputLabel>
           <Select
             value={selectedCategory}
             label="Assignment Type"
             onChange={(e) => handleCategoryChange(e.target.value as AssignmentCategory)}
+            sx={{
+              minHeight: '56px',
+              '& .MuiSelect-select': {
+                padding: '16.5px 14px',
+                fontSize: '1rem'
+              }
+            }}
           >
             <MenuItem value="tenant">
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -195,7 +214,20 @@ export default function TwoStepAssignmentSelector({
 
       {/* Step 2: Person Selection */}
       <Grid item xs={12} sm={7} md={8}>
-        <FormControl fullWidth={fullWidth} disabled={!selectedCategory}>
+        <FormControl
+          fullWidth={fullWidth}
+          disabled={!selectedCategory}
+          sx={{
+            '& .MuiInputBase-root': {
+              minHeight: '56px',
+              fontSize: '1rem'
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '1rem',
+              fontWeight: 500
+            }
+          }}
+        >
           <InputLabel>
             {selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
           </InputLabel>
@@ -203,6 +235,13 @@ export default function TwoStepAssignmentSelector({
             value={selectedPerson}
             label={selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
             onChange={(e) => handlePersonChange(e.target.value)}
+            sx={{
+              minHeight: '56px',
+              '& .MuiSelect-select': {
+                padding: '16.5px 14px',
+                fontSize: '1rem'
+              }
+            }}
             renderValue={(selected) => {
               if (!selected || !selectedPersonInfo) {
                 return "";
