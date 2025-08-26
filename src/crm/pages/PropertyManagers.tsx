@@ -52,9 +52,7 @@ export default function PropertyManagers() {
     lastName: "",
     email: "",
     phone: "",
-    hireDate: "",
-    experience: 0,
-    certifications: "",
+    specialties: "",
   });
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
