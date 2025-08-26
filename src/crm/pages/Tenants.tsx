@@ -647,6 +647,31 @@ export default function Tenants() {
                 />
               </Grid>
             </Grid>
+
+            {/* Account Number Display */}
+            {selectedTenant && (
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Account Number"
+                    fullWidth
+                    value={selectedTenant.accountNumber || 'Will be generated on save'}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    sx={{
+                      minHeight: '80px',
+                      '& .MuiInputBase-root': {
+                        minHeight: '56px',
+                        backgroundColor: 'grey.50'
+                      }
+                    }}
+                    helperText="Account number is automatically generated"
+                  />
+                </Grid>
+              </Grid>
+            )}
+
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
