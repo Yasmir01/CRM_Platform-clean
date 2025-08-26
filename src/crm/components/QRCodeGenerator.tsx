@@ -1,4 +1,5 @@
 import * as React from "react";
+import { generateCanvasQRCode, generateFallbackQRCode } from '../utils/qrCodeUtils';
 import {
   Box,
   Typography,
