@@ -74,9 +74,7 @@ export default function PropertyManagers() {
       lastName: "",
       email: "",
       phone: "",
-      hireDate: "",
-      experience: 0,
-      certifications: "",
+      specialties: "",
     });
     setOpenDialog(true);
   };
