@@ -247,7 +247,7 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
+  const [documents, setDocuments] = React.useState<Document[]>([
     {
       id: "1",
       name: "Monthly Inspection Checklist.pdf",
@@ -362,6 +362,18 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
 
   const handleUploadDocument = () => {
     if (newDocument.file) {
+      const uploadedDocument: Document = {
+        id: Date.now().toString(),
+        name: newDocument.file.name,
+        type: newDocument.file.type || "Unknown",
+        size: newDocument.file.size,
+        uploadDate: new Date().toISOString(),
+        uploadedBy: "Current User",
+        category: newDocument.category,
+        url: URL.createObjectURL(newDocument.file), // Create object URL for local file
+      };
+
+      setDocuments(prev => [uploadedDocument, ...prev]);
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
