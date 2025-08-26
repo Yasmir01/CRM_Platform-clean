@@ -1037,22 +1037,61 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
             </Button>
           </Stack>
           <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
+            {documents.length === 0 ? (
+              <ListItem>
                 <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
+                  primary="No documents uploaded"
+                  secondary="Upload documents like licenses, insurance certificates, and contracts"
                 />
-                <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
               </ListItem>
-            ))}
+            ) : (
+              documents.map((doc) => (
+                <ListItem key={doc.id} divider>
+                  <ListItemIcon>
+                    <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography variant="subtitle2">{doc.name}</Typography>
+                        {doc.isEncrypted && (
+                          <Chip size="small" label="Encrypted" color="primary" variant="outlined" />
+                        )}
+                      </Stack>
+                    }
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.uploadDate).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDocumentPreview(doc)}
+                        title="Preview Document"
+                      >
+                        <VisibilityRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDocumentDownload(doc)}
+                        title="Download Document"
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                      {canDeleteDocuments && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteDocument(doc)}
+                          title="Delete Document"
+                          color="error"
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      )}
+                    </Stack>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
+            )}
           </List>
         </Paper>
       </TabPanel>
