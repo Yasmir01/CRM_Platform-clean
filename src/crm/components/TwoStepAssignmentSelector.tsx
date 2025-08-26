@@ -185,7 +185,7 @@ export default function TwoStepAssignmentSelector({
             label="Assignment Type"
             onChange={(e) => handleCategoryChange(e.target.value as AssignmentCategory)}
             sx={{
-              minWidth: '180px',
+              minWidth: '200px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'
