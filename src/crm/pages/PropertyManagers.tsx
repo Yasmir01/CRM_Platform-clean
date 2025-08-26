@@ -102,7 +102,7 @@ export default function PropertyManagers() {
   };
 
   const handleSaveManager = () => {
-    const specialtiesArray = formData.certifications.split(",").map(c => c.trim()).filter(c => c);
+    const specialtiesArray = formData.specialties.split(",").map(c => c.trim()).filter(c => c);
 
     if (selectedManager) {
       // Edit existing manager
@@ -130,6 +130,14 @@ export default function PropertyManagers() {
       addPropertyManager(newManagerData);
     }
     setOpenDialog(false);
+    // Reset form
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      specialties: "",
+    });
   };
 
   const handleDeleteManager = (id: string) => {
