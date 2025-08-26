@@ -84,14 +84,15 @@ export default function TwoStepAssignmentSelector({
     onChange(personValue);
   };
 
-  // Get people for the selected category
-  const getPeopleForCategory = () => {
+  // Get people for the selected category with memoization for better performance
+  const getPeopleForCategory = React.useCallback(() => {
     switch (selectedCategory) {
       case "tenant":
-        let filteredTenants = tenants || [];
+        if (!tenants) return [];
+        let filteredTenants = tenants;
         // If propertyId is provided, only show tenants from that property
         if (propertyId) {
-          filteredTenants = filteredTenants.filter(
+          filteredTenants = tenants.filter(
             (tenant: Tenant) => tenant.propertyId === propertyId
           );
         }
@@ -103,7 +104,8 @@ export default function TwoStepAssignmentSelector({
         }));
 
       case "manager":
-        return (propertyManagers || []).map((manager: PropertyManager) => ({
+        if (!propertyManagers) return [];
+        return propertyManagers.map((manager: PropertyManager) => ({
           id: `pm_${manager.id}`,
           name: `${manager.firstName} ${manager.lastName}`,
           email: manager.email,
@@ -111,9 +113,10 @@ export default function TwoStepAssignmentSelector({
         }));
 
       case "serviceProvider":
-        const serviceProviders = contacts?.filter(
+        if (!contacts) return [];
+        const serviceProviders = contacts.filter(
           (contact: Contact) => contact.type === "ServiceProvider"
-        ) || [];
+        );
         return serviceProviders.map((provider: Contact) => ({
           id: `sp_${provider.id}`,
           name: provider.company || `${provider.firstName} ${provider.lastName}`,
@@ -124,7 +127,7 @@ export default function TwoStepAssignmentSelector({
       default:
         return [];
     }
-  };
+  }, [selectedCategory, tenants, propertyManagers, contacts, propertyId]);
 
   const getCategoryIcon = (category: AssignmentCategory) => {
     switch (category) {
