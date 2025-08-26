@@ -440,11 +440,44 @@ export default function QRAnalyticsDashboard({
                 <Grid item xs={12} sm={6}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="body2" gutterBottom>QR Code</Typography>
-                    <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCode.content)}`}
-                      alt="QR Code"
-                      style={{ maxWidth: 150, height: 'auto' }}
-                    />
+                    <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCode.content)}`}
+                        alt="QR Code"
+                        style={{ maxWidth: 150, height: 'auto' }}
+                      />
+                      {qrCode.customization?.logoUrl && (
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            bgcolor: 'white',
+                            border: 1,
+                            borderColor: 'white',
+                            borderRadius: qrCode.customization.eyeStyle === 'circle' ? '50%' : qrCode.customization.eyeStyle === 'rounded' ? 1 : 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                            width: Math.min(30, (qrCode.customization.logoSize || 20) * 1.5),
+                            height: Math.min(30, (qrCode.customization.logoSize || 20) * 1.5)
+                          }}
+                        >
+                          <img
+                            src={qrCode.customization.logoUrl}
+                            alt="Logo"
+                            style={{
+                              maxWidth: '100%',
+                              maxHeight: '100%',
+                              objectFit: 'contain'
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 </Grid>
               </Grid>
