@@ -1604,6 +1604,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     deleteProperty,
     addPropertyManager,
     updatePropertyManager,
+    deletePropertyManager,
     addTenant,
     updateTenant,
     moveOutTenant,
