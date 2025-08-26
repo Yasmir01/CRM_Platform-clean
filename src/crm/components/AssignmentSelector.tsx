@@ -48,6 +48,17 @@ export default function AssignmentSelector({
 }: AssignmentSelectorProps) {
   const { propertyManagers, tenants, contacts } = useCrmData();
 
+  // Debug logging (can be removed in production)
+  React.useEffect(() => {
+    console.log("AssignmentSelector data:", {
+      propertyManagers: propertyManagers?.length || 0,
+      tenants: tenants?.length || 0,
+      contacts: contacts?.length || 0,
+      serviceProviders: contacts?.filter(c => c.type === "ServiceProvider").length || 0,
+      includeTypes,
+    });
+  }, [propertyManagers, tenants, contacts, includeTypes]);
+
   const assignmentOptions = React.useMemo(() => {
     const options: AssignmentOption[] = [];
 
