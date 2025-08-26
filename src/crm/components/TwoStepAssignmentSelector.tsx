@@ -38,6 +38,19 @@ export default function TwoStepAssignmentSelector({
   tenantId,
 }: TwoStepAssignmentSelectorProps) {
   const { propertyManagers, tenants, contacts } = useCrmData();
+
+  // Debug logging to check data availability
+  React.useEffect(() => {
+    console.log("TwoStepAssignmentSelector - Data Check:", {
+      propertyManagers: propertyManagers?.length || 0,
+      tenants: tenants?.length || 0,
+      contacts: contacts?.length || 0,
+      serviceProviders: contacts?.filter(c => c.type === "ServiceProvider")?.length || 0,
+      allContacts: contacts,
+      allTenants: tenants,
+      allManagers: propertyManagers
+    });
+  }, [propertyManagers, tenants, contacts]);
   
   // Parse the current value to determine category and person
   const [selectedCategory, setSelectedCategory] = React.useState<AssignmentCategory>("");
