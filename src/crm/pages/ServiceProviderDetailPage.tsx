@@ -263,28 +263,12 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Plumbing License.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2023-01-15T10:00:00Z",
-      uploadedBy: "David Wilson",
-      category: "License",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Liability Insurance Certificate.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "David Wilson",
-      category: "Insurance",
-      url: "#"
-    }
-  ]);
+  // Get real documents from CrmDataContext filtered for this service provider
+  const documents = state.documents.filter(doc =>
+    doc.serviceProviderId === providerId ||
+    doc.entityId === providerId ||
+    (doc.category === 'ServiceProvider' && doc.entityId === providerId)
+  );
 
   const [newNote, setNewNote] = React.useState({
     content: "",
