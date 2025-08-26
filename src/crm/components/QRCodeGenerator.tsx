@@ -441,6 +441,8 @@ export default function QRCodeGenerator({
   const [logoFile, setLogoFile] = React.useState<File | null>(null);
   const [logoPreview, setLogoPreview] = React.useState<string>("");
   const [selectedTemplate, setSelectedTemplate] = React.useState<QRTemplate | null>(null);
+  const [generatedQRUrl, setGeneratedQRUrl] = React.useState<string>("");
+  const [isGeneratingQR, setIsGeneratingQR] = React.useState<boolean>(false);
 
   // Load selected QR data for editing
   React.useEffect(() => {
