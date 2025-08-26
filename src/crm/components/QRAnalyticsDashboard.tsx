@@ -462,8 +462,8 @@ export default function QRAnalyticsDashboard({
                             justifyContent: 'center',
                             overflow: 'hidden',
                             boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-                            width: Math.min(30, (qrCode.customization.logoSize || 20) * 1.5),
-                            height: Math.min(30, (qrCode.customization.logoSize || 20) * 1.5)
+                            width: ((qrCode.customization.logoSize || 20) / 100) * 150,
+                            height: ((qrCode.customization.logoSize || 20) / 100) * 150
                           }}
                         >
                           <img
