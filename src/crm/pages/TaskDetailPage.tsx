@@ -148,6 +148,30 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+// Helper functions
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const isValidBase64 = (str: string): boolean => {
+  try {
+    // Basic validation: check if string matches Base64 pattern
+    const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Pattern.test(str) || str.length === 0) {
+      return false;
+    }
+    // Try decoding to validate
+    const decoded = atob(str);
+    return decoded.length > 0;
+  } catch (e) {
+    return false;
+  }
+};
+
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
   const { state } = useCrmData();
   const { properties, tenants } = state;
