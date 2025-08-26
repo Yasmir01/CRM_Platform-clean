@@ -1586,8 +1586,8 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                           <Avatar
                             src={qr.customization.logoUrl}
                             sx={{
-                              width: qr.customization.logoSize,
-                              height: qr.customization.logoSize,
+                              width: (qr.customization.logoSize / 100) * 60,
+                              height: (qr.customization.logoSize / 100) * 60,
                               position: 'absolute',
                               top: '50%',
                               left: '50%',
