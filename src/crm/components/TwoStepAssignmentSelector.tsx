@@ -221,13 +221,13 @@ export default function TwoStepAssignmentSelector({
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={12} sm={6} md={6}>
+      <Grid item xs={12} sm={6}>
         <FormControl
           fullWidth={fullWidth}
           disabled={!selectedCategory}
           sx={{
             '& .MuiInputBase-root': {
-              minWidth: '220px',
+              minWidth: '200px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
