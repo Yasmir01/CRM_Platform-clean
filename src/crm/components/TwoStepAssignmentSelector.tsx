@@ -163,7 +163,7 @@ export default function TwoStepAssignmentSelector({
   return (
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
-      <Grid item xs={6}>
+      <Grid item xs={12} sm={5} md={4}>
         <FormControl fullWidth={fullWidth}>
           <InputLabel>Assignment Type</InputLabel>
           <Select
@@ -194,7 +194,7 @@ export default function TwoStepAssignmentSelector({
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={6}>
+      <Grid item xs={12} sm={7} md={8}>
         <FormControl fullWidth={fullWidth} disabled={!selectedCategory}>
           <InputLabel>
             {selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
