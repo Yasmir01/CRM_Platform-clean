@@ -147,6 +147,10 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
   const [openSubTaskDialog, setOpenSubTaskDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [openDocumentPreview, setOpenDocumentPreview] = React.useState(false);
+  const [openDocumentHistory, setOpenDocumentHistory] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<Document | null>(null);
+  const [documentToDelete, setDocumentToDelete] = React.useState<Document | null>(null);
 
   // Mock task data
   const task = {
