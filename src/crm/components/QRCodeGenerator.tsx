@@ -536,7 +536,9 @@ export default function QRCodeGenerator({
     }
   };
 
-  const handleCreateQR = () => {
+  const handleCreateQR = async () => {
+    // Ensure QR code is generated with latest content
+    const qrUrl = await generateCanvasQR();
     const newQR: QRCodeData = {
       id: selectedQR?.id || Date.now().toString(),
       title: formData.title,
