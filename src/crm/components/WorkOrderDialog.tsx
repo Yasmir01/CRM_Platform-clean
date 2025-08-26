@@ -21,6 +21,7 @@ import {
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useMode } from "../contexts/ModeContext";
+import TwoStepAssignmentSelector from "./TwoStepAssignmentSelector";
 
 interface WorkOrder {
   id: string;
@@ -432,13 +433,13 @@ export default function WorkOrderDialog({
                   }}
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Assigned To"
-                  fullWidth
+              <Grid item xs={12}>
+                <TwoStepAssignmentSelector
                   value={formData.assignedTo}
-                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  placeholder="Service provider or team member"
+                  onChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                  label="Assigned To"
+                  propertyId={formData.propertyId}
+                  excludeCategories={["tenant"]}
                 />
               </Grid>
             </Grid>
