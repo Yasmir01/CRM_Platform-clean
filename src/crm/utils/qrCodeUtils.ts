@@ -4,12 +4,15 @@ export interface QRCodeCustomization {
   foregroundColor: string;
   backgroundColor: string;
   gradientEnabled: boolean;
-  gradientColors: string[];
+  gradientColors?: string[];
   logoUrl?: string;
   logoSize: number;
-  style: string;
-  pattern: string;
-  eyeStyle: string;
+  style: "square" | "rounded" | "dots" | "circle";
+  pattern: "square" | "circle" | "rounded";
+  eyeStyle: "square" | "circle" | "rounded";
+  frameStyle?: "none" | "simple" | "rounded" | "shadow";
+  frameColor?: string;
+  frameText?: string;
 }
 
 export const generateCanvasQRCode = async (
