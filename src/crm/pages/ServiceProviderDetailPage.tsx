@@ -1297,13 +1297,13 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
+            disabled={!newDocument.file || isUploading}
             startIcon={<CloudUploadRoundedIcon />}
           >
-            Upload Document
+            {isUploading ? 'Uploading...' : 'Upload Document'}
           </Button>
         </DialogActions>
       </Dialog>
