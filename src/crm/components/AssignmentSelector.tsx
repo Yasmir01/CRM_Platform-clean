@@ -130,6 +130,18 @@ export default function AssignmentSelector({
     }
   };
 
+  // Auto-select tenant if tenantId is provided and no value is currently selected
+  React.useEffect(() => {
+    if (tenantId && !value && includeTypes.includes("tenants")) {
+      const tenantOption = assignmentOptions.find(option =>
+        option.type === "tenant" && option.id === `tenant_${tenantId}`
+      );
+      if (tenantOption) {
+        onChange(tenantOption.id);
+      }
+    }
+  }, [tenantId, value, assignmentOptions, includeTypes, onChange]);
+
   const selectedOption = assignmentOptions.find(option => option.id === value);
 
   return (
