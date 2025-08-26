@@ -804,7 +804,8 @@ export default function Tasks({ propertyId, tenantId }: TasksProps = {}) {
                   onChange={(value) => setFormData({ ...formData, assignedTo: value })}
                   label="Assigned To"
                   includeTypes={["propertyManagers", "serviceProviders", "tenants"]}
-                  propertyId={formData.propertyId}
+                  propertyId={formData.propertyId || propertyId}
+                  tenantId={tenantId}
                 />
               </Grid>
               <Grid item xs={6}>
