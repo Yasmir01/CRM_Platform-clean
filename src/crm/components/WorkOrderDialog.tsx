@@ -420,29 +420,33 @@ export default function WorkOrderDialog({
 
           {/* Only show estimated cost and assigned to fields for management users */}
           {!isUserTenant && (
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  label="Estimated Cost"
-                  type="number"
-                  fullWidth
-                  value={formData.estimatedCost}
-                  onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
-                  InputProps={{
-                    startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
-                  }}
-                />
+            <>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Estimated Cost"
+                    type="number"
+                    fullWidth
+                    value={formData.estimatedCost}
+                    onChange={(e) => setFormData({ ...formData, estimatedCost: e.target.value })}
+                    InputProps={{
+                      startAdornment: <Typography sx={{ mr: 1 }}>$</Typography>,
+                    }}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TwoStepAssignmentSelector
-                  value={formData.assignedTo}
-                  onChange={(value) => setFormData({ ...formData, assignedTo: value })}
-                  label="Assigned To"
-                  propertyId={formData.propertyId}
-                  excludeCategories={["tenant"]}
-                />
+              <Grid container spacing={2} sx={{ mt: 0 }}>
+                <Grid item xs={12}>
+                  <TwoStepAssignmentSelector
+                    value={formData.assignedTo}
+                    onChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                    label="Assigned To"
+                    propertyId={formData.propertyId}
+                    excludeCategories={["tenant"]}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
+            </>
           )}
 
           <TextField
