@@ -1221,6 +1221,10 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     syncEntityToContacts(updatedManager, 'PropertyManager');
   };
 
+  const deletePropertyManager = (id: string) => {
+    dispatch({ type: 'DELETE_PROPERTY_MANAGER', payload: id });
+  };
+
   const addTenant = (tenantData: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => {
     const tenant: Tenant = {
       ...tenantData,
