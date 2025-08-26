@@ -544,7 +544,7 @@ export default function QRCodeGenerator({
       title: formData.title,
       content: formData.content,
       type: formData.type,
-      qrCodeUrl: generateQRCode(),
+      qrCodeUrl: qrUrl || generatedQRUrl || generateQRCode(),
       customization,
       createdAt: selectedQR?.createdAt || new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
