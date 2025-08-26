@@ -37,7 +37,8 @@ export default function TwoStepAssignmentSelector({
   propertyId,
   tenantId,
 }: TwoStepAssignmentSelectorProps) {
-  const { propertyManagers, tenants, contacts } = useCrmData();
+  const { state } = useCrmData();
+  const { propertyManagers, tenants, contacts } = state;
 
   // Debug logging to check data availability
   React.useEffect(() => {
