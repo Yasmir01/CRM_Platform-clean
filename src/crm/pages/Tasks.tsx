@@ -42,6 +42,7 @@ import {
 import TaskDetailPage from "./TaskDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import AssignmentSelector from "../components/AssignmentSelector";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -65,6 +66,7 @@ interface Task {
   dueTime?: string;
   category: "Call" | "Email" | "Property" | "Maintenance" | "Work Order" | "Follow-up" | "Other";
   customCategory?: string;
+  customCategoryDescription?: string;
   property?: string;
   propertyId?: string; // Add propertyId for better integration
   client?: string;
@@ -238,7 +240,12 @@ const generateRealTasks = (crmData: any): Task[] => {
   return tasks;
 };
 
-export default function Tasks() {
+interface TasksProps {
+  propertyId?: string;
+  tenantId?: string;
+}
+
+export default function Tasks({ propertyId, tenantId }: TasksProps = {}) {
   const navigate = useNavigate();
   const { state } = useCrmData();
   const { properties, tenants } = state;
@@ -293,8 +300,9 @@ export default function Tasks() {
     dueTime: "",
     category: "Other" as Task["category"],
     customCategory: "",
+    customCategoryDescription: "",
     property: "",
-    propertyId: "",
+    propertyId: propertyId || "",
     client: "",
     reminder: false,
     workOrderId: "",
@@ -318,6 +326,7 @@ export default function Tasks() {
       dueTime: "",
       category: "Other",
       customCategory: "",
+      customCategoryDescription: "",
       property: "",
       propertyId: "",
       client: "",
@@ -340,6 +349,7 @@ export default function Tasks() {
       dueTime: task.dueTime || "",
       category: task.category,
       customCategory: task.customCategory || "",
+      customCategoryDescription: task.customCategoryDescription || "",
       property: task.property || "",
       propertyId: task.propertyId || "",
       client: task.client || "",
@@ -466,7 +476,7 @@ export default function Tasks() {
           <Button
             variant="outlined"
             startIcon={<CalendarTodayRoundedIcon />}
-            onClick={() => navigate('/calendar')}
+            onClick={() => navigate('/crm/calendar')}
           >
             View Calendar
           </Button>
@@ -789,17 +799,13 @@ export default function Tasks() {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <TextField
-                  label="Assigned To"
-                  fullWidth
+                <AssignmentSelector
                   value={formData.assignedTo}
-                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  sx={{
-                    '& .MuiInputBase-input': {
-                      textAlign: 'left',
-                      paddingLeft: '14px'
-                    }
-                  }}
+                  onChange={(value) => setFormData({ ...formData, assignedTo: value })}
+                  label="Assigned To"
+                  includeTypes={["propertyManagers", "serviceProviders", "tenants"]}
+                  propertyId={formData.propertyId || propertyId}
+                  tenantId={tenantId}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -865,7 +871,7 @@ export default function Tasks() {
                       if (selectedCategory === "Other") {
                         setCategoryDialogOpen(true);
                       } else {
-                        setFormData({ ...formData, category: selectedCategory, customCategory: "" });
+                        setFormData({ ...formData, category: selectedCategory, customCategory: "", customCategoryDescription: "" });
                       }
                     }}
                   >
@@ -1068,6 +1074,25 @@ export default function Tasks() {
               }}
             />
 
+            <TextField
+              label="Category Description"
+              fullWidth
+              multiline
+              rows={3}
+              value={formData.customCategoryDescription || ""}
+              onChange={(e) => setFormData({ ...formData, customCategoryDescription: e.target.value })}
+              placeholder="Describe what types of tasks will use this category..."
+              helperText="Optional: Explain when this category should be used"
+              inputProps={{ maxLength: 200 }}
+              sx={{
+                '& .MuiInputBase-input': {
+                  textAlign: 'left',
+                  paddingLeft: '14px',
+                  fontSize: '16px'
+                }
+              }}
+            />
+
             <Box sx={{
               p: 2,
               bgcolor: 'grey.50',
@@ -1092,7 +1117,7 @@ export default function Tasks() {
           <Button
             onClick={() => {
               setCategoryDialogOpen(false);
-              setFormData({ ...formData, category: "Follow-up", customCategory: "" });
+              setFormData({ ...formData, category: "Follow-up", customCategory: "", customCategoryDescription: "" });
             }}
             sx={{ minWidth: 100 }}
           >

@@ -26,6 +26,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import PropertyManagerDetailPage from "./PropertyManagerDetailPage";
+import { useCrmData, PropertyManager } from "../contexts/CrmDataContext";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -37,64 +38,9 @@ import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
 import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 
-interface PropertyManager {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  properties: string[];
-  status: "Active" | "Inactive" | "On Leave";
-  hireDate: string;
-  experience: number; // years
-  certifications: string[];
-  profilePicture?: string;
-}
-
-const mockManagers: PropertyManager[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Smith",
-    email: "john.smith@company.com",
-    phone: "(555) 111-2222",
-    properties: ["Sunset Apartments", "Ocean View Villa"],
-    status: "Active",
-    hireDate: "2022-01-15",
-    experience: 5,
-    certifications: ["CPM", "RPA"],
-    profilePicture: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
-  },
-  {
-    id: "2",
-    firstName: "Emily",
-    lastName: "Davis",
-    email: "emily.davis@company.com",
-    phone: "(555) 333-4444",
-    properties: ["Downtown Lofts"],
-    status: "Active",
-    hireDate: "2023-03-20",
-    experience: 3,
-    certifications: ["ARM"],
-    profilePicture: "https://images.unsplash.com/photo-1494790108755-2616b612c94c?w=150",
-  },
-  {
-    id: "3",
-    firstName: "Mike",
-    lastName: "Wilson",
-    email: "mike.wilson@company.com",
-    phone: "(555) 555-6666",
-    properties: ["Business Center", "Retail Plaza"],
-    status: "On Leave",
-    hireDate: "2021-08-10",
-    experience: 7,
-    certifications: ["CPM", "RPA", "CCIM"],
-    profilePicture: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
-  },
-];
-
 export default function PropertyManagers() {
-  const [managers, setManagers] = React.useState<PropertyManager[]>(mockManagers);
+  const { state, addPropertyManager, updatePropertyManager, deletePropertyManager } = useCrmData();
+  const { propertyManagers: managers } = state;
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedManager, setSelectedManager] = React.useState<PropertyManager | null>(null);
@@ -106,9 +52,7 @@ export default function PropertyManagers() {
     lastName: "",
     email: "",
     phone: "",
-    hireDate: "",
-    experience: 0,
-    certifications: "",
+    specialties: "",
   });
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,34 +102,46 @@ export default function PropertyManagers() {
   };
 
   const handleSaveManager = () => {
-    const certArray = formData.certifications.split(",").map(c => c.trim()).filter(c => c);
+    const specialtiesArray = formData.specialties.split(",").map(c => c.trim()).filter(c => c);
 
     if (selectedManager) {
       // Edit existing manager
-      setManagers(prev =>
-        prev.map(m =>
-          m.id === selectedManager.id
-            ? { ...m, ...formData, certifications: certArray, profilePicture: profilePicture || m.profilePicture }
-            : m
-        )
-      );
+      const updatedManager: PropertyManager = {
+        ...selectedManager,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        specialties: specialtiesArray,
+        status: "Active",
+      };
+      updatePropertyManager(updatedManager);
     } else {
       // Add new manager
-      const newManager: PropertyManager = {
-        id: Date.now().toString(),
-        ...formData,
-        properties: [],
-        status: "Active",
-        certifications: certArray,
-        profilePicture: profilePicture,
+      const newManagerData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        propertyIds: [] as string[],
+        specialties: specialtiesArray,
+        status: "Active" as const,
       };
-      setManagers(prev => [...prev, newManager]);
+      addPropertyManager(newManagerData);
     }
     setOpenDialog(false);
+    // Reset form
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      specialties: "",
+    });
   };
 
   const handleDeleteManager = (id: string) => {
-    setManagers(prev => prev.filter(m => m.id !== id));
+    deletePropertyManager(id);
   };
 
   const filteredManagers = managers.filter(manager =>
@@ -335,8 +291,8 @@ export default function PropertyManagers() {
               <TableCell>Manager</TableCell>
               <TableCell>Contact</TableCell>
               <TableCell>Properties</TableCell>
-              <TableCell>Experience</TableCell>
-              <TableCell>Certifications</TableCell>
+              <TableCell>Specialties Count</TableCell>
+              <TableCell>Specialties</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -365,7 +321,7 @@ export default function PropertyManagers() {
                         {manager.firstName} {manager.lastName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Since {new Date(manager.hireDate).toLocaleDateString()}
+                        ID: {manager.id}
                       </Typography>
                     </Box>
                   </Stack>
@@ -384,13 +340,13 @@ export default function PropertyManagers() {
                 </TableCell>
                 <TableCell>
                   <Stack spacing={0.5}>
-                    {manager.properties.map((property, index) => (
+                    {manager.propertyIds.map((propertyId, index) => (
                       <Stack key={index} direction="row" alignItems="center" spacing={1}>
                         <HomeWorkRoundedIcon fontSize="small" color="action" />
-                        <Typography variant="body2">{property}</Typography>
+                        <Typography variant="body2">Property {propertyId}</Typography>
                       </Stack>
                     ))}
-                    {manager.properties.length === 0 && (
+                    {manager.propertyIds.length === 0 && (
                       <Typography variant="body2" color="text.secondary">
                         No properties assigned
                       </Typography>
@@ -399,15 +355,15 @@ export default function PropertyManagers() {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {manager.experience} years
+                    {manager.specialties.length} specialties
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                    {manager.certifications.map((cert, index) => (
+                    {manager.specialties.map((specialty, index) => (
                       <Chip
                         key={index}
-                        label={cert}
+                        label={specialty}
                         size="small"
                         variant="outlined"
                       />
@@ -529,33 +485,12 @@ export default function PropertyManagers() {
                 />
               </Grid>
             </Grid>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField
-                  label="Hire Date"
-                  type="date"
-                  fullWidth
-                  value={formData.hireDate}
-                  onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Years of Experience"
-                  type="number"
-                  fullWidth
-                  value={formData.experience}
-                  onChange={(e) => setFormData({ ...formData, experience: parseInt(e.target.value) || 0 })}
-                />
-              </Grid>
-            </Grid>
             <TextField
-              label="Certifications (comma separated)"
+              label="Specialties (comma separated)"
               fullWidth
-              value={formData.certifications}
-              onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
-              placeholder="CPM, RPA, ARM, CCIM"
+              value={formData.specialties}
+              onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
+              placeholder="Residential, Commercial, Luxury Properties"
               helperText="Enter certifications separated by commas"
             />
           </Stack>

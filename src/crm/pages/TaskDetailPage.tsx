@@ -66,6 +66,8 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import { useCrmData } from "../contexts/CrmDataContext";
+import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 
 interface TaskUpdate {
   id: string;
@@ -132,6 +134,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
+  const { properties, tenants } = useCrmData();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [openNoteDialog, setOpenNoteDialog] = React.useState(false);
   const [openDocumentDialog, setOpenDocumentDialog] = React.useState(false);
@@ -980,11 +983,10 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
               value={newSubTask.description}
               onChange={(e) => setNewSubTask({ ...newSubTask, description: e.target.value })}
             />
-            <TextField
-              label="Assigned To"
-              fullWidth
+            <TwoStepAssignmentSelector
               value={newSubTask.assignedTo}
-              onChange={(e) => setNewSubTask({ ...newSubTask, assignedTo: e.target.value })}
+              onChange={(value) => setNewSubTask({ ...newSubTask, assignedTo: value })}
+              label="Assigned To"
             />
             <TextField
               label="Due Date"

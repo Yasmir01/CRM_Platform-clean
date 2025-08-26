@@ -576,7 +576,78 @@ const initialState: CrmState = {
       updatedAt: new Date().toISOString(),
     }
   ],
-  contacts: [],
+  contacts: [
+    {
+      id: "contact1",
+      type: "ServiceProvider",
+      firstName: "Alex",
+      lastName: "Martinez",
+      email: "alex@reliableplumbing.com",
+      phone: "(555) 111-2222",
+      company: "Reliable Plumbing Services",
+      status: "Active",
+      tags: ["Plumbing", "Emergency", "Licensed"],
+      notes: "Specializes in emergency repairs and maintenance",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "contact2",
+      type: "ServiceProvider",
+      firstName: "Lisa",
+      lastName: "Thompson",
+      email: "lisa@sparkelectrical.com",
+      phone: "(555) 333-4444",
+      company: "Spark Electrical Contractors",
+      status: "Active",
+      tags: ["Electrical", "Certified", "Residential"],
+      notes: "Certified electrician with 15+ years experience",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "contact3",
+      type: "ServiceProvider",
+      firstName: "Carlos",
+      lastName: "Rodriguez",
+      email: "carlos@coolairhvac.com",
+      phone: "(555) 555-6666",
+      company: "Cool Air HVAC Solutions",
+      status: "Active",
+      tags: ["HVAC", "Installation", "Maintenance"],
+      notes: "HVAC specialist for residential and commercial properties",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "contact4",
+      type: "ServiceProvider",
+      firstName: "Jennifer",
+      lastName: "Lee",
+      email: "jennifer@pristinecleaning.com",
+      phone: "(555) 777-8888",
+      company: "Pristine Cleaning Services",
+      status: "Active",
+      tags: ["Cleaning", "Move-out", "Deep Clean"],
+      notes: "Professional cleaning for move-outs and deep cleaning",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "contact5",
+      type: "ServiceProvider",
+      firstName: "Mike",
+      lastName: "Wilson",
+      email: "mike@wilsonlandscaping.com",
+      phone: "(555) 999-0000",
+      company: "Wilson Landscaping & Maintenance",
+      status: "Active",
+      tags: ["Landscaping", "Maintenance", "Seasonal"],
+      notes: "Full-service landscaping and property maintenance",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  ],
   deals: [],
   quotes: [],
   campaigns: [],
@@ -984,6 +1055,7 @@ export const CrmDataContext = createContext<{
   deleteProperty: (id: string) => void;
   addPropertyManager: (manager: Omit<PropertyManager, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updatePropertyManager: (manager: PropertyManager) => void;
+  deletePropertyManager: (id: string) => void;
   addTenant: (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTenant: (tenant: Tenant) => void;
   moveOutTenant: (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => void;
@@ -1147,6 +1219,10 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const updatedManager = { ...manager, updatedAt: new Date().toISOString() };
     dispatch({ type: 'UPDATE_PROPERTY_MANAGER', payload: updatedManager });
     syncEntityToContacts(updatedManager, 'PropertyManager');
+  };
+
+  const deletePropertyManager = (id: string) => {
+    dispatch({ type: 'DELETE_PROPERTY_MANAGER', payload: id });
   };
 
   const addTenant = (tenantData: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -1528,6 +1604,7 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     deleteProperty,
     addPropertyManager,
     updatePropertyManager,
+    deletePropertyManager,
     addTenant,
     updateTenant,
     moveOutTenant,
