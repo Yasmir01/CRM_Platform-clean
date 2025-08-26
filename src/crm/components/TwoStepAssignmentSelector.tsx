@@ -221,7 +221,7 @@ export default function TwoStepAssignmentSelector({
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={12} sm={6} md={7}>
+      <Grid item xs={12} sm={6} md={6}>
         <FormControl
           fullWidth={fullWidth}
           disabled={!selectedCategory}
