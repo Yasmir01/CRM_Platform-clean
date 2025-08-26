@@ -694,7 +694,7 @@ export default function QRCodeGenerator({
   };
 
   const shareQR = async () => {
-    const qrCodeUrl = generateQRCode();
+    const qrCodeUrl = generatedQRUrl || generateQRCode();
     const shareData = {
       title: formData.title || 'QR Code',
       text: `Check out this QR code: ${formData.title || 'Custom QR Code'}\nContent: ${formData.content}`,
