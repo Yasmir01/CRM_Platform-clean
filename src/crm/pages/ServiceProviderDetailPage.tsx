@@ -33,11 +33,16 @@ import {
   Badge,
   Rating,
   LinearProgress,
+  Tooltip,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
 import WorkOrderDialog from "../components/WorkOrderDialog";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import { useAuth } from "../contexts/AuthContext";
+import { documentSecurityService } from "../services/DocumentSecurityService";
+import { useRoleManagement } from "../hooks/useRoleManagement";
+import activityTracker from "../services/ActivityTrackingService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -59,6 +64,9 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import PendingRoundedIcon from "@mui/icons-material/PendingRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface CallLog {
   id: string;
@@ -154,7 +162,18 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
   const [openWorkOrderDialog, setOpenWorkOrderDialog] = React.useState(false);
 
+  // Document management state
+  const [previewDocument, setPreviewDocument] = React.useState<any>(null);
+  const [openPreviewDialog, setOpenPreviewDialog] = React.useState(false);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  // Context hooks
+  const { state, addDocument, deleteDocument: deleteDocumentFromContext } = useCrmData();
+  const { user: currentUser } = useAuth();
   const { refreshActivities } = useActivityTracking();
+  const { canDeleteDocuments } = useRoleManagement();
 
   // Mock service provider data
   const provider = {
@@ -246,28 +265,12 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Plumbing License.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2023-01-15T10:00:00Z",
-      uploadedBy: "David Wilson",
-      category: "License",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Liability Insurance Certificate.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "David Wilson",
-      category: "Insurance",
-      url: "#"
-    }
-  ]);
+  // Get real documents from CrmDataContext filtered for this service provider
+  const documents = state.documents.filter(doc =>
+    doc.serviceProviderId === providerId ||
+    doc.entityId === providerId ||
+    (doc.category === 'ServiceProvider' && doc.entityId === providerId)
+  );
 
   const [newNote, setNewNote] = React.useState({
     content: "",
@@ -338,11 +341,253 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+  const handleUploadDocument = async () => {
+    if (!newDocument.file || !currentUser) return;
+
+    setIsUploading(true);
+
+    try {
+      // Encrypt and store document using DocumentSecurityService
+      const secureDocument = await documentSecurityService.encryptDocument(
+        newDocument.file,
+        {
+          category: newDocument.category,
+          entityId: providerId,
+          entityType: 'serviceProvider',
+          tags: ['service-provider-document'],
+          description: newDocument.description,
+          isConfidential: newDocument.category === 'License' || newDocument.category === 'Insurance' || newDocument.category === 'Contract',
+          userId: currentUser.id,
+          userEmail: currentUser.email
+        }
+      );
+
+      // Save document reference to CrmDataContext for UI display
+      const savedDocument = addDocument({
+        name: secureDocument.name,
+        type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        size: secureDocument.size,
+        url: secureDocument.id, // Store document ID instead of URL
+        category: newDocument.category,
+        serviceProviderId: providerId,
+        entityId: providerId,
+        uploadedBy: currentUser.displayName || currentUser.email,
+        description: newDocument.description,
+        tags: secureDocument.metadata.tags,
+        isEncrypted: true, // Flag to indicate this is an encrypted document
+        securityDocumentId: secureDocument.id // Link to the encrypted document
+      });
+
+      // Track activity for the upload
+      activityTracker.trackActivity({
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName || currentUser.email,
+        action: 'create',
+        entityType: 'document',
+        entityId: savedDocument.id,
+        entityName: newDocument.file.name,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        description: `Document uploaded: ${newDocument.file.name}`,
+        severity: 'medium',
+        category: 'operational',
+        metadata: {
+          category: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type,
+          isEncrypted: true,
+          relatedEntityType: 'serviceProvider',
+          relatedEntityId: providerId,
+          relatedEntityName: provider.companyName
+        }
+      });
+
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+      // Show success message
+      alert(`Document "${secureDocument.name}" uploaded and encrypted successfully!`);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDocumentPreview = async (doc: any) => {
+    if (!currentUser) return;
+
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Preview encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Create a blob URL for preview
+        let byteArray: Uint8Array;
+        try {
+          // Validate and decode Base64 content
+          const base64Content = decryptedDocument.content.split(',')[1] || decryptedDocument.content;
+          byteArray = new Uint8Array(atob(base64Content).split('').map(c => c.charCodeAt(0)));
+        } catch (error) {
+          console.error('Base64 decode error:', error);
+          alert('Unable to preview document. The file may be corrupted.');
+          return;
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType || 'application/octet-stream' });
+        const previewUrl = URL.createObjectURL(blob);
+
+        setPreviewDocument({
+          ...doc,
+          previewUrl,
+          filename: decryptedDocument.filename,
+          mimeType: decryptedDocument.mimeType
+        });
+        setOpenPreviewDialog(true);
+      } else {
+        // For non-encrypted documents, use the direct URL
+        setPreviewDocument({
+          ...doc,
+          previewUrl: doc.url,
+          filename: doc.name,
+          mimeType: `application/${doc.type.toLowerCase()}`
+        });
+        setOpenPreviewDialog(true);
+      }
+    } catch (error) {
+      console.error('Error previewing document:', error);
+      alert('Failed to preview document. Please try again.');
+    }
+  };
+
+  const handleDocumentDownload = async (doc: any) => {
+    if (!currentUser) return;
+
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Download encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Create a blob from the decrypted content
+        let byteArray: Uint8Array;
+        try {
+          // Validate and decode Base64 content
+          const base64Content = decryptedDocument.content.split(',')[1] || decryptedDocument.content;
+          byteArray = new Uint8Array(atob(base64Content).split('').map(c => c.charCodeAt(0)));
+        } catch (error) {
+          console.error('Base64 decode error:', error);
+          alert('Unable to download document. The file may be corrupted.');
+          return;
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType || 'application/octet-stream' });
+
+        // Create download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = decryptedDocument.filename || doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      } else {
+        // For non-encrypted documents, download directly
+        const link = document.createElement('a');
+        link.href = doc.url;
+        link.download = doc.name;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document. Please try again.');
+    }
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!documentToDelete || !currentUser) return;
+
+    try {
+      // Delete from security service if encrypted
+      if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
+        await documentSecurityService.deleteDocument(
+          documentToDelete.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+      }
+
+      // Remove from CrmDataContext
+      deleteDocumentFromContext(documentToDelete.id);
+
+      // Track activity for the deletion
+      activityTracker.trackActivity({
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName || currentUser.email,
+        action: 'delete',
+        entityType: 'document',
+        entityId: documentToDelete.id,
+        entityName: documentToDelete.name,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
+          }
+        ],
+        description: `Document deleted: ${documentToDelete.name}`,
+        severity: 'medium',
+        category: 'operational',
+        metadata: {
+          category: documentToDelete.category,
+          wasEncrypted: documentToDelete.isEncrypted,
+          relatedEntityType: 'serviceProvider',
+          relatedEntityId: providerId,
+          relatedEntityName: provider.companyName
+        }
+      });
+
+      alert(`Document "${documentToDelete.name}" deleted successfully!`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  // Helper function to validate Base64 content
+  const isValidBase64 = (str: string): boolean => {
+    try {
+      return btoa(atob(str)) === str;
+    } catch (err) {
+      return false;
     }
   };
 
@@ -813,22 +1058,61 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
             </Button>
           </Stack>
           <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
+            {documents.length === 0 ? (
+              <ListItem>
                 <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
+                  primary="No documents uploaded"
+                  secondary="Upload documents like licenses, insurance certificates, and contracts"
                 />
-                <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
               </ListItem>
-            ))}
+            ) : (
+              documents.map((doc) => (
+                <ListItem key={doc.id} divider>
+                  <ListItemIcon>
+                    <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography variant="subtitle2">{doc.name}</Typography>
+                        {doc.isEncrypted && (
+                          <Chip size="small" label="Encrypted" color="primary" variant="outlined" />
+                        )}
+                      </Stack>
+                    }
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.uploadDate || Date.now()).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDocumentPreview(doc)}
+                        title="Preview Document"
+                      >
+                        <VisibilityRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDocumentDownload(doc)}
+                        title="Download Document"
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                      {canDeleteDocuments && (
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDeleteDocument(doc)}
+                          title="Delete Document"
+                          color="error"
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      )}
+                    </Stack>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
+            )}
           </List>
         </Paper>
       </TabPanel>
@@ -1034,13 +1318,13 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
+            disabled={!newDocument.file || isUploading}
             startIcon={<CloudUploadRoundedIcon />}
           >
-            Upload Document
+            {isUploading ? 'Uploading...' : 'Upload Document'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1059,6 +1343,105 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
           setTimeout(() => setCurrentTab(1), 100);
         }}
       />
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={openPreviewDialog}
+        onClose={() => {
+          setOpenPreviewDialog(false);
+          if (previewDocument?.previewUrl) {
+            URL.revokeObjectURL(previewDocument.previewUrl);
+          }
+          setPreviewDocument(null);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{ sx: { height: '90vh' } }}
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6">
+              Document Preview: {previewDocument?.filename || previewDocument?.name}
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setOpenPreviewDialog(false);
+                if (previewDocument?.previewUrl) {
+                  URL.revokeObjectURL(previewDocument.previewUrl);
+                }
+                setPreviewDocument(null);
+              }}
+            >
+              <CloseRoundedIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          {previewDocument && (
+            <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {previewDocument.mimeType?.startsWith('image/') ? (
+                <img
+                  src={previewDocument.previewUrl}
+                  alt={previewDocument.filename || previewDocument.name}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              ) : previewDocument.mimeType?.includes('pdf') ? (
+                <iframe
+                  src={previewDocument.previewUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title={previewDocument.filename || previewDocument.name}
+                />
+              ) : (
+                <Box sx={{ textAlign: 'center', p: 4 }}>
+                  <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Preview not available
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    This file type cannot be previewed in the browser.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadRoundedIcon />}
+                    onClick={() => handleDocumentDownload(previewDocument)}
+                    sx={{ mt: 2 }}
+                  >
+                    Download to View
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog open={deleteDocumentDialogOpen} onClose={() => setDeleteDocumentDialogOpen(false)}>
+        <DialogTitle>Delete Document</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+          </Typography>
+          {documentToDelete?.isEncrypted && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              This is an encrypted document. Deleting it will permanently remove all versions and access logs.
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDocumentDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={confirmDeleteDocument}
+            color="error"
+            variant="contained"
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

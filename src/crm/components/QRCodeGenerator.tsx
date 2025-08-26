@@ -1,4 +1,5 @@
 import * as React from "react";
+import { generateCanvasQRCode, generateFallbackQRCode } from '../utils/qrCodeUtils';
 import {
   Box,
   Typography,
@@ -440,6 +441,15 @@ export default function QRCodeGenerator({
   const [logoFile, setLogoFile] = React.useState<File | null>(null);
   const [logoPreview, setLogoPreview] = React.useState<string>("");
   const [selectedTemplate, setSelectedTemplate] = React.useState<QRTemplate | null>(null);
+  const [generatedQRUrl, setGeneratedQRUrl] = React.useState<string>("");
+  const [isGeneratingQR, setIsGeneratingQR] = React.useState<boolean>(false);
+
+  // Regenerate QR code when content or customization changes
+  React.useEffect(() => {
+    if (formData.content) {
+      generateCanvasQR();
+    }
+  }, [formData.content, customization, logoPreview]);
 
   // Load selected QR data for editing
   React.useEffect(() => {
@@ -484,39 +494,57 @@ export default function QRCodeGenerator({
   };
 
   const generateQRCode = (): string => {
-    // Ensure URLs have proper protocol
+    // Return the generated URL if available, otherwise fallback
+    if (generatedQRUrl) {
+      return generatedQRUrl;
+    }
+
+    // Fallback to external API
     let content = formData.content;
     if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
       content = "https://" + content.replace(/^(www\.)?/, "www.");
     }
 
-    // Use QR Server API with better parameter mapping
-    const baseUrl = "https://api.qrserver.com/v1/create-qr-code/";
-    const params = new URLSearchParams({
-      size: "300x300",
-      data: content,
-      color: customization.foregroundColor.replace("#", ""),
-      bgcolor: customization.backgroundColor.replace("#", ""),
-      margin: "0",
-      format: "png",
-      ecc: "M"
-    });
-
-    // Add visual style indicators in the URL for user feedback
-    // Note: Visual styles are applied via CSS overlay in the preview
-    const styleId = `${customization.style}-${customization.pattern}-${customization.eyeStyle}`;
-    params.append("v", styleId); // Version/style identifier
-
-    return `${baseUrl}?${params.toString()}`;
+    return generateFallbackQRCode(content, customization);
   };
 
-  const handleCreateQR = () => {
+  const generateCanvasQR = async (): Promise<string> => {
+    if (!formData.content) return "";
+
+    setIsGeneratingQR(true);
+    try {
+      let content = formData.content;
+      if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
+        content = "https://" + content.replace(/^(www\.)?/, "www.");
+      }
+
+      const qrUrl = await generateCanvasQRCode(content, customization, 300);
+      setGeneratedQRUrl(qrUrl);
+      return qrUrl;
+    } catch (error) {
+      console.error('Failed to generate canvas QR code:', error);
+      // Fallback to external API
+      let content = formData.content;
+      if (formData.type === "URL" && content && !content.startsWith("http://") && !content.startsWith("https://")) {
+        content = "https://" + content.replace(/^(www\.)?/, "www.");
+      }
+      const fallbackUrl = generateFallbackQRCode(content, customization);
+      setGeneratedQRUrl(fallbackUrl);
+      return fallbackUrl;
+    } finally {
+      setIsGeneratingQR(false);
+    }
+  };
+
+  const handleCreateQR = async () => {
+    // Ensure QR code is generated with latest content
+    const qrUrl = await generateCanvasQR();
     const newQR: QRCodeData = {
       id: selectedQR?.id || Date.now().toString(),
       title: formData.title,
       content: formData.content,
       type: formData.type,
-      qrCodeUrl: generateQRCode(),
+      qrCodeUrl: qrUrl || generatedQRUrl || generateQRCode(),
       customization,
       createdAt: selectedQR?.createdAt || new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
@@ -592,6 +620,21 @@ export default function QRCodeGenerator({
 
   const downloadQR = async () => {
     try {
+      // Ensure we have the latest generated QR
+      const qrUrl = await generateCanvasQR();
+
+      // If we have a canvas-generated data URL, download it directly
+      if (qrUrl.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.download = `${formData.title.replace(/\s+/g, '_')}_QR.png`;
+        link.href = qrUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // Fallback to canvas generation for external URLs
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
@@ -651,7 +694,7 @@ export default function QRCodeGenerator({
   };
 
   const shareQR = async () => {
-    const qrCodeUrl = generateQRCode();
+    const qrCodeUrl = generatedQRUrl || generateQRCode();
     const shareData = {
       title: formData.title || 'QR Code',
       text: `Check out this QR code: ${formData.title || 'Custom QR Code'}\nContent: ${formData.content}`,
@@ -1032,17 +1075,35 @@ export default function QRCodeGenerator({
                   p: customization.gradientEnabled ? 0.5 : 0
                 }}
               >
-                <img
-                  src={generateQRCode()}
-                  alt="QR Code Preview"
-                  style={{
-                    maxWidth: 200,
-                    maxHeight: 200,
-                    borderRadius: customization.style === 'rounded' ? 8 : 0,
-                    filter: customization.style === 'dots' ? 'blur(0.5px) contrast(1.2)' : 'none',
-                    transform: customization.style === 'circle' ? 'scale(0.95)' : 'none'
-                  }}
-                />
+                {isGeneratingQR ? (
+                  <Box
+                    sx={{
+                      width: 200,
+                      height: 200,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.100',
+                      borderRadius: customization.style === 'rounded' ? 2 : 0
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Generating QR...
+                    </Typography>
+                  </Box>
+                ) : (
+                  <img
+                    src={generateQRCode()}
+                    alt="QR Code Preview"
+                    style={{
+                      maxWidth: 200,
+                      maxHeight: 200,
+                      borderRadius: customization.style === 'rounded' ? 8 : 0,
+                      filter: customization.style === 'dots' ? 'blur(0.5px) contrast(1.2)' : 'none',
+                      transform: customization.style === 'circle' ? 'scale(0.95)' : 'none'
+                    }}
+                  />
+                )}
                 {/* Style overlay effects */}
                 {customization.pattern === 'circle' && (
                   <Box
@@ -1327,7 +1388,13 @@ export default function QRCodeGenerator({
           <Button 
             variant="contained" 
             onClick={() => setCurrentStep(currentStep + 1)}
-            disabled={currentStep === 0 && (!formData.title || !formData.content)}
+            disabled={
+              currentStep === 0 && (
+                !formData.title ||
+                !formData.content ||
+                (formData.isPasswordProtected && !formData.password)
+              )
+            }
           >
             Next
           </Button>
@@ -1361,7 +1428,7 @@ export default function QRCodeGenerator({
             </Tooltip>
             <Tooltip title="Copy QR Code URL to Clipboard" sx={uniformTooltipStyles}>
               <IconButton
-                onClick={() => copyToClipboard(generateQRCode())}
+                onClick={() => copyToClipboard(generatedQRUrl || generateQRCode())}
                 disabled={!formData.content}
                 sx={{
                   bgcolor: 'action.hover',
@@ -1377,7 +1444,11 @@ export default function QRCodeGenerator({
               color="primary"
               size="large"
               onClick={handleCreateQR}
-              disabled={!formData.title || !formData.content}
+              disabled={
+                !formData.title ||
+                !formData.content ||
+                (formData.isPasswordProtected && !formData.password)
+              }
               startIcon={<QrCodeRoundedIcon />}
               sx={{
                 minWidth: 180,

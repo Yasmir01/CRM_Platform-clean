@@ -442,7 +442,7 @@ export default function QRAnalyticsDashboard({
                     <Typography variant="body2" gutterBottom>QR Code</Typography>
                     <Box sx={{ position: 'relative', display: 'inline-block' }}>
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCode.content)}`}
+                        src={qrCode.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrCode.content)}`}
                         alt="QR Code"
                         style={{ maxWidth: 150, height: 'auto' }}
                       />

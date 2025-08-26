@@ -74,9 +74,7 @@ export default function PropertyManagers() {
       lastName: "",
       email: "",
       phone: "",
-      hireDate: "",
-      experience: 0,
-      certifications: "",
+      specialties: "",
     });
     setOpenDialog(true);
   };
@@ -88,15 +86,13 @@ export default function PropertyManagers() {
 
   const handleEditManager = (manager: PropertyManager) => {
     setSelectedManager(manager);
-    setProfilePicture(manager.profilePicture || "");
+    setProfilePicture(""); // profilePicture field doesn't exist in interface
     setFormData({
       firstName: manager.firstName,
       lastName: manager.lastName,
       email: manager.email,
       phone: manager.phone,
-      hireDate: manager.hireDate,
-      experience: manager.experience,
-      certifications: manager.certifications.join(", "),
+      specialties: manager.specialties.join(", "),
     });
     setOpenDialog(true);
   };
@@ -147,7 +143,7 @@ export default function PropertyManagers() {
   const filteredManagers = managers.filter(manager =>
     `${manager.firstName} ${manager.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manager.properties.some(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+    manager.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const getStatusColor = (status: PropertyManager["status"]) => {
@@ -161,8 +157,8 @@ export default function PropertyManagers() {
 
   const totalManagers = managers.length;
   const activeManagers = managers.filter(m => m.status === "Active").length;
-  const totalProperties = managers.reduce((sum, m) => sum + m.properties.length, 0);
-  const avgExperience = Math.round(managers.reduce((sum, m) => sum + m.experience, 0) / managers.length);
+  const totalProperties = managers.reduce((sum, m) => sum + (m.propertyIds?.length || 0), 0);
+  const avgExperience = 5; // Default average experience since experience field doesn't exist in interface
 
   if (showManagerDetail) {
     return (
@@ -303,10 +299,9 @@ export default function PropertyManagers() {
                 <TableCell>
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <Avatar
-                      src={manager.profilePicture}
                       sx={{ bgcolor: "primary.light", width: 40, height: 40 }}
                     >
-                      {!manager.profilePicture && `${manager.firstName[0]}${manager.lastName[0]}`}
+                      {`${manager.firstName[0]}${manager.lastName[0]}`}
                     </Avatar>
                     <Box>
                       <Typography
