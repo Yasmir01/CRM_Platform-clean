@@ -86,7 +86,7 @@ export default function PropertyManagers() {
 
   const handleEditManager = (manager: PropertyManager) => {
     setSelectedManager(manager);
-    setProfilePicture(manager.profilePicture || "");
+    setProfilePicture(""); // profilePicture field doesn't exist in interface
     setFormData({
       firstName: manager.firstName,
       lastName: manager.lastName,
@@ -299,10 +299,9 @@ export default function PropertyManagers() {
                 <TableCell>
                   <Stack direction="row" alignItems="center" spacing={2}>
                     <Avatar
-                      src={manager.profilePicture}
                       sx={{ bgcolor: "primary.light", width: 40, height: 40 }}
                     >
-                      {!manager.profilePicture && `${manager.firstName[0]}${manager.lastName[0]}`}
+                      {`${manager.firstName[0]}${manager.lastName[0]}`}
                     </Avatar>
                     <Box>
                       <Typography
