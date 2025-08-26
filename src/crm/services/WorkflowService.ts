@@ -74,6 +74,7 @@ interface TenantPaymentInfo {
 
 interface Tenant {
   id: string;
+  accountNumber?: string;
   firstName: string;
   lastName: string;
   email: string;

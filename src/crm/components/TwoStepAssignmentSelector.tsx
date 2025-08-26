@@ -25,6 +25,7 @@ interface TwoStepAssignmentSelectorProps {
   fullWidth?: boolean;
   propertyId?: string; // For context-aware tenant filtering
   tenantId?: string; // For context-aware tenant pre-selection
+  excludeCategories?: AssignmentCategory[]; // Categories to exclude from selection
 }
 
 type AssignmentCategory = "tenant" | "manager" | "serviceProvider" | "";
@@ -36,6 +37,7 @@ export default function TwoStepAssignmentSelector({
   fullWidth = true,
   propertyId,
   tenantId,
+  excludeCategories = [],
 }: TwoStepAssignmentSelectorProps) {
   const { state } = useCrmData();
   const { propertyManagers, tenants, contacts } = state;
@@ -163,12 +165,12 @@ export default function TwoStepAssignmentSelector({
   return (
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
-      <Grid item xs={12} sm={6} md={5}>
+      <Grid item xs={12} sm={6}>
         <FormControl
           fullWidth={fullWidth}
           sx={{
             '& .MuiInputBase-root': {
-              minWidth: '180px',
+              minWidth: '200px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
@@ -183,43 +185,49 @@ export default function TwoStepAssignmentSelector({
             label="Assignment Type"
             onChange={(e) => handleCategoryChange(e.target.value as AssignmentCategory)}
             sx={{
-              minWidth: '180px',
+              minWidth: '200px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'
               }
             }}
           >
-            <MenuItem value="tenant">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <TenantIcon sx={{ fontSize: 20, color: "success.main" }} />
-                <Typography>Tenant</Typography>
-              </Stack>
-            </MenuItem>
-            <MenuItem value="manager">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <PersonIcon sx={{ fontSize: 20, color: "primary.main" }} />
-                <Typography>Property Manager</Typography>
-              </Stack>
-            </MenuItem>
-            <MenuItem value="serviceProvider">
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <BusinessIcon sx={{ fontSize: 20, color: "warning.main" }} />
-                <Typography>Service Provider</Typography>
-              </Stack>
-            </MenuItem>
+            {!excludeCategories.includes("tenant") && (
+              <MenuItem value="tenant">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <TenantIcon sx={{ fontSize: 20, color: "success.main" }} />
+                  <Typography>Tenant</Typography>
+                </Stack>
+              </MenuItem>
+            )}
+            {!excludeCategories.includes("manager") && (
+              <MenuItem value="manager">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <PersonIcon sx={{ fontSize: 20, color: "primary.main" }} />
+                  <Typography>Property Manager</Typography>
+                </Stack>
+              </MenuItem>
+            )}
+            {!excludeCategories.includes("serviceProvider") && (
+              <MenuItem value="serviceProvider">
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <BusinessIcon sx={{ fontSize: 20, color: "warning.main" }} />
+                  <Typography>Service Provider</Typography>
+                </Stack>
+              </MenuItem>
+            )}
           </Select>
         </FormControl>
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={12} sm={6} md={7}>
+      <Grid item xs={12} sm={6}>
         <FormControl
           fullWidth={fullWidth}
           disabled={!selectedCategory}
           sx={{
             '& .MuiInputBase-root': {
-              minWidth: '220px',
+              minWidth: '200px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
@@ -236,7 +244,7 @@ export default function TwoStepAssignmentSelector({
             label={selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
             onChange={(e) => handlePersonChange(e.target.value)}
             sx={{
-              minWidth: '220px',
+              minWidth: '200px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'

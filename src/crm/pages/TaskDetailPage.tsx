@@ -75,7 +75,10 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import LockIcon from "@mui/icons-material/Lock";
+import FileDownloadRoundedIcon from "@mui/icons-material/FileDownload";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { documentSecurityService } from "../services/DocumentSecurityService";
 import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 
 interface TaskUpdate {
@@ -104,6 +107,9 @@ interface Document {
   uploadedBy: string;
   category: "Instructions" | "Reference" | "Deliverable" | "Resource" | "Other";
   url: string;
+  isEncrypted?: boolean;
+  securityDocumentId?: string;
+  isDecryptedForPreview?: boolean;
 }
 
 interface SubTask {
@@ -141,6 +147,30 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
+
+// Helper functions
+const formatFileSize = (bytes: number) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+const isValidBase64 = (str: string): boolean => {
+  try {
+    // Basic validation: check if string matches Base64 pattern
+    const base64Pattern = /^[A-Za-z0-9+/]*={0,2}$/;
+    if (!base64Pattern.test(str) || str.length === 0) {
+      return false;
+    }
+    // Try decoding to validate
+    const decoded = atob(str);
+    return decoded.length > 0;
+  } catch (e) {
+    return false;
+  }
+};
 
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
   const { state } = useCrmData();
@@ -401,23 +431,80 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     }
   };
 
-  const handleDownloadDocument = (document: Document) => {
+  const handleDownloadDocument = (doc: Document) => {
     // In a real app, this would trigger a download from the server
     const link = document.createElement('a');
-    link.href = document.url;
-    link.download = document.name;
+    link.href = doc.url;
+    link.download = doc.name;
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
     // Show success message
-    alert(`Downloading ${document.name}...`);
+    alert(`Downloading ${doc.name}...`);
   };
 
-  const handleViewDocument = (document: Document) => {
-    setSelectedDocument(document);
-    setOpenDocumentPreview(true);
+  const handleViewDocument = async (doc: Document) => {
+    // Mock current user for now
+    const currentUser = { id: "user1", email: "user@example.com" };
+
+    if (doc.isEncrypted && doc.securityDocumentId) {
+      try {
+        // Decrypt the document for preview
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Convert decrypted content to blob URL for preview
+        let byteArray: Uint8Array;
+
+        try {
+          // Validate and decode Base64 content
+          if (!isValidBase64(decryptedDocument.content)) {
+            throw new Error('Decrypted content is not valid Base64');
+          }
+
+          const byteCharacters = atob(decryptedDocument.content);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        } catch (base64Error) {
+          console.error('Base64 decoding failed:', base64Error);
+          // Fallback: treat as binary string
+          const byteNumbers = new Array(decryptedDocument.content.length);
+          for (let i = 0; i < decryptedDocument.content.length; i++) {
+            byteNumbers[i] = decryptedDocument.content.charCodeAt(i);
+          }
+          byteArray = new Uint8Array(byteNumbers);
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType });
+        const url = URL.createObjectURL(blob);
+
+        const previewDocument: Document = {
+          ...doc,
+          url,
+          name: decryptedDocument.filename,
+          type: decryptedDocument.mimeType,
+          isDecryptedForPreview: true
+        };
+
+        setSelectedDocument(previewDocument);
+        setOpenDocumentPreview(true);
+      } catch (error) {
+        console.error('Failed to decrypt document for preview:', error);
+        alert('Failed to decrypt document for preview. Please check your permissions or contact support.');
+      }
+    } else {
+      // Non-encrypted document
+      setSelectedDocument(doc);
+      setOpenDocumentPreview(true);
+    }
   };
 
   const handleViewDocumentHistory = (document: Document) => {
@@ -435,14 +522,6 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
       alert(`Document "${documentToDelete.name}" deleted successfully!`);
       setDocumentToDelete(null);
     }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   const getStatusColor = (status: TaskUpdate["status"] | SubTask["status"]) => {
@@ -662,7 +741,7 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
                       icon={getStepIcon(update.status)}
                       optional={
                         <Typography variant="caption">
-                          {new Date(update.date).toLocaleString()} • by {update.updatedBy}
+                          {new Date(update.date).toLocaleString()} ��� by {update.updatedBy}
                         </Typography>
                       }
                     >
@@ -1246,47 +1325,197 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
       </Dialog>
 
       {/* Document Preview Dialog */}
-      <Dialog open={openDocumentPreview} onClose={() => setOpenDocumentPreview(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <VisibilityRoundedIcon />
-            <Box>
-              <Typography variant="h6">Document Preview</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {selectedDocument?.name}
-              </Typography>
-            </Box>
+      <Dialog
+        open={openDocumentPreview}
+        onClose={() => {
+          // Clean up blob URL if it was created for encrypted document preview
+          if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+            URL.revokeObjectURL(selectedDocument.url);
+          }
+          setSelectedDocument(null);
+          setOpenDocumentPreview(false);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            height: '90vh',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">
+              Document Preview - {selectedDocument?.name || 'Unknown Document'}
+              {selectedDocument?.isEncrypted && (
+                <Chip
+                  icon={<LockIcon />}
+                  label="Encrypted"
+                  size="small"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                />
+              )}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<FileDownloadRoundedIcon />}
+                onClick={() => {
+                  if (selectedDocument) {
+                    handleDownloadDocument(selectedDocument);
+                  }
+                }}
+              >
+                Download
+              </Button>
+              <IconButton onClick={() => {
+                // Clean up blob URL if it was created for encrypted document preview
+                if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+                  URL.revokeObjectURL(selectedDocument.url);
+                }
+                setSelectedDocument(null);
+                setOpenDocumentPreview(false);
+              }}>
+                <DeleteRoundedIcon />
+              </IconButton>
+            </Stack>
           </Stack>
         </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2} alignItems="center" textAlign="center" sx={{ py: 4 }}>
-            <AttachFileRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
-            <Typography variant="h6">Document Preview</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Document preview functionality would be implemented here.
-            </Typography>
-            <Typography variant="body2">
-              <strong>Size:</strong> {selectedDocument && formatFileSize(selectedDocument.size)}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Category:</strong> {selectedDocument?.category}
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<DownloadRoundedIcon />}
-              onClick={() => {
-                if (selectedDocument) {
-                  handleDownloadDocument(selectedDocument);
-                  setOpenDocumentPreview(false);
-                }
+        <DialogContent sx={{ p: 0, height: '100%' }}>
+          {selectedDocument ? (
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                bgcolor: '#f5f5f5'
               }}
             >
-              Download Document
-            </Button>
-          </Stack>
+              {/* Document Preview based on type */}
+              {selectedDocument.type?.toLowerCase().includes('image') ||
+               selectedDocument.name?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                // Image Preview
+                <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2 }}>
+                  <Box
+                    component="img"
+                    src={selectedDocument.url || ''}
+                    alt={selectedDocument.name || 'Document preview'}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain',
+                      boxShadow: 3,
+                      borderRadius: 1
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      if (target.parentElement) {
+                        target.parentElement.innerHTML = `
+                          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: #666;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+                            <div>Unable to display image</div>
+                            <div style="font-size: 12px; margin-top: 8px;">Use download button to view the file</div>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </Box>
+              ) : selectedDocument.type?.toLowerCase().includes('pdf') ||
+                 selectedDocument.name?.toLowerCase().endsWith('.pdf') ? (
+                // PDF Preview
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', p: 4 }}>
+                  <DescriptionRoundedIcon sx={{ fontSize: 120, color: 'primary.main', mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>PDF Document</Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+                    PDF preview is not available in this view. You can download the document or open it in a new tab.
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() => window.open(selectedDocument.url, '_blank')}
+                    startIcon={<VisibilityRoundedIcon />}
+                  >
+                    Open in New Tab
+                  </Button>
+                </Box>
+              ) : (
+                // Other file types
+                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', p: 4 }}>
+                  <AttachFileRoundedIcon sx={{ fontSize: 120, color: 'primary.main', mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    {selectedDocument.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+                    Preview not available for this file type. Download the document to view its contents.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      if (selectedDocument) {
+                        handleDownloadDocument(selectedDocument);
+                      }
+                    }}
+                    startIcon={<FileDownloadRoundedIcon />}
+                  >
+                    Download to View
+                  </Button>
+                </Box>
+              )}
+
+              {/* Document Info Panel */}
+              <Paper sx={{ p: 2, m: 2, mt: 0 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">File Name</Typography>
+                    <Typography variant="body1">{selectedDocument.name}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Category</Typography>
+                    <Typography variant="body1">{selectedDocument.category}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Size</Typography>
+                    <Typography variant="body1">{formatFileSize(selectedDocument.size)}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="text.secondary">Uploaded</Typography>
+                    <Typography variant="body1">{new Date(selectedDocument.uploadDate).toLocaleDateString()}</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" color="text.secondary">Uploaded By</Typography>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <Typography variant="body1">{selectedDocument.uploadedBy}</Typography>
+                      {selectedDocument.isEncrypted && (
+                        <Chip
+                          icon={<LockIcon />}
+                          label="Encrypted"
+                          size="small"
+                          color="primary"
+                        />
+                      )}
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Box>
+          ) : null}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDocumentPreview(false)}>Close</Button>
+          <Button onClick={() => {
+            // Clean up blob URL if it was created for encrypted document preview
+            if (selectedDocument?.isDecryptedForPreview && selectedDocument?.url) {
+              URL.revokeObjectURL(selectedDocument.url);
+            }
+            setSelectedDocument(null);
+            setOpenDocumentPreview(false);
+          }}>
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 

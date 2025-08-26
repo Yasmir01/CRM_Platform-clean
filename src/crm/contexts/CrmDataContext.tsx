@@ -60,6 +60,7 @@ export interface PropertyManager {
 
 export interface Tenant {
   id: string;
+  accountNumber?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -1125,6 +1126,27 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
+  // Migration: Generate account numbers for existing tenants
+  useEffect(() => {
+    if (state.initialized && state.tenants.length > 0) {
+      const tenantsNeedingAccountNumbers = state.tenants.filter(tenant => !tenant.accountNumber);
+
+      if (tenantsNeedingAccountNumbers.length > 0) {
+        // Generate account numbers for existing tenants
+        const updatedTenants = tenantsNeedingAccountNumbers.map(tenant => ({
+          ...tenant,
+          accountNumber: generateTenantAccountNumber(tenant.firstName, tenant.lastName),
+          updatedAt: new Date().toISOString()
+        }));
+
+        // Update tenants one by one to trigger proper state updates
+        updatedTenants.forEach(tenant => {
+          dispatch({ type: 'UPDATE_TENANT', payload: tenant });
+        });
+      }
+    }
+  }, [state.initialized, state.tenants.length]);
+
   // Save data to localStorage whenever state changes
   useEffect(() => {
     if (state.initialized) {
@@ -1225,10 +1247,32 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     dispatch({ type: 'DELETE_PROPERTY_MANAGER', payload: id });
   };
 
+  // Generate unique tenant account number
+  const generateTenantAccountNumber = (firstName: string, lastName: string): string => {
+    // Get or initialize counter from localStorage
+    const counterKey = 'tenantAccountCounter';
+    const currentCounter = LocalStorageService.getItem<number>(counterKey, 0);
+    const nextCounter = currentCounter + 1;
+    LocalStorageService.setItem(counterKey, nextCounter);
+
+    // Generate 3-digit prefix from counter (padded)
+    const prefix = String(nextCounter).padStart(3, '0').slice(-3);
+
+    // Get initials (uppercase)
+    const lastNameInitial = lastName.charAt(0).toUpperCase() || 'X';
+    const firstNameInitial = firstName.charAt(0).toUpperCase() || 'X';
+
+    // Generate 2-digit suffix from counter
+    const suffix = String(nextCounter * 7 % 100).padStart(2, '0');
+
+    return `${prefix}${lastNameInitial}${firstNameInitial}${suffix}`;
+  };
+
   const addTenant = (tenantData: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => {
     const tenant: Tenant = {
       ...tenantData,
       id: Date.now().toString(),
+      accountNumber: tenantData.accountNumber || generateTenantAccountNumber(tenantData.firstName, tenantData.lastName),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

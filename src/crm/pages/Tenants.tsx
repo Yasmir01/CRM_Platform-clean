@@ -75,6 +75,7 @@ interface TenantPaymentInfo {
 
 interface Tenant {
   id: string;
+  accountNumber?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -453,6 +454,7 @@ export default function Tenants() {
           <TableHead>
             <TableRow>
               <TableCell>Tenant</TableCell>
+              <TableCell>Account #</TableCell>
               <TableCell>Contact</TableCell>
               <TableCell>Property</TableCell>
               <TableCell>Lease Period</TableCell>
@@ -492,6 +494,11 @@ export default function Tenants() {
                       </Typography>
                     </Box>
                   </Stack>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                    {tenant.accountNumber || 'Not generated'}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Stack spacing={1}>
@@ -640,6 +647,31 @@ export default function Tenants() {
                 />
               </Grid>
             </Grid>
+
+            {/* Account Number Display */}
+            {selectedTenant && (
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Account Number"
+                    fullWidth
+                    value={selectedTenant.accountNumber || 'Will be generated on save'}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    sx={{
+                      minHeight: '80px',
+                      '& .MuiInputBase-root': {
+                        minHeight: '56px',
+                        backgroundColor: 'grey.50'
+                      }
+                    }}
+                    helperText="Account number is automatically generated"
+                  />
+                </Grid>
+              </Grid>
+            )}
+
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <TextField
