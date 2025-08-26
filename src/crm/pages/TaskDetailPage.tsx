@@ -892,40 +892,127 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
               Upload Document
             </Button>
           </Stack>
-          <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
-                />
-                <ListItemSecondaryAction>
-                  <Tooltip
-                    title={`Download ${doc.name}`}
-                    componentsProps={{
-                      tooltip: {
-                        sx: uniformTooltipStyles
-                      }
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDownloadDocument(doc)}
-                      sx={{
-                        bgcolor: 'action.hover',
-                        '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
-                      }}
-                    >
-                      <DownloadRoundedIcon />
-                    </IconButton>
-                  </Tooltip>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Size</TableCell>
+                  <TableCell>Upload Date</TableCell>
+                  <TableCell>Uploaded By</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <AttachFileRoundedIcon fontSize="small" />
+                        <Typography variant="body2">{doc.name}</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={doc.category} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell>{formatFileSize(doc.size)}</TableCell>
+                    <TableCell>{new Date(doc.uploadDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{doc.uploadedBy}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip
+                          title={`View ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
+                            }}
+                          >
+                            <VisibilityRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title={`Download ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDownloadDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'success.light', color: 'success.main' }
+                            }}
+                          >
+                            <DownloadRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title="View Document History"
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocumentHistory(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'info.light', color: 'info.main' }
+                            }}
+                          >
+                            <DescriptionRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title={`Delete ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'error.light', color: 'error.main' }
+                            }}
+                          >
+                            <DeleteRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {documents.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        No documents uploaded yet
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </TabPanel>
 
