@@ -383,9 +383,9 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         userId: currentUser.id,
         userDisplayName: currentUser.displayName || currentUser.email,
         action: 'create',
-        entityType: 'serviceProvider',
-        entityId: providerId,
-        entityName: provider.companyName,
+        entityType: 'document',
+        entityId: savedDocument.id,
+        entityName: newDocument.file.name,
         changes: [
           {
             field: 'documents',
@@ -395,11 +395,16 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
           }
         ],
         description: `Document uploaded: ${newDocument.file.name}`,
+        severity: 'medium',
+        category: 'operational',
         metadata: {
           category: newDocument.category,
           fileSize: newDocument.file.size,
           fileType: newDocument.file.type,
-          isEncrypted: true
+          isEncrypted: true,
+          relatedEntityType: 'serviceProvider',
+          relatedEntityId: providerId,
+          relatedEntityName: provider.companyName
         }
       });
 
