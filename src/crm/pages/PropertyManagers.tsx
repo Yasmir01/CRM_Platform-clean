@@ -39,7 +39,7 @@ import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
 
 export default function PropertyManagers() {
-  const { state, addPropertyManager, updatePropertyManager } = useCrmData();
+  const { state, addPropertyManager, updatePropertyManager, deletePropertyManager } = useCrmData();
   const { propertyManagers: managers } = state;
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
