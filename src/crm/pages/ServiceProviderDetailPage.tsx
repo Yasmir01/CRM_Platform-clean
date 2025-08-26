@@ -571,6 +571,15 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   };
 
+  // Helper function to validate Base64 content
+  const isValidBase64 = (str: string): boolean => {
+    try {
+      return btoa(atob(str)) === str;
+    } catch (err) {
+      return false;
+    }
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
