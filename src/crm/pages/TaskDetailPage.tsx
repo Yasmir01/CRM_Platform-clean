@@ -75,7 +75,10 @@ import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import LockIcon from "@mui/icons-material/Lock";
+import FileDownloadRoundedIcon from "@mui/icons-material/FileDownload";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { documentSecurityService } from "../services/DocumentSecurityService";
 import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 
 interface TaskUpdate {
@@ -104,6 +107,9 @@ interface Document {
   uploadedBy: string;
   category: "Instructions" | "Reference" | "Deliverable" | "Resource" | "Other";
   url: string;
+  isEncrypted?: boolean;
+  securityDocumentId?: string;
+  isDecryptedForPreview?: boolean;
 }
 
 interface SubTask {
