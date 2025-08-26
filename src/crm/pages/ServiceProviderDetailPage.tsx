@@ -172,7 +172,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   // Context hooks
   const { state, addDocument, deleteDocument: deleteDocumentFromContext } = useCrmData();
   const { user: currentUser } = useAuth();
-  const { refreshActivities, trackActivity: activityTracker } = useActivityTracking();
+  const { refreshActivities } = useActivityTracking();
   const { canDeleteDocuments } = useRoleManagement();
 
   // Mock service provider data
