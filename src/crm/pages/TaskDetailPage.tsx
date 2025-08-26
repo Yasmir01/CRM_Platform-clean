@@ -409,6 +409,28 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     alert(`Downloading ${document.name}...`);
   };
 
+  const handleViewDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setOpenDocumentPreview(true);
+  };
+
+  const handleViewDocumentHistory = (document: Document) => {
+    setSelectedDocument(document);
+    setOpenDocumentHistory(true);
+  };
+
+  const handleDeleteDocument = (document: Document) => {
+    setDocumentToDelete(document);
+  };
+
+  const confirmDeleteDocument = () => {
+    if (documentToDelete) {
+      setDocuments(prev => prev.filter(doc => doc.id !== documentToDelete.id));
+      alert(`Document "${documentToDelete.name}" deleted successfully!`);
+      setDocumentToDelete(null);
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
