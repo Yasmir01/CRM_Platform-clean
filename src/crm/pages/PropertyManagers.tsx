@@ -485,33 +485,12 @@ export default function PropertyManagers() {
                 />
               </Grid>
             </Grid>
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <TextField
-                  label="Hire Date"
-                  type="date"
-                  fullWidth
-                  value={formData.hireDate}
-                  onChange={(e) => setFormData({ ...formData, hireDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Years of Experience"
-                  type="number"
-                  fullWidth
-                  value={formData.experience}
-                  onChange={(e) => setFormData({ ...formData, experience: parseInt(e.target.value) || 0 })}
-                />
-              </Grid>
-            </Grid>
             <TextField
-              label="Certifications (comma separated)"
+              label="Specialties (comma separated)"
               fullWidth
-              value={formData.certifications}
-              onChange={(e) => setFormData({ ...formData, certifications: e.target.value })}
-              placeholder="CPM, RPA, ARM, CCIM"
+              value={formData.specialties}
+              onChange={(e) => setFormData({ ...formData, specialties: e.target.value })}
+              placeholder="Residential, Commercial, Luxury Properties"
               helperText="Enter certifications separated by commas"
             />
           </Stack>
