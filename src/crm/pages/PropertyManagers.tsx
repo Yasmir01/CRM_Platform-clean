@@ -94,9 +94,7 @@ export default function PropertyManagers() {
       lastName: manager.lastName,
       email: manager.email,
       phone: manager.phone,
-      hireDate: manager.hireDate,
-      experience: manager.experience,
-      certifications: manager.certifications.join(", "),
+      specialties: manager.specialties.join(", "),
     });
     setOpenDialog(true);
   };
@@ -147,7 +145,7 @@ export default function PropertyManagers() {
   const filteredManagers = managers.filter(manager =>
     `${manager.firstName} ${manager.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
     manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    manager.properties.some(p => p.toLowerCase().includes(searchTerm.toLowerCase()))
+    manager.specialties.some(s => s.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const getStatusColor = (status: PropertyManager["status"]) => {
