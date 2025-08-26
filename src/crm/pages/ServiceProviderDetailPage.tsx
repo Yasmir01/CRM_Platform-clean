@@ -1322,6 +1322,105 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
           setTimeout(() => setCurrentTab(1), 100);
         }}
       />
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={openPreviewDialog}
+        onClose={() => {
+          setOpenPreviewDialog(false);
+          if (previewDocument?.previewUrl) {
+            URL.revokeObjectURL(previewDocument.previewUrl);
+          }
+          setPreviewDocument(null);
+        }}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{ sx: { height: '90vh' } }}
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Typography variant="h6">
+              Document Preview: {previewDocument?.filename || previewDocument?.name}
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setOpenPreviewDialog(false);
+                if (previewDocument?.previewUrl) {
+                  URL.revokeObjectURL(previewDocument.previewUrl);
+                }
+                setPreviewDocument(null);
+              }}
+            >
+              <CloseRoundedIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
+          {previewDocument && (
+            <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {previewDocument.mimeType?.startsWith('image/') ? (
+                <img
+                  src={previewDocument.previewUrl}
+                  alt={previewDocument.filename || previewDocument.name}
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              ) : previewDocument.mimeType?.includes('pdf') ? (
+                <iframe
+                  src={previewDocument.previewUrl}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  title={previewDocument.filename || previewDocument.name}
+                />
+              ) : (
+                <Box sx={{ textAlign: 'center', p: 4 }}>
+                  <AttachFileRoundedIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Preview not available
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    This file type cannot be previewed in the browser.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadRoundedIcon />}
+                    onClick={() => handleDocumentDownload(previewDocument)}
+                    sx={{ mt: 2 }}
+                  >
+                    Download to View
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog open={deleteDocumentDialogOpen} onClose={() => setDeleteDocumentDialogOpen(false)}>
+        <DialogTitle>Delete Document</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+          </Typography>
+          {documentToDelete?.isEncrypted && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              This is an encrypted document. Deleting it will permanently remove all versions and access logs.
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDocumentDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={confirmDeleteDocument}
+            color="error"
+            variant="contained"
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
