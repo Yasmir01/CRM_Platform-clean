@@ -1060,17 +1060,35 @@ export default function QRCodeGenerator({
                   p: customization.gradientEnabled ? 0.5 : 0
                 }}
               >
-                <img
-                  src={generateQRCode()}
-                  alt="QR Code Preview"
-                  style={{
-                    maxWidth: 200,
-                    maxHeight: 200,
-                    borderRadius: customization.style === 'rounded' ? 8 : 0,
-                    filter: customization.style === 'dots' ? 'blur(0.5px) contrast(1.2)' : 'none',
-                    transform: customization.style === 'circle' ? 'scale(0.95)' : 'none'
-                  }}
-                />
+                {isGeneratingQR ? (
+                  <Box
+                    sx={{
+                      width: 200,
+                      height: 200,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.100',
+                      borderRadius: customization.style === 'rounded' ? 2 : 0
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Generating QR...
+                    </Typography>
+                  </Box>
+                ) : (
+                  <img
+                    src={generateQRCode()}
+                    alt="QR Code Preview"
+                    style={{
+                      maxWidth: 200,
+                      maxHeight: 200,
+                      borderRadius: customization.style === 'rounded' ? 8 : 0,
+                      filter: customization.style === 'dots' ? 'blur(0.5px) contrast(1.2)' : 'none',
+                      transform: customization.style === 'circle' ? 'scale(0.95)' : 'none'
+                    }}
+                  />
+                )}
                 {/* Style overlay effects */}
                 {customization.pattern === 'circle' && (
                   <Box
