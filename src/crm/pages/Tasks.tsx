@@ -302,7 +302,7 @@ export default function Tasks({ propertyId, tenantId }: TasksProps = {}) {
     customCategory: "",
     customCategoryDescription: "",
     property: "",
-    propertyId: "",
+    propertyId: propertyId || "",
     client: "",
     reminder: false,
     workOrderId: "",
