@@ -42,6 +42,7 @@ import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useAuth } from "../contexts/AuthContext";
 import { documentSecurityService } from "../services/DocumentSecurityService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import activityTracker from "../services/ActivityTrackingService";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
