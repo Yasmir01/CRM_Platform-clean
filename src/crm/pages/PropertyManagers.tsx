@@ -291,8 +291,8 @@ export default function PropertyManagers() {
               <TableCell>Manager</TableCell>
               <TableCell>Contact</TableCell>
               <TableCell>Properties</TableCell>
-              <TableCell>Experience</TableCell>
-              <TableCell>Certifications</TableCell>
+              <TableCell>Specialties Count</TableCell>
+              <TableCell>Specialties</TableCell>
               <TableCell>Status</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
