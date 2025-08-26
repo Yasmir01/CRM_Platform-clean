@@ -549,9 +549,9 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         userId: currentUser.id,
         userDisplayName: currentUser.displayName || currentUser.email,
         action: 'delete',
-        entityType: 'serviceProvider',
-        entityId: providerId,
-        entityName: provider.companyName,
+        entityType: 'document',
+        entityId: documentToDelete.id,
+        entityName: documentToDelete.name,
         changes: [
           {
             field: 'documents',
@@ -561,9 +561,14 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
           }
         ],
         description: `Document deleted: ${documentToDelete.name}`,
+        severity: 'medium',
+        category: 'operational',
         metadata: {
           category: documentToDelete.category,
-          wasEncrypted: documentToDelete.isEncrypted
+          wasEncrypted: documentToDelete.isEncrypted,
+          relatedEntityType: 'serviceProvider',
+          relatedEntityId: providerId,
+          relatedEntityName: provider.companyName
         }
       });
 
