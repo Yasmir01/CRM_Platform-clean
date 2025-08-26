@@ -244,7 +244,7 @@ export default function TwoStepAssignmentSelector({
             label={selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
             onChange={(e) => handlePersonChange(e.target.value)}
             sx={{
-              minWidth: '220px',
+              minWidth: '200px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'
