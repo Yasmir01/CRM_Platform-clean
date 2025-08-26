@@ -135,9 +135,7 @@ export default function PropertyManagers() {
   };
 
   const handleDeleteManager = (id: string) => {
-    // Note: deletePropertyManager function doesn't exist in context yet
-    // For now, we'll need to add it to the context or handle this differently
-    console.log("Delete manager functionality needs to be implemented in context");
+    deletePropertyManager(id);
   };
 
   const filteredManagers = managers.filter(manager =>
