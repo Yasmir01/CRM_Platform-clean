@@ -1126,6 +1126,27 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, []);
 
+  // Migration: Generate account numbers for existing tenants
+  useEffect(() => {
+    if (state.initialized && state.tenants.length > 0) {
+      const tenantsNeedingAccountNumbers = state.tenants.filter(tenant => !tenant.accountNumber);
+
+      if (tenantsNeedingAccountNumbers.length > 0) {
+        // Generate account numbers for existing tenants
+        const updatedTenants = tenantsNeedingAccountNumbers.map(tenant => ({
+          ...tenant,
+          accountNumber: generateTenantAccountNumber(tenant.firstName, tenant.lastName),
+          updatedAt: new Date().toISOString()
+        }));
+
+        // Update tenants one by one to trigger proper state updates
+        updatedTenants.forEach(tenant => {
+          dispatch({ type: 'UPDATE_TENANT', payload: tenant });
+        });
+      }
+    }
+  }, [state.initialized, state.tenants.length]);
+
   // Save data to localStorage whenever state changes
   useEffect(() => {
     if (state.initialized) {
