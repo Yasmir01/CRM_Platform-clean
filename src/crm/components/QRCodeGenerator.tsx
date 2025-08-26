@@ -620,6 +620,21 @@ export default function QRCodeGenerator({
 
   const downloadQR = async () => {
     try {
+      // Ensure we have the latest generated QR
+      const qrUrl = await generateCanvasQR();
+
+      // If we have a canvas-generated data URL, download it directly
+      if (qrUrl.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.download = `${formData.title.replace(/\s+/g, '_')}_QR.png`;
+        link.href = qrUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // Fallback to canvas generation for external URLs
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
