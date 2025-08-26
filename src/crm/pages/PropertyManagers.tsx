@@ -321,7 +321,7 @@ export default function PropertyManagers() {
                         {manager.firstName} {manager.lastName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Since {new Date(manager.hireDate).toLocaleDateString()}
+                        ID: {manager.id}
                       </Typography>
                     </Box>
                   </Stack>
