@@ -340,13 +340,13 @@ export default function PropertyManagers() {
                 </TableCell>
                 <TableCell>
                   <Stack spacing={0.5}>
-                    {manager.properties.map((property, index) => (
+                    {manager.propertyIds.map((propertyId, index) => (
                       <Stack key={index} direction="row" alignItems="center" spacing={1}>
                         <HomeWorkRoundedIcon fontSize="small" color="action" />
-                        <Typography variant="body2">{property}</Typography>
+                        <Typography variant="body2">Property {propertyId}</Typography>
                       </Stack>
                     ))}
-                    {manager.properties.length === 0 && (
+                    {manager.propertyIds.length === 0 && (
                       <Typography variant="body2" color="text.secondary">
                         No properties assigned
                       </Typography>
