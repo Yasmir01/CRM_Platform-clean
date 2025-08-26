@@ -1055,6 +1055,7 @@ export const CrmDataContext = createContext<{
   deleteProperty: (id: string) => void;
   addPropertyManager: (manager: Omit<PropertyManager, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updatePropertyManager: (manager: PropertyManager) => void;
+  deletePropertyManager: (id: string) => void;
   addTenant: (tenant: Omit<Tenant, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTenant: (tenant: Tenant) => void;
   moveOutTenant: (tenantId: string, moveOutData: { moveOutDate: string; moveOutReason?: string; forwardingAddress?: string; securityDepositRefunded?: boolean; finalCharges?: number }) => void;
