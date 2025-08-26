@@ -1428,7 +1428,7 @@ export default function QRCodeGenerator({
             </Tooltip>
             <Tooltip title="Copy QR Code URL to Clipboard" sx={uniformTooltipStyles}>
               <IconButton
-                onClick={() => copyToClipboard(generateQRCode())}
+                onClick={() => copyToClipboard(generatedQRUrl || generateQRCode())}
                 disabled={!formData.content}
                 sx={{
                   bgcolor: 'action.hover',
