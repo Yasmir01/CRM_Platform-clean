@@ -355,15 +355,15 @@ export default function PropertyManagers() {
                 </TableCell>
                 <TableCell>
                   <Typography variant="body2">
-                    {manager.experience} years
+                    {manager.specialties.length} specialties
                   </Typography>
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={0.5} flexWrap="wrap">
-                    {manager.certifications.map((cert, index) => (
+                    {manager.specialties.map((specialty, index) => (
                       <Chip
                         key={index}
-                        label={cert}
+                        label={specialty}
                         size="small"
                         variant="outlined"
                       />
