@@ -416,6 +416,160 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
     }
   };
 
+  const handleDocumentPreview = async (doc: any) => {
+    if (!currentUser) return;
+
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Preview encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Create a blob URL for preview
+        let byteArray: Uint8Array;
+        try {
+          // Validate and decode Base64 content
+          const base64Content = decryptedDocument.content.split(',')[1] || decryptedDocument.content;
+          byteArray = new Uint8Array(atob(base64Content).split('').map(c => c.charCodeAt(0)));
+        } catch (error) {
+          console.error('Base64 decode error:', error);
+          alert('Unable to preview document. The file may be corrupted.');
+          return;
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType || 'application/octet-stream' });
+        const previewUrl = URL.createObjectURL(blob);
+
+        setPreviewDocument({
+          ...doc,
+          previewUrl,
+          filename: decryptedDocument.filename,
+          mimeType: decryptedDocument.mimeType
+        });
+        setOpenPreviewDialog(true);
+      } else {
+        // For non-encrypted documents, use the direct URL
+        setPreviewDocument({
+          ...doc,
+          previewUrl: doc.url,
+          filename: doc.name,
+          mimeType: `application/${doc.type.toLowerCase()}`
+        });
+        setOpenPreviewDialog(true);
+      }
+    } catch (error) {
+      console.error('Error previewing document:', error);
+      alert('Failed to preview document. Please try again.');
+    }
+  };
+
+  const handleDocumentDownload = async (doc: any) => {
+    if (!currentUser) return;
+
+    try {
+      if (doc.isEncrypted && doc.securityDocumentId) {
+        // Download encrypted document using DocumentSecurityService
+        const decryptedDocument = await documentSecurityService.decryptDocument(
+          doc.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+
+        // Create a blob from the decrypted content
+        let byteArray: Uint8Array;
+        try {
+          // Validate and decode Base64 content
+          const base64Content = decryptedDocument.content.split(',')[1] || decryptedDocument.content;
+          byteArray = new Uint8Array(atob(base64Content).split('').map(c => c.charCodeAt(0)));
+        } catch (error) {
+          console.error('Base64 decode error:', error);
+          alert('Unable to download document. The file may be corrupted.');
+          return;
+        }
+
+        const blob = new Blob([byteArray], { type: decryptedDocument.mimeType || 'application/octet-stream' });
+
+        // Create download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = decryptedDocument.filename || doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      } else {
+        // For non-encrypted documents, download directly
+        const link = document.createElement('a');
+        link.href = doc.url;
+        link.download = doc.name;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      alert('Failed to download document. Please try again.');
+    }
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = async () => {
+    if (!documentToDelete || !currentUser) return;
+
+    try {
+      // Delete from security service if encrypted
+      if (documentToDelete.isEncrypted && documentToDelete.securityDocumentId) {
+        await documentSecurityService.deleteDocument(
+          documentToDelete.securityDocumentId,
+          currentUser.id,
+          currentUser.email
+        );
+      }
+
+      // Remove from CrmDataContext
+      deleteDocumentFromContext(documentToDelete.id);
+
+      // Track activity for the deletion
+      activityTracker.trackActivity({
+        userId: currentUser.id,
+        userDisplayName: currentUser.displayName || currentUser.email,
+        action: 'delete',
+        entityType: 'serviceProvider',
+        entityId: providerId,
+        entityName: provider.companyName,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
+          }
+        ],
+        description: `Document deleted: ${documentToDelete.name}`,
+        metadata: {
+          category: documentToDelete.category,
+          wasEncrypted: documentToDelete.isEncrypted
+        }
+      });
+
+      alert(`Document "${documentToDelete.name}" deleted successfully!`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
