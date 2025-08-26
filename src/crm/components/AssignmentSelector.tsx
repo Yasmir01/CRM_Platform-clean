@@ -53,8 +53,8 @@ export default function AssignmentSelector({
     const options: AssignmentOption[] = [];
 
     // Add Property Managers
-    if (includeTypes.includes("propertyManagers")) {
-      propertyManagers?.forEach((manager: PropertyManager) => {
+    if (includeTypes.includes("propertyManagers") && propertyManagers) {
+      propertyManagers.forEach((manager: PropertyManager) => {
         options.push({
           id: `pm_${manager.id}`,
           name: `${manager.firstName} ${manager.lastName}`,
@@ -65,10 +65,10 @@ export default function AssignmentSelector({
     }
 
     // Add Service Providers from contacts
-    if (includeTypes.includes("serviceProviders")) {
-      const serviceProviders = contacts?.filter(
+    if (includeTypes.includes("serviceProviders") && contacts) {
+      const serviceProviders = contacts.filter(
         (contact: Contact) => contact.type === "ServiceProvider"
-      ) || [];
+      );
 
       serviceProviders.forEach((provider: Contact) => {
         options.push({
@@ -82,12 +82,12 @@ export default function AssignmentSelector({
     }
 
     // Add Tenants (optionally filtered by property)
-    if (includeTypes.includes("tenants")) {
-      let filteredTenants = tenants || [];
-      
+    if (includeTypes.includes("tenants") && tenants) {
+      let filteredTenants = tenants;
+
       // If propertyId is provided, only show tenants from that property
       if (propertyId) {
-        filteredTenants = filteredTenants.filter(
+        filteredTenants = tenants.filter(
           (tenant: Tenant) => tenant.propertyId === propertyId
         );
       }
