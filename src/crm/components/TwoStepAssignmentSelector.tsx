@@ -163,7 +163,7 @@ export default function TwoStepAssignmentSelector({
   return (
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
-      <Grid item xs={12} sm={5} md={4}>
+      <Grid item xs={12} sm={6} md={5}>
         <FormControl
           fullWidth={fullWidth}
           sx={{
@@ -213,7 +213,7 @@ export default function TwoStepAssignmentSelector({
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={12} sm={7} md={8}>
+      <Grid item xs={12} sm={6} md={7}>
         <FormControl
           fullWidth={fullWidth}
           disabled={!selectedCategory}
