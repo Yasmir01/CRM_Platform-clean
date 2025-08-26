@@ -37,18 +37,17 @@ export default function TwoStepAssignmentSelector({
   propertyId,
   tenantId,
 }: TwoStepAssignmentSelectorProps) {
-  const { propertyManagers, tenants, contacts } = useCrmData();
+  const { state } = useCrmData();
+  const { propertyManagers, tenants, contacts } = state;
 
   // Debug logging to check data availability
   React.useEffect(() => {
-    console.log("TwoStepAssignmentSelector - Data Check:", {
+    console.log("TwoStepAssignmentSelector - Real-time Data Update:", {
       propertyManagers: propertyManagers?.length || 0,
       tenants: tenants?.length || 0,
       contacts: contacts?.length || 0,
       serviceProviders: contacts?.filter(c => c.type === "ServiceProvider")?.length || 0,
-      allContacts: contacts,
-      allTenants: tenants,
-      allManagers: propertyManagers
+      timestamp: new Date().toISOString()
     });
   }, [propertyManagers, tenants, contacts]);
   
@@ -85,14 +84,15 @@ export default function TwoStepAssignmentSelector({
     onChange(personValue);
   };
 
-  // Get people for the selected category
-  const getPeopleForCategory = () => {
+  // Get people for the selected category with memoization for better performance
+  const getPeopleForCategory = React.useCallback(() => {
     switch (selectedCategory) {
       case "tenant":
-        let filteredTenants = tenants || [];
+        if (!tenants) return [];
+        let filteredTenants = tenants;
         // If propertyId is provided, only show tenants from that property
         if (propertyId) {
-          filteredTenants = filteredTenants.filter(
+          filteredTenants = tenants.filter(
             (tenant: Tenant) => tenant.propertyId === propertyId
           );
         }
@@ -104,7 +104,8 @@ export default function TwoStepAssignmentSelector({
         }));
 
       case "manager":
-        return (propertyManagers || []).map((manager: PropertyManager) => ({
+        if (!propertyManagers) return [];
+        return propertyManagers.map((manager: PropertyManager) => ({
           id: `pm_${manager.id}`,
           name: `${manager.firstName} ${manager.lastName}`,
           email: manager.email,
@@ -112,9 +113,10 @@ export default function TwoStepAssignmentSelector({
         }));
 
       case "serviceProvider":
-        const serviceProviders = contacts?.filter(
+        if (!contacts) return [];
+        const serviceProviders = contacts.filter(
           (contact: Contact) => contact.type === "ServiceProvider"
-        ) || [];
+        );
         return serviceProviders.map((provider: Contact) => ({
           id: `sp_${provider.id}`,
           name: provider.company || `${provider.firstName} ${provider.lastName}`,
@@ -125,7 +127,7 @@ export default function TwoStepAssignmentSelector({
       default:
         return [];
     }
-  };
+  }, [selectedCategory, tenants, propertyManagers, contacts, propertyId]);
 
   const getCategoryIcon = (category: AssignmentCategory) => {
     switch (category) {
@@ -153,23 +155,40 @@ export default function TwoStepAssignmentSelector({
     }
   };
 
-  const getSelectedPersonInfo = () => {
+  const selectedPersonInfo = React.useMemo(() => {
     const people = getPeopleForCategory();
     return people.find(person => person.id === selectedPerson);
-  };
-
-  const selectedPersonInfo = getSelectedPersonInfo();
+  }, [getPeopleForCategory, selectedPerson]);
 
   return (
     <Grid container spacing={2}>
       {/* Step 1: Category Selection */}
-      <Grid item xs={6}>
-        <FormControl fullWidth={fullWidth}>
+      <Grid item xs={12} sm={6} md={5}>
+        <FormControl
+          fullWidth={fullWidth}
+          sx={{
+            '& .MuiInputBase-root': {
+              minWidth: '180px',
+              fontSize: '1rem'
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '1rem',
+              fontWeight: 500
+            }
+          }}
+        >
           <InputLabel>Assignment Type</InputLabel>
           <Select
             value={selectedCategory}
             label="Assignment Type"
             onChange={(e) => handleCategoryChange(e.target.value as AssignmentCategory)}
+            sx={{
+              minWidth: '180px',
+              '& .MuiSelect-select': {
+                padding: '16.5px 14px',
+                fontSize: '1rem'
+              }
+            }}
           >
             <MenuItem value="tenant">
               <Stack direction="row" alignItems="center" spacing={1}>
@@ -194,8 +213,21 @@ export default function TwoStepAssignmentSelector({
       </Grid>
 
       {/* Step 2: Person Selection */}
-      <Grid item xs={6}>
-        <FormControl fullWidth={fullWidth} disabled={!selectedCategory}>
+      <Grid item xs={12} sm={6} md={7}>
+        <FormControl
+          fullWidth={fullWidth}
+          disabled={!selectedCategory}
+          sx={{
+            '& .MuiInputBase-root': {
+              minWidth: '220px',
+              fontSize: '1rem'
+            },
+            '& .MuiInputLabel-root': {
+              fontSize: '1rem',
+              fontWeight: 500
+            }
+          }}
+        >
           <InputLabel>
             {selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
           </InputLabel>
@@ -203,6 +235,13 @@ export default function TwoStepAssignmentSelector({
             value={selectedPerson}
             label={selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
             onChange={(e) => handlePersonChange(e.target.value)}
+            sx={{
+              minWidth: '220px',
+              '& .MuiSelect-select': {
+                padding: '16.5px 14px',
+                fontSize: '1rem'
+              }
+            }}
             renderValue={(selected) => {
               if (!selected || !selectedPersonInfo) {
                 return "";

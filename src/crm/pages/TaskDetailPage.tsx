@@ -27,6 +27,12 @@ import {
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tab,
   Tabs,
   Alert,
@@ -66,6 +72,9 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import { useCrmData } from "../contexts/CrmDataContext";
 import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 
@@ -134,7 +143,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
-  const { properties, tenants } = useCrmData();
+  const { state } = useCrmData();
+  const { properties, tenants } = state;
   const [currentTab, setCurrentTab] = React.useState(0);
   const [openNoteDialog, setOpenNoteDialog] = React.useState(false);
   const [openDocumentDialog, setOpenDocumentDialog] = React.useState(false);
@@ -143,6 +153,10 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
   const [openSubTaskDialog, setOpenSubTaskDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [openDocumentPreview, setOpenDocumentPreview] = React.useState(false);
+  const [openDocumentHistory, setOpenDocumentHistory] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<Document | null>(null);
+  const [documentToDelete, setDocumentToDelete] = React.useState<Document | null>(null);
 
   // Mock task data
   const task = {
@@ -246,7 +260,7 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
+  const [documents, setDocuments] = React.useState<Document[]>([
     {
       id: "1",
       name: "Monthly Inspection Checklist.pdf",
@@ -361,6 +375,18 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
 
   const handleUploadDocument = () => {
     if (newDocument.file) {
+      const uploadedDocument: Document = {
+        id: Date.now().toString(),
+        name: newDocument.file.name,
+        type: newDocument.file.type || "Unknown",
+        size: newDocument.file.size,
+        uploadDate: new Date().toISOString(),
+        uploadedBy: "Current User",
+        category: newDocument.category,
+        url: URL.createObjectURL(newDocument.file), // Create object URL for local file
+      };
+
+      setDocuments(prev => [uploadedDocument, ...prev]);
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
@@ -387,6 +413,28 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
 
     // Show success message
     alert(`Downloading ${document.name}...`);
+  };
+
+  const handleViewDocument = (document: Document) => {
+    setSelectedDocument(document);
+    setOpenDocumentPreview(true);
+  };
+
+  const handleViewDocumentHistory = (document: Document) => {
+    setSelectedDocument(document);
+    setOpenDocumentHistory(true);
+  };
+
+  const handleDeleteDocument = (document: Document) => {
+    setDocumentToDelete(document);
+  };
+
+  const confirmDeleteDocument = () => {
+    if (documentToDelete) {
+      setDocuments(prev => prev.filter(doc => doc.id !== documentToDelete.id));
+      alert(`Document "${documentToDelete.name}" deleted successfully!`);
+      setDocumentToDelete(null);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -844,40 +892,127 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
               Upload Document
             </Button>
           </Stack>
-          <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
-                />
-                <ListItemSecondaryAction>
-                  <Tooltip
-                    title={`Download ${doc.name}`}
-                    componentsProps={{
-                      tooltip: {
-                        sx: uniformTooltipStyles
-                      }
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDownloadDocument(doc)}
-                      sx={{
-                        bgcolor: 'action.hover',
-                        '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
-                      }}
-                    >
-                      <DownloadRoundedIcon />
-                    </IconButton>
-                  </Tooltip>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Size</TableCell>
+                  <TableCell>Upload Date</TableCell>
+                  <TableCell>Uploaded By</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {documents.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <AttachFileRoundedIcon fontSize="small" />
+                        <Typography variant="body2">{doc.name}</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={doc.category} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell>{formatFileSize(doc.size)}</TableCell>
+                    <TableCell>{new Date(doc.uploadDate).toLocaleDateString()}</TableCell>
+                    <TableCell>{doc.uploadedBy}</TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip
+                          title={`View ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
+                            }}
+                          >
+                            <VisibilityRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title={`Download ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDownloadDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'success.light', color: 'success.main' }
+                            }}
+                          >
+                            <DownloadRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title="View Document History"
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleViewDocumentHistory(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'info.light', color: 'info.main' }
+                            }}
+                          >
+                            <DescriptionRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip
+                          title={`Delete ${doc.name}`}
+                          componentsProps={{
+                            tooltip: {
+                              sx: uniformTooltipStyles
+                            }
+                          }}
+                        >
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteDocument(doc)}
+                            sx={{
+                              bgcolor: 'action.hover',
+                              '&:hover': { bgcolor: 'error.light', color: 'error.main' }
+                            }}
+                          >
+                            <DeleteRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {documents.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      <Typography variant="body2" color="text.secondary">
+                        No documents uploaded yet
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       </TabPanel>
 
@@ -1106,6 +1241,141 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
             startIcon={<CloudUploadRoundedIcon />}
           >
             Upload Document
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={openDocumentPreview} onClose={() => setOpenDocumentPreview(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <VisibilityRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document Preview</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocument?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} alignItems="center" textAlign="center" sx={{ py: 4 }}>
+            <AttachFileRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+            <Typography variant="h6">Document Preview</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Document preview functionality would be implemented here.
+            </Typography>
+            <Typography variant="body2">
+              <strong>Size:</strong> {selectedDocument && formatFileSize(selectedDocument.size)}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Category:</strong> {selectedDocument?.category}
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={() => {
+                if (selectedDocument) {
+                  handleDownloadDocument(selectedDocument);
+                  setOpenDocumentPreview(false);
+                }
+              }}
+            >
+              Download Document
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentPreview(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document History Dialog */}
+      <Dialog open={openDocumentHistory} onClose={() => setOpenDocumentHistory(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DescriptionRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document History</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocument?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <Typography variant="h6">Version History</Typography>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary="Version 1.0 (Current)"
+                  secondary={`Uploaded by ${selectedDocument?.uploadedBy} on ${selectedDocument && new Date(selectedDocument.uploadDate).toLocaleDateString()}`}
+                />
+              </ListItem>
+            </List>
+
+            <Divider />
+
+            <Typography variant="h6">Access Log</Typography>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary="Document Created"
+                  secondary={`${selectedDocument?.uploadedBy} uploaded this document on ${selectedDocument && new Date(selectedDocument.uploadDate).toLocaleDateString()}`}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Last Accessed"
+                  secondary="Document was last accessed today"
+                />
+              </ListItem>
+            </List>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentHistory(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog
+        open={!!documentToDelete}
+        onClose={() => setDocumentToDelete(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DeleteRoundedIcon color="error" />
+            <Typography variant="h6">Delete Document</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Typography variant="body1">
+              Are you sure you want to delete this document? This action cannot be undone.
+            </Typography>
+            {documentToDelete && (
+              <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                <Typography variant="subtitle2">{documentToDelete.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {documentToDelete.category} • {formatFileSize(documentToDelete.size)}
+                </Typography>
+              </Paper>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentToDelete(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={confirmDeleteDocument}
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
           </Button>
         </DialogActions>
       </Dialog>

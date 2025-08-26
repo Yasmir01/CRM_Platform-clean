@@ -42,7 +42,7 @@ import {
 import TaskDetailPage from "./TaskDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
-import AssignmentSelector from "../components/AssignmentSelector";
+import TwoStepAssignmentSelector from "../components/TwoStepAssignmentSelector";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -798,12 +798,11 @@ export default function Tasks({ propertyId, tenantId }: TasksProps = {}) {
             />
 
             <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <AssignmentSelector
+              <Grid item xs={12}>
+                <TwoStepAssignmentSelector
                   value={formData.assignedTo}
                   onChange={(value) => setFormData({ ...formData, assignedTo: value })}
                   label="Assigned To"
-                  includeTypes={["propertyManagers", "serviceProviders", "tenants"]}
                   propertyId={formData.propertyId || propertyId}
                   tenantId={tenantId}
                 />
