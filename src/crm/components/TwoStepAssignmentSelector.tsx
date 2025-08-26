@@ -168,7 +168,7 @@ export default function TwoStepAssignmentSelector({
           fullWidth={fullWidth}
           sx={{
             '& .MuiInputBase-root': {
-              minHeight: '56px',
+              minWidth: '180px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
@@ -183,7 +183,7 @@ export default function TwoStepAssignmentSelector({
             label="Assignment Type"
             onChange={(e) => handleCategoryChange(e.target.value as AssignmentCategory)}
             sx={{
-              minHeight: '56px',
+              minWidth: '180px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'
@@ -219,7 +219,7 @@ export default function TwoStepAssignmentSelector({
           disabled={!selectedCategory}
           sx={{
             '& .MuiInputBase-root': {
-              minHeight: '56px',
+              minWidth: '220px',
               fontSize: '1rem'
             },
             '& .MuiInputLabel-root': {
@@ -236,7 +236,7 @@ export default function TwoStepAssignmentSelector({
             label={selectedCategory ? `Select ${getCategoryLabel(selectedCategory)}` : "Select Type First"}
             onChange={(e) => handlePersonChange(e.target.value)}
             sx={{
-              minHeight: '56px',
+              minWidth: '220px',
               '& .MuiSelect-select': {
                 padding: '16.5px 14px',
                 fontSize: '1rem'
