@@ -137,7 +137,7 @@ export default function QrRedirector() {
       setPasswordRequired(false);
       
       // Check if lead capture is required
-      if (qrCode.tracking.captureLeads && qrCode.tracking.requireContact) {
+      if (qrCode.tracking.captureLeads) {
         setShowLeadCapture(true);
       } else {
         handleRedirect(qrCode);
