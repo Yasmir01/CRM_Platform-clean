@@ -1327,7 +1327,13 @@ export default function QRCodeGenerator({
           <Button 
             variant="contained" 
             onClick={() => setCurrentStep(currentStep + 1)}
-            disabled={currentStep === 0 && (!formData.title || !formData.content)}
+            disabled={
+              currentStep === 0 && (
+                !formData.title ||
+                !formData.content ||
+                (formData.isPasswordProtected && !formData.password)
+              )
+            }
           >
             Next
           </Button>
