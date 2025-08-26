@@ -454,6 +454,7 @@ export default function Tenants() {
           <TableHead>
             <TableRow>
               <TableCell>Tenant</TableCell>
+              <TableCell>Account #</TableCell>
               <TableCell>Contact</TableCell>
               <TableCell>Property</TableCell>
               <TableCell>Lease Period</TableCell>
@@ -493,6 +494,11 @@ export default function Tenants() {
                       </Typography>
                     </Box>
                   </Stack>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
+                    {tenant.accountNumber || 'Not generated'}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Stack spacing={1}>
