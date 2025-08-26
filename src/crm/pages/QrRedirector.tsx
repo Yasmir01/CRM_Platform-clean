@@ -120,7 +120,7 @@ export default function QrRedirector() {
     }
 
     // Check if lead capture is required
-    if (foundQr.tracking.captureLeads && foundQr.tracking.requireContact) {
+    if (foundQr.tracking.captureLeads) {
       setShowLeadCapture(true);
       setLoading(false);
       return;
