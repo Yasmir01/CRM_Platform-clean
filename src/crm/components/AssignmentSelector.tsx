@@ -46,7 +46,8 @@ export default function AssignmentSelector({
   propertyId,
   tenantId,
 }: AssignmentSelectorProps) {
-  const { propertyManagers, tenants, contacts } = useCrmData();
+  const { state } = useCrmData();
+  const { propertyManagers, tenants, contacts } = state;
 
   const assignmentOptions = React.useMemo(() => {
     const options: AssignmentOption[] = [];
