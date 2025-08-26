@@ -444,6 +444,13 @@ export default function QRCodeGenerator({
   const [generatedQRUrl, setGeneratedQRUrl] = React.useState<string>("");
   const [isGeneratingQR, setIsGeneratingQR] = React.useState<boolean>(false);
 
+  // Regenerate QR code when content or customization changes
+  React.useEffect(() => {
+    if (formData.content) {
+      generateCanvasQR();
+    }
+  }, [formData.content, customization, logoPreview]);
+
   // Load selected QR data for editing
   React.useEffect(() => {
     if (selectedQR) {
