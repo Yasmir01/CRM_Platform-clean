@@ -42,14 +42,12 @@ export default function TwoStepAssignmentSelector({
 
   // Debug logging to check data availability
   React.useEffect(() => {
-    console.log("TwoStepAssignmentSelector - Data Check:", {
+    console.log("TwoStepAssignmentSelector - Real-time Data Update:", {
       propertyManagers: propertyManagers?.length || 0,
       tenants: tenants?.length || 0,
       contacts: contacts?.length || 0,
       serviceProviders: contacts?.filter(c => c.type === "ServiceProvider")?.length || 0,
-      allContacts: contacts,
-      allTenants: tenants,
-      allManagers: propertyManagers
+      timestamp: new Date().toISOString()
     });
   }, [propertyManagers, tenants, contacts]);
   
