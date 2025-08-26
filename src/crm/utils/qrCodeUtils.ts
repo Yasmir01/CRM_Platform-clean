@@ -48,41 +48,89 @@ export const generateCanvasQRCode = async (
         // Clear canvas
         ctx.clearRect(0, 0, size, size);
 
+        // Fill background first
+        ctx.fillStyle = customization.backgroundColor;
+        ctx.fillRect(0, 0, size, size);
+
+        // Create a temporary canvas to process the QR image
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        if (!tempCtx) return;
+
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+
+        // Draw QR image to temp canvas
+        tempCtx.drawImage(qrImage, 0, 0, size, size);
+
+        // Get image data to identify QR modules (black pixels)
+        const imageData = tempCtx.getImageData(0, 0, size, size);
+        const data = imageData.data;
+
+        // Process each pixel
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // If pixel is dark (QR module), make it transparent so we can fill with our color
+          // If pixel is light (background), make it fully transparent
+          if (r < 128 && g < 128 && b < 128) {
+            // Dark pixel - this is a QR module, keep it but make it black
+            data[i] = 0;     // R
+            data[i + 1] = 0; // G
+            data[i + 2] = 0; // B
+            data[i + 3] = 255; // A - fully opaque
+          } else {
+            // Light pixel - make it transparent
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+            data[i + 3] = 0; // A - fully transparent
+          }
+        }
+
+        // Put the processed image data back
+        tempCtx.putImageData(imageData, 0, 0);
+
         if (customization.gradientEnabled && customization.gradientColors && customization.gradientColors.length >= 2) {
-          // Create gradient background
+          // Create gradient for QR modules
           const gradient = ctx.createLinearGradient(0, 0, size, size);
           gradient.addColorStop(0, customization.gradientColors[0] || customization.foregroundColor);
           gradient.addColorStop(1, customization.gradientColors[1] || customization.backgroundColor);
-          
-          // Fill background
-          ctx.fillStyle = customization.backgroundColor;
-          ctx.fillRect(0, 0, size, size);
-          
-          // Draw QR image
-          ctx.drawImage(qrImage, 0, 0, size, size);
-          
-          // Apply gradient to QR modules
-          ctx.globalCompositeOperation = 'source-in';
+
+          // Fill the main canvas with gradient
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, size, size);
-          
+
+          // Use destination-in to only keep gradient where QR modules are
+          ctx.globalCompositeOperation = 'destination-in';
+          ctx.drawImage(tempCanvas, 0, 0, size, size);
+
+          // Reset composite operation and add background back
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = customization.backgroundColor;
+          ctx.fillRect(0, 0, size, size);
+
           // Reset composite operation
           ctx.globalCompositeOperation = 'source-over';
         } else {
-          // Fill background
+          // For solid color QR codes
+          // Fill with foreground color
+          ctx.fillStyle = customization.foregroundColor;
+          ctx.fillRect(0, 0, size, size);
+
+          // Use destination-in to only keep color where QR modules are
+          ctx.globalCompositeOperation = 'destination-in';
+          ctx.drawImage(tempCanvas, 0, 0, size, size);
+
+          // Reset composite operation and add background back
+          ctx.globalCompositeOperation = 'destination-over';
           ctx.fillStyle = customization.backgroundColor;
           ctx.fillRect(0, 0, size, size);
-          
-          // Draw QR with custom colors
-          ctx.drawImage(qrImage, 0, 0, size, size);
-          
-          // Apply foreground color to QR modules
-          if (customization.foregroundColor !== '#000000') {
-            ctx.globalCompositeOperation = 'source-in';
-            ctx.fillStyle = customization.foregroundColor;
-            ctx.fillRect(0, 0, size, size);
-            ctx.globalCompositeOperation = 'source-over';
-          }
+
+          // Reset composite operation
+          ctx.globalCompositeOperation = 'source-over';
         }
 
         // Add logo if provided
