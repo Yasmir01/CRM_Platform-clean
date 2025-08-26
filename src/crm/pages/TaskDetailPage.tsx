@@ -1244,6 +1244,141 @@ export default function TaskDetailPage({ taskId, onBack }: TaskDetailProps) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog open={openDocumentPreview} onClose={() => setOpenDocumentPreview(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <VisibilityRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document Preview</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocument?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} alignItems="center" textAlign="center" sx={{ py: 4 }}>
+            <AttachFileRoundedIcon sx={{ fontSize: 80, color: 'primary.main' }} />
+            <Typography variant="h6">Document Preview</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Document preview functionality would be implemented here.
+            </Typography>
+            <Typography variant="body2">
+              <strong>Size:</strong> {selectedDocument && formatFileSize(selectedDocument.size)}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Category:</strong> {selectedDocument?.category}
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={() => {
+                if (selectedDocument) {
+                  handleDownloadDocument(selectedDocument);
+                  setOpenDocumentPreview(false);
+                }
+              }}
+            >
+              Download Document
+            </Button>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentPreview(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document History Dialog */}
+      <Dialog open={openDocumentHistory} onClose={() => setOpenDocumentHistory(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DescriptionRoundedIcon />
+            <Box>
+              <Typography variant="h6">Document History</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {selectedDocument?.name}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <Typography variant="h6">Version History</Typography>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary="Version 1.0 (Current)"
+                  secondary={`Uploaded by ${selectedDocument?.uploadedBy} on ${selectedDocument && new Date(selectedDocument.uploadDate).toLocaleDateString()}`}
+                />
+              </ListItem>
+            </List>
+
+            <Divider />
+
+            <Typography variant="h6">Access Log</Typography>
+            <List>
+              <ListItem>
+                <ListItemText
+                  primary="Document Created"
+                  secondary={`${selectedDocument?.uploadedBy} uploaded this document on ${selectedDocument && new Date(selectedDocument.uploadDate).toLocaleDateString()}`}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Last Accessed"
+                  secondary="Document was last accessed today"
+                />
+              </ListItem>
+            </List>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentHistory(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog
+        open={!!documentToDelete}
+        onClose={() => setDocumentToDelete(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <DeleteRoundedIcon color="error" />
+            <Typography variant="h6">Delete Document</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2}>
+            <Typography variant="body1">
+              Are you sure you want to delete this document? This action cannot be undone.
+            </Typography>
+            {documentToDelete && (
+              <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                <Typography variant="subtitle2">{documentToDelete.name}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {documentToDelete.category} • {formatFileSize(documentToDelete.size)}
+                </Typography>
+              </Paper>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentToDelete(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={confirmDeleteDocument}
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
