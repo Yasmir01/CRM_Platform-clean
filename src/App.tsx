@@ -130,6 +130,12 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<CrmLogin />} />
+      {/* Public help route - accessible without authentication */}
+      <Route path="/help" element={
+        <React.Suspense fallback={<PageLoader />}>
+          <HelpSupport />
+        </React.Suspense>
+      } />
       <Route path="/crm" element={
         <ProtectedRoute>
           <CrmDashboard />
