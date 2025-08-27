@@ -279,6 +279,11 @@ function AppRoutes() {
             <IntegrationManagement />
           </React.Suspense>
         } />
+        <Route path="real-estate-platforms" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <RealEstatePlatformIntegrations />
+          </React.Suspense>
+        } />
         <Route path="backup" element={
           <React.Suspense fallback={<PageLoader />}>
             <BackupManagement />
