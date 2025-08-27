@@ -191,7 +191,7 @@ export default function RealEstatePlatformIntegrations() {
             <Button
               variant="contained"
               startIcon={<Help />}
-              onClick={() => window.open('/help?category=platform-integrations', '_blank')}
+              onClick={() => window.open('/crm/help?category=platform-integrations', '_blank')}
             >
               Help & Guides
             </Button>
@@ -345,7 +345,7 @@ export default function RealEstatePlatformIntegrations() {
                   variant="outlined"
                   fullWidth
                   startIcon={<MonetizationOn />}
-                  onClick={() => window.open('/help?article=platform-pricing-overview', '_blank')}
+                  onClick={() => window.open('/crm/help?article=platform-pricing-overview', '_blank')}
                 >
                   View Pricing & Bundles
                 </Button>
@@ -354,7 +354,7 @@ export default function RealEstatePlatformIntegrations() {
                   variant="outlined"
                   fullWidth
                   startIcon={<Security />}
-                  onClick={() => window.open('/help?article=platform-authentication-overview', '_blank')}
+                  onClick={() => window.open('/crm/help?article=platform-authentication-overview', '_blank')}
                 >
                   Setup Platform Authentication
                 </Button>
