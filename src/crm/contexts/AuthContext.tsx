@@ -95,6 +95,9 @@ const mockUsers: User[] = [
     permissions: ['manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_staff'],
     properties: ['Regional Portfolio'],
     createdAt: '2024-01-03T00:00:00Z',
+    timezone: 'America/Chicago',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '4',
@@ -107,6 +110,9 @@ const mockUsers: User[] = [
     permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
     properties: ['Sunset Apartments', 'Ocean View Villa'],
     createdAt: '2024-01-04T00:00:00Z',
+    timezone: 'America/Denver',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '5',
@@ -118,6 +124,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_properties', 'view_tenants', 'view_reports', 'send_communications'],
     createdAt: '2024-01-05T00:00:00Z',
+    timezone: 'Asia/Shanghai',
+    preferredLanguage: 'zh',
+    countryCode: 'CN',
   },
   {
     id: '6',
