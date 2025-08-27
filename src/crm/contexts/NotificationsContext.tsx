@@ -209,6 +209,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   const crmContext = useContext(CrmDataContext);
   const state = crmContext?.state;
   const [manualNotifications, setManualNotifications] = useState<Notification[]>([]);
+  const [readIds, setReadIds] = useState<Record<string, boolean>>({});
+  const [removedIds, setRemovedIds] = useState<Record<string, boolean>>({});
 
   const notifications = useMemo(() => {
     if (!state?.initialized) return manualNotifications;
