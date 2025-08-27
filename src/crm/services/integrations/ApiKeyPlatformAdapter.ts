@@ -596,3 +596,377 @@ export class ZumperAdapter extends ApiKeyPlatformAdapter {
     }
   }
 }
+
+/**
+ * RentBerry Platform Adapter
+ */
+export class RentBerryAdapter extends ApiKeyPlatformAdapter {
+  constructor() {
+    super('rentberry', 'https://api.rentberry.com/v1', 'v1');
+  }
+
+  protected getTestEndpoint(): string {
+    return '/account';
+  }
+
+  async publishListing(listingData: PropertyListingData): Promise<ListingPublishResult> {
+    try {
+      const rentberryData = this.transformPropertyData(listingData);
+      const response = await this.makeApiRequest(
+        '/properties',
+        'POST',
+        rentberryData,
+        this.getAuthHeaders()
+      );
+
+      return {
+        success: true,
+        externalListingId: response.property_id,
+        listingUrl: `https://rentberry.com/property/${response.property_id}`,
+        message: 'Listing published successfully to RentBerry'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to publish to RentBerry'
+      };
+    }
+  }
+
+  async updateListing(externalListingId: string, listingData: Partial<PropertyListingData>): Promise<ListingUpdateResult> {
+    try {
+      const updateData = this.transformPropertyData(listingData);
+      await this.makeApiRequest(
+        `/properties/${externalListingId}`,
+        'PUT',
+        updateData,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing updated successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update listing' };
+    }
+  }
+
+  async removeListing(externalListingId: string): Promise<ListingRemovalResult> {
+    try {
+      await this.makeApiRequest(
+        `/properties/${externalListingId}`,
+        'DELETE',
+        undefined,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing removed successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to remove listing' };
+    }
+  }
+
+  async getListingStatus(externalListingId: string): Promise<any> {
+    return await this.makeApiRequest(
+      `/properties/${externalListingId}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<PlatformAnalytics> {
+    const response = await this.makeApiRequest(
+      `/analytics?start=${startDate}&end=${endDate}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+
+    return {
+      platform: 'rentberry',
+      period: 'custom',
+      startDate,
+      endDate,
+      metrics: {
+        totalListings: response.total_properties || 0,
+        activeListings: response.active_properties || 0,
+        successfulPublications: response.published_properties || 0,
+        failedPublications: response.failed_properties || 0,
+        totalViews: response.total_views || 0,
+        totalInquiries: response.total_applications || 0,
+        conversionRate: response.application_rate || 0,
+        averageTimeToPublish: response.avg_publish_time || 0,
+        revenue: response.revenue || 0,
+        costs: response.fees || 0,
+        profit: (response.revenue || 0) - (response.fees || 0)
+      },
+      topPerformingListings: response.top_properties || []
+    };
+  }
+
+  transformPropertyData(crmData: any): PropertyListingData {
+    return {
+      propertyId: crmData.id,
+      platform: 'rentberry',
+      title: crmData.name || 'Rental Property',
+      description: this.sanitizeText(crmData.description || '', 800),
+      price: crmData.monthlyRent || crmData.price || 0,
+      priceType: 'monthly',
+      propertyType: crmData.type || 'apartment',
+      address: {
+        street: crmData.address || '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'US'
+      },
+      details: {
+        bedrooms: crmData.bedrooms || 0,
+        bathrooms: crmData.bathrooms || 0,
+        squareFootage: crmData.squareFootage,
+        amenities: crmData.amenities || []
+      },
+      media: {
+        photos: (crmData.photos || []).slice(0, 20)
+      },
+      availability: {
+        availableDate: crmData.availableDate || new Date().toISOString().split('T')[0]
+      },
+      contact: {
+        name: crmData.contactName || 'Property Manager',
+        email: crmData.contactEmail || '',
+        phone: crmData.contactPhone || '',
+        preferredContact: 'email'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  getValidationRules(): any {
+    return {
+      required: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+      maxPhotos: 20,
+      maxDescriptionLength: 800,
+      propertyTypes: ['apartment', 'house', 'condo'],
+      priceRange: { min: 1, max: 15000 }
+    };
+  }
+
+  validateListingData(listingData: PropertyListingData): { valid: boolean; errors: string[] } {
+    const rules = this.getValidationRules();
+    const errors: string[] = [];
+
+    errors.push(...this.validateRequiredFields(listingData, rules.required));
+    errors.push(...this.validateNumericField(listingData.price, 'price', rules.priceRange.min, rules.priceRange.max));
+
+    if (listingData.media.photos && listingData.media.photos.length > rules.maxPhotos) {
+      errors.push(`Maximum ${rules.maxPhotos} photos allowed`);
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  async handleWebhook(payload: any): Promise<{ processed: boolean; action?: string }> {
+    try {
+      switch (payload.event) {
+        case 'property.published':
+          return { processed: true, action: 'listing_published' };
+        case 'property.updated':
+          return { processed: true, action: 'listing_updated' };
+        case 'property.deleted':
+          return { processed: true, action: 'listing_removed' };
+        case 'application.received':
+          return { processed: true, action: 'application_received' };
+        default:
+          return { processed: false };
+      }
+    } catch (error) {
+      return { processed: false };
+    }
+  }
+}
+
+/**
+ * Dwellsy Platform Adapter
+ */
+export class DwellsyAdapter extends ApiKeyPlatformAdapter {
+  constructor() {
+    super('dwellsy', 'https://api.dwellsy.com/v1', 'v1');
+  }
+
+  protected getTestEndpoint(): string {
+    return '/user';
+  }
+
+  async publishListing(listingData: PropertyListingData): Promise<ListingPublishResult> {
+    try {
+      const dwellsyData = this.transformPropertyData(listingData);
+      const response = await this.makeApiRequest(
+        '/listings',
+        'POST',
+        dwellsyData,
+        this.getAuthHeaders()
+      );
+
+      return {
+        success: true,
+        externalListingId: response.listing_id,
+        listingUrl: `https://dwellsy.com/listing/${response.listing_id}`,
+        message: 'Listing published successfully to Dwellsy'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to publish to Dwellsy'
+      };
+    }
+  }
+
+  async updateListing(externalListingId: string, listingData: Partial<PropertyListingData>): Promise<ListingUpdateResult> {
+    try {
+      const updateData = this.transformPropertyData(listingData);
+      await this.makeApiRequest(
+        `/listings/${externalListingId}`,
+        'PUT',
+        updateData,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing updated successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update listing' };
+    }
+  }
+
+  async removeListing(externalListingId: string): Promise<ListingRemovalResult> {
+    try {
+      await this.makeApiRequest(
+        `/listings/${externalListingId}`,
+        'DELETE',
+        undefined,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing removed successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to remove listing' };
+    }
+  }
+
+  async getListingStatus(externalListingId: string): Promise<any> {
+    return await this.makeApiRequest(
+      `/listings/${externalListingId}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<PlatformAnalytics> {
+    const response = await this.makeApiRequest(
+      `/analytics?start=${startDate}&end=${endDate}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+
+    return {
+      platform: 'dwellsy',
+      period: 'custom',
+      startDate,
+      endDate,
+      metrics: {
+        totalListings: response.total_listings || 0,
+        activeListings: response.active_listings || 0,
+        successfulPublications: response.published_listings || 0,
+        failedPublications: response.failed_listings || 0,
+        totalViews: response.total_views || 0,
+        totalInquiries: response.total_inquiries || 0,
+        conversionRate: response.inquiry_rate || 0,
+        averageTimeToPublish: response.avg_publish_time || 0,
+        revenue: response.revenue || 0,
+        costs: response.costs || 0,
+        profit: (response.revenue || 0) - (response.costs || 0)
+      },
+      topPerformingListings: response.top_listings || []
+    };
+  }
+
+  transformPropertyData(crmData: any): PropertyListingData {
+    return {
+      propertyId: crmData.id,
+      platform: 'dwellsy',
+      title: crmData.name || 'No Fee Rental',
+      description: this.sanitizeText(crmData.description || '', 600),
+      price: crmData.monthlyRent || crmData.price || 0,
+      priceType: 'monthly',
+      propertyType: crmData.type || 'apartment',
+      address: {
+        street: crmData.address || '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'US'
+      },
+      details: {
+        bedrooms: crmData.bedrooms || 0,
+        bathrooms: crmData.bathrooms || 0,
+        squareFootage: crmData.squareFootage,
+        amenities: crmData.amenities || []
+      },
+      media: {
+        photos: (crmData.photos || []).slice(0, 15)
+      },
+      availability: {
+        availableDate: crmData.availableDate || new Date().toISOString().split('T')[0]
+      },
+      contact: {
+        name: crmData.contactName || 'Landlord',
+        email: crmData.contactEmail || '',
+        phone: crmData.contactPhone || '',
+        preferredContact: 'email'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  getValidationRules(): any {
+    return {
+      required: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+      maxPhotos: 15,
+      maxDescriptionLength: 600,
+      propertyTypes: ['apartment', 'house', 'studio'],
+      priceRange: { min: 1, max: 12000 }
+    };
+  }
+
+  validateListingData(listingData: PropertyListingData): { valid: boolean; errors: string[] } {
+    const rules = this.getValidationRules();
+    const errors: string[] = [];
+
+    errors.push(...this.validateRequiredFields(listingData, rules.required));
+    errors.push(...this.validateNumericField(listingData.price, 'price', rules.priceRange.min, rules.priceRange.max));
+
+    if (listingData.media.photos && listingData.media.photos.length > rules.maxPhotos) {
+      errors.push(`Maximum ${rules.maxPhotos} photos allowed`);
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  async handleWebhook(payload: any): Promise<{ processed: boolean; action?: string }> {
+    try {
+      switch (payload.type) {
+        case 'listing.created':
+          return { processed: true, action: 'listing_published' };
+        case 'listing.updated':
+          return { processed: true, action: 'listing_updated' };
+        case 'listing.deleted':
+          return { processed: true, action: 'listing_removed' };
+        default:
+          return { processed: false };
+      }
+    } catch (error) {
+      return { processed: false };
+    }
+  }
+}
