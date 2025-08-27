@@ -191,33 +191,71 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Publish property to multiple platforms
+   * Publish property to multiple platforms using real publishing service
    */
   async publishProperty(
     propertyData: PropertyListingData,
     platforms: RealEstatePlatform[],
     userId: string
   ): Promise<PublishingJob> {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const job: PublishingJob = {
-      id: jobId,
-      propertyId: propertyData.propertyId,
-      platforms,
-      status: 'pending',
-      submittedAt: new Date().toISOString(),
-      results: [],
-      totalPlatforms: platforms.length,
-      successfulPlatforms: 0,
-      failedPlatforms: 0
-    };
+    try {
+      // Use real listing publishing service
+      const result = await ListingPublishingService.publishProperty(
+        propertyData,
+        platforms,
+        { userId }
+      );
 
-    this.publishingJobs.set(jobId, job);
+      if (result.success && result.jobId) {
+        // Get the job from publishing service
+        const job = ListingPublishingService.getPublishingJob(result.jobId);
+        if (job) {
+          this.publishingJobs.set(job.id, job);
+          return job;
+        }
+      }
 
-    // Process publications asynchronously
-    this.processPublishingJob(job, propertyData, userId);
+      // Fallback: create job with results
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const job: PublishingJob = {
+        id: jobId,
+        propertyId: propertyData.propertyId,
+        platforms,
+        status: result.success ? 'completed' : 'failed',
+        submittedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        results: result.results || [],
+        totalPlatforms: platforms.length,
+        successfulPlatforms: result.results?.filter(r => r.status === 'published').length || 0,
+        failedPlatforms: result.results?.filter(r => r.status === 'failed').length || 0
+      };
 
-    return job;
+      this.publishingJobs.set(jobId, job);
+      return job;
+
+    } catch (error) {
+      // Fallback error job
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const job: PublishingJob = {
+        id: jobId,
+        propertyId: propertyData.propertyId,
+        platforms,
+        status: 'failed',
+        submittedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        results: platforms.map(platform => ({
+          platform,
+          status: 'failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })),
+        totalPlatforms: platforms.length,
+        successfulPlatforms: 0,
+        failedPlatforms: platforms.length
+      };
+
+      this.publishingJobs.set(jobId, job);
+      return job;
+    }
   }
 
   /**
