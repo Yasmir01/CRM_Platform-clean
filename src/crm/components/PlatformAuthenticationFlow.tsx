@@ -181,9 +181,20 @@ export default function PlatformAuthenticationFlow({
     setError(null);
 
     try {
+      let authConfigToSend = { ...authData };
+
+      // For OAuth2 platforms, if we have an authorization code, we need to exchange it for tokens first
+      if (config.authenticationType === 'oauth2' && authData.authorizationCode) {
+        // For now, simulate successful OAuth exchange
+        // In a real implementation, this would call the platform's token exchange endpoint
+        authConfigToSend.accessToken = `access_token_${Date.now()}`;
+        authConfigToSend.refreshToken = `refresh_token_${Date.now()}`;
+        authConfigToSend.tokenExpiresAt = new Date(Date.now() + 3600000).toISOString();
+      }
+
       const result = await RealEstatePlatformService.authenticatePlatform(
         platform,
-        authData,
+        authConfigToSend,
         userId
       );
 
@@ -290,19 +301,53 @@ export default function PlatformAuthenticationFlow({
             <Typography variant="h6" gutterBottom>Step 3: Authorize Access</Typography>
             <Alert severity="warning" sx={{ mb: 2 }}>
               Click the button below to authorize access. You'll be redirected to {config.displayName}.
+              After authorization, you'll receive an authorization code that you need to enter below.
             </Alert>
-            <Button
-              variant="contained"
-              startIcon={<Launch />}
-              onClick={() => {
-                // In real implementation, this would open OAuth flow
-                window.open(`https://${platform}.com/oauth/authorize?client_id=${authData.clientId}&redirect_uri=${authData.redirectUri}&scope=listings`, '_blank');
-                handleNext();
-              }}
-              disabled={!authData.clientId || !authData.clientSecret}
-            >
-              Authorize with {config.displayName}
-            </Button>
+
+            <Stack spacing={2}>
+              <Button
+                variant="contained"
+                startIcon={<Launch />}
+                onClick={() => {
+                  // Generate proper OAuth URL using the adapter logic
+                  const params = new URLSearchParams({
+                    client_id: authData.clientId!,
+                    redirect_uri: authData.redirectUri!,
+                    response_type: 'code',
+                    scope: 'listings read write',
+                    state: Math.random().toString(36).substring(2)
+                  });
+
+                  const authUrl = platform === 'zillow'
+                    ? `https://www.zillow.com/oauth/authorize?${params.toString()}`
+                    : `https://api.${platform}.com/oauth/authorize?${params.toString()}`;
+
+                  window.open(authUrl, '_blank');
+                }}
+                disabled={!authData.clientId || !authData.clientSecret}
+              >
+                Authorize with {config.displayName}
+              </Button>
+
+              <TextField
+                fullWidth
+                label="Authorization Code"
+                value={authData.authorizationCode || ''}
+                onChange={(e) => setAuthData(prev => ({ ...prev, authorizationCode: e.target.value }))}
+                placeholder="Enter the authorization code you received"
+                helperText="After clicking 'Authorize', you'll be redirected and receive an authorization code. Paste it here."
+              />
+
+              {authData.authorizationCode && (
+                <Button
+                  variant="outlined"
+                  onClick={handleNext}
+                  startIcon={<CheckCircle />}
+                >
+                  Continue with Authorization Code
+                </Button>
+              )}
+            </Stack>
           </Box>
         )}
       </Stack>
@@ -560,6 +605,10 @@ export default function PlatformAuthenticationFlow({
   const canProceed = () => {
     switch (config.authenticationType) {
       case 'oauth2':
+        if (activeStep === 2) {
+          // For OAuth step 3, need authorization code
+          return authData.authorizationCode;
+        }
         return authData.clientId && authData.clientSecret;
       case 'api_key':
         return authData.apiKey;
