@@ -101,7 +101,11 @@ export default function RealEstatePlatformIntegrations() {
       setBundles(availableBundles);
       
       // Load recent publishing jobs (mock data for demo)
-      const mockJobs: PublishingJob[] = (properties || []).slice(0, 3).map((property, index) => ({
+      // Only create jobs for properties that are publishable (Available or Unlisted)
+      const publishableProperties = (properties || []).filter(property =>
+        property && (property.status === 'Available' || property.status === 'Unlisted')
+      );
+      const mockJobs: PublishingJob[] = publishableProperties.slice(0, 3).map((property, index) => ({
         id: `job_${index}`,
         propertyId: property.id,
         platforms: ['zillow', 'apartments_com', 'trulia'] as RealEstatePlatform[],
