@@ -385,6 +385,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
           <Tab label="Subscriber Accounts" />
+          <Tab label="Role Management" />
           <Tab label="System Analytics" />
           <Tab label="Billing Management" />
           <Tab label="System Settings" />
