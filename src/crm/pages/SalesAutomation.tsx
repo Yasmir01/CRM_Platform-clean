@@ -48,7 +48,6 @@ import {
   StepContent,
   Switch,
   FormControlLabel,
-  InputAdornment,
 } from "@mui/material";
 import {
   fixedFormControlStyles,
