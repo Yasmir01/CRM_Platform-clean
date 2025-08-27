@@ -147,6 +147,23 @@ export default function CrmLogin() {
     }
   };
 
+  // Show password reset component if requested
+  if (showPasswordReset) {
+    return (
+      <LoginContainer>
+        <PasswordResetRequest
+          onBack={() => setShowPasswordReset(false)}
+          onSuccess={(email, resetToken) => {
+            console.log('Password reset initiated for:', email);
+            if (resetToken) {
+              console.log('Reset token (demo):', resetToken);
+            }
+          }}
+        />
+      </LoginContainer>
+    );
+  }
+
   return (
     <LoginContainer>
       <LoginCard>
