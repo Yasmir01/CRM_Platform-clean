@@ -1030,7 +1030,9 @@ export default function MarketingAutomation() {
                           size="small"
                           color="error"
                           onClick={() => {
-                            setCampaigns(prev => prev.filter(c => c.id !== campaign.id));
+                            // Use context function to delete campaign
+                            console.log('Delete campaign:', campaign.id);
+                            // TODO: Implement deleteCampaign in CrmDataContext
                           }}
                         >
                           <DeleteRoundedIcon />
