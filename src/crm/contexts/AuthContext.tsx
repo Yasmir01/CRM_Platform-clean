@@ -18,6 +18,10 @@ export interface User {
   avatar?: string;
   lastLogin?: string;
   createdAt: string;
+  // User preferences
+  preferredLanguage?: string;
+  timezone?: string;
+  countryCode?: string;
 }
 
 export interface AuthContextType {
@@ -49,6 +53,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings'],
     createdAt: '2024-01-01T00:00:00Z',
+    timezone: 'UTC',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '1',
@@ -59,6 +66,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties'],
     createdAt: '2024-01-01T00:00:00Z',
+    timezone: 'America/New_York',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '2',
@@ -70,6 +80,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['all'],
     createdAt: '2024-01-02T00:00:00Z',
+    timezone: 'America/Los_Angeles',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '3',
@@ -82,6 +95,9 @@ const mockUsers: User[] = [
     permissions: ['manage_properties', 'manage_tenants', 'manage_leases', 'view_reports', 'send_communications', 'manage_maintenance', 'manage_staff'],
     properties: ['Regional Portfolio'],
     createdAt: '2024-01-03T00:00:00Z',
+    timezone: 'America/Chicago',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '4',
@@ -94,6 +110,9 @@ const mockUsers: User[] = [
     permissions: ['manage_properties', 'manage_tenants', 'view_reports', 'send_communications'],
     properties: ['Sunset Apartments', 'Ocean View Villa'],
     createdAt: '2024-01-04T00:00:00Z',
+    timezone: 'America/Denver',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '5',
@@ -105,6 +124,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['view_properties', 'view_tenants', 'view_reports', 'send_communications'],
     createdAt: '2024-01-05T00:00:00Z',
+    timezone: 'Asia/Shanghai',
+    preferredLanguage: 'zh',
+    countryCode: 'CN',
   },
   {
     id: '6',
@@ -117,6 +139,9 @@ const mockUsers: User[] = [
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
     createdAt: '2024-01-06T00:00:00Z',
+    timezone: 'America/New_York',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '7',
@@ -129,6 +154,9 @@ const mockUsers: User[] = [
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
     createdAt: '2024-01-07T00:00:00Z',
+    timezone: 'America/Los_Angeles',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
 ];
 
@@ -213,10 +241,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('users', JSON.stringify(mockUsers));
     }
 
-    // Ensure all users have name property
+    // Ensure all users have name property and timezone defaults
     usersList = usersList.map(user => ({
       ...user,
-      name: user.name || `${user.firstName} ${user.lastName}`
+      name: user.name || `${user.firstName} ${user.lastName}`,
+      timezone: user.timezone || 'UTC',
+      preferredLanguage: user.preferredLanguage || 'en',
+      countryCode: user.countryCode || 'US'
     }));
 
     setUsers(usersList);
