@@ -304,9 +304,9 @@ export default function PlatformAuthenticationManagement() {
                           <Typography variant="subtitle1">
                             {platform.displayName}
                           </Typography>
-                          <Chip 
-                            label={platform.authenticationType.replace('_', ' ')} 
-                            size="small" 
+                          <Chip
+                            label={platform.authenticationType.replace('_', ' ')}
+                            size="small"
                             variant="outlined"
                           />
                         </Stack>
@@ -320,9 +320,9 @@ export default function PlatformAuthenticationManagement() {
                             {platform.description}
                           </Typography>
                           {platform.websiteUrl && (
-                            <Link 
-                              href={platform.websiteUrl} 
-                              target="_blank" 
+                            <Link
+                              href={platform.websiteUrl}
+                              target="_blank"
                               rel="noopener noreferrer"
                               variant="caption"
                               sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
@@ -332,6 +332,8 @@ export default function PlatformAuthenticationManagement() {
                           )}
                         </Stack>
                       }
+                      primaryTypographyProps={{ component: 'div' }}
+                      secondaryTypographyProps={{ component: 'div' }}
                     />
                     
                     <ListItemSecondaryAction>
