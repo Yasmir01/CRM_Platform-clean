@@ -96,6 +96,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LaunchIcon from "@mui/icons-material/Launch";
 import WebIcon from "@mui/icons-material/Web";
 import SmsIcon from "@mui/icons-material/Sms";
+import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
+import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Campaign } from "../contexts/CrmDataContext";
@@ -481,6 +483,20 @@ export default function MarketingAutomation() {
   const [openAutomationDialog, setOpenAutomationDialog] = React.useState(false);
   const [openSegmentDialog, setOpenSegmentDialog] = React.useState(false);
   const [selectedCampaign, setSelectedCampaign] = React.useState<Campaign | null>(null);
+  const [selectedAutomation, setSelectedAutomation] = React.useState<MarketingAutomation | null>(null);
+  const [selectedSegment, setSelectedSegment] = React.useState<Segment | null>(null);
+  const [automationFormData, setAutomationFormData] = React.useState({
+    name: '',
+    description: '',
+    triggerType: 'Contact Added' as AutomationTrigger['type'],
+    emailTemplate: ''
+  });
+  const [segmentFormData, setSegmentFormData] = React.useState({
+    name: '',
+    description: '',
+    criteria: [{ field: 'email', operator: 'contains' as const, value: '', logic: 'AND' as const }]
+  });
+
   const [campaignFormData, setCampaignFormData] = React.useState({
     name: "",
     type: "Email" as Campaign["type"],
@@ -807,10 +823,25 @@ export default function MarketingAutomation() {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+        <Tabs
+          value={currentTab}
+          onChange={(_, newValue) => setCurrentTab(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
           <Tab
             icon={<CampaignRoundedIcon />}
             label="Campaigns"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<EmailRoundedIcon />}
+            label="Email Marketing"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<SmsRoundedIcon />}
+            label="SMS Marketing"
             iconPosition="start"
           />
           <Tab
@@ -829,6 +860,16 @@ export default function MarketingAutomation() {
             iconPosition="start"
           />
           <Tab
+            icon={<PublicRoundedIcon />}
+            label="Landing Pages"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<LocalOfferIcon />}
+            label="Promotions"
+            iconPosition="start"
+          />
+          <Tab
             icon={<AnalyticsIcon />}
             label="Analytics"
             iconPosition="start"
@@ -836,8 +877,17 @@ export default function MarketingAutomation() {
         </Tabs>
       </Box>
 
-      {/* Campaigns Tab */}
+      {/* Multi-Channel Campaigns Tab */}
       <TabPanel value={currentTab} index={0}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            🚀 <strong>Unified Campaign Hub</strong>
+          </Typography>
+          <Typography variant="body2">
+            Create and manage multi-channel campaigns across Email, SMS, and Social media.
+            For dedicated Email or SMS campaign creation, use the respective tabs above.
+          </Typography>
+        </Alert>
         {/* Campaign Controls */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -980,7 +1030,9 @@ export default function MarketingAutomation() {
                           size="small"
                           color="error"
                           onClick={() => {
-                            setCampaigns(prev => prev.filter(c => c.id !== campaign.id));
+                            // Use context function to delete campaign
+                            console.log('Delete campaign:', campaign.id);
+                            // TODO: Implement deleteCampaign in CrmDataContext
                           }}
                         >
                           <DeleteRoundedIcon />
@@ -995,8 +1047,22 @@ export default function MarketingAutomation() {
         </TableContainer>
       </TabPanel>
 
-      {/* Automations Tab */}
+      {/* Email Marketing Tab */}
       <TabPanel value={currentTab} index={1}>
+        <Box sx={{ mt: -3 }}>
+          <EmailMarketing />
+        </Box>
+      </TabPanel>
+
+      {/* SMS Marketing Tab */}
+      <TabPanel value={currentTab} index={2}>
+        <Box sx={{ mt: -3 }}>
+          <SmsMarketing />
+        </Box>
+      </TabPanel>
+
+      {/* Automations Tab */}
+      <TabPanel value={currentTab} index={3}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Marketing Automations</Typography>
           <Button
@@ -1056,10 +1122,32 @@ export default function MarketingAutomation() {
                     </Box>
 
                     <Stack direction="row" spacing={1}>
-                      <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<EditRoundedIcon />}
+                        onClick={() => {
+                          setSelectedAutomation(automation);
+                          setAutomationFormData({
+                            name: automation.name,
+                            description: automation.description,
+                            triggerType: automation.trigger.type,
+                            emailTemplate: ''
+                          });
+                          setOpenAutomationDialog(true);
+                        }}
+                      >
                         Edit
                       </Button>
-                      <Button size="small" variant="outlined" startIcon={<AnalyticsIcon />}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<AnalyticsIcon />}
+                        onClick={() => {
+                          // Navigate to detailed analytics view
+                          navigate('/crm/analytics', { state: { automationId: automation.id } });
+                        }}
+                      >
                         Analytics
                       </Button>
                     </Stack>
@@ -1072,7 +1160,7 @@ export default function MarketingAutomation() {
       </TabPanel>
 
       {/* Segments Tab */}
-      <TabPanel value={currentTab} index={2}>
+      <TabPanel value={currentTab} index={4}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Audience Segments</Typography>
           <Button
@@ -1119,10 +1207,31 @@ export default function MarketingAutomation() {
                     </Stack>
 
                     <Stack direction="row" spacing={1}>
-                      <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<EditRoundedIcon />}
+                        onClick={() => {
+                          setSelectedSegment(segment);
+                          setSegmentFormData({
+                            name: segment.name,
+                            description: segment.description,
+                            criteria: segment.criteria
+                          });
+                          setOpenSegmentDialog(true);
+                        }}
+                      >
                         Edit
                       </Button>
-                      <Button size="small" variant="outlined" startIcon={<GroupRoundedIcon />}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<GroupRoundedIcon />}
+                        onClick={() => {
+                          // Navigate to contacts view filtered by this segment
+                          navigate('/crm/contacts', { state: { segmentFilter: segment.id } });
+                        }}
+                      >
                         View Contacts
                       </Button>
                     </Stack>
@@ -1135,83 +1244,149 @@ export default function MarketingAutomation() {
       </TabPanel>
 
       {/* Templates Tab */}
-      <TabPanel value={currentTab} index={3}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h6">Email Templates</Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTemplateDialog(true)}
-          >
-            Create Template
-          </Button>
-        </Stack>
+      <TabPanel value={currentTab} index={5}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            📄 <strong>Template Library</strong>
+          </Typography>
+          <Typography variant="body2">
+            Access your comprehensive template library for emails, SMS, rental applications, and more.
+          </Typography>
+        </Alert>
+        <Box sx={{ mt: -3 }}>
+          <Templates />
+        </Box>
+      </TabPanel>
 
-        <Grid container spacing={3}>
-          {templates.map((template) => (
-            <Grid item xs={12} md={6} lg={4} key={template.id}>
+      {/* Landing Pages Tab */}
+      <TabPanel value={currentTab} index={6}>
+        <Box sx={{ mt: -3 }}>
+          <PropertyLandingPages />
+        </Box>
+      </TabPanel>
+
+      {/* Promotions Tab */}
+      <TabPanel value={currentTab} index={7}>
+        <Box sx={{ mt: -3 }}>
+          <Promotions />
+        </Box>
+      </TabPanel>
+
+      {/* Analytics Tab */}
+      <TabPanel value={currentTab} index={8}>
+        <Stack spacing={3}>
+          <Typography variant="h6">Marketing Analytics Dashboard</Typography>
+
+          {/* Analytics Overview Cards */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <Box
-                  sx={{
-                    height: 150,
-                    bgcolor: 'grey.100',
-                    backgroundImage: template.thumbnail ? `url(${template.thumbnail})` : 'none',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {!template.thumbnail && <TemplateIcon sx={{ fontSize: 40, color: 'grey.400' }} />}
-                </Box>
                 <CardContent>
-                  <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "primary.main" }}>
+                      <CampaignRoundedIcon />
+                    </Avatar>
                     <Box>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                        <Typography variant="h6" fontWeight="medium" noWrap>
-                          {template.name}
-                        </Typography>
-                        <Chip label={template.category} size="small" variant="outlined" />
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {template.subject}
-                      </Typography>
+                      <Typography variant="h6" color="text.secondary">Total Campaigns</Typography>
+                      <Typography variant="h4">{totalCampaigns}</Typography>
                     </Box>
-
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Used {template.usageCount} times
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(template.dateModified).toLocaleDateString()}
-                      </Typography>
-                    </Stack>
-
-                    <Stack direction="row" spacing={1}>
-                      <Button size="small" variant="outlined" startIcon={<EditRoundedIcon />}>
-                        Edit
-                      </Button>
-                      <Button size="small" variant="outlined" startIcon={<VisibilityRoundedIcon />}>
-                        Preview
-                      </Button>
-                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      </TabPanel>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "success.main" }}>
+                      <TrendingUpRoundedIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Open Rate</Typography>
+                      <Typography variant="h4">{avgOpenRate.toFixed(1)}%</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "info.main" }}>
+                      <EmailRoundedIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Click Rate</Typography>
+                      <Typography variant="h4">{avgClickRate.toFixed(1)}%</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "warning.main" }}>$</Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Revenue</Typography>
+                      <Typography variant="h4">${(totalRevenue / 1000).toFixed(0)}K</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
-      {/* Analytics Tab */}
-      <TabPanel value={currentTab} index={4}>
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="h6">Advanced Marketing Analytics Coming Soon</Typography>
-          <Typography variant="body2">
-            This section will include detailed campaign performance, ROI analysis, and attribution reporting.
-          </Typography>
-        </Alert>
+          {/* Campaign Performance Table */}
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Campaign Performance</Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Campaign</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Sent</TableCell>
+                      <TableCell>Open Rate</TableCell>
+                      <TableCell>Click Rate</TableCell>
+                      <TableCell>Revenue</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {campaigns.slice(0, 5).map((campaign) => (
+                      <TableRow key={campaign.id}>
+                        <TableCell>{campaign.name}</TableCell>
+                        <TableCell>
+                          <Chip label={campaign.type} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>{campaign.metrics.sent.toLocaleString()}</TableCell>
+                        <TableCell>
+                          {((campaign.metrics.opened / campaign.metrics.sent) * 100).toFixed(1)}%
+                        </TableCell>
+                        <TableCell>
+                          {((campaign.metrics.clicked / campaign.metrics.sent) * 100).toFixed(1)}%
+                        </TableCell>
+                        <TableCell>${campaign.metrics.revenue.toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+
+          <Alert severity="info">
+            <Typography variant="subtitle1" gutterBottom>
+              🔮 <strong>Advanced Analytics Coming Soon</strong>
+            </Typography>
+            <Typography variant="body2">
+              Enhanced analytics including conversion funnels, attribution modeling, customer journey mapping, and A/B testing results will be available in the next update.
+            </Typography>
+          </Alert>
+        </Stack>
       </TabPanel>
 
       {/* Marketing Tool Sub-Page Dialog */}
@@ -1289,7 +1464,7 @@ export default function MarketingAutomation() {
                     onChange={(e) => setCampaignFormData({ ...campaignFormData, type: e.target.value as Campaign["type"] })}
                   >
                     <MenuItem value="Email">📧 Email</MenuItem>
-                    <MenuItem value="SMS">📱 SMS</MenuItem>
+                    <MenuItem value="SMS">�� SMS</MenuItem>
                     <MenuItem value="Social">📱 Social Media</MenuItem>
                     <MenuItem value="Push">🔔 Push Notification</MenuItem>
                     <MenuItem value="Multi-Channel">🌐 Multi-Channel</MenuItem>
@@ -1592,42 +1767,259 @@ export default function MarketingAutomation() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openAutomationDialog} onClose={() => setOpenAutomationDialog(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Create Marketing Automation</DialogTitle>
+      <Dialog open={openAutomationDialog} onClose={() => {
+        setOpenAutomationDialog(false);
+        setSelectedAutomation(null);
+        setAutomationFormData({ name: '', description: '', triggerType: 'Contact Added', emailTemplate: '' });
+      }} maxWidth="lg" fullWidth>
+        <DialogTitle>{selectedAutomation ? 'Edit' : 'Create'} Marketing Automation</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            Automation builder implementation coming soon...
-          </Typography>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Automation Name"
+              value={automationFormData.name}
+              onChange={(e) => setAutomationFormData({ ...automationFormData, name: e.target.value })}
+              placeholder="e.g., Welcome Series for New Customers"
+            />
+
+            <TextField
+              fullWidth
+              label="Description"
+              multiline
+              rows={3}
+              value={automationFormData.description}
+              onChange={(e) => setAutomationFormData({ ...automationFormData, description: e.target.value })}
+              placeholder="Describe what this automation does..."
+            />
+
+            <FormControl fullWidth>
+              <InputLabel>Trigger Event</InputLabel>
+              <Select
+                value={automationFormData.triggerType}
+                label="Trigger Event"
+                onChange={(e) => setAutomationFormData({ ...automationFormData, triggerType: e.target.value as AutomationTrigger['type'] })}
+              >
+                <MenuItem value="Contact Added">Contact Added</MenuItem>
+                <MenuItem value="Email Opened">Email Opened</MenuItem>
+                <MenuItem value="Link Clicked">Link Clicked</MenuItem>
+                <MenuItem value="Form Submitted">Form Submitted</MenuItem>
+                <MenuItem value="Date/Time">Date/Time</MenuItem>
+                <MenuItem value="Custom Event">Custom Event</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Autocomplete
+              options={templates}
+              getOptionLabel={(option) => option.name}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Email Template"
+                  placeholder="Select an email template"
+                />
+              )}
+              onChange={(_, value) => setAutomationFormData({ ...automationFormData, emailTemplate: value?.id || '' })}
+            />
+
+            <Alert severity="info">
+              Advanced workflow builder with multiple steps, conditions, and triggers will be available in the full automation engine.
+            </Alert>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenAutomationDialog(false)}>Cancel</Button>
-          <Button variant="contained">Create Automation</Button>
+          <Button onClick={() => {
+            setOpenAutomationDialog(false);
+            setSelectedAutomation(null);
+            setAutomationFormData({ name: '', description: '', triggerType: 'Contact Added', emailTemplate: '' });
+          }}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!automationFormData.name || !automationFormData.description}
+            onClick={() => {
+              // Here you would save the automation
+              console.log('Saving automation:', automationFormData);
+              // For now, just close the dialog
+              setOpenAutomationDialog(false);
+              setSelectedAutomation(null);
+              setAutomationFormData({ name: '', description: '', triggerType: 'Contact Added', emailTemplate: '' });
+            }}
+          >
+            {selectedAutomation ? 'Update' : 'Create'} Automation
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openSegmentDialog} onClose={() => setOpenSegmentDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Create Audience Segment</DialogTitle>
+      <Dialog open={openSegmentDialog} onClose={() => {
+        setOpenSegmentDialog(false);
+        setSelectedSegment(null);
+        setSegmentFormData({ name: '', description: '', criteria: [{ field: 'email', operator: 'contains', value: '', logic: 'AND' }] });
+      }} maxWidth="md" fullWidth>
+        <DialogTitle>{selectedSegment ? 'Edit' : 'Create'} Audience Segment</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            Segment builder implementation coming soon...
-          </Typography>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Segment Name"
+              value={segmentFormData.name}
+              onChange={(e) => setSegmentFormData({ ...segmentFormData, name: e.target.value })}
+              placeholder="e.g., High-Value Customers"
+            />
+
+            <TextField
+              fullWidth
+              label="Description"
+              multiline
+              rows={2}
+              value={segmentFormData.description}
+              onChange={(e) => setSegmentFormData({ ...segmentFormData, description: e.target.value })}
+              placeholder="Describe this segment..."
+            />
+
+            <Typography variant="h6">Segment Criteria</Typography>
+
+            {segmentFormData.criteria.map((criterion, index) => (
+              <Card key={index} variant="outlined">
+                <CardContent>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={3}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Field</InputLabel>
+                        <Select
+                          value={criterion.field}
+                          label="Field"
+                          onChange={(e) => {
+                            const newCriteria = [...segmentFormData.criteria];
+                            newCriteria[index].field = e.target.value;
+                            setSegmentFormData({ ...segmentFormData, criteria: newCriteria });
+                          }}
+                        >
+                          <MenuItem value="email">Email</MenuItem>
+                          <MenuItem value="firstName">First Name</MenuItem>
+                          <MenuItem value="lastName">Last Name</MenuItem>
+                          <MenuItem value="city">City</MenuItem>
+                          <MenuItem value="state">State</MenuItem>
+                          <MenuItem value="propertyType">Property Type</MenuItem>
+                          <MenuItem value="leadScore">Lead Score</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Operator</InputLabel>
+                        <Select
+                          value={criterion.operator}
+                          label="Operator"
+                          onChange={(e) => {
+                            const newCriteria = [...segmentFormData.criteria];
+                            newCriteria[index].operator = e.target.value as any;
+                            setSegmentFormData({ ...segmentFormData, criteria: newCriteria });
+                          }}
+                        >
+                          <MenuItem value="equals">Equals</MenuItem>
+                          <MenuItem value="not_equals">Not Equals</MenuItem>
+                          <MenuItem value="contains">Contains</MenuItem>
+                          <MenuItem value="not_contains">Not Contains</MenuItem>
+                          <MenuItem value="greater_than">Greater Than</MenuItem>
+                          <MenuItem value="less_than">Less Than</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label="Value"
+                        value={criterion.value}
+                        onChange={(e) => {
+                          const newCriteria = [...segmentFormData.criteria];
+                          newCriteria[index].value = e.target.value;
+                          setSegmentFormData({ ...segmentFormData, criteria: newCriteria });
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={2}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const newCriteria = segmentFormData.criteria.filter((_, i) => i !== index);
+                          setSegmentFormData({ ...segmentFormData, criteria: newCriteria });
+                        }}
+                        disabled={segmentFormData.criteria.length === 1}
+                      >
+                        <DeleteRoundedIcon />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            ))}
+
+            <Button
+              startIcon={<AddRoundedIcon />}
+              onClick={() => {
+                setSegmentFormData({
+                  ...segmentFormData,
+                  criteria: [...segmentFormData.criteria, { field: 'email', operator: 'contains', value: '', logic: 'AND' }]
+                });
+              }}
+            >
+              Add Criteria
+            </Button>
+
+            <Alert severity="info">
+              Advanced segment logic with nested conditions and custom fields will be available in the full segmentation engine.
+            </Alert>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenSegmentDialog(false)}>Cancel</Button>
-          <Button variant="contained">Create Segment</Button>
+          <Button onClick={() => {
+            setOpenSegmentDialog(false);
+            setSelectedSegment(null);
+            setSegmentFormData({ name: '', description: '', criteria: [{ field: 'email', operator: 'contains', value: '', logic: 'AND' }] });
+          }}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!segmentFormData.name || !segmentFormData.description}
+            onClick={() => {
+              // Here you would save the segment
+              console.log('Saving segment:', segmentFormData);
+              // For now, just close the dialog
+              setOpenSegmentDialog(false);
+              setSelectedSegment(null);
+              setSegmentFormData({ name: '', description: '', criteria: [{ field: 'email', operator: 'contains', value: '', logic: 'AND' }] });
+            }}
+          >
+            {selectedSegment ? 'Update' : 'Create'} Segment
+          </Button>
         </DialogActions>
       </Dialog>
 
       <Dialog open={openTemplateDialog} onClose={() => setOpenTemplateDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle>Create Email Template</DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            Template editor implementation coming soon...
-          </Typography>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <Alert severity="info">
+              For the full template editing experience with rich text editor, form builder, and advanced features, please use the main Templates page.
+            </Alert>
+            <Box>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<OpenInNewRoundedIcon />}
+                onClick={() => {
+                  setOpenTemplateDialog(false);
+                  setCurrentTab(5); // Switch to Templates tab
+                }}
+                fullWidth
+              >
+                Open Full Template Editor
+              </Button>
+            </Box>
+          </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenTemplateDialog(false)}>Cancel</Button>
-          <Button variant="contained">Save Template</Button>
+          <Button onClick={() => setOpenTemplateDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

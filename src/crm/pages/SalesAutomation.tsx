@@ -46,6 +46,8 @@ import {
   Step,
   StepLabel,
   StepContent,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import {
   fixedFormControlStyles,
@@ -89,21 +91,31 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import SubscriptionsIcon from "@mui/icons-material/SubscriptionsRounded";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
+import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
+import PhotoCameraRoundedIcon from "@mui/icons-material/PhotoCameraRounded";
+import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Deal, Quote, Contact } from "../contexts/CrmDataContext";
 import NumberInput from "../components/NumberInput";
 
-interface Deal {
+// CRM Add-on Sale specific interfaces
+interface AddOnDeal {
   id: string;
-  title: string;
-  company: string;
-  contact: string;
+  productName: string;
+  productType: "Power Tools Suite" | "Power Dialer Pro" | "Properties Pack" | "Maintenance Scheduler" | "Photography Service" | "Custom Package";
+  customerName: string;
+  customerEmail: string;
+  currentPlan: "Basic" | "Premium" | "Enterprise";
+  stage: "Interest" | "Demo Scheduled" | "Trial Active" | "Purchase Decision" | "Activated" | "Cancelled";
   value: number;
-  stage: "Prospecting" | "Qualification" | "Proposal" | "Negotiation" | "Closed Won" | "Closed Lost";
   probability: number;
   expectedCloseDate: string;
   actualCloseDate?: string;
-  source: string;
+  source: "In-App Notification" | "Support Request" | "Account Manager" | "Marketplace Browse" | "Referral" | "Renewal";
   assignedTo: string;
   description: string;
   tags: string[];
@@ -114,11 +126,15 @@ interface Deal {
   lostReason?: string;
   nextAction?: string;
   notes: string[];
+  trialStartDate?: string;
+  trialEndDate?: string;
+  demoScheduledDate?: string;
+  activationDate?: string;
 }
 
 interface DealActivity {
   id: string;
-  type: "call" | "email" | "meeting" | "note" | "task" | "quote" | "proposal";
+  type: "call" | "email" | "demo" | "trial_start" | "trial_end" | "support" | "follow_up";
   title: string;
   description: string;
   date: string;
@@ -128,15 +144,15 @@ interface DealActivity {
   attachments?: string[];
 }
 
-interface Quote {
+interface AddOnQuote {
   id: string;
   dealId: string;
   quoteNumber: string;
-  title: string;
-  customer: string;
+  productName: string;
+  customerName: string;
+  customerEmail: string;
   items: QuoteItem[];
   subtotal: number;
-  tax: number;
   discount: number;
   total: number;
   status: "Draft" | "Sent" | "Accepted" | "Rejected" | "Expired";
@@ -145,6 +161,8 @@ interface Quote {
   dateCreated: string;
   dateModified: string;
   notes: string;
+  trialOffered: boolean;
+  trialDuration?: number;
 }
 
 interface QuoteItem {
@@ -154,9 +172,10 @@ interface QuoteItem {
   quantity: number;
   unitPrice: number;
   total: number;
+  billingCycle: "one-time" | "monthly" | "yearly";
 }
 
-interface Pipeline {
+interface AddOnPipeline {
   id: string;
   name: string;
   stages: PipelineStage[];
@@ -169,65 +188,7 @@ interface PipelineStage {
   probability: number;
   order: number;
   color: string;
-}
-
-// Marketplace Subscription Management Interfaces
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  type: "Basic" | "Premium" | "Enterprise" | "Custom";
-  price: number;
-  billingCycle: "monthly" | "yearly" | "one-time";
-  features: string[];
-  accessLevel: string[];
-  maxUsers?: number;
-  maxProperties?: number;
-  supportLevel: "Basic" | "Priority" | "Premium";
   description: string;
-}
-
-interface EmailCode {
-  id: string;
-  code: string;
-  dealId: string;
-  subscriptionId?: string;
-  email: string;
-  status: "Generated" | "Sent" | "Redeemed" | "Expired";
-  generatedAt: string;
-  sentAt?: string;
-  redeemedAt?: string;
-  expiryDate: string;
-  redemptionAttempts: number;
-  planId: string;
-}
-
-interface Subscription {
-  id: string;
-  userId?: string;
-  planId: string;
-  dealId?: string;
-  emailCode?: string;
-  status: "Active" | "Inactive" | "Pending" | "Cancelled" | "Expired";
-  startDate: string;
-  endDate: string;
-  lastPaymentDate?: string;
-  nextPaymentDate?: string;
-  paymentStatus: "Paid" | "Pending" | "Failed" | "Cancelled";
-  accessGranted: boolean;
-  features: string[];
-  autoRenewal: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MarketplaceDeal extends Deal {
-  dealType: "Property" | "Subscription";
-  subscriptionPlanId?: string;
-  subscriptionDuration?: number;
-  emailCodeGenerated?: boolean;
-  codeDeliveryStatus?: "Pending" | "Sent" | "Delivered" | "Failed";
-  accessLevel?: string[];
-  isMarketplaceSale: boolean;
 }
 
 interface TabPanelProps {
@@ -251,331 +212,310 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const mockPipelines: Pipeline[] = [
-  {
-    id: "1",
-    name: "Standard Sales Process",
-    isDefault: true,
-    stages: [
-      { id: "1", name: "Prospecting", probability: 10, order: 1, color: "#f44336" },
-      { id: "2", name: "Qualification", probability: 25, order: 2, color: "#ff9800" },
-      { id: "3", name: "Proposal", probability: 50, order: 3, color: "#2196f3" },
-      { id: "4", name: "Negotiation", probability: 75, order: 4, color: "#9c27b0" },
-      { id: "5", name: "Closed Won", probability: 100, order: 5, color: "#4caf50" },
-      { id: "6", name: "Closed Lost", probability: 0, order: 6, color: "#607d8b" },
-    ]
-  }
-];
-
-// Marketplace Subscription Plans
-const subscriptionPlans: SubscriptionPlan[] = [
-  {
-    id: "plan_basic",
-    name: "Basic Plan",
-    type: "Basic",
-    price: 29.99,
-    billingCycle: "monthly",
-    features: [
-      "Up to 5 properties",
-      "Basic tenant management",
-      "Email support",
-      "Mobile app access",
-      "Basic reporting"
-    ],
-    accessLevel: ["dashboard", "properties", "tenants"],
-    maxUsers: 1,
-    maxProperties: 5,
-    supportLevel: "Basic",
-    description: "Perfect for individual landlords managing a few properties"
-  },
-  {
-    id: "plan_premium",
-    name: "Premium Plan",
-    type: "Premium",
-    price: 79.99,
-    billingCycle: "monthly",
-    features: [
-      "Up to 25 properties",
-      "Advanced tenant management",
-      "Work order management",
-      "Financial reporting",
-      "Email & phone support",
-      "Custom branding",
-      "API access"
-    ],
-    accessLevel: ["dashboard", "properties", "tenants", "workorders", "analytics", "api"],
-    maxUsers: 3,
-    maxProperties: 25,
-    supportLevel: "Priority",
-    description: "Ideal for growing property management businesses"
-  },
-  {
-    id: "plan_enterprise",
-    name: "Enterprise Plan",
-    type: "Enterprise",
-    price: 199.99,
-    billingCycle: "monthly",
-    features: [
-      "Unlimited properties",
-      "Multi-user access",
-      "Advanced analytics",
-      "Custom integrations",
-      "Priority support",
-      "White-label solution",
-      "Advanced API access",
-      "Custom workflows"
-    ],
-    accessLevel: ["*"], // Full access
-    maxUsers: -1, // Unlimited
-    maxProperties: -1, // Unlimited
-    supportLevel: "Premium",
-    description: "Complete solution for large property management companies"
-  }
-];
-
-// Email Code Management System
-const generateEmailCode = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+// CRM Add-on Sales Pipeline
+const addOnPipeline: AddOnPipeline = {
+  id: "addon_pipeline",
+  name: "CRM Add-on Sales Process",
+  isDefault: true,
+  stages: [
+    { 
+      id: "1", 
+      name: "Interest", 
+      probability: 20, 
+      order: 1, 
+      color: "#2196f3",
+      description: "Customer shows interest in add-on features"
+    },
+    { 
+      id: "2", 
+      name: "Demo Scheduled", 
+      probability: 40, 
+      order: 2, 
+      color: "#ff9800",
+      description: "Demo or trial setup scheduled"
+    },
+    { 
+      id: "3", 
+      name: "Trial Active", 
+      probability: 65, 
+      order: 3, 
+      color: "#9c27b0",
+      description: "Customer actively using trial version"
+    },
+    { 
+      id: "4", 
+      name: "Purchase Decision", 
+      probability: 80, 
+      order: 4, 
+      color: "#ff5722",
+      description: "Customer evaluating purchase decision"
+    },
+    { 
+      id: "5", 
+      name: "Activated", 
+      probability: 100, 
+      order: 5, 
+      color: "#4caf50",
+      description: "Add-on purchased and activated"
+    },
+    { 
+      id: "6", 
+      name: "Cancelled", 
+      probability: 0, 
+      order: 6, 
+      color: "#607d8b",
+      description: "Trial cancelled or purchase declined"
+    },
+  ]
 };
 
-const createEmailCode = (dealId: string, email: string, planId: string): EmailCode => {
-  const code = generateEmailCode();
-  const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + 30); // Code expires in 30 days
-
-  return {
-    id: `code_${Date.now()}`,
-    code,
-    dealId,
-    email,
-    status: "Generated",
-    generatedAt: new Date().toISOString(),
-    expiryDate: expiryDate.toISOString(),
-    redemptionAttempts: 0,
-    planId
-  };
-};
-
-const validateAndRedeemCode = (code: string, email: string): { valid: boolean; subscription?: Subscription; error?: string } => {
-  // This would typically validate against a database
-  // For demo purposes, we'll simulate validation
-  const emailCode = mockEmailCodes.find(ec => ec.code === code && ec.email === email);
-
-  if (!emailCode) {
-    return { valid: false, error: "Invalid code or email" };
-  }
-
-  if (emailCode.status === "Redeemed") {
-    return { valid: false, error: "Code has already been redeemed" };
-  }
-
-  if (new Date(emailCode.expiryDate) < new Date()) {
-    return { valid: false, error: "Code has expired" };
-  }
-
-  // Create subscription
-  const plan = subscriptionPlans.find(p => p.id === emailCode.planId);
-  if (!plan) {
-    return { valid: false, error: "Invalid subscription plan" };
-  }
-
-  const endDate = new Date();
-  if (plan.billingCycle === "monthly") {
-    endDate.setMonth(endDate.getMonth() + 1);
-  } else if (plan.billingCycle === "yearly") {
-    endDate.setFullYear(endDate.getFullYear() + 1);
-  }
-
-  const subscription: Subscription = {
-    id: `sub_${Date.now()}`,
-    planId: plan.id,
-    dealId: emailCode.dealId,
-    emailCode: code,
-    status: "Active",
-    startDate: new Date().toISOString(),
-    endDate: endDate.toISOString(),
-    paymentStatus: "Paid",
-    accessGranted: true,
-    features: plan.features,
-    autoRenewal: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-
-  return { valid: true, subscription };
-};
-
-// Mock email codes for demonstration
-const mockEmailCodes: EmailCode[] = [
+// Mock CRM add-on deals
+const mockAddOnDeals: AddOnDeal[] = [
   {
-    id: "code_1",
-    code: "DEMO1234",
-    dealId: "deal_1",
-    email: "demo@example.com",
-    status: "Generated",
-    generatedAt: new Date().toISOString(),
-    expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    redemptionAttempts: 0,
-    planId: "plan_premium"
-  }
-];
-
-const mockDeals: Deal[] = [
-  {
-    id: "1",
-    title: "Enterprise CRM Implementation",
-    company: "Tech Solutions Inc",
-    contact: "Sarah Johnson",
-    value: 125000,
-    stage: "Proposal",
+    id: "addon_1",
+    productName: "Power Tools Suite",
+    productType: "Power Tools Suite",
+    customerName: "Sarah Johnson",
+    customerEmail: "sarah@techproperties.com",
+    currentPlan: "Premium",
+    stage: "Trial Active",
+    value: 29.99,
     probability: 75,
     expectedCloseDate: "2024-02-15",
-    source: "Website Inquiry",
+    source: "In-App Notification",
     assignedTo: "John Smith",
-    description: "Complete CRM implementation for 500+ user organization",
-    tags: ["Enterprise", "High Value", "Tech"],
+    description: "Customer interested in QR-it and Win-it tools for their marketing campaigns",
+    tags: ["Marketing", "Tools", "Trial User"],
     activities: [
       {
         id: "1",
-        type: "meeting",
-        title: "Discovery Call",
-        description: "Initial needs assessment and requirements gathering",
-        date: "2024-01-15",
-        duration: 60,
-        outcome: "Positive - moving to proposal stage"
-      }
-    ],
-    customFields: { priority: "High", segment: "Enterprise" },
-    dateCreated: "2024-01-10",
-    dateModified: "2024-01-15",
-    nextAction: "Send detailed proposal by EOW",
-    notes: ["Very interested in automation features", "Budget approved"]
-  },
-  {
-    id: "2",
-    title: "Property Management Software",
-    company: "Global Corp",
-    contact: "Michael Chen",
-    value: 75000,
-    stage: "Negotiation",
-    probability: 85,
-    expectedCloseDate: "2024-01-30",
-    source: "Referral",
-    assignedTo: "Emily Davis",
-    description: "Multi-location property management solution",
-    tags: ["Property", "Multi-location", "Referral"],
-    activities: [
+        type: "demo",
+        title: "Power Tools Demo",
+        description: "Demonstrated QR-it campaign creation and Win-it prize setup",
+        date: "2024-01-20",
+        duration: 30,
+        outcome: "Very interested, started 7-day trial"
+      },
       {
         id: "2",
-        type: "call",
-        title: "Contract Discussion",
-        description: "Reviewing contract terms and pricing",
-        date: "2024-01-18",
-        duration: 30,
-        outcome: "Minor pricing adjustments needed"
+        type: "trial_start",
+        title: "Trial Activated",
+        description: "7-day trial of Power Tools Suite activated",
+        date: "2024-01-20",
+        outcome: "Trial code: PT7D-2024-001"
       }
     ],
-    customFields: { priority: "Medium", segment: "Mid-Market" },
-    dateCreated: "2024-01-05",
-    dateModified: "2024-01-18",
-    nextAction: "Finalize contract terms",
-    notes: ["Price sensitive", "Looking for 3-year deal"]
+    customFields: { urgency: "Medium", propertiesCount: 15 },
+    dateCreated: "2024-01-18",
+    dateModified: "2024-01-20",
+    nextAction: "Follow up on trial experience day 5",
+    notes: ["Loves the QR code analytics", "Wants to try Win-it for tenant events"],
+    trialStartDate: "2024-01-20",
+    trialEndDate: "2024-01-27",
+    demoScheduledDate: "2024-01-20"
   },
   {
-    id: "3",
-    title: "Startup Package Deal",
-    company: "Startup Ventures",
-    contact: "Lisa Rodriguez",
-    value: 25000,
-    stage: "Qualification",
-    probability: 40,
-    expectedCloseDate: "2024-02-28",
-    source: "Social Media",
-    assignedTo: "Mike Wilson",
-    description: "CRM solution for growing startup",
-    tags: ["Startup", "Small Business", "Growth"],
+    id: "addon_2",
+    productName: "Power Dialer Pro",
+    productType: "Power Dialer Pro",
+    customerName: "Michael Chen",
+    customerEmail: "m.chen@globalproperties.com",
+    currentPlan: "Enterprise",
+    stage: "Purchase Decision",
+    value: 19.99,
+    probability: 85,
+    expectedCloseDate: "2024-01-30",
+    source: "Support Request",
+    assignedTo: "Emily Davis",
+    description: "Heavy phone user needs professional dialing solution for team",
+    tags: ["Communication", "Team License", "High Volume"],
     activities: [
       {
         id: "3",
-        type: "email",
-        title: "Product Demo Follow-up",
-        description: "Sent demo video and pricing information",
-        date: "2024-01-16",
-        outcome: "Awaiting response"
+        type: "call",
+        title: "Needs Assessment",
+        description: "Discussed current calling challenges and team size",
+        date: "2024-01-22",
+        duration: 45,
+        outcome: "Perfect fit - needs multi-user license"
+      },
+      {
+        id: "4",
+        type: "demo",
+        title: "Team Demo",
+        description: "Demonstrated dialer features to property management team",
+        date: "2024-01-23",
+        duration: 60,
+        outcome: "Team impressed with professional interface"
       }
     ],
-    customFields: { priority: "Low", segment: "SMB" },
-    dateCreated: "2024-01-12",
-    dateModified: "2024-01-16",
-    nextAction: "Schedule follow-up call",
-    notes: ["Limited budget", "Fast decision maker"]
+    customFields: { urgency: "High", teamSize: 8 },
+    dateCreated: "2024-01-21",
+    dateModified: "2024-01-23",
+    nextAction: "Send team licensing quote",
+    notes: ["Needs 8 user licenses", "Budget approved by management"]
+  },
+  {
+    id: "addon_3",
+    productName: "Additional Properties Pack (x3)",
+    productType: "Properties Pack",
+    customerName: "Lisa Rodriguez",
+    customerEmail: "lisa@startuprentals.com",
+    currentPlan: "Basic",
+    stage: "Interest",
+    value: 45.00, // 3 packs x $15
+    probability: 60,
+    expectedCloseDate: "2024-02-10",
+    source: "Marketplace Browse",
+    assignedTo: "Mike Wilson",
+    description: "Growing startup needs to add 15 more properties to Basic plan",
+    tags: ["Growth", "Scaling", "Basic Plan"],
+    activities: [
+      {
+        id: "5",
+        type: "email",
+        title: "Scaling Options",
+        description: "Sent information about property packs vs plan upgrade",
+        date: "2024-01-24",
+        outcome: "Customer prefers flexible property packs"
+      }
+    ],
+    customFields: { urgency: "Medium", currentProperties: 5 },
+    dateCreated: "2024-01-24",
+    dateModified: "2024-01-24",
+    nextAction: "Schedule growth planning call",
+    notes: ["Fast-growing company", "Prefers monthly over annual"]
+  },
+  {
+    id: "addon_4",
+    productName: "Professional Photography Service",
+    productType: "Photography Service",
+    customerName: "Robert Kim",
+    customerEmail: "robert@luxurymanagement.com",
+    currentPlan: "Enterprise",
+    stage: "Demo Scheduled",
+    value: 499.99,
+    probability: 70,
+    expectedCloseDate: "2024-02-05",
+    source: "Account Manager",
+    assignedTo: "Jennifer Adams",
+    description: "Luxury property manager needs professional photos for 3 high-end units",
+    tags: ["Photography", "Luxury", "Multiple Properties"],
+    activities: [
+      {
+        id: "6",
+        type: "call",
+        title: "Portfolio Review",
+        description: "Reviewed current property photos and discussed upgrade needs",
+        date: "2024-01-25",
+        duration: 30,
+        outcome: "Interested in Premium package for 3 units"
+      }
+    ],
+    customFields: { urgency: "High", propertyValue: "Luxury" },
+    dateCreated: "2024-01-25",
+    dateModified: "2024-01-25",
+    nextAction: "Send sample work and schedule shoot",
+    notes: ["High-end market focus", "Quality is priority over price"],
+    demoScheduledDate: "2024-01-28"
   }
 ];
 
-const mockQuotes: Quote[] = [
+// Mock add-on quotes
+const mockAddOnQuotes: AddOnQuote[] = [
   {
-    id: "1",
-    dealId: "1",
-    quoteNumber: "Q-2024-001",
-    title: "Enterprise CRM Implementation",
-    customer: "Tech Solutions Inc",
+    id: "quote_addon_1",
+    dealId: "addon_2",
+    quoteNumber: "AO-2024-001",
+    productName: "Power Dialer Pro - Team License",
+    customerName: "Michael Chen",
+    customerEmail: "m.chen@globalproperties.com",
     items: [
       {
         id: "1",
-        product: "CRM Platform License",
-        description: "Annual license for 500 users",
-        quantity: 500,
-        unitPrice: 120,
-        total: 60000
+        product: "Power Dialer Pro",
+        description: "Professional dialing system with analytics",
+        quantity: 8,
+        unitPrice: 16.99,
+        total: 135.92,
+        billingCycle: "monthly"
       },
       {
         id: "2",
-        product: "Implementation Services",
-        description: "Professional setup and configuration",
+        product: "Setup & Training",
+        description: "Team onboarding and setup assistance",
         quantity: 1,
-        unitPrice: 45000,
-        total: 45000
-      },
-      {
-        id: "3",
-        product: "Training Package",
-        description: "Comprehensive user training program",
-        quantity: 1,
-        unitPrice: 15000,
-        total: 15000
+        unitPrice: 0,
+        total: 0,
+        billingCycle: "one-time"
       }
     ],
-    subtotal: 120000,
-    tax: 9600,
-    discount: 4600,
-    total: 125000,
+    subtotal: 135.92,
+    discount: 15.92, // Team discount
+    total: 120.00,
     status: "Sent",
     validUntil: "2024-02-15",
-    createdBy: "John Smith",
-    dateCreated: "2024-01-16",
-    dateModified: "2024-01-16",
-    notes: "Special pricing for multi-year commitment"
+    createdBy: "Emily Davis",
+    dateCreated: "2024-01-24",
+    dateModified: "2024-01-24",
+    notes: "Team pricing discount applied - special rate for 8+ users",
+    trialOffered: true,
+    trialDuration: 7
+  },
+  {
+    id: "quote_addon_2",
+    dealId: "addon_4",
+    quoteNumber: "AO-2024-002",
+    productName: "Professional Photography - Premium Package",
+    customerName: "Robert Kim",
+    customerEmail: "robert@luxurymanagement.com",
+    items: [
+      {
+        id: "3",
+        product: "Premium Photography Package",
+        description: "40 photos + virtual tour + drone shots per property",
+        quantity: 3,
+        unitPrice: 499.99,
+        total: 1499.97,
+        billingCycle: "one-time"
+      },
+      {
+        id: "4",
+        product: "Rush Delivery",
+        description: "24-hour turnaround instead of 48 hours",
+        quantity: 3,
+        unitPrice: 100.00,
+        total: 300.00,
+        billingCycle: "one-time"
+      }
+    ],
+    subtotal: 1799.97,
+    discount: 300.00, // Multiple property discount
+    total: 1499.97,
+    status: "Draft",
+    validUntil: "2024-02-10",
+    createdBy: "Jennifer Adams",
+    dateCreated: "2024-01-25",
+    dateModified: "2024-01-25",
+    notes: "Bulk discount for 3 properties. Rush delivery requested.",
+    trialOffered: false
   }
 ];
 
-const getStageColor = (stage: Deal["stage"]) => {
-  switch (stage) {
-    case "Prospecting": return "error";
-    case "Qualification": return "warning";
-    case "Proposal": return "info";
-    case "Negotiation": return "secondary";
-    case "Closed Won": return "success";
-    case "Closed Lost": return "default";
-    default: return "default";
-  }
+const getStageColor = (stage: AddOnDeal["stage"]) => {
+  const stageColors = {
+    "Interest": "info",
+    "Demo Scheduled": "warning", 
+    "Trial Active": "secondary",
+    "Purchase Decision": "primary",
+    "Activated": "success",
+    "Cancelled": "default"
+  } as const;
+  
+  return stageColors[stage] || "default";
 };
 
-const getQuoteStatusColor = (status: Quote["status"]) => {
+const getQuoteStatusColor = (status: AddOnQuote["status"]) => {
   switch (status) {
     case "Sent": return "info";
     case "Accepted": return "success";
@@ -586,197 +526,160 @@ const getQuoteStatusColor = (status: Quote["status"]) => {
   }
 };
 
+const getProductIcon = (productType: AddOnDeal["productType"]) => {
+  switch (productType) {
+    case "Power Tools Suite": return <BuildRoundedIcon />;
+    case "Power Dialer Pro": return <PhoneRoundedIcon />;
+    case "Properties Pack": return <HomeRoundedIcon />;
+    case "Maintenance Scheduler": return <SmartToyRoundedIcon />;
+    case "Photography Service": return <PhotoCameraRoundedIcon />;
+    default: return <ExtensionRoundedIcon />;
+  }
+};
+
 export default function SalesAutomation() {
   const navigate = useNavigate();
   const { trackPropertyActivity } = useActivityTracking();
-  const { state, addDeal, updateDeal, addQuote, updateQuote, addContact } = useCrmData();
-  const { deals, quotes, contacts } = state;
-  const [pipelines] = React.useState<Pipeline[]>(mockPipelines);
   const [currentTab, setCurrentTab] = React.useState(0);
   const [viewMode, setViewMode] = React.useState<'kanban' | 'list'>('kanban');
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStage, setFilterStage] = React.useState("All");
+  const [filterProduct, setFilterProduct] = React.useState("All");
+  const [deals] = React.useState<AddOnDeal[]>(mockAddOnDeals);
+  const [quotes] = React.useState<AddOnQuote[]>(mockAddOnQuotes);
   const [openDealDialog, setOpenDealDialog] = React.useState(false);
   const [openQuoteDialog, setOpenQuoteDialog] = React.useState(false);
+  const [selectedDeal, setSelectedDeal] = React.useState<AddOnDeal | null>(null);
+  const [selectedQuote, setSelectedQuote] = React.useState<AddOnQuote | null>(null);
+
+  // Form state for new opportunities
   const [dealFormData, setDealFormData] = React.useState({
-    title: "",
-    contactId: "",
-    propertyId: "",
-    stage: "Lead" as Deal["stage"],
-    value: 0,
+    productType: "Power Tools Suite" as AddOnDeal["productType"],
+    productName: "",
+    customerName: "",
+    customerEmail: "",
+    currentPlan: "Premium" as AddOnDeal["currentPlan"],
+    stage: "Interest" as AddOnDeal["stage"],
+    value: 29.99,
+    billingCycle: "monthly" as "monthly" | "yearly" | "one-time",
     probability: 50,
     expectedCloseDate: "",
-    description: ""
-  });
-  const [quoteFormData, setQuoteFormData] = React.useState({
-    dealId: "",
-    propertyId: "",
-    contactId: "",
-    monthlyRent: 0,
-    securityDeposit: 0,
-    applicationFee: 0,
-    petDeposit: 0,
-    leaseTermMonths: 12,
-    validUntil: "",
+    source: "Marketplace Browse" as AddOnDeal["source"],
+    assignedTo: "Account Manager",
+    description: "",
+    tags: [] as string[],
+    trialOffered: false,
+    trialDuration: 7,
     notes: ""
   });
-  const [selectedDeal, setSelectedDeal] = React.useState<Deal | null>(null);
-  const [selectedQuote, setSelectedQuote] = React.useState<Quote | null>(null);
-
-  // Subscription Management State
-  const [emailCodes, setEmailCodes] = React.useState<EmailCode[]>(mockEmailCodes);
-  const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
-  const [codeFormData, setCodeFormData] = React.useState({
-    planId: "plan_premium",
-    email: "",
-    dealId: ""
-  });
-  const [redemptionFormData, setRedemptionFormData] = React.useState({
-    code: "",
-    email: ""
-  });
-
-  const currentPipeline = pipelines[0]; // Using default pipeline
 
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = 
-      deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deal.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deal.contact.toLowerCase().includes(searchTerm.toLowerCase());
+      deal.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deal.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deal.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStage = filterStage === "All" || deal.stage === filterStage;
+    const matchesProduct = filterProduct === "All" || deal.productType === filterProduct;
     
-    return matchesSearch && matchesStage;
+    return matchesSearch && matchesStage && matchesProduct;
   });
 
+  // Calculate metrics
   const totalDealsValue = deals.reduce((sum, deal) => sum + deal.value, 0);
-  const wonDeals = deals.filter(d => d.stage === "Closed Won");
-  const totalWonValue = wonDeals.reduce((sum, deal) => sum + deal.value, 0);
+  const activatedDeals = deals.filter(d => d.stage === "Activated");
+  const totalActivatedValue = activatedDeals.reduce((sum, deal) => sum + deal.value, 0);
   const avgDealSize = deals.length > 0 ? totalDealsValue / deals.length : 0;
-  const winRate = deals.length > 0 ? (wonDeals.length / deals.length) * 100 : 0;
+  const conversionRate = deals.length > 0 ? (activatedDeals.length / deals.length) * 100 : 0;
+  const trialDeals = deals.filter(d => d.stage === "Trial Active");
 
   const getDealsByStage = (stage: string) => {
     return filteredDeals.filter(deal => deal.stage === stage);
   };
 
   const handleAddDeal = () => {
+    // Reset form when adding new deal
     setSelectedDeal(null);
     setDealFormData({
-      title: "",
-      contactId: "",
-      propertyId: "",
-      stage: "Lead",
-      value: 0,
+      productType: "Power Tools Suite",
+      productName: "Power Tools Suite",
+      customerName: "",
+      customerEmail: "",
+      currentPlan: "Premium",
+      stage: "Interest",
+      value: 29.99,
+      billingCycle: "monthly",
       probability: 50,
-      expectedCloseDate: "",
-      description: ""
+      expectedCloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      source: "Marketplace Browse",
+      assignedTo: "Account Manager",
+      description: "",
+      tags: [],
+      trialOffered: false,
+      trialDuration: 7,
+      notes: ""
     });
     setOpenDealDialog(true);
   };
 
-  const handleEditDeal = (deal: Deal) => {
+  const handleEditDeal = (deal: AddOnDeal) => {
     setSelectedDeal(deal);
     setDealFormData({
-      title: deal.title,
-      contactId: deal.contactId,
-      propertyId: deal.propertyId || "",
+      productType: deal.productType,
+      productName: deal.productName,
+      customerName: deal.customerName,
+      customerEmail: deal.customerEmail,
+      currentPlan: deal.currentPlan,
       stage: deal.stage,
       value: deal.value,
+      billingCycle: deal.productType === "Photography Service" ? "one-time" : "monthly",
       probability: deal.probability,
       expectedCloseDate: deal.expectedCloseDate,
-      description: deal.description
+      source: deal.source,
+      assignedTo: deal.assignedTo,
+      description: deal.description,
+      tags: deal.tags,
+      trialOffered: !!deal.trialStartDate,
+      trialDuration: 7,
+      notes: deal.notes.join('\n')
     });
     setOpenDealDialog(true);
-  };
-
-  const handleSaveDeal = () => {
-    if (selectedDeal) {
-      updateDeal({
-        ...selectedDeal,
-        ...dealFormData,
-        activities: selectedDeal.activities
-      });
-    } else {
-      addDeal({
-        ...dealFormData,
-        activities: []
-      });
-    }
-    setOpenDealDialog(false);
   };
 
   const handleAddQuote = () => {
-    setSelectedQuote(null);
-    setQuoteFormData({
-      dealId: "",
-      propertyId: "",
-      contactId: "",
-      monthlyRent: 0,
-      securityDeposit: 0,
-      applicationFee: 0,
-      petDeposit: 0,
-      leaseTermMonths: 12,
-      validUntil: "",
-      notes: ""
-    });
     setOpenQuoteDialog(true);
   };
 
-  const handleEditQuote = (quote: Quote) => {
+  const handleEditQuote = (quote: AddOnQuote) => {
     setSelectedQuote(quote);
-    setQuoteFormData({
-      dealId: quote.dealId,
-      propertyId: quote.propertyId,
-      contactId: quote.contactId,
-      monthlyRent: quote.monthlyRent,
-      securityDeposit: quote.securityDeposit,
-      applicationFee: quote.applicationFee,
-      petDeposit: quote.petDeposit || 0,
-      leaseTermMonths: quote.leaseTermMonths,
-      validUntil: quote.validUntil,
-      notes: quote.notes || ""
-    });
     setOpenQuoteDialog(true);
-  };
-
-  const handleSaveQuote = () => {
-    const quoteData = {
-      ...quoteFormData,
-      status: "Draft" as const,
-      additionalFees: []
-    };
-
-    if (selectedQuote) {
-      updateQuote({
-        ...selectedQuote,
-        ...quoteData
-      });
-    } else {
-      addQuote(quoteData);
-    }
-    setOpenQuoteDialog(false);
   };
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            color: 'text.primary',
-            fontWeight: 600,
-            fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
-          }}
-        >
-          Sales Automation
-        </Typography>
+        <Box>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              color: 'text.primary',
+              fontWeight: 600,
+              fontSize: { xs: '1.75rem', sm: '2rem', md: '2.125rem' }
+            }}
+          >
+            CRM Add-on Sales
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Manage sales of Power Tools, Dialer Pro, Properties Packs, and Services
+          </Typography>
+        </Box>
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
             startIcon={<FileDownloadRoundedIcon />}
-            onClick={() => console.log('Export sales data')}
+            onClick={() => console.log('Export add-on sales data')}
           >
             Export
           </Button>
@@ -792,7 +695,7 @@ export default function SalesAutomation() {
             startIcon={<AddRoundedIcon />}
             onClick={handleAddDeal}
           >
-            Add Deal
+            Add Opportunity
           </Button>
         </Stack>
       </Stack>
@@ -802,7 +705,7 @@ export default function SalesAutomation() {
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
           <Tab
             icon={<PipelineIcon />}
-            label="Sales Pipeline"
+            label="Add-on Pipeline"
             iconPosition="start"
           />
           <Tab
@@ -816,14 +719,14 @@ export default function SalesAutomation() {
             iconPosition="start"
           />
           <Tab
-            icon={<SubscriptionsIcon />}
-            label="Subscriptions"
+            icon={<PlayArrowRoundedIcon />}
+            label={`Active Trials (${trialDeals.length})`}
             iconPosition="start"
           />
         </Tabs>
       </Box>
 
-      {/* Sales Pipeline Tab */}
+      {/* Add-on Pipeline Tab */}
       <TabPanel value={currentTab} index={0}>
         {/* Sales Stats */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -836,7 +739,10 @@ export default function SalesAutomation() {
                   </Avatar>
                   <Box>
                     <Typography variant="h6" color="text.secondary">Total Pipeline</Typography>
-                    <Typography variant="h4">${(totalDealsValue / 1000).toFixed(0)}K</Typography>
+                    <Typography variant="h4">${totalDealsValue.toFixed(0)}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {deals.length} opportunities
+                    </Typography>
                   </Box>
                 </Stack>
               </CardContent>
@@ -847,11 +753,14 @@ export default function SalesAutomation() {
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
                   <Avatar sx={{ bgcolor: "success.main" }}>
-                    <MonetizationOnRoundedIcon />
+                    <CheckCircleIcon />
                   </Avatar>
                   <Box>
-                    <Typography variant="h6" color="text.secondary">Won Deals</Typography>
-                    <Typography variant="h4">${(totalWonValue / 1000).toFixed(0)}K</Typography>
+                    <Typography variant="h6" color="text.secondary">Activated</Typography>
+                    <Typography variant="h4">${totalActivatedValue.toFixed(0)}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {activatedDeals.length} add-ons sold
+                    </Typography>
                   </Box>
                 </Stack>
               </CardContent>
@@ -861,12 +770,15 @@ export default function SalesAutomation() {
             <Card>
               <CardContent>
                 <Stack direction="row" alignItems="center" spacing={2}>
-                  <Avatar sx={{ bgcolor: "info.main" }}>
-                    <AccountBalanceRoundedIcon />
+                  <Avatar sx={{ bgcolor: "secondary.main" }}>
+                    <PlayArrowRoundedIcon />
                   </Avatar>
                   <Box>
-                    <Typography variant="h6" color="text.secondary">Avg Deal Size</Typography>
-                    <Typography variant="h4">${(avgDealSize / 1000).toFixed(0)}K</Typography>
+                    <Typography variant="h6" color="text.secondary">Active Trials</Typography>
+                    <Typography variant="h4">{trialDeals.length}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Currently testing add-ons
+                    </Typography>
                   </Box>
                 </Stack>
               </CardContent>
@@ -880,8 +792,11 @@ export default function SalesAutomation() {
                     <TrendingUpRoundedIcon />
                   </Avatar>
                   <Box>
-                    <Typography variant="h6" color="text.secondary">Win Rate</Typography>
-                    <Typography variant="h4">{winRate.toFixed(0)}%</Typography>
+                    <Typography variant="h6" color="text.secondary">Conversion Rate</Typography>
+                    <Typography variant="h4">{conversionRate.toFixed(0)}%</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Trial to activation
+                    </Typography>
                   </Box>
                 </Stack>
               </CardContent>
@@ -895,7 +810,7 @@ export default function SalesAutomation() {
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
               <Stack direction="row" alignItems="center" spacing={2}>
                 <TextField
-                  placeholder="Search deals..."
+                  placeholder="Search opportunities..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -908,18 +823,33 @@ export default function SalesAutomation() {
                   sx={{ minWidth: 300 }}
                 />
                 <FormControl sx={{ minWidth: 150 }}>
-                  <InputLabel>Filter Stage</InputLabel>
+                  <InputLabel>Stage</InputLabel>
                   <Select
                     value={filterStage}
-                    label="Filter Stage"
+                    label="Stage"
                     onChange={(e) => setFilterStage(e.target.value)}
                   >
                     <MenuItem value="All">All Stages</MenuItem>
-                    {currentPipeline.stages.map((stage) => (
+                    {addOnPipeline.stages.map((stage) => (
                       <MenuItem key={stage.id} value={stage.name}>
                         {stage.name}
                       </MenuItem>
                     ))}
+                  </Select>
+                </FormControl>
+                <FormControl sx={{ minWidth: 180 }}>
+                  <InputLabel>Product</InputLabel>
+                  <Select
+                    value={filterProduct}
+                    label="Product"
+                    onChange={(e) => setFilterProduct(e.target.value)}
+                  >
+                    <MenuItem value="All">All Products</MenuItem>
+                    <MenuItem value="Power Tools Suite">Power Tools Suite</MenuItem>
+                    <MenuItem value="Power Dialer Pro">Power Dialer Pro</MenuItem>
+                    <MenuItem value="Properties Pack">Properties Pack</MenuItem>
+                    <MenuItem value="Maintenance Scheduler">Maintenance Scheduler</MenuItem>
+                    <MenuItem value="Photography Service">Photography Service</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
@@ -943,7 +873,7 @@ export default function SalesAutomation() {
         {viewMode === 'kanban' ? (
           /* Kanban View */
           <Grid container spacing={2}>
-            {currentPipeline.stages.map((stage) => {
+            {addOnPipeline.stages.map((stage) => {
               const stageDeals = getDealsByStage(stage.name);
               const stageValue = stageDeals.reduce((sum, deal) => sum + deal.value, 0);
               
@@ -963,8 +893,11 @@ export default function SalesAutomation() {
                         <Typography variant="h6" fontWeight="medium" color={stage.color}>
                           {stage.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {stageDeals.length} deals • ${(stageValue / 1000).toFixed(0)}K
+                        <Typography variant="caption" color="text.secondary">
+                          {stageDeals.length} deals • ${stageValue.toFixed(0)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                          {stage.description}
                         </Typography>
                       </Box>
                       
@@ -978,21 +911,37 @@ export default function SalesAutomation() {
                           onClick={() => handleEditDeal(deal)}
                         >
                           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                            <Typography variant="subtitle2" fontWeight="medium" noWrap>
-                              {deal.title}
-                            </Typography>
+                            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                              {getProductIcon(deal.productType)}
+                              <Typography variant="subtitle2" fontWeight="medium" noWrap>
+                                {deal.productName}
+                              </Typography>
+                            </Stack>
                             <Typography variant="caption" color="text.secondary" noWrap>
-                              {deal.company}
+                              {deal.customerName}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                              {deal.currentPlan} Plan
                             </Typography>
                             <Box sx={{ mt: 1, mb: 1 }}>
                               <Typography variant="h6" color="primary.main">
-                                ${(deal.value / 1000).toFixed(0)}K
+                                ${deal.value}
+                                <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>
+                                  {deal.productType === "Photography Service" ? "" : "/mo"}
+                                </Typography>
                               </Typography>
                               <Typography variant="caption" color="text.secondary">
                                 {deal.probability}% • {new Date(deal.expectedCloseDate).toLocaleDateString()}
                               </Typography>
                             </Box>
-                            <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                            {deal.trialStartDate && deal.stage === "Trial Active" && (
+                              <Alert severity="info" sx={{ mt: 1, p: 0.5 }}>
+                                <Typography variant="caption">
+                                  Trial ends {new Date(deal.trialEndDate!).toLocaleDateString()}
+                                </Typography>
+                              </Alert>
+                            )}
+                            <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mt: 1 }}>
                               {deal.tags.slice(0, 2).map((tag, index) => (
                                 <Chip key={index} label={tag} size="small" variant="outlined" />
                               ))}
@@ -1012,12 +961,12 @@ export default function SalesAutomation() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Deal</TableCell>
-                  <TableCell>Company & Contact</TableCell>
+                  <TableCell>Product & Customer</TableCell>
+                  <TableCell>Current Plan</TableCell>
                   <TableCell>Value & Stage</TableCell>
                   <TableCell>Probability</TableCell>
-                  <TableCell>Close Date</TableCell>
-                  <TableCell>Assigned To</TableCell>
+                  <TableCell>Expected Close</TableCell>
+                  <TableCell>Trial Status</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -1025,29 +974,25 @@ export default function SalesAutomation() {
                 {filteredDeals.map((deal) => (
                   <TableRow key={deal.id}>
                     <TableCell>
-                      <Box>
-                        <Typography variant="subtitle2" fontWeight="medium">
-                          {deal.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Created {new Date(deal.dateCreated).toLocaleDateString()}
-                        </Typography>
-                      </Box>
+                      <Stack direction="row" alignItems="center" spacing={2}>
+                        {getProductIcon(deal.productType)}
+                        <Box>
+                          <Typography variant="subtitle2" fontWeight="medium">
+                            {deal.productName}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {deal.customerName}
+                          </Typography>
+                        </Box>
+                      </Stack>
                     </TableCell>
                     <TableCell>
-                      <Box>
-                        <Typography variant="body2" fontWeight="medium">
-                          {deal.company}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {deal.contact}
-                        </Typography>
-                      </Box>
+                      <Chip label={deal.currentPlan} size="small" />
                     </TableCell>
                     <TableCell>
                       <Stack spacing={1}>
                         <Typography variant="body2" fontWeight="medium">
-                          ${deal.value.toLocaleString()}
+                          ${deal.value}{deal.productType === "Photography Service" ? "" : "/mo"}
                         </Typography>
                         <Chip
                           label={deal.stage}
@@ -1072,27 +1017,29 @@ export default function SalesAutomation() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">{deal.assignedTo}</Typography>
+                      {deal.trialStartDate ? (
+                        <Box>
+                          <Typography variant="caption" color="success.main">
+                            Active Trial
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            Ends {new Date(deal.trialEndDate!).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Typography variant="caption" color="text.secondary">
+                          No trial
+                        </Typography>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={0.5}>
-                        <Tooltip title="Edit Deal">
+                        <Tooltip title="View Details">
                           <IconButton
                             size="small"
                             onClick={() => handleEditDeal(deal)}
                           >
                             <EditRoundedIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete Deal">
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => {
-                              setDeals(prev => prev.filter(d => d.id !== deal.id));
-                            }}
-                          >
-                            <DeleteRoundedIcon />
                           </IconButton>
                         </Tooltip>
                       </Stack>
@@ -1165,7 +1112,7 @@ export default function SalesAutomation() {
                   <Box>
                     <Typography variant="h6" color="text.secondary">Quote Value</Typography>
                     <Typography variant="h4">
-                      ${(quotes.reduce((sum, q) => sum + q.total, 0) / 1000).toFixed(0)}K
+                      ${quotes.reduce((sum, q) => sum + q.total, 0).toFixed(0)}
                     </Typography>
                   </Box>
                 </Stack>
@@ -1179,11 +1126,12 @@ export default function SalesAutomation() {
             <TableHead>
               <TableRow>
                 <TableCell>Quote #</TableCell>
+                <TableCell>Product</TableCell>
                 <TableCell>Customer</TableCell>
-                <TableCell>Title</TableCell>
                 <TableCell>Value</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Valid Until</TableCell>
+                <TableCell>Trial Offered</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -1195,8 +1143,8 @@ export default function SalesAutomation() {
                       {quote.quoteNumber}
                     </Typography>
                   </TableCell>
-                  <TableCell>{quote.customer}</TableCell>
-                  <TableCell>{quote.title}</TableCell>
+                  <TableCell>{quote.productName}</TableCell>
+                  <TableCell>{quote.customerName}</TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight="medium">
                       ${quote.total.toLocaleString()}
@@ -1213,6 +1161,13 @@ export default function SalesAutomation() {
                     {new Date(quote.validUntil).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
+                    {quote.trialOffered ? (
+                      <Chip label={`${quote.trialDuration} days`} color="info" size="small" />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">No</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Stack direction="row" spacing={0.5}>
                       <Tooltip title="Edit Quote">
                         <IconButton
@@ -1220,17 +1175,6 @@ export default function SalesAutomation() {
                           onClick={() => handleEditQuote(quote)}
                         >
                           <EditRoundedIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Quote">
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => {
-                            setQuotes(prev => prev.filter(q => q.id !== quote.id));
-                          }}
-                        >
-                          <DeleteRoundedIcon />
                         </IconButton>
                       </Tooltip>
                     </Stack>
@@ -1244,585 +1188,528 @@ export default function SalesAutomation() {
 
       {/* Sales Analytics Tab */}
       <TabPanel value={currentTab} index={2}>
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="h6">Advanced Analytics Coming Soon</Typography>
-          <Typography variant="body2">
-            This section will include comprehensive sales analytics, forecasting, and performance metrics.
-          </Typography>
-        </Alert>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Most Popular Add-ons
+                </Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Power Tools Suite</Typography>
+                      <Typography variant="body2" fontWeight="medium">45% of sales</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={45} />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Properties Pack</Typography>
+                      <Typography variant="body2" fontWeight="medium">30% of sales</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={30} />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Power Dialer Pro</Typography>
+                      <Typography variant="body2" fontWeight="medium">15% of sales</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={15} />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Photography Service</Typography>
+                      <Typography variant="body2" fontWeight="medium">10% of sales</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={10} />
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Conversion by Plan Type
+                </Typography>
+                <Stack spacing={2}>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Enterprise Plan</Typography>
+                      <Typography variant="body2" fontWeight="medium">85% conversion</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={85} color="success" />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Premium Plan</Typography>
+                      <Typography variant="body2" fontWeight="medium">65% conversion</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={65} color="warning" />
+                  </Box>
+                  <Box>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="body2">Basic Plan</Typography>
+                      <Typography variant="body2" fontWeight="medium">35% conversion</Typography>
+                    </Stack>
+                    <LinearProgress variant="determinate" value={35} color="error" />
+                  </Box>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </TabPanel>
 
-      {/* Subscriptions Tab */}
+      {/* Active Trials Tab */}
       <TabPanel value={currentTab} index={3}>
-        {/* Subscription Plans Overview */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12}>
-            <Typography variant="h5" gutterBottom>
-              🚀 Marketplace Subscription Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              Manage subscription plans, email codes, and user access for the marketplace.
-            </Typography>
-          </Grid>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="h6">Active Trial Management</Typography>
+          <Typography variant="body2">
+            Monitor and manage customers who are currently testing add-on features. Follow up before trials expire to maximize conversion.
+          </Typography>
+        </Alert>
 
-          {/* Subscription Plans Cards */}
-          {subscriptionPlans.map((plan) => (
-            <Grid item xs={12} md={4} key={plan.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  border: plan.type === 'Premium' ? 2 : 1,
-                  borderColor: plan.type === 'Premium' ? 'primary.main' : 'divider',
-                  position: 'relative'
-                }}
-              >
-                {plan.type === 'Premium' && (
-                  <Chip
-                    label="MOST POPULAR"
-                    color="primary"
-                    size="small"
-                    sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      fontWeight: 'bold'
-                    }}
-                  />
-                )}
+        <Grid container spacing={3}>
+          {trialDeals.map((deal) => (
+            <Grid item xs={12} md={6} lg={4} key={deal.id}>
+              <Card>
                 <CardContent>
                   <Stack spacing={2}>
-                    <Box>
-                      <Typography variant="h5" fontWeight="bold">
-                        {plan.name}
-                      </Typography>
-                      <Typography variant="h3" color="primary.main" fontWeight="bold">
-                        ${plan.price}
-                        <Typography component="span" variant="body1" color="text.secondary">
-                          /{plan.billingCycle === 'monthly' ? 'mo' : 'yr'}
+                    <Stack direction="row" alignItems="center" spacing={2}>
+                      {getProductIcon(deal.productType)}
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6">{deal.productName}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {deal.customerName}
                         </Typography>
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {plan.description}
-                      </Typography>
-                    </Box>
-
-                    <Divider />
+                      </Box>
+                      <Chip label="TRIAL" color="secondary" size="small" />
+                    </Stack>
 
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-                        Features:
+                      <Typography variant="body2" gutterBottom>
+                        Trial Progress
                       </Typography>
-                      <Stack spacing={1}>
-                        {plan.features.map((feature, index) => (
-                          <Stack key={index} direction="row" alignItems="center" spacing={1}>
-                            <CheckCircleIcon color="success" fontSize="small" />
-                            <Typography variant="body2">{feature}</Typography>
+                      {deal.trialStartDate && deal.trialEndDate && (
+                        <Box>
+                          <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                            <Typography variant="caption">
+                              Started: {new Date(deal.trialStartDate).toLocaleDateString()}
+                            </Typography>
+                            <Typography variant="caption">
+                              Ends: {new Date(deal.trialEndDate).toLocaleDateString()}
+                            </Typography>
                           </Stack>
-                        ))}
-                      </Stack>
+                          {(() => {
+                            const start = new Date(deal.trialStartDate).getTime();
+                            const end = new Date(deal.trialEndDate).getTime();
+                            const now = new Date().getTime();
+                            const progress = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100));
+                            const daysLeft = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+                            
+                            return (
+                              <>
+                                <LinearProgress 
+                                  variant="determinate" 
+                                  value={progress}
+                                  color={daysLeft <= 2 ? "error" : daysLeft <= 5 ? "warning" : "primary"}
+                                />
+                                <Typography variant="caption" color={daysLeft <= 2 ? "error.main" : "text.secondary"}>
+                                  {daysLeft > 0 ? `${daysLeft} days remaining` : "Trial expired"}
+                                </Typography>
+                              </>
+                            );
+                          })()}
+                        </Box>
+                      )}
                     </Box>
 
                     <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        ${deal.value}/month after trial
+                      </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        • {plan.maxUsers === -1 ? 'Unlimited' : plan.maxUsers} user{plan.maxUsers !== 1 ? 's' : ''}
-                        <br />
-                        • {plan.maxProperties === -1 ? 'Unlimited' : plan.maxProperties} properties
-                        <br />
-                        • {plan.supportLevel} support
+                        {deal.probability}% likelihood to convert
                       </Typography>
                     </Box>
 
-                    <Button
-                      variant={plan.type === 'Premium' ? 'contained' : 'outlined'}
-                      fullWidth
-                      onClick={() => {
-                        // Generate email code for this plan
-                        const code = createEmailCode('demo_deal', 'customer@example.com', plan.id);
-                        alert(`🎉 Subscription Code Generated!\n\nCode: ${code.code}\nPlan: ${plan.name}\nValid until: ${new Date(code.expiryDate).toLocaleDateString()}\n\nThis code can be used to activate the ${plan.name} subscription.`);
-                      }}
-                    >
-                      Generate Code
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                      <Button 
+                        size="small" 
+                        variant="outlined"
+                        onClick={() => alert(`Following up with ${deal.customerName} about their ${deal.productName} trial`)}
+                      >
+                        Follow Up
+                      </Button>
+                      <Button 
+                        size="small" 
+                        variant="contained"
+                        onClick={() => handleEditDeal(deal)}
+                      >
+                        Convert
+                      </Button>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
           ))}
         </Grid>
-
-        {/* Email Code Management Section */}
-        <Card sx={{ mb: 4 }}>
-          <CardContent>
-            <Stack spacing={3}>
-              <Typography variant="h6">📧 Email Code Management</Typography>
-
-              {/* Code Generation Form */}
-              <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Generate New Subscription Code
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                      <InputLabel>Subscription Plan</InputLabel>
-                      <Select defaultValue="plan_premium" label="Subscription Plan">
-                        {subscriptionPlans.map((plan) => (
-                          <MenuItem key={plan.id} value={plan.id}>
-                            {plan.name} - ${plan.price}/{plan.billingCycle === 'monthly' ? 'mo' : 'yr'}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Customer Email"
-                      type="email"
-                      placeholder="customer@example.com"
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      sx={{ height: '56px' }}
-                      onClick={() => {
-                        const code = generateEmailCode();
-                        alert(`✅ Code Generated: ${code}\n\nThis code has been created and can be sent to the customer for account activation.`);
-                      }}
-                    >
-                      Generate & Send Code
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Paper>
-
-              {/* Code Redemption Section */}
-              <Paper sx={{ p: 3, bgcolor: 'background.default' }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Code Redemption System
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Redemption Code"
-                      placeholder="Enter 8-character code"
-                      inputProps={{ maxLength: 8, style: { textTransform: 'uppercase' } }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      fullWidth
-                      label="Customer Email"
-                      type="email"
-                      placeholder="customer@example.com"
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={4}>
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      sx={{ height: '56px' }}
-                      onClick={() => {
-                        // Demo redemption validation
-                        const result = validateAndRedeemCode('DEMO1234', 'demo@example.com');
-                        if (result.valid) {
-                          alert(`🎉 Code Redeemed Successfully!\n\nSubscription activated for Premium Plan\nAccess granted to all features\nSubscription expires: ${new Date(result.subscription!.endDate).toLocaleDateString()}`);
-                        } else {
-                          alert(`❌ Redemption Failed: ${result.error}`);
-                        }
-                      }}
-                    >
-                      Validate & Redeem
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Paper>
-
-              {/* Demo Codes Table */}
-              <Box>
-                <Typography variant="subtitle1" gutterBottom>
-                  Recent Email Codes
-                </Typography>
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Code</TableCell>
-                        <TableCell>Email</TableCell>
-                        <TableCell>Plan</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Expires</TableCell>
-                        <TableCell>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {mockEmailCodes.map((code) => {
-                        const plan = subscriptionPlans.find(p => p.id === code.planId);
-                        return (
-                          <TableRow key={code.id}>
-                            <TableCell>
-                              <Typography variant="body2" fontFamily="monospace" fontWeight="bold">
-                                {code.code}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>{code.email}</TableCell>
-                            <TableCell>{plan?.name}</TableCell>
-                            <TableCell>
-                              <Chip
-                                label={code.status}
-                                color={
-                                  code.status === 'Redeemed' ? 'success' :
-                                  code.status === 'Expired' ? 'error' :
-                                  code.status === 'Sent' ? 'info' : 'default'
-                                }
-                                size="small"
-                              />
-                            </TableCell>
-                            <TableCell>
-                              {new Date(code.expiryDate).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <IconButton
-                                size="small"
-                                onClick={() => alert(`📧 Resending code ${code.code} to ${code.email}`)}
-                              >
-                                <EmailRoundedIcon />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => alert(`🗑️ Code ${code.code} has been deactivated`)}
-                              >
-                                <DeleteRoundedIcon />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
-
-        {/* Subscription Analytics */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>📊 Subscription Analytics</Typography>
-                <Stack spacing={2}>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Active Subscriptions</Typography>
-                    <Typography variant="h4" color="success.main">24</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Monthly Recurring Revenue</Typography>
-                    <Typography variant="h4" color="primary.main">$1,847</Typography>
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">Code Redemption Rate</Typography>
-                    <Typography variant="h4">87%</Typography>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>⚡ Quick Actions</Typography>
-                <Stack spacing={2}>
-                  <Button
-                    variant="outlined"
-                    startIcon={<EmailRoundedIcon />}
-                    onClick={() => alert('📧 Bulk email functionality would open here')}
-                  >
-                    Send Bulk Codes
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<FileDownloadRoundedIcon />}
-                    onClick={() => alert('📊 Subscription report exported')}
-                  >
-                    Export Report
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    startIcon={<SettingsRoundedIcon />}
-                    onClick={() => alert('⚙️ Subscription settings would open here')}
-                  >
-                    Manage Settings
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
       </TabPanel>
 
-      {/* Deal Dialog */}
-      <Dialog open={openDealDialog} onClose={() => setOpenDealDialog(false)} maxWidth="md" fullWidth>
+      {/* Add/Edit Opportunity Dialog */}
+      <Dialog open={openDealDialog} onClose={() => setOpenDealDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle>
-          {selectedDeal ? "Edit Deal" : "Create New Deal"}
+          <Stack direction="row" alignItems="center" spacing={2}>
+            {getProductIcon(dealFormData.productType)}
+            <Typography variant="h6">
+              {selectedDeal ? "Edit Opportunity" : "Add New Opportunity"}
+            </Typography>
+          </Stack>
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={3} sx={{ mt: 2 }}>
-            <TextField
-              label="Deal Title"
-              fullWidth
-              required
-              value={dealFormData.title}
-              onChange={(e) => setDealFormData({ ...dealFormData, title: e.target.value })}
-              placeholder="Enter deal title"
-            />
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
+              {/* Product Selection */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary.main">
+                  🛍️ Product & Pricing
+                </Typography>
+              </Grid>
 
-            <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Contact</InputLabel>
+                <FormControl fullWidth>
+                  <InputLabel>Product Type</InputLabel>
                   <Select
-                    value={dealFormData.contactId}
-                    label="Contact"
-                    onChange={(e) => setDealFormData({ ...dealFormData, contactId: e.target.value })}
+                    value={dealFormData.productType}
+                    label="Product Type"
+                    onChange={(e) => {
+                      const productType = e.target.value as AddOnDeal["productType"];
+                      const productInfo = {
+                        "Power Tools Suite": { name: "Power Tools Suite", price: 29.99, billing: "monthly" },
+                        "Power Dialer Pro": { name: "Power Dialer Pro", price: 19.99, billing: "monthly" },
+                        "Properties Pack": { name: "Additional Properties Pack", price: 15.00, billing: "monthly" },
+                        "Maintenance Scheduler": { name: "Smart Maintenance Scheduler", price: 2.50, billing: "monthly" },
+                        "Photography Service": { name: "Professional Photography", price: 299.99, billing: "one-time" },
+                        "Custom Package": { name: "Custom Package", price: 0, billing: "monthly" }
+                      }[productType];
+
+                      setDealFormData(prev => ({
+                        ...prev,
+                        productType,
+                        productName: productInfo.name,
+                        value: productInfo.price,
+                        billingCycle: productInfo.billing as any
+                      }));
+                    }}
                   >
-                    {contacts.map((contact) => (
-                      <MenuItem key={contact.id} value={contact.id}>
-                        {contact.firstName} {contact.lastName}
-                        {contact.company && (
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                            ({contact.company})
-                          </Typography>
-                        )}
-                      </MenuItem>
-                    ))}
+                    <MenuItem value="Power Tools Suite">🛠️ Power Tools Suite</MenuItem>
+                    <MenuItem value="Power Dialer Pro">📞 Power Dialer Pro</MenuItem>
+                    <MenuItem value="Properties Pack">🏠 Properties Pack</MenuItem>
+                    <MenuItem value="Maintenance Scheduler">🔧 Maintenance Scheduler</MenuItem>
+                    <MenuItem value="Photography Service">📸 Photography Service</MenuItem>
+                    <MenuItem value="Custom Package">📦 Custom Package</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
+
               <Grid item xs={12} md={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Stage</InputLabel>
+                <TextField
+                  fullWidth
+                  label="Product Name"
+                  value={dealFormData.productName}
+                  onChange={(e) => setDealFormData(prev => ({...prev, productName: e.target.value}))}
+                  placeholder="Customize product name if needed"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Price"
+                  type="number"
+                  value={dealFormData.value}
+                  onChange={(e) => setDealFormData(prev => ({...prev, value: parseFloat(e.target.value) || 0}))}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Billing Cycle</InputLabel>
+                  <Select
+                    value={dealFormData.billingCycle}
+                    label="Billing Cycle"
+                    onChange={(e) => setDealFormData(prev => ({...prev, billingCycle: e.target.value as any}))}
+                  >
+                    <MenuItem value="monthly">Monthly Subscription</MenuItem>
+                    <MenuItem value="yearly">Yearly Subscription</MenuItem>
+                    <MenuItem value="one-time">One-time Payment</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Revenue Impact
+                  </Typography>
+                  <Typography variant="h6" color="primary.main">
+                    ${dealFormData.billingCycle === "yearly"
+                      ? (dealFormData.value * 12).toFixed(0)
+                      : dealFormData.value.toFixed(0)}
+                    {dealFormData.billingCycle === "yearly" ? "/year" :
+                     dealFormData.billingCycle === "monthly" ? "/month" : " total"}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Customer Information */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  👤 Customer Information
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Name"
+                  value={dealFormData.customerName}
+                  onChange={(e) => setDealFormData(prev => ({...prev, customerName: e.target.value}))}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Email"
+                  type="email"
+                  value={dealFormData.customerEmail}
+                  onChange={(e) => setDealFormData(prev => ({...prev, customerEmail: e.target.value}))}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Current Plan</InputLabel>
+                  <Select
+                    value={dealFormData.currentPlan}
+                    label="Current Plan"
+                    onChange={(e) => setDealFormData(prev => ({...prev, currentPlan: e.target.value as any}))}
+                  >
+                    <MenuItem value="Basic">Basic Plan</MenuItem>
+                    <MenuItem value="Premium">Premium Plan</MenuItem>
+                    <MenuItem value="Enterprise">Enterprise Plan</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Lead Source</InputLabel>
+                  <Select
+                    value={dealFormData.source}
+                    label="Lead Source"
+                    onChange={(e) => setDealFormData(prev => ({...prev, source: e.target.value as any}))}
+                  >
+                    <MenuItem value="In-App Notification">In-App Notification</MenuItem>
+                    <MenuItem value="Support Request">Support Request</MenuItem>
+                    <MenuItem value="Account Manager">Account Manager</MenuItem>
+                    <MenuItem value="Marketplace Browse">Marketplace Browse</MenuItem>
+                    <MenuItem value="Referral">Referral</MenuItem>
+                    <MenuItem value="Renewal">Renewal</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Assigned To"
+                  value={dealFormData.assignedTo}
+                  onChange={(e) => setDealFormData(prev => ({...prev, assignedTo: e.target.value}))}
+                />
+              </Grid>
+
+              {/* Sales Pipeline */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  📈 Sales Pipeline
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Pipeline Stage</InputLabel>
                   <Select
                     value={dealFormData.stage}
-                    label="Stage"
-                    onChange={(e) => setDealFormData({ ...dealFormData, stage: e.target.value as Deal["stage"] })}
+                    label="Pipeline Stage"
+                    onChange={(e) => setDealFormData(prev => ({...prev, stage: e.target.value as any}))}
                   >
-                    <MenuItem value="Lead">Lead</MenuItem>
-                    <MenuItem value="Qualified">Qualified</MenuItem>
-                    <MenuItem value="Proposal">Proposal</MenuItem>
-                    <MenuItem value="Negotiation">Negotiation</MenuItem>
-                    <MenuItem value="Closed Won">Closed Won</MenuItem>
-                    <MenuItem value="Closed Lost">Closed Lost</MenuItem>
+                    <MenuItem value="Interest">Interest</MenuItem>
+                    <MenuItem value="Demo Scheduled">Demo Scheduled</MenuItem>
+                    <MenuItem value="Trial Active">Trial Active</MenuItem>
+                    <MenuItem value="Purchase Decision">Purchase Decision</MenuItem>
+                    <MenuItem value="Activated">Activated</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
-            </Grid>
 
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <NumberInput
-                  label="Deal Value"
+              <Grid item xs={12} md={4}>
+                <TextField
                   fullWidth
-                  required
-                  value={dealFormData.value}
-                  onChange={(value) => setDealFormData({ ...dealFormData, value })}
-                  min={0}
-                  prefix="$"
-                  allowDecimals={false}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <NumberInput
                   label="Probability (%)"
-                  fullWidth
+                  type="number"
                   value={dealFormData.probability}
-                  onChange={(value) => setDealFormData({ ...dealFormData, probability: value })}
-                  min={0}
-                  max={100}
-                  suffix="%"
-                  allowDecimals={false}
+                  onChange={(e) => setDealFormData(prev => ({...prev, probability: parseInt(e.target.value) || 0}))}
+                  InputProps={{
+                    inputProps: { min: 0, max: 100 },
+                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Expected Close Date"
+                  type="date"
+                  value={dealFormData.expectedCloseDate}
+                  onChange={(e) => setDealFormData(prev => ({...prev, expectedCloseDate: e.target.value}))}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+
+              {/* Trial Setup */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  🔄 Trial Setup
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={dealFormData.trialOffered}
+                      onChange={(e) => setDealFormData(prev => ({...prev, trialOffered: e.target.checked}))}
+                    />
+                  }
+                  label="Offer Free Trial"
+                />
+                {dealFormData.trialOffered && (
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    Trial will generate activation code for customer
+                  </Alert>
+                )}
+              </Grid>
+
+              {dealFormData.trialOffered && (
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Trial Duration"
+                    type="number"
+                    value={dealFormData.trialDuration}
+                    onChange={(e) => setDealFormData(prev => ({...prev, trialDuration: parseInt(e.target.value) || 7}))}
+                    InputProps={{
+                      inputProps: { min: 1, max: 30 },
+                      endAdornment: <InputAdornment position="end">days</InputAdornment>
+                    }}
+                  />
+                </Grid>
+              )}
+
+              {/* Additional Details */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  📝 Additional Details
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description & Notes"
+                  multiline
+                  rows={3}
+                  value={dealFormData.description}
+                  onChange={(e) => setDealFormData(prev => ({...prev, description: e.target.value}))}
+                  placeholder="Describe customer needs, product fit, key discussion points..."
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Tags (comma-separated)"
+                  value={dealFormData.tags.join(', ')}
+                  onChange={(e) => setDealFormData(prev => ({
+                    ...prev,
+                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)
+                  }))}
+                  placeholder="e.g., high-priority, enterprise, trial-user"
                 />
               </Grid>
             </Grid>
-
-            <TextField
-              label="Expected Close Date"
-              type="date"
-              fullWidth
-              value={dealFormData.expectedCloseDate}
-              onChange={(e) => setDealFormData({ ...dealFormData, expectedCloseDate: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={3}
-              value={dealFormData.description}
-              onChange={(e) => setDealFormData({ ...dealFormData, description: e.target.value })}
-              placeholder="Enter deal description and notes..."
-            />
-          </Stack>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDealDialog(false)}>Cancel</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setOpenDealDialog(false)}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
-            onClick={handleSaveDeal}
-            disabled={!dealFormData.title || !dealFormData.contactId || !dealFormData.value}
+            onClick={() => {
+              // Here you would normally save to your backend/state management
+              console.log('Saving opportunity:', dealFormData);
+
+              // Show success message
+              alert(`✅ Opportunity ${selectedDeal ? 'updated' : 'created'} successfully!\n\nProduct: ${dealFormData.productName}\nCustomer: ${dealFormData.customerName}\nValue: $${dealFormData.value}/${dealFormData.billingCycle}\nStage: ${dealFormData.stage}${dealFormData.trialOffered ? '\n🔄 Trial offered: ' + dealFormData.trialDuration + ' days' : ''}`);
+
+              setOpenDealDialog(false);
+            }}
+            startIcon={selectedDeal ? <EditRoundedIcon /> : <AddRoundedIcon />}
           >
-            {selectedDeal ? "Update Deal" : "Create Deal"}
+            {selectedDeal ? "Update Opportunity" : "Create Opportunity"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Quote Dialog */}
-      <Dialog open={openQuoteDialog} onClose={() => setOpenQuoteDialog(false)} maxWidth="lg" fullWidth>
+      {/* Quote Dialog (Enhanced) */}
+      <Dialog open={openQuoteDialog} onClose={() => setOpenQuoteDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           {selectedQuote ? "Edit Quote" : "Create New Quote"}
         </DialogTitle>
         <DialogContent>
-          <Stack spacing={3} sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Property</InputLabel>
-                  <Select
-                    value={quoteFormData.propertyId}
-                    label="Property"
-                    onChange={(e) => setQuoteFormData({ ...quoteFormData, propertyId: e.target.value })}
-                  >
-                    {state.properties.filter(p => p.status === "Available").map((property) => (
-                      <MenuItem key={property.id} value={property.id}>
-                        {property.name} - {property.address}
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                          (${property.monthlyRent.toLocaleString()}/mo)
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth required>
-                  <InputLabel>Contact</InputLabel>
-                  <Select
-                    value={quoteFormData.contactId}
-                    label="Contact"
-                    onChange={(e) => setQuoteFormData({ ...quoteFormData, contactId: e.target.value })}
-                  >
-                    {contacts.map((contact) => (
-                      <MenuItem key={contact.id} value={contact.id}>
-                        {contact.firstName} {contact.lastName}
-                        {contact.company && (
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                            ({contact.company})
-                          </Typography>
-                        )}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <NumberInput
-                  label="Monthly Rent"
-                  fullWidth
-                  required
-                  value={quoteFormData.monthlyRent}
-                  onChange={(value) => setQuoteFormData({ ...quoteFormData, monthlyRent: value })}
-                  min={0}
-                  prefix="$"
-                  allowDecimals={false}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <NumberInput
-                  label="Security Deposit"
-                  fullWidth
-                  value={quoteFormData.securityDeposit}
-                  onChange={(value) => setQuoteFormData({ ...quoteFormData, securityDeposit: value })}
-                  min={0}
-                  prefix="$"
-                  allowDecimals={false}
-                />
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <NumberInput
-                  label="Application Fee"
-                  fullWidth
-                  value={quoteFormData.applicationFee}
-                  onChange={(value) => setQuoteFormData({ ...quoteFormData, applicationFee: value })}
-                  min={0}
-                  prefix="$"
-                  allowDecimals={false}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <NumberInput
-                  label="Pet Deposit"
-                  fullWidth
-                  value={quoteFormData.petDeposit}
-                  onChange={(value) => setQuoteFormData({ ...quoteFormData, petDeposit: value })}
-                  min={0}
-                  prefix="$"
-                  allowDecimals={false}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <NumberInput
-                  label="Lease Term (Months)"
-                  fullWidth
-                  value={quoteFormData.leaseTermMonths}
-                  onChange={(value) => setQuoteFormData({ ...quoteFormData, leaseTermMonths: value })}
-                  min={1}
-                  max={36}
-                  allowDecimals={false}
-                />
-              </Grid>
-            </Grid>
-
-            <TextField
-              label="Valid Until"
-              type="date"
-              fullWidth
-              value={quoteFormData.validUntil}
-              onChange={(e) => setQuoteFormData({ ...quoteFormData, validUntil: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              helperText="Quote expiration date"
-            />
-
-            <TextField
-              label="Notes"
-              fullWidth
-              multiline
-              rows={3}
-              value={quoteFormData.notes}
-              onChange={(e) => setQuoteFormData({ ...quoteFormData, notes: e.target.value })}
-              placeholder="Additional terms, conditions, or special offers..."
-            />
-          </Stack>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Enhanced quote creation with pricing tiers, discounts, and trial offers will be implemented here.
+            Features will include:
+            • Product selection from marketplace
+            • Volume discounts for multiple licenses
+            • Trial period offerings
+            • Custom pricing for enterprise deals
+          </Alert>
+          <Typography variant="body2" color="text.secondary">
+            This will integrate with the opportunity data and support all billing cycles (monthly, yearly, one-time).
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenQuoteDialog(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleSaveQuote}
-            disabled={!quoteFormData.propertyId || !quoteFormData.contactId || !quoteFormData.monthlyRent}
-          >
+          <Button variant="contained" startIcon={<QuoteIcon />}>
             {selectedQuote ? "Update Quote" : "Create Quote"}
           </Button>
         </DialogActions>

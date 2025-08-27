@@ -74,17 +74,13 @@ const mainListItems = [
 ];
 
 const marketingListItems = [
-  { text: "Email Marketing", icon: <EmailRoundedIcon />, path: "/crm/email-marketing" },
-  { text: "SMS Marketing", icon: <SmsRoundedIcon />, path: "/crm/sms-marketing" },
-  { text: "Templates", icon: <DescriptionRoundedIcon />, path: "/crm/templates" },
-  { text: "Landing Pages", icon: <PublicRoundedIcon />, path: "/crm/landing-pages" },
-  { text: "Promotions", icon: <CampaignRoundedIcon />, path: "/crm/promotions" },
+  // All marketing features now consolidated into Marketing Automation
+  // Landing Pages and Promotions integrated into the main Marketing Automation hub
 ];
 
 const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
-  { text: "Automation Engine", icon: <AutorenewRoundedIcon />, path: "/crm/automation" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
@@ -247,25 +243,9 @@ export default function CrmMenuContent() {
             </ListItem>
           ))}
         </List>
-        {/* Marketing/Management Tools - Only show in Management mode */}
-        {isManagementMode && (
-          <>
-            <Divider sx={{ my: 1 }} />
-            <List dense>
-              {marketingListItems.map((item, index) => (
-                <ListItem key={index} disablePadding sx={{ display: "block" }}>
-                  <ListItemButton
-                    selected={location.pathname === item.path}
-                    onClick={() => handleNavigation(item.path)}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </>
-        )}
+        {/* Marketing Tools - All features consolidated into Marketing Automation (main menu) */}
+        {/* Email Marketing, SMS Marketing, Templates, Landing Pages, and Promotions */}
+        {/* are now integrated into the unified Marketing Automation hub */}
       </Box>
       {/* Secondary items - Adjust based on mode */}
       <Box>
