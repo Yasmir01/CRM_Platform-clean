@@ -6,7 +6,7 @@
 import { LocalStorageService } from './LocalStorageService';
 import { BasePlatformAdapter } from './integrations/BasePlatformAdapter';
 import { ZillowAdapter, TruliaAdapter, RealtorComAdapter } from './integrations/OAuth2PlatformAdapter';
-import { ApartmentsComAdapter, ZumperAdapter } from './integrations/ApiKeyPlatformAdapter';
+import { ApartmentsComAdapter, ZumperAdapter, RentBerryAdapter, DwellsyAdapter } from './integrations/ApiKeyPlatformAdapter';
 import { CraigslistAdapter } from './integrations/ScrapingPlatformAdapter';
 import type {
   AuthenticationResult,
@@ -100,6 +100,20 @@ class PlatformConnectionServiceClass {
         connectionHealth: 'error'
       });
 
+      this.adapters.set('rentberry', {
+        adapter: new RentBerryAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
+
+      this.adapters.set('dwellsy', {
+        adapter: new DwellsyAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
+
       // Scraping Platforms
       this.adapters.set('craigslist', {
         adapter: new CraigslistAdapter(),
@@ -122,8 +136,7 @@ class PlatformConnectionServiceClass {
    */
   private initializeMockAdapters(): void {
     const mockPlatforms: RealEstatePlatform[] = [
-      'rentberry', 'dwellsy', 'rent_jungle',
-      'rentprep', 'move_com', 'rentdigs', 'apartment_list', 'cozycozy', 'doorsteps'
+      'rent_jungle', 'rentprep', 'move_com', 'rentdigs', 'apartment_list', 'cozycozy', 'doorsteps'
     ];
 
     mockPlatforms.forEach(platform => {
