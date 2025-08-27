@@ -281,56 +281,33 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Remove property from platforms
+   * Remove property from platforms using real connection service
    */
   async removePropertyFromPlatforms(
     propertyId: string,
     platforms: RealEstatePlatform[],
     userId: string
   ): Promise<PublishingResult[]> {
-    const results: PublishingResult[] = [];
+    try {
+      // Use real listing publishing service for removal
+      const result = await ListingPublishingService.removeListing(propertyId, platforms, userId);
 
-    for (const platform of platforms) {
-      try {
-        if (!this.isPlatformAuthenticated(platform)) {
-          results.push({
-            platform,
-            status: 'failed',
-            error: 'Platform not authenticated',
-            message: 'Authentication required'
-          });
-          continue;
-        }
+      return result.results.map(r => ({
+        platform: r.platform,
+        status: r.success ? 'removed' : 'failed',
+        message: r.message,
+        error: r.success ? undefined : r.message
+      }));
 
-        // Simulate removal (in real implementation, call platform API)
-        const success = await this.removePlatformListing(platform, propertyId);
-        
-        results.push({
-          platform,
-          status: success ? 'removed' : 'failed',
-          message: success ? 'Property removed successfully' : 'Failed to remove property'
-        });
-
-        this.logActivity({
-          platform,
-          action: 'remove',
-          propertyId,
-          status: success ? 'success' : 'failure',
-          message: success ? 'Property removed from platform' : 'Failed to remove property',
-          userId,
-          userEmail: 'user@example.com'
-        });
-
-      } catch (error) {
-        results.push({
-          platform,
-          status: 'failed',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+    } catch (error) {
+      // Fallback error handling
+      return platforms.map(platform => ({
+        platform,
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Failed to remove property'
+      }));
     }
-
-    return results;
   }
 
   /**
