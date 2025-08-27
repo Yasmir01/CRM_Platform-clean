@@ -8,6 +8,13 @@ import { BasePlatformAdapter } from './integrations/BasePlatformAdapter';
 import { ZillowAdapter } from './integrations/OAuth2PlatformAdapter';
 import { ApartmentsComAdapter, ZumperAdapter } from './integrations/ApiKeyPlatformAdapter';
 import { CraigslistAdapter } from './integrations/ScrapingPlatformAdapter';
+import type {
+  AuthenticationResult,
+  ListingPublishResult,
+  ListingUpdateResult,
+  ListingRemovalResult,
+  PlatformConnectionStatus
+} from './integrations/BasePlatformAdapter';
 import {
   RealEstatePlatform,
   PlatformAuthConfig,
@@ -55,38 +62,64 @@ class PlatformConnectionServiceClass {
    * Initialize all platform adapters
    */
   private initializeAdapters(): void {
-    // OAuth2 Platforms
-    this.adapters.set('zillow', {
-      adapter: new ZillowAdapter(),
-      isConnected: false,
-      lastConnectionCheck: new Date().toISOString(),
-      connectionHealth: 'error'
-    });
+    try {
+      // OAuth2 Platforms
+      this.adapters.set('zillow', {
+        adapter: new ZillowAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
 
-    // API Key Platforms
-    this.adapters.set('apartments_com', {
-      adapter: new ApartmentsComAdapter(),
-      isConnected: false,
-      lastConnectionCheck: new Date().toISOString(),
-      connectionHealth: 'error'
-    });
+      // API Key Platforms
+      this.adapters.set('apartments_com', {
+        adapter: new ApartmentsComAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
 
-    this.adapters.set('zumper', {
-      adapter: new ZumperAdapter(),
-      isConnected: false,
-      lastConnectionCheck: new Date().toISOString(),
-      connectionHealth: 'error'
-    });
+      this.adapters.set('zumper', {
+        adapter: new ZumperAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
 
-    // Scraping Platforms
-    this.adapters.set('craigslist', {
-      adapter: new CraigslistAdapter(),
-      isConnected: false,
-      lastConnectionCheck: new Date().toISOString(),
-      connectionHealth: 'error'
-    });
+      // Scraping Platforms
+      this.adapters.set('craigslist', {
+        adapter: new CraigslistAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
 
-    console.log(`Initialized ${this.adapters.size} platform adapters`);
+      // Initialize mock adapters for other platforms until real implementations are added
+      this.initializeMockAdapters();
+
+      console.log(`Initialized ${this.adapters.size} platform adapters`);
+    } catch (error) {
+      console.error('Failed to initialize platform adapters:', error);
+    }
+  }
+
+  /**
+   * Initialize mock adapters for platforms not yet implemented
+   */
+  private initializeMockAdapters(): void {
+    const mockPlatforms: RealEstatePlatform[] = [
+      'realtors_com', 'trulia', 'rentberry', 'dwellsy', 'rent_jungle',
+      'rentprep', 'move_com', 'rentdigs', 'apartment_list', 'cozycozy', 'doorsteps'
+    ];
+
+    mockPlatforms.forEach(platform => {
+      this.adapters.set(platform, {
+        adapter: new MockPlatformAdapter(platform),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
+    });
   }
 
   /**
@@ -636,6 +669,160 @@ class PlatformConnectionServiceClass {
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}
+
+/**
+ * Mock Platform Adapter for platforms not yet implemented
+ */
+class MockPlatformAdapter extends BasePlatformAdapter {
+  constructor(platform: RealEstatePlatform) {
+    super(platform, `https://api.${platform}.com`);
+  }
+
+  async initialize(authConfig: PlatformAuthConfig): Promise<AuthenticationResult> {
+    return {
+      success: false,
+      error: `${this.platform} integration coming soon! Please check back later.`
+    };
+  }
+
+  async authenticate(): Promise<AuthenticationResult> {
+    return {
+      success: false,
+      error: `${this.platform} integration coming soon!`
+    };
+  }
+
+  async refreshAuthentication(): Promise<AuthenticationResult> {
+    return { success: false, error: 'Not implemented' };
+  }
+
+  async testConnection(): Promise<PlatformConnectionStatus> {
+    return {
+      isConnected: false,
+      lastChecked: new Date().toISOString(),
+      connectionHealth: 'error',
+      error: `${this.platform} integration coming soon!`
+    };
+  }
+
+  async publishListing(listingData: PropertyListingData): Promise<ListingPublishResult> {
+    return {
+      success: false,
+      error: `${this.platform} integration coming soon! This platform will be available in a future update.`
+    };
+  }
+
+  async updateListing(externalListingId: string, listingData: Partial<PropertyListingData>): Promise<ListingUpdateResult> {
+    return {
+      success: false,
+      error: `${this.platform} integration coming soon!`
+    };
+  }
+
+  async removeListing(externalListingId: string): Promise<ListingRemovalResult> {
+    return {
+      success: false,
+      error: `${this.platform} integration coming soon!`
+    };
+  }
+
+  async getListingStatus(externalListingId: string): Promise<any> {
+    throw new Error(`${this.platform} integration coming soon!`);
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<PlatformAnalytics> {
+    return {
+      platform: this.platform,
+      period: 'custom',
+      startDate,
+      endDate,
+      metrics: {
+        totalListings: 0,
+        activeListings: 0,
+        successfulPublications: 0,
+        failedPublications: 0,
+        totalViews: 0,
+        totalInquiries: 0,
+        conversionRate: 0,
+        averageTimeToPublish: 0,
+        revenue: 0,
+        costs: 0,
+        profit: 0
+      },
+      topPerformingListings: []
+    };
+  }
+
+  transformPropertyData(crmData: any): PropertyListingData {
+    return {
+      propertyId: crmData.id || '',
+      platform: this.platform,
+      title: crmData.name || 'Property Listing',
+      description: crmData.description || '',
+      price: crmData.monthlyRent || crmData.price || 0,
+      priceType: 'monthly',
+      propertyType: crmData.type || 'apartment',
+      address: {
+        street: crmData.address || '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'US'
+      },
+      details: {
+        bedrooms: crmData.bedrooms || 0,
+        bathrooms: crmData.bathrooms || 0,
+        squareFootage: crmData.squareFootage,
+        amenities: crmData.amenities || []
+      },
+      media: {
+        photos: crmData.photos || []
+      },
+      availability: {
+        availableDate: crmData.availableDate || new Date().toISOString().split('T')[0]
+      },
+      contact: {
+        name: crmData.contactName || '',
+        phone: crmData.contactPhone || '',
+        email: crmData.contactEmail || '',
+        preferredContact: 'email'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  getValidationRules(): any {
+    return {
+      required: ['title', 'price'],
+      maxPhotos: 20,
+      maxDescriptionLength: 1000
+    };
+  }
+
+  validateListingData(listingData: PropertyListingData): { valid: boolean; errors: string[] } {
+    return {
+      valid: false,
+      errors: [`${this.platform} integration coming soon!`]
+    };
+  }
+
+  async handleWebhook(payload: any): Promise<{ processed: boolean; action?: string }> {
+    return { processed: false };
+  }
+
+  async getRateLimitInfo(): Promise<{ limit: number; remaining: number; resetTime: string }> {
+    return {
+      limit: 0,
+      remaining: 0,
+      resetTime: new Date().toISOString()
+    };
+  }
+
+  protected getAuthHeaders(): Record<string, string> {
+    return {};
   }
 }
 
