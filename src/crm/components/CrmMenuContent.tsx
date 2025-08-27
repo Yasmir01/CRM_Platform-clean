@@ -74,11 +74,8 @@ const mainListItems = [
 ];
 
 const marketingListItems = [
-  { text: "Email Marketing", icon: <EmailRoundedIcon />, path: "/crm/email-marketing" },
-  { text: "SMS Marketing", icon: <SmsRoundedIcon />, path: "/crm/sms-marketing" },
-  { text: "Templates", icon: <DescriptionRoundedIcon />, path: "/crm/templates" },
-  { text: "Landing Pages", icon: <PublicRoundedIcon />, path: "/crm/landing-pages" },
-  { text: "Promotions", icon: <CampaignRoundedIcon />, path: "/crm/promotions" },
+  // All marketing features now consolidated into Marketing Automation
+  // Landing Pages and Promotions integrated into the main Marketing Automation hub
 ];
 
 const secondaryListItems = [
