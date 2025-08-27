@@ -80,6 +80,7 @@ import {
   Settings as SettingsIcon
 } from '@mui/icons-material';
 import { accessControlService } from '../services/AccessControlService';
+import { userManagementService, User as UserMgmtUser, UserAction } from '../services/UserManagementService';
 import { uniformTooltipStyles } from '../utils/formStyles';
 
 interface TabPanelProps {
