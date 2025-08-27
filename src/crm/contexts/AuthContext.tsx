@@ -18,6 +18,10 @@ export interface User {
   avatar?: string;
   lastLogin?: string;
   createdAt: string;
+  // User preferences
+  preferredLanguage?: string;
+  timezone?: string;
+  countryCode?: string;
 }
 
 export interface AuthContextType {
