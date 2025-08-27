@@ -495,20 +495,20 @@ export default function RealEstatePlatformIntegrations() {
                       <Card variant="outlined">
                         <CardContent sx={{ pb: 1 }}>
                           <Typography variant="subtitle1" noWrap>
-                            {property.name}
+                            {property?.name || 'Unknown Property'}
                           </Typography>
                           <Typography variant="body2" color="text.secondary" noWrap>
-                            {property.address}
+                            {property?.address || 'Address not available'}
                           </Typography>
                           <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                            ${property.monthlyRent}/month
+                            ${property?.monthlyRent || 0}/month
                           </Typography>
                           <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Chip label={property.type} size="small" />
-                            <Chip 
-                              label={property.status} 
-                              size="small" 
-                              color={property.status === 'Available' ? 'success' : 'default'}
+                            <Chip label={property?.type || 'Unknown'} size="small" />
+                            <Chip
+                              label={property?.status || 'Unknown'}
+                              size="small"
+                              color={property?.status === 'Available' ? 'success' : 'default'}
                             />
                           </Stack>
                           <Button
