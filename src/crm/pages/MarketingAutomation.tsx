@@ -495,7 +495,6 @@ export default function MarketingAutomation() {
     criteria: [{ field: 'email', operator: 'contains' as const, value: '', logic: 'AND' as const }]
   });
 
-  const navigate = useNavigate();
   const [campaignFormData, setCampaignFormData] = React.useState({
     name: "",
     type: "Email" as Campaign["type"],
@@ -1363,7 +1362,7 @@ export default function MarketingAutomation() {
                     onChange={(e) => setCampaignFormData({ ...campaignFormData, type: e.target.value as Campaign["type"] })}
                   >
                     <MenuItem value="Email">📧 Email</MenuItem>
-                    <MenuItem value="SMS">📱 SMS</MenuItem>
+                    <MenuItem value="SMS">�� SMS</MenuItem>
                     <MenuItem value="Social">📱 Social Media</MenuItem>
                     <MenuItem value="Push">🔔 Push Notification</MenuItem>
                     <MenuItem value="Multi-Channel">🌐 Multi-Channel</MenuItem>
