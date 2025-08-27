@@ -98,6 +98,342 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+// Platform Edit Form Component
+function PlatformEditForm({
+  platform,
+  onSave,
+  onCancel
+}: {
+  platform: PlatformConfiguration | null;
+  onSave: (data: Partial<PlatformConfiguration>) => void;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = React.useState({
+    displayName: platform?.displayName || '',
+    description: platform?.description || '',
+    websiteUrl: platform?.websiteUrl || '',
+    status: platform?.status || 'inactive' as PlatformStatus,
+    basePrice: platform?.pricing.basePrice || 0,
+    priceType: platform?.pricing.priceType || 'per_listing' as any,
+    bundleEligible: platform?.pricing.bundleEligible || false,
+    maxPhotos: platform?.maxPhotos || 20,
+    maxDescriptionLength: platform?.maxDescriptionLength || 1000,
+    processingTime: platform?.processingTime || '1-2 hours',
+    listingDuration: platform?.listingDuration || 30
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave({
+      displayName: formData.displayName,
+      description: formData.description,
+      websiteUrl: formData.websiteUrl,
+      status: formData.status,
+      pricing: {
+        ...platform?.pricing,
+        basePrice: formData.basePrice,
+        priceType: formData.priceType,
+        bundleEligible: formData.bundleEligible
+      },
+      maxPhotos: formData.maxPhotos,
+      maxDescriptionLength: formData.maxDescriptionLength,
+      processingTime: formData.processingTime,
+      listingDuration: formData.listingDuration,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Display Name"
+            value={formData.displayName}
+            onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth required>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={formData.status}
+              label="Status"
+              onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as PlatformStatus }))}
+            >
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="inactive">Inactive</MenuItem>
+              <MenuItem value="suspended">Suspended</MenuItem>
+              <MenuItem value="error">Error</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Description"
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            multiline
+            rows={2}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Website URL"
+            value={formData.websiteUrl}
+            onChange={(e) => setFormData(prev => ({ ...prev, websiteUrl: e.target.value }))}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Processing Time"
+            value={formData.processingTime}
+            onChange={(e) => setFormData(prev => ({ ...prev, processingTime: e.target.value }))}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Base Price"
+            type="number"
+            value={formData.basePrice}
+            onChange={(e) => setFormData(prev => ({ ...prev, basePrice: parseFloat(e.target.value) || 0 }))}
+            InputProps={{
+              startAdornment: <InputAdornment position="start">$</InputAdornment>
+            }}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Max Photos"
+            type="number"
+            value={formData.maxPhotos}
+            onChange={(e) => setFormData(prev => ({ ...prev, maxPhotos: parseInt(e.target.value) || 0 }))}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <TextField
+            fullWidth
+            label="Listing Duration (days)"
+            type="number"
+            value={formData.listingDuration}
+            onChange={(e) => setFormData(prev => ({ ...prev, listingDuration: parseInt(e.target.value) || 0 }))}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.bundleEligible}
+                onChange={(e) => setFormData(prev => ({ ...prev, bundleEligible: e.target.checked }))}
+              />
+            }
+            label="Bundle Eligible"
+          />
+        </Grid>
+      </Grid>
+
+      <DialogActions sx={{ px: 0, mt: 3 }}>
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button type="submit" variant="contained" startIcon={<SaveIcon />}>
+          Save Platform
+        </Button>
+      </DialogActions>
+    </Box>
+  );
+}
+
+// Bundle Edit Form Component
+function BundleEditForm({
+  bundle,
+  availablePlatforms,
+  onSave,
+  onCancel
+}: {
+  bundle: PlatformBundle | null;
+  availablePlatforms: PlatformConfiguration[];
+  onSave: (data: Partial<PlatformBundle>) => void;
+  onCancel: () => void;
+}) {
+  const [formData, setFormData] = React.useState({
+    name: bundle?.name || '',
+    description: bundle?.description || '',
+    platforms: bundle?.platforms || [],
+    totalPrice: bundle?.totalPrice || 0,
+    discountPercentage: bundle?.discountPercentage || 0,
+    isPopular: bundle?.isPopular || false,
+    isActive: bundle?.isActive !== false,
+    features: bundle?.features || []
+  });
+
+  const [newFeature, setNewFeature] = React.useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const originalPrice = formData.platforms.reduce((total, platformName) => {
+      const platform = availablePlatforms.find(p => p.platform === platformName);
+      return total + (platform?.pricing.basePrice || 0);
+    }, 0);
+
+    onSave({
+      name: formData.name,
+      description: formData.description,
+      platforms: formData.platforms,
+      totalPrice: formData.totalPrice,
+      originalPrice,
+      discountPercentage: formData.discountPercentage,
+      isPopular: formData.isPopular,
+      isActive: formData.isActive,
+      features: formData.features,
+      updatedAt: new Date().toISOString()
+    });
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        features: [...prev.features, newFeature.trim()]
+      }));
+      setNewFeature('');
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
+  return (
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Bundle Name"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            required
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Total Price"
+            type="number"
+            value={formData.totalPrice}
+            onChange={(e) => setFormData(prev => ({ ...prev, totalPrice: parseFloat(e.target.value) || 0 }))}
+            InputProps={{
+              startAdornment: <InputAdornment position="start">$</InputAdornment>
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            label="Description"
+            value={formData.description}
+            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            multiline
+            rows={2}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel>Included Platforms</InputLabel>
+            <Select
+              multiple
+              value={formData.platforms}
+              label="Included Platforms"
+              onChange={(e) => setFormData(prev => ({ ...prev, platforms: e.target.value as RealEstatePlatform[] }))}
+            >
+              {availablePlatforms.map((platform) => (
+                <MenuItem key={platform.platform} value={platform.platform}>
+                  {platform.displayName} (${platform.pricing.basePrice})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Discount Percentage"
+            type="number"
+            value={formData.discountPercentage}
+            onChange={(e) => setFormData(prev => ({ ...prev, discountPercentage: parseFloat(e.target.value) || 0 }))}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Stack direction="row" spacing={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isPopular}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isPopular: e.target.checked }))}
+                />
+              }
+              label="Mark as Popular"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                />
+              }
+              label="Active"
+            />
+          </Stack>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="subtitle2" gutterBottom>Features</Typography>
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <TextField
+              size="small"
+              placeholder="Add feature"
+              value={newFeature}
+              onChange={(e) => setNewFeature(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+            />
+            <Button size="small" onClick={addFeature} variant="outlined">
+              Add
+            </Button>
+          </Stack>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {formData.features.map((feature, index) => (
+              <Chip
+                key={index}
+                label={feature}
+                size="small"
+                onDelete={() => removeFeature(index)}
+              />
+            ))}
+          </Stack>
+        </Grid>
+      </Grid>
+
+      <DialogActions sx={{ px: 0, mt: 3 }}>
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button type="submit" variant="contained" startIcon={<SaveIcon />}>
+          Save Bundle
+        </Button>
+      </DialogActions>
+    </Box>
+  );
+}
+
 export default function RealEstatePlatformAdmin() {
   const [tabValue, setTabValue] = React.useState(0);
   const [platforms, setPlatforms] = React.useState<PlatformConfiguration[]>([]);
