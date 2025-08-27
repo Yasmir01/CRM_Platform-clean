@@ -96,6 +96,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LaunchIcon from "@mui/icons-material/Launch";
 import WebIcon from "@mui/icons-material/Web";
 import SmsIcon from "@mui/icons-material/Sms";
+import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
+import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Campaign } from "../contexts/CrmDataContext";
