@@ -286,6 +286,16 @@ function AppRoutes() {
             <RealEstatePlatformIntegrations />
           </React.Suspense>
         } />
+        <Route path="platform-pricing" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PlatformPricingManagement />
+          </React.Suspense>
+        } />
+        <Route path="platform-authentication" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PlatformAuthenticationManagement />
+          </React.Suspense>
+        } />
         <Route path="backup" element={
           <React.Suspense fallback={<PageLoader />}>
             <BackupManagement />
