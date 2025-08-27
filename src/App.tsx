@@ -49,6 +49,8 @@ const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
 const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
+const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformPricingManagement"));
+const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
 const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 
