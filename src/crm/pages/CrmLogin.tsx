@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PasswordResetRequest from "../components/PasswordResetRequest";
 
 const LoginContainer = styled(Box)(({ theme }) => ({
   minHeight: "100vh",
