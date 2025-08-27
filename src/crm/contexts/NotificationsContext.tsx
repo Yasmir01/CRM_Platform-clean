@@ -283,6 +283,10 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   };
 
   const removeNotification = (id: string) => {
+    // Add to removed IDs override (works for both generated and manual notifications)
+    setRemovedIds(prev => ({ ...prev, [id]: true }));
+
+    // Also remove from manual notifications
     setManualNotifications(prev => prev.filter(notification => notification.id !== id));
   };
 
