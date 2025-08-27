@@ -495,6 +495,8 @@ export default function UserRoles() {
 
   const handleEditUser = (user: User) => {
     setSelectedUser(user);
+    // Find the actual auth user to get the full data including preferences
+    const authUser = authUsers.find(u => u.id === user.id);
     setUserFormData({
       firstName: user.firstName,
       lastName: user.lastName,
@@ -503,9 +505,9 @@ export default function UserRoles() {
       password: "",
       status: user.status,
       linkedPropertyId: user.linkedPropertyId || "",
-      preferredLanguage: user.preferredLanguage || "en",
-      timezone: user.timezone || "UTC",
-      countryCode: user.countryCode || "US",
+      preferredLanguage: authUser?.preferredLanguage || user.preferredLanguage || "en",
+      timezone: authUser?.timezone || user.timezone || "UTC",
+      countryCode: authUser?.countryCode || user.countryCode || "US",
     });
     setOpenUserDialog(true);
   };
