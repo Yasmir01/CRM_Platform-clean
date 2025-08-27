@@ -302,6 +302,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
 
   const clearAllNotifications = () => {
     setManualNotifications([]);
+    setReadIds({});
+    setRemovedIds({});
   };
 
   const getNotificationsByType = (type: Notification['type']) => {
