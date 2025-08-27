@@ -378,6 +378,9 @@ export default function UserRoles() {
       status: authUser.status,
       lastLogin: authUser.lastLogin,
       profilePicture: authUser.avatar,
+      preferredLanguage: authUser.preferredLanguage,
+      timezone: authUser.timezone,
+      countryCode: authUser.countryCode,
     };
   });
   const [searchTerm, setSearchTerm] = React.useState("");
