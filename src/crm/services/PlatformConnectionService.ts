@@ -5,7 +5,7 @@
 
 import { LocalStorageService } from './LocalStorageService';
 import { BasePlatformAdapter } from './integrations/BasePlatformAdapter';
-import { ZillowAdapter } from './integrations/OAuth2PlatformAdapter';
+import { ZillowAdapter, TruliaAdapter, RealtorComAdapter } from './integrations/OAuth2PlatformAdapter';
 import { ApartmentsComAdapter, ZumperAdapter } from './integrations/ApiKeyPlatformAdapter';
 import { CraigslistAdapter } from './integrations/ScrapingPlatformAdapter';
 import type {
@@ -71,6 +71,20 @@ class PlatformConnectionServiceClass {
         connectionHealth: 'error'
       });
 
+      this.adapters.set('trulia', {
+        adapter: new TruliaAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
+
+      this.adapters.set('realtors_com', {
+        adapter: new RealtorComAdapter(),
+        isConnected: false,
+        lastConnectionCheck: new Date().toISOString(),
+        connectionHealth: 'error'
+      });
+
       // API Key Platforms
       this.adapters.set('apartments_com', {
         adapter: new ApartmentsComAdapter(),
@@ -108,7 +122,7 @@ class PlatformConnectionServiceClass {
    */
   private initializeMockAdapters(): void {
     const mockPlatforms: RealEstatePlatform[] = [
-      'realtors_com', 'trulia', 'rentberry', 'dwellsy', 'rent_jungle',
+      'rentberry', 'dwellsy', 'rent_jungle',
       'rentprep', 'move_com', 'rentdigs', 'apartment_list', 'cozycozy', 'doorsteps'
     ];
 
