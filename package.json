@@ -20,10 +20,17 @@
     "@mui/x-charts": "^8.3.1",
     "@mui/x-data-grid": "^8.9.1",
     "@mui/x-date-pickers": "^8.10.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/crypto-js": "^4.2.2",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.15.5",
     "@types/qrcode": "^1.5.5",
+    "@types/uuid": "^10.0.0",
+    "bcryptjs": "^3.0.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -31,7 +38,8 @@
     "react-router-dom": "^6.22.3",
     "react-swipeable": "^7.0.2",
     "recharts": "^2.15.4",
-    "use-sync-external-store": "^1.5.0"
+    "use-sync-external-store": "^1.5.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.4",
