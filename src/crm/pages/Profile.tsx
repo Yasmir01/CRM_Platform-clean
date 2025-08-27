@@ -203,6 +203,15 @@ export default function Profile() {
     return countries.find(c => c.code === code)?.name || code;
   };
 
+  const detectAndSetLocalTimezone = () => {
+    const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setFormData({ ...formData, timezone: localTimezone });
+
+    // Show notification about detected timezone
+    const timezoneName = getTimezoneName(localTimezone) || localTimezone;
+    console.log(`Local timezone detected: ${localTimezone} (${timezoneName})`);
+  };
+
   const hasUnsavedChanges = () => {
     return editMode && (
       formData.firstName !== profile.firstName ||
