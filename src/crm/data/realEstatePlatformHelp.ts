@@ -836,9 +836,9 @@ export const platformIntegrationArticles: HelpArticle[] = [
 // Update quick actions to include platform integration
 export const platformQuickActions = [
   { label: "Platform Setup", tag: "platform-setup", color: "primary" },
-  { label: "Publishing Guide", tag: "publishing", color: "success" },
-  { label: "Authentication", tag: "authentication", color: "warning" },
+  { label: "Publishing Guide", tag: "platform-publishing", color: "success" },
+  { label: "Platform Auth", tag: "platform-authentication", color: "warning" },
   { label: "Bundles & Pricing", tag: "pricing", color: "secondary" },
-  { label: "Platform Analytics", tag: "analytics", color: "info" },
+  { label: "Platform Analytics", tag: "platform-analytics", color: "info" },
   { label: "Troubleshooting", tag: "troubleshooting", color: "error" },
 ];
