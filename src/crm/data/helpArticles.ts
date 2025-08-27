@@ -865,10 +865,8 @@ export const helpArticles: HelpArticle[] = [
 
 export const quickActions = [
   { label: "Getting Started", tag: "setup", color: "primary" },
-  { label: "Platform Publishing", tag: "publishing", color: "success" },
   { label: "Email Setup", tag: "email", color: "info" },
   { label: "Property Management", tag: "properties", color: "success" },
-  { label: "Platform Authentication", tag: "authentication", color: "warning" },
   { label: "Tenant Applications", tag: "applications", color: "warning" },
   { label: "Payment Processing", tag: "payments", color: "secondary" },
   { label: "Work Orders", tag: "work-orders", color: "error" },
