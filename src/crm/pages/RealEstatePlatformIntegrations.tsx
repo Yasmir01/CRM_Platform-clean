@@ -202,7 +202,7 @@ export default function RealEstatePlatformIntegrations() {
             <Button
               variant="contained"
               startIcon={<Help />}
-              onClick={() => window.open('/crm/help?category=platform-integrations', '_blank')}
+              onClick={() => window.open('/help?category=platform-integrations', '_blank')}
             >
               Help & Guides
             </Button>
