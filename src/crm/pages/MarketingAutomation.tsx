@@ -1272,98 +1272,119 @@ export default function MarketingAutomation() {
 
       {/* Analytics Tab */}
       <TabPanel value={currentTab} index={8}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-          <Typography variant="h6">Email Templates</Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTemplateDialog(true)}
-          >
-            Create Template
-          </Button>
-        </Stack>
+        <Stack spacing={3}>
+          <Typography variant="h6">Marketing Analytics Dashboard</Typography>
 
-        <Grid container spacing={3}>
-          {templates.map((template) => (
-            <Grid item xs={12} md={6} lg={4} key={template.id}>
+          {/* Analytics Overview Cards */}
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
               <Card>
-                <Box
-                  sx={{
-                    height: 150,
-                    bgcolor: 'grey.100',
-                    backgroundImage: template.thumbnail ? `url(${template.thumbnail})` : 'none',
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  {!template.thumbnail && <TemplateIcon sx={{ fontSize: 40, color: 'grey.400' }} />}
-                </Box>
                 <CardContent>
-                  <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "primary.main" }}>
+                      <CampaignRoundedIcon />
+                    </Avatar>
                     <Box>
-                      <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                        <Typography variant="h6" fontWeight="medium" noWrap>
-                          {template.name}
-                        </Typography>
-                        <Chip label={template.category} size="small" variant="outlined" />
-                      </Stack>
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {template.subject}
-                      </Typography>
+                      <Typography variant="h6" color="text.secondary">Total Campaigns</Typography>
+                      <Typography variant="h4">{totalCampaigns}</Typography>
                     </Box>
-
-                    <Stack direction="row" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Used {template.usageCount} times
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(template.dateModified).toLocaleDateString()}
-                      </Typography>
-                    </Stack>
-
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<EditRoundedIcon />}
-                        onClick={() => {
-                // Switch to Templates tab for editing
-                setCurrentTab(5);
-              }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<VisibilityRoundedIcon />}
-                        onClick={() => {
-                // Switch to Templates tab for preview
-                setCurrentTab(5);
-              }}
-                      >
-                        Preview
-                      </Button>
-                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
-        </Grid>
-      </TabPanel>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "success.main" }}>
+                      <TrendingUpRoundedIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Open Rate</Typography>
+                      <Typography variant="h4">{avgOpenRate.toFixed(1)}%</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "info.main" }}>
+                      <EmailRoundedIcon />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Click Rate</Typography>
+                      <Typography variant="h4">{avgClickRate.toFixed(1)}%</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Avatar sx={{ bgcolor: "warning.main" }}>$</Avatar>
+                    <Box>
+                      <Typography variant="h6" color="text.secondary">Revenue</Typography>
+                      <Typography variant="h4">${(totalRevenue / 1000).toFixed(0)}K</Typography>
+                    </Box>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
-      {/* Analytics Tab */}
-      <TabPanel value={currentTab} index={4}>
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="h6">Advanced Marketing Analytics Coming Soon</Typography>
-          <Typography variant="body2">
-            This section will include detailed campaign performance, ROI analysis, and attribution reporting.
-          </Typography>
-        </Alert>
+          {/* Campaign Performance Table */}
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>Campaign Performance</Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Campaign</TableCell>
+                      <TableCell>Type</TableCell>
+                      <TableCell>Sent</TableCell>
+                      <TableCell>Open Rate</TableCell>
+                      <TableCell>Click Rate</TableCell>
+                      <TableCell>Revenue</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {campaigns.slice(0, 5).map((campaign) => (
+                      <TableRow key={campaign.id}>
+                        <TableCell>{campaign.name}</TableCell>
+                        <TableCell>
+                          <Chip label={campaign.type} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>{campaign.metrics.sent.toLocaleString()}</TableCell>
+                        <TableCell>
+                          {((campaign.metrics.opened / campaign.metrics.sent) * 100).toFixed(1)}%
+                        </TableCell>
+                        <TableCell>
+                          {((campaign.metrics.clicked / campaign.metrics.sent) * 100).toFixed(1)}%
+                        </TableCell>
+                        <TableCell>${campaign.metrics.revenue.toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+
+          <Alert severity="info">
+            <Typography variant="subtitle1" gutterBottom>
+              🔮 <strong>Advanced Analytics Coming Soon</strong>
+            </Typography>
+            <Typography variant="body2">
+              Enhanced analytics including conversion funnels, attribution modeling, customer journey mapping, and A/B testing results will be available in the next update.
+            </Typography>
+          </Alert>
+        </Stack>
       </TabPanel>
 
       {/* Marketing Tool Sub-Page Dialog */}
