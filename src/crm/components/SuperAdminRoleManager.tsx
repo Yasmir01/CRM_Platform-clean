@@ -1043,6 +1043,12 @@ export default function SuperAdminRoleManager() {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={(e) => handleUserSelection(user.id, e.target.checked)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Stack direction="row" alignItems="center" spacing={2}>
                       <Avatar>
