@@ -1309,117 +1309,124 @@ export default function MarketingAutomation() {
       {/* Analytics Tab */}
       <TabPanel value={currentTab} index={8}>
         <Stack spacing={3}>
-          <Typography variant="h6">Marketing Analytics Dashboard</Typography>
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              📊 Marketing Analytics Overview
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Comprehensive insights across all your marketing channels
+            </Typography>
+          </Box>
 
-          {/* Analytics Overview Cards */}
-          <Grid container spacing={2}>
+          {/* Unified KPI Dashboard */}
+          <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: "primary.main" }}>
-                      <CampaignRoundedIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" color="text.secondary">Total Campaigns</Typography>
-                      <Typography variant="h4">{totalCampaigns}</Typography>
-                    </Box>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Total Campaigns
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold">
+                      {totalCampaigns}
+                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <TrendingUpRoundedIcon fontSize="small" color="success" />
+                      <Typography variant="body2" color="success.main">
+                        +12% this month
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
+
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: "success.main" }}>
-                      <TrendingUpRoundedIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" color="text.secondary">Open Rate</Typography>
-                      <Typography variant="h4">{avgOpenRate.toFixed(1)}%</Typography>
-                    </Box>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Avg Open Rate
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold">
+                      {avgOpenRate.toFixed(1)}%
+                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <TrendingUpRoundedIcon fontSize="small" color="success" />
+                      <Typography variant="body2" color="success.main">
+                        +8% this week
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
+
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: "info.main" }}>
-                      <EmailRoundedIcon />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" color="text.secondary">Click Rate</Typography>
-                      <Typography variant="h4">{avgClickRate.toFixed(1)}%</Typography>
-                    </Box>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Avg Click Rate
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold">
+                      {avgClickRate.toFixed(1)}%
+                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <TrendingUpRoundedIcon fontSize="small" color="success" />
+                      <Typography variant="body2" color="success.main">
+                        +5% this week
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
+
             <Grid item xs={12} sm={6} md={3}>
               <Card>
                 <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={2}>
-                    <Avatar sx={{ bgcolor: "warning.main" }}>$</Avatar>
-                    <Box>
-                      <Typography variant="h6" color="text.secondary">Revenue</Typography>
-                      <Typography variant="h4">${(totalRevenue / 1000).toFixed(0)}K</Typography>
-                    </Box>
+                  <Stack spacing={1}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Revenue Generated
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold">
+                      ${(totalRevenue / 1000).toFixed(0)}K
+                    </Typography>
+                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                      <TrendingUpRoundedIcon fontSize="small" color="success" />
+                      <Typography variant="body2" color="success.main">
+                        +15% this month
+                      </Typography>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
 
-          {/* Campaign Performance Table */}
+          {/* Quick Actions */}
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Campaign Performance</Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Campaign</TableCell>
-                      <TableCell>Type</TableCell>
-                      <TableCell>Sent</TableCell>
-                      <TableCell>Open Rate</TableCell>
-                      <TableCell>Click Rate</TableCell>
-                      <TableCell>Revenue</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {campaigns.slice(0, 5).map((campaign) => (
-                      <TableRow key={campaign.id}>
-                        <TableCell>{campaign.name}</TableCell>
-                        <TableCell>
-                          <Chip label={campaign.type} size="small" variant="outlined" />
-                        </TableCell>
-                        <TableCell>{campaign.metrics.sent.toLocaleString()}</TableCell>
-                        <TableCell>
-                          {((campaign.metrics.opened / campaign.metrics.sent) * 100).toFixed(1)}%
-                        </TableCell>
-                        <TableCell>
-                          {((campaign.metrics.clicked / campaign.metrics.sent) * 100).toFixed(1)}%
-                        </TableCell>
-                        <TableCell>${campaign.metrics.revenue.toLocaleString()}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    📈 Detailed Analytics & Reports
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Access comprehensive analytics, custom reports, and advanced insights
+                  </Typography>
+                </Box>
+                <Button
+                  variant="contained"
+                  startIcon={<AnalyticsIcon />}
+                  onClick={() => navigate('/analytics-insights')}
+                >
+                  View Full Analytics
+                </Button>
+              </Stack>
             </CardContent>
           </Card>
-
-          <Alert severity="info">
-            <Typography variant="subtitle1" gutterBottom>
-              🔮 <strong>Advanced Analytics Coming Soon</strong>
-            </Typography>
-            <Typography variant="body2">
-              Enhanced analytics including conversion funnels, attribution modeling, customer journey mapping, and A/B testing results will be available in the next update.
-            </Typography>
-          </Alert>
         </Stack>
       </TabPanel>
 
