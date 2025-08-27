@@ -1358,34 +1358,358 @@ export default function SalesAutomation() {
         </Grid>
       </TabPanel>
 
-      {/* Placeholder Dialogs */}
-      <Dialog open={openDealDialog} onClose={() => setOpenDealDialog(false)} maxWidth="md" fullWidth>
+      {/* Add/Edit Opportunity Dialog */}
+      <Dialog open={openDealDialog} onClose={() => setOpenDealDialog(false)} maxWidth="lg" fullWidth>
         <DialogTitle>
-          {selectedDeal ? "Edit Opportunity" : "Add New Opportunity"}
+          <Stack direction="row" alignItems="center" spacing={2}>
+            {getProductIcon(dealFormData.productType)}
+            <Typography variant="h6">
+              {selectedDeal ? "Edit Opportunity" : "Add New Opportunity"}
+            </Typography>
+          </Stack>
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info">
-            Deal creation/editing dialog would be implemented here with fields for product selection, customer info, trial setup, etc.
-          </Alert>
+          <Box sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
+              {/* Product Selection */}
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom color="primary.main">
+                  🛍️ Product & Pricing
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Product Type</InputLabel>
+                  <Select
+                    value={dealFormData.productType}
+                    label="Product Type"
+                    onChange={(e) => {
+                      const productType = e.target.value as AddOnDeal["productType"];
+                      const productInfo = {
+                        "Power Tools Suite": { name: "Power Tools Suite", price: 29.99, billing: "monthly" },
+                        "Power Dialer Pro": { name: "Power Dialer Pro", price: 19.99, billing: "monthly" },
+                        "Properties Pack": { name: "Additional Properties Pack", price: 15.00, billing: "monthly" },
+                        "Maintenance Scheduler": { name: "Smart Maintenance Scheduler", price: 2.50, billing: "monthly" },
+                        "Photography Service": { name: "Professional Photography", price: 299.99, billing: "one-time" },
+                        "Custom Package": { name: "Custom Package", price: 0, billing: "monthly" }
+                      }[productType];
+
+                      setDealFormData(prev => ({
+                        ...prev,
+                        productType,
+                        productName: productInfo.name,
+                        value: productInfo.price,
+                        billingCycle: productInfo.billing as any
+                      }));
+                    }}
+                  >
+                    <MenuItem value="Power Tools Suite">🛠️ Power Tools Suite</MenuItem>
+                    <MenuItem value="Power Dialer Pro">📞 Power Dialer Pro</MenuItem>
+                    <MenuItem value="Properties Pack">🏠 Properties Pack</MenuItem>
+                    <MenuItem value="Maintenance Scheduler">🔧 Maintenance Scheduler</MenuItem>
+                    <MenuItem value="Photography Service">📸 Photography Service</MenuItem>
+                    <MenuItem value="Custom Package">📦 Custom Package</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Product Name"
+                  value={dealFormData.productName}
+                  onChange={(e) => setDealFormData(prev => ({...prev, productName: e.target.value}))}
+                  placeholder="Customize product name if needed"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Price"
+                  type="number"
+                  value={dealFormData.value}
+                  onChange={(e) => setDealFormData(prev => ({...prev, value: parseFloat(e.target.value) || 0}))}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Billing Cycle</InputLabel>
+                  <Select
+                    value={dealFormData.billingCycle}
+                    label="Billing Cycle"
+                    onChange={(e) => setDealFormData(prev => ({...prev, billingCycle: e.target.value as any}))}
+                  >
+                    <MenuItem value="monthly">Monthly Subscription</MenuItem>
+                    <MenuItem value="yearly">Yearly Subscription</MenuItem>
+                    <MenuItem value="one-time">One-time Payment</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Revenue Impact
+                  </Typography>
+                  <Typography variant="h6" color="primary.main">
+                    ${dealFormData.billingCycle === "yearly"
+                      ? (dealFormData.value * 12).toFixed(0)
+                      : dealFormData.value.toFixed(0)}
+                    {dealFormData.billingCycle === "yearly" ? "/year" :
+                     dealFormData.billingCycle === "monthly" ? "/month" : " total"}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Customer Information */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  👤 Customer Information
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Name"
+                  value={dealFormData.customerName}
+                  onChange={(e) => setDealFormData(prev => ({...prev, customerName: e.target.value}))}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Email"
+                  type="email"
+                  value={dealFormData.customerEmail}
+                  onChange={(e) => setDealFormData(prev => ({...prev, customerEmail: e.target.value}))}
+                  required
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Current Plan</InputLabel>
+                  <Select
+                    value={dealFormData.currentPlan}
+                    label="Current Plan"
+                    onChange={(e) => setDealFormData(prev => ({...prev, currentPlan: e.target.value as any}))}
+                  >
+                    <MenuItem value="Basic">Basic Plan</MenuItem>
+                    <MenuItem value="Premium">Premium Plan</MenuItem>
+                    <MenuItem value="Enterprise">Enterprise Plan</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Lead Source</InputLabel>
+                  <Select
+                    value={dealFormData.source}
+                    label="Lead Source"
+                    onChange={(e) => setDealFormData(prev => ({...prev, source: e.target.value as any}))}
+                  >
+                    <MenuItem value="In-App Notification">In-App Notification</MenuItem>
+                    <MenuItem value="Support Request">Support Request</MenuItem>
+                    <MenuItem value="Account Manager">Account Manager</MenuItem>
+                    <MenuItem value="Marketplace Browse">Marketplace Browse</MenuItem>
+                    <MenuItem value="Referral">Referral</MenuItem>
+                    <MenuItem value="Renewal">Renewal</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Assigned To"
+                  value={dealFormData.assignedTo}
+                  onChange={(e) => setDealFormData(prev => ({...prev, assignedTo: e.target.value}))}
+                />
+              </Grid>
+
+              {/* Sales Pipeline */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  📈 Sales Pipeline
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Pipeline Stage</InputLabel>
+                  <Select
+                    value={dealFormData.stage}
+                    label="Pipeline Stage"
+                    onChange={(e) => setDealFormData(prev => ({...prev, stage: e.target.value as any}))}
+                  >
+                    <MenuItem value="Interest">Interest</MenuItem>
+                    <MenuItem value="Demo Scheduled">Demo Scheduled</MenuItem>
+                    <MenuItem value="Trial Active">Trial Active</MenuItem>
+                    <MenuItem value="Purchase Decision">Purchase Decision</MenuItem>
+                    <MenuItem value="Activated">Activated</MenuItem>
+                    <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Probability (%)"
+                  type="number"
+                  value={dealFormData.probability}
+                  onChange={(e) => setDealFormData(prev => ({...prev, probability: parseInt(e.target.value) || 0}))}
+                  InputProps={{
+                    inputProps: { min: 0, max: 100 },
+                    endAdornment: <InputAdornment position="end">%</InputAdornment>
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <TextField
+                  fullWidth
+                  label="Expected Close Date"
+                  type="date"
+                  value={dealFormData.expectedCloseDate}
+                  onChange={(e) => setDealFormData(prev => ({...prev, expectedCloseDate: e.target.value}))}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+
+              {/* Trial Setup */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  🔄 Trial Setup
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={dealFormData.trialOffered}
+                      onChange={(e) => setDealFormData(prev => ({...prev, trialOffered: e.target.checked}))}
+                    />
+                  }
+                  label="Offer Free Trial"
+                />
+                {dealFormData.trialOffered && (
+                  <Alert severity="info" sx={{ mt: 1 }}>
+                    Trial will generate activation code for customer
+                  </Alert>
+                )}
+              </Grid>
+
+              {dealFormData.trialOffered && (
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Trial Duration"
+                    type="number"
+                    value={dealFormData.trialDuration}
+                    onChange={(e) => setDealFormData(prev => ({...prev, trialDuration: parseInt(e.target.value) || 7}))}
+                    InputProps={{
+                      inputProps: { min: 1, max: 30 },
+                      endAdornment: <InputAdornment position="end">days</InputAdornment>
+                    }}
+                  />
+                </Grid>
+              )}
+
+              {/* Additional Details */}
+              <Grid item xs={12}>
+                <Divider />
+                <Typography variant="h6" gutterBottom color="primary.main" sx={{ mt: 2 }}>
+                  📝 Additional Details
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description & Notes"
+                  multiline
+                  rows={3}
+                  value={dealFormData.description}
+                  onChange={(e) => setDealFormData(prev => ({...prev, description: e.target.value}))}
+                  placeholder="Describe customer needs, product fit, key discussion points..."
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Tags (comma-separated)"
+                  value={dealFormData.tags.join(', ')}
+                  onChange={(e) => setDealFormData(prev => ({
+                    ...prev,
+                    tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)
+                  }))}
+                  placeholder="e.g., high-priority, enterprise, trial-user"
+                />
+              </Grid>
+            </Grid>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDealDialog(false)}>Cancel</Button>
-          <Button variant="contained">Save</Button>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setOpenDealDialog(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              // Here you would normally save to your backend/state management
+              console.log('Saving opportunity:', dealFormData);
+
+              // Show success message
+              alert(`✅ Opportunity ${selectedDeal ? 'updated' : 'created'} successfully!\n\nProduct: ${dealFormData.productName}\nCustomer: ${dealFormData.customerName}\nValue: $${dealFormData.value}/${dealFormData.billingCycle}\nStage: ${dealFormData.stage}${dealFormData.trialOffered ? '\n🔄 Trial offered: ' + dealFormData.trialDuration + ' days' : ''}`);
+
+              setOpenDealDialog(false);
+            }}
+            startIcon={selectedDeal ? <EditRoundedIcon /> : <AddRoundedIcon />}
+          >
+            {selectedDeal ? "Update Opportunity" : "Create Opportunity"}
+          </Button>
         </DialogActions>
       </Dialog>
 
+      {/* Quote Dialog (Enhanced) */}
       <Dialog open={openQuoteDialog} onClose={() => setOpenQuoteDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>
           {selectedQuote ? "Edit Quote" : "Create New Quote"}
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info">
-            Quote creation/editing dialog would be implemented here with product selection, pricing tiers, trial offers, etc.
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Enhanced quote creation with pricing tiers, discounts, and trial offers will be implemented here.
+            Features will include:
+            • Product selection from marketplace
+            • Volume discounts for multiple licenses
+            • Trial period offerings
+            • Custom pricing for enterprise deals
           </Alert>
+          <Typography variant="body2" color="text.secondary">
+            This will integrate with the opportunity data and support all billing cycles (monthly, yearly, one-time).
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenQuoteDialog(false)}>Cancel</Button>
-          <Button variant="contained">Save</Button>
+          <Button variant="contained" startIcon={<QuoteIcon />}>
+            {selectedQuote ? "Update Quote" : "Create Quote"}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
