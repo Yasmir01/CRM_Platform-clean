@@ -277,6 +277,16 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       console.error('Error marking suggestion notifications as read:', error);
     }
 
+    // Mark all current notifications as read in override state
+    setReadIds(prev => {
+      const newReadIds = { ...prev };
+      notifications.forEach(notification => {
+        newReadIds[notification.id] = true;
+      });
+      return newReadIds;
+    });
+
+    // Also update manual notifications for consistency
     setManualNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
     );
