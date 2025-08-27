@@ -228,6 +228,19 @@ export default function SuperAdminRoleManager() {
   const [userDialogOpen, setUserDialogOpen] = React.useState(false);
   const [assignRoleDialogOpen, setAssignRoleDialogOpen] = React.useState(false);
   const [bulkActionsOpen, setBulkActionsOpen] = React.useState(false);
+  const [statusChangeDialogOpen, setStatusChangeDialogOpen] = React.useState(false);
+  const [userActionsDialogOpen, setUserActionsDialogOpen] = React.useState(false);
+
+  // Status change state
+  const [statusChangeData, setStatusChangeData] = React.useState<{
+    userId: string;
+    currentStatus: User['status'];
+    newStatus: User['status'];
+    userName: string;
+  } | null>(null);
+
+  // User actions history
+  const [userActions, setUserActions] = React.useState<UserAction[]>([]);
 
   // Form states
   const [roleForm, setRoleForm] = React.useState({
