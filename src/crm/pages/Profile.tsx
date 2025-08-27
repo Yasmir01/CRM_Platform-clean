@@ -547,9 +547,18 @@ export default function Profile() {
                             {tz.label}
                           </MenuItem>
                         ))}
-                        <MenuItem value={Intl.DateTimeFormat().resolvedOptions().timeZone}>
-                          {Intl.DateTimeFormat().resolvedOptions().timeZone} (Your Local Timezone)
-                        </MenuItem>
+                        {(() => {
+                          const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                          const isLocalTzInList = timezones.some(tz => tz.value === localTz);
+                          if (!isLocalTzInList) {
+                            return (
+                              <MenuItem key={localTz} value={localTz}>
+                                {localTz} (Your Local Timezone)
+                              </MenuItem>
+                            );
+                          }
+                          return null;
+                        })()}
                       </Select>
                     </FormControl>
                     {editMode && (
