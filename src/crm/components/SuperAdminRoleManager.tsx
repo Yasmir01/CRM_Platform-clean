@@ -269,6 +269,10 @@ export default function SuperAdminRoleManager() {
   const [typeFilter, setTypeFilter] = React.useState('all');
   const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
 
+  // Bulk operations state
+  const [bulkRoleAssignDialogOpen, setBulkRoleAssignDialogOpen] = React.useState(false);
+  const [bulkRoleId, setBulkRoleId] = React.useState('');
+
   React.useEffect(() => {
     loadData();
   }, []);
