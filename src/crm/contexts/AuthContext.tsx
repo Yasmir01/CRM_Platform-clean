@@ -139,6 +139,9 @@ const mockUsers: User[] = [
     permissions: ['view_profile', 'view_lease', 'pay_rent', 'submit_maintenance'],
     properties: ['Sunset Apartments'],
     createdAt: '2024-01-06T00:00:00Z',
+    timezone: 'America/New_York',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '7',
@@ -151,6 +154,9 @@ const mockUsers: User[] = [
     permissions: ['view_work_orders', 'update_work_status', 'submit_invoices'],
     serviceType: 'Plumbing',
     createdAt: '2024-01-07T00:00:00Z',
+    timezone: 'America/Los_Angeles',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
 ];
 
