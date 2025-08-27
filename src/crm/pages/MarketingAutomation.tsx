@@ -821,10 +821,25 @@ export default function MarketingAutomation() {
 
       {/* Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+        <Tabs
+          value={currentTab}
+          onChange={(_, newValue) => setCurrentTab(newValue)}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
           <Tab
             icon={<CampaignRoundedIcon />}
             label="Campaigns"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<EmailRoundedIcon />}
+            label="Email Marketing"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<SmsRoundedIcon />}
+            label="SMS Marketing"
             iconPosition="start"
           />
           <Tab
@@ -843,6 +858,16 @@ export default function MarketingAutomation() {
             iconPosition="start"
           />
           <Tab
+            icon={<PublicRoundedIcon />}
+            label="Landing Pages"
+            iconPosition="start"
+          />
+          <Tab
+            icon={<LocalOfferIcon />}
+            label="Promotions"
+            iconPosition="start"
+          />
+          <Tab
             icon={<AnalyticsIcon />}
             label="Analytics"
             iconPosition="start"
@@ -850,8 +875,17 @@ export default function MarketingAutomation() {
         </Tabs>
       </Box>
 
-      {/* Campaigns Tab */}
+      {/* Multi-Channel Campaigns Tab */}
       <TabPanel value={currentTab} index={0}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            🚀 <strong>Unified Campaign Hub</strong>
+          </Typography>
+          <Typography variant="body2">
+            Create and manage multi-channel campaigns across Email, SMS, and Social media.
+            For dedicated Email or SMS campaign creation, use the respective tabs above.
+          </Typography>
+        </Alert>
         {/* Campaign Controls */}
         <Card sx={{ mb: 3 }}>
           <CardContent>
@@ -1009,8 +1043,22 @@ export default function MarketingAutomation() {
         </TableContainer>
       </TabPanel>
 
-      {/* Automations Tab */}
+      {/* Email Marketing Tab */}
       <TabPanel value={currentTab} index={1}>
+        <Box sx={{ mt: -3 }}>
+          <EmailMarketing />
+        </Box>
+      </TabPanel>
+
+      {/* SMS Marketing Tab */}
+      <TabPanel value={currentTab} index={2}>
+        <Box sx={{ mt: -3 }}>
+          <SmsMarketing />
+        </Box>
+      </TabPanel>
+
+      {/* Automations Tab */}
+      <TabPanel value={currentTab} index={3}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Marketing Automations</Typography>
           <Button
@@ -1108,7 +1156,7 @@ export default function MarketingAutomation() {
       </TabPanel>
 
       {/* Segments Tab */}
-      <TabPanel value={currentTab} index={2}>
+      <TabPanel value={currentTab} index={4}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Audience Segments</Typography>
           <Button
@@ -1192,7 +1240,36 @@ export default function MarketingAutomation() {
       </TabPanel>
 
       {/* Templates Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={5}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            📄 <strong>Template Library</strong>
+          </Typography>
+          <Typography variant="body2">
+            Access your comprehensive template library for emails, SMS, rental applications, and more.
+          </Typography>
+        </Alert>
+        <Box sx={{ mt: -3 }}>
+          <Templates />
+        </Box>
+      </TabPanel>
+
+      {/* Landing Pages Tab */}
+      <TabPanel value={currentTab} index={6}>
+        <Box sx={{ mt: -3 }}>
+          <PropertyLandingPages />
+        </Box>
+      </TabPanel>
+
+      {/* Promotions Tab */}
+      <TabPanel value={currentTab} index={7}>
+        <Box sx={{ mt: -3 }}>
+          <Promotions />
+        </Box>
+      </TabPanel>
+
+      {/* Analytics Tab */}
+      <TabPanel value={currentTab} index={8}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
           <Typography variant="h6">Email Templates</Typography>
           <Button
@@ -1251,9 +1328,9 @@ export default function MarketingAutomation() {
                         variant="outlined"
                         startIcon={<EditRoundedIcon />}
                         onClick={() => {
-                          // Navigate to main Templates page for editing
-                          navigate('/crm/templates', { state: { editTemplateId: template.id } });
-                        }}
+                // Switch to Templates tab for editing
+                setCurrentTab(5);
+              }}
                       >
                         Edit
                       </Button>
@@ -1262,9 +1339,9 @@ export default function MarketingAutomation() {
                         variant="outlined"
                         startIcon={<VisibilityRoundedIcon />}
                         onClick={() => {
-                          // Navigate to main Templates page for preview
-                          navigate('/crm/templates', { state: { previewTemplateId: template.id } });
-                        }}
+                // Switch to Templates tab for preview
+                setCurrentTab(5);
+              }}
                       >
                         Preview
                       </Button>
@@ -1907,7 +1984,7 @@ export default function MarketingAutomation() {
                 startIcon={<OpenInNewRoundedIcon />}
                 onClick={() => {
                   setOpenTemplateDialog(false);
-                  navigate('/crm/templates');
+                  setCurrentTab(5); // Switch to Templates tab
                 }}
                 fullWidth
               >
