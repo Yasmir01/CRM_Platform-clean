@@ -296,8 +296,8 @@ export default function SuperAdminRoleManager() {
           name: 'Property Manager',
           description: 'Manage properties, tenants, and maintenance',
           type: 'system',
-          permissions: defaultPermissions.filter(p => 
-            ['properties', 'tenants', 'workorders', 'communications', 'reports'].some(resource => 
+          permissions: defaultPermissions.filter(p =>
+            ['properties', 'tenants', 'workorders', 'communications', 'reports'].some(resource =>
               p.resource === resource
             )
           ),
@@ -313,7 +313,7 @@ export default function SuperAdminRoleManager() {
           name: 'Tenant',
           description: 'Basic tenant access to own information',
           type: 'system',
-          permissions: defaultPermissions.filter(p => 
+          permissions: defaultPermissions.filter(p =>
             p.scope === 'own' || ['workorders_create', 'communications_view'].includes(p.id)
           ),
           hierarchy: 1,
@@ -325,83 +325,22 @@ export default function SuperAdminRoleManager() {
         }
       ];
 
-      const mockUsers: User[] = [
-        {
-          id: '1',
-          email: 'superadmin@propertycrm.com',
-          firstName: 'Super',
-          lastName: 'Administrator',
-          status: 'active',
-          roles: ['super_admin'],
-          lastLogin: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          metadata: {
-            department: 'IT',
-            jobTitle: 'System Administrator',
-            phoneNumber: '+1-555-0100',
-            timezone: 'UTC',
-            language: 'en',
-            twoFactorEnabled: true
-          }
-        },
-        {
-          id: '2',
-          email: 'admin@propertycrm.com',
-          firstName: 'John',
-          lastName: 'Admin',
-          status: 'active',
-          roles: ['admin'],
-          lastLogin: new Date(Date.now() - 3600000).toISOString(),
-          createdAt: new Date().toISOString(),
-          metadata: {
-            department: 'Management',
-            jobTitle: 'Administrator',
-            phoneNumber: '+1-555-0101',
-            timezone: 'America/New_York',
-            language: 'en',
-            twoFactorEnabled: true
-          }
-        },
-        {
-          id: '3',
-          email: 'manager@propertycrm.com',
-          firstName: 'Sarah',
-          lastName: 'Manager',
-          status: 'active',
-          roles: ['property_manager'],
-          lastLogin: new Date(Date.now() - 7200000).toISOString(),
-          createdAt: new Date().toISOString(),
-          metadata: {
-            department: 'Operations',
-            jobTitle: 'Property Manager',
-            phoneNumber: '+1-555-0102',
-            timezone: 'America/Los_Angeles',
-            language: 'en',
-            twoFactorEnabled: false
-          }
-        },
-        {
-          id: '4',
-          email: 'inactive@propertycrm.com',
-          firstName: 'Mike',
-          lastName: 'Wilson',
-          status: 'inactive',
-          roles: ['property_manager'],
-          lastLogin: new Date(Date.now() - 86400000 * 7).toISOString(),
-          createdAt: new Date().toISOString(),
-          metadata: {
-            department: 'Operations',
-            jobTitle: 'Property Manager',
-            phoneNumber: '+1-555-0103',
-            timezone: 'America/Chicago',
-            language: 'en',
-            twoFactorEnabled: false
-          }
-        }
-      ];
+      // Load users from UserManagementService
+      const userMgmtUsers = userManagementService.getUsers();
+      const convertedUsers: User[] = userMgmtUsers.map(user => ({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        status: user.status,
+        roles: [user.role], // Convert single role to array for consistency
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+        metadata: user.metadata
+      }));
 
       setRoles(mockRoles);
-      setUsers(mockUsers);
+      setUsers(convertedUsers);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
