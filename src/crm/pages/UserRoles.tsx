@@ -520,6 +520,9 @@ export default function UserRoles() {
           lastName: userFormData.lastName,
           email: userFormData.email,
           status: userFormData.status,
+          preferredLanguage: userFormData.preferredLanguage,
+          timezone: userFormData.timezone,
+          countryCode: userFormData.countryCode,
         });
       }
     } else {
@@ -541,6 +544,9 @@ export default function UserRoles() {
         role: selectedRole,
         status: userFormData.status,
         permissions: selectedRole === 'Admin' ? ['all'] : [], // Will be set by role permissions
+        preferredLanguage: userFormData.preferredLanguage,
+        timezone: userFormData.timezone,
+        countryCode: userFormData.countryCode,
       });
 
       // Update role user count
