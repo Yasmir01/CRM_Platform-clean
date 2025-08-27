@@ -70,6 +70,14 @@ import { TransUnionService } from "../services/TransUnionService";
 import { EmailService } from "../services/EmailService";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import { RealEstatePlatformService } from "../services/RealEstatePlatformService";
+import { PlatformBundleService } from "../services/PlatformBundleService";
+import { useCrmData } from "../contexts/CrmDataContext";
+import { PropertyPublishingInterface } from "../components/PropertyPublishingInterface";
+import { useNavigate } from "react-router-dom";
+import PublishRoundedIcon from "@mui/icons-material/PublishRounded";
+import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
+import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
 
 interface Integration {
   id: string;
@@ -547,7 +555,17 @@ const getCategoryIcon = (category: Integration["category"]) => {
 
 export default function IntegrationManagement() {
   const { isSuperAdmin } = useRoleManagement();
+  const navigate = useNavigate();
+  const { properties } = useCrmData();
   const [currentTab, setCurrentTab] = React.useState(0);
+
+  // Real Estate Platform state
+  const [realEstatePlatforms, setRealEstatePlatforms] = React.useState<any[]>([]);
+  const [connectedPlatformsCount, setConnectedPlatformsCount] = React.useState(0);
+  const [availableBundles, setAvailableBundles] = React.useState<any[]>([]);
+  const [publishingDialogOpen, setPublishingDialogOpen] = React.useState(false);
+  const [selectedProperty, setSelectedProperty] = React.useState<any>(null);
+  const [realEstateInitialized, setRealEstateInitialized] = React.useState(false);
 
   // Initialize integrations with persisted data, merging with mock data
   const initializeIntegrations = () => {
@@ -597,6 +615,33 @@ export default function IntegrationManagement() {
   const [testingIntegrations, setTestingIntegrations] = React.useState<Set<string>>(new Set());
   const [syncingIntegrations, setSyncingIntegrations] = React.useState<Set<string>>(new Set());
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', severity: 'success' as 'success' | 'error' | 'info' });
+
+  // Initialize Real Estate Platform services
+  React.useEffect(() => {
+    const initializeRealEstate = async () => {
+      try {
+        await RealEstatePlatformService.initialize();
+        await PlatformBundleService.initialize();
+
+        const platforms = RealEstatePlatformService.getAvailablePlatforms();
+        setRealEstatePlatforms(platforms);
+
+        const connectedCount = platforms.filter(platform =>
+          RealEstatePlatformService.isPlatformAuthenticated(platform.platform)
+        ).length;
+        setConnectedPlatformsCount(connectedCount);
+
+        const bundles = PlatformBundleService.getAvailableBundles();
+        setAvailableBundles(bundles);
+
+        setRealEstateInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize real estate platform services:', error);
+      }
+    };
+
+    initializeRealEstate();
+  }, []);
 
   const showNotification = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -1326,80 +1371,154 @@ export default function IntegrationManagement() {
         </Stack>
       </Stack>
 
-      {/* Real Estate Platform Integrations */}
+      {/* Real Estate Platform Integrations - Enhanced Dynamic Section */}
       <Card sx={{ mb: 3, bgcolor: 'primary.50', border: '2px solid', borderColor: 'primary.main' }}>
         <CardContent>
           <Stack spacing={3}>
             <Stack direction="row" alignItems="center" spacing={2}>
               <Avatar sx={{ bgcolor: "primary.main", width: 56, height: 56 }}>
-                🏠
+                <HomeWorkRoundedIcon sx={{ fontSize: 28 }} />
               </Avatar>
               <Box flex={1}>
                 <Typography variant="h5" fontWeight="600" color="primary.main">
                   Real Estate Platform Integrations
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Publish your properties to 15+ major real estate platforms with one click
+                  Publish your properties to {realEstatePlatforms.length}+ major real estate platforms with one click
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<IntegrationInstructionsRoundedIcon />}
-                onClick={() => window.open('/crm/real-estate-platforms', '_blank')}
-              >
-                Manage Platforms
-              </Button>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="outlined"
+                  startIcon={<PublishRoundedIcon />}
+                  onClick={() => {
+                    if (properties.length > 0) {
+                      setSelectedProperty(properties[0]);
+                      setPublishingDialogOpen(true);
+                    } else {
+                      setSnackbar({ open: true, message: 'No properties available to publish', severity: 'info' });
+                    }
+                  }}
+                  disabled={!realEstateInitialized || properties.length === 0}
+                >
+                  Quick Publish
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<IntegrationInstructionsRoundedIcon />}
+                  onClick={() => navigate('/crm/real-estate-platforms')}
+                >
+                  Manage Platforms
+                </Button>
+              </Stack>
             </Stack>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} md={3}>
+              <Grid item xs={12} sm={3}>
                 <Stack alignItems="center" spacing={1}>
-                  <Typography variant="h6" color="primary.main">15+</Typography>
+                  <Typography variant="h6" color="primary.main">
+                    {realEstatePlatforms.length}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary" align="center">
-                    Supported Platforms
+                    Available Platforms
                   </Typography>
                 </Stack>
               </Grid>
-              <Grid item xs={12} md={9}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Available Platforms:
-                </Typography>
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
-                  {[
-                    'Zillow', 'Apartments.com', 'Realtor.com', 'Craigslist', 'Trulia',
-                    'Rentberry', 'Zumper', 'Apartment List', 'RentPrep', 'Dwellsy'
-                  ].map((platform) => (
-                    <Chip
-                      key={platform}
-                      label={platform}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderColor: 'primary.main',
-                        color: 'primary.main',
-                        '&:hover': { bgcolor: 'primary.50' }
-                      }}
-                    />
-                  ))}
-                  <Chip
-                    label="+5 more"
-                    size="small"
-                    color="primary"
-                  />
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="success.main">
+                    {connectedPlatformsCount}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Connected
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="info.main">
+                    {availableBundles.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Bundle Options
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="warning.main">
+                    {properties.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Ready Properties
+                  </Typography>
                 </Stack>
               </Grid>
             </Grid>
 
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Featured Platforms:
+              </Typography>
+              <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+                {realEstatePlatforms.slice(0, 8).map((platform) => {
+                  const isConnected = RealEstatePlatformService.isPlatformAuthenticated(platform.platform as RealEstatePlatform);
+                  return (
+                    <Chip
+                      key={platform.platform}
+                      label={platform.displayName}
+                      size="small"
+                      variant={isConnected ? "filled" : "outlined"}
+                      color={isConnected ? "success" : "default"}
+                      sx={{
+                        borderColor: isConnected ? 'success.main' : 'primary.main',
+                        color: isConnected ? 'success.contrastText' : 'primary.main',
+                        '&:hover': { bgcolor: isConnected ? 'success.light' : 'primary.50' }
+                      }}
+                    />
+                  );
+                })}
+                {realEstatePlatforms.length > 8 && (
+                  <Chip
+                    label={`+${realEstatePlatforms.length - 8} more`}
+                    size="small"
+                    color="primary"
+                  />
+                )}
+              </Stack>
+            </Box>
+
             <Alert severity="info" sx={{ bgcolor: 'transparent', border: '1px solid', borderColor: 'info.main' }}>
               <Typography variant="body2">
-                <strong>New!</strong> Publish properties to multiple platforms simultaneously with bundle pricing options.
-                Professional authentication flows support OAuth, API keys, and direct login methods.
+                <strong>Live Integration!</strong> Connected to {connectedPlatformsCount} platforms with {availableBundles.length} bundle options available.
+                {connectedPlatformsCount === 0 ? ' Start by connecting your first platform!' : ' Ready to publish your properties instantly.'}
               </Typography>
             </Alert>
           </Stack>
         </CardContent>
       </Card>
+
+      {/* Property Publishing Dialog */}
+      {publishingDialogOpen && selectedProperty && (
+        <PropertyPublishingInterface
+          property={selectedProperty}
+          isOpen={publishingDialogOpen}
+          onClose={() => {
+            setPublishingDialogOpen(false);
+            setSelectedProperty(null);
+          }}
+          onPublishComplete={(results) => {
+            setSnackbar({
+              open: true,
+              message: `Published to ${results.filter(r => r.status === 'success').length} platforms successfully!`,
+              severity: 'success'
+            });
+            setPublishingDialogOpen(false);
+            setSelectedProperty(null);
+          }}
+        />
+      )}
 
       {/* Integration Stats */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
