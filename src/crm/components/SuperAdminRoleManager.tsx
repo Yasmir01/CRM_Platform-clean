@@ -1618,6 +1618,100 @@ export default function SuperAdminRoleManager() {
           <Button onClick={() => setUserActionsDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Role Assignment Dialog */}
+      <Dialog open={bulkRoleAssignDialogOpen} onClose={() => setBulkRoleAssignDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Bulk Role Assignment
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Alert severity="info">
+              Assign a role to {selectedUsers.length} selected user{selectedUsers.length !== 1 ? 's' : ''}.
+            </Alert>
+
+            <FormControl fullWidth required>
+              <InputLabel>Select Role to Assign</InputLabel>
+              <Select
+                value={bulkRoleId}
+                label="Select Role to Assign"
+                onChange={(e) => setBulkRoleId(e.target.value)}
+              >
+                {roles.map((role) => (
+                  <MenuItem key={role.id} value={role.id}>
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2">{role.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {role.description}
+                        </Typography>
+                      </Box>
+                      <Stack direction="row" spacing={1}>
+                        <Chip
+                          label={getHierarchyLabel(role.hierarchy)}
+                          size="small"
+                          color={role.type === 'system' ? 'primary' : 'secondary'}
+                        />
+                        <Chip
+                          label={`${role.userCount} users`}
+                          size="small"
+                          color="default"
+                        />
+                      </Stack>
+                    </Stack>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Typography variant="subtitle2">Selected Users:</Typography>
+            <Paper variant="outlined" sx={{ maxHeight: 200, overflow: 'auto', p: 1 }}>
+              <Stack spacing={1}>
+                {selectedUsers.map((userId) => {
+                  const user = users.find(u => u.id === userId);
+                  return user ? (
+                    <Stack key={userId} direction="row" alignItems="center" spacing={2}>
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2">
+                          {user.firstName} {user.lastName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {user.email} • Current: {user.roles.join(', ') || 'No roles'}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={user.status}
+                        size="small"
+                        color={getStatusColor(user.status) as any}
+                      />
+                    </Stack>
+                  ) : null;
+                })}
+              </Stack>
+            </Paper>
+
+            <Alert severity="warning">
+              <Typography variant="body2">
+                This action will add the selected role to all selected users. Existing roles will be preserved.
+                All changes will be logged in the system audit trail.
+              </Typography>
+            </Alert>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBulkRoleAssignDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleBulkRoleAssignment}
+            disabled={!bulkRoleId || selectedUsers.length === 0}
+          >
+            Assign Role to {selectedUsers.length} User{selectedUsers.length !== 1 ? 's' : ''}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
