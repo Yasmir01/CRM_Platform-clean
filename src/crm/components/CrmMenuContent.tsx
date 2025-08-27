@@ -244,25 +244,9 @@ export default function CrmMenuContent() {
             </ListItem>
           ))}
         </List>
-        {/* Marketing/Management Tools - Only show in Management mode */}
-        {isManagementMode && (
-          <>
-            <Divider sx={{ my: 1 }} />
-            <List dense>
-              {marketingListItems.map((item, index) => (
-                <ListItem key={index} disablePadding sx={{ display: "block" }}>
-                  <ListItemButton
-                    selected={location.pathname === item.path}
-                    onClick={() => handleNavigation(item.path)}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </>
-        )}
+        {/* Marketing Tools - All features consolidated into Marketing Automation (main menu) */}
+        {/* Email Marketing, SMS Marketing, Templates, Landing Pages, and Promotions */}
+        {/* are now integrated into the unified Marketing Automation hub */}
       </Box>
       {/* Secondary items - Adjust based on mode */}
       <Box>
