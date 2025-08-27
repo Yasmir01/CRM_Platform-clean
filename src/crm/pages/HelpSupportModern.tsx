@@ -79,6 +79,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export default function HelpSupportModern() {
   const theme = useTheme();
+  const location = useLocation();
   const { isSuperAdmin } = useRoleManagement();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("");
@@ -88,6 +89,27 @@ export default function HelpSupportModern() {
 
   // Check if user is super admin
   const isUserSuperAdmin = React.useMemo(() => isSuperAdmin(), []);
+
+  // Handle URL query parameters
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get("category");
+    const articleParam = params.get("article");
+
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+      // Clear search term to show category view
+      setSearchTerm("");
+    }
+
+    if (articleParam) {
+      // Find and open specific article
+      const article = helpArticles.find(a => a.id === articleParam);
+      if (article && (!article.superAdminOnly || isUserSuperAdmin)) {
+        setSelectedArticle(article);
+      }
+    }
+  }, [location.search, isUserSuperAdmin]);
 
   // Filter articles based on search and filters
   const filteredArticles = React.useMemo(() => {
