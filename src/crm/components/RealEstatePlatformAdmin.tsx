@@ -217,6 +217,58 @@ export default function RealEstatePlatformAdmin() {
     }
   };
 
+  const handleSavePlatform = async (platformData: Partial<PlatformConfiguration>) => {
+    try {
+      if (selectedPlatform) {
+        // Update existing platform
+        await RealEstatePlatformService.updatePlatformConfig(
+          selectedPlatform.platform,
+          platformData,
+          'super_admin_001'
+        );
+        setPlatforms(prev => prev.map(p =>
+          p.platform === selectedPlatform.platform ? { ...p, ...platformData } : p
+        ));
+        showSnackbar('Platform updated successfully', 'success');
+      } else {
+        // Create new platform (would need additional implementation)
+        showSnackbar('Platform creation not implemented yet', 'error');
+      }
+    } catch (error) {
+      showSnackbar('Failed to save platform', 'error');
+    } finally {
+      setPlatformDialogOpen(false);
+      setSelectedPlatform(null);
+    }
+  };
+
+  const handleSaveBundle = async (bundleData: Partial<PlatformBundle>) => {
+    try {
+      if (selectedBundle) {
+        // Update existing bundle
+        const updatedBundle = await PlatformBundleService.updateBundle(selectedBundle.id, bundleData);
+        if (updatedBundle) {
+          setBundles(prev => prev.map(b =>
+            b.id === selectedBundle.id ? updatedBundle : b
+          ));
+          showSnackbar('Bundle updated successfully', 'success');
+        }
+      } else {
+        // Create new bundle
+        const newBundle = await PlatformBundleService.createBundle(bundleData as Omit<PlatformBundle, 'id'>);
+        if (newBundle) {
+          setBundles(prev => [...prev, newBundle]);
+          showSnackbar('Bundle created successfully', 'success');
+        }
+      }
+    } catch (error) {
+      showSnackbar('Failed to save bundle', 'error');
+    } finally {
+      setBundleDialogOpen(false);
+      setSelectedBundle(null);
+    }
+  };
+
   const getStatusIcon = (status: PlatformStatus) => {
     switch (status) {
       case 'active': return <CheckCircleIcon color="success" />;
