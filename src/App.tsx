@@ -9,6 +9,8 @@ import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
 import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
+// Test the new authentication system
+import './crm/utils/authTest';
 
 // Lazy load CRM components for better performance
 import CrmMainDashboard from "./crm/components/CrmMainDashboard";

@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PasswordResetRequest from "../components/PasswordResetRequest";
 
 const LoginContainer = styled(Box)(({ theme }) => ({
   minHeight: "100vh",
@@ -71,6 +72,7 @@ export default function CrmLogin() {
   const [success, setSuccess] = React.useState("");
   const [forgotPasswordOpen, setForgotPasswordOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
+  const [showPasswordReset, setShowPasswordReset] = React.useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,6 +147,23 @@ export default function CrmLogin() {
     }
   };
 
+  // Show password reset component if requested
+  if (showPasswordReset) {
+    return (
+      <LoginContainer>
+        <PasswordResetRequest
+          onBack={() => setShowPasswordReset(false)}
+          onSuccess={(email, resetToken) => {
+            console.log('Password reset initiated for:', email);
+            if (resetToken) {
+              console.log('Reset token (demo):', resetToken);
+            }
+          }}
+        />
+      </LoginContainer>
+    );
+  }
+
   return (
     <LoginContainer>
       <LoginCard>
@@ -214,7 +233,7 @@ export default function CrmLogin() {
                 <Link
                   component="button"
                   type="button"
-                  onClick={() => setForgotPasswordOpen(true)}
+                  onClick={() => setShowPasswordReset(true)}
                   sx={{ textDecoration: "none" }}
                 >
                   Forgot your password?

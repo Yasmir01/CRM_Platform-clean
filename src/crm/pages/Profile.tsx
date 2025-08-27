@@ -82,18 +82,32 @@ const languages = [
 ];
 
 const timezones = [
-  { value: "UTC", label: "UTC" },
-  { value: "America/New_York", label: "Eastern Time" },
-  { value: "America/Chicago", label: "Central Time" },
-  { value: "America/Denver", label: "Mountain Time" },
-  { value: "America/Los_Angeles", label: "Pacific Time" },
-  { value: "Europe/London", label: "London" },
-  { value: "Europe/Paris", label: "Paris" },
-  { value: "Europe/Berlin", label: "Berlin" },
-  { value: "Asia/Tokyo", label: "Tokyo" },
-  { value: "Asia/Shanghai", label: "Shanghai" },
-  { value: "Asia/Dubai", label: "Dubai" },
-  { value: "Australia/Sydney", label: "Sydney" },
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "America/New_York", label: "Eastern Time (US)" },
+  { value: "America/Chicago", label: "Central Time (US)" },
+  { value: "America/Denver", label: "Mountain Time (US)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (US)" },
+  { value: "America/Anchorage", label: "Alaska Time" },
+  { value: "Pacific/Honolulu", label: "Hawaii Time" },
+  { value: "America/Toronto", label: "Eastern Time (Canada)" },
+  { value: "America/Vancouver", label: "Pacific Time (Canada)" },
+  { value: "Europe/London", label: "London (GMT/BST)" },
+  { value: "Europe/Paris", label: "Paris (CET/CEST)" },
+  { value: "Europe/Berlin", label: "Berlin (CET/CEST)" },
+  { value: "Europe/Rome", label: "Rome (CET/CEST)" },
+  { value: "Europe/Madrid", label: "Madrid (CET/CEST)" },
+  { value: "Europe/Amsterdam", label: "Amsterdam (CET/CEST)" },
+  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: "Asia/Shanghai", label: "Shanghai (CST)" },
+  { value: "Asia/Dubai", label: "Dubai (GST)" },
+  { value: "Asia/Singapore", label: "Singapore (SGT)" },
+  { value: "Asia/Hong_Kong", label: "Hong Kong (HKT)" },
+  { value: "Asia/Seoul", label: "Seoul (KST)" },
+  { value: "Asia/Mumbai", label: "Mumbai (IST)" },
+  { value: "Australia/Sydney", label: "Sydney (AEDT/AEST)" },
+  { value: "Australia/Melbourne", label: "Melbourne (AEDT/AEST)" },
+  { value: "Australia/Perth", label: "Perth (AWST)" },
+  { value: "Pacific/Auckland", label: "Auckland (NZDT/NZST)" },
 ];
 
 const countries = [
@@ -201,6 +215,26 @@ export default function Profile() {
 
   const getCountryName = (code: string) => {
     return countries.find(c => c.code === code)?.name || code;
+  };
+
+  const detectAndSetLocalTimezone = () => {
+    const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setFormData({ ...formData, timezone: localTimezone });
+
+    // Get a friendly name for the timezone
+    const timezoneName = getTimezoneName(localTimezone);
+    const displayName = timezoneName ? timezoneName : localTimezone;
+
+    // Get current time in the detected timezone for confirmation
+    const now = new Date();
+    const localTime = now.toLocaleString('en-US', {
+      timeZone: localTimezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    alert(`✅ Local timezone detected and set!\n\nTimezone: ${displayName}\nCurrent time: ${localTime}\n\nRemember to save your changes.`);
   };
 
   const hasUnsavedChanges = () => {
@@ -500,20 +534,45 @@ export default function Profile() {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth disabled={!editMode}>
-                    <InputLabel>Timezone</InputLabel>
-                    <Select
-                      value={editMode ? formData.timezone : profile.timezone}
-                      label="Timezone"
-                      onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    >
-                      {timezones.map((tz) => (
-                        <MenuItem key={tz.value} value={tz.value}>
-                          {tz.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <Stack spacing={1}>
+                    <FormControl fullWidth disabled={!editMode}>
+                      <InputLabel>Timezone</InputLabel>
+                      <Select
+                        value={editMode ? formData.timezone : profile.timezone}
+                        label="Timezone"
+                        onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                      >
+                        {timezones.map((tz) => (
+                          <MenuItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </MenuItem>
+                        ))}
+                        {(() => {
+                          const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                          const isLocalTzInList = timezones.some(tz => tz.value === localTz);
+                          if (!isLocalTzInList) {
+                            return (
+                              <MenuItem key={localTz} value={localTz}>
+                                {localTz} (Your Local Timezone)
+                              </MenuItem>
+                            );
+                          }
+                          return null;
+                        })()}
+                      </Select>
+                    </FormControl>
+                    {editMode && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<AccessTimeRoundedIcon />}
+                        onClick={detectAndSetLocalTimezone}
+                        sx={{ alignSelf: 'flex-start' }}
+                      >
+                        Use Local Timezone
+                      </Button>
+                    )}
+                  </Stack>
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <FormControl fullWidth disabled={!editMode}>
