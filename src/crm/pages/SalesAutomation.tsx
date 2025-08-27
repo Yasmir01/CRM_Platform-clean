@@ -550,6 +550,27 @@ export default function SalesAutomation() {
   const [selectedDeal, setSelectedDeal] = React.useState<AddOnDeal | null>(null);
   const [selectedQuote, setSelectedQuote] = React.useState<AddOnQuote | null>(null);
 
+  // Form state for new opportunities
+  const [dealFormData, setDealFormData] = React.useState({
+    productType: "Power Tools Suite" as AddOnDeal["productType"],
+    productName: "",
+    customerName: "",
+    customerEmail: "",
+    currentPlan: "Premium" as AddOnDeal["currentPlan"],
+    stage: "Interest" as AddOnDeal["stage"],
+    value: 29.99,
+    billingCycle: "monthly" as "monthly" | "yearly" | "one-time",
+    probability: 50,
+    expectedCloseDate: "",
+    source: "Marketplace Browse" as AddOnDeal["source"],
+    assignedTo: "Account Manager",
+    description: "",
+    tags: [] as string[],
+    trialOffered: false,
+    trialDuration: 7,
+    notes: ""
+  });
+
   const filteredDeals = deals.filter(deal => {
     const matchesSearch = 
       deal.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -575,11 +596,51 @@ export default function SalesAutomation() {
   };
 
   const handleAddDeal = () => {
+    // Reset form when adding new deal
+    setSelectedDeal(null);
+    setDealFormData({
+      productType: "Power Tools Suite",
+      productName: "Power Tools Suite",
+      customerName: "",
+      customerEmail: "",
+      currentPlan: "Premium",
+      stage: "Interest",
+      value: 29.99,
+      billingCycle: "monthly",
+      probability: 50,
+      expectedCloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      source: "Marketplace Browse",
+      assignedTo: "Account Manager",
+      description: "",
+      tags: [],
+      trialOffered: false,
+      trialDuration: 7,
+      notes: ""
+    });
     setOpenDealDialog(true);
   };
 
   const handleEditDeal = (deal: AddOnDeal) => {
     setSelectedDeal(deal);
+    setDealFormData({
+      productType: deal.productType,
+      productName: deal.productName,
+      customerName: deal.customerName,
+      customerEmail: deal.customerEmail,
+      currentPlan: deal.currentPlan,
+      stage: deal.stage,
+      value: deal.value,
+      billingCycle: deal.productType === "Photography Service" ? "one-time" : "monthly",
+      probability: deal.probability,
+      expectedCloseDate: deal.expectedCloseDate,
+      source: deal.source,
+      assignedTo: deal.assignedTo,
+      description: deal.description,
+      tags: deal.tags,
+      trialOffered: !!deal.trialStartDate,
+      trialDuration: 7,
+      notes: deal.notes.join('\n')
+    });
     setOpenDealDialog(true);
   };
 
