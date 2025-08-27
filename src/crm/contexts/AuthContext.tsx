@@ -53,6 +53,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['all', 'manage_users', 'manage_company', 'manage_templates', 'system_settings'],
     createdAt: '2024-01-01T00:00:00Z',
+    timezone: 'UTC',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '1',
@@ -63,6 +66,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['manage_templates', 'manage_company', 'view_analytics', 'manage_properties'],
     createdAt: '2024-01-01T00:00:00Z',
+    timezone: 'America/New_York',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '2',
@@ -74,6 +80,9 @@ const mockUsers: User[] = [
     status: 'Active',
     permissions: ['all'],
     createdAt: '2024-01-02T00:00:00Z',
+    timezone: 'America/Los_Angeles',
+    preferredLanguage: 'en',
+    countryCode: 'US',
   },
   {
     id: '3',
