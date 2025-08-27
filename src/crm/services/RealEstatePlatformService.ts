@@ -1,10 +1,13 @@
 /**
  * Real Estate Platform Integration Service
  * Main service for managing all real estate platform integrations
+ * Now uses real API connections instead of mock implementations
  */
 
 import { LocalStorageService } from './LocalStorageService';
-import { 
+import { PlatformConnectionService } from './PlatformConnectionService';
+import { ListingPublishingService } from './ListingPublishingService';
+import {
   RealEstatePlatform,
   PlatformConfiguration,
   PlatformAuthConfig,
@@ -34,23 +37,27 @@ class RealEstatePlatformServiceClass {
     if (this.isInitialized) return;
 
     try {
+      // Initialize real connection services
+      await PlatformConnectionService.initialize();
+      await ListingPublishingService.initialize();
+
       // Load platform configurations from storage
       const configs = this.loadPlatformConfigurations();
       configs.forEach(config => {
         this.platformConfigs.set(config.platform, config);
       });
 
-      // Load authentication status
-      const authStatus = this.loadAuthenticationStatus();
-      authStatus.forEach((isAuth, platform) => {
-        this.authenticated.set(platform, isAuth);
+      // Get real connection status from PlatformConnectionService
+      const connectionStatuses = PlatformConnectionService.getAllConnectionStatuses();
+      Object.entries(connectionStatuses).forEach(([platform, status]) => {
+        this.authenticated.set(platform as RealEstatePlatform, status.isConnected);
       });
 
       // Initialize default platform configurations
       this.initializeDefaultPlatforms();
 
       this.isInitialized = true;
-      console.log('RealEstatePlatformService initialized successfully');
+      console.log('RealEstatePlatformService initialized with real connections');
     } catch (error) {
       console.error('Failed to initialize RealEstatePlatformService:', error);
       throw error;
@@ -114,36 +121,35 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Authenticate with a platform
+   * Authenticate with a platform using real connection service
    */
   async authenticatePlatform(
     platform: RealEstatePlatform,
     authData: Partial<PlatformAuthConfig>,
     userId: string
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; message: string; authUrl?: string }> {
     try {
       const config = this.platformConfigs.get(platform);
       if (!config) {
         return { success: false, message: 'Platform not found' };
       }
 
-      // Update auth configuration
-      config.authConfig = {
+      // Use real connection service for authentication
+      const authConfig: PlatformAuthConfig = {
         ...config.authConfig,
         ...authData,
         environment: authData.environment || 'sandbox'
       };
 
-      // Perform authentication based on type
-      const authResult = await this.performAuthentication(platform, config.authConfig);
-      
-      if (authResult.success) {
+      const result = await PlatformConnectionService.connectPlatform(platform, authConfig, userId);
+
+      if (result.success) {
         this.authenticated.set(platform, true);
         config.status = 'active';
         config.lastSync = new Date().toISOString();
-        
+        config.authConfig = authConfig;
+
         this.savePlatformConfigurations();
-        this.saveAuthenticationStatus();
 
         this.logActivity({
           platform,
@@ -156,62 +162,106 @@ class RealEstatePlatformServiceClass {
       } else {
         this.authenticated.set(platform, false);
         config.status = 'error';
-        
+
         this.logActivity({
           platform,
           action: 'auth',
           status: 'failure',
-          message: authResult.message || 'Authentication failed',
+          message: result.message || 'Authentication failed',
           userId,
           userEmail: 'user@example.com'
         });
       }
 
-      return authResult;
+      return result;
     } catch (error) {
       console.error(`Authentication failed for ${platform}:`, error);
-      return { 
-        success: false, 
-        message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        success: false,
+        message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
 
   /**
-   * Check if platform is authenticated
+   * Check if platform is authenticated using real connection status
    */
   isPlatformAuthenticated(platform: RealEstatePlatform): boolean {
-    return this.authenticated.get(platform) || false;
+    try {
+      const connectionStatuses = PlatformConnectionService.getAllConnectionStatuses();
+      return connectionStatuses[platform]?.isConnected || false;
+    } catch (error) {
+      // Fallback to stored status
+      return this.authenticated.get(platform) || false;
+    }
   }
 
   /**
-   * Publish property to multiple platforms
+   * Publish property to multiple platforms using real publishing service
    */
   async publishProperty(
     propertyData: PropertyListingData,
     platforms: RealEstatePlatform[],
     userId: string
   ): Promise<PublishingJob> {
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const job: PublishingJob = {
-      id: jobId,
-      propertyId: propertyData.propertyId,
-      platforms,
-      status: 'pending',
-      submittedAt: new Date().toISOString(),
-      results: [],
-      totalPlatforms: platforms.length,
-      successfulPlatforms: 0,
-      failedPlatforms: 0
-    };
+    try {
+      // Use real listing publishing service
+      const result = await ListingPublishingService.publishProperty(
+        propertyData,
+        platforms,
+        { userId }
+      );
 
-    this.publishingJobs.set(jobId, job);
+      if (result.success && result.jobId) {
+        // Get the job from publishing service
+        const job = ListingPublishingService.getPublishingJob(result.jobId);
+        if (job) {
+          this.publishingJobs.set(job.id, job);
+          return job;
+        }
+      }
 
-    // Process publications asynchronously
-    this.processPublishingJob(job, propertyData, userId);
+      // Fallback: create job with results
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const job: PublishingJob = {
+        id: jobId,
+        propertyId: propertyData.propertyId,
+        platforms,
+        status: result.success ? 'completed' : 'failed',
+        submittedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        results: result.results || [],
+        totalPlatforms: platforms.length,
+        successfulPlatforms: result.results?.filter(r => r.status === 'published').length || 0,
+        failedPlatforms: result.results?.filter(r => r.status === 'failed').length || 0
+      };
 
-    return job;
+      this.publishingJobs.set(jobId, job);
+      return job;
+
+    } catch (error) {
+      // Fallback error job
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const job: PublishingJob = {
+        id: jobId,
+        propertyId: propertyData.propertyId,
+        platforms,
+        status: 'failed',
+        submittedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        results: platforms.map(platform => ({
+          platform,
+          status: 'failed',
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })),
+        totalPlatforms: platforms.length,
+        successfulPlatforms: 0,
+        failedPlatforms: platforms.length
+      };
+
+      this.publishingJobs.set(jobId, job);
+      return job;
+    }
   }
 
   /**
@@ -231,104 +281,74 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Remove property from platforms
+   * Remove property from platforms using real connection service
    */
   async removePropertyFromPlatforms(
     propertyId: string,
     platforms: RealEstatePlatform[],
     userId: string
   ): Promise<PublishingResult[]> {
-    const results: PublishingResult[] = [];
+    try {
+      // Use real listing publishing service for removal
+      const result = await ListingPublishingService.removeListing(propertyId, platforms, userId);
 
-    for (const platform of platforms) {
-      try {
-        if (!this.isPlatformAuthenticated(platform)) {
-          results.push({
-            platform,
-            status: 'failed',
-            error: 'Platform not authenticated',
-            message: 'Authentication required'
-          });
-          continue;
-        }
+      return result.results.map(r => ({
+        platform: r.platform,
+        status: r.success ? 'removed' : 'failed',
+        message: r.message,
+        error: r.success ? undefined : r.message
+      }));
 
-        // Simulate removal (in real implementation, call platform API)
-        const success = await this.removePlatformListing(platform, propertyId);
-        
-        results.push({
-          platform,
-          status: success ? 'removed' : 'failed',
-          message: success ? 'Property removed successfully' : 'Failed to remove property'
-        });
-
-        this.logActivity({
-          platform,
-          action: 'remove',
-          propertyId,
-          status: success ? 'success' : 'failure',
-          message: success ? 'Property removed from platform' : 'Failed to remove property',
-          userId,
-          userEmail: 'user@example.com'
-        });
-
-      } catch (error) {
-        results.push({
-          platform,
-          status: 'failed',
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-      }
+    } catch (error) {
+      // Fallback error handling
+      return platforms.map(platform => ({
+        platform,
+        status: 'failed',
+        error: error instanceof Error ? error.message : 'Unknown error',
+        message: 'Failed to remove property'
+      }));
     }
-
-    return results;
   }
 
   /**
-   * Get platform analytics
+   * Get platform analytics using real connection service
    */
-  getPlatformAnalytics(
+  async getPlatformAnalytics(
     platform: RealEstatePlatform,
     period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly'
-  ): PlatformAnalytics {
-    // In real implementation, this would query actual analytics data
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date();
-    
-    switch (period) {
-      case 'daily':
-        startDate.setDate(startDate.getDate() - 1);
-        break;
-      case 'weekly':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'monthly':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case 'yearly':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
-    }
+  ): Promise<PlatformAnalytics | null> {
+    try {
+      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = new Date();
 
-    return {
-      platform,
-      period,
-      startDate: startDate.toISOString().split('T')[0],
-      endDate,
-      metrics: {
-        totalListings: Math.floor(Math.random() * 100) + 10,
-        activeListings: Math.floor(Math.random() * 80) + 5,
-        successfulPublications: Math.floor(Math.random() * 90) + 8,
-        failedPublications: Math.floor(Math.random() * 10),
-        totalViews: Math.floor(Math.random() * 5000) + 100,
-        totalInquiries: Math.floor(Math.random() * 200) + 10,
-        conversionRate: Math.random() * 10 + 2,
-        averageTimeToPublish: Math.random() * 30 + 5,
-        revenue: Math.random() * 10000 + 1000,
-        costs: Math.random() * 2000 + 200,
-        profit: Math.random() * 8000 + 800
-      },
-      topPerformingListings: []
-    };
+      switch (period) {
+        case 'daily':
+          startDate.setDate(startDate.getDate() - 1);
+          break;
+        case 'weekly':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'monthly':
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case 'yearly':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+      }
+
+      // Use real connection service to get analytics
+      const analytics = await PlatformConnectionService.getPlatformAnalytics(
+        platform,
+        startDate.toISOString().split('T')[0],
+        endDate
+      );
+
+      return analytics;
+
+    } catch (error) {
+      console.error(`Failed to get analytics for ${platform}:`, error);
+      return null;
+    }
   }
 
   /**
@@ -552,8 +572,423 @@ class RealEstatePlatformServiceClass {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         syncFrequency: 'real_time'
+      },
+      {
+        id: 'realtors_com_001',
+        platform: 'realtors_com',
+        displayName: 'Realtor.com',
+        description: 'Official site of the National Association of Realtors',
+        websiteUrl: 'https://realtor.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'realtors_com_pricing',
+          platform: 'realtors_com',
+          priceType: 'per_listing',
+          basePrice: 12.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['MLS Direct Access', 'Premium Placement', 'Agent Directory', 'Market Insights'],
+        supportedPropertyTypes: ['House', 'Condo', 'Townhome', 'Land', 'Multi-Family'],
+        maxPhotos: 40,
+        maxDescriptionLength: 1500,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms', 'squareFootage'],
+        optionalFields: ['yearBuilt', 'lotSize', 'garage', 'basement'],
+        geographicCoverage: ['United States'],
+        processingTime: '2-4 hours',
+        autoRenewal: true,
+        listingDuration: 90,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'craigslist_001',
+        platform: 'craigslist',
+        displayName: 'Craigslist',
+        description: 'Classified advertisements website',
+        websiteUrl: 'https://craigslist.org',
+        status: 'inactive',
+        authenticationType: 'scraping_based',
+        pricing: {
+          id: 'craigslist_pricing',
+          platform: 'craigslist',
+          priceType: 'per_listing',
+          basePrice: 5.00,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Wide Local Reach', 'Simple Posting', 'Cost Effective'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Room', 'Sublet'],
+        maxPhotos: 8,
+        maxDescriptionLength: 500,
+        requiredFields: ['title', 'price', 'address'],
+        optionalFields: ['amenities', 'utilities'],
+        geographicCoverage: ['United States', 'Canada', 'International'],
+        processingTime: 'Immediate',
+        autoRenewal: false,
+        listingDuration: 30,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'manual'
+      },
+      {
+        id: 'trulia_001',
+        platform: 'trulia',
+        displayName: 'Trulia',
+        description: 'Real estate website owned by Zillow',
+        websiteUrl: 'https://trulia.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'trulia_pricing',
+          platform: 'trulia',
+          priceType: 'per_listing',
+          basePrice: 8.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Crime Maps', 'School Ratings', 'Neighborhood Insights', 'Price History'],
+        supportedPropertyTypes: ['House', 'Condo', 'Townhome', 'Apartment'],
+        maxPhotos: 35,
+        maxDescriptionLength: 1200,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['walkScore', 'schoolDistrict'],
+        geographicCoverage: ['United States'],
+        processingTime: '1-3 hours',
+        autoRenewal: true,
+        listingDuration: 45,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'rentberry_001',
+        platform: 'rentberry',
+        displayName: 'Rentberry',
+        description: 'Rental platform with automated bidding',
+        websiteUrl: 'https://rentberry.com',
+        status: 'inactive',
+        authenticationType: 'api_key',
+        pricing: {
+          id: 'rentberry_pricing',
+          platform: 'rentberry',
+          priceType: 'commission_based',
+          basePrice: 0,
+          currency: 'USD',
+          bundleEligible: false,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Automated Bidding', 'Tenant Screening', 'Digital Leasing', 'Payment Processing'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Condo'],
+        maxPhotos: 20,
+        maxDescriptionLength: 800,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['amenities', 'petPolicy'],
+        geographicCoverage: ['United States', 'United Kingdom'],
+        processingTime: '30 minutes',
+        autoRenewal: true,
+        listingDuration: 60,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'real_time'
+      },
+      {
+        id: 'dwellsy_001',
+        platform: 'dwellsy',
+        displayName: 'Dwellsy',
+        description: 'Rental marketplace with no broker fees',
+        websiteUrl: 'https://dwellsy.com',
+        status: 'inactive',
+        authenticationType: 'api_key',
+        pricing: {
+          id: 'dwellsy_pricing',
+          platform: 'dwellsy',
+          priceType: 'flat_fee',
+          basePrice: 25.00,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['No Broker Fees', 'Direct Landlord Contact', 'Virtual Tours'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Studio'],
+        maxPhotos: 15,
+        maxDescriptionLength: 600,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['petPolicy', 'amenities'],
+        geographicCoverage: ['New York', 'New Jersey', 'Connecticut'],
+        processingTime: '1 hour',
+        autoRenewal: true,
+        listingDuration: 45,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'zumper_001',
+        platform: 'zumper',
+        displayName: 'Zumper',
+        description: 'Apartment rental platform',
+        websiteUrl: 'https://zumper.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'zumper_pricing',
+          platform: 'zumper',
+          priceType: 'per_listing',
+          basePrice: 15.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Instant Applications', '3D Floor Plans', 'Market Analytics'],
+        supportedPropertyTypes: ['Apartment', 'Condo', 'Townhome'],
+        maxPhotos: 30,
+        maxDescriptionLength: 1000,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['floorPlan', 'amenities'],
+        geographicCoverage: ['United States', 'Canada'],
+        processingTime: '2 hours',
+        autoRenewal: true,
+        listingDuration: 60,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'rent_jungle_001',
+        platform: 'rent_jungle',
+        displayName: 'Rent Jungle',
+        description: 'Apartment search and rental listings',
+        websiteUrl: 'https://rentjungle.com',
+        status: 'inactive',
+        authenticationType: 'api_key',
+        pricing: {
+          id: 'rent_jungle_pricing',
+          platform: 'rent_jungle',
+          priceType: 'monthly_subscription',
+          basePrice: 29.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Market Reports', 'Rent Comparisons', 'Neighborhood Data'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Condo'],
+        maxPhotos: 20,
+        maxDescriptionLength: 800,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['amenities', 'utilities'],
+        geographicCoverage: ['United States'],
+        processingTime: '4 hours',
+        autoRenewal: true,
+        listingDuration: 30,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'rentprep_001',
+        platform: 'rentprep',
+        displayName: 'RentPrep',
+        description: 'Landlord and property management platform',
+        websiteUrl: 'https://rentprep.com',
+        status: 'inactive',
+        authenticationType: 'username_password',
+        pricing: {
+          id: 'rentprep_pricing',
+          platform: 'rentprep',
+          priceType: 'per_listing',
+          basePrice: 7.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Tenant Screening', 'Credit Reports', 'Background Checks'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Duplex', 'Mobile Home'],
+        maxPhotos: 12,
+        maxDescriptionLength: 500,
+        requiredFields: ['title', 'price', 'address'],
+        optionalFields: ['petPolicy', 'utilities'],
+        geographicCoverage: ['United States'],
+        processingTime: '6 hours',
+        autoRenewal: false,
+        listingDuration: 30,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'weekly'
+      },
+      {
+        id: 'move_com_001',
+        platform: 'move_com',
+        displayName: 'Move.com',
+        description: 'Real estate and moving services',
+        websiteUrl: 'https://move.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'move_com_pricing',
+          platform: 'move_com',
+          priceType: 'per_listing',
+          basePrice: 11.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Moving Services', 'Real Estate Insights', 'Agent Network'],
+        supportedPropertyTypes: ['House', 'Condo', 'Townhome'],
+        maxPhotos: 25,
+        maxDescriptionLength: 1000,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['yearBuilt', 'lotSize'],
+        geographicCoverage: ['United States'],
+        processingTime: '3 hours',
+        autoRenewal: true,
+        listingDuration: 60,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'rentdigs_001',
+        platform: 'rentdigs',
+        displayName: 'RentDigs',
+        description: 'Rental property marketplace',
+        websiteUrl: 'https://rentdigs.com',
+        status: 'inactive',
+        authenticationType: 'api_key',
+        pricing: {
+          id: 'rentdigs_pricing',
+          platform: 'rentdigs',
+          priceType: 'flat_fee',
+          basePrice: 19.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Property Management Tools', 'Tenant Portal', 'Maintenance Tracking'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Condo'],
+        maxPhotos: 18,
+        maxDescriptionLength: 700,
+        requiredFields: ['title', 'price', 'address', 'bedrooms'],
+        optionalFields: ['amenities', 'petPolicy'],
+        geographicCoverage: ['United States'],
+        processingTime: '2 hours',
+        autoRenewal: true,
+        listingDuration: 45,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'apartment_list_001',
+        platform: 'apartment_list',
+        displayName: 'Apartment List',
+        description: 'Commission-free apartment search',
+        websiteUrl: 'https://apartmentlist.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'apartment_list_pricing',
+          platform: 'apartment_list',
+          priceType: 'commission_based',
+          basePrice: 0,
+          currency: 'USD',
+          bundleEligible: false,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Commission Free', 'Renter Rewards', 'Personalized Recommendations'],
+        supportedPropertyTypes: ['Apartment', 'Townhome', 'Condo'],
+        maxPhotos: 22,
+        maxDescriptionLength: 900,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['amenities', 'petPolicy'],
+        geographicCoverage: ['United States'],
+        processingTime: '1 hour',
+        autoRenewal: true,
+        listingDuration: 60,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'real_time'
+      },
+      {
+        id: 'cozycozy_001',
+        platform: 'cozycozy',
+        displayName: 'CozyCozy',
+        description: 'International rental search engine',
+        websiteUrl: 'https://cozycozy.com',
+        status: 'inactive',
+        authenticationType: 'api_key',
+        pricing: {
+          id: 'cozycozy_pricing',
+          platform: 'cozycozy',
+          priceType: 'per_listing',
+          basePrice: 13.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['International Reach', 'Multi-language Support', 'Currency Conversion'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Studio', 'Room'],
+        maxPhotos: 16,
+        maxDescriptionLength: 600,
+        requiredFields: ['title', 'price', 'address'],
+        optionalFields: ['amenities', 'utilities'],
+        geographicCoverage: ['United States', 'Europe', 'Asia'],
+        processingTime: '4 hours',
+        autoRenewal: true,
+        listingDuration: 90,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
+      },
+      {
+        id: 'doorsteps_001',
+        platform: 'doorsteps',
+        displayName: 'Doorsteps',
+        description: 'Move.com powered rental platform',
+        websiteUrl: 'https://doorsteps.com',
+        status: 'inactive',
+        authenticationType: 'oauth2',
+        pricing: {
+          id: 'doorsteps_pricing',
+          platform: 'doorsteps',
+          priceType: 'monthly_subscription',
+          basePrice: 39.99,
+          currency: 'USD',
+          bundleEligible: true,
+          isActive: true,
+          effectiveDate: new Date().toISOString()
+        },
+        features: ['Move.com Integration', 'Professional Photography', 'Market Analytics'],
+        supportedPropertyTypes: ['Apartment', 'House', 'Condo', 'Townhome'],
+        maxPhotos: 28,
+        maxDescriptionLength: 1100,
+        requiredFields: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+        optionalFields: ['amenities', 'petPolicy', 'parking'],
+        geographicCoverage: ['United States'],
+        processingTime: '2-3 hours',
+        autoRenewal: true,
+        listingDuration: 75,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        syncFrequency: 'daily'
       }
-      // Add other platforms as needed
     ];
 
     defaultPlatforms.forEach(config => {

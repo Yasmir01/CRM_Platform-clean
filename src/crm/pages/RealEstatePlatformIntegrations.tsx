@@ -48,6 +48,7 @@ import {
   Close
 } from '@mui/icons-material';
 
+import { useNavigate } from 'react-router-dom';
 import { useCrmData } from '../contexts/CrmDataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRoleManagement } from '../hooks/useRoleManagement';
@@ -63,6 +64,7 @@ import {
 } from '../types/RealEstatePlatformTypes';
 
 export default function RealEstatePlatformIntegrations() {
+  const navigate = useNavigate();
   const { properties } = useCrmData();
   const { user } = useAuth();
   const { isSuperAdmin } = useRoleManagement();
@@ -99,7 +101,7 @@ export default function RealEstatePlatformIntegrations() {
       setBundles(availableBundles);
       
       // Load recent publishing jobs (mock data for demo)
-      const mockJobs: PublishingJob[] = properties.slice(0, 3).map((property, index) => ({
+      const mockJobs: PublishingJob[] = (properties || []).slice(0, 3).map((property, index) => ({
         id: `job_${index}`,
         propertyId: property.id,
         platforms: ['zillow', 'apartments_com', 'trulia'] as RealEstatePlatform[],
@@ -191,7 +193,7 @@ export default function RealEstatePlatformIntegrations() {
             <Button
               variant="contained"
               startIcon={<Help />}
-              onClick={() => window.open('/help?category=platform-integrations', '_blank')}
+              onClick={() => window.open('/crm/help?category=platform-integrations', '_blank')}
             >
               Help & Guides
             </Button>
@@ -331,9 +333,9 @@ export default function RealEstatePlatformIntegrations() {
                   variant="contained"
                   fullWidth
                   startIcon={<Publish />}
-                  disabled={properties.length === 0}
+                  disabled={!properties?.length}
                   onClick={() => {
-                    if (properties.length > 0) {
+                    if (properties?.length > 0) {
                       handleQuickPublish(properties[0]);
                     }
                   }}
@@ -345,16 +347,16 @@ export default function RealEstatePlatformIntegrations() {
                   variant="outlined"
                   fullWidth
                   startIcon={<MonetizationOn />}
-                  onClick={() => window.open('/help?article=platform-pricing-overview', '_blank')}
+                  onClick={() => navigate('/crm/platform-pricing')}
                 >
                   View Pricing & Bundles
                 </Button>
-                
+
                 <Button
                   variant="outlined"
                   fullWidth
                   startIcon={<Security />}
-                  onClick={() => window.open('/help?article=platform-authentication-overview', '_blank')}
+                  onClick={() => navigate('/crm/platform-authentication')}
                 >
                   Setup Platform Authentication
                 </Button>
@@ -391,30 +393,41 @@ export default function RealEstatePlatformIntegrations() {
                   return (
                     <ListItem key={platform.id} sx={{ px: 0 }}>
                       <ListItemIcon>
-                        {isConnected ? (
-                          <CheckCircle color="success" />
-                        ) : (
-                          <Error color="error" />
-                        )}
+                        <Tooltip
+                          title={isConnected ? 'Platform is connected and authenticated' : 'Platform requires authentication'}
+                          arrow
+                        >
+                          {isConnected ? (
+                            <CheckCircle color="success" />
+                          ) : (
+                            <Error color="error" />
+                          )}
+                        </Tooltip>
                       </ListItemIcon>
                       <ListItemText
-                        primary={platform.displayName}
+                        primary={
+                          <Tooltip title={platform.description} arrow>
+                            <span>{platform.displayName}</span>
+                          </Tooltip>
+                        }
                         secondary={`$${platform.pricing.basePrice} - ${isConnected ? 'Connected' : 'Not Connected'}`}
                       />
-                      <Chip
-                        label={platform.status}
-                        size="small"
-                        color={platform.status === 'active' ? 'success' : 'default'}
-                      />
+                      <Tooltip title={`Platform status: ${platform.status}`} arrow>
+                        <Chip
+                          label={platform.status}
+                          size="small"
+                          color={platform.status === 'active' ? 'success' : 'default'}
+                        />
+                      </Tooltip>
                     </ListItem>
                   );
                 })}
               </List>
               
-              {platforms.length > 5 && (
+              {(platforms?.length || 0) > 5 && (
                 <Box sx={{ textAlign: 'center', mt: 2 }}>
                   <Button size="small" onClick={() => setAdminDialogOpen(true)}>
-                    View All {platforms.length} Platforms
+                    View All {platforms?.length || 0} Platforms
                   </Button>
                 </Box>
               )}
@@ -430,14 +443,14 @@ export default function RealEstatePlatformIntegrations() {
                 Recent Publishing Activity
               </Typography>
               
-              {recentJobs.length === 0 ? (
+              {(recentJobs?.length || 0) === 0 ? (
                 <Alert severity="info">
                   No recent publishing activity. Start by publishing your first property!
                 </Alert>
               ) : (
                 <List>
                   {recentJobs.map((job) => {
-                    const property = properties.find(p => p.id === job.propertyId);
+                    const property = properties?.find(p => p.id === job.propertyId);
                     const successRate = Math.round((job.successfulPlatforms / job.totalPlatforms) * 100);
                     
                     return (
@@ -484,31 +497,31 @@ export default function RealEstatePlatformIntegrations() {
                 Properties Ready for Publishing
               </Typography>
               
-              {properties.length === 0 ? (
+              {(!properties?.length) ? (
                 <Alert severity="warning">
                   No properties available. Add properties first to start publishing.
                 </Alert>
               ) : (
                 <Grid container spacing={2}>
-                  {properties.slice(0, 6).map((property) => (
+                  {(properties || []).slice(0, 6).map((property) => (
                     <Grid item xs={12} sm={6} md={4} key={property.id}>
                       <Card variant="outlined">
                         <CardContent sx={{ pb: 1 }}>
                           <Typography variant="subtitle1" noWrap>
-                            {property.name}
+                            {property?.name || 'Unknown Property'}
                           </Typography>
                           <Typography variant="body2" color="text.secondary" noWrap>
-                            {property.address}
+                            {property?.address || 'Address not available'}
                           </Typography>
                           <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                            ${property.monthlyRent}/month
+                            ${property?.monthlyRent || 0}/month
                           </Typography>
                           <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Chip label={property.type} size="small" />
-                            <Chip 
-                              label={property.status} 
-                              size="small" 
-                              color={property.status === 'Available' ? 'success' : 'default'}
+                            <Chip label={property?.type || 'Unknown'} size="small" />
+                            <Chip
+                              label={property?.status || 'Unknown'}
+                              size="small"
+                              color={property?.status === 'Available' ? 'success' : 'default'}
                             />
                           </Stack>
                           <Button
@@ -528,10 +541,10 @@ export default function RealEstatePlatformIntegrations() {
                 </Grid>
               )}
               
-              {properties.length > 6 && (
+              {(properties?.length || 0) > 6 && (
                 <Box sx={{ textAlign: 'center', mt: 3 }}>
                   <Button variant="outlined">
-                    View All {properties.length} Properties
+                    View All {properties?.length || 0} Properties
                   </Button>
                 </Box>
               )}
