@@ -209,12 +209,30 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   const crmContext = useContext(CrmDataContext);
   const state = crmContext?.state;
   const [manualNotifications, setManualNotifications] = useState<Notification[]>([]);
+  const [readIds, setReadIds] = useState<Record<string, boolean>>({});
+  const [removedIds, setRemovedIds] = useState<Record<string, boolean>>({});
 
   const notifications = useMemo(() => {
-    if (!state?.initialized) return manualNotifications;
+    if (!state?.initialized) {
+      // Apply overrides to manual notifications
+      return manualNotifications
+        .filter(n => !removedIds[n.id])
+        .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+    }
+
     const realNotifications = generateRealNotifications(state);
-    return [...realNotifications, ...manualNotifications];
-  }, [state, manualNotifications]);
+
+    // Apply overrides to both real and manual notifications
+    const realWithOverrides = realNotifications
+      .filter(n => !removedIds[n.id])
+      .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+
+    const manualWithOverrides = manualNotifications
+      .filter(n => !removedIds[n.id])
+      .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+
+    return [...realWithOverrides, ...manualWithOverrides];
+  }, [state, manualNotifications, readIds, removedIds]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -235,6 +253,10 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       suggestionService.markNotificationAsRead(suggestionNotificationId);
     }
 
+    // Mark as read in override state (works for both generated and manual notifications)
+    setReadIds(prev => ({ ...prev, [id]: true }));
+
+    // Also update manual notifications for consistency
     setManualNotifications(prev =>
       prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
@@ -255,17 +277,33 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       console.error('Error marking suggestion notifications as read:', error);
     }
 
+    // Mark all current notifications as read in override state
+    setReadIds(prev => {
+      const newReadIds = { ...prev };
+      notifications.forEach(notification => {
+        newReadIds[notification.id] = true;
+      });
+      return newReadIds;
+    });
+
+    // Also update manual notifications for consistency
     setManualNotifications(prev =>
       prev.map(notification => ({ ...notification, read: true }))
     );
   };
 
   const removeNotification = (id: string) => {
+    // Add to removed IDs override (works for both generated and manual notifications)
+    setRemovedIds(prev => ({ ...prev, [id]: true }));
+
+    // Also remove from manual notifications
     setManualNotifications(prev => prev.filter(notification => notification.id !== id));
   };
 
   const clearAllNotifications = () => {
     setManualNotifications([]);
+    setReadIds({});
+    setRemovedIds({});
   };
 
   const getNotificationsByType = (type: Notification['type']) => {
