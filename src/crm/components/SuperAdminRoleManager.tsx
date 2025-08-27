@@ -601,18 +601,62 @@ export default function SuperAdminRoleManager() {
   };
 
   const handleRemoveRole = (userId: string, roleId: string) => {
-    setUsers(prev => prev.map(u => 
-      u.id === userId 
+    setUsers(prev => prev.map(u =>
+      u.id === userId
         ? { ...u, roles: u.roles.filter(r => r !== roleId) }
         : u
     ));
 
     // Update role user count
-    setRoles(prev => prev.map(r => 
-      r.id === roleId 
+    setRoles(prev => prev.map(r =>
+      r.id === roleId
         ? { ...r, userCount: Math.max(0, r.userCount - 1) }
         : r
     ));
+  };
+
+  const handleBulkRoleAssignment = async () => {
+    if (selectedUsers.length === 0 || !bulkRoleId) {
+      alert('Please select users and a role to assign');
+      return;
+    }
+
+    try {
+      // Use UserManagementService for bulk role assignment
+      const result = await userManagementService.bulkAssignRole(
+        selectedUsers,
+        bulkRoleId,
+        'super_admin_001',
+        'Bulk role assignment by Super Admin'
+      );
+
+      alert(`Successfully assigned role to ${result.results.successful.length} users. ${result.results.failed.length} failed.`);
+
+      if (result.results.failed.length > 0) {
+        console.log('Failed assignments:', result.results.failed);
+      }
+
+      // Clear selections and reload data
+      setSelectedUsers([]);
+      setBulkRoleId('');
+      setBulkRoleAssignDialogOpen(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error in bulk role assignment:', error);
+      alert('Failed to perform bulk role assignment');
+    }
+  };
+
+  const handleUserSelection = (userId: string, selected: boolean) => {
+    setSelectedUsers(prev =>
+      selected
+        ? [...prev, userId]
+        : prev.filter(id => id !== userId)
+    );
+  };
+
+  const handleSelectAllUsers = (selected: boolean) => {
+    setSelectedUsers(selected ? filteredUsers.map(u => u.id) : []);
   };
 
   const handlePermissionToggle = (permissionId: string) => {
