@@ -73,7 +73,7 @@ import {
   Schedule as ScheduleIcon,
   Group as GroupIcon,
   Link as LinkIcon,
-  Copy as CopyIcon
+  ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import { collaborationService } from '../services/CollaborationService';
 import { uniformTooltipStyles } from '../utils/formStyles';

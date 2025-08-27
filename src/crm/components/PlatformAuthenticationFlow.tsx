@@ -51,7 +51,7 @@ import {
   Warning,
   Info,
   Launch,
-  Copy,
+  ContentCopy,
   Refresh,
   Security,
   Key,
