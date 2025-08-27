@@ -109,9 +109,7 @@ export default function RealEstatePlatformIntegrations() {
       
       // Load recent publishing jobs (mock data for demo)
       // Only create jobs for properties that are publishable (Available or Unlisted)
-      const publishableProperties = (properties || []).filter(property =>
-        property && (property.status === 'Available' || property.status === 'Unlisted')
-      );
+      const publishableProperties = getPublishableProperties();
       const mockJobs: PublishingJob[] = publishableProperties.slice(0, 3).map((property, index) => ({
         id: `job_${index}`,
         propertyId: property.id,
@@ -344,16 +342,9 @@ export default function RealEstatePlatformIntegrations() {
                   variant="contained"
                   fullWidth
                   startIcon={<Publish />}
-                  disabled={(() => {
-                    const publishableProperties = (properties || []).filter(property =>
-                      property && (property.status === 'Available' || property.status === 'Unlisted')
-                    );
-                    return publishableProperties.length === 0;
-                  })()}
+                  disabled={getPublishableProperties().length === 0}
                   onClick={() => {
-                    const publishableProperties = (properties || []).filter(property =>
-                      property && (property.status === 'Available' || property.status === 'Unlisted')
-                    );
+                    const publishableProperties = getPublishableProperties();
                     if (publishableProperties.length > 0) {
                       handleQuickPublish(publishableProperties[0]);
                     }
@@ -518,9 +509,7 @@ export default function RealEstatePlatformIntegrations() {
               
               {(() => {
                 // Filter properties that are ready for publishing (Available or Unlisted)
-                const publishableProperties = (properties || []).filter(property =>
-                  property && (property.status === 'Available' || property.status === 'Unlisted')
-                );
+                const publishableProperties = getPublishableProperties();
 
                 if (!properties?.length) {
                   return (
@@ -580,9 +569,7 @@ export default function RealEstatePlatformIntegrations() {
               })()}
               
               {(() => {
-                const publishableProperties = (properties || []).filter(property =>
-                  property && (property.status === 'Available' || property.status === 'Unlisted')
-                );
+                const publishableProperties = getPublishableProperties();
                 return publishableProperties.length > 6 && (
                   <Box sx={{ textAlign: 'center', mt: 3 }}>
                     <Button variant="outlined">
