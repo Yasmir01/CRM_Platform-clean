@@ -534,3 +534,395 @@ export class ZillowAdapter extends OAuth2PlatformAdapter {
     }
   }
 }
+
+/**
+ * Trulia Platform Adapter
+ */
+export class TruliaAdapter extends OAuth2PlatformAdapter {
+  constructor() {
+    super(
+      'trulia',
+      'https://api.trulia.com/v1',
+      'https://www.trulia.com/oauth/authorize',
+      'https://api.trulia.com/oauth/token',
+      ['listings:read', 'listings:write', 'analytics:read']
+    );
+  }
+
+  protected getTestEndpoint(): string {
+    return '/user/profile';
+  }
+
+  async publishListing(listingData: PropertyListingData): Promise<ListingPublishResult> {
+    try {
+      await this.ensureAuthenticated();
+
+      const truliaData = this.transformPropertyData(listingData);
+      const response = await this.makeApiRequest(
+        '/listings',
+        'POST',
+        truliaData,
+        this.getAuthHeaders()
+      );
+
+      return {
+        success: true,
+        externalListingId: response.listing_id,
+        listingUrl: `https://www.trulia.com/listing/${response.listing_id}`,
+        message: 'Listing published successfully to Trulia'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to publish to Trulia'
+      };
+    }
+  }
+
+  async updateListing(externalListingId: string, listingData: Partial<PropertyListingData>): Promise<ListingUpdateResult> {
+    try {
+      await this.ensureAuthenticated();
+      const updateData = this.transformPropertyData(listingData);
+      await this.makeApiRequest(
+        `/listings/${externalListingId}`,
+        'PUT',
+        updateData,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing updated successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update listing' };
+    }
+  }
+
+  async removeListing(externalListingId: string): Promise<ListingRemovalResult> {
+    try {
+      await this.ensureAuthenticated();
+      await this.makeApiRequest(`/listings/${externalListingId}`, 'DELETE', undefined, this.getAuthHeaders());
+      return { success: true, message: 'Listing removed successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to remove listing' };
+    }
+  }
+
+  async getListingStatus(externalListingId: string): Promise<any> {
+    await this.ensureAuthenticated();
+    return await this.makeApiRequest(`/listings/${externalListingId}/status`, 'GET', undefined, this.getAuthHeaders());
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<PlatformAnalytics> {
+    await this.ensureAuthenticated();
+    const response = await this.makeApiRequest(
+      `/analytics?start_date=${startDate}&end_date=${endDate}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+
+    return {
+      platform: 'trulia',
+      period: 'custom',
+      startDate,
+      endDate,
+      metrics: {
+        totalListings: response.total_listings || 0,
+        activeListings: response.active_listings || 0,
+        successfulPublications: response.successful_publications || 0,
+        failedPublications: response.failed_publications || 0,
+        totalViews: response.total_views || 0,
+        totalInquiries: response.total_inquiries || 0,
+        conversionRate: response.conversion_rate || 0,
+        averageTimeToPublish: response.avg_time_to_publish || 0,
+        revenue: response.revenue || 0,
+        costs: response.costs || 0,
+        profit: response.profit || 0
+      },
+      topPerformingListings: response.top_listings || []
+    };
+  }
+
+  transformPropertyData(crmData: any): PropertyListingData {
+    return {
+      propertyId: crmData.id,
+      platform: 'trulia',
+      title: crmData.name || 'Property Listing',
+      description: crmData.description || '',
+      price: crmData.monthlyRent || crmData.price || 0,
+      priceType: 'monthly',
+      propertyType: crmData.type || 'house',
+      address: {
+        street: crmData.address || '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'US'
+      },
+      details: {
+        bedrooms: crmData.bedrooms || 0,
+        bathrooms: crmData.bathrooms || 0,
+        squareFootage: crmData.squareFootage || 0,
+        amenities: crmData.amenities || []
+      },
+      media: {
+        photos: crmData.photos || []
+      },
+      availability: {
+        availableDate: crmData.availableDate || new Date().toISOString().split('T')[0]
+      },
+      contact: {
+        name: crmData.contactName || 'Property Manager',
+        email: crmData.contactEmail || '',
+        phone: crmData.contactPhone || '',
+        preferredContact: 'email'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  getValidationRules(): any {
+    return {
+      required: ['title', 'price', 'address', 'bedrooms', 'bathrooms'],
+      maxPhotos: 35,
+      maxDescriptionLength: 1200,
+      propertyTypes: ['house', 'condo', 'townhome', 'apartment'],
+      priceRange: { min: 1, max: 40000 }
+    };
+  }
+
+  validateListingData(listingData: PropertyListingData): { valid: boolean; errors: string[] } {
+    const rules = this.getValidationRules();
+    const errors: string[] = [];
+
+    errors.push(...this.validateRequiredFields(listingData, rules.required));
+    errors.push(...this.validateNumericField(listingData.price, 'price', rules.priceRange.min, rules.priceRange.max));
+    errors.push(...this.validateNumericField(listingData.details.bedrooms, 'bedrooms', 0, 10));
+    errors.push(...this.validateNumericField(listingData.details.bathrooms, 'bathrooms', 0, 10));
+
+    if (listingData.media.photos && listingData.media.photos.length > rules.maxPhotos) {
+      errors.push(`Maximum ${rules.maxPhotos} photos allowed`);
+    }
+
+    if (listingData.description && listingData.description.length > rules.maxDescriptionLength) {
+      errors.push(`Description must be no more than ${rules.maxDescriptionLength} characters`);
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  async handleWebhook(payload: any): Promise<{ processed: boolean; action?: string }> {
+    try {
+      switch (payload.event_type) {
+        case 'listing.published':
+          return { processed: true, action: 'listing_published' };
+        case 'listing.updated':
+          return { processed: true, action: 'listing_updated' };
+        case 'listing.removed':
+          return { processed: true, action: 'listing_removed' };
+        default:
+          return { processed: false };
+      }
+    } catch (error) {
+      return { processed: false };
+    }
+  }
+}
+
+/**
+ * Realtor.com Platform Adapter
+ */
+export class RealtorComAdapter extends OAuth2PlatformAdapter {
+  constructor() {
+    super(
+      'realtors_com',
+      'https://api.realtor.com/v2',
+      'https://www.realtor.com/oauth/authorize',
+      'https://api.realtor.com/oauth/token',
+      ['listings:read', 'listings:write', 'mls:access']
+    );
+  }
+
+  protected getTestEndpoint(): string {
+    return '/user/profile';
+  }
+
+  async publishListing(listingData: PropertyListingData): Promise<ListingPublishResult> {
+    try {
+      await this.ensureAuthenticated();
+
+      const realtorData = this.transformPropertyData(listingData);
+      const response = await this.makeApiRequest(
+        '/listings',
+        'POST',
+        realtorData,
+        this.getAuthHeaders()
+      );
+
+      return {
+        success: true,
+        externalListingId: response.listing_id,
+        listingUrl: `https://www.realtor.com/listing/${response.listing_id}`,
+        message: 'Listing published successfully to Realtor.com'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to publish to Realtor.com'
+      };
+    }
+  }
+
+  async updateListing(externalListingId: string, listingData: Partial<PropertyListingData>): Promise<ListingUpdateResult> {
+    try {
+      await this.ensureAuthenticated();
+      const updateData = this.transformPropertyData(listingData);
+      await this.makeApiRequest(
+        `/listings/${externalListingId}`,
+        'PUT',
+        updateData,
+        this.getAuthHeaders()
+      );
+      return { success: true, message: 'Listing updated successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update listing' };
+    }
+  }
+
+  async removeListing(externalListingId: string): Promise<ListingRemovalResult> {
+    try {
+      await this.ensureAuthenticated();
+      await this.makeApiRequest(`/listings/${externalListingId}`, 'DELETE', undefined, this.getAuthHeaders());
+      return { success: true, message: 'Listing removed successfully' };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to remove listing' };
+    }
+  }
+
+  async getListingStatus(externalListingId: string): Promise<any> {
+    await this.ensureAuthenticated();
+    return await this.makeApiRequest(`/listings/${externalListingId}`, 'GET', undefined, this.getAuthHeaders());
+  }
+
+  async getAnalytics(startDate: string, endDate: string): Promise<PlatformAnalytics> {
+    await this.ensureAuthenticated();
+    const response = await this.makeApiRequest(
+      `/analytics?start_date=${startDate}&end_date=${endDate}`,
+      'GET',
+      undefined,
+      this.getAuthHeaders()
+    );
+
+    return {
+      platform: 'realtors_com',
+      period: 'custom',
+      startDate,
+      endDate,
+      metrics: {
+        totalListings: response.total_listings || 0,
+        activeListings: response.active_listings || 0,
+        successfulPublications: response.successful_publications || 0,
+        failedPublications: response.failed_publications || 0,
+        totalViews: response.total_views || 0,
+        totalInquiries: response.total_inquiries || 0,
+        conversionRate: response.conversion_rate || 0,
+        averageTimeToPublish: response.avg_time_to_publish || 0,
+        revenue: response.revenue || 0,
+        costs: response.costs || 0,
+        profit: response.profit || 0
+      },
+      topPerformingListings: response.top_listings || []
+    };
+  }
+
+  transformPropertyData(crmData: any): PropertyListingData {
+    return {
+      propertyId: crmData.id,
+      platform: 'realtors_com',
+      title: crmData.name || 'Property Listing',
+      description: crmData.description || '',
+      price: crmData.monthlyRent || crmData.price || 0,
+      priceType: 'monthly',
+      propertyType: crmData.type || 'house',
+      address: {
+        street: crmData.address || '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: 'US'
+      },
+      details: {
+        bedrooms: crmData.bedrooms || 0,
+        bathrooms: crmData.bathrooms || 0,
+        squareFootage: crmData.squareFootage || 0,
+        amenities: crmData.amenities || []
+      },
+      media: {
+        photos: crmData.photos || []
+      },
+      availability: {
+        availableDate: crmData.availableDate || new Date().toISOString().split('T')[0]
+      },
+      contact: {
+        name: crmData.contactName || 'Realtor',
+        email: crmData.contactEmail || '',
+        phone: crmData.contactPhone || '',
+        preferredContact: 'email'
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+  }
+
+  getValidationRules(): any {
+    return {
+      required: ['title', 'price', 'address', 'bedrooms', 'bathrooms', 'squareFootage'],
+      maxPhotos: 40,
+      maxDescriptionLength: 1500,
+      propertyTypes: ['house', 'condo', 'townhome', 'land', 'multi-family'],
+      priceRange: { min: 1, max: 100000 }
+    };
+  }
+
+  validateListingData(listingData: PropertyListingData): { valid: boolean; errors: string[] } {
+    const rules = this.getValidationRules();
+    const errors: string[] = [];
+
+    errors.push(...this.validateRequiredFields(listingData, rules.required));
+    errors.push(...this.validateNumericField(listingData.price, 'price', rules.priceRange.min, rules.priceRange.max));
+    errors.push(...this.validateNumericField(listingData.details.bedrooms, 'bedrooms', 0, 15));
+    errors.push(...this.validateNumericField(listingData.details.bathrooms, 'bathrooms', 0, 15));
+
+    if (!listingData.details.squareFootage) {
+      errors.push('Square footage is required for Realtor.com');
+    }
+
+    if (listingData.media.photos && listingData.media.photos.length > rules.maxPhotos) {
+      errors.push(`Maximum ${rules.maxPhotos} photos allowed`);
+    }
+
+    if (listingData.description && listingData.description.length > rules.maxDescriptionLength) {
+      errors.push(`Description must be no more than ${rules.maxDescriptionLength} characters`);
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  async handleWebhook(payload: any): Promise<{ processed: boolean; action?: string }> {
+    try {
+      switch (payload.event_type) {
+        case 'listing.published':
+          return { processed: true, action: 'listing_published' };
+        case 'listing.updated':
+          return { processed: true, action: 'listing_updated' };
+        case 'listing.removed':
+          return { processed: true, action: 'listing_removed' };
+        default:
+          return { processed: false };
+      }
+    } catch (error) {
+      return { processed: false };
+    }
+  }
+}
