@@ -706,37 +706,72 @@ export default function MarketingAutomation() {
           </Typography>
           <Stack direction="row" spacing={2} flexWrap="wrap" gap={1}>
             <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool('email-marketing')}
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
+              variant={currentTab === 1 ? "contained" : "outlined"}
+              onClick={() => setCurrentTab(1)}
+              sx={{
+                color: currentTab === 1 ? 'primary.contrastText' : 'primary.contrastText',
+                borderColor: 'primary.contrastText',
+                bgcolor: currentTab === 1 ? 'rgba(255,255,255,0.2)' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
             >
               📧 Email Marketing
             </Button>
             <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool('sms-marketing')}
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
+              variant={currentTab === 2 ? "contained" : "outlined"}
+              onClick={() => setCurrentTab(2)}
+              sx={{
+                color: currentTab === 2 ? 'primary.contrastText' : 'primary.contrastText',
+                borderColor: 'primary.contrastText',
+                bgcolor: currentTab === 2 ? 'rgba(255,255,255,0.2)' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
             >
               📱 SMS Marketing
             </Button>
             <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool('templates')}
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
+              variant={currentTab === 5 ? "contained" : "outlined"}
+              onClick={() => setCurrentTab(5)}
+              sx={{
+                color: currentTab === 5 ? 'primary.contrastText' : 'primary.contrastText',
+                borderColor: 'primary.contrastText',
+                bgcolor: currentTab === 5 ? 'rgba(255,255,255,0.2)' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
             >
               📄 Templates
             </Button>
             <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool('landing-pages')}
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
+              variant={currentTab === 6 ? "contained" : "outlined"}
+              onClick={() => setCurrentTab(6)}
+              sx={{
+                color: currentTab === 6 ? 'primary.contrastText' : 'primary.contrastText',
+                borderColor: 'primary.contrastText',
+                bgcolor: currentTab === 6 ? 'rgba(255,255,255,0.2)' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
             >
               🎯 Landing Pages
             </Button>
             <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool('promotions')}
-              sx={{ color: 'primary.contrastText', borderColor: 'primary.contrastText' }}
+              variant={currentTab === 7 ? "contained" : "outlined"}
+              onClick={() => setCurrentTab(7)}
+              sx={{
+                color: currentTab === 7 ? 'primary.contrastText' : 'primary.contrastText',
+                borderColor: 'primary.contrastText',
+                bgcolor: currentTab === 7 ? 'rgba(255,255,255,0.2)' : 'transparent',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
             >
               🎁 Promotions
             </Button>
