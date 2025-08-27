@@ -241,10 +241,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('users', JSON.stringify(mockUsers));
     }
 
-    // Ensure all users have name property
+    // Ensure all users have name property and timezone defaults
     usersList = usersList.map(user => ({
       ...user,
-      name: user.name || `${user.firstName} ${user.lastName}`
+      name: user.name || `${user.firstName} ${user.lastName}`,
+      timezone: user.timezone || 'UTC',
+      preferredLanguage: user.preferredLanguage || 'en',
+      countryCode: user.countryCode || 'US'
     }));
 
     setUsers(usersList);
