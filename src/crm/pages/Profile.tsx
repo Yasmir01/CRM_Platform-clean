@@ -509,20 +509,36 @@ export default function Profile() {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <FormControl fullWidth disabled={!editMode}>
-                    <InputLabel>Timezone</InputLabel>
-                    <Select
-                      value={editMode ? formData.timezone : profile.timezone}
-                      label="Timezone"
-                      onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                    >
-                      {timezones.map((tz) => (
-                        <MenuItem key={tz.value} value={tz.value}>
-                          {tz.label}
+                  <Stack spacing={1}>
+                    <FormControl fullWidth disabled={!editMode}>
+                      <InputLabel>Timezone</InputLabel>
+                      <Select
+                        value={editMode ? formData.timezone : profile.timezone}
+                        label="Timezone"
+                        onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                      >
+                        {timezones.map((tz) => (
+                          <MenuItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </MenuItem>
+                        ))}
+                        <MenuItem value={Intl.DateTimeFormat().resolvedOptions().timeZone}>
+                          {Intl.DateTimeFormat().resolvedOptions().timeZone} (Your Local Timezone)
                         </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      </Select>
+                    </FormControl>
+                    {editMode && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<AccessTimeRoundedIcon />}
+                        onClick={detectAndSetLocalTimezone}
+                        sx={{ alignSelf: 'flex-start' }}
+                      >
+                        Use Local Timezone
+                      </Button>
+                    )}
+                  </Stack>
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <FormControl fullWidth disabled={!editMode}>
