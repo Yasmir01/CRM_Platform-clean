@@ -497,13 +497,31 @@ export default function RealEstatePlatformIntegrations() {
                 Properties Ready for Publishing
               </Typography>
               
-              {(!properties?.length) ? (
-                <Alert severity="warning">
-                  No properties available. Add properties first to start publishing.
-                </Alert>
-              ) : (
-                <Grid container spacing={2}>
-                  {(properties || []).slice(0, 6).map((property) => (
+              {(() => {
+                // Filter properties that are ready for publishing (Available or Unlisted)
+                const publishableProperties = (properties || []).filter(property =>
+                  property && (property.status === 'Available' || property.status === 'Unlisted')
+                );
+
+                if (!properties?.length) {
+                  return (
+                    <Alert severity="warning">
+                      No properties available. Add properties first to start publishing.
+                    </Alert>
+                  );
+                }
+
+                if (publishableProperties.length === 0) {
+                  return (
+                    <Alert severity="info">
+                      No properties ready for publishing. Properties with "Available" or "Unlisted" status can be published to platforms.
+                    </Alert>
+                  );
+                }
+
+                return (
+                  <Grid container spacing={2}>
+                    {publishableProperties.slice(0, 6).map((property) => (
                     <Grid item xs={12} sm={6} md={4} key={property.id}>
                       <Card variant="outlined">
                         <CardContent sx={{ pb: 1 }}>
@@ -537,17 +555,23 @@ export default function RealEstatePlatformIntegrations() {
                         </CardContent>
                       </Card>
                     </Grid>
-                  ))}
-                </Grid>
-              )}
+                    ))}
+                  </Grid>
+                );
+              })()}
               
-              {(properties?.length || 0) > 6 && (
-                <Box sx={{ textAlign: 'center', mt: 3 }}>
-                  <Button variant="outlined">
-                    View All {properties?.length || 0} Properties
-                  </Button>
-                </Box>
-              )}
+              {(() => {
+                const publishableProperties = (properties || []).filter(property =>
+                  property && (property.status === 'Available' || property.status === 'Unlisted')
+                );
+                return publishableProperties.length > 6 && (
+                  <Box sx={{ textAlign: 'center', mt: 3 }}>
+                    <Button variant="outlined">
+                      View All {publishableProperties.length} Available Properties
+                    </Button>
+                  </Box>
+                );
+              })()}
             </CardContent>
           </Card>
         </Grid>
