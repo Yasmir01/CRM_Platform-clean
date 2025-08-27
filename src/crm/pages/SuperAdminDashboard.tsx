@@ -586,8 +586,13 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
         </TableContainer>
       </TabPanel>
 
-      {/* System Analytics Tab */}
+      {/* Role Management Tab */}
       <TabPanel value={currentTab} index={1}>
+        <SuperAdminRoleManager />
+      </TabPanel>
+
+      {/* System Analytics Tab */}
+      <TabPanel value={currentTab} index={2}>
         <Alert severity="info" sx={{ mb: 3 }}>
           System analytics dashboard showing platform usage, performance metrics, and subscriber insights.
         </Alert>
@@ -616,7 +621,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* Billing Management Tab */}
-      <TabPanel value={currentTab} index={2}>
+      <TabPanel value={currentTab} index={3}>
         <Alert severity="info" sx={{ mb: 3 }}>
           Billing management system for processing payments, managing subscriptions, and handling billing disputes.
         </Alert>
@@ -635,7 +640,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* System Settings Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={4}>
         <Alert severity="warning" sx={{ mb: 3 }}>
           <Typography variant="h6">System-Wide Configuration</Typography>
           <Typography variant="body2">
