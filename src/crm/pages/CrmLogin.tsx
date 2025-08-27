@@ -72,6 +72,7 @@ export default function CrmLogin() {
   const [success, setSuccess] = React.useState("");
   const [forgotPasswordOpen, setForgotPasswordOpen] = React.useState(false);
   const [resetEmail, setResetEmail] = React.useState("");
+  const [showPasswordReset, setShowPasswordReset] = React.useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
