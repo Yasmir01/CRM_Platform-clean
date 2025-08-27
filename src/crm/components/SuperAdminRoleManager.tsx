@@ -1060,25 +1060,77 @@ export default function SuperAdminRoleManager() {
                       </Tooltip>
                       {user.status === 'active' ? (
                         <Tooltip title="Deactivate User" sx={uniformTooltipStyles}>
-                          <IconButton 
-                            size="small" 
+                          <IconButton
+                            size="small"
                             color="error"
-                            onClick={() => handleUserStatusChange(user.id, 'inactive')}
+                            onClick={() => handleUserStatusChangeRequest(user.id, 'inactive')}
                           >
                             <LockIcon />
                           </IconButton>
                         </Tooltip>
-                      ) : (
+                      ) : user.status === 'inactive' ? (
                         <Tooltip title="Activate User" sx={uniformTooltipStyles}>
-                          <IconButton 
-                            size="small" 
+                          <IconButton
+                            size="small"
                             color="success"
-                            onClick={() => handleUserStatusChange(user.id, 'active')}
+                            onClick={() => handleUserStatusChangeRequest(user.id, 'active')}
                           >
                             <LockOpenIcon />
                           </IconButton>
                         </Tooltip>
+                      ) : user.status === 'suspended' ? (
+                        <Tooltip title="Unsuspend User" sx={uniformTooltipStyles}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleUserStatusChangeRequest(user.id, 'active')}
+                          >
+                            <CheckCircleIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ) : user.status === 'locked' ? (
+                        <Tooltip title="Unlock User" sx={uniformTooltipStyles}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleUserStatusChangeRequest(user.id, 'active')}
+                          >
+                            <LockOpenIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip title="Activate User" sx={uniformTooltipStyles}>
+                          <IconButton
+                            size="small"
+                            color="success"
+                            onClick={() => handleUserStatusChangeRequest(user.id, 'active')}
+                          >
+                            <CheckCircleIcon />
+                          </IconButton>
+                        </Tooltip>
                       )}
+                      <Tooltip title="Suspend User" sx={uniformTooltipStyles}>
+                        <IconButton
+                          size="small"
+                          color="warning"
+                          onClick={() => handleUserStatusChangeRequest(user.id, 'suspended')}
+                          disabled={user.status === 'suspended'}
+                        >
+                          <WarningIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="View User Actions" sx={uniformTooltipStyles}>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setUserActions(userManagementService.getUserActions(user.id));
+                            setUserActionsDialogOpen(true);
+                          }}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
                     </Stack>
                   </TableCell>
                 </TableRow>
