@@ -80,6 +80,7 @@ export interface PlatformAuthConfig {
   accessToken?: string;
   refreshToken?: string;
   tokenExpiresAt?: string;
+  authorizationCode?: string;
   scopes?: string[];
   webhookUrl?: string;
   redirectUri?: string;
