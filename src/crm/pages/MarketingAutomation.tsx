@@ -1549,7 +1549,7 @@ export default function MarketingAutomation() {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => setActiveMarketingTool('templates')}
+                            onClick={() => setCurrentTab(5)}
                             startIcon={<LaunchIcon />}
                           >
                             Manage Templates
@@ -1587,7 +1587,7 @@ export default function MarketingAutomation() {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => setActiveMarketingTool('landing-pages')}
+                            onClick={() => setCurrentTab(6)}
                             startIcon={<LaunchIcon />}
                           >
                             Manage Landing Pages
@@ -1625,7 +1625,7 @@ export default function MarketingAutomation() {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => setActiveMarketingTool('sms-marketing')}
+                            onClick={() => setCurrentTab(2)}
                             startIcon={<LaunchIcon />}
                           >
                             SMS Marketing
@@ -1663,7 +1663,7 @@ export default function MarketingAutomation() {
                           <Button
                             size="small"
                             variant="outlined"
-                            onClick={() => setActiveMarketingTool('promotions')}
+                            onClick={() => setCurrentTab(7)}
                             startIcon={<LaunchIcon />}
                           >
                             Manage Promotions
