@@ -513,10 +513,38 @@ export default function SuperAdminRoleManager() {
     }
   };
 
-  const handleUserStatusChange = (userId: string, newStatus: User['status']) => {
-    setUsers(prev => prev.map(u => 
-      u.id === userId ? { ...u, status: newStatus } : u
-    ));
+  const handleUserStatusChange = async (userId: string, newStatus: User['status'], reason?: string) => {
+    try {
+      const currentUser = users.find(u => u.id === userId);
+      if (!currentUser) return;
+
+      switch (newStatus) {
+        case 'active':
+          if (currentUser.status === 'inactive') {
+            await userManagementService.activateUser(userId, 'super_admin_001', reason);
+          } else if (currentUser.status === 'suspended') {
+            await userManagementService.unsuspendUser(userId, 'super_admin_001', reason);
+          } else if (currentUser.status === 'locked') {
+            await userManagementService.unlockUser(userId, 'super_admin_001', reason);
+          }
+          break;
+        case 'inactive':
+          await userManagementService.deactivateUser(userId, 'super_admin_001', reason);
+          break;
+        case 'suspended':
+          await userManagementService.suspendUser(userId, 'super_admin_001', reason || 'Suspended by Super Admin');
+          break;
+        case 'locked':
+          await userManagementService.lockUser(userId, 'super_admin_001', reason || 'Account locked for security');
+          break;
+      }
+
+      // Reload data to reflect changes
+      await loadData();
+    } catch (error) {
+      console.error('Error changing user status:', error);
+      alert(error instanceof Error ? error.message : 'Failed to change user status');
+    }
   };
 
   const handleAssignRole = (userId: string, roleId: string) => {
