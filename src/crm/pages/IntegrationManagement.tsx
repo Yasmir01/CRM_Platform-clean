@@ -1384,7 +1384,7 @@ export default function IntegrationManagement() {
                   Real Estate Platform Integrations
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Publish your properties to {realEstatePlatforms.length}+ major real estate platforms with one click
+                  Publish your properties to {realEstatePlatforms?.length || 0}+ major real estate platforms with one click
                 </Typography>
               </Box>
               <Stack direction="row" spacing={1}>
@@ -1392,14 +1392,14 @@ export default function IntegrationManagement() {
                   variant="outlined"
                   startIcon={<PublishRoundedIcon />}
                   onClick={() => {
-                    if (properties.length > 0) {
+                    if (properties?.length > 0) {
                       setSelectedProperty(properties[0]);
                       setPublishingDialogOpen(true);
                     } else {
                       setSnackbar({ open: true, message: 'No properties available to publish', severity: 'info' });
                     }
                   }}
-                  disabled={!realEstateInitialized || properties.length === 0}
+                  disabled={!realEstateInitialized || !properties?.length}
                 >
                   Quick Publish
                 </Button>
@@ -1418,7 +1418,7 @@ export default function IntegrationManagement() {
               <Grid item xs={12} sm={3}>
                 <Stack alignItems="center" spacing={1}>
                   <Typography variant="h6" color="primary.main">
-                    {realEstatePlatforms.length}
+                    {realEstatePlatforms?.length || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" align="center">
                     Available Platforms
@@ -1438,7 +1438,7 @@ export default function IntegrationManagement() {
               <Grid item xs={12} sm={3}>
                 <Stack alignItems="center" spacing={1}>
                   <Typography variant="h6" color="info.main">
-                    {availableBundles.length}
+                    {availableBundles?.length || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" align="center">
                     Bundle Options
@@ -1448,7 +1448,7 @@ export default function IntegrationManagement() {
               <Grid item xs={12} sm={3}>
                 <Stack alignItems="center" spacing={1}>
                   <Typography variant="h6" color="warning.main">
-                    {properties.length}
+                    {properties?.length || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" align="center">
                     Ready Properties
@@ -1462,7 +1462,7 @@ export default function IntegrationManagement() {
                 Featured Platforms:
               </Typography>
               <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
-                {realEstatePlatforms.slice(0, 8).map((platform) => {
+                {realEstatePlatforms?.slice(0, 8).map((platform) => {
                   const isConnected = RealEstatePlatformService.isPlatformAuthenticated(platform.platform as RealEstatePlatform);
                   return (
                     <Chip
@@ -1479,9 +1479,9 @@ export default function IntegrationManagement() {
                     />
                   );
                 })}
-                {realEstatePlatforms.length > 8 && (
+                {(realEstatePlatforms?.length || 0) > 8 && (
                   <Chip
-                    label={`+${realEstatePlatforms.length - 8} more`}
+                    label={`+${(realEstatePlatforms?.length || 0) - 8} more`}
                     size="small"
                     color="primary"
                   />
@@ -1491,7 +1491,7 @@ export default function IntegrationManagement() {
 
             <Alert severity="info" sx={{ bgcolor: 'transparent', border: '1px solid', borderColor: 'info.main' }}>
               <Typography variant="body2">
-                <strong>Live Integration!</strong> Connected to {connectedPlatformsCount} platforms with {availableBundles.length} bundle options available.
+                <strong>Live Integration!</strong> Connected to {connectedPlatformsCount} platforms with {availableBundles?.length || 0} bundle options available.
                 {connectedPlatformsCount === 0 ? ' Start by connecting your first platform!' : ' Ready to publish your properties instantly.'}
               </Typography>
             </Alert>
