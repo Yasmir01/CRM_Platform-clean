@@ -1372,13 +1372,13 @@ export default function SuperAdminRoleManager() {
             <Alert severity="info">
               Select roles to assign to this user. Users can have multiple roles.
             </Alert>
-            
+
             <Typography variant="subtitle2">Current Roles:</Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
               {selectedUser?.roles.map((roleId) => {
                 const role = roles.find(r => r.id === roleId);
                 return role ? (
-                  <Chip 
+                  <Chip
                     key={roleId}
                     label={role.name}
                     onDelete={() => handleRemoveRole(selectedUser.id, roleId)}
@@ -1413,9 +1413,9 @@ export default function SuperAdminRoleManager() {
                           {role.description}
                         </Typography>
                       </Box>
-                      <Chip 
-                        label={getHierarchyLabel(role.hierarchy)} 
-                        size="small" 
+                      <Chip
+                        label={getHierarchyLabel(role.hierarchy)}
+                        size="small"
                         color={role.type === 'system' ? 'primary' : 'secondary'}
                       />
                     </Stack>
@@ -1427,6 +1427,124 @@ export default function SuperAdminRoleManager() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAssignRoleDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Status Change Confirmation Dialog */}
+      <Dialog open={statusChangeDialogOpen} onClose={() => setStatusChangeDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          Confirm User Status Change
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 2 }}>
+            <Alert severity="warning">
+              <Typography variant="subtitle2">
+                Change Status: {statusChangeData?.userName}
+              </Typography>
+              <Typography variant="body2">
+                From <strong>{statusChangeData?.currentStatus}</strong> to <strong>{statusChangeData?.newStatus}</strong>
+              </Typography>
+            </Alert>
+
+            <TextField
+              label="Reason for Status Change"
+              multiline
+              rows={3}
+              fullWidth
+              placeholder="Provide a reason for this status change..."
+              value={userForm.password} // Reusing this field temporarily
+              onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
+            />
+
+            <Typography variant="body2" color="text.secondary">
+              This action will be logged and tracked in the system audit trail.
+            </Typography>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setStatusChangeDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color={statusChangeData?.newStatus === 'active' ? 'success' : 'error'}
+            onClick={() => handleConfirmStatusChange(userForm.password)}
+          >
+            Confirm Status Change
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* User Actions History Dialog */}
+      <Dialog open={userActionsDialogOpen} onClose={() => setUserActionsDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          User Actions History - {selectedUser?.firstName} {selectedUser?.lastName}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <Alert severity="info">
+              Complete audit trail of all actions performed on this user account.
+            </Alert>
+
+            {userActions.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+                No actions recorded for this user.
+              </Typography>
+            ) : (
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Date/Time</TableCell>
+                      <TableCell>Action</TableCell>
+                      <TableCell>Performed By</TableCell>
+                      <TableCell>Reason</TableCell>
+                      <TableCell>Details</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {userActions.map((action) => (
+                      <TableRow key={action.id}>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {new Date(action.performedAt).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(action.performedAt).toLocaleTimeString()}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={action.action.replace('_', ' ').toUpperCase()}
+                            size="small"
+                            color={
+                              action.action === 'activate' ? 'success' :
+                              action.action === 'deactivate' ? 'error' :
+                              action.action === 'suspend' ? 'warning' : 'default'
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{action.performedBy}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">{action.reason || 'No reason provided'}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          {action.previousValue && action.newValue && (
+                            <Typography variant="caption" color="text.secondary">
+                              {JSON.stringify(action.previousValue)} → {JSON.stringify(action.newValue)}
+                            </Typography>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUserActionsDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>
