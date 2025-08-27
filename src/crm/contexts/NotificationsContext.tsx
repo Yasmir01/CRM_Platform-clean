@@ -253,6 +253,10 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       suggestionService.markNotificationAsRead(suggestionNotificationId);
     }
 
+    // Mark as read in override state (works for both generated and manual notifications)
+    setReadIds(prev => ({ ...prev, [id]: true }));
+
+    // Also update manual notifications for consistency
     setManualNotifications(prev =>
       prev.map(notification =>
         notification.id === id ? { ...notification, read: true } : notification
