@@ -1025,6 +1025,13 @@ export default function SuperAdminRoleManager() {
           <Table>
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                    indeterminate={selectedUsers.length > 0 && selectedUsers.length < filteredUsers.length}
+                    onChange={(e) => handleSelectAllUsers(e.target.checked)}
+                  />
+                </TableCell>
                 <TableCell>User</TableCell>
                 <TableCell>Roles</TableCell>
                 <TableCell>Status</TableCell>
