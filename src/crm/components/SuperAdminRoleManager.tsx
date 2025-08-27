@@ -526,6 +526,27 @@ export default function SuperAdminRoleManager() {
     }
   };
 
+  const handleUserStatusChangeRequest = (userId: string, newStatus: User['status']) => {
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    setStatusChangeData({
+      userId,
+      currentStatus: user.status,
+      newStatus,
+      userName: `${user.firstName} ${user.lastName}`
+    });
+    setStatusChangeDialogOpen(true);
+  };
+
+  const handleConfirmStatusChange = async (reason: string) => {
+    if (!statusChangeData) return;
+
+    await handleUserStatusChange(statusChangeData.userId, statusChangeData.newStatus, reason);
+    setStatusChangeDialogOpen(false);
+    setStatusChangeData(null);
+  };
+
   const handleUserStatusChange = async (userId: string, newStatus: User['status'], reason?: string) => {
     try {
       const currentUser = users.find(u => u.id === userId);
