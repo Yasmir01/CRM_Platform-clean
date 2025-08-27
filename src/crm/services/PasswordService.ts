@@ -1,23 +1,26 @@
-import bcrypt from 'bcryptjs';
+// Browser-compatible password service (replaces bcrypt for frontend development)
 
 export class PasswordService {
-  private static readonly SALT_ROUNDS = 12;
   private static readonly MIN_PASSWORD_LENGTH = 8;
 
   /**
-   * Hash a password using bcrypt
+   * Hash a password (browser-compatible simulation)
+   * Note: In production, password hashing should be done server-side
    */
   static async hashPassword(password: string): Promise<string> {
     if (!password || password.length < this.MIN_PASSWORD_LENGTH) {
       throw new Error(`Password must be at least ${this.MIN_PASSWORD_LENGTH} characters long`);
     }
     
-    const salt = await bcrypt.genSalt(this.SALT_ROUNDS);
-    return bcrypt.hash(password, salt);
+    // For development, use a simple hash simulation
+    // In production, this would be handled by server-side bcrypt
+    const salt = this.generateSalt();
+    const hash = await this.simpleHash(password + salt);
+    return `$dev$${salt}$${hash}`;
   }
 
   /**
-   * Verify a password against its hash
+   * Verify a password against its hash (browser-compatible simulation)
    */
   static async verifyPassword(password: string, hash: string): Promise<boolean> {
     if (!password || !hash) {
@@ -25,7 +28,24 @@ export class PasswordService {
     }
     
     try {
-      return await bcrypt.compare(password, hash);
+      // Handle development hash format
+      if (hash.startsWith('$dev$')) {
+        const parts = hash.split('$');
+        if (parts.length !== 4) return false;
+        
+        const salt = parts[2];
+        const storedHash = parts[3];
+        const computedHash = await this.simpleHash(password + salt);
+        
+        return computedHash === storedHash;
+      }
+      
+      // For demo purposes, also accept plain text passwords (development only)
+      if (process.env.NODE_ENV === 'development') {
+        return password === hash;
+      }
+      
+      return false;
     } catch (error) {
       console.error('Password verification error:', error);
       return false;
@@ -120,5 +140,46 @@ export class PasswordService {
    */
   static generateTemporaryPassword(): string {
     return this.generateSecurePassword(12);
+  }
+
+  // Private helper methods for browser-compatible hashing
+
+  /**
+   * Generate a simple salt for development
+   */
+  private static generateSalt(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let salt = '';
+    for (let i = 0; i < 16; i++) {
+      salt += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return salt;
+  }
+
+  /**
+   * Simple hash function for browser compatibility (development only)
+   */
+  private static async simpleHash(input: string): Promise<string> {
+    // Use Web Crypto API if available, otherwise fallback to simple hash
+    if (crypto && crypto.subtle) {
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (error) {
+        // Fallback to simple hash if Web Crypto API fails
+      }
+    }
+    
+    // Simple fallback hash (not cryptographically secure - development only)
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash).toString(16);
   }
 }
