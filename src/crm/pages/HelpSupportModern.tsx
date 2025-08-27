@@ -57,7 +57,8 @@ import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
-import { helpCategories, helpArticles, quickActions, type HelpCategory, type HelpArticle } from "../data/helpArticles";
+import { helpCategories, helpArticles, quickActions } from "../data/helpArticles";
+import type { HelpCategory, HelpArticle } from "../data/helpTypes";
 
 // Icon mapping for the help categories
 const iconMap: Record<string, React.ReactNode> = {
