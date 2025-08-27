@@ -37,23 +37,27 @@ class RealEstatePlatformServiceClass {
     if (this.isInitialized) return;
 
     try {
+      // Initialize real connection services
+      await PlatformConnectionService.initialize();
+      await ListingPublishingService.initialize();
+
       // Load platform configurations from storage
       const configs = this.loadPlatformConfigurations();
       configs.forEach(config => {
         this.platformConfigs.set(config.platform, config);
       });
 
-      // Load authentication status
-      const authStatus = this.loadAuthenticationStatus();
-      authStatus.forEach((isAuth, platform) => {
-        this.authenticated.set(platform, isAuth);
+      // Get real connection status from PlatformConnectionService
+      const connectionStatuses = PlatformConnectionService.getAllConnectionStatuses();
+      Object.entries(connectionStatuses).forEach(([platform, status]) => {
+        this.authenticated.set(platform as RealEstatePlatform, status.isConnected);
       });
 
       // Initialize default platform configurations
       this.initializeDefaultPlatforms();
 
       this.isInitialized = true;
-      console.log('RealEstatePlatformService initialized successfully');
+      console.log('RealEstatePlatformService initialized with real connections');
     } catch (error) {
       console.error('Failed to initialize RealEstatePlatformService:', error);
       throw error;
