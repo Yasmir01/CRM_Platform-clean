@@ -437,7 +437,7 @@ export default function RealEstatePlatformIntegrations() {
               ) : (
                 <List>
                   {recentJobs.map((job) => {
-                    const property = properties.find(p => p.id === job.propertyId);
+                    const property = properties?.find(p => p.id === job.propertyId);
                     const successRate = Math.round((job.successfulPlatforms / job.totalPlatforms) * 100);
                     
                     return (
@@ -490,7 +490,7 @@ export default function RealEstatePlatformIntegrations() {
                 </Alert>
               ) : (
                 <Grid container spacing={2}>
-                  {properties.slice(0, 6).map((property) => (
+                  {(properties || []).slice(0, 6).map((property) => (
                     <Grid item xs={12} sm={6} md={4} key={property.id}>
                       <Card variant="outlined">
                         <CardContent sx={{ pb: 1 }}>
