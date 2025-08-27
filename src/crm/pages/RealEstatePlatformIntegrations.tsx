@@ -333,10 +333,18 @@ export default function RealEstatePlatformIntegrations() {
                   variant="contained"
                   fullWidth
                   startIcon={<Publish />}
-                  disabled={!properties?.length}
+                  disabled={(() => {
+                    const publishableProperties = (properties || []).filter(property =>
+                      property && (property.status === 'Available' || property.status === 'Unlisted')
+                    );
+                    return publishableProperties.length === 0;
+                  })()}
                   onClick={() => {
-                    if (properties?.length > 0) {
-                      handleQuickPublish(properties[0]);
+                    const publishableProperties = (properties || []).filter(property =>
+                      property && (property.status === 'Available' || property.status === 'Unlisted')
+                    );
+                    if (publishableProperties.length > 0) {
+                      handleQuickPublish(publishableProperties[0]);
                     }
                   }}
                 >
