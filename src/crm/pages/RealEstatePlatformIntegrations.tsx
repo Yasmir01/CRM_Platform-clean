@@ -99,7 +99,7 @@ export default function RealEstatePlatformIntegrations() {
       setBundles(availableBundles);
       
       // Load recent publishing jobs (mock data for demo)
-      const mockJobs: PublishingJob[] = properties.slice(0, 3).map((property, index) => ({
+      const mockJobs: PublishingJob[] = (properties || []).slice(0, 3).map((property, index) => ({
         id: `job_${index}`,
         propertyId: property.id,
         platforms: ['zillow', 'apartments_com', 'trulia'] as RealEstatePlatform[],
@@ -331,9 +331,9 @@ export default function RealEstatePlatformIntegrations() {
                   variant="contained"
                   fullWidth
                   startIcon={<Publish />}
-                  disabled={properties.length === 0}
+                  disabled={!properties?.length}
                   onClick={() => {
-                    if (properties.length > 0) {
+                    if (properties?.length > 0) {
                       handleQuickPublish(properties[0]);
                     }
                   }}
@@ -411,10 +411,10 @@ export default function RealEstatePlatformIntegrations() {
                 })}
               </List>
               
-              {platforms.length > 5 && (
+              {(platforms?.length || 0) > 5 && (
                 <Box sx={{ textAlign: 'center', mt: 2 }}>
                   <Button size="small" onClick={() => setAdminDialogOpen(true)}>
-                    View All {platforms.length} Platforms
+                    View All {platforms?.length || 0} Platforms
                   </Button>
                 </Box>
               )}
@@ -430,7 +430,7 @@ export default function RealEstatePlatformIntegrations() {
                 Recent Publishing Activity
               </Typography>
               
-              {recentJobs.length === 0 ? (
+              {(recentJobs?.length || 0) === 0 ? (
                 <Alert severity="info">
                   No recent publishing activity. Start by publishing your first property!
                 </Alert>
@@ -484,7 +484,7 @@ export default function RealEstatePlatformIntegrations() {
                 Properties Ready for Publishing
               </Typography>
               
-              {properties.length === 0 ? (
+              {(!properties?.length) ? (
                 <Alert severity="warning">
                   No properties available. Add properties first to start publishing.
                 </Alert>
@@ -528,10 +528,10 @@ export default function RealEstatePlatformIntegrations() {
                 </Grid>
               )}
               
-              {properties.length > 6 && (
+              {(properties?.length || 0) > 6 && (
                 <Box sx={{ textAlign: 'center', mt: 3 }}>
                   <Button variant="outlined">
-                    View All {properties.length} Properties
+                    View All {properties?.length || 0} Properties
                   </Button>
                 </Box>
               )}
