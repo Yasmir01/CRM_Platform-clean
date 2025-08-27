@@ -81,6 +81,13 @@ export default function RealEstatePlatformIntegrations() {
     message: ''
   });
 
+  // Helper function to get properties ready for publishing
+  const getPublishableProperties = React.useCallback(() => {
+    return (properties || []).filter(property =>
+      property && (property.status === 'Available' || property.status === 'Unlisted')
+    );
+  }, [properties]);
+
   React.useEffect(() => {
     initializeData();
   }, []);
