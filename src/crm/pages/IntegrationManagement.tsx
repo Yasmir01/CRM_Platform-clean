@@ -1326,6 +1326,81 @@ export default function IntegrationManagement() {
         </Stack>
       </Stack>
 
+      {/* Real Estate Platform Integrations */}
+      <Card sx={{ mb: 3, bgcolor: 'primary.50', border: '2px solid', borderColor: 'primary.main' }}>
+        <CardContent>
+          <Stack spacing={3}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Avatar sx={{ bgcolor: "primary.main", width: 56, height: 56 }}>
+                🏠
+              </Avatar>
+              <Box flex={1}>
+                <Typography variant="h5" fontWeight="600" color="primary.main">
+                  Real Estate Platform Integrations
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Publish your properties to 15+ major real estate platforms with one click
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<IntegrationInstructionsRoundedIcon />}
+                onClick={() => window.open('/crm/real-estate-platforms', '_blank')}
+              >
+                Manage Platforms
+              </Button>
+            </Stack>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="primary.main">15+</Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Supported Platforms
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} md={9}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Available Platforms:
+                </Typography>
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+                  {[
+                    'Zillow', 'Apartments.com', 'Realtor.com', 'Craigslist', 'Trulia',
+                    'Rentberry', 'Zumper', 'Apartment List', 'RentPrep', 'Dwellsy'
+                  ].map((platform) => (
+                    <Chip
+                      key={platform}
+                      label={platform}
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        borderColor: 'primary.main',
+                        color: 'primary.main',
+                        '&:hover': { bgcolor: 'primary.50' }
+                      }}
+                    />
+                  ))}
+                  <Chip
+                    label="+5 more"
+                    size="small"
+                    color="primary"
+                  />
+                </Stack>
+              </Grid>
+            </Grid>
+
+            <Alert severity="info" sx={{ bgcolor: 'transparent', border: '1px solid', borderColor: 'info.main' }}>
+              <Typography variant="body2">
+                <strong>New!</strong> Publish properties to multiple platforms simultaneously with bundle pricing options.
+                Professional authentication flows support OAuth, API keys, and direct login methods.
+              </Typography>
+            </Alert>
+          </Stack>
+        </CardContent>
+      </Card>
+
       {/* Integration Stats */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -1426,6 +1501,7 @@ export default function IntegrationManagement() {
                   <MenuItem value="CRM">CRM</MenuItem>
                   <MenuItem value="Marketing">Marketing</MenuItem>
                   <MenuItem value="Finance">Finance</MenuItem>
+                  <MenuItem value="Real Estate" disabled>Real Estate (See Above ↑)</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

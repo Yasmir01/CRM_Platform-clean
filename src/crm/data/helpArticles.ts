@@ -1,30 +1,14 @@
-export interface HelpCategory {
-  id: string;
-  title: string;
-  description: string;
-  iconName: string; // Store icon name as string, map to component in React
-  color: string;
-  articleCount: number;
-  popularTags: string[];
-  featured?: boolean;
-}
+import { HelpCategory, HelpArticle } from './helpTypes';
 
-export interface HelpArticle {
-  id: string;
-  title: string;
-  summary: string;
-  content: string[];
-  category: string;
-  tags: string[];
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  readTime: string;
-  helpful: number;
-  lastUpdated: string;
-  planRequired?: "Basic" | "Professional" | "Enterprise" | "Custom";
-  superAdminOnly?: boolean;
-}
+// Import platform integration help data
+import { 
+  platformIntegrationCategories, 
+  platformIntegrationArticles, 
+  platformQuickActions 
+} from './realEstatePlatformHelp';
 
-export const helpCategories: HelpCategory[] = [
+// Original categories
+const originalCategories: HelpCategory[] = [
   {
     id: "getting-started",
     title: "Getting Started",
@@ -139,7 +123,8 @@ export const helpCategories: HelpCategory[] = [
   },
 ];
 
-export const helpArticles: HelpArticle[] = [
+// Original articles
+const originalArticles: HelpArticle[] = [
   // Getting Started Articles
   {
     id: "getting-started-overview",
@@ -867,6 +852,17 @@ export const helpArticles: HelpArticle[] = [
   }
 ];
 
+// Export merged categories and articles
+export const helpCategories: HelpCategory[] = [
+  ...platformIntegrationCategories,
+  ...originalCategories
+];
+
+export const helpArticles: HelpArticle[] = [
+  ...platformIntegrationArticles,
+  ...originalArticles
+];
+
 export const quickActions = [
   { label: "Getting Started", tag: "setup", color: "primary" },
   { label: "Email Setup", tag: "email", color: "info" },
@@ -876,4 +872,5 @@ export const quickActions = [
   { label: "Work Orders", tag: "work-orders", color: "error" },
   { label: "Calendar & Tasks", tag: "calendar", color: "primary" },
   { label: "Power Tools", tag: "power-tools", color: "secondary" },
+  ...platformQuickActions,
 ];
