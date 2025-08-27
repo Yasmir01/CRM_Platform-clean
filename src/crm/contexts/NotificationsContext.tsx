@@ -213,10 +213,26 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   const [removedIds, setRemovedIds] = useState<Record<string, boolean>>({});
 
   const notifications = useMemo(() => {
-    if (!state?.initialized) return manualNotifications;
+    if (!state?.initialized) {
+      // Apply overrides to manual notifications
+      return manualNotifications
+        .filter(n => !removedIds[n.id])
+        .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+    }
+
     const realNotifications = generateRealNotifications(state);
-    return [...realNotifications, ...manualNotifications];
-  }, [state, manualNotifications]);
+
+    // Apply overrides to both real and manual notifications
+    const realWithOverrides = realNotifications
+      .filter(n => !removedIds[n.id])
+      .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+
+    const manualWithOverrides = manualNotifications
+      .filter(n => !removedIds[n.id])
+      .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+
+    return [...realWithOverrides, ...manualWithOverrides];
+  }, [state, manualNotifications, readIds, removedIds]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
