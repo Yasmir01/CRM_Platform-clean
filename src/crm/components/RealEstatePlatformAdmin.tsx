@@ -59,8 +59,8 @@ import {
   Refresh as RefreshIcon,
   Analytics as AnalyticsIcon,
   AttachMoney as MoneyIcon,
-  Bundle as BundleIcon,
-  Platform as PlatformIcon,
+  Category as BundleIcon,
+  Hub as PlatformIcon,
   Save as SaveIcon,
   Cancel as CancelIcon
 } from '@mui/icons-material';
