@@ -184,10 +184,16 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Check if platform is authenticated
+   * Check if platform is authenticated using real connection status
    */
   isPlatformAuthenticated(platform: RealEstatePlatform): boolean {
-    return this.authenticated.get(platform) || false;
+    try {
+      const connectionStatuses = PlatformConnectionService.getAllConnectionStatuses();
+      return connectionStatuses[platform]?.isConnected || false;
+    } catch (error) {
+      // Fallback to stored status
+      return this.authenticated.get(platform) || false;
+    }
   }
 
   /**
