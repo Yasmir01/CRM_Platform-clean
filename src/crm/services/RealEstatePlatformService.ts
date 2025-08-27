@@ -311,51 +311,44 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Get platform analytics
+   * Get platform analytics using real connection service
    */
-  getPlatformAnalytics(
+  async getPlatformAnalytics(
     platform: RealEstatePlatform,
     period: 'daily' | 'weekly' | 'monthly' | 'yearly' = 'monthly'
-  ): PlatformAnalytics {
-    // In real implementation, this would query actual analytics data
-    const endDate = new Date().toISOString().split('T')[0];
-    const startDate = new Date();
-    
-    switch (period) {
-      case 'daily':
-        startDate.setDate(startDate.getDate() - 1);
-        break;
-      case 'weekly':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'monthly':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case 'yearly':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
-    }
+  ): Promise<PlatformAnalytics | null> {
+    try {
+      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = new Date();
 
-    return {
-      platform,
-      period,
-      startDate: startDate.toISOString().split('T')[0],
-      endDate,
-      metrics: {
-        totalListings: Math.floor(Math.random() * 100) + 10,
-        activeListings: Math.floor(Math.random() * 80) + 5,
-        successfulPublications: Math.floor(Math.random() * 90) + 8,
-        failedPublications: Math.floor(Math.random() * 10),
-        totalViews: Math.floor(Math.random() * 5000) + 100,
-        totalInquiries: Math.floor(Math.random() * 200) + 10,
-        conversionRate: Math.random() * 10 + 2,
-        averageTimeToPublish: Math.random() * 30 + 5,
-        revenue: Math.random() * 10000 + 1000,
-        costs: Math.random() * 2000 + 200,
-        profit: Math.random() * 8000 + 800
-      },
-      topPerformingListings: []
-    };
+      switch (period) {
+        case 'daily':
+          startDate.setDate(startDate.getDate() - 1);
+          break;
+        case 'weekly':
+          startDate.setDate(startDate.getDate() - 7);
+          break;
+        case 'monthly':
+          startDate.setMonth(startDate.getMonth() - 1);
+          break;
+        case 'yearly':
+          startDate.setFullYear(startDate.getFullYear() - 1);
+          break;
+      }
+
+      // Use real connection service to get analytics
+      const analytics = await PlatformConnectionService.getPlatformAnalytics(
+        platform,
+        startDate.toISOString().split('T')[0],
+        endDate
+      );
+
+      return analytics;
+
+    } catch (error) {
+      console.error(`Failed to get analytics for ${platform}:`, error);
+      return null;
+    }
   }
 
   /**
