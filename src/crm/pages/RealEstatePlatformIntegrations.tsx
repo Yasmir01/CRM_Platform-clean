@@ -347,16 +347,16 @@ export default function RealEstatePlatformIntegrations() {
                   variant="outlined"
                   fullWidth
                   startIcon={<MonetizationOn />}
-                  onClick={() => window.open('/crm/help?article=platform-pricing-overview', '_blank')}
+                  onClick={() => navigate('/crm/platform-pricing')}
                 >
                   View Pricing & Bundles
                 </Button>
-                
+
                 <Button
                   variant="outlined"
                   fullWidth
                   startIcon={<Security />}
-                  onClick={() => window.open('/crm/help?article=platform-authentication-overview', '_blank')}
+                  onClick={() => navigate('/crm/platform-authentication')}
                 >
                   Setup Platform Authentication
                 </Button>
