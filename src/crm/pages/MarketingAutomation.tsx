@@ -475,7 +475,6 @@ export default function MarketingAutomation() {
   const [automations, setAutomations] = React.useState<MarketingAutomation[]>(mockAutomations);
   const [segments, setSegments] = React.useState<Segment[]>(mockSegments);
   const [currentTab, setCurrentTab] = React.useState(0);
-  const [activeMarketingTool, setActiveMarketingTool] = React.useState<string | null>(null);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState("All");
   const [openCampaignDialog, setOpenCampaignDialog] = React.useState(false);
