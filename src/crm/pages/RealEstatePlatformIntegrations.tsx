@@ -64,6 +64,7 @@ import {
 } from '../types/RealEstatePlatformTypes';
 
 export default function RealEstatePlatformIntegrations() {
+  const navigate = useNavigate();
   const { properties } = useCrmData();
   const { user } = useAuth();
   const { isSuperAdmin } = useRoleManagement();
