@@ -1,10 +1,13 @@
 /**
  * Real Estate Platform Integration Service
  * Main service for managing all real estate platform integrations
+ * Now uses real API connections instead of mock implementations
  */
 
 import { LocalStorageService } from './LocalStorageService';
-import { 
+import { PlatformConnectionService } from './PlatformConnectionService';
+import { ListingPublishingService } from './ListingPublishingService';
+import {
   RealEstatePlatform,
   PlatformConfiguration,
   PlatformAuthConfig,
