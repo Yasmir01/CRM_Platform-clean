@@ -73,7 +73,7 @@ import { useRoleManagement } from "../hooks/useRoleManagement";
 import { RealEstatePlatformService } from "../services/RealEstatePlatformService";
 import { PlatformBundleService } from "../services/PlatformBundleService";
 import { useCrmData } from "../contexts/CrmDataContext";
-import { PropertyPublishingInterface } from "../components/PropertyPublishingInterface";
+import PropertyPublishingInterface from "../components/PropertyPublishingInterface";
 import { useNavigate } from "react-router-dom";
 import PublishRoundedIcon from "@mui/icons-material/PublishRounded";
 import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
@@ -254,7 +254,7 @@ const mockIntegrations: Integration[] = [
       dataTransferred: 0.8,
       uptime: 73.5
     },
-    icon: "💬",
+    icon: "��",
     setupComplexity: "Easy",
     pricing: "Free",
     features: ["Notifications", "Alerts", "Team Updates", "Channel Integration"],
