@@ -737,6 +737,16 @@ export default function SuperAdminRoleManager() {
           Role & User Management
         </Typography>
         <Stack direction="row" spacing={2}>
+          {selectedUsers.length > 0 && (
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<AssignmentIcon />}
+              onClick={() => setBulkRoleAssignDialogOpen(true)}
+            >
+              Bulk Assign Roles ({selectedUsers.length})
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
