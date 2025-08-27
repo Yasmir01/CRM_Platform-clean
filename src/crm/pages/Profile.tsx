@@ -221,9 +221,20 @@ export default function Profile() {
     const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setFormData({ ...formData, timezone: localTimezone });
 
-    // Show notification about detected timezone
-    const timezoneName = getTimezoneName(localTimezone) || localTimezone;
-    console.log(`Local timezone detected: ${localTimezone} (${timezoneName})`);
+    // Get a friendly name for the timezone
+    const timezoneName = getTimezoneName(localTimezone);
+    const displayName = timezoneName ? timezoneName : localTimezone;
+
+    // Get current time in the detected timezone for confirmation
+    const now = new Date();
+    const localTime = now.toLocaleString('en-US', {
+      timeZone: localTimezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    alert(`✅ Local timezone detected and set!\n\nTimezone: ${displayName}\nCurrent time: ${localTime}\n\nRemember to save your changes.`);
   };
 
   const hasUnsavedChanges = () => {
