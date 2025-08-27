@@ -391,21 +391,32 @@ export default function RealEstatePlatformIntegrations() {
                   return (
                     <ListItem key={platform.id} sx={{ px: 0 }}>
                       <ListItemIcon>
-                        {isConnected ? (
-                          <CheckCircle color="success" />
-                        ) : (
-                          <Error color="error" />
-                        )}
+                        <Tooltip
+                          title={isConnected ? 'Platform is connected and authenticated' : 'Platform requires authentication'}
+                          arrow
+                        >
+                          {isConnected ? (
+                            <CheckCircle color="success" />
+                          ) : (
+                            <Error color="error" />
+                          )}
+                        </Tooltip>
                       </ListItemIcon>
                       <ListItemText
-                        primary={platform.displayName}
+                        primary={
+                          <Tooltip title={platform.description} arrow>
+                            <span>{platform.displayName}</span>
+                          </Tooltip>
+                        }
                         secondary={`$${platform.pricing.basePrice} - ${isConnected ? 'Connected' : 'Not Connected'}`}
                       />
-                      <Chip
-                        label={platform.status}
-                        size="small"
-                        color={platform.status === 'active' ? 'success' : 'default'}
-                      />
+                      <Tooltip title={`Platform status: ${platform.status}`} arrow>
+                        <Chip
+                          label={platform.status}
+                          size="small"
+                          color={platform.status === 'active' ? 'success' : 'default'}
+                        />
+                      </Tooltip>
                     </ListItem>
                   );
                 })}
