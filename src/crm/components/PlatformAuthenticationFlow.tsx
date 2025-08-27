@@ -231,7 +231,7 @@ export default function PlatformAuthenticationFlow({
               <Box component="span" sx={{ fontFamily: 'monospace', bg: 'grey.100', px: 1, ml: 1 }}>
                 https://yourapp.com/oauth/callback
                 <IconButton size="small" onClick={() => copyToClipboard('https://yourapp.com/oauth/callback')}>
-                  <Copy fontSize="small" />
+                  <ContentCopy fontSize="small" />
                 </IconButton>
               </Box>
             </Typography>
