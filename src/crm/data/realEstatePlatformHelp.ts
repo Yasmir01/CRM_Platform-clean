@@ -3,7 +3,7 @@
  * Comprehensive help articles for the platform integration system
  */
 
-import { HelpCategory, HelpArticle } from './helpArticles';
+import { HelpCategory, HelpArticle } from './helpTypes';
 
 // New categories for platform integrations
 export const platformIntegrationCategories: HelpCategory[] = [
