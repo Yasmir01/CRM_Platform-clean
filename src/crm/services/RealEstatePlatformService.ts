@@ -121,36 +121,35 @@ class RealEstatePlatformServiceClass {
   }
 
   /**
-   * Authenticate with a platform
+   * Authenticate with a platform using real connection service
    */
   async authenticatePlatform(
     platform: RealEstatePlatform,
     authData: Partial<PlatformAuthConfig>,
     userId: string
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; message: string; authUrl?: string }> {
     try {
       const config = this.platformConfigs.get(platform);
       if (!config) {
         return { success: false, message: 'Platform not found' };
       }
 
-      // Update auth configuration
-      config.authConfig = {
+      // Use real connection service for authentication
+      const authConfig: PlatformAuthConfig = {
         ...config.authConfig,
         ...authData,
         environment: authData.environment || 'sandbox'
       };
 
-      // Perform authentication based on type
-      const authResult = await this.performAuthentication(platform, config.authConfig);
-      
-      if (authResult.success) {
+      const result = await PlatformConnectionService.connectPlatform(platform, authConfig, userId);
+
+      if (result.success) {
         this.authenticated.set(platform, true);
         config.status = 'active';
         config.lastSync = new Date().toISOString();
-        
+        config.authConfig = authConfig;
+
         this.savePlatformConfigurations();
-        this.saveAuthenticationStatus();
 
         this.logActivity({
           platform,
@@ -163,23 +162,23 @@ class RealEstatePlatformServiceClass {
       } else {
         this.authenticated.set(platform, false);
         config.status = 'error';
-        
+
         this.logActivity({
           platform,
           action: 'auth',
           status: 'failure',
-          message: authResult.message || 'Authentication failed',
+          message: result.message || 'Authentication failed',
           userId,
           userEmail: 'user@example.com'
         });
       }
 
-      return authResult;
+      return result;
     } catch (error) {
       console.error(`Authentication failed for ${platform}:`, error);
-      return { 
-        success: false, 
-        message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      return {
+        success: false,
+        message: `Authentication error: ${error instanceof Error ? error.message : 'Unknown error'}`
       };
     }
   }
