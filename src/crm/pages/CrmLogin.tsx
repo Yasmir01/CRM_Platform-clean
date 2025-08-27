@@ -216,7 +216,7 @@ export default function CrmLogin() {
                 <Link
                   component="button"
                   type="button"
-                  onClick={() => setForgotPasswordOpen(true)}
+                  onClick={() => setShowPasswordReset(true)}
                   sx={{ textDecoration: "none" }}
                 >
                   Forgot your password?
