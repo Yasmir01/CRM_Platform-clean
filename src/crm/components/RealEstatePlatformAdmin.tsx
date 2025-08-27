@@ -671,6 +671,45 @@ export default function RealEstatePlatformAdmin() {
         <AnalyticsTab />
       </TabPanel>
 
+      {/* Platform Edit Dialog */}
+      <Dialog
+        open={platformDialogOpen}
+        onClose={() => setPlatformDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {selectedPlatform ? `Edit ${selectedPlatform.displayName}` : 'Add New Platform'}
+        </DialogTitle>
+        <DialogContent>
+          <PlatformEditForm
+            platform={selectedPlatform}
+            onSave={handleSavePlatform}
+            onCancel={() => setPlatformDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Bundle Edit Dialog */}
+      <Dialog
+        open={bundleDialogOpen}
+        onClose={() => setBundleDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {selectedBundle ? `Edit ${selectedBundle.name}` : 'Create New Bundle'}
+        </DialogTitle>
+        <DialogContent>
+          <BundleEditForm
+            bundle={selectedBundle}
+            availablePlatforms={platforms}
+            onSave={handleSaveBundle}
+            onCancel={() => setBundleDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
         <DialogTitle>Confirm Deletion</DialogTitle>
