@@ -1424,40 +1424,6 @@ export default function MarketingAutomation() {
         </Stack>
       </TabPanel>
 
-      {/* Marketing Tool Sub-Page Dialog */}
-      <Dialog
-        open={activeMarketingTool !== null}
-        onClose={() => setActiveMarketingTool(null)}
-        maxWidth="xl"
-        fullWidth
-        PaperProps={{ sx: { height: '90vh' } }}
-      >
-        <DialogTitle>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">
-              {activeMarketingTool === 'email-marketing' && '📧 Email Marketing Hub'}
-              {activeMarketingTool === 'sms-marketing' && '📱 SMS Marketing Hub'}
-              {activeMarketingTool === 'templates' && '📄 Template Library'}
-              {activeMarketingTool === 'landing-pages' && '🎯 Landing Page Builder'}
-              {activeMarketingTool === 'promotions' && '🎁 Promotions Manager'}
-            </Typography>
-            <Button
-              variant="outlined"
-              onClick={() => setActiveMarketingTool(null)}
-              size="small"
-            >
-              Back to Marketing Automation
-            </Button>
-          </Stack>
-        </DialogTitle>
-        <DialogContent sx={{ height: '100%', overflowY: 'auto', p: 0 }}>
-          {activeMarketingTool === 'email-marketing' && <EmailMarketing />}
-          {activeMarketingTool === 'sms-marketing' && <SmsMarketing />}
-          {activeMarketingTool === 'templates' && <Templates />}
-          {activeMarketingTool === 'landing-pages' && <PropertyLandingPages />}
-          {activeMarketingTool === 'promotions' && <Promotions />}
-        </DialogContent>
-      </Dialog>
 
       {/* Enhanced Campaign Dialog with Rich Text Tools */}
       <Dialog open={openCampaignDialog} onClose={() => setOpenCampaignDialog(false)} maxWidth="xl" fullWidth>
