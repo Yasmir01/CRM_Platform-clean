@@ -1115,6 +1115,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       maxPetsAllowed: property.maxPetsAllowed || 0,
       parkingSpaces: property.parkingSpaces || 0,
       tags: property.tags || [],
+      assignedBusinessBankAccountId: property.assignedBusinessBankAccountId || '',
     });
     setOpenDialog(true);
   };
@@ -5328,7 +5329,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">
-              🔧 Work Orders - {selectedPropertyForModal?.name}
+              ��� Work Orders - {selectedPropertyForModal?.name}
             </Typography>
             <Stack direction="row" spacing={1}>
               <Button
