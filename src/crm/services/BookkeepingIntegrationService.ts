@@ -8,6 +8,11 @@
 import { RentPayment, PaymentFee, PaymentMethod } from '../types/PaymentTypes';
 import { LedgerEntry, TenantFinancialProfile } from '../types/TenantFinancialTypes';
 
+// Import adapter instances
+import { quickBooksAdapter } from './integrations/QuickBooksAdapter';
+import { xeroAdapter } from './integrations/XeroAdapter';
+import { sageAdapter, freshBooksAdapter, waveAdapter, zohoBooksAdapter } from './integrations/BookkeepingAdapters';
+
 export interface BookkeepingProvider {
   id: string;
   name: string;
