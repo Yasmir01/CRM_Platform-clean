@@ -1129,6 +1129,147 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={openDocumentPreview}
+        onClose={() => setOpenDocumentPreview(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6">{previewDocument?.name}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {previewDocument && formatFileSize(previewDocument.size)} • {previewDocument?.type}
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setOpenDocumentPreview(false)}>
+              <DownloadRoundedIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent>
+          {previewDocument && (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              {FileStorageService.isImageFile(previewDocument.type, previewDocument.name) ? (
+                previewDocument.dataUrl || previewDocument.preview ? (
+                  <Box
+                    component="img"
+                    src={previewDocument.dataUrl || previewDocument.preview}
+                    alt={previewDocument.name}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '70vh',
+                      objectFit: 'contain',
+                      borderRadius: 1
+                    }}
+                    onError={(e) => {
+                      console.error('Image preview failed to load for:', previewDocument.name);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parentContainer = target.parentElement;
+                      if (parentContainer) {
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.style.cssText = `
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          height: 200px;
+                          background-color: #f5f5f5;
+                          border: 2px dashed #ddd;
+                          border-radius: 8px;
+                          color: #666;
+                          text-align: center;
+                          padding: 20px;
+                        `;
+                        fallbackDiv.innerHTML = `
+                          <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                          <div style="font-weight: bold; margin-bottom: 4px;">${previewDocument.name}</div>
+                          <div style="font-size: 12px;">Preview not available</div>
+                        `;
+                        parentContainer.appendChild(fallbackDiv);
+                      }
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      maxWidth: 400,
+                      height: 200,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50',
+                      margin: '0 auto'
+                    }}
+                  >
+                    <Stack spacing={1} alignItems="center">
+                      <Typography sx={{ fontSize: 32 }}>📷</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {previewDocument.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Image preview unavailable
+                      </Typography>
+                    </Stack>
+                  </Box>
+                )
+              ) : FileStorageService.isPdfFile(previewDocument.type) ? (
+                <Box>
+                  <Typography sx={{ fontSize: 64, mb: 2 }}>📄</Typography>
+                  <Typography>
+                    PDF preview not available. Click download to view the file.
+                  </Typography>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography sx={{ fontSize: 64, mb: 2 }}>📎</Typography>
+                  <Typography>
+                    Preview not available for this file type. Click download to view the file.
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentPreview(false)}>Close</Button>
+          {previewDocument && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={() => {
+                if (previewDocument.dataUrl) {
+                  const storedFile: StoredFile = {
+                    id: previewDocument.id,
+                    name: previewDocument.name,
+                    size: previewDocument.size,
+                    type: previewDocument.type,
+                    lastModified: new Date(previewDocument.uploadDate).getTime(),
+                    dataUrl: previewDocument.dataUrl,
+                    preview: previewDocument.preview
+                  };
+                  FileStorageService.downloadFile(storedFile);
+                } else {
+                  alert('File data not available for download');
+                }
+                setOpenDocumentPreview(false);
+              }}
+            >
+              Download
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
