@@ -1204,6 +1204,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       status: "Unlisted" as const,
       images: [],
       tags: formData.tags,
+      assignedBusinessBankAccountId: formData.assignedBusinessBankAccountId,
     };
 
       // Track new property creation
