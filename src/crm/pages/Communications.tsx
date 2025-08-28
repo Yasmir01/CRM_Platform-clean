@@ -758,6 +758,19 @@ export default function Communications() {
         </Stack>
       </Stack>
 
+      {/* Real Data Alert */}
+      <Alert severity="success" sx={{ mb: 3 }}>
+        <Stack>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            📞 Now Using Real CRM Data!
+          </Typography>
+          <Typography variant="body2">
+            Communications are now generated from your actual CRM contacts: {tenants.length} tenants, {propertyManagers.length} property managers,
+            and {contacts.length} service providers. Phone numbers and communication history reflect real contact data.
+          </Typography>
+        </Stack>
+      </Alert>
+
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
