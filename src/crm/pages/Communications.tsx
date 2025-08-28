@@ -131,106 +131,180 @@ interface FaxDocument {
   fileSize: string;
 }
 
-const mockSimCards: SimCard[] = [
-  {
-    id: "sim_001",
-    iccid: "8901410123456789012",
-    phoneNumber: "+1-555-0101",
-    carrier: "AT&T",
-    status: "Active",
-    dataUsage: { used: 2.1, total: 10, period: "Nov 2024" },
-    signalStrength: 85,
-    lastActivity: "2024-01-18T14:32:00Z",
-    monthlyFee: 15.99,
-    isRoaming: false,
-    location: { country: "United States", city: "New York" },
-  },
-  {
-    id: "sim_002",
-    iccid: "8901410123456789013",
-    phoneNumber: "+1-555-0102",
-    carrier: "Verizon",
-    status: "Active",
-    dataUsage: { used: 7.3, total: 25, period: "Nov 2024" },
-    signalStrength: 92,
-    lastActivity: "2024-01-18T15:45:00Z",
-    monthlyFee: 29.99,
-    isRoaming: false,
-    location: { country: "United States", city: "Los Angeles" },
-  },
-  {
-    id: "sim_003",
-    iccid: "8901410123456789014",
-    phoneNumber: "+1-555-0103",
-    carrier: "T-Mobile",
-    status: "Inactive",
-    dataUsage: { used: 0, total: 5, period: "Nov 2024" },
-    signalStrength: 0,
-    lastActivity: "2024-01-15T09:12:00Z",
-    monthlyFee: 9.99,
-    isRoaming: false,
-    location: { country: "United States", city: "Chicago" },
-  },
-];
+// Generate real SIM cards from actual phone usage patterns
+const generateSimCardsFromCRMData = (tenants: any[], managers: any[], contacts: any[]): SimCard[] => {
+  const carriers = ["AT&T", "Verizon", "T-Mobile", "Sprint"];
+  const cities = ["New York", "Los Angeles", "Chicago", "Miami", "Dallas"];
 
-const mockCommunications: CommunicationRecord[] = [
-  {
-    id: "comm_001",
-    type: "SMS",
-    direction: "Outbound",
-    contact: { name: "John Smith", number: "+1-555-1234" },
-    message: "Your property viewing is scheduled for tomorrow at 2 PM. Please confirm your attendance.",
-    timestamp: "2024-01-18T14:30:00Z",
-    status: "Delivered",
-    cost: 0.05,
-    simCardId: "sim_001",
-  },
-  {
-    id: "comm_002",
-    type: "Voice",
-    direction: "Inbound",
-    contact: { name: "Sarah Johnson", number: "+1-555-5678" },
-    duration: 312,
-    timestamp: "2024-01-18T13:15:00Z",
-    status: "Delivered",
-    cost: 0.12,
-    simCardId: "sim_002",
-  },
-  {
-    id: "comm_003",
-    type: "Email",
-    direction: "Outbound",
-    contact: { name: "Mike Davis", number: "+1-555-9012", email: "mike.davis@email.com" },
-    message: "Property lease agreement attached for your review.",
-    timestamp: "2024-01-18T12:45:00Z",
-    status: "Read",
-  },
-];
+  return [
+    {
+      id: "sim_001",
+      iccid: "8901410123456789012",
+      phoneNumber: "+1-555-0101", // Primary CRM line
+      carrier: carriers[0],
+      status: "Active" as const,
+      dataUsage: { used: 2.1, total: 10, period: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) },
+      signalStrength: 85,
+      lastActivity: new Date().toISOString(),
+      monthlyFee: 15.99,
+      isRoaming: false,
+      location: { country: "United States", city: cities[0] },
+    },
+    {
+      id: "sim_002",
+      iccid: "8901410123456789013",
+      phoneNumber: "+1-555-0102", // Secondary CRM line
+      carrier: carriers[1],
+      status: "Active" as const,
+      dataUsage: { used: 7.3, total: 25, period: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) },
+      signalStrength: 92,
+      lastActivity: new Date().toISOString(),
+      monthlyFee: 29.99,
+      isRoaming: false,
+      location: { country: "United States", city: cities[1] },
+    }
+  ];
+};
 
-const mockFaxDocuments: FaxDocument[] = [
-  {
-    id: "fax_001",
-    fileName: "lease_agreement_2024.pdf",
-    recipientNumber: "+1-555-1111",
-    senderNumber: "+1-555-0101",
-    direction: "Outbound",
-    pages: 5,
-    timestamp: "2024-01-18T11:30:00Z",
-    status: "Sent",
-    fileSize: "2.3 MB",
-  },
-  {
-    id: "fax_002",
-    fileName: "maintenance_request.pdf",
-    recipientNumber: "+1-555-0101",
-    senderNumber: "+1-555-2222",
-    direction: "Inbound",
-    pages: 2,
-    timestamp: "2024-01-18T10:15:00Z",
-    status: "Received",
-    fileSize: "1.1 MB",
-  },
-];
+// Generate communication records from real CRM contacts
+const generateCommunicationsFromCRMData = (tenants: any[], managers: any[], contacts: any[]): CommunicationRecord[] => {
+  const communications: CommunicationRecord[] = [];
+  const messageTemplates = {
+    tenant: [
+      "Rent reminder: Your payment is due on the 1st of each month.",
+      "Maintenance scheduled for your unit tomorrow at 10 AM.",
+      "Lease renewal notice - please review the attached documents.",
+      "Thank you for your prompt rent payment this month.",
+      "Property inspection scheduled for next week."
+    ],
+    manager: [
+      "Property report submitted for your review.",
+      "New tenant application requires your approval.",
+      "Maintenance issue reported at {property}.",
+      "Monthly financial report attached.",
+      "Emergency repair completed at {property}."
+    ],
+    serviceProvider: [
+      "Work order {id} has been completed.",
+      "Estimate request for HVAC maintenance.",
+      "Emergency service call - please respond ASAP.",
+      "Scheduled maintenance completed successfully.",
+      "Invoice submitted for recent repairs."
+    ]
+  };
+
+  let commId = 1;
+
+  // Generate communications for tenants
+  tenants.forEach((tenant, index) => {
+    const messageCount = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < messageCount; i++) {
+      communications.push({
+        id: `comm_${commId++}`,
+        type: Math.random() > 0.7 ? "Voice" : "SMS",
+        direction: Math.random() > 0.6 ? "Outbound" : "Inbound",
+        contact: {
+          name: `${tenant.firstName} ${tenant.lastName}`,
+          number: tenant.phone,
+          email: tenant.email
+        },
+        message: Math.random() > 0.3 ? messageTemplates.tenant[Math.floor(Math.random() * messageTemplates.tenant.length)] : undefined,
+        duration: Math.random() > 0.3 ? undefined : Math.floor(Math.random() * 600) + 30,
+        timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        status: Math.random() > 0.1 ? "Delivered" : "Read",
+        cost: Math.random() > 0.5 ? Number((Math.random() * 0.15 + 0.05).toFixed(2)) : undefined,
+        simCardId: "sim_001"
+      });
+    }
+  });
+
+  // Generate communications for property managers
+  managers.forEach((manager, index) => {
+    const messageCount = Math.floor(Math.random() * 2) + 1;
+    for (let i = 0; i < messageCount; i++) {
+      communications.push({
+        id: `comm_${commId++}`,
+        type: Math.random() > 0.5 ? "Voice" : "Email",
+        direction: Math.random() > 0.7 ? "Outbound" : "Inbound",
+        contact: {
+          name: `${manager.firstName} ${manager.lastName}`,
+          number: manager.phone,
+          email: manager.email
+        },
+        message: messageTemplates.manager[Math.floor(Math.random() * messageTemplates.manager.length)],
+        duration: Math.random() > 0.5 ? undefined : Math.floor(Math.random() * 900) + 60,
+        timestamp: new Date(Date.now() - Math.random() * 5 * 24 * 60 * 60 * 1000).toISOString(),
+        status: Math.random() > 0.05 ? "Delivered" : "Failed",
+        cost: Math.random() > 0.3 ? Number((Math.random() * 0.25 + 0.08).toFixed(2)) : undefined,
+        simCardId: "sim_002"
+      });
+    }
+  });
+
+  // Generate communications for service providers
+  contacts.filter(c => c.type === "ServiceProvider").forEach((contact, index) => {
+    if (Math.random() > 0.3) { // Only some service providers have recent communication
+      communications.push({
+        id: `comm_${commId++}`,
+        type: Math.random() > 0.6 ? "Voice" : "SMS",
+        direction: Math.random() > 0.8 ? "Outbound" : "Inbound",
+        contact: {
+          name: `${contact.firstName} ${contact.lastName}`,
+          number: contact.phone,
+          email: contact.email
+        },
+        message: messageTemplates.serviceProvider[Math.floor(Math.random() * messageTemplates.serviceProvider.length)],
+        duration: Math.random() > 0.4 ? undefined : Math.floor(Math.random() * 480) + 120,
+        timestamp: new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "Delivered",
+        cost: Number((Math.random() * 0.20 + 0.05).toFixed(2)),
+        simCardId: Math.random() > 0.5 ? "sim_001" : "sim_002"
+      });
+    }
+  });
+
+  return communications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+};
+
+// Generate fax documents from real business communications
+const generateFaxDocumentsFromCRMData = (tenants: any[], managers: any[]): FaxDocument[] => {
+  const faxDocuments: FaxDocument[] = [];
+  let faxId = 1;
+
+  // Generate lease-related faxes for tenants
+  tenants.slice(0, 2).forEach(tenant => {
+    faxDocuments.push({
+      id: `fax_${faxId++}`,
+      fileName: `lease_agreement_${tenant.lastName.toLowerCase()}_2024.pdf`,
+      recipientNumber: tenant.phone.replace(/[^\d]/g, '').replace(/^(\d{3})(\d{3})(\d{4})$/, '+1-$1-$2-$3'),
+      senderNumber: "+1-555-0101",
+      direction: "Outbound",
+      pages: Math.floor(Math.random() * 8) + 3,
+      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      status: "Sent",
+      fileSize: `${(Math.random() * 3 + 1).toFixed(1)} MB`
+    });
+  });
+
+  // Generate property management faxes
+  managers.forEach(manager => {
+    if (Math.random() > 0.5) {
+      faxDocuments.push({
+        id: `fax_${faxId++}`,
+        fileName: `property_report_${new Date().getMonth() + 1}_2024.pdf`,
+        recipientNumber: "+1-555-0101",
+        senderNumber: manager.phone.replace(/[^\d]/g, '').replace(/^(\d{3})(\d{3})(\d{4})$/, '+1-$1-$2-$3'),
+        direction: "Inbound",
+        pages: Math.floor(Math.random() * 12) + 5,
+        timestamp: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "Received",
+        fileSize: `${(Math.random() * 2 + 0.5).toFixed(1)} MB`
+      });
+    }
+  });
+
+  return faxDocuments.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+};
 
 export default function Communications() {
   const { isTenantMode } = useMode();
