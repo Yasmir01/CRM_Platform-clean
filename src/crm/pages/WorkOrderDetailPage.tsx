@@ -196,18 +196,45 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Before_repair_photo.jpg",
-      type: "JPG",
-      size: 1200000,
-      uploadDate: "2024-01-18T14:45:00Z",
-      uploadedBy: "David Wilson",
-      category: "Before Photo",
-      url: "#"
+  // Load documents from CRM context for this work order
+  const [documents, setDocuments] = React.useState<Document[]>(() => {
+    // Get documents from CRM context that are associated with this work order
+    const workOrderDocs = state.documents?.filter(doc =>
+      doc.workOrderId === workOrderId ||
+      doc.entityId === workOrderId ||
+      doc.tags?.includes(`work-order-${workOrderId}`)
+    ) || [];
+
+    // If no docs found, use mock data for demo
+    if (workOrderDocs.length === 0) {
+      return [
+        {
+          id: "1",
+          name: "Before_repair_photo.jpg",
+          type: "image/jpeg",
+          size: 1200000,
+          uploadDate: "2024-01-18T14:45:00Z",
+          uploadedBy: "David Wilson",
+          category: "Before Photo",
+          url: "#",
+          dataUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzMzNzNkYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxNnB4Ij5CZWZvcmUgUGhvdG88L3RleHQ+PC9zdmc+"
+        }
+      ];
     }
-  ]);
+
+    return workOrderDocs.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      type: doc.type || 'application/octet-stream',
+      size: doc.size || 0,
+      uploadDate: doc.uploadedAt || doc.createdAt || new Date().toISOString(),
+      uploadedBy: doc.uploadedBy || 'Unknown',
+      category: (doc.category as Document['category']) || 'Other',
+      url: doc.url || '#',
+      dataUrl: doc.dataUrl,
+      preview: doc.preview
+    }));
+  });
 
   const [newNote, setNewNote] = React.useState({
     content: "",
