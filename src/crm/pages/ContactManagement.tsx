@@ -1006,6 +1006,16 @@ export default function ContactManagement() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="contacts"
+        onImport={handleBulkImportContacts}
+        existingData={allContacts}
+        relatedData={{}}
+      />
     </Box>
   );
 }
