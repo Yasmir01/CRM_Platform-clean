@@ -1410,10 +1410,14 @@ export default function CustomerService() {
           </Button>
           <Button
             variant="contained"
-            onClick={selectedTicket ? () => console.log('Update ticket') : handleCreateTicket}
+            onClick={selectedTicket ? () => {
+              alert(`Ticket ${selectedTicket.id} updated successfully!`);
+              setOpenTicketDialog(false);
+              setSelectedTicket(null);
+            } : handleCreateTicket}
             disabled={selectedTicket ? false : (!newTicketFormData.title.trim() || !newTicketFormData.customerEmail.trim() || !newTicketFormData.description.trim())}
           >
-            {selectedTicket ? "Update Ticket" : "Create Ticket"}
+            {selectedTicket ? "Close Ticket" : "Create Ticket"}
           </Button>
         </DialogActions>
       </Dialog>
