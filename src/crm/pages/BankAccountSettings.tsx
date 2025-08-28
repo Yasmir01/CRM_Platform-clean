@@ -59,6 +59,14 @@ const BankAccountSettings: React.FC = () => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
 
+  // Dialog states
+  const [addAccountOpen, setAddAccountOpen] = useState(false);
+  const [editAccountOpen, setEditAccountOpen] = useState(false);
+  const [viewTransactionsOpen, setViewTransactionsOpen] = useState(false);
+  const [removeAccountOpen, setRemoveAccountOpen] = useState(false);
+  const [paymentRoutingOpen, setPaymentRoutingOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<BusinessBankAccount | null>(null);
+
   const tabs = [
     { label: 'Business Accounts', icon: <BusinessIcon /> },
     { label: 'Payment Routing', icon: <RouteIcon /> },
@@ -66,31 +74,107 @@ const BankAccountSettings: React.FC = () => {
     { label: 'Analytics', icon: <AnalyticsIcon /> }
   ];
 
-  // Mock data for demonstration
-  const businessAccounts = [
+  // Business accounts state
+  const [businessAccounts, setBusinessAccounts] = useState<BusinessBankAccount[]>([
     {
       id: 'biz_bank_main',
+      organizationId: 'org_main',
       bankName: 'Chase Business Banking',
-      accountType: 'Business Checking',
+      accountType: 'business_checking' as const,
       accountNumber: '****1234',
       routingNumber: '021000021',
+      accountHolderName: 'Property Management LLC',
+      businessName: 'Property Management LLC',
+      taxId: '**-*7890',
       isVerified: true,
       isPrimary: true,
       canReceivePayments: true,
-      balance: 125000.00
+      canSendPayments: true,
+      dailyReceiveLimit: 10000000,
+      monthlyReceiveLimit: 300000000,
+      fees: {
+        achReceive: 0,
+        achSend: 25,
+        wireReceive: 1500,
+        wireSend: 3000,
+        monthlyMaintenance: 1200,
+        overdraftFee: 3500
+      },
+      processingSchedule: {
+        achDebitDays: [1, 2, 3, 4, 5],
+        achCreditDays: [1, 2, 3, 4, 5],
+        cutoffTime: '17:00',
+        timezone: 'America/New_York',
+        holidays: []
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     {
       id: 'biz_bank_savings',
+      organizationId: 'org_main',
       bankName: 'Bank of America',
-      accountType: 'Business Savings',
+      accountType: 'business_savings' as const,
       accountNumber: '****5678',
       routingNumber: '011000015',
+      accountHolderName: 'Property Management LLC',
+      businessName: 'Property Management LLC',
+      taxId: '**-*7890',
       isVerified: true,
       isPrimary: false,
       canReceivePayments: false,
-      balance: 50000.00
+      canSendPayments: true,
+      dailyReceiveLimit: 5000000,
+      monthlyReceiveLimit: 150000000,
+      fees: {
+        achReceive: 0,
+        achSend: 25,
+        wireReceive: 1500,
+        wireSend: 3000,
+        monthlyMaintenance: 800,
+        overdraftFee: 3500
+      },
+      processingSchedule: {
+        achDebitDays: [1, 2, 3, 4, 5],
+        achCreditDays: [1, 2, 3, 4, 5],
+        cutoffTime: '17:00',
+        timezone: 'America/New_York',
+        holidays: []
+      },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     }
-  ];
+  ]);
+
+  // Event handlers
+  const handleAddAccount = (newAccount: BusinessBankAccount) => {
+    setBusinessAccounts([...businessAccounts, newAccount]);
+  };
+
+  const handleEditAccount = (account: BusinessBankAccount) => {
+    setSelectedAccount(account);
+    setEditAccountOpen(true);
+  };
+
+  const handleViewTransactions = (account: BusinessBankAccount) => {
+    setSelectedAccount(account);
+    setViewTransactionsOpen(true);
+  };
+
+  const handleRemoveAccount = (account: BusinessBankAccount) => {
+    setSelectedAccount(account);
+    setRemoveAccountOpen(true);
+  };
+
+  const handleAccountUpdated = (updatedAccount: BusinessBankAccount) => {
+    setBusinessAccounts(businessAccounts.map(acc =>
+      acc.id === updatedAccount.id ? updatedAccount : acc
+    ));
+  };
+
+  const handleAccountRemoved = (accountId: string) => {
+    setBusinessAccounts(businessAccounts.filter(acc => acc.id !== accountId));
+  };
 
   return (
     <Box>
