@@ -91,6 +91,7 @@ import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
+import BulkUploadDialog from "../components/BulkUploadDialog";
 
 interface PropertyImage {
   id: string;
