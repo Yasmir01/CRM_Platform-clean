@@ -553,7 +553,7 @@ export default function CustomerService() {
           <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTicketDialog(true)}
+            onClick={handleOpenNewTicketDialog}
           >
             New Ticket
           </Button>
