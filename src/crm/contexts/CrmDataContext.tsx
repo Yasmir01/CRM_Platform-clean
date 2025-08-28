@@ -278,15 +278,20 @@ export interface Document {
   type: string;
   size: number;
   url: string;
-  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "Other";
+  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "HR" | "Certification" | "Training" | "Performance" | "Other";
   propertyId?: string;
   tenantId?: string;
   contactId?: string;
   dealId?: string;
+  propertyManagerId?: string;
   uploadedBy: string;
   uploadedAt: string;
   description?: string;
   tags: string[];
+  // Additional fields for encryption support (used by tenant documents)
+  isEncrypted?: boolean;
+  securityDocumentId?: string;
+  createdAt?: string;
 }
 
 export interface Payment {
