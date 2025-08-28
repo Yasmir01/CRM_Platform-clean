@@ -436,6 +436,11 @@ export default function PropertyDetailPage({
       setSavedHeaderColor(savedColor);
     }
   }, []);
+
+  // Sync editFormData with property when property changes
+  React.useEffect(() => {
+    setEditFormData(property);
+  }, [property]);
   const [selectedAppliance, setSelectedAppliance] = React.useState<Appliance | null>(null);
   const [applianceImages, setApplianceImages] = React.useState<ApplianceImage[]>([]);
   const [applianceFormData, setApplianceFormData] = React.useState<Partial<Appliance>>({
