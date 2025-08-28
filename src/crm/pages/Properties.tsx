@@ -467,6 +467,7 @@ export default function Properties() {
   const [addressBackgroundColor, setAddressBackgroundColor] = React.useState('secondary.main'); // Default pink/secondary color
   const [globalBackgroundSettings, setGlobalBackgroundSettings] = React.useState(false);
   const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
+  const [combinedUploadDialogOpen, setCombinedUploadDialogOpen] = React.useState(false);
 
   // Load saved background color from localStorage on component mount
   React.useEffect(() => {
@@ -658,7 +659,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     
     <div class="property-details">
         <div class="detail-item"><strong>🛏�� Bedrooms:</strong> ${property.bedrooms || 'TBD'}</div>
-        <div class="detail-item"><strong>�� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
+        <div class="detail-item"><strong>���� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
         <div class="detail-item"><strong>�� Square Footage:</strong> ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}</div>
         <div class="detail-item"><strong>�� Parking:</strong> ${property.parkingSpaces || 0} space(s)</div>
         <div class="detail-item"><strong>�� Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
