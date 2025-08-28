@@ -97,6 +97,8 @@ export default function WorkOrderDialog({
     isEmergency: false
   });
 
+  const [attachments, setAttachments] = React.useState<StoredFile[]>([]);
+
   // Reset form when dialog opens with property info
   React.useEffect(() => {
     if (open && (propertyId || assignedTo)) {
