@@ -71,6 +71,7 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
