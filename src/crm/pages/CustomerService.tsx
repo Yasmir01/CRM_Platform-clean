@@ -1367,7 +1367,11 @@ export default function CustomerService() {
           }}>
             Cancel
           </Button>
-          <Button variant="contained">
+          <Button
+            variant="contained"
+            onClick={selectedTicket ? () => console.log('Update ticket') : handleCreateTicket}
+            disabled={selectedTicket ? false : (!newTicketFormData.title.trim() || !newTicketFormData.customerEmail.trim() || !newTicketFormData.description.trim())}
+          >
             {selectedTicket ? "Update Ticket" : "Create Ticket"}
           </Button>
         </DialogActions>
