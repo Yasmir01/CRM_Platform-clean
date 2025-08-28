@@ -218,7 +218,18 @@ export class BookkeepingIntegrationService {
 
   constructor() {
     this.initializeProviders();
+    this.initializeAdapters();
     this.loadConnections();
+  }
+
+  private initializeAdapters() {
+    // Register all available adapters
+    this.adapters.set('quickbooks', quickBooksAdapter);
+    this.adapters.set('xero', xeroAdapter);
+    this.adapters.set('sage', sageAdapter);
+    this.adapters.set('freshbooks', freshBooksAdapter);
+    this.adapters.set('wave', waveAdapter);
+    this.adapters.set('zoho', zohoBooksAdapter);
   }
 
   private initializeProviders() {
