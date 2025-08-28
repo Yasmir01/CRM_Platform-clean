@@ -1032,7 +1032,7 @@ export default function Communications() {
                       <Stack>
                         <Typography variant="body2">{comm.contact.name}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {comm.contact.number}
+                          {formatPhoneDisplay(comm.contact.number)}
                         </Typography>
                       </Stack>
                     </TableCell>
