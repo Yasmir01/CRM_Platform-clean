@@ -104,6 +104,16 @@ const originalCategories: HelpCategory[] = [
     popularTags: ["calendar", "tasks", "scheduling", "appointments"],
   },
   {
+    id: "bookkeeping",
+    title: "Bookkeeping & Accounting",
+    description: "Connect and configure accounting software (QuickBooks, Xero, Sage) and manage financial sync",
+    iconName: "AccountBalanceRounded",
+    color: "#0b8043",
+    articleCount: 6,
+    popularTags: ["bookkeeping", "quickbooks", "xero", "reconciliation", "accounting"],
+    featured: true,
+  },
+  {
     id: "power-tools",
     title: "Power Tools & AI",
     description: "Advanced tools, AI features, and productivity enhancements",
