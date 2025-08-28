@@ -56,6 +56,9 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 
 interface CallLog {
   id: string;
