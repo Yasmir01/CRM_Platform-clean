@@ -919,58 +919,46 @@ export default function PropertyDetailPage({
                 </Typography>
                 <Box sx={{
                   height: 300,
-                  bgcolor: 'grey.200',
                   borderRadius: 1,
                   position: 'relative',
                   overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  mb: 2
                 }}>
-                  <Box
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      bgcolor: 'background.paper',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      p: 2
+                  <iframe
+                    src={`https://www.google.com/maps?q=${encodeURIComponent(property.address)}&output=embed&z=15`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`Map showing ${property.address}`}
+                  />
+                </Box>
+                <Stack direction="row" spacing={1} justifyContent="center">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<LaunchRoundedIcon />}
+                    onClick={() => {
+                      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`, '_blank');
                     }}
                   >
-                    <LocationOnRoundedIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-                    <Typography variant="h6" gutterBottom>
-                      📍 {property.address}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      Click below to view on map
-                    </Typography>
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<LaunchRoundedIcon />}
-                        onClick={() => {
-                          window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`, '_blank');
-                        }}
-                      >
-                        Open in Maps
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DirectionsRoundedIcon />}
-                        onClick={() => {
-                          window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.address)}`, '_blank');
-                        }}
-                      >
-                        Get Directions
-                      </Button>
-                    </Stack>
-                  </Box>
-                </Box>
+                    Open in Maps
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DirectionsRoundedIcon />}
+                    onClick={() => {
+                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.address)}`, '_blank');
+                    }}
+                  >
+                    Get Directions
+                  </Button>
+                </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   ���� {property.address}
                 </Typography>
