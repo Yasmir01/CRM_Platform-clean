@@ -1014,6 +1014,7 @@ export const quickActions = [
   { label: "Property Management", tag: "properties", color: "success" },
   { label: "Tenant Applications", tag: "applications", color: "warning" },
   { label: "Payment Processing", tag: "payments", color: "secondary" },
+  { label: "Bookkeeping Setup", tag: "bookkeeping", color: "success" },
   { label: "Work Orders", tag: "work-orders", color: "error" },
   { label: "Calendar & Tasks", tag: "calendar", color: "primary" },
   { label: "Power Tools", tag: "power-tools", color: "secondary" },
