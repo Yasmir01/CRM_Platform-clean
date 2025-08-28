@@ -33,6 +33,8 @@ import {
   Badge,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import { useActivityTracking } from "../hooks/useActivityTracking";
+import { useCrmData } from "../contexts/CrmDataContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
