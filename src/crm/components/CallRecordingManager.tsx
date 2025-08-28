@@ -888,10 +888,97 @@ export default function CallRecordingManager({
         <Alert severity="info" sx={{ mb: 2 }}>
           Archived recordings are stored for compliance but excluded from analytics and training.
         </Alert>
-        <Typography variant="h6">
+        <Typography variant="h6" sx={{ mb: 2 }}>
           Archived Recordings ({recordings.filter(r => r.isArchived).length})
         </Typography>
-        {/* Similar table/grid layout for archived recordings */}
+
+        {recordings.filter(r => r.isArchived).length === 0 ? (
+          <Alert severity="info">No archived recordings found.</Alert>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Contact</TableCell>
+                  <TableCell>Direction</TableCell>
+                  <TableCell>Duration</TableCell>
+                  <TableCell>Quality</TableCell>
+                  <TableCell>Archived Date</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {recordings.filter(r => r.isArchived).map((recording) => (
+                  <TableRow key={recording.id} hover>
+                    <TableCell>
+                      <Stack>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {recording.contactName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {recording.contactNumber}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        {recording.direction === "Inbound" ? (
+                          <CallReceivedRoundedIcon color="info" fontSize="small" />
+                        ) : (
+                          <CallMadeRoundedIcon color="primary" fontSize="small" />
+                        )}
+                        <Typography variant="body2">{recording.direction}</Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {formatDuration(recording.duration)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={recording.quality}
+                        color={getQualityColor(recording.quality) as any}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {new Date(recording.timestamp).toLocaleDateString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Tooltip title="Restore" sx={uniformTooltipStyles}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleArchiveRecording(recording.id)}
+                          >
+                            <ArchiveRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Delete Permanently" sx={uniformTooltipStyles}>
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              if (window.confirm('Permanently delete this recording? This cannot be undone.')) {
+                                onDeleteRecording(recording.id);
+                              }
+                            }}
+                            color="error"
+                          >
+                            <DeleteRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </TabPanel>
 
       {/* Training Tab */}
