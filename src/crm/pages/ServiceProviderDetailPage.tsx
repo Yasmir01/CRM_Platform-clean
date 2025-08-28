@@ -365,7 +365,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
       // Save document reference to CrmDataContext for UI display
       const savedDocument = addDocument({
         name: secureDocument.name,
-        type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        type: secureDocument.type || 'application/octet-stream', // Store full MIME type for proper preview detection
         size: secureDocument.size,
         url: secureDocument.id, // Store document ID instead of URL
         category: newDocument.category,
@@ -459,11 +459,29 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         setOpenPreviewDialog(true);
       } else {
         // For non-encrypted documents, use the direct URL
+        // For non-encrypted documents, try to determine correct MIME type
+        const docType = doc.type?.toLowerCase() || '';
+        const docName = doc.name?.toLowerCase() || '';
+
+        let mimeType = doc.type || 'application/octet-stream';
+
+        // If type doesn't include slash (old format like "PNG"), try to construct proper MIME type
+        if (!mimeType.includes('/')) {
+          if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'].includes(docType) ||
+              docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+            mimeType = `image/${docType === 'jpg' ? 'jpeg' : docType}`;
+          } else if (docType === 'pdf' || docName.endsWith('.pdf')) {
+            mimeType = 'application/pdf';
+          } else {
+            mimeType = `application/${docType}`;
+          }
+        }
+
         setPreviewDocument({
           ...doc,
           previewUrl: doc.url,
           filename: doc.name,
-          mimeType: `application/${doc.type.toLowerCase()}`
+          mimeType
         });
         setOpenPreviewDialog(true);
       }
