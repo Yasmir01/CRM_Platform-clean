@@ -373,6 +373,91 @@ export default function CustomerService() {
     .reduce((sum, t) => sum + (t.satisfaction || 0), 0) /
     tickets.filter(t => t.satisfaction).length || 0;
 
+  const handleCreateTicket = () => {
+    // Validate required fields
+    if (!newTicketFormData.title.trim()) {
+      alert('Please enter a ticket title');
+      return;
+    }
+    if (!newTicketFormData.customerEmail.trim()) {
+      alert('Please enter customer email');
+      return;
+    }
+    if (!newTicketFormData.description.trim()) {
+      alert('Please enter a description');
+      return;
+    }
+
+    // Create new ticket
+    const now = new Date().toISOString();
+    const newTicket: SupportTicket = {
+      id: `T-${String(tickets.length + 1).padStart(3, '0')}`,
+      title: newTicketFormData.title,
+      description: newTicketFormData.description,
+      status: "Open",
+      priority: newTicketFormData.priority,
+      category: newTicketFormData.category,
+      customer: {
+        id: Date.now().toString(),
+        name: newTicketFormData.customerName || newTicketFormData.customerEmail.split('@')[0],
+        email: newTicketFormData.customerEmail,
+        phone: newTicketFormData.customerPhone || undefined,
+        company: newTicketFormData.customerCompany || undefined
+      },
+      assignedTo: newTicketFormData.assignedTo || undefined,
+      tags: [newTicketFormData.category.toLowerCase().replace(' ', '-')],
+      createdAt: now,
+      updatedAt: now,
+      messages: [
+        {
+          id: "1",
+          content: newTicketFormData.description,
+          author: {
+            id: Date.now().toString(),
+            name: newTicketFormData.customerName || newTicketFormData.customerEmail.split('@')[0],
+            role: "Customer"
+          },
+          timestamp: now
+        }
+      ]
+    };
+
+    // Add ticket to state
+    setTickets(prev => [newTicket, ...prev]);
+
+    // Reset form and close dialog
+    setNewTicketFormData({
+      title: "",
+      priority: "Medium",
+      category: "General",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      customerCompany: "",
+      description: "",
+      assignedTo: ""
+    });
+    setOpenTicketDialog(false);
+
+    alert(`Ticket ${newTicket.id} created successfully!`);
+  };
+
+  const handleOpenNewTicketDialog = () => {
+    setSelectedTicket(null);
+    setNewTicketFormData({
+      title: "",
+      priority: "Medium",
+      category: "General",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      customerCompany: "",
+      description: "",
+      assignedTo: ""
+    });
+    setOpenTicketDialog(true);
+  };
+
   const handleSaveArticle = (status: string) => {
     const now = new Date().toISOString();
     const tagsArray = articleFormData.tags.split(",").map(tag => tag.trim()).filter(tag => tag);
