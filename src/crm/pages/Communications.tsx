@@ -1396,7 +1396,7 @@ export default function Communications() {
       </TabPanel>
 
       {/* Power Dialer Tab */}
-      <TabPanel value={selectedTab} index={3}>
+      <TabPanel value={selectedTab} index={4}>
         <Stack spacing={3}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">Power Dialer - Automated Calling</Typography>
