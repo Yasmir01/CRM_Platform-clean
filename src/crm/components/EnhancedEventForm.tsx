@@ -306,7 +306,7 @@ const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   };
 
   return (
-    <>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Dialog
         open={open}
         onClose={onClose}
@@ -738,7 +738,7 @@ const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
           onCancel={() => setShowConflictDetection(false)}
         />
       )}
-    </>
+    </LocalizationProvider>
   );
 };
 
