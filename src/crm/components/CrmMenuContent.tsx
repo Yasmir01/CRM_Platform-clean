@@ -47,6 +47,7 @@ import IntegrationInstructionsRoundedIcon from "@mui/icons-material/IntegrationI
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
 import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -81,6 +82,7 @@ const marketingListItems = [
 const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
+  { text: "Bank Account Settings", icon: <AccountBalanceRoundedIcon />, path: "/crm/bank-account-settings" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
