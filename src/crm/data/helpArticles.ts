@@ -54,8 +54,8 @@ const originalCategories: HelpCategory[] = [
     description: "Payment processing, financial management, and rent collection",
     iconName: "PaymentRounded",
     color: "#d32f2f",
-    articleCount: 15,
-    popularTags: ["payments", "financial", "rent", "billing"],
+    articleCount: 19,
+    popularTags: ["payments", "financial", "rent", "billing", "ach", "security"],
   },
   {
     id: "maintenance",
@@ -394,6 +394,116 @@ const originalArticles: HelpArticle[] = [
 
   // Payment & Financial Articles
   {
+    id: "bank-account-connection",
+    title: "Connecting Bank Accounts for ACH Payments",
+    summary: "Step-by-step guide to securely connect tenant bank accounts for seamless rent payments",
+    content: [
+      "Navigate to Rent Collection → Payment Methods → Connect Bank Account",
+      "Choose between Plaid integration (instant verification) or manual micro-deposits",
+      "For Plaid: Search and select your bank, then sign in securely through bank portal",
+      "For micro-deposits: Enter account details and verify small deposits within 1-2 business days",
+      "Bank connections use bank-level encryption and are PCI DSS compliant",
+      "Connected accounts support ACH payments with 1-3 business day processing",
+      "Set daily and monthly payment limits for enhanced security",
+      "View all connected bank accounts in Bank Account Management section"
+    ],
+    category: "payments",
+    tags: ["bank-accounts", "ach", "plaid", "verification", "security"],
+    difficulty: "Beginner",
+    readTime: "8 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
+    planRequired: "Professional"
+  },
+  {
+    id: "enhanced-payment-processing",
+    title: "Enhanced Payment Processing & ACH",
+    summary: "Understanding ACH payments, processing fees, and payment routing",
+    content: [
+      "ACH payments offer lower fees compared to credit cards (typically $0.50-$1.50 vs 2.9%)",
+      "Payments are automatically routed to your configured business bank account",
+      "Processing times: ACH 1-3 business days, Cards instantly",
+      "Payment status tracking: Pending → Processing → Completed or Failed",
+      "Automatic retry logic for failed payments with smart scheduling",
+      "Enhanced fraud detection analyzes payment patterns and risk factors",
+      "Real-time payment notifications via email and SMS",
+      "Comprehensive payment history and transaction reporting available"
+    ],
+    category: "payments",
+    tags: ["ach", "processing", "fees", "routing", "fraud-detection"],
+    difficulty: "Intermediate",
+    readTime: "7 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
+    planRequired: "Professional"
+  },
+  {
+    id: "payment-security-compliance",
+    title: "Payment Security & PCI Compliance",
+    summary: "Understanding our enterprise-grade security measures for payment processing",
+    content: [
+      "All payment data is encrypted using AES-256 encryption",
+      "System maintains PCI DSS compliance with regular security audits",
+      "Advanced fraud detection monitors for suspicious payment patterns",
+      "Rate limiting prevents automated attacks and excessive payment attempts",
+      "Real-time security monitoring with automated threat response",
+      "Bank account verification prevents unauthorized account usage",
+      "All payment activities are logged for compliance and audit trails",
+      "Two-factor authentication recommended for payment-related actions"
+    ],
+    category: "payments",
+    tags: ["security", "pci-compliance", "encryption", "fraud-detection", "compliance"],
+    difficulty: "Intermediate",
+    readTime: "6 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
+    planRequired: "Professional"
+  },
+  {
+    id: "business-bank-account-setup",
+    title: "Setting Up Business Bank Accounts",
+    summary: "Configure business bank accounts for receiving rent payments and managing cash flow",
+    content: [
+      "Navigate to Settings → Bank Account Settings → Business Accounts",
+      "Add business bank accounts where rent payments will be deposited",
+      "Configure primary and secondary accounts for payment routing",
+      "Set up payment routing rules based on property type or payment amount",
+      "Monitor business account balances and transaction history",
+      "Configure daily and monthly receiving limits for enhanced security",
+      "Set up automated bank reconciliation with accounting software",
+      "Review bank connection status and payment processing schedules"
+    ],
+    category: "payments",
+    tags: ["business-banking", "routing", "reconciliation", "cash-flow"],
+    difficulty: "Advanced",
+    readTime: "9 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
+    planRequired: "Professional"
+  },
+  {
+    id: "payment-system-testing",
+    title: "Payment System Testing & Validation",
+    summary: "How to run comprehensive tests to ensure your payment system is secure and functional",
+    content: [
+      "Access Payment System Tests from Power Tools → System Tests",
+      "Run Bank Account Management tests to verify connection and verification flows",
+      "Execute Payment Processing tests for ACH and card payment functionality",
+      "Validate Security Features including fraud detection and encryption",
+      "Test PCI Compliance validation and security monitoring systems",
+      "Review Integration Flows to ensure bookkeeping sync works correctly",
+      "All tests include detailed results with pass/fail status and recommendations",
+      "Run tests after any configuration changes or before going live"
+    ],
+    category: "payments",
+    tags: ["testing", "validation", "security", "compliance", "verification"],
+    difficulty: "Advanced",
+    readTime: "10 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
+    planRequired: "Professional"
+  },
+  {
     id: "rent-collection-setup",
     title: "Setting Up Automated Rent Collection",
     summary: "Configure automated rent collection and payment processing systems",
@@ -453,6 +563,28 @@ const originalArticles: HelpArticle[] = [
     readTime: "11 min",
     helpful: 89,
     lastUpdated: "2024-01-08",
+    planRequired: "Professional"
+  },
+  {
+    id: "payment-troubleshooting",
+    title: "Troubleshooting Payment & Bank Connection Issues",
+    summary: "Common payment problems and how to resolve them quickly",
+    content: [
+      "Bank verification failed: Check account and routing numbers, ensure account is active",
+      "ACH payment declined: Verify sufficient funds and account permissions",
+      "Micro-deposit verification: Allow 1-2 business days, check for small deposits",
+      "Payment stuck in processing: ACH payments take 1-3 business days to complete",
+      "Bank connection expired: Re-authenticate through Plaid or update credentials",
+      "Payment routing issues: Verify business bank account configuration",
+      "Security blocks: Review fraud detection alerts and contact support if needed",
+      "For persistent issues, use the Security Monitoring Dashboard to check system status"
+    ],
+    category: "payments",
+    tags: ["troubleshooting", "bank-issues", "verification", "support"],
+    difficulty: "Intermediate",
+    readTime: "6 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20",
     planRequired: "Professional"
   },
 
@@ -1014,6 +1146,7 @@ export const quickActions = [
   { label: "Property Management", tag: "properties", color: "success" },
   { label: "Tenant Applications", tag: "applications", color: "warning" },
   { label: "Payment Processing", tag: "payments", color: "secondary" },
+  { label: "Bank Account Setup", tag: "bank-accounts", color: "info" },
   { label: "Bookkeeping Setup", tag: "bookkeeping", color: "success" },
   { label: "Work Orders", tag: "work-orders", color: "error" },
   { label: "Calendar & Tasks", tag: "calendar", color: "primary" },
