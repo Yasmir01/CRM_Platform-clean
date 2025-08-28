@@ -347,7 +347,7 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
 
       const document = {
         name: newDocument.file.name,
-        type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        type: newDocument.file.type || 'application/octet-stream', // Store full MIME type for proper preview detection
         size: newDocument.file.size,
         url: fileUrl,
         category: newDocument.category,
