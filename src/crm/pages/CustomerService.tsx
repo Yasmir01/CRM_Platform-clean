@@ -1364,6 +1364,18 @@ export default function CustomerService() {
           <Button onClick={() => {
             setOpenTicketDialog(false);
             setSelectedTicket(null);
+            // Reset form data when canceling
+            setNewTicketFormData({
+              title: "",
+              priority: "Medium",
+              category: "General",
+              customerEmail: "",
+              customerName: "",
+              customerPhone: "",
+              customerCompany: "",
+              description: "",
+              assignedTo: ""
+            });
           }}>
             Cancel
           </Button>
