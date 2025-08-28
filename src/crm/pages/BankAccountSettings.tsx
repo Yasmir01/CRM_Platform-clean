@@ -311,7 +311,7 @@ const BankAccountSettings: React.FC = () => {
                       High-Value Routing
                     </Typography>
                     <Typography variant="body2" color="text.secondary" paragraph>
-                      Payments > $5,000 → Business Savings Account
+                      Payments over $5,000 go to Business Savings Account
                     </Typography>
                     <Button variant="outlined" size="small">
                       Edit Rule
