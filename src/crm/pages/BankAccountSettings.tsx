@@ -286,10 +286,7 @@ const BankAccountSettings: React.FC = () => {
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => {
-                  // TODO: Open add account dialog
-                  alert('Add Bank Account functionality will be implemented');
-                }}
+                onClick={() => setAddAccountOpen(true)}
               >
                 Add Bank Account
               </Button>
