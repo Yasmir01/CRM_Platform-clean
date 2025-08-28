@@ -3568,6 +3568,153 @@ export default function PropertyDetailPage({
           });
         }}
       />
+
+      {/* Edit Property Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <EditRoundedIcon />
+            <Typography variant="h6">Edit Property</Typography>
+          </Stack>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Property Name"
+                value={editFormData.name || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                placeholder="Enter property name..."
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel>Property Type</InputLabel>
+                <Select
+                  value={editFormData.type || 'Apartment'}
+                  label="Property Type"
+                  onChange={(e) => setEditFormData({ ...editFormData, type: e.target.value as any })}
+                >
+                  <MenuItem value="Apartment">Apartment</MenuItem>
+                  <MenuItem value="House">House</MenuItem>
+                  <MenuItem value="Condo">Condo</MenuItem>
+                  <MenuItem value="Townhome">Townhome</MenuItem>
+                  <MenuItem value="Commercial">Commercial</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Address"
+                value={editFormData.address || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                placeholder="Enter property address..."
+                helperText="Full address including street, city, state, and zip code"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Monthly Rent"
+                type="number"
+                value={editFormData.monthlyRent || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, monthlyRent: Number(e.target.value) })}
+                InputProps={{ startAdornment: '$' }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Units"
+                type="number"
+                value={editFormData.units || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, units: Number(e.target.value) })}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Security Deposit"
+                type="number"
+                value={editFormData.securityDeposit || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, securityDeposit: Number(e.target.value) })}
+                InputProps={{ startAdornment: '$' }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Square Footage"
+                type="number"
+                value={editFormData.squareFootage || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, squareFootage: Number(e.target.value) })}
+                InputProps={{ endAdornment: 'sq ft' }}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Bedrooms"
+                type="number"
+                value={editFormData.bedrooms || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, bedrooms: Number(e.target.value) })}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <TextField
+                fullWidth
+                label="Bathrooms"
+                type="number"
+                step="0.5"
+                value={editFormData.bathrooms || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, bathrooms: Number(e.target.value) })}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Pet Policy"
+                value={editFormData.petPolicy || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, petPolicy: e.target.value })}
+                placeholder="e.g., Cats allowed, No pets, Dogs under 50lbs..."
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                label="Parking Spaces"
+                type="number"
+                value={editFormData.parkingSpaces || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, parkingSpaces: Number(e.target.value) })}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                multiline
+                minRows={3}
+                maxRows={6}
+                label="Description"
+                value={editFormData.description || ''}
+                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                placeholder="Enter property description..."
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveProperty}
+            startIcon={<EditRoundedIcon />}
+          >
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
