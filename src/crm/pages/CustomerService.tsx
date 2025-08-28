@@ -458,6 +458,23 @@ export default function CustomerService() {
     setOpenTicketDialog(true);
   };
 
+  const handleUpdateTicketField = (ticketId: string, field: string, value: any) => {
+    setTickets(prev => prev.map(ticket =>
+      ticket.id === ticketId
+        ? {
+            ...ticket,
+            [field]: value,
+            updatedAt: new Date().toISOString()
+          }
+        : ticket
+    ));
+
+    // Also update the selectedTicket if it's the one being edited
+    if (selectedTicket && selectedTicket.id === ticketId) {
+      setSelectedTicket(prev => prev ? { ...prev, [field]: value } : null);
+    }
+  };
+
   const handleSaveArticle = (status: string) => {
     const now = new Date().toISOString();
     const tagsArray = articleFormData.tags.split(",").map(tag => tag.trim()).filter(tag => tag);
