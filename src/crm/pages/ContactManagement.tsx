@@ -370,6 +370,26 @@ export default function ContactManagement() {
     assignedTo: "",
     customFields: {}
   });
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
+
+  const handleBulkImportContacts = async (importedContacts: any[]) => {
+    try {
+      // Add each contact using the existing addContact function
+      for (const contactData of importedContacts) {
+        const newContact = {
+          ...contactData,
+          lastContact: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        addContact(newContact);
+      }
+    } catch (error) {
+      console.error('Error importing contacts:', error);
+      throw new Error('Failed to import contacts');
+    }
+  };
 
   const filteredContacts = allContacts.filter(contact => {
     const matchesSearch = 
