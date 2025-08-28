@@ -534,6 +534,13 @@ export default function ContactManagement() {
             Export
           </Button>
           <Button
+            variant="outlined"
+            startIcon={<CloudUploadRoundedIcon />}
+            onClick={() => setBulkUploadDialogOpen(true)}
+          >
+            Bulk Import
+          </Button>
+          <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
             onClick={handleAddContact}
