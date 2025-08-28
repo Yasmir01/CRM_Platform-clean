@@ -327,6 +327,17 @@ export default function CustomerService() {
   const [openArticleDialog, setOpenArticleDialog] = React.useState(false);
   const [selectedTicket, setSelectedTicket] = React.useState<SupportTicket | null>(null);
   const [selectedArticle, setSelectedArticle] = React.useState<KnowledgeBaseArticle | null>(null);
+  const [newTicketFormData, setNewTicketFormData] = React.useState({
+    title: "",
+    priority: "Medium" as SupportTicket["priority"],
+    category: "General" as SupportTicket["category"],
+    customerEmail: "",
+    customerName: "",
+    customerPhone: "",
+    customerCompany: "",
+    description: "",
+    assignedTo: ""
+  });
   const [articleFormData, setArticleFormData] = React.useState({
     title: "",
     content: "",
@@ -361,6 +372,121 @@ export default function CustomerService() {
     .filter(t => t.satisfaction)
     .reduce((sum, t) => sum + (t.satisfaction || 0), 0) /
     tickets.filter(t => t.satisfaction).length || 0;
+
+  const handleCreateTicket = () => {
+    // Validate required fields
+    if (!newTicketFormData.title.trim()) {
+      alert('Please enter a ticket title');
+      return;
+    }
+    if (!newTicketFormData.customerEmail.trim()) {
+      alert('Please enter customer email');
+      return;
+    }
+    if (!newTicketFormData.description.trim()) {
+      alert('Please enter a description');
+      return;
+    }
+
+    // Create new ticket
+    const now = new Date().toISOString();
+    const newTicket: SupportTicket = {
+      id: `T-${String(tickets.length + 1).padStart(3, '0')}`,
+      title: newTicketFormData.title,
+      description: newTicketFormData.description,
+      status: "Open",
+      priority: newTicketFormData.priority,
+      category: newTicketFormData.category,
+      customer: {
+        id: Date.now().toString(),
+        name: newTicketFormData.customerName || newTicketFormData.customerEmail.split('@')[0],
+        email: newTicketFormData.customerEmail,
+        phone: newTicketFormData.customerPhone || undefined,
+        company: newTicketFormData.customerCompany || undefined
+      },
+      assignedTo: newTicketFormData.assignedTo || undefined,
+      tags: [newTicketFormData.category.toLowerCase().replace(' ', '-')],
+      createdAt: now,
+      updatedAt: now,
+      messages: [
+        {
+          id: "1",
+          content: newTicketFormData.description,
+          author: {
+            id: Date.now().toString(),
+            name: newTicketFormData.customerName || newTicketFormData.customerEmail.split('@')[0],
+            role: "Customer"
+          },
+          timestamp: now
+        }
+      ]
+    };
+
+    // Add ticket to state
+    setTickets(prev => [newTicket, ...prev]);
+
+    // Reset form and close dialog
+    setNewTicketFormData({
+      title: "",
+      priority: "Medium",
+      category: "General",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      customerCompany: "",
+      description: "",
+      assignedTo: ""
+    });
+    setOpenTicketDialog(false);
+
+    alert(`Ticket ${newTicket.id} created successfully!`);
+  };
+
+  const handleOpenNewTicketDialog = () => {
+    setSelectedTicket(null);
+    setNewTicketFormData({
+      title: "",
+      priority: "Medium",
+      category: "General",
+      customerEmail: "",
+      customerName: "",
+      customerPhone: "",
+      customerCompany: "",
+      description: "",
+      assignedTo: ""
+    });
+    setOpenTicketDialog(true);
+  };
+
+  const handleUpdateTicketField = (ticketId: string, field: string, value: any) => {
+    setTickets(prev => prev.map(ticket =>
+      ticket.id === ticketId
+        ? {
+            ...ticket,
+            [field]: value,
+            updatedAt: new Date().toISOString()
+          }
+        : ticket
+    ));
+
+    // Also update the selectedTicket if it's the one being edited
+    if (selectedTicket && selectedTicket.id === ticketId) {
+      setSelectedTicket(prev => prev ? { ...prev, [field]: value } : null);
+    }
+
+    // Show visual feedback
+    const fieldNames: { [key: string]: string } = {
+      status: 'Status',
+      assignedTo: 'Assignment',
+      priority: 'Priority'
+    };
+
+    const fieldName = fieldNames[field] || field;
+    const displayValue = value || 'None';
+
+    // You could replace this with a toast notification for better UX
+    console.log(`✓ ${fieldName} updated to: ${displayValue}`);
+  };
 
   const handleSaveArticle = (status: string) => {
     const now = new Date().toISOString();
@@ -457,7 +583,7 @@ export default function CustomerService() {
           <Button
             variant="contained"
             startIcon={<AddRoundedIcon />}
-            onClick={() => setOpenTicketDialog(true)}
+            onClick={handleOpenNewTicketDialog}
           >
             New Ticket
           </Button>
@@ -1025,6 +1151,12 @@ export default function CustomerService() {
         <DialogContent>
           {selectedTicket ? (
             <Stack spacing={3} sx={{ mt: 1 }}>
+              <Alert severity="success">
+                <Typography variant="body2">
+                  <strong>Editing Ticket {selectedTicket.id}</strong><br />
+                  Changes to status and assignment are saved automatically when you select them.
+                </Typography>
+              </Alert>
               {/* Ticket Details */}
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
@@ -1035,7 +1167,12 @@ export default function CustomerService() {
                         <Box>
                           <Typography variant="body2" color="text.secondary">Status</Typography>
                           <FormControl size="small" sx={{ minWidth: 120 }}>
-                            <Select value={selectedTicket.status}>
+                            <Select
+                              value={selectedTicket.status}
+                              onChange={(e) => {
+                                handleUpdateTicketField(selectedTicket.id, 'status', e.target.value);
+                              }}
+                            >
                               <MenuItem value="Open">Open</MenuItem>
                               <MenuItem value="In Progress">In Progress</MenuItem>
                               <MenuItem value="Pending">Pending</MenuItem>
@@ -1059,7 +1196,10 @@ export default function CustomerService() {
                         <Box>
                           <Typography variant="body2" color="text.secondary">Assigned To</Typography>
                           <FormControl size="small" fullWidth>
-                            <Select value={selectedTicket.assignedTo || ""}>
+                            <Select
+                              value={selectedTicket.assignedTo || ""}
+                              onChange={(e) => handleUpdateTicketField(selectedTicket.id, 'assignedTo', e.target.value || undefined)}
+                            >
                               <MenuItem value="">Unassigned</MenuItem>
                               <MenuItem value="Mike Wilson">Mike Wilson</MenuItem>
                               <MenuItem value="Emily Davis">Emily Davis</MenuItem>
@@ -1148,19 +1288,31 @@ export default function CustomerService() {
             </Stack>
           ) : (
             <Stack spacing={3} sx={{ mt: 1 }}>
+              <Alert severity="info">
+                <Typography variant="body2">
+                  <strong>Creating New Support Ticket</strong><br />
+                  Fill out the form below to create a new customer support ticket. Required fields are marked with *.
+                </Typography>
+              </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
                     label="Title"
                     fullWidth
                     required
+                    value={newTicketFormData.title}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, title: e.target.value })}
                     placeholder="Brief description of the issue"
                   />
                 </Grid>
                 <Grid item xs={12} md={3}>
                   <FormControl fullWidth required>
                     <InputLabel>Priority</InputLabel>
-                    <Select value="" label="Priority">
+                    <Select
+                      value={newTicketFormData.priority}
+                      label="Priority"
+                      onChange={(e) => setNewTicketFormData({ ...newTicketFormData, priority: e.target.value as SupportTicket["priority"] })}
+                    >
                       <MenuItem value="Low">Low</MenuItem>
                       <MenuItem value="Medium">Medium</MenuItem>
                       <MenuItem value="High">High</MenuItem>
@@ -1171,7 +1323,11 @@ export default function CustomerService() {
                 <Grid item xs={12} md={3}>
                   <FormControl fullWidth required>
                     <InputLabel>Category</InputLabel>
-                    <Select value="" label="Category">
+                    <Select
+                      value={newTicketFormData.category}
+                      label="Category"
+                      onChange={(e) => setNewTicketFormData({ ...newTicketFormData, category: e.target.value as SupportTicket["category"] })}
+                    >
                       <MenuItem value="Technical">Technical</MenuItem>
                       <MenuItem value="Billing">Billing</MenuItem>
                       <MenuItem value="Feature Request">Feature Request</MenuItem>
@@ -1182,13 +1338,50 @@ export default function CustomerService() {
                 </Grid>
               </Grid>
 
-              <TextField
-                label="Customer Email"
-                fullWidth
-                required
-                type="email"
-                placeholder="customer@example.com"
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Email"
+                    fullWidth
+                    required
+                    type="email"
+                    value={newTicketFormData.customerEmail}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerEmail: e.target.value })}
+                    placeholder="customer@example.com"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Name"
+                    fullWidth
+                    value={newTicketFormData.customerName}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerName: e.target.value })}
+                    placeholder="John Smith"
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Phone (Optional)"
+                    fullWidth
+                    type="tel"
+                    value={newTicketFormData.customerPhone}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerPhone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Company (Optional)"
+                    fullWidth
+                    value={newTicketFormData.customerCompany}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerCompany: e.target.value })}
+                    placeholder="Company Name"
+                  />
+                </Grid>
+              </Grid>
 
               <TextField
                 label="Description"
@@ -1196,12 +1389,18 @@ export default function CustomerService() {
                 multiline
                 rows={6}
                 required
+                value={newTicketFormData.description}
+                onChange={(e) => setNewTicketFormData({ ...newTicketFormData, description: e.target.value })}
                 placeholder="Detailed description of the issue..."
               />
 
               <FormControl fullWidth>
                 <InputLabel>Assign To</InputLabel>
-                <Select value="" label="Assign To">
+                <Select
+                  value={newTicketFormData.assignedTo}
+                  label="Assign To"
+                  onChange={(e) => setNewTicketFormData({ ...newTicketFormData, assignedTo: e.target.value })}
+                >
                   <MenuItem value="">Auto-assign</MenuItem>
                   <MenuItem value="Mike Wilson">Mike Wilson</MenuItem>
                   <MenuItem value="Emily Davis">Emily Davis</MenuItem>
@@ -1215,11 +1414,31 @@ export default function CustomerService() {
           <Button onClick={() => {
             setOpenTicketDialog(false);
             setSelectedTicket(null);
+            // Reset form data when canceling
+            setNewTicketFormData({
+              title: "",
+              priority: "Medium",
+              category: "General",
+              customerEmail: "",
+              customerName: "",
+              customerPhone: "",
+              customerCompany: "",
+              description: "",
+              assignedTo: ""
+            });
           }}>
             Cancel
           </Button>
-          <Button variant="contained">
-            {selectedTicket ? "Update Ticket" : "Create Ticket"}
+          <Button
+            variant="contained"
+            onClick={selectedTicket ? () => {
+              alert(`Ticket ${selectedTicket.id} updated successfully!`);
+              setOpenTicketDialog(false);
+              setSelectedTicket(null);
+            } : handleCreateTicket}
+            disabled={selectedTicket ? false : (!newTicketFormData.title.trim() || !newTicketFormData.customerEmail.trim() || !newTicketFormData.description.trim())}
+          >
+            {selectedTicket ? "Close Ticket" : "Create Ticket"}
           </Button>
         </DialogActions>
       </Dialog>

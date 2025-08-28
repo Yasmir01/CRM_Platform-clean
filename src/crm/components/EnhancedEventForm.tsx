@@ -33,6 +33,8 @@ import {
   Slider,
 } from "@mui/material";
 import { DatePicker, TimePicker } from "@mui/x-date-pickers";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
@@ -304,7 +306,7 @@ const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
   };
 
   return (
-    <>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Dialog
         open={open}
         onClose={onClose}
@@ -736,7 +738,7 @@ const EnhancedEventForm: React.FC<EnhancedEventFormProps> = ({
           onCancel={() => setShowConflictDetection(false)}
         />
       )}
-    </>
+    </LocalizationProvider>
   );
 };
 

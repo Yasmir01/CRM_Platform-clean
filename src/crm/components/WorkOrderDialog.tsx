@@ -22,6 +22,8 @@ import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useMode } from "../contexts/ModeContext";
 import TwoStepAssignmentSelector from "./TwoStepAssignmentSelector";
+import EnhancedFileUploadField from "./EnhancedFileUploadField";
+import { FileStorageService, StoredFile } from "../services/FileStorageService";
 
 interface WorkOrder {
   id: string;
@@ -95,6 +97,8 @@ export default function WorkOrderDialog({
     isEmergency: false
   });
 
+  const [attachments, setAttachments] = React.useState<StoredFile[]>([]);
+
   // Reset form when dialog opens with property info
   React.useEffect(() => {
     if (open && (propertyId || assignedTo)) {
@@ -157,7 +161,29 @@ export default function WorkOrderDialog({
     };
 
     // Save to CrmDataContext (this will auto-save to localStorage)
-    addWorkOrder(workOrderData);
+    const savedWorkOrder = addWorkOrder(workOrderData);
+
+    // Save attachments as documents if any
+    if (attachments.length > 0) {
+      attachments.forEach(attachment => {
+        const document = {
+          name: attachment.name,
+          type: attachment.type,
+          size: attachment.size,
+          url: attachment.dataUrl,
+          dataUrl: attachment.dataUrl,
+          preview: attachment.preview,
+          category: 'Other', // Default category for work order attachments
+          workOrderId: savedWorkOrder.id,
+          entityId: savedWorkOrder.id,
+          entityType: 'workOrder',
+          uploadedBy: user?.name || 'Unknown',
+          description: `Attached during work order creation`,
+          tags: [`work-order-${savedWorkOrder.id}`, 'work-order-attachment', 'initial-attachment']
+        };
+        addDocument(document);
+      });
+    }
 
     // Call the callback to notify parent component (if needed)
     if (onWorkOrderCreated) {
@@ -188,6 +214,7 @@ export default function WorkOrderDialog({
       notes: "",
       isEmergency: false
     });
+    setAttachments([]);
     onClose();
   };
 
@@ -210,6 +237,7 @@ export default function WorkOrderDialog({
       notes: "",
       isEmergency: false
     });
+    setAttachments([]);
     onClose();
   };
 
@@ -457,6 +485,21 @@ export default function WorkOrderDialog({
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             placeholder="Any additional information..."
+          />
+
+          {/* File Upload Section */}
+          <EnhancedFileUploadField
+            field={{
+              id: 'work-order-attachments',
+              type: 'file',
+              label: 'Attachments (Optional)',
+              required: false,
+              maxFiles: 5,
+              maxFileSize: 10,
+              description: 'Upload photos, documents, or other files related to this work order'
+            }}
+            currentFiles={attachments}
+            onFilesChange={setAttachments}
           />
         </Stack>
       </DialogContent>

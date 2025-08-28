@@ -37,8 +37,11 @@ import {
   StepLabel,
   StepContent,
   Tooltip,
+  CircularProgress,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import { FileStorageService, StoredFile } from "../services/FileStorageService";
+import { useCrmData } from "../contexts/CrmDataContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -61,6 +64,7 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 interface WorkOrderUpdate {
   id: string;
@@ -88,6 +92,8 @@ interface Document {
   uploadedBy: string;
   category: "Before Photo" | "After Photo" | "Invoice" | "Receipt" | "Permit" | "Other";
   url: string;
+  dataUrl?: string; // Base64 data for file storage
+  preview?: string; // Preview/thumbnail for images
 }
 
 interface WorkOrderDetailProps {
@@ -117,6 +123,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDetailProps) {
+  const { state, addDocument } = useCrmData();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [openNoteDialog, setOpenNoteDialog] = React.useState(false);
   const [openDocumentDialog, setOpenDocumentDialog] = React.useState(false);
@@ -124,6 +131,9 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
   const [openMessageDialog, setOpenMessageDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [previewDocument, setPreviewDocument] = React.useState<Document | null>(null);
+  const [openDocumentPreview, setOpenDocumentPreview] = React.useState(false);
 
   // Mock work order data
   const workOrder = {
@@ -186,18 +196,45 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Before_repair_photo.jpg",
-      type: "JPG",
-      size: 1200000,
-      uploadDate: "2024-01-18T14:45:00Z",
-      uploadedBy: "David Wilson",
-      category: "Before Photo",
-      url: "#"
+  // Load documents from CRM context for this work order
+  const [documents, setDocuments] = React.useState<Document[]>(() => {
+    // Get documents from CRM context that are associated with this work order
+    const workOrderDocs = state.documents?.filter(doc =>
+      doc.workOrderId === workOrderId ||
+      doc.entityId === workOrderId ||
+      doc.tags?.includes(`work-order-${workOrderId}`)
+    ) || [];
+
+    // If no docs found, use mock data for demo
+    if (workOrderDocs.length === 0) {
+      return [
+        {
+          id: "1",
+          name: "Before_repair_photo.jpg",
+          type: "image/jpeg",
+          size: 1200000,
+          uploadDate: "2024-01-18T14:45:00Z",
+          uploadedBy: "David Wilson",
+          category: "Before Photo",
+          url: "#",
+          dataUrl: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iIzMzNzNkYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9Im1vbm9zcGFjZSIgZm9udC1zaXplPSIxNnB4Ij5CZWZvcmUgUGhvdG88L3RleHQ+PC9zdmc+"
+        }
+      ];
     }
-  ]);
+
+    return workOrderDocs.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      type: doc.type || 'application/octet-stream',
+      size: doc.size || 0,
+      uploadDate: doc.uploadedAt || doc.createdAt || new Date().toISOString(),
+      uploadedBy: doc.uploadedBy || 'Unknown',
+      category: (doc.category as Document['category']) || 'Other',
+      url: doc.url || '#',
+      dataUrl: doc.dataUrl,
+      preview: doc.preview
+    }));
+  });
 
   const [newNote, setNewNote] = React.useState({
     content: "",
@@ -282,11 +319,68 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) return;
+
+    setIsUploading(true);
+
+    try {
+      // Process file using FileStorageService
+      const result = await FileStorageService.processFiles([newDocument.file]);
+
+      if (!result.success || !result.files || result.files.length === 0) {
+        throw new Error(result.error || 'Failed to process file');
+      }
+
+      const processedFile = result.files[0];
+
+      // Create document object
+      const document = {
+        name: processedFile.name,
+        type: processedFile.type,
+        size: processedFile.size,
+        url: processedFile.dataUrl, // Use dataUrl as the primary storage
+        dataUrl: processedFile.dataUrl, // Store base64 data
+        preview: processedFile.preview, // Store preview/thumbnail if available
+        category: newDocument.category,
+        workOrderId: workOrderId,
+        entityId: workOrderId,
+        entityType: 'workOrder',
+        uploadedBy: 'Current User',
+        description: newDocument.description,
+        tags: [`work-order-${workOrderId}`, 'work-order-document']
+      };
+
+      // Save document to CRM context
+      const savedDocument = addDocument(document);
+
+      // Update local documents state
+      const newDoc: Document = {
+        id: savedDocument.id,
+        name: savedDocument.name,
+        type: savedDocument.type,
+        size: savedDocument.size,
+        uploadDate: savedDocument.uploadedAt || new Date().toISOString(),
+        uploadedBy: savedDocument.uploadedBy,
+        category: savedDocument.category as Document['category'],
+        url: savedDocument.url,
+        dataUrl: savedDocument.dataUrl,
+        preview: savedDocument.preview
+      };
+
+      setDocuments(prev => [newDoc, ...prev]);
+
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+      alert(`Document "${processedFile.name}" uploaded successfully!`);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert(`Failed to upload document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -696,16 +790,91 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
             {documents.map((doc) => (
               <ListItem key={doc.id} divider>
                 <ListItemIcon>
-                  <AttachFileRoundedIcon />
+                  {FileStorageService.isImageFile(doc.type, doc.name) ? (
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {doc.preview || doc.dataUrl ? (
+                        <Box
+                          component="img"
+                          src={doc.preview || doc.dataUrl}
+                          alt={doc.name}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 16px;">📷</div>';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <Typography sx={{ fontSize: 16 }}>📷</Typography>
+                      )}
+                    </Box>
+                  ) : FileStorageService.isPdfFile(doc.type) ? (
+                    <Typography sx={{ fontSize: 24 }}>📄</Typography>
+                  ) : (
+                    <AttachFileRoundedIcon />
+                  )}
                 </ListItemIcon>
                 <ListItemText
                   primary={doc.name}
                   secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
+                  <Stack direction="row" spacing={1}>
+                    <Tooltip title="Preview">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setPreviewDocument(doc);
+                          setOpenDocumentPreview(true);
+                        }}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (doc.dataUrl) {
+                            // Create a temporary stored file object for download
+                            const storedFile: StoredFile = {
+                              id: doc.id,
+                              name: doc.name,
+                              size: doc.size,
+                              type: doc.type,
+                              lastModified: new Date(doc.uploadDate).getTime(),
+                              dataUrl: doc.dataUrl,
+                              preview: doc.preview
+                            };
+                            FileStorageService.downloadFile(storedFile);
+                          } else {
+                            alert('File data not available for download');
+                          }
+                        }}
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
                 </ListItemSecondaryAction>
               </ListItem>
             ))}
@@ -909,8 +1078,9 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
                 fullWidth
                 startIcon={<CloudUploadRoundedIcon />}
                 sx={{ py: 2 }}
+                disabled={isUploading}
               >
-                {newDocument.file ? newDocument.file.name : "Choose File"}
+                {isUploading ? "Processing..." : (newDocument.file ? newDocument.file.name : "Choose File")}
               </Button>
             </label>
             
@@ -949,14 +1119,155 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
-            startIcon={<CloudUploadRoundedIcon />}
+            disabled={!newDocument.file || isUploading}
+            startIcon={isUploading ? <CircularProgress size={16} /> : <CloudUploadRoundedIcon />}
           >
-            Upload File
+            {isUploading ? "Uploading..." : "Upload File"}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document Preview Dialog */}
+      <Dialog
+        open={openDocumentPreview}
+        onClose={() => setOpenDocumentPreview(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6">{previewDocument?.name}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {previewDocument && formatFileSize(previewDocument.size)} • {previewDocument?.type}
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setOpenDocumentPreview(false)}>
+              <DownloadRoundedIcon />
+            </IconButton>
+          </Stack>
+        </DialogTitle>
+
+        <DialogContent>
+          {previewDocument && (
+            <Box sx={{ textAlign: 'center', py: 2 }}>
+              {FileStorageService.isImageFile(previewDocument.type, previewDocument.name) ? (
+                previewDocument.dataUrl || previewDocument.preview ? (
+                  <Box
+                    component="img"
+                    src={previewDocument.dataUrl || previewDocument.preview}
+                    alt={previewDocument.name}
+                    sx={{
+                      maxWidth: '100%',
+                      maxHeight: '70vh',
+                      objectFit: 'contain',
+                      borderRadius: 1
+                    }}
+                    onError={(e) => {
+                      console.error('Image preview failed to load for:', previewDocument.name);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parentContainer = target.parentElement;
+                      if (parentContainer) {
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.style.cssText = `
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          height: 200px;
+                          background-color: #f5f5f5;
+                          border: 2px dashed #ddd;
+                          border-radius: 8px;
+                          color: #666;
+                          text-align: center;
+                          padding: 20px;
+                        `;
+                        fallbackDiv.innerHTML = `
+                          <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                          <div style="font-weight: bold; margin-bottom: 4px;">${previewDocument.name}</div>
+                          <div style="font-size: 12px;">Preview not available</div>
+                        `;
+                        parentContainer.appendChild(fallbackDiv);
+                      }
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      maxWidth: 400,
+                      height: 200,
+                      border: '2px dashed',
+                      borderColor: 'grey.300',
+                      borderRadius: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'grey.50',
+                      margin: '0 auto'
+                    }}
+                  >
+                    <Stack spacing={1} alignItems="center">
+                      <Typography sx={{ fontSize: 32 }}>📷</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {previewDocument.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Image preview unavailable
+                      </Typography>
+                    </Stack>
+                  </Box>
+                )
+              ) : FileStorageService.isPdfFile(previewDocument.type) ? (
+                <Box>
+                  <Typography sx={{ fontSize: 64, mb: 2 }}>📄</Typography>
+                  <Typography>
+                    PDF preview not available. Click download to view the file.
+                  </Typography>
+                </Box>
+              ) : (
+                <Box>
+                  <Typography sx={{ fontSize: 64, mb: 2 }}>📎</Typography>
+                  <Typography>
+                    Preview not available for this file type. Click download to view the file.
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDocumentPreview(false)}>Close</Button>
+          {previewDocument && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadRoundedIcon />}
+              onClick={() => {
+                if (previewDocument.dataUrl) {
+                  const storedFile: StoredFile = {
+                    id: previewDocument.id,
+                    name: previewDocument.name,
+                    size: previewDocument.size,
+                    type: previewDocument.type,
+                    lastModified: new Date(previewDocument.uploadDate).getTime(),
+                    dataUrl: previewDocument.dataUrl,
+                    preview: previewDocument.preview
+                  };
+                  FileStorageService.downloadFile(storedFile);
+                } else {
+                  alert('File data not available for download');
+                }
+                setOpenDocumentPreview(false);
+              }}
+            >
+              Download
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </Box>
