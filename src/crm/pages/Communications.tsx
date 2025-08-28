@@ -1548,7 +1548,7 @@ export default function Communications() {
       </TabPanel>
 
       {/* Provider Settings Tab */}
-      <TabPanel value={selectedTab} index={4}>
+      <TabPanel value={selectedTab} index={5}>
         <Stack spacing={3}>
           <Typography variant="h6">Communication Provider Configuration</Typography>
           
