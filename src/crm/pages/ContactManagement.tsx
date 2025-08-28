@@ -204,6 +204,8 @@ const getStatusColor = (status: Contact["status"]) => {
     case "Qualified": return "info";
     case "Active": return "success";
     case "Inactive": return "error";
+    case "Vendor": return "secondary";
+    case "Other": return "default";
     default: return "default";
   }
 };
