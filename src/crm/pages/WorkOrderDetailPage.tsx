@@ -319,11 +319,68 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
-      alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) return;
+
+    setIsUploading(true);
+
+    try {
+      // Process file using FileStorageService
+      const result = await FileStorageService.processFiles([newDocument.file]);
+
+      if (!result.success || !result.files || result.files.length === 0) {
+        throw new Error(result.error || 'Failed to process file');
+      }
+
+      const processedFile = result.files[0];
+
+      // Create document object
+      const document = {
+        name: processedFile.name,
+        type: processedFile.type,
+        size: processedFile.size,
+        url: processedFile.dataUrl, // Use dataUrl as the primary storage
+        dataUrl: processedFile.dataUrl, // Store base64 data
+        preview: processedFile.preview, // Store preview/thumbnail if available
+        category: newDocument.category,
+        workOrderId: workOrderId,
+        entityId: workOrderId,
+        entityType: 'workOrder',
+        uploadedBy: 'Current User',
+        description: newDocument.description,
+        tags: [`work-order-${workOrderId}`, 'work-order-document']
+      };
+
+      // Save document to CRM context
+      const savedDocument = addDocument(document);
+
+      // Update local documents state
+      const newDoc: Document = {
+        id: savedDocument.id,
+        name: savedDocument.name,
+        type: savedDocument.type,
+        size: savedDocument.size,
+        uploadDate: savedDocument.uploadedAt || new Date().toISOString(),
+        uploadedBy: savedDocument.uploadedBy,
+        category: savedDocument.category as Document['category'],
+        url: savedDocument.url,
+        dataUrl: savedDocument.dataUrl,
+        preview: savedDocument.preview
+      };
+
+      setDocuments(prev => [newDoc, ...prev]);
+
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+      alert(`Document "${processedFile.name}" uploaded successfully!`);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert(`Failed to upload document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploading(false);
     }
   };
 
