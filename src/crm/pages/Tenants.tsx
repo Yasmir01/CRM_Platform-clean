@@ -296,6 +296,44 @@ export default function Tenants() {
     dispatch({ type: 'DELETE_TENANT', payload: id });
   };
 
+  const handleBulkImportTenants = async (importedTenants: any[]) => {
+    try {
+      // Add each tenant using the existing addTenant function
+      for (const tenantData of importedTenants) {
+        const newTenant = {
+          ...tenantData,
+          status: "Pending" as const,
+          profilePicture: "",
+          emergencyContact: tenantData.emergencyContact ? {
+            name: tenantData.emergencyContact,
+            phone: tenantData.emergencyPhone || "",
+            relationship: "Emergency Contact"
+          } : undefined,
+          communicationPrefs: {
+            smsEnabled: true,
+            emailEnabled: true,
+            phoneEnabled: true,
+            achOptIn: false,
+            autoPayEnabled: false,
+          },
+          paymentInfo: {
+            bankAccountLast4: "",
+            routingNumber: "",
+            cardLast4: "",
+            cardType: "",
+            autoPayAmount: 0,
+            autoPayDate: 1,
+          }
+        };
+
+        addTenant(newTenant);
+      }
+    } catch (error) {
+      console.error('Error importing tenants:', error);
+      throw new Error('Failed to import tenants');
+    }
+  };
+
   const handleViewTenantDetail = (tenantId: string) => {
     setDetailTenantId(tenantId);
     setShowTenantDetail(true);
