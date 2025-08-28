@@ -308,6 +308,11 @@ function AppRoutes() {
             <BackupManagement />
           </React.Suspense>
         } />
+        <Route path="bank-account-settings" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <BankAccountSettings />
+          </React.Suspense>
+        } />
         <Route path="automation" element={
           <React.Suspense fallback={<PageLoader />}>
             <MarketingAutomation />
