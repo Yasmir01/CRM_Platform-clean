@@ -210,10 +210,10 @@ export class BookkeepingIntegrationService {
   private providers: Map<string, BookkeepingProvider> = new Map();
   private connections: Map<string, BookkeepingConnection> = new Map();
   private adapters: Map<string, BookkeepingAdapter> = new Map();
+  private adaptersInitialized: boolean = false;
 
   constructor() {
     this.initializeProviders();
-    this.initializeAdapters();
     this.loadConnections();
   }
 
