@@ -22,6 +22,8 @@ import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useMode } from "../contexts/ModeContext";
 import TwoStepAssignmentSelector from "./TwoStepAssignmentSelector";
+import EnhancedFileUploadField from "./EnhancedFileUploadField";
+import { FileStorageService, StoredFile } from "../services/FileStorageService";
 
 interface WorkOrder {
   id: string;
