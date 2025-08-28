@@ -359,6 +359,8 @@ export default function ContactManagement() {
     zipCode: "",
     source: "Website",
     status: "Lead",
+    statusDescription: "",
+    sourceDescription: "",
     tags: [] as string[],
     nextFollowUp: "",
     assignedTo: "",
