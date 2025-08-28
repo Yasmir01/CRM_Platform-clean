@@ -1174,25 +1174,6 @@ export const CrmDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [state]);
 
-  // Save data to localStorage whenever state changes
-  useEffect(() => {
-    if (state.initialized) {
-      LocalStorageService.syncAllData({
-        properties: state.properties,
-        tenants: state.tenants,
-        managers: state.propertyManagers,
-        contacts: state.contacts,
-        deals: state.deals,
-        quotes: state.quotes,
-        campaigns: state.campaigns,
-        workOrders: state.workOrders,
-        news: state.notes, // Note: notes are saved as news in LocalStorageService
-        announcements: state.announcements,
-        documents: state.documents
-      });
-    }
-  }, [state]);
-
   // Set up auto-save interval
   useEffect(() => {
     const cleanup = LocalStorageService.enableAutoSave(() => ({
