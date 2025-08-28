@@ -1302,8 +1302,25 @@ export default function Communications() {
         </Stack>
       </TabPanel>
 
-      {/* Fax Tab */}
+      {/* Call Recordings Tab */}
       <TabPanel value={selectedTab} index={2}>
+        <CallRecordingManager
+          recordings={callRecordings}
+          onUpdateRecording={(recordingId, updates) => {
+            setCallRecordings(prev => prev.map(rec =>
+              rec.id === recordingId ? { ...rec, ...updates } : rec
+            ));
+          }}
+          onDeleteRecording={(recordingId) => {
+            setCallRecordings(prev => prev.filter(rec => rec.id !== recordingId));
+          }}
+          recordingSettings={recordingSettings}
+          onUpdateSettings={setRecordingSettings}
+        />
+      </TabPanel>
+
+      {/* Fax Tab */}
+      <TabPanel value={selectedTab} index={3}>
         <Stack spacing={3}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">Fax Communications</Typography>
