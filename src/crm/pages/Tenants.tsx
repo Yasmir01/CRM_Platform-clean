@@ -55,6 +55,8 @@ import AutoModeIcon from "@mui/icons-material/AutoMode";
 import PaymentIcon from "@mui/icons-material/Payment";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
+import BulkUploadDialog from "../components/BulkUploadDialog";
 
 interface CommunicationPreferences {
   smsEnabled: boolean;
@@ -133,6 +135,7 @@ export default function Tenants() {
       autoPayDate: 1,
     },
   });
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
 
   // Handle navigation from Properties page
   React.useEffect(() => {
@@ -293,6 +296,44 @@ export default function Tenants() {
     dispatch({ type: 'DELETE_TENANT', payload: id });
   };
 
+  const handleBulkImportTenants = async (importedTenants: any[]) => {
+    try {
+      // Add each tenant using the existing addTenant function
+      for (const tenantData of importedTenants) {
+        const newTenant = {
+          ...tenantData,
+          status: "Pending" as const,
+          profilePicture: "",
+          emergencyContact: tenantData.emergencyContact ? {
+            name: tenantData.emergencyContact,
+            phone: tenantData.emergencyPhone || "",
+            relationship: "Emergency Contact"
+          } : undefined,
+          communicationPrefs: {
+            smsEnabled: true,
+            emailEnabled: true,
+            phoneEnabled: true,
+            achOptIn: false,
+            autoPayEnabled: false,
+          },
+          paymentInfo: {
+            bankAccountLast4: "",
+            routingNumber: "",
+            cardLast4: "",
+            cardType: "",
+            autoPayAmount: 0,
+            autoPayDate: 1,
+          }
+        };
+
+        addTenant(newTenant);
+      }
+    } catch (error) {
+      console.error('Error importing tenants:', error);
+      throw new Error('Failed to import tenants');
+    }
+  };
+
   const handleViewTenantDetail = (tenantId: string) => {
     setDetailTenantId(tenantId);
     setShowTenantDetail(true);
@@ -349,14 +390,23 @@ export default function Tenants() {
         <Typography variant="h4" component="h1">
           Tenant Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={handleAddTenant}
-          data-testid="add-tenant-button"
-        >
-          Add Tenant
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="outlined"
+            startIcon={<CloudUploadRoundedIcon />}
+            onClick={() => setBulkUploadDialogOpen(true)}
+          >
+            Bulk Import
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={handleAddTenant}
+            data-testid="add-tenant-button"
+          >
+            Add Tenant
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Stats Cards */}
@@ -1111,6 +1161,16 @@ export default function Tenants() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="tenants"
+        onImport={handleBulkImportTenants}
+        existingData={tenants}
+        relatedData={{ properties }}
+      />
     </Box>
   );
 }

@@ -71,9 +71,11 @@ import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import ThumbUpRoundedIcon from "@mui/icons-material/ThumbUpRounded";
+import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import BulkUploadDialog from "../components/BulkUploadDialog";
 
 // Using unified Contact interface from CrmDataContext
 
@@ -368,6 +370,26 @@ export default function ContactManagement() {
     assignedTo: "",
     customFields: {}
   });
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
+
+  const handleBulkImportContacts = async (importedContacts: any[]) => {
+    try {
+      // Add each contact using the existing addContact function
+      for (const contactData of importedContacts) {
+        const newContact = {
+          ...contactData,
+          lastContact: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        addContact(newContact);
+      }
+    } catch (error) {
+      console.error('Error importing contacts:', error);
+      throw new Error('Failed to import contacts');
+    }
+  };
 
   const filteredContacts = allContacts.filter(contact => {
     const matchesSearch = 
@@ -510,6 +532,13 @@ export default function ContactManagement() {
             onClick={() => console.log('Export contacts')}
           >
             Export
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<CloudUploadRoundedIcon />}
+            onClick={() => setBulkUploadDialogOpen(true)}
+          >
+            Bulk Import
           </Button>
           <Button
             variant="contained"
@@ -977,6 +1006,16 @@ export default function ContactManagement() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="contacts"
+        onImport={handleBulkImportContacts}
+        existingData={allContacts}
+        relatedData={{}}
+      />
     </Box>
   );
 }

@@ -89,8 +89,11 @@ import PropertyDetailPage from "./PropertyDetailPage";
 import ExportDialog from "../components/ExportDialog";
 import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
+import { CombinedImportData } from "../utils/bulkUploadUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
+import BulkUploadDialog from "../components/BulkUploadDialog";
+import CombinedBulkUploadDialog from "../components/CombinedBulkUploadDialog";
 
 interface PropertyImage {
   id: string;
@@ -464,6 +467,8 @@ export default function Properties() {
   const [backgroundPreferencesOpen, setBackgroundPreferencesOpen] = React.useState(false);
   const [addressBackgroundColor, setAddressBackgroundColor] = React.useState('secondary.main'); // Default pink/secondary color
   const [globalBackgroundSettings, setGlobalBackgroundSettings] = React.useState(false);
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
+  const [combinedUploadDialogOpen, setCombinedUploadDialogOpen] = React.useState(false);
 
   // Load saved background color from localStorage on component mount
   React.useEffect(() => {
@@ -1071,6 +1076,135 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     setOpenDialog(true);
   };
 
+  const handleBulkImportProperties = async (importedProperties: any[]) => {
+    try {
+      // Add each property using the existing addProperty function
+      for (const propertyData of importedProperties) {
+        const newProperty = {
+          ...propertyData,
+          occupancy: 0,
+          status: "Unlisted" as const,
+          images: [],
+          tags: propertyData.tags || [],
+          assignedBusinessBankAccountId: "",
+        };
+
+        addProperty(newProperty);
+
+        // Track bulk import activity
+        trackPropertyActivity(
+          'create',
+          Date.now().toString(),
+          newProperty.name,
+          [
+            { field: 'name', oldValue: null, newValue: newProperty.name, displayName: 'Property Name' },
+            { field: 'address', oldValue: null, newValue: newProperty.address, displayName: 'Address' },
+            { field: 'type', oldValue: null, newValue: newProperty.type, displayName: 'Property Type' },
+            { field: 'monthlyRent', oldValue: null, newValue: newProperty.monthlyRent, displayName: 'Monthly Rent' }
+          ],
+          `Property "${newProperty.name}" imported via bulk upload`,
+          { notes: `Bulk import: ${importedProperties.length} properties total` }
+        );
+      }
+    } catch (error) {
+      console.error('Error importing properties:', error);
+      throw new Error('Failed to import properties');
+    }
+  };
+
+  const handleCombinedImport = async (combinedData: CombinedImportData) => {
+    try {
+      // Step 1: Import properties first
+      const propertyIdMap = new Map<string, string>(); // propertyName -> propertyId
+
+      for (const propertyData of combinedData.properties) {
+        const newProperty = {
+          ...propertyData,
+          occupancy: 0,
+          status: "Unlisted" as const,
+          images: [],
+          tags: propertyData.tags || [],
+          assignedBusinessBankAccountId: "",
+        };
+
+        const addedProperty = addProperty(newProperty);
+
+        // Track the property name to ID mapping for tenant linking
+        if (addedProperty && addedProperty.id) {
+          propertyIdMap.set(propertyData.name, addedProperty.id);
+        }
+
+        // Track property creation activity
+        trackPropertyActivity(
+          'create',
+          Date.now().toString(),
+          newProperty.name,
+          [
+            { field: 'name', oldValue: null, newValue: newProperty.name, displayName: 'Property Name' },
+            { field: 'address', oldValue: null, newValue: newProperty.address, displayName: 'Address' },
+            { field: 'type', oldValue: null, newValue: newProperty.type, displayName: 'Property Type' },
+            { field: 'monthlyRent', oldValue: null, newValue: newProperty.monthlyRent, displayName: 'Monthly Rent' }
+          ],
+          `Property "${newProperty.name}" imported via combined bulk upload`,
+          { notes: `Combined import: ${combinedData.properties.length} properties, ${combinedData.tenants.length} tenants` }
+        );
+      }
+
+      // Step 2: Import tenants and link them to properties
+      for (const tenantData of combinedData.tenants) {
+        // Find the property ID for linking
+        let propertyId = '';
+        if (tenantData.propertyName) {
+          // Check newly created properties first
+          propertyId = propertyIdMap.get(tenantData.propertyName) || '';
+
+          // If not found in new properties, check existing properties
+          if (!propertyId) {
+            const existingProperty = (properties || []).find(p =>
+              p && p.name.toLowerCase() === tenantData.propertyName!.toLowerCase()
+            );
+            if (existingProperty) {
+              propertyId = existingProperty.id;
+            }
+          }
+        }
+
+        const newTenant = {
+          ...tenantData,
+          propertyId: propertyId,
+          status: "Pending" as const,
+          profilePicture: "",
+          emergencyContact: tenantData.emergencyContact ? {
+            name: tenantData.emergencyContact,
+            phone: tenantData.emergencyPhone || "",
+            relationship: "Emergency Contact"
+          } : undefined,
+          communicationPrefs: {
+            smsEnabled: true,
+            emailEnabled: true,
+            phoneEnabled: true,
+            achOptIn: false,
+            autoPayEnabled: false,
+          },
+          paymentInfo: {
+            bankAccountLast4: "",
+            routingNumber: "",
+            cardLast4: "",
+            cardType: "",
+            autoPayAmount: 0,
+            autoPayDate: 1,
+          }
+        };
+
+        addTenant(newTenant);
+      }
+
+    } catch (error) {
+      console.error('Error importing combined data:', error);
+      throw new Error('Failed to import combined data');
+    }
+  };
+
   const exportPropertiesData = (data: any[], filename: string) => {
     // Convert to CSV format
     const headers = Object.keys(data[0]);
@@ -1421,6 +1555,47 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               onClick={() => setExportDialogOpen(true)}
             >
               Export
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title="Import multiple properties from CSV or JSON file"
+            componentsProps={{
+              tooltip: {
+                sx: uniformTooltipStyles
+              }
+            }}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              onClick={() => setBulkUploadDialogOpen(true)}
+            >
+              Bulk Import
+            </Button>
+          </Tooltip>
+          <Tooltip
+            title="Import properties and tenants together in a single file with automatic linking"
+            componentsProps={{
+              tooltip: {
+                sx: uniformTooltipStyles
+              }
+            }}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              onClick={() => setCombinedUploadDialogOpen(true)}
+              sx={{
+                bgcolor: 'primary.50',
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.100',
+                  borderColor: 'primary.dark'
+                }
+              }}
+            >
+              🏠👥 Combined Import
             </Button>
           </Tooltip>
           <Tooltip
@@ -6097,6 +6272,25 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         data={filteredProperties}
         title="Properties"
         defaultFilename="properties-export"
+      />
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="properties"
+        onImport={handleBulkImportProperties}
+        existingData={properties}
+        relatedData={{ propertyManagers }}
+      />
+
+      {/* Combined Bulk Upload Dialog */}
+      <CombinedBulkUploadDialog
+        open={combinedUploadDialogOpen}
+        onClose={() => setCombinedUploadDialogOpen(false)}
+        onImport={handleCombinedImport}
+        existingProperties={properties}
+        existingTenants={tenants}
       />
         </Box>
       )}
