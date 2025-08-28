@@ -123,6 +123,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDetailProps) {
+  const { state, addDocument } = useCrmData();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [openNoteDialog, setOpenNoteDialog] = React.useState(false);
   const [openDocumentDialog, setOpenDocumentDialog] = React.useState(false);
@@ -130,6 +131,9 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
   const [openMessageDialog, setOpenMessageDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [previewDocument, setPreviewDocument] = React.useState<Document | null>(null);
+  const [openDocumentPreview, setOpenDocumentPreview] = React.useState(false);
 
   // Mock work order data
   const workOrder = {
