@@ -308,11 +308,25 @@ const generateFaxDocumentsFromCRMData = (tenants: any[], managers: any[]): FaxDo
 
 export default function Communications() {
   const { isTenantMode } = useMode();
+  const { state } = useCrmData();
+  const { tenants, propertyManagers, contacts } = state;
+
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [simCards, setSimCards] = React.useState<SimCard[]>(mockSimCards);
-  const [communications, setCommunications] = React.useState<CommunicationRecord[]>(mockCommunications);
-  const [faxDocuments, setFaxDocuments] = React.useState<FaxDocument[]>(mockFaxDocuments);
+
+  // Generate real data from CRM
+  const [simCards, setSimCards] = React.useState<SimCard[]>([]);
+  const [communications, setCommunications] = React.useState<CommunicationRecord[]>([]);
+  const [faxDocuments, setFaxDocuments] = React.useState<FaxDocument[]>([]);
+
+  // Initialize real data when CRM data is available
+  React.useEffect(() => {
+    if (tenants.length > 0 || propertyManagers.length > 0 || contacts.length > 0) {
+      setSimCards(generateSimCardsFromCRMData(tenants, propertyManagers, contacts));
+      setCommunications(generateCommunicationsFromCRMData(tenants, propertyManagers, contacts));
+      setFaxDocuments(generateFaxDocumentsFromCRMData(tenants, propertyManagers));
+    }
+  }, [tenants, propertyManagers, contacts]);
   const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null);
   const [openCommunicationDialog, setOpenCommunicationDialog] = React.useState(false);
   const [openSMSConnectionDialog, setOpenSMSConnectionDialog] = React.useState(false);
