@@ -497,7 +497,7 @@ export default function BookkeepingManagement() {
                               size="small"
                               onClick={() => handleTestConnection(connection)}
                             >
-                              <TestRoundedIcon />
+                              <PlayArrowRoundedIcon />
                             </IconButton>
                           </Tooltip>
                           

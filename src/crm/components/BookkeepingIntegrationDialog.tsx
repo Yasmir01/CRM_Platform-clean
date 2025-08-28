@@ -587,7 +587,7 @@ export default function BookkeepingIntegrationDialog({
             <Typography variant="subtitle1">Connection Test</Typography>
             <Button
               variant="outlined"
-              startIcon={isLoading ? <CircularProgress size={16} /> : <TestRoundedIcon />}
+              startIcon={isLoading ? <CircularProgress size={16} /> : <PlayArrowRoundedIcon />}
               onClick={handleTestConnection}
               disabled={isLoading}
             >
