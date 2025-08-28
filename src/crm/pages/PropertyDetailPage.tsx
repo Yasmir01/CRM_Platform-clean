@@ -923,7 +923,8 @@ export default function PropertyDetailPage({
                   position: 'relative',
                   overflow: 'hidden',
                   border: '1px solid',
-                  borderColor: 'divider'
+                  borderColor: 'divider',
+                  mb: 2
                 }}>
                   <iframe
                     src={`https://www.google.com/maps?q=${encodeURIComponent(property.address)}&output=embed&z=15`}
@@ -936,6 +937,28 @@ export default function PropertyDetailPage({
                     title={`Map showing ${property.address}`}
                   />
                 </Box>
+                <Stack direction="row" spacing={1} justifyContent="center">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<LaunchRoundedIcon />}
+                    onClick={() => {
+                      window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(property.address)}`, '_blank');
+                    }}
+                  >
+                    Open in Maps
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DirectionsRoundedIcon />}
+                    onClick={() => {
+                      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(property.address)}`, '_blank');
+                    }}
+                  >
+                    Get Directions
+                  </Button>
+                </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   ���� {property.address}
                 </Typography>
