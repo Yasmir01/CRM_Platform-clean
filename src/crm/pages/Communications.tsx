@@ -1282,7 +1282,7 @@ export default function Communications() {
                   Select a contact list to start a power dialing campaign
                 </Typography>
                 <Grid container spacing={2}>
-                  {["Prospects", "Tenants", "Property Managers", "Service Providers"].map((listName) => (
+                  {Object.entries(getContactListCounts()).map(([listName, count]) => (
                     <Grid item xs={12} sm={6} md={3} key={listName}>
                       <Card
                         variant="outlined"
@@ -1301,7 +1301,7 @@ export default function Communications() {
                           />
                           <Typography variant="subtitle1">{listName}</Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {Math.floor(Math.random() * 50) + 10} contacts
+                            {count} contact{count !== 1 ? 's' : ''}
                           </Typography>
                           {selectedContactList === listName && (
                             <Chip
