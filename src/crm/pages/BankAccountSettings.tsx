@@ -9,7 +9,11 @@ import {
   Grid,
   Alert,
   Button,
-  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Chip,
   useTheme
 } from '@mui/material';
 import {
@@ -18,12 +22,10 @@ import {
   Route as RouteIcon,
   Security as SecurityIcon,
   Analytics as AnalyticsIcon,
-  Settings as SettingsIcon
+  Add as AddIcon,
+  CheckCircle as VerifiedIcon,
+  Warning as WarningIcon
 } from '@mui/icons-material';
-
-import BankAccountManagement from '../components/BankAccountManagement';
-import BusinessBankAccountManagement from '../components/BusinessBankAccountManagement';
-import { useCrmData } from '../contexts/CrmDataContext';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -49,14 +51,38 @@ function TabPanel(props: TabPanelProps) {
 const BankAccountSettings: React.FC = () => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
-  const { tenants } = useCrmData();
 
   const tabs = [
-    { label: 'Tenant Bank Accounts', icon: <BankIcon /> },
     { label: 'Business Accounts', icon: <BusinessIcon /> },
     { label: 'Payment Routing', icon: <RouteIcon /> },
     { label: 'Security & Compliance', icon: <SecurityIcon /> },
     { label: 'Analytics', icon: <AnalyticsIcon /> }
+  ];
+
+  // Mock data for demonstration
+  const businessAccounts = [
+    {
+      id: 'biz_bank_main',
+      bankName: 'Chase Business Banking',
+      accountType: 'Business Checking',
+      accountNumber: '****1234',
+      routingNumber: '021000021',
+      isVerified: true,
+      isPrimary: true,
+      canReceivePayments: true,
+      balance: 125000.00
+    },
+    {
+      id: 'biz_bank_savings',
+      bankName: 'Bank of America',
+      accountType: 'Business Savings',
+      accountNumber: '****5678',
+      routingNumber: '011000015',
+      isVerified: true,
+      isPrimary: false,
+      canReceivePayments: false,
+      balance: 50000.00
+    }
   ];
 
   return (
@@ -77,30 +103,14 @@ const BankAccountSettings: React.FC = () => {
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <BankIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-                <Typography variant="h6">Connected Accounts</Typography>
-              </Box>
-              <Typography variant="h4" color="primary">
-                {tenants.length > 0 ? tenants.length * 2 : '0'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Active bank connections
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <BusinessIcon sx={{ mr: 1, color: theme.palette.success.main }} />
                 <Typography variant="h6">Business Accounts</Typography>
               </Box>
               <Typography variant="h4" color="success.main">
-                2
+                {businessAccounts.length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Receiving accounts
+                Connected accounts
               </Typography>
             </CardContent>
           </Card>
@@ -113,7 +123,7 @@ const BankAccountSettings: React.FC = () => {
                 <Typography variant="h6">Verification Rate</Typography>
               </Box>
               <Typography variant="h4" color="warning.main">
-                95%
+                100%
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Accounts verified
@@ -133,6 +143,22 @@ const BankAccountSettings: React.FC = () => {
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 ACH processing
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <BankIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
+                <Typography variant="h6">Total Balance</Typography>
+              </Box>
+              <Typography variant="h4" color="primary">
+                $175K
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Across all accounts
               </Typography>
             </CardContent>
           </Card>
@@ -160,52 +186,99 @@ const BankAccountSettings: React.FC = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          {/* Tenant Bank Accounts */}
+          {/* Business Bank Accounts */}
           <Box sx={{ px: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Tenant Bank Account Management
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              View and manage bank accounts connected by tenants for rent payments.
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6">
+                Business Bank Account Management
+              </Typography>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  // TODO: Open add account dialog
+                  alert('Add Bank Account functionality will be implemented');
+                }}
+              >
+                Add Bank Account
+              </Button>
+            </Box>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Manage your business bank accounts that receive rent payments and handle disbursements.
             </Typography>
 
-            {tenants.length > 0 ? (
-              <Grid container spacing={3}>
-                {tenants.slice(0, 3).map((tenant) => (
-                  <Grid item xs={12} key={tenant.id}>
-                    <Card variant="outlined">
-                      <CardContent>
-                        <Typography variant="subtitle1" gutterBottom>
-                          {tenant.name}
-                        </Typography>
-                        <BankAccountManagement tenantId={tenant.id} />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            ) : (
-              <Alert severity="info">
-                No tenants available. Add tenants to manage their bank accounts.
-              </Alert>
-            )}
+            <Grid container spacing={3}>
+              {businessAccounts.map((account) => (
+                <Grid item xs={12} key={account.id}>
+                  <Card variant="outlined">
+                    <CardContent>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <BusinessIcon sx={{ mr: 2, fontSize: 40, color: theme.palette.primary.main }} />
+                          <Box>
+                            <Typography variant="h6" gutterBottom>
+                              {account.bankName}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {account.accountType} • {account.accountNumber}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Routing: {account.routingNumber}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography variant="h6" color="primary">
+                            ${account.balance.toLocaleString()}
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                            {account.isVerified && (
+                              <Chip
+                                icon={<VerifiedIcon />}
+                                label="Verified"
+                                size="small"
+                                color="success"
+                              />
+                            )}
+                            {account.isPrimary && (
+                              <Chip
+                                label="Primary"
+                                size="small"
+                                color="primary"
+                              />
+                            )}
+                            {account.canReceivePayments && (
+                              <Chip
+                                label="Receives Payments"
+                                size="small"
+                                variant="outlined"
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                        <Button variant="outlined" size="small">
+                          Edit Account
+                        </Button>
+                        <Button variant="outlined" size="small">
+                          View Transactions
+                        </Button>
+                        <Button variant="outlined" size="small" color="error">
+                          Remove
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
           </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          {/* Business Bank Accounts */}
-          <Box sx={{ px: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Business Bank Account Management
-            </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Manage your business bank accounts that receive rent payments and handle disbursements.
-            </Typography>
-            <BusinessBankAccountManagement organizationId="org_main" />
-          </Box>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={2}>
           {/* Payment Routing */}
           <Box sx={{ px: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -256,7 +329,7 @@ const BankAccountSettings: React.FC = () => {
           </Box>
         </TabPanel>
 
-        <TabPanel value={tabValue} index={3}>
+        <TabPanel value={tabValue} index={2}>
           {/* Security & Compliance */}
           <Box sx={{ px: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -278,8 +351,8 @@ const BankAccountSettings: React.FC = () => {
                       All bank account data is encrypted using AES-256
                     </Alert>
                     <Typography variant="body2" color="text.secondary">
-                      • Account numbers are tokenized
-                      • Routing numbers are masked
+                      • Account numbers are tokenized<br />
+                      • Routing numbers are masked<br />
                       • PII data is encrypted at rest
                     </Typography>
                   </CardContent>
@@ -295,30 +368,10 @@ const BankAccountSettings: React.FC = () => {
                       PCI DSS & NACHA compliant
                     </Alert>
                     <Typography variant="body2" color="text.secondary">
-                      • Annual security audits
-                      • SOC 2 Type II certified
+                      • Annual security audits<br />
+                      • SOC 2 Type II certified<br />
                       • Bank-level security standards
                     </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid item xs={12}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Access Control & Audit Logging
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" paragraph>
-                      All bank account operations are logged and monitored for security compliance.
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Button variant="outlined" size="small">
-                        View Audit Logs
-                      </Button>
-                      <Button variant="outlined" size="small">
-                        Security Settings
-                      </Button>
-                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
@@ -326,7 +379,7 @@ const BankAccountSettings: React.FC = () => {
           </Box>
         </TabPanel>
 
-        <TabPanel value={tabValue} index={4}>
+        <TabPanel value={tabValue} index={3}>
           {/* Analytics */}
           <Box sx={{ px: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -376,13 +429,6 @@ const BankAccountSettings: React.FC = () => {
                     </Box>
                   </CardContent>
                 </Card>
-              </Grid>
-              <Grid item xs={12}>
-                <Alert severity="info">
-                  <Typography variant="body2">
-                    Advanced analytics including payment trends, tenant behavior, and cash flow forecasting will be available in the next release.
-                  </Typography>
-                </Alert>
               </Grid>
             </Grid>
           </Box>
