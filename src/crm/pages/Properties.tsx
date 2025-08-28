@@ -6152,6 +6152,16 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         title="Properties"
         defaultFilename="properties-export"
       />
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="properties"
+        onImport={handleBulkImportProperties}
+        existingData={properties}
+        relatedData={{ propertyManagers }}
+      />
         </Box>
       )}
     </>
