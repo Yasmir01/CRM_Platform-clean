@@ -348,13 +348,26 @@ const BankAccountSettings: React.FC = () => {
                       </Box>
                       
                       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                        <Button variant="outlined" size="small">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleEditAccount(account)}
+                        >
                           Edit Account
                         </Button>
-                        <Button variant="outlined" size="small">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleViewTransactions(account)}
+                        >
                           View Transactions
                         </Button>
-                        <Button variant="outlined" size="small" color="error">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveAccount(account)}
+                        >
                           Remove
                         </Button>
                       </Box>
@@ -386,7 +399,11 @@ const BankAccountSettings: React.FC = () => {
                     <Typography variant="body2" color="text.secondary" paragraph>
                       All rent payments go to Chase Business Checking
                     </Typography>
-                    <Button variant="outlined" size="small">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPaymentRoutingOpen(true)}
+                    >
                       Edit Rule
                     </Button>
                   </CardContent>
