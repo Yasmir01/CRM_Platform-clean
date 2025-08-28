@@ -135,6 +135,7 @@ export default function Tenants() {
       autoPayDate: 1,
     },
   });
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
 
   // Handle navigation from Properties page
   React.useEffect(() => {
