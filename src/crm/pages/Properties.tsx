@@ -1574,6 +1574,31 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             </Button>
           </Tooltip>
           <Tooltip
+            title="Import properties and tenants together in a single file with automatic linking"
+            componentsProps={{
+              tooltip: {
+                sx: uniformTooltipStyles
+              }
+            }}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              onClick={() => setCombinedUploadDialogOpen(true)}
+              sx={{
+                bgcolor: 'primary.50',
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                '&:hover': {
+                  bgcolor: 'primary.100',
+                  borderColor: 'primary.dark'
+                }
+              }}
+            >
+              🏠👥 Combined Import
+            </Button>
+          </Tooltip>
+          <Tooltip
             title="Add a new property to the system"
             componentsProps={{
               tooltip: {
@@ -3995,7 +4020,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             <Alert severity="success">
               <Typography variant="body2">
                 <strong>What happens next:</strong>
-                <br />��� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
+                <br />���� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
                 <br />• Task will be assigned to {inspectionData.inspector || 'selected inspector'}
                 <br />• {inspectionData.notifyTenant ? `Tenant will be notified ${inspectionData.reminderDays} days in advance` : 'No tenant notification will be sent'}
                 <br />• Inspection reminder will be sent to inspector 1 day before
@@ -5900,7 +5925,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          ������ Share Property Listing - {shareProperty?.name}
+          ���� Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
