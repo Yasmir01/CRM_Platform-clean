@@ -66,6 +66,7 @@ import PendingRoundedIcon from "@mui/icons-material/PendingRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface CallLog {
