@@ -331,11 +331,70 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) return;
+
+    setUploadingDocument(true);
+
+    try {
+      // Convert file to data URL for better persistence
+      const fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(newDocument.file as File);
+      });
+
+      const document = {
+        name: newDocument.file.name,
+        type: newDocument.file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        size: newDocument.file.size,
+        url: fileUrl,
+        category: newDocument.category,
+        propertyManagerId: managerId,
+        uploadedBy: 'Current User',
+        description: newDocument.description,
+        tags: []
+      };
+
+      addDocument(document);
+
+      // Track document upload activity
+      trackPropertyActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'create',
+        entityType: 'property-manager',
+        entityId: managerId,
+        entityName: `${manager.firstName} ${manager.lastName}`,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        description: `Document uploaded: ${newDocument.file.name}`,
+        metadata: {
+          category: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type
+        },
+        severity: 'low',
+        category: 'operational'
+      });
+
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document. Please try again.');
+    } finally {
+      setUploadingDocument(false);
     }
   };
 
