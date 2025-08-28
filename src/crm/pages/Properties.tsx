@@ -1112,6 +1112,99 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     }
   };
 
+  const handleCombinedImport = async (combinedData: CombinedImportData) => {
+    try {
+      // Step 1: Import properties first
+      const propertyIdMap = new Map<string, string>(); // propertyName -> propertyId
+
+      for (const propertyData of combinedData.properties) {
+        const newProperty = {
+          ...propertyData,
+          occupancy: 0,
+          status: "Unlisted" as const,
+          images: [],
+          tags: propertyData.tags || [],
+          assignedBusinessBankAccountId: "",
+        };
+
+        const addedProperty = addProperty(newProperty);
+
+        // Track the property name to ID mapping for tenant linking
+        if (addedProperty && addedProperty.id) {
+          propertyIdMap.set(propertyData.name, addedProperty.id);
+        }
+
+        // Track property creation activity
+        trackPropertyActivity(
+          'create',
+          Date.now().toString(),
+          newProperty.name,
+          [
+            { field: 'name', oldValue: null, newValue: newProperty.name, displayName: 'Property Name' },
+            { field: 'address', oldValue: null, newValue: newProperty.address, displayName: 'Address' },
+            { field: 'type', oldValue: null, newValue: newProperty.type, displayName: 'Property Type' },
+            { field: 'monthlyRent', oldValue: null, newValue: newProperty.monthlyRent, displayName: 'Monthly Rent' }
+          ],
+          `Property "${newProperty.name}" imported via combined bulk upload`,
+          { notes: `Combined import: ${combinedData.properties.length} properties, ${combinedData.tenants.length} tenants` }
+        );
+      }
+
+      // Step 2: Import tenants and link them to properties
+      for (const tenantData of combinedData.tenants) {
+        // Find the property ID for linking
+        let propertyId = '';
+        if (tenantData.propertyName) {
+          // Check newly created properties first
+          propertyId = propertyIdMap.get(tenantData.propertyName) || '';
+
+          // If not found in new properties, check existing properties
+          if (!propertyId) {
+            const existingProperty = (properties || []).find(p =>
+              p && p.name.toLowerCase() === tenantData.propertyName!.toLowerCase()
+            );
+            if (existingProperty) {
+              propertyId = existingProperty.id;
+            }
+          }
+        }
+
+        const newTenant = {
+          ...tenantData,
+          propertyId: propertyId,
+          status: "Pending" as const,
+          profilePicture: "",
+          emergencyContact: tenantData.emergencyContact ? {
+            name: tenantData.emergencyContact,
+            phone: tenantData.emergencyPhone || "",
+            relationship: "Emergency Contact"
+          } : undefined,
+          communicationPrefs: {
+            smsEnabled: true,
+            emailEnabled: true,
+            phoneEnabled: true,
+            achOptIn: false,
+            autoPayEnabled: false,
+          },
+          paymentInfo: {
+            bankAccountLast4: "",
+            routingNumber: "",
+            cardLast4: "",
+            cardType: "",
+            autoPayAmount: 0,
+            autoPayDate: 1,
+          }
+        };
+
+        addTenant(newTenant);
+      }
+
+    } catch (error) {
+      console.error('Error importing combined data:', error);
+      throw new Error('Failed to import combined data');
+    }
+  };
+
   const exportPropertiesData = (data: any[], filename: string) => {
     // Convert to CSV format
     const headers = Object.keys(data[0]);
@@ -3272,7 +3365,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           target.style.alignItems = 'center';
                           target.style.justifyContent = 'center';
                           target.style.color = '#666';
-                          target.alt = `���� ${image.alt} (failed to load)`;
+                          target.alt = `�� ${image.alt} (failed to load)`;
                         }}
                       />
 
@@ -5807,7 +5900,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       {/* Enhanced Social Media Sharing Dialog */}
       <Dialog open={socialShareDialogOpen} onClose={() => setSocialShareDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
-          ���� Share Property Listing - {shareProperty?.name}
+          ������ Share Property Listing - {shareProperty?.name}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
