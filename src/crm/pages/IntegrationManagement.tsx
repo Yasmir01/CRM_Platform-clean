@@ -569,6 +569,10 @@ export default function IntegrationManagement() {
   const [selectedProperty, setSelectedProperty] = React.useState<any>(null);
   const [realEstateInitialized, setRealEstateInitialized] = React.useState(false);
 
+  // Bookkeeping integration state
+  const [bookkeepingConnections, setBookkeepingConnections] = React.useState<any[]>([]);
+  const [bookkeepingInitialized, setBookkeepingInitialized] = React.useState(false);
+
   // Initialize integrations with persisted data, merging with mock data
   const initializeIntegrations = () => {
     const persistedIntegrations = LocalStorageService.getIntegrations();
