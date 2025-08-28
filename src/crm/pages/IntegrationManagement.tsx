@@ -74,10 +74,12 @@ import { RealEstatePlatformService } from "../services/RealEstatePlatformService
 import { PlatformBundleService } from "../services/PlatformBundleService";
 import { useCrmData } from "../contexts/CrmDataContext";
 import PropertyPublishingInterface from "../components/PropertyPublishingInterface";
+import BookkeepingManagement from "../components/BookkeepingManagement";
 import { useNavigate } from "react-router-dom";
 import PublishRoundedIcon from "@mui/icons-material/PublishRounded";
 import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
 import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
+import { bookkeepingIntegrationService } from "../services/BookkeepingIntegrationService";
 
 interface Integration {
   id: string;
@@ -567,6 +569,10 @@ export default function IntegrationManagement() {
   const [selectedProperty, setSelectedProperty] = React.useState<any>(null);
   const [realEstateInitialized, setRealEstateInitialized] = React.useState(false);
 
+  // Bookkeeping integration state
+  const [bookkeepingConnections, setBookkeepingConnections] = React.useState<any[]>([]);
+  const [bookkeepingInitialized, setBookkeepingInitialized] = React.useState(false);
+
   // Initialize integrations with persisted data, merging with mock data
   const initializeIntegrations = () => {
     const persistedIntegrations = LocalStorageService.getIntegrations();
@@ -640,7 +646,18 @@ export default function IntegrationManagement() {
       }
     };
 
+    const initializeBookkeeping = async () => {
+      try {
+        const connections = bookkeepingIntegrationService.getConnections();
+        setBookkeepingConnections(connections);
+        setBookkeepingInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize bookkeeping integration service:', error);
+      }
+    };
+
     initializeRealEstate();
+    initializeBookkeeping();
   }, []);
 
   const showNotification = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {

@@ -55,6 +55,9 @@ import CellWifiRoundedIcon from "@mui/icons-material/CellWifiRounded";
 import { uniformTooltipStyles } from "../utils/formStyles";
 import CommunicationDialog, { Contact } from "../components/CommunicationDialog";
 import SMSConnectionDialog from "../components/SMSConnectionDialog";
+import CallRecordingManager from "../components/CallRecordingManager";
+import CallQualityAnalyzer from "../components/CallQualityAnalyzer";
+import RecordingSettingsDialog from "../components/RecordingSettingsDialog";
 import { useMode } from "../contexts/ModeContext";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { formatPhoneDisplay, getCleanPhoneNumber } from "../components/PhoneNumberField";
@@ -950,6 +953,19 @@ export default function Communications() {
         </Stack>
       </Alert>
 
+      {/* Enhanced Call Recording Alert */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Stack>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            🎙️ Comprehensive Call Recording System Active!
+          </Typography>
+          <Typography variant="body2">
+            Advanced call recording features now include: AI quality analysis, automatic transcription, sentiment scoring,
+            compliance monitoring, training recommendations, and webhook integration with your provider settings.
+          </Typography>
+        </Stack>
+      </Alert>
+
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -1299,8 +1315,25 @@ export default function Communications() {
         </Stack>
       </TabPanel>
 
-      {/* Fax Tab */}
+      {/* Call Recordings Tab */}
       <TabPanel value={selectedTab} index={2}>
+        <CallRecordingManager
+          recordings={callRecordings}
+          onUpdateRecording={(recordingId, updates) => {
+            setCallRecordings(prev => prev.map(rec =>
+              rec.id === recordingId ? { ...rec, ...updates } : rec
+            ));
+          }}
+          onDeleteRecording={(recordingId) => {
+            setCallRecordings(prev => prev.filter(rec => rec.id !== recordingId));
+          }}
+          recordingSettings={recordingSettings}
+          onUpdateSettings={setRecordingSettings}
+        />
+      </TabPanel>
+
+      {/* Fax Tab */}
+      <TabPanel value={selectedTab} index={3}>
         <Stack spacing={3}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">Fax Communications</Typography>
@@ -1376,7 +1409,7 @@ export default function Communications() {
       </TabPanel>
 
       {/* Power Dialer Tab */}
-      <TabPanel value={selectedTab} index={3}>
+      <TabPanel value={selectedTab} index={4}>
         <Stack spacing={3}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">Power Dialer - Automated Calling</Typography>
@@ -1528,7 +1561,7 @@ export default function Communications() {
       </TabPanel>
 
       {/* Provider Settings Tab */}
-      <TabPanel value={selectedTab} index={4}>
+      <TabPanel value={selectedTab} index={5}>
         <Stack spacing={3}>
           <Typography variant="h6">Communication Provider Configuration</Typography>
           
