@@ -1161,6 +1161,16 @@ export default function Tenants() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Bulk Upload Dialog */}
+      <BulkUploadDialog
+        open={bulkUploadDialogOpen}
+        onClose={() => setBulkUploadDialogOpen(false)}
+        dataType="tenants"
+        onImport={handleBulkImportTenants}
+        existingData={tenants}
+        relatedData={{ properties }}
+      />
     </Box>
   );
 }
