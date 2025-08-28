@@ -419,14 +419,11 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
       deleteDocument(documentToDelete.id);
 
       // Track deletion activity
-      trackPropertyActivity({
-        userId: 'current-user',
-        userDisplayName: 'Current User',
-        action: 'delete',
-        entityType: 'property-manager',
-        entityId: managerId,
-        entityName: `${manager.firstName} ${manager.lastName}`,
-        changes: [
+      trackPropertyActivity(
+        'delete',
+        managerId,
+        `${manager.firstName} ${manager.lastName}`,
+        [
           {
             field: 'documents',
             oldValue: documentToDelete.name,
@@ -434,15 +431,13 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
             displayName: 'Document Deleted'
           }
         ],
-        description: `Document deleted: ${documentToDelete.name}`,
-        metadata: {
+        `Document deleted: ${documentToDelete.name}`,
+        {
           documentId: documentToDelete.id,
           documentName: documentToDelete.name,
           documentCategory: documentToDelete.category
-        },
-        severity: 'medium',
-        category: 'operational'
-      });
+        }
+      );
 
       alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
     } catch (error) {
