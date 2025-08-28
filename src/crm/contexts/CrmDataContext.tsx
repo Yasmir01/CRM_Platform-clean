@@ -30,6 +30,7 @@ export interface Property {
   maxPetsAllowed?: number;
   parkingSpaces?: number;
   tags?: string[];
+  assignedBusinessBankAccountId?: string; // Business bank account for receiving rent payments
   createdAt: string;
   updatedAt: string;
 }

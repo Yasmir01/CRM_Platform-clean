@@ -90,6 +90,7 @@ import ExportDialog from "../components/ExportDialog";
 import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 
 interface PropertyImage {
   id: string;
@@ -370,6 +371,7 @@ export default function Properties() {
     maxPetsAllowed: 0,
     parkingSpaces: 0,
     tags: [] as string[],
+    assignedBusinessBankAccountId: "",
   });
   const [typeDialogOpen, setTypeDialogOpen] = React.useState(false);
   const [listingFormData, setListingFormData] = React.useState({
@@ -1113,6 +1115,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       maxPetsAllowed: property.maxPetsAllowed || 0,
       parkingSpaces: property.parkingSpaces || 0,
       tags: property.tags || [],
+      assignedBusinessBankAccountId: property.assignedBusinessBankAccountId || '',
     });
     setOpenDialog(true);
   };
@@ -1201,6 +1204,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       status: "Unlisted" as const,
       images: [],
       tags: formData.tags,
+      assignedBusinessBankAccountId: formData.assignedBusinessBankAccountId,
     };
 
       // Track new property creation
@@ -1225,6 +1229,34 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       addProperty(newPropertyData);
     }
     setOpenDialog(false);
+    // Reset form when closing
+    setSelectedProperty(null);
+    setFormData({
+      name: "",
+      address: "",
+      type: "Apartment" as Property["type"],
+      customType: "",
+      units: 1,
+      monthlyRent: 0,
+      securityDeposit: 0,
+      managerId: "",
+      managerIds: [] as string[],
+      tenantIds: [] as string[],
+      assignedTenants: [] as string[],
+      description: "",
+      amenities: [] as string[],
+      squareFootage: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      petPolicy: "",
+      petDeposit: 0,
+      petFee: 0,
+      petDepositRefundable: true,
+      maxPetsAllowed: 0,
+      parkingSpaces: 0,
+      tags: [] as string[],
+      assignedBusinessBankAccountId: "",
+    });
   };
 
   const handleDeleteProperty = (id: string) => {
@@ -3183,7 +3215,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           target.style.alignItems = 'center';
                           target.style.justifyContent = 'center';
                           target.style.color = '#666';
-                          target.alt = `❌ ${image.alt} (failed to load)`;
+                          target.alt = `�� ${image.alt} (failed to load)`;
                         }}
                       />
 
@@ -4965,6 +4997,18 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               placeholder="Enter a detailed description of the property..."
             />
 
+            {/* Bank Account Assignment Section */}
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, border: '1px dashed', borderColor: 'primary.main' }}>
+              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                🏦 Payment Routing
+              </Typography>
+              <BusinessBankAccountSelector
+                value={formData.assignedBusinessBankAccountId || undefined}
+                onChange={(accountId) => setFormData({ ...formData, assignedBusinessBankAccountId: accountId || '' })}
+                helperText="Assign a specific business bank account to receive all rent payments for this property. If not set, the system will use default payment routing rules."
+              />
+            </Box>
+
             <Divider />
 
             {/* Tenant Assignment Section */}
@@ -5314,7 +5358,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="h6">
-              🔧 Work Orders - {selectedPropertyForModal?.name}
+              ��� Work Orders - {selectedPropertyForModal?.name}
             </Typography>
             <Stack direction="row" spacing={1}>
               <Button

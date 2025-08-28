@@ -1,7 +1,7 @@
-import { 
-  RentPayment, 
-  PaymentMethod, 
-  PaymentSchedule, 
+import {
+  RentPayment,
+  PaymentMethod,
+  PaymentSchedule,
   PaymentReminder,
   CashPaymentLocation,
   PaymentProcessor,
@@ -10,7 +10,7 @@ import {
   PaymentReport,
   PaymentFee
 } from '../types/PaymentTypes';
-import { 
+import {
   BankConnection,
   BankTransaction,
   BusinessBankAccount,
@@ -19,6 +19,9 @@ import {
   EnhancedPaymentMethod
 } from '../types/BankAccountTypes';
 import { bankAccountService } from './BankAccountService';
+import { securityMiddleware } from '../utils/advancedSecurity';
+import { PCIComplianceValidator } from '../utils/pciComplianceValidator';
+import { PaymentEncryption } from '../utils/paymentSecurity';
 
 interface PaymentRoutingResult {
   selectedRoute: PaymentRoute;
@@ -173,8 +176,23 @@ export class EnhancedPaymentService {
       }
     }
 
-    // Determine routing
+    // Determine routing - check property assignment first
     let businessBankAccountId = options?.businessBankAccountId;
+
+    // Check if property has an assigned business bank account
+    if (!businessBankAccountId && payment.propertyId) {
+      try {
+        // In production, this would fetch from the database
+        // For now, we'll check localStorage via a helper method
+        const propertyBankAccount = await this.getPropertyBankAccount(payment.propertyId);
+        if (propertyBankAccount) {
+          businessBankAccountId = propertyBankAccount;
+        }
+      } catch (error) {
+        console.warn('Failed to get property bank account assignment:', error);
+      }
+    }
+
     if (!businessBankAccountId && !options?.bypassRouting) {
       const routing = await this.determinePaymentRoute(payment);
       businessBankAccountId = routing.businessBankAccount.id;
@@ -441,6 +459,21 @@ export class EnhancedPaymentService {
     };
     this.payments.push(newPayment);
     return newPayment;
+  }
+
+  /**
+   * Get property-assigned business bank account
+   */
+  private async getPropertyBankAccount(propertyId: string): Promise<string | null> {
+    try {
+      // Get property data from localStorage (in production this would be from Neon database)
+      const properties = JSON.parse(localStorage.getItem('crm_properties') || '[]');
+      const property = properties.find((p: any) => p.id === propertyId);
+      return property?.assignedBusinessBankAccountId || null;
+    } catch (error) {
+      console.error('Error fetching property bank account:', error);
+      return null;
+    }
   }
 
   // Initialize mock data
