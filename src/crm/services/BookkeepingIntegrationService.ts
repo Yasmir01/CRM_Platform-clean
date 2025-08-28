@@ -583,7 +583,7 @@ export class BookkeepingIntegrationService {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
