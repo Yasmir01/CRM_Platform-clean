@@ -82,6 +82,7 @@ const marketingListItems = [
 const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
+  { text: "Bank Account Settings", icon: <AccountBalanceRoundedIcon />, path: "/crm/bank-account-settings" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
