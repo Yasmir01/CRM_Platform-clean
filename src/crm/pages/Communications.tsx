@@ -803,9 +803,12 @@ export default function Communications() {
                 </Avatar>
                 <Box>
                   <Typography variant="h6" color="text.secondary">
-                    Communications
+                    Total Contacts
                   </Typography>
-                  <Typography variant="h4">{totalCommunications}</Typography>
+                  <Typography variant="h4">{totalContacts}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {totalCommunications} recent communications
+                  </Typography>
                 </Box>
               </Stack>
             </CardContent>
