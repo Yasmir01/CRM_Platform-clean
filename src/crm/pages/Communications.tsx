@@ -437,6 +437,24 @@ export default function Communications() {
   const [simCards, setSimCards] = React.useState<SimCard[]>([]);
   const [communications, setCommunications] = React.useState<CommunicationRecord[]>([]);
   const [faxDocuments, setFaxDocuments] = React.useState<FaxDocument[]>([]);
+  const [callRecordings, setCallRecordings] = React.useState<CallRecording[]>([]);
+
+  // Call Recording Settings
+  const [recordingSettings, setRecordingSettings] = React.useState<RecordingSettings>({
+    autoRecord: true,
+    recordInbound: true,
+    recordOutbound: true,
+    enableTranscription: true,
+    retentionDays: 90,
+    qualityAnalysis: true,
+    customerConsent: true,
+    storageLocation: "cloud",
+    compressionEnabled: true
+  });
+
+  const [recordingSearchTerm, setRecordingSearchTerm] = React.useState("");
+  const [selectedRecording, setSelectedRecording] = React.useState<CallRecording | null>(null);
+  const [recordingPlayerOpen, setRecordingPlayerOpen] = React.useState(false);
 
   // Initialize real data when CRM data is available
   React.useEffect(() => {
@@ -444,6 +462,7 @@ export default function Communications() {
       setSimCards(generateSimCardsFromCRMData(tenants, propertyManagers, contacts));
       setCommunications(generateCommunicationsFromCRMData(tenants, propertyManagers, contacts));
       setFaxDocuments(generateFaxDocumentsFromCRMData(tenants, propertyManagers));
+      setCallRecordings(generateCallRecordingsFromCRMData(tenants, propertyManagers, contacts));
     }
   }, [tenants, propertyManagers, contacts]);
   const [selectedContact, setSelectedContact] = React.useState<Contact | null>(null);
