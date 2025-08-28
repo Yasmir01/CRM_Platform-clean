@@ -418,7 +418,11 @@ const BankAccountSettings: React.FC = () => {
                     <Typography variant="body2" color="text.secondary" paragraph>
                       Payments over $5,000 go to Business Savings Account
                     </Typography>
-                    <Button variant="outlined" size="small">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setPaymentRoutingOpen(true)}
+                    >
                       Edit Rule
                     </Button>
                   </CardContent>
