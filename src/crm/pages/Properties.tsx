@@ -1073,6 +1073,42 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     setOpenDialog(true);
   };
 
+  const handleBulkImportProperties = async (importedProperties: any[]) => {
+    try {
+      // Add each property using the existing addProperty function
+      for (const propertyData of importedProperties) {
+        const newProperty = {
+          ...propertyData,
+          occupancy: 0,
+          status: "Unlisted" as const,
+          images: [],
+          tags: propertyData.tags || [],
+          assignedBusinessBankAccountId: "",
+        };
+
+        addProperty(newProperty);
+
+        // Track bulk import activity
+        trackPropertyActivity(
+          'create',
+          Date.now().toString(),
+          newProperty.name,
+          [
+            { field: 'name', oldValue: null, newValue: newProperty.name, displayName: 'Property Name' },
+            { field: 'address', oldValue: null, newValue: newProperty.address, displayName: 'Address' },
+            { field: 'type', oldValue: null, newValue: newProperty.type, displayName: 'Property Type' },
+            { field: 'monthlyRent', oldValue: null, newValue: newProperty.monthlyRent, displayName: 'Monthly Rent' }
+          ],
+          `Property "${newProperty.name}" imported via bulk upload`,
+          { notes: `Bulk import: ${importedProperties.length} properties total` }
+        );
+      }
+    } catch (error) {
+      console.error('Error importing properties:', error);
+      throw new Error('Failed to import properties');
+    }
+  };
+
   const exportPropertiesData = (data: any[], filename: string) => {
     // Convert to CSV format
     const headers = Object.keys(data[0]);
@@ -2452,7 +2488,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                         startIcon={<WebRoundedIcon />}
                         onClick={() => {
                           const landingPageUrl = `${window.location.origin}/property-landing/${property.id}`;
-                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
+                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n��� Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
                         }}
                       >
                         Create Landing Page
