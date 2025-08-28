@@ -131,6 +131,39 @@ interface FaxDocument {
   fileSize: string;
 }
 
+interface CallRecording {
+  id: string;
+  callId: string;
+  contactName: string;
+  contactNumber: string;
+  direction: "Inbound" | "Outbound";
+  duration: number;
+  timestamp: string;
+  recordingUrl: string;
+  fileSize: string;
+  transcription?: string;
+  tags: string[];
+  notes?: string;
+  quality: "Excellent" | "Good" | "Fair" | "Poor";
+  agentId: string;
+  agentName: string;
+  disposition: "Sale" | "Follow-up" | "No Interest" | "Callback" | "Information" | "Complaint" | "Other";
+  isStarred: boolean;
+  isArchived: boolean;
+}
+
+interface RecordingSettings {
+  autoRecord: boolean;
+  recordInbound: boolean;
+  recordOutbound: boolean;
+  enableTranscription: boolean;
+  retentionDays: number;
+  qualityAnalysis: boolean;
+  customerConsent: boolean;
+  storageLocation: "local" | "cloud" | "both";
+  compressionEnabled: boolean;
+}
+
 // Generate real SIM cards from actual phone usage patterns
 const generateSimCardsFromCRMData = (tenants: any[], managers: any[], contacts: any[]): SimCard[] => {
   const carriers = ["AT&T", "Verizon", "T-Mobile", "Sprint"];
