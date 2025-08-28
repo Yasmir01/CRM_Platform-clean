@@ -176,8 +176,23 @@ export class EnhancedPaymentService {
       }
     }
 
-    // Determine routing
+    // Determine routing - check property assignment first
     let businessBankAccountId = options?.businessBankAccountId;
+
+    // Check if property has an assigned business bank account
+    if (!businessBankAccountId && payment.propertyId) {
+      try {
+        // In production, this would fetch from the database
+        // For now, we'll check localStorage via a helper method
+        const propertyBankAccount = await this.getPropertyBankAccount(payment.propertyId);
+        if (propertyBankAccount) {
+          businessBankAccountId = propertyBankAccount;
+        }
+      } catch (error) {
+        console.warn('Failed to get property bank account assignment:', error);
+      }
+    }
+
     if (!businessBankAccountId && !options?.bypassRouting) {
       const routing = await this.determinePaymentRoute(payment);
       businessBankAccountId = routing.businessBankAccount.id;
