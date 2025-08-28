@@ -1151,6 +1151,12 @@ export default function CustomerService() {
         <DialogContent>
           {selectedTicket ? (
             <Stack spacing={3} sx={{ mt: 1 }}>
+              <Alert severity="success">
+                <Typography variant="body2">
+                  <strong>Editing Ticket {selectedTicket.id}</strong><br />
+                  Changes to status and assignment are saved automatically when you select them.
+                </Typography>
+              </Alert>
               {/* Ticket Details */}
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
