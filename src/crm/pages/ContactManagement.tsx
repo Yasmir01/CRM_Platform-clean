@@ -929,6 +929,8 @@ export default function ContactManagement() {
                   <MenuItem value="Customer">Customer</MenuItem>
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="Vendor">Vendor</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
