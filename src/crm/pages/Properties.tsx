@@ -4020,7 +4020,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             <Alert severity="success">
               <Typography variant="body2">
                 <strong>What happens next:</strong>
-                <br />���� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
+                <br />��� Calendar event will be created for {inspectionData.date} at {inspectionData.time || 'selected time'}
                 <br />• Task will be assigned to {inspectionData.inspector || 'selected inspector'}
                 <br />• {inspectionData.notifyTenant ? `Tenant will be notified ${inspectionData.reminderDays} days in advance` : 'No tenant notification will be sent'}
                 <br />• Inspection reminder will be sent to inspector 1 day before
@@ -6282,6 +6282,15 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         onImport={handleBulkImportProperties}
         existingData={properties}
         relatedData={{ propertyManagers }}
+      />
+
+      {/* Combined Bulk Upload Dialog */}
+      <CombinedBulkUploadDialog
+        open={combinedUploadDialogOpen}
+        onClose={() => setCombinedUploadDialogOpen(false)}
+        onImport={handleCombinedImport}
+        existingProperties={properties}
+        existingTenants={tenants}
       />
         </Box>
       )}
