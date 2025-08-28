@@ -953,6 +953,19 @@ export default function Communications() {
         </Stack>
       </Alert>
 
+      {/* Enhanced Call Recording Alert */}
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <Stack>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            🎙️ Comprehensive Call Recording System Active!
+          </Typography>
+          <Typography variant="body2">
+            Advanced call recording features now include: AI quality analysis, automatic transcription, sentiment scoring,
+            compliance monitoring, training recommendations, and webhook integration with your provider settings.
+          </Typography>
+        </Stack>
+      </Alert>
+
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
