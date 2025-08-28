@@ -402,6 +402,11 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
   };
 
   const handlePreviewDocument = (doc: any) => {
+    console.log('Preview document:', {
+      name: doc.name,
+      type: doc.type,
+      url: doc.url?.substring(0, 50) + '...' // Just show beginning of URL for debugging
+    });
     setSelectedDocument(doc);
     setDocumentViewModalOpen(true);
   };
