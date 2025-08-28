@@ -602,6 +602,7 @@ export default function Communications() {
   const totalDataUsage = simCards.reduce((sum, sim) => sum + sim.dataUsage.used, 0);
   const totalMonthlyCost = simCards.reduce((sum, sim) => sum + sim.monthlyFee, 0);
   const totalCommunications = communications.length;
+  const totalContacts = tenants.length + propertyManagers.length + contacts.length;
 
   // Auto-refresh functionality
   React.useEffect(() => {
