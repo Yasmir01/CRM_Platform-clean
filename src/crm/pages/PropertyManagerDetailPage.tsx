@@ -249,28 +249,10 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Property Management License.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "HR Department",
-      category: "Certification",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Performance Review 2023.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2023-12-15T10:00:00Z",
-      uploadedBy: "Regional Manager",
-      category: "Performance",
-      url: "#"
-    }
-  ]);
+  // Get documents for this property manager from CrmDataContext
+  const managerDocuments = React.useMemo(() => {
+    return state.documents?.filter(doc => doc.propertyManagerId === managerId) || [];
+  }, [state.documents, managerId]);
 
   const [newNote, setNewNote] = React.useState({
     content: "",
