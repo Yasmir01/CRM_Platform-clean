@@ -1087,7 +1087,25 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
               documents.map((doc) => (
                 <ListItem key={doc.id} divider>
                   <ListItemIcon>
-                    <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />
+                    {(() => {
+                      const docType = doc.type?.toLowerCase() || '';
+                      const docName = doc.name?.toLowerCase() || '';
+
+                      // Check for PDF
+                      if (docType.includes('pdf') || docName.endsWith('.pdf')) {
+                        return <DescriptionRoundedIcon color="error" />;
+                      }
+                      // Check for images
+                      else if (docType.startsWith('image/') ||
+                               ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(docType) ||
+                               docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+                        return <VisibilityRoundedIcon color="primary" />;
+                      }
+                      // Default file icon
+                      else {
+                        return <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />;
+                      }
+                    })()}
                   </ListItemIcon>
                   <ListItemText
                     primary={
