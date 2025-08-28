@@ -39,6 +39,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import { FileStorageService, StoredFile } from "../services/FileStorageService";
+import { useCrmData } from "../contexts/CrmDataContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
