@@ -1233,7 +1233,18 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
                   }}
                   title={selectedDocument.name}
                 />
-              ) : selectedDocument.type?.toLowerCase().match(/^image/) ? (
+              ) : (() => {
+                const docType = selectedDocument.type?.toLowerCase() || '';
+                const docName = selectedDocument.name?.toLowerCase() || '';
+
+                // Check if it's an image (MIME type or common extensions)
+                const isImage = docType.startsWith('image/') ||
+                               docType === 'png' || docType === 'jpg' || docType === 'jpeg' ||
+                               docType === 'gif' || docType === 'webp' || docType === 'svg' ||
+                               docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/);
+
+                return isImage;
+              })() ? (
                 <img
                   src={selectedDocument.url}
                   alt={selectedDocument.name}
@@ -1241,6 +1252,9 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
                     maxWidth: '100%',
                     maxHeight: '100%',
                     objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    console.error('Error loading image:', e);
                   }}
                 />
               ) : (
