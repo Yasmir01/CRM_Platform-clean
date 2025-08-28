@@ -161,7 +161,29 @@ export default function WorkOrderDialog({
     };
 
     // Save to CrmDataContext (this will auto-save to localStorage)
-    addWorkOrder(workOrderData);
+    const savedWorkOrder = addWorkOrder(workOrderData);
+
+    // Save attachments as documents if any
+    if (attachments.length > 0) {
+      attachments.forEach(attachment => {
+        const document = {
+          name: attachment.name,
+          type: attachment.type,
+          size: attachment.size,
+          url: attachment.dataUrl,
+          dataUrl: attachment.dataUrl,
+          preview: attachment.preview,
+          category: 'Other', // Default category for work order attachments
+          workOrderId: savedWorkOrder.id,
+          entityId: savedWorkOrder.id,
+          entityType: 'workOrder',
+          uploadedBy: user?.name || 'Unknown',
+          description: `Attached during work order creation`,
+          tags: [`work-order-${savedWorkOrder.id}`, 'work-order-attachment', 'initial-attachment']
+        };
+        addDocument(document);
+      });
+    }
 
     // Call the callback to notify parent component (if needed)
     if (onWorkOrderCreated) {
