@@ -390,14 +390,23 @@ export default function Tenants() {
         <Typography variant="h4" component="h1">
           Tenant Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={handleAddTenant}
-          data-testid="add-tenant-button"
-        >
-          Add Tenant
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="outlined"
+            startIcon={<CloudUploadRoundedIcon />}
+            onClick={() => setBulkUploadDialogOpen(true)}
+          >
+            Bulk Import
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={handleAddTenant}
+            data-testid="add-tenant-button"
+          >
+            Add Tenant
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Stats Cards */}
