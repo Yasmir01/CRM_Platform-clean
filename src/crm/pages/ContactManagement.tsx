@@ -75,6 +75,7 @@ import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import BulkUploadDialog from "../components/BulkUploadDialog";
 
 // Using unified Contact interface from CrmDataContext
 
