@@ -568,7 +568,23 @@ export default function Communications() {
 
   const handleContactListSelect = (listName: string) => {
     setSelectedContactList(listName);
-    alert(`Selected contact list: ${listName}`);
+    const contactCounts = {
+      "Prospects": contacts.filter(c => c.type === "Prospect").length,
+      "Tenants": tenants.length,
+      "Property Managers": propertyManagers.length,
+      "Service Providers": contacts.filter(c => c.type === "ServiceProvider").length
+    };
+    alert(`Selected contact list: ${listName} (${contactCounts[listName as keyof typeof contactCounts] || 0} contacts)`);
+  };
+
+  // Get real contact counts for Power Dialer
+  const getContactListCounts = () => {
+    return {
+      "Prospects": contacts.filter(c => c.type === "Prospect").length,
+      "Tenants": tenants.length,
+      "Property Managers": propertyManagers.length,
+      "Service Providers": contacts.filter(c => c.type === "ServiceProvider").length
+    };
   };
 
   const calculateSuccessRate = () => {
