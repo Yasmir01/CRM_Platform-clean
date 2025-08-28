@@ -624,6 +624,8 @@ export default function ContactManagement() {
                   <MenuItem value="Qualified">Qualified</MenuItem>
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="Vendor">Vendors</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
