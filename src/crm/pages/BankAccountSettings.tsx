@@ -543,6 +543,44 @@ const BankAccountSettings: React.FC = () => {
           </Box>
         </TabPanel>
       </Card>
+
+      {/* Dialogs */}
+      <AddBankAccountDialog
+        open={addAccountOpen}
+        onClose={() => setAddAccountOpen(false)}
+        onAccountAdded={handleAddAccount}
+        organizationId="org_main"
+      />
+
+      <EditBankAccountDialog
+        open={editAccountOpen}
+        onClose={() => setEditAccountOpen(false)}
+        onAccountUpdated={handleAccountUpdated}
+        account={selectedAccount}
+      />
+
+      <ViewTransactionsDialog
+        open={viewTransactionsOpen}
+        onClose={() => setViewTransactionsOpen(false)}
+        account={selectedAccount}
+      />
+
+      <RemoveBankAccountDialog
+        open={removeAccountOpen}
+        onClose={() => setRemoveAccountOpen(false)}
+        onAccountRemoved={handleAccountRemoved}
+        account={selectedAccount}
+      />
+
+      <PaymentRoutingDialog
+        open={paymentRoutingOpen}
+        onClose={() => setPaymentRoutingOpen(false)}
+        businessAccounts={businessAccounts}
+        onRoutingUpdated={() => {
+          // Refresh routing data if needed
+          console.log('Payment routing updated');
+        }}
+      />
     </Box>
   );
 };
