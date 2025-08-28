@@ -427,6 +427,13 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const handleDocumentPreview = async (doc: any) => {
     if (!currentUser) return;
 
+    console.log('Preview document:', {
+      name: doc.name,
+      type: doc.type,
+      isEncrypted: doc.isEncrypted,
+      securityDocumentId: doc.securityDocumentId
+    });
+
     try {
       if (doc.isEncrypted && doc.securityDocumentId) {
         // Preview encrypted document using DocumentSecurityService
