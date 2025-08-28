@@ -1203,6 +1203,102 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Document Preview Modal */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => setDocumentViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { height: '90vh' }
+        }}
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">{selectedDocument?.name}</Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<DownloadRoundedIcon />}
+                onClick={() => selectedDocument && handleDownloadDocument(selectedDocument)}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
+          {selectedDocument && (
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {selectedDocument.type?.toLowerCase().includes('pdf') ? (
+                <iframe
+                  src={selectedDocument.url}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '600px',
+                    border: 'none'
+                  }}
+                  title={selectedDocument.name}
+                />
+              ) : selectedDocument.type?.toLowerCase().match(/^image/) ? (
+                <img
+                  src={selectedDocument.url}
+                  alt={selectedDocument.name}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              ) : (
+                <Box sx={{ textAlign: 'center', p: 4 }}>
+                  <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Preview not available for this file type
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {selectedDocument.name}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadRoundedIcon />}
+                    onClick={() => handleDownloadDocument(selectedDocument)}
+                  >
+                    Download to View
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentViewModalOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog open={deleteDocumentDialogOpen} onClose={() => setDeleteDocumentDialogOpen(false)}>
+        <DialogTitle>Delete Document</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDocumentDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={confirmDeleteDocument}
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
