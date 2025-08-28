@@ -4967,6 +4967,18 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               placeholder="Enter a detailed description of the property..."
             />
 
+            {/* Bank Account Assignment Section */}
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1, border: '1px dashed', borderColor: 'primary.main' }}>
+              <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                🏦 Payment Routing
+              </Typography>
+              <BusinessBankAccountSelector
+                value={formData.assignedBusinessBankAccountId || undefined}
+                onChange={(accountId) => setFormData({ ...formData, assignedBusinessBankAccountId: accountId || '' })}
+                helperText="Assign a specific business bank account to receive all rent payments for this property. If not set, the system will use default payment routing rules."
+              />
+            </Box>
+
             <Divider />
 
             {/* Tenant Assignment Section */}
