@@ -646,7 +646,18 @@ export default function IntegrationManagement() {
       }
     };
 
+    const initializeBookkeeping = async () => {
+      try {
+        const connections = bookkeepingIntegrationService.getConnections();
+        setBookkeepingConnections(connections);
+        setBookkeepingInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize bookkeeping integration service:', error);
+      }
+    };
+
     initializeRealEstate();
+    initializeBookkeeping();
   }, []);
 
   const showNotification = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
