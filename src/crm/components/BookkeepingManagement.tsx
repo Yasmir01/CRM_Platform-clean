@@ -197,7 +197,7 @@ export default function BookkeepingManagement() {
 
     try {
       // Get recent payments to sync
-      const payments = await PaymentService.getRentPayments();
+      const payments = await paymentService.getRentPayments();
       const recentPayments = payments.filter(payment => 
         new Date(payment.updatedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
       );
