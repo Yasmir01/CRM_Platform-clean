@@ -921,24 +921,51 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
               Upload Document
             </Button>
           </Stack>
-          <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+          {managerDocuments.length === 0 ? (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              No documents uploaded yet. Click "Upload Document" to add documents for this property manager.
+            </Alert>
+          ) : (
+            <List>
+              {managerDocuments.map((doc) => (
+                <ListItem key={doc.id} divider>
+                  <ListItemIcon>
+                    {doc.type === 'PDF' ? <DescriptionRoundedIcon /> : <AttachFileRoundedIcon />}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={doc.name}
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.createdAt).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handlePreviewDocument(doc)}
+                        title="Preview Document"
+                      >
+                        <VisibilityRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDownloadDocument(doc)}
+                        title="Download Document"
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeleteDocument(doc)}
+                        title="Delete Document"
+                      >
+                        <DeleteRoundedIcon />
+                      </IconButton>
+                    </Stack>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </Paper>
       </TabPanel>
 
