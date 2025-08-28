@@ -90,6 +90,7 @@ import ExportDialog from "../components/ExportDialog";
 import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
+import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 
 interface PropertyImage {
   id: string;
@@ -3183,7 +3184,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           target.style.alignItems = 'center';
                           target.style.justifyContent = 'center';
                           target.style.color = '#666';
-                          target.alt = `❌ ${image.alt} (failed to load)`;
+                          target.alt = `�� ${image.alt} (failed to load)`;
                         }}
                       />
 

@@ -461,6 +461,21 @@ export class EnhancedPaymentService {
     return newPayment;
   }
 
+  /**
+   * Get property-assigned business bank account
+   */
+  private async getPropertyBankAccount(propertyId: string): Promise<string | null> {
+    try {
+      // Get property data from localStorage (in production this would be from Neon database)
+      const properties = JSON.parse(localStorage.getItem('crm_properties') || '[]');
+      const property = properties.find((p: any) => p.id === propertyId);
+      return property?.assignedBusinessBankAccountId || null;
+    } catch (error) {
+      console.error('Error fetching property bank account:', error);
+      return null;
+    }
+  }
+
   // Initialize mock data
   private initializeMockData(): void {
     // Add sample payments
