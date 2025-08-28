@@ -486,6 +486,21 @@ export default function WorkOrderDialog({
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             placeholder="Any additional information..."
           />
+
+          {/* File Upload Section */}
+          <EnhancedFileUploadField
+            field={{
+              id: 'work-order-attachments',
+              type: 'file',
+              label: 'Attachments (Optional)',
+              required: false,
+              maxFiles: 5,
+              maxFileSize: 10,
+              description: 'Upload photos, documents, or other files related to this work order'
+            }}
+            currentFiles={attachments}
+            onFilesChange={setAttachments}
+          />
         </Stack>
       </DialogContent>
       <DialogActions>
