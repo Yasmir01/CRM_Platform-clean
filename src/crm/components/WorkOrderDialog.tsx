@@ -214,6 +214,7 @@ export default function WorkOrderDialog({
       notes: "",
       isEmergency: false
     });
+    setAttachments([]);
     onClose();
   };
 
@@ -236,6 +237,7 @@ export default function WorkOrderDialog({
       notes: "",
       isEmergency: false
     });
+    setAttachments([]);
     onClose();
   };
 
