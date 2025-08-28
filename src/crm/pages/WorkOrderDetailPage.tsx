@@ -1078,8 +1078,9 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
                 fullWidth
                 startIcon={<CloudUploadRoundedIcon />}
                 sx={{ py: 2 }}
+                disabled={isUploading}
               >
-                {newDocument.file ? newDocument.file.name : "Choose File"}
+                {isUploading ? "Processing..." : (newDocument.file ? newDocument.file.name : "Choose File")}
               </Button>
             </label>
             
@@ -1118,13 +1119,13 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
-            startIcon={<CloudUploadRoundedIcon />}
+            disabled={!newDocument.file || isUploading}
+            startIcon={isUploading ? <CircularProgress size={16} /> : <CloudUploadRoundedIcon />}
           >
-            Upload File
+            {isUploading ? "Uploading..." : "Upload File"}
           </Button>
         </DialogActions>
       </Dialog>
