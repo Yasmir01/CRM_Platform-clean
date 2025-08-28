@@ -473,6 +473,19 @@ export default function CustomerService() {
     if (selectedTicket && selectedTicket.id === ticketId) {
       setSelectedTicket(prev => prev ? { ...prev, [field]: value } : null);
     }
+
+    // Show visual feedback
+    const fieldNames: { [key: string]: string } = {
+      status: 'Status',
+      assignedTo: 'Assignment',
+      priority: 'Priority'
+    };
+
+    const fieldName = fieldNames[field] || field;
+    const displayValue = value || 'None';
+
+    // You could replace this with a toast notification for better UX
+    console.log(`✓ ${fieldName} updated to: ${displayValue}`);
   };
 
   const handleSaveArticle = (status: string) => {
