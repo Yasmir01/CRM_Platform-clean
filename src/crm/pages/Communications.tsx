@@ -1039,6 +1039,15 @@ export default function Communications() {
             iconPosition="start"
           />
           <Tab
+            icon={
+              <Badge badgeContent={totalRecordings} color="primary" max={99}>
+                <PhoneRoundedIcon />
+              </Badge>
+            }
+            label="Call Recordings"
+            iconPosition="start"
+          />
+          <Tab
             icon={<PhoneRoundedIcon />}
             label="Fax"
             iconPosition="start"
