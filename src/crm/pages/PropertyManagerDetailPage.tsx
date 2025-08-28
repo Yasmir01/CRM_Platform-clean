@@ -1129,13 +1129,13 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
-            startIcon={<CloudUploadRoundedIcon />}
+            disabled={!newDocument.file || uploadingDocument}
+            startIcon={uploadingDocument ? null : <CloudUploadRoundedIcon />}
           >
-            Upload Document
+            {uploadingDocument ? "Uploading..." : "Upload Document"}
           </Button>
         </DialogActions>
       </Dialog>
