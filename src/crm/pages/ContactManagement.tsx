@@ -435,6 +435,8 @@ export default function ContactManagement() {
       const updatedContact = {
         ...selectedContact,
         ...formData,
+        ...(formData.status === "Other" && { statusDescription: formData.statusDescription }),
+        ...(formData.source === "Other" && { sourceDescription: formData.sourceDescription }),
         updatedAt: new Date().toISOString()
       };
       updateContact(updatedContact);
