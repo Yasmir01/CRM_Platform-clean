@@ -1462,6 +1462,22 @@ ${property.description || 'Beautiful property available for rent. Contact us for
             </Button>
           </Tooltip>
           <Tooltip
+            title="Import multiple properties from CSV or JSON file"
+            componentsProps={{
+              tooltip: {
+                sx: uniformTooltipStyles
+              }
+            }}
+          >
+            <Button
+              variant="outlined"
+              startIcon={<CloudUploadRoundedIcon />}
+              onClick={() => setBulkUploadDialogOpen(true)}
+            >
+              Bulk Import
+            </Button>
+          </Tooltip>
+          <Tooltip
             title="Add a new property to the system"
             componentsProps={{
               tooltip: {
@@ -2488,7 +2504,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                         startIcon={<WebRoundedIcon />}
                         onClick={() => {
                           const landingPageUrl = `${window.location.origin}/property-landing/${property.id}`;
-                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n��� Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
+                          alert(`��� Landing Page Created!\n\nYour property landing page is ready at:\n${landingPageUrl}\n\nFeatures:\n• Professional property showcase\n• Virtual tour integration\n• Contact form for inquiries\n• Social media sharing\n• Mobile responsive design\n\nThe page is now live and ready to share with potential tenants!`);
                         }}
                       >
                         Create Landing Page
