@@ -766,11 +766,22 @@ export default function Communications() {
     (comm.message && comm.message.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const filteredRecordings = callRecordings.filter(rec =>
+    !rec.isArchived && (
+      rec.contactName.toLowerCase().includes(recordingSearchTerm.toLowerCase()) ||
+      rec.contactNumber.includes(recordingSearchTerm) ||
+      rec.tags.some(tag => tag.toLowerCase().includes(recordingSearchTerm.toLowerCase())) ||
+      (rec.notes && rec.notes.toLowerCase().includes(recordingSearchTerm.toLowerCase()))
+    )
+  );
+
   const activeSimCards = simCards.filter(sim => sim.status === "Active").length;
   const totalDataUsage = simCards.reduce((sum, sim) => sum + sim.dataUsage.used, 0);
   const totalMonthlyCost = simCards.reduce((sum, sim) => sum + sim.monthlyFee, 0);
   const totalCommunications = communications.length;
   const totalContacts = tenants.length + propertyManagers.length + contacts.length;
+  const totalRecordings = callRecordings.filter(rec => !rec.isArchived).length;
+  const starredRecordings = callRecordings.filter(rec => rec.isStarred && !rec.isArchived).length;
 
   // Auto-refresh functionality
   React.useEffect(() => {
