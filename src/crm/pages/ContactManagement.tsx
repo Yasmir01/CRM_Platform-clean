@@ -204,6 +204,8 @@ const getStatusColor = (status: Contact["status"]) => {
     case "Qualified": return "info";
     case "Active": return "success";
     case "Inactive": return "error";
+    case "Vendor": return "secondary";
+    case "Other": return "default";
     default: return "default";
   }
 };
@@ -359,6 +361,8 @@ export default function ContactManagement() {
     zipCode: "",
     source: "Website",
     status: "Lead",
+    statusDescription: "",
+    sourceDescription: "",
     tags: [] as string[],
     nextFollowUp: "",
     assignedTo: "",
@@ -415,8 +419,10 @@ export default function ContactManagement() {
       city: "", // Not in unified interface
       state: "", // Not in unified interface
       zipCode: "", // Not in unified interface
-      source: "CRM", // Default for synced contacts
+      source: contact.source || "CRM", // Default for synced contacts
       status: contact.status,
+      statusDescription: contact.statusDescription || "",
+      sourceDescription: contact.sourceDescription || "",
       tags: contact.tags,
       nextFollowUp: "", // Not in unified interface
       assignedTo: "", // Not in unified interface
@@ -431,6 +437,8 @@ export default function ContactManagement() {
       const updatedContact = {
         ...selectedContact,
         ...formData,
+        ...(formData.status === "Other" && { statusDescription: formData.statusDescription }),
+        ...(formData.source === "Other" && { sourceDescription: formData.sourceDescription }),
         updatedAt: new Date().toISOString()
       };
       updateContact(updatedContact);
@@ -439,7 +447,9 @@ export default function ContactManagement() {
       const newContactData = {
         ...formData,
         lastContact: new Date().toISOString().split('T')[0],
-        notes: '' // Add missing required field
+        notes: '', // Add missing required field
+        ...(formData.status === "Other" && { statusDescription: formData.statusDescription }),
+        ...(formData.source === "Other" && { sourceDescription: formData.sourceDescription })
       };
       addContact(newContactData);
     }
@@ -622,6 +632,8 @@ export default function ContactManagement() {
                   <MenuItem value="Qualified">Qualified</MenuItem>
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="Vendor">Vendors</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -641,6 +653,7 @@ export default function ContactManagement() {
                   <MenuItem value="Event">Event</MenuItem>
                   <MenuItem value="Advertisement">Advertisement</MenuItem>
                   <MenuItem value="Partner">Partner</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -904,6 +917,7 @@ export default function ContactManagement() {
                   <MenuItem value="Event">Event</MenuItem>
                   <MenuItem value="Advertisement">Advertisement</MenuItem>
                   <MenuItem value="Partner">Partner</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -921,9 +935,39 @@ export default function ContactManagement() {
                   <MenuItem value="Customer">Customer</MenuItem>
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
+                  <MenuItem value="Vendor">Vendor</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
+            {formData.status === "Other" && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Status Description"
+                  placeholder="Please describe the status..."
+                  value={formData.statusDescription}
+                  onChange={(e) => setFormData({...formData, statusDescription: e.target.value})}
+                  multiline
+                  rows={2}
+                  required
+                />
+              </Grid>
+            )}
+            {formData.source === "Other" && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Source Description"
+                  placeholder="Please describe the source..."
+                  value={formData.sourceDescription}
+                  onChange={(e) => setFormData({...formData, sourceDescription: e.target.value})}
+                  multiline
+                  rows={2}
+                  required
+                />
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>

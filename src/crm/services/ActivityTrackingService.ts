@@ -365,13 +365,18 @@ class ActivityTrackingService {
   private determineSeverity(action: ActivityEvent['action'], changes: ActivityEvent['changes']): ActivityEvent['severity'] {
     if (action === 'delete') return 'high';
     if (action === 'move') return 'medium';
-    
-    const hasFinancialChange = changes.some(c => 
-      c.field.toLowerCase().includes('rent') || 
-      c.field.toLowerCase().includes('deposit') || 
+
+    // Safety check: ensure changes is defined and is an array
+    if (!changes || !Array.isArray(changes)) {
+      return 'low';
+    }
+
+    const hasFinancialChange = changes.some(c =>
+      c.field.toLowerCase().includes('rent') ||
+      c.field.toLowerCase().includes('deposit') ||
       c.field.toLowerCase().includes('payment')
     );
-    
+
     if (hasFinancialChange) return 'medium';
     return 'low';
   }
@@ -380,22 +385,27 @@ class ActivityTrackingService {
     if (action === 'payment') return 'financial';
     if (action === 'maintenance') return 'maintenance';
     if (action === 'communication') return 'communication';
-    
-    const hasFinancialChange = changes.some(c => 
-      c.field.toLowerCase().includes('rent') || 
-      c.field.toLowerCase().includes('deposit') || 
+
+    // Safety check: ensure changes is defined and is an array
+    if (!changes || !Array.isArray(changes)) {
+      return 'operational';
+    }
+
+    const hasFinancialChange = changes.some(c =>
+      c.field.toLowerCase().includes('rent') ||
+      c.field.toLowerCase().includes('deposit') ||
       c.field.toLowerCase().includes('payment')
     );
-    
+
     if (hasFinancialChange) return 'financial';
-    
-    const hasMaintenanceChange = changes.some(c => 
-      c.field.toLowerCase().includes('maintenance') || 
+
+    const hasMaintenanceChange = changes.some(c =>
+      c.field.toLowerCase().includes('maintenance') ||
       c.field.toLowerCase().includes('repair')
     );
-    
+
     if (hasMaintenanceChange) return 'maintenance';
-    
+
     return 'operational';
   }
 

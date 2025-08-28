@@ -33,6 +33,8 @@ import {
   Badge,
 } from "@mui/material";
 import RichTextEditor from "../components/RichTextEditor";
+import { useActivityTracking } from "../hooks/useActivityTracking";
+import { useCrmData } from "../contexts/CrmDataContext";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -54,6 +56,9 @@ import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 
 interface CallLog {
   id: string;
@@ -134,6 +139,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function PropertyManagerDetailPage({ managerId, onBack }: PropertyManagerDetailProps) {
+  const { state, addDocument, deleteDocument } = useCrmData();
+  const { trackPropertyActivity } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterType, setFilterType] = React.useState("All");
@@ -144,6 +151,11 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
   const [openTaskDialog, setOpenTaskDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [uploadingDocument, setUploadingDocument] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
 
   // Mock manager data
   const manager = {
@@ -237,28 +249,10 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
     }
   ]);
 
-  const [documents] = React.useState<Document[]>([
-    {
-      id: "1",
-      name: "Property Management License.pdf",
-      type: "PDF",
-      size: 1200000,
-      uploadDate: "2024-01-01T10:00:00Z",
-      uploadedBy: "HR Department",
-      category: "Certification",
-      url: "#"
-    },
-    {
-      id: "2",
-      name: "Performance Review 2023.pdf",
-      type: "PDF",
-      size: 850000,
-      uploadDate: "2023-12-15T10:00:00Z",
-      uploadedBy: "Regional Manager",
-      category: "Performance",
-      url: "#"
-    }
-  ]);
+  // Get documents for this property manager from CrmDataContext
+  const managerDocuments = React.useMemo(() => {
+    return state.documents?.filter(doc => doc.propertyManagerId === managerId) || [];
+  }, [state.documents, managerId]);
 
   const [newNote, setNewNote] = React.useState({
     content: "",
@@ -337,11 +331,65 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
     }
   };
 
-  const handleUploadDocument = () => {
-    if (newDocument.file) {
+  const handleUploadDocument = async () => {
+    if (!newDocument.file) return;
+
+    setUploadingDocument(true);
+
+    try {
+      // Convert file to data URL for better persistence
+      const fileUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(newDocument.file as File);
+      });
+
+      const document = {
+        name: newDocument.file.name,
+        type: newDocument.file.type || 'application/octet-stream', // Store full MIME type for proper preview detection
+        size: newDocument.file.size,
+        url: fileUrl,
+        category: newDocument.category,
+        propertyManagerId: managerId,
+        uploadedBy: 'Current User',
+        description: newDocument.description,
+        tags: []
+      };
+
+      addDocument(document);
+
+      // Track document upload activity
+      trackPropertyActivity(
+        'create',
+        managerId,
+        `${manager.firstName} ${manager.lastName}`,
+        [
+          {
+            field: 'documents',
+            oldValue: '',
+            newValue: newDocument.file.name,
+            displayName: 'Document Added'
+          }
+        ],
+        `Document uploaded: ${newDocument.file.name}`,
+        {
+          category: newDocument.category,
+          fileSize: newDocument.file.size,
+          fileType: newDocument.file.type
+        }
+      );
+
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
+      // Reset form and close dialog
       setNewDocument({ file: null, category: "Other", description: "" });
       setOpenDocumentDialog(false);
+
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document. Please try again.');
+    } finally {
+      setUploadingDocument(false);
     }
   };
 
@@ -351,6 +399,69 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
       setNewTask({ title: "", description: "", priority: "Medium", dueDate: "", category: "Other" });
       setOpenTaskDialog(false);
     }
+  };
+
+  const handlePreviewDocument = (doc: any) => {
+    console.log('Preview document:', {
+      name: doc.name,
+      type: doc.type,
+      url: doc.url?.substring(0, 50) + '...' // Just show beginning of URL for debugging
+    });
+    setSelectedDocument(doc);
+    setDocumentViewModalOpen(true);
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = () => {
+    if (!documentToDelete) return;
+
+    try {
+      // Remove from CRM context
+      deleteDocument(documentToDelete.id);
+
+      // Track deletion activity
+      trackPropertyActivity(
+        'delete',
+        managerId,
+        `${manager.firstName} ${manager.lastName}`,
+        [
+          {
+            field: 'documents',
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
+          }
+        ],
+        `Document deleted: ${documentToDelete.name}`,
+        {
+          documentId: documentToDelete.id,
+          documentName: documentToDelete.name,
+          documentCategory: documentToDelete.category
+        }
+      );
+
+      alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleDownloadDocument = (doc: any) => {
+    // Create download link
+    const link = document.createElement('a');
+    link.href = doc.url || '#';
+    link.download = doc.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const formatDuration = (seconds: number) => {
@@ -805,24 +916,64 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
               Upload Document
             </Button>
           </Stack>
-          <List>
-            {documents.map((doc) => (
-              <ListItem key={doc.id} divider>
-                <ListItemIcon>
-                  <AttachFileRoundedIcon />
-                </ListItemIcon>
-                <ListItemText
-                  primary={doc.name}
-                  secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
+          {managerDocuments.length === 0 ? (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              No documents uploaded yet. Click "Upload Document" to add documents for this property manager.
+            </Alert>
+          ) : (
+            <List>
+              {managerDocuments.map((doc) => (
+                <ListItem key={doc.id} divider>
+                  <ListItemIcon>
+                    {(() => {
+                      const docType = doc.type?.toLowerCase() || '';
+                      const docName = doc.name?.toLowerCase() || '';
+
+                      if (docType.includes('pdf') || docName.endsWith('.pdf')) {
+                        return <DescriptionRoundedIcon color="error" />;
+                      } else if (docType.startsWith('image/') ||
+                                 ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(docType) ||
+                                 docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+                        return <VisibilityRoundedIcon color="primary" />;
+                      } else {
+                        return <AttachFileRoundedIcon />;
+                      }
+                    })()}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={doc.name}
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.createdAt).toLocaleDateString()}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Stack direction="row" spacing={1}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handlePreviewDocument(doc)}
+                        title="Preview Document"
+                      >
+                        <VisibilityRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDownloadDocument(doc)}
+                        title="Download Document"
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDeleteDocument(doc)}
+                        title="Delete Document"
+                      >
+                        <DeleteRoundedIcon />
+                      </IconButton>
+                    </Stack>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </Paper>
       </TabPanel>
 
@@ -986,13 +1137,13 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDocumentDialog(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleUploadDocument}
-            disabled={!newDocument.file}
-            startIcon={<CloudUploadRoundedIcon />}
+            disabled={!newDocument.file || uploadingDocument}
+            startIcon={uploadingDocument ? null : <CloudUploadRoundedIcon />}
           >
-            Upload Document
+            {uploadingDocument ? "Uploading..." : "Upload Document"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1057,6 +1208,116 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
           <Button onClick={() => setOpenTaskDialog(false)}>Cancel</Button>
           <Button variant="contained" onClick={handleAddTask}>
             Assign Task
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Document Preview Modal */}
+      <Dialog
+        open={documentViewModalOpen}
+        onClose={() => setDocumentViewModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: { height: '90vh' }
+        }}
+      >
+        <DialogTitle>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h6">{selectedDocument?.name}</Typography>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<DownloadRoundedIcon />}
+                onClick={() => selectedDocument && handleDownloadDocument(selectedDocument)}
+              >
+                Download
+              </Button>
+            </Stack>
+          </Stack>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column' }}>
+          {selectedDocument && (
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {selectedDocument.type?.toLowerCase().includes('pdf') ? (
+                <iframe
+                  src={selectedDocument.url}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '600px',
+                    border: 'none'
+                  }}
+                  title={selectedDocument.name}
+                />
+              ) : (() => {
+                const docType = selectedDocument.type?.toLowerCase() || '';
+                const docName = selectedDocument.name?.toLowerCase() || '';
+
+                // Check if it's an image (MIME type or common extensions)
+                const isImage = docType.startsWith('image/') ||
+                               docType === 'png' || docType === 'jpg' || docType === 'jpeg' ||
+                               docType === 'gif' || docType === 'webp' || docType === 'svg' ||
+                               docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/);
+
+                return isImage;
+              })() ? (
+                <img
+                  src={selectedDocument.url}
+                  alt={selectedDocument.name}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain'
+                  }}
+                  onError={(e) => {
+                    console.error('Error loading image:', e);
+                  }}
+                />
+              ) : (
+                <Box sx={{ textAlign: 'center', p: 4 }}>
+                  <DescriptionRoundedIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    Preview not available for this file type
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {selectedDocument.name}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadRoundedIcon />}
+                    onClick={() => handleDownloadDocument(selectedDocument)}
+                  >
+                    Download to View
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentViewModalOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Document Confirmation Dialog */}
+      <Dialog open={deleteDocumentDialogOpen} onClose={() => setDeleteDocumentDialogOpen(false)}>
+        <DialogTitle>Delete Document</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{documentToDelete?.name}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDocumentDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={confirmDeleteDocument}
+            startIcon={<DeleteRoundedIcon />}
+          >
+            Delete Document
           </Button>
         </DialogActions>
       </Dialog>

@@ -66,6 +66,7 @@ import PendingRoundedIcon from "@mui/icons-material/PendingRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface CallLog {
@@ -365,7 +366,7 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
       // Save document reference to CrmDataContext for UI display
       const savedDocument = addDocument({
         name: secureDocument.name,
-        type: secureDocument.type.split('/')[1]?.toUpperCase() || 'UNKNOWN',
+        type: secureDocument.type || 'application/octet-stream', // Store full MIME type for proper preview detection
         size: secureDocument.size,
         url: secureDocument.id, // Store document ID instead of URL
         category: newDocument.category,
@@ -426,6 +427,13 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
   const handleDocumentPreview = async (doc: any) => {
     if (!currentUser) return;
 
+    console.log('Preview document:', {
+      name: doc.name,
+      type: doc.type,
+      isEncrypted: doc.isEncrypted,
+      securityDocumentId: doc.securityDocumentId
+    });
+
     try {
       if (doc.isEncrypted && doc.securityDocumentId) {
         // Preview encrypted document using DocumentSecurityService
@@ -459,11 +467,29 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
         setOpenPreviewDialog(true);
       } else {
         // For non-encrypted documents, use the direct URL
+        // For non-encrypted documents, try to determine correct MIME type
+        const docType = doc.type?.toLowerCase() || '';
+        const docName = doc.name?.toLowerCase() || '';
+
+        let mimeType = doc.type || 'application/octet-stream';
+
+        // If type doesn't include slash (old format like "PNG"), try to construct proper MIME type
+        if (!mimeType.includes('/')) {
+          if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'tiff'].includes(docType) ||
+              docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+            mimeType = `image/${docType === 'jpg' ? 'jpeg' : docType}`;
+          } else if (docType === 'pdf' || docName.endsWith('.pdf')) {
+            mimeType = 'application/pdf';
+          } else {
+            mimeType = `application/${docType}`;
+          }
+        }
+
         setPreviewDocument({
           ...doc,
           previewUrl: doc.url,
           filename: doc.name,
-          mimeType: `application/${doc.type.toLowerCase()}`
+          mimeType
         });
         setOpenPreviewDialog(true);
       }
@@ -1069,7 +1095,25 @@ export default function ServiceProviderDetailPage({ providerId, onBack }: Servic
               documents.map((doc) => (
                 <ListItem key={doc.id} divider>
                   <ListItemIcon>
-                    <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />
+                    {(() => {
+                      const docType = doc.type?.toLowerCase() || '';
+                      const docName = doc.name?.toLowerCase() || '';
+
+                      // Check for PDF
+                      if (docType.includes('pdf') || docName.endsWith('.pdf')) {
+                        return <DescriptionRoundedIcon color="error" />;
+                      }
+                      // Check for images
+                      else if (docType.startsWith('image/') ||
+                               ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(docType) ||
+                               docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+                        return <VisibilityRoundedIcon color="primary" />;
+                      }
+                      // Default file icon
+                      else {
+                        return <AttachFileRoundedIcon color={doc.isEncrypted ? "primary" : "action"} />;
+                      }
+                    })()}
                   </ListItemIcon>
                   <ListItemText
                     primary={

@@ -95,11 +95,14 @@ export interface Contact {
   email: string;
   phone: string;
   company?: string;
-  status: "Active" | "Inactive";
+  status: "Lead" | "Qualified" | "Prospect" | "Customer" | "Active" | "Inactive" | "Vendor" | "Other";
   tags: string[];
   notes: string;
   lastContact?: string;
   relatedEntityId?: string; // ID of related tenant, manager, etc.
+  statusDescription?: string; // Description when status is "Other"
+  source?: "Website" | "Referral" | "Cold Call" | "Social Media" | "Event" | "Advertisement" | "Partner" | "Other";
+  sourceDescription?: string; // Description when source is "Other"
   createdAt: string;
   updatedAt: string;
 }
@@ -275,15 +278,20 @@ export interface Document {
   type: string;
   size: number;
   url: string;
-  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "Other";
+  category: "Lease" | "Insurance" | "Inspection" | "Maintenance" | "Legal" | "Financial" | "HR" | "Certification" | "Training" | "Performance" | "Other";
   propertyId?: string;
   tenantId?: string;
   contactId?: string;
   dealId?: string;
+  propertyManagerId?: string;
   uploadedBy: string;
   uploadedAt: string;
   description?: string;
   tags: string[];
+  // Additional fields for encryption support (used by tenant documents)
+  isEncrypted?: boolean;
+  securityDocumentId?: string;
+  createdAt?: string;
 }
 
 export interface Payment {
