@@ -443,7 +443,9 @@ export default function ContactManagement() {
       const newContactData = {
         ...formData,
         lastContact: new Date().toISOString().split('T')[0],
-        notes: '' // Add missing required field
+        notes: '', // Add missing required field
+        ...(formData.status === "Other" && { statusDescription: formData.statusDescription }),
+        ...(formData.source === "Other" && { sourceDescription: formData.sourceDescription })
       };
       addContact(newContactData);
     }
