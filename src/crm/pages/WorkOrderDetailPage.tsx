@@ -790,16 +790,91 @@ export default function WorkOrderDetailPage({ workOrderId, onBack }: WorkOrderDe
             {documents.map((doc) => (
               <ListItem key={doc.id} divider>
                 <ListItemIcon>
-                  <AttachFileRoundedIcon />
+                  {FileStorageService.isImageFile(doc.type, doc.name) ? (
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {doc.preview || doc.dataUrl ? (
+                        <Box
+                          component="img"
+                          src={doc.preview || doc.dataUrl}
+                          alt={doc.name}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 16px;">📷</div>';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <Typography sx={{ fontSize: 16 }}>📷</Typography>
+                      )}
+                    </Box>
+                  ) : FileStorageService.isPdfFile(doc.type) ? (
+                    <Typography sx={{ fontSize: 24 }}>📄</Typography>
+                  ) : (
+                    <AttachFileRoundedIcon />
+                  )}
                 </ListItemIcon>
                 <ListItemText
                   primary={doc.name}
                   secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadDate).toLocaleDateString()}`}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <DownloadRoundedIcon />
-                  </IconButton>
+                  <Stack direction="row" spacing={1}>
+                    <Tooltip title="Preview">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setPreviewDocument(doc);
+                          setOpenDocumentPreview(true);
+                        }}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (doc.dataUrl) {
+                            // Create a temporary stored file object for download
+                            const storedFile: StoredFile = {
+                              id: doc.id,
+                              name: doc.name,
+                              size: doc.size,
+                              type: doc.type,
+                              lastModified: new Date(doc.uploadDate).getTime(),
+                              dataUrl: doc.dataUrl,
+                              preview: doc.preview
+                            };
+                            FileStorageService.downloadFile(storedFile);
+                          } else {
+                            alert('File data not available for download');
+                          }
+                        }}
+                      >
+                        <DownloadRoundedIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
                 </ListItemSecondaryAction>
               </ListItem>
             ))}
