@@ -95,11 +95,14 @@ export interface Contact {
   email: string;
   phone: string;
   company?: string;
-  status: "Active" | "Inactive";
+  status: "Lead" | "Qualified" | "Prospect" | "Customer" | "Active" | "Inactive" | "Vendor" | "Other";
   tags: string[];
   notes: string;
   lastContact?: string;
   relatedEntityId?: string; // ID of related tenant, manager, etc.
+  statusDescription?: string; // Description when status is "Other"
+  source?: "Website" | "Referral" | "Cold Call" | "Social Media" | "Event" | "Advertisement" | "Partner" | "Other";
+  sourceDescription?: string; // Description when source is "Other"
   createdAt: string;
   updatedAt: string;
 }
