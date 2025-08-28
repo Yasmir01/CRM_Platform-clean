@@ -645,6 +645,7 @@ export default function ContactManagement() {
                   <MenuItem value="Event">Event</MenuItem>
                   <MenuItem value="Advertisement">Advertisement</MenuItem>
                   <MenuItem value="Partner">Partner</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
