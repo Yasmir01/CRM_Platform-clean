@@ -475,15 +475,238 @@ export function generateTenantTemplate(): string {
   return [headers.join(','), sampleData.join(',')].join('\n');
 }
 
+// Combined data processing for Properties + Tenants
+export interface CombinedImportData {
+  properties: PropertyData[];
+  tenants: TenantData[];
+  propertyTenantsMap: Map<string, string[]>; // propertyName -> tenant emails
+}
+
+export function validateCombinedData(data: any[], existingProperties: any[] = [], existingTenants: any[] = []): ImportResult {
+  const errors: ImportError[] = [];
+  const properties: PropertyData[] = [];
+  const tenants: TenantData[] = [];
+  const propertyTenantsMap = new Map<string, string[]>();
+
+  // Separate properties and tenants based on 'type' field
+  const propertyRows = data.filter(row => row.type && ['Apartment', 'House', 'Condo', 'Townhome', 'Commercial'].includes(row.type));
+  const tenantRows = data.filter(row => row.firstName && row.lastName && row.email && row.leaseStart);
+
+  // Validate properties first
+  if (propertyRows.length > 0) {
+    const propertyResult = validatePropertyData(propertyRows, existingProperties);
+    properties.push(...propertyResult.data);
+    errors.push(...propertyResult.errors);
+  }
+
+  // Create a map of property names for tenant validation
+  const allProperties = [...existingProperties, ...properties];
+  const propertyNameMap = new Map<string, string>();
+  allProperties.forEach(prop => {
+    if (prop.name) {
+      propertyNameMap.set(prop.name.toLowerCase(), prop.name);
+    }
+  });
+
+  // Validate tenants with enhanced property linking
+  tenantRows.forEach((row, index) => {
+    const rowNumber = propertyRows.length + index + 2; // Adjust for property rows and header
+
+    // Required fields validation
+    if (!row.firstName || !row.firstName.trim()) {
+      errors.push({ row: rowNumber, field: 'firstName', message: 'First name is required' });
+    }
+
+    if (!row.lastName || !row.lastName.trim()) {
+      errors.push({ row: rowNumber, field: 'lastName', message: 'Last name is required' });
+    }
+
+    if (!row.email || !row.email.trim()) {
+      errors.push({ row: rowNumber, field: 'email', message: 'Email is required' });
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(row.email)) {
+        errors.push({ row: rowNumber, field: 'email', message: 'Invalid email format' });
+      }
+    }
+
+    if (!row.phone || !row.phone.trim()) {
+      errors.push({ row: rowNumber, field: 'phone', message: 'Phone number is required' });
+    }
+
+    // Property linking validation
+    let linkedPropertyName = '';
+    if (row.propertyName) {
+      const normalizedPropertyName = row.propertyName.toLowerCase();
+      if (propertyNameMap.has(normalizedPropertyName)) {
+        linkedPropertyName = propertyNameMap.get(normalizedPropertyName)!;
+      } else {
+        errors.push({ row: rowNumber, field: 'propertyName', message: `Property "${row.propertyName}" not found in existing or uploaded properties` });
+      }
+    } else {
+      errors.push({ row: rowNumber, field: 'propertyName', message: 'Property name is required for tenant linking' });
+    }
+
+    // Date validation
+    if (!row.leaseStart || !row.leaseStart.trim()) {
+      errors.push({ row: rowNumber, field: 'leaseStart', message: 'Lease start date is required' });
+    } else if (isNaN(Date.parse(row.leaseStart))) {
+      errors.push({ row: rowNumber, field: 'leaseStart', message: 'Invalid lease start date format' });
+    }
+
+    if (!row.leaseEnd || !row.leaseEnd.trim()) {
+      errors.push({ row: rowNumber, field: 'leaseEnd', message: 'Lease end date is required' });
+    } else if (isNaN(Date.parse(row.leaseEnd))) {
+      errors.push({ row: rowNumber, field: 'leaseEnd', message: 'Invalid lease end date format' });
+    }
+
+    // Monthly rent validation
+    const monthlyRent = parseFloat(row.monthlyRent);
+    if (isNaN(monthlyRent) || monthlyRent < 0) {
+      errors.push({ row: rowNumber, field: 'monthlyRent', message: 'Monthly rent must be a valid positive number' });
+    }
+
+    // Check for duplicates in existing tenants
+    const duplicate = existingTenants.find(t => t.email.toLowerCase() === row.email.toLowerCase());
+    if (duplicate) {
+      errors.push({ row: rowNumber, message: `Tenant with email "${row.email}" already exists` });
+    }
+
+    // Check for duplicates in current batch
+    const batchDuplicate = tenants.find(t => t.email.toLowerCase() === row.email.toLowerCase());
+    if (batchDuplicate) {
+      errors.push({ row: rowNumber, message: `Duplicate tenant email "${row.email}" found in upload batch` });
+    }
+
+    // If no errors for this row, add to valid data
+    const rowErrors = errors.filter(e => e.row === rowNumber);
+    if (rowErrors.length === 0) {
+      const tenantData: TenantData = {
+        firstName: row.firstName.trim(),
+        lastName: row.lastName.trim(),
+        email: row.email.trim().toLowerCase(),
+        phone: row.phone.trim(),
+        propertyName: linkedPropertyName,
+        unit: row.unit?.trim() || '',
+        leaseStart: row.leaseStart.trim(),
+        leaseEnd: row.leaseEnd.trim(),
+        monthlyRent: monthlyRent,
+        emergencyContact: row.emergencyContact?.trim() || '',
+        emergencyPhone: row.emergencyPhone?.trim() || ''
+      };
+
+      tenants.push(tenantData);
+
+      // Track property-tenant relationships
+      if (linkedPropertyName) {
+        if (!propertyTenantsMap.has(linkedPropertyName)) {
+          propertyTenantsMap.set(linkedPropertyName, []);
+        }
+        propertyTenantsMap.get(linkedPropertyName)!.push(tenantData.email);
+      }
+    }
+  });
+
+  const combinedData: CombinedImportData = {
+    properties,
+    tenants,
+    propertyTenantsMap
+  };
+
+  return {
+    success: errors.length === 0,
+    totalRecords: data.length,
+    successfulRecords: properties.length + tenants.length,
+    failedRecords: errors.length,
+    errors,
+    data: combinedData
+  };
+}
+
+export function generateCombinedTemplate(): string {
+  const headers = [
+    // Common fields
+    'type', // 'Property' or 'Tenant' to distinguish rows
+
+    // Property fields
+    'name',
+    'address',
+    'units',
+    'monthlyRent',
+    'securityDeposit',
+    'description',
+    'amenities',
+    'squareFootage',
+    'bedrooms',
+    'bathrooms',
+    'petPolicy',
+    'petDeposit',
+    'petFee',
+    'parkingSpaces',
+
+    // Tenant fields
+    'firstName',
+    'lastName',
+    'email',
+    'phone',
+    'propertyName', // Links tenant to property
+    'unit',
+    'leaseStart',
+    'leaseEnd',
+    'emergencyContact',
+    'emergencyPhone'
+  ];
+
+  const samplePropertyData = [
+    'Apartment', // type
+    'Sunset Apartments', // name
+    '123 Main St, Los Angeles, CA 90210', // address
+    '24', // units
+    '2500', // monthlyRent
+    '2500', // securityDeposit
+    'Beautiful apartment complex with modern amenities', // description
+    'Pool, Gym, Parking, Laundry', // amenities
+    '850', // squareFootage
+    '2', // bedrooms
+    '1', // bathrooms
+    'Cats allowed', // petPolicy
+    '500', // petDeposit
+    '50', // petFee
+    '1', // parkingSpaces
+    '', '', '', '', '', '', '', '', '', '' // Empty tenant fields
+  ];
+
+  const sampleTenantData = [
+    '', // type (empty for tenant)
+    '', '', '', '', '', '', '', '', '', '', '', '', '', '', // Empty property fields
+    'Jane', // firstName
+    'Smith', // lastName
+    'jane.smith@email.com', // email
+    '(555) 987-6543', // phone
+    'Sunset Apartments', // propertyName
+    '2A', // unit
+    '2024-01-01', // leaseStart
+    '2024-12-31', // leaseEnd
+    'Mike Smith', // emergencyContact
+    '(555) 999-8888' // emergencyPhone
+  ];
+
+  return [
+    headers.join(','),
+    samplePropertyData.join(','),
+    sampleTenantData.join(',')
+  ].join('\n');
+}
+
 // File processing function
 export function processUploadedFile(file: File): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        
+
         if (file.name.endsWith('.csv')) {
           const data = parseCSV(content);
           resolve(data);
@@ -497,11 +720,11 @@ export function processUploadedFile(file: File): Promise<any[]> {
         reject(new Error('Failed to parse file: ' + (error as Error).message));
       }
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file'));
     };
-    
+
     reader.readAsText(file);
   });
 }
