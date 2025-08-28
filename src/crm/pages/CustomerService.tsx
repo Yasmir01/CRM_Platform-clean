@@ -1244,6 +1244,12 @@ export default function CustomerService() {
             </Stack>
           ) : (
             <Stack spacing={3} sx={{ mt: 1 }}>
+              <Alert severity="info">
+                <Typography variant="body2">
+                  <strong>Creating New Support Ticket</strong><br />
+                  Fill out the form below to create a new customer support ticket. Required fields are marked with *.
+                </Typography>
+              </Alert>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <TextField
