@@ -934,7 +934,7 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
                   </ListItemIcon>
                   <ListItemText
                     primary={doc.name}
-                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.createdAt).toLocaleDateString()}`}
+                    secondary={`${doc.category} • ${formatFileSize(doc.size)} • Uploaded by ${doc.uploadedBy} on ${new Date(doc.uploadedAt || doc.createdAt).toLocaleDateString()}`}
                   />
                   <ListItemSecondaryAction>
                     <Stack direction="row" spacing={1}>
