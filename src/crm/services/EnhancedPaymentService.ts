@@ -1,7 +1,7 @@
-import { 
-  RentPayment, 
-  PaymentMethod, 
-  PaymentSchedule, 
+import {
+  RentPayment,
+  PaymentMethod,
+  PaymentSchedule,
   PaymentReminder,
   CashPaymentLocation,
   PaymentProcessor,
@@ -10,7 +10,7 @@ import {
   PaymentReport,
   PaymentFee
 } from '../types/PaymentTypes';
-import { 
+import {
   BankConnection,
   BankTransaction,
   BusinessBankAccount,
@@ -19,6 +19,9 @@ import {
   EnhancedPaymentMethod
 } from '../types/BankAccountTypes';
 import { bankAccountService } from './BankAccountService';
+import { securityMiddleware } from '../utils/advancedSecurity';
+import { PCIComplianceValidator } from '../utils/pciComplianceValidator';
+import { PaymentEncryption } from '../utils/paymentSecurity';
 
 interface PaymentRoutingResult {
   selectedRoute: PaymentRoute;
