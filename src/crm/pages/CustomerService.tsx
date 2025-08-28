@@ -1163,7 +1163,9 @@ export default function CustomerService() {
                           <FormControl size="small" sx={{ minWidth: 120 }}>
                             <Select
                               value={selectedTicket.status}
-                              onChange={(e) => handleUpdateTicketField(selectedTicket.id, 'status', e.target.value)}
+                              onChange={(e) => {
+                                handleUpdateTicketField(selectedTicket.id, 'status', e.target.value);
+                              }}
                             >
                               <MenuItem value="Open">Open</MenuItem>
                               <MenuItem value="In Progress">In Progress</MenuItem>
