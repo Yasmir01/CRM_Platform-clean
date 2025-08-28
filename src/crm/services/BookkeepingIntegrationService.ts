@@ -622,9 +622,9 @@ export class BookkeepingIntegrationService {
    * Get financial reports from bookkeeping system
    */
   async getFinancialReports(
-    connectionId: string, 
-    reportType: string, 
-    startDate: string, 
+    connectionId: string,
+    reportType: string,
+    startDate: string,
     endDate: string
   ): Promise<any> {
     const connection = this.connections.get(connectionId);
@@ -632,7 +632,7 @@ export class BookkeepingIntegrationService {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
