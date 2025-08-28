@@ -406,6 +406,69 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
     }
   };
 
+  const handlePreviewDocument = (doc: any) => {
+    setSelectedDocument(doc);
+    setDocumentViewModalOpen(true);
+  };
+
+  const handleDeleteDocument = (doc: any) => {
+    setDocumentToDelete(doc);
+    setDeleteDocumentDialogOpen(true);
+  };
+
+  const confirmDeleteDocument = () => {
+    if (!documentToDelete) return;
+
+    try {
+      // Remove from CRM context
+      deleteDocument(documentToDelete.id);
+
+      // Track deletion activity
+      trackPropertyActivity({
+        userId: 'current-user',
+        userDisplayName: 'Current User',
+        action: 'delete',
+        entityType: 'property-manager',
+        entityId: managerId,
+        entityName: `${manager.firstName} ${manager.lastName}`,
+        changes: [
+          {
+            field: 'documents',
+            oldValue: documentToDelete.name,
+            newValue: '',
+            displayName: 'Document Deleted'
+          }
+        ],
+        description: `Document deleted: ${documentToDelete.name}`,
+        metadata: {
+          documentId: documentToDelete.id,
+          documentName: documentToDelete.name,
+          documentCategory: documentToDelete.category
+        },
+        severity: 'medium',
+        category: 'operational'
+      });
+
+      alert(`Document "${documentToDelete.name}" has been deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      alert('Failed to delete document. Please try again.');
+    } finally {
+      setDeleteDocumentDialogOpen(false);
+      setDocumentToDelete(null);
+    }
+  };
+
+  const handleDownloadDocument = (doc: any) => {
+    // Create download link
+    const link = document.createElement('a');
+    link.href = doc.url || '#';
+    link.download = doc.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
