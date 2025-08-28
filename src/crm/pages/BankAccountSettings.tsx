@@ -296,7 +296,7 @@ const BankAccountSettings: React.FC = () => {
                       Default Routing Rule
                     </Typography>
                     <Typography variant="body2" color="text.secondary" paragraph>
-                      All rent payments → Chase Business Checking
+                      All rent payments go to Chase Business Checking
                     </Typography>
                     <Button variant="outlined" size="small">
                       Edit Rule
