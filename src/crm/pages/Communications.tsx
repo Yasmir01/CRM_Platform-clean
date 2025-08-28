@@ -56,6 +56,8 @@ import { uniformTooltipStyles } from "../utils/formStyles";
 import CommunicationDialog, { Contact } from "../components/CommunicationDialog";
 import SMSConnectionDialog from "../components/SMSConnectionDialog";
 import { useMode } from "../contexts/ModeContext";
+import { useCrmData } from "../contexts/CrmDataContext";
+import { formatPhoneDisplay, getCleanPhoneNumber } from "../components/PhoneNumberField";
 
 interface TabPanelProps {
   children?: React.ReactNode;
