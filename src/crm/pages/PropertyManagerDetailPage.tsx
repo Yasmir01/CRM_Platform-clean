@@ -925,7 +925,20 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
               {managerDocuments.map((doc) => (
                 <ListItem key={doc.id} divider>
                   <ListItemIcon>
-                    {doc.type === 'PDF' ? <DescriptionRoundedIcon /> : <AttachFileRoundedIcon />}
+                    {(() => {
+                      const docType = doc.type?.toLowerCase() || '';
+                      const docName = doc.name?.toLowerCase() || '';
+
+                      if (docType.includes('pdf') || docName.endsWith('.pdf')) {
+                        return <DescriptionRoundedIcon color="error" />;
+                      } else if (docType.startsWith('image/') ||
+                                 ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(docType) ||
+                                 docName.match(/\.(png|jpg|jpeg|gif|webp|svg|bmp|tiff)$/)) {
+                        return <VisibilityRoundedIcon color="primary" />;
+                      } else {
+                        return <AttachFileRoundedIcon />;
+                      }
+                    })()}
                   </ListItemIcon>
                   <ListItemText
                     primary={doc.name}
