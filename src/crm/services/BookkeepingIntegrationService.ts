@@ -217,14 +217,23 @@ export class BookkeepingIntegrationService {
     this.loadConnections();
   }
 
-  private initializeAdapters() {
-    // Register all available adapters
-    this.adapters.set('quickbooks', quickBooksAdapter);
-    this.adapters.set('xero', xeroAdapter);
-    this.adapters.set('sage', sageAdapter);
-    this.adapters.set('freshbooks', freshBooksAdapter);
-    this.adapters.set('wave', waveAdapter);
-    this.adapters.set('zoho', zohoBooksAdapter);
+  private async initializeAdapters() {
+    // Use dynamic imports to avoid circular dependency
+    try {
+      const { quickBooksAdapter } = await import('./integrations/QuickBooksAdapter');
+      const { xeroAdapter } = await import('./integrations/XeroAdapter');
+      const { sageAdapter, freshBooksAdapter, waveAdapter, zohoBooksAdapter } = await import('./integrations/BookkeepingAdapters');
+
+      // Register all available adapters
+      this.adapters.set('quickbooks', quickBooksAdapter);
+      this.adapters.set('xero', xeroAdapter);
+      this.adapters.set('sage', sageAdapter);
+      this.adapters.set('freshbooks', freshBooksAdapter);
+      this.adapters.set('wave', waveAdapter);
+      this.adapters.set('zoho', zohoBooksAdapter);
+    } catch (error) {
+      console.error('Failed to initialize bookkeeping adapters:', error);
+    }
   }
 
   private initializeProviders() {
