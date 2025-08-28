@@ -934,6 +934,34 @@ export default function ContactManagement() {
                 </Select>
               </FormControl>
             </Grid>
+            {formData.status === "Other" && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Status Description"
+                  placeholder="Please describe the status..."
+                  value={formData.statusDescription}
+                  onChange={(e) => setFormData({...formData, statusDescription: e.target.value})}
+                  multiline
+                  rows={2}
+                  required
+                />
+              </Grid>
+            )}
+            {formData.source === "Other" && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Source Description"
+                  placeholder="Please describe the source..."
+                  value={formData.sourceDescription}
+                  onChange={(e) => setFormData({...formData, sourceDescription: e.target.value})}
+                  multiline
+                  rows={2}
+                  required
+                />
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
         <DialogActions>
