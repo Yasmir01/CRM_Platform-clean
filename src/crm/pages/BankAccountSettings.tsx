@@ -318,7 +318,7 @@ const BankAccountSettings: React.FC = () => {
                         </Box>
                         <Box sx={{ textAlign: 'right' }}>
                           <Typography variant="h6" color="primary">
-                            ${account.balance.toLocaleString()}
+                            ${(account.isPrimary ? 125000 : 50000).toLocaleString()}
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                             {account.isVerified && (
