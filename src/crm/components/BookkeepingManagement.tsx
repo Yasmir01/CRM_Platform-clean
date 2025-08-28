@@ -51,7 +51,7 @@ import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import TestRoundedIcon from "@mui/icons-material/TestRounded";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import MonetizationOnRoundedIcon from "@mui/icons-material/MonetizationOnRounded";
 import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
@@ -66,8 +66,8 @@ import {
   SyncResult,
   bookkeepingIntegrationService 
 } from "../services/BookkeepingIntegrationService";
-import { PaymentService } from "../services/PaymentService";
-import { TenantFinancialService } from "../services/TenantFinancialService";
+import { paymentService } from "../services/PaymentService";
+import { tenantFinancialService } from "../services/TenantFinancialService";
 
 interface ReconciliationRecord {
   id: string;
@@ -197,7 +197,7 @@ export default function BookkeepingManagement() {
 
     try {
       // Get recent payments to sync
-      const payments = await PaymentService.getRentPayments();
+      const payments = await paymentService.getRentPayments();
       const recentPayments = payments.filter(payment => 
         new Date(payment.updatedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
       );
@@ -497,7 +497,7 @@ export default function BookkeepingManagement() {
                               size="small"
                               onClick={() => handleTestConnection(connection)}
                             >
-                              <TestRoundedIcon />
+                              <PlayArrowRoundedIcon />
                             </IconButton>
                           </Tooltip>
                           

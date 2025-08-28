@@ -210,10 +210,30 @@ export class BookkeepingIntegrationService {
   private providers: Map<string, BookkeepingProvider> = new Map();
   private connections: Map<string, BookkeepingConnection> = new Map();
   private adapters: Map<string, BookkeepingAdapter> = new Map();
+  private adaptersInitialized: boolean = false;
 
   constructor() {
     this.initializeProviders();
     this.loadConnections();
+  }
+
+  private async initializeAdapters() {
+    // Use dynamic imports to avoid circular dependency
+    try {
+      const { quickBooksAdapter } = await import('./integrations/QuickBooksAdapter');
+      const { xeroAdapter } = await import('./integrations/XeroAdapter');
+      const { sageAdapter, freshBooksAdapter, waveAdapter, zohoBooksAdapter } = await import('./integrations/BookkeepingAdapters');
+
+      // Register all available adapters
+      this.adapters.set('quickbooks', quickBooksAdapter);
+      this.adapters.set('xero', xeroAdapter);
+      this.adapters.set('sage', sageAdapter);
+      this.adapters.set('freshbooks', freshBooksAdapter);
+      this.adapters.set('wave', waveAdapter);
+      this.adapters.set('zoho', zohoBooksAdapter);
+    } catch (error) {
+      console.error('Failed to initialize bookkeeping adapters:', error);
+    }
   }
 
   private initializeProviders() {
@@ -420,7 +440,7 @@ export class BookkeepingIntegrationService {
    * Test connection to bookkeeping provider
    */
   async testConnection(connection: BookkeepingConnection): Promise<{ success: boolean; message: string }> {
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
@@ -445,7 +465,7 @@ export class BookkeepingIntegrationService {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
@@ -563,7 +583,7 @@ export class BookkeepingIntegrationService {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
@@ -602,9 +622,9 @@ export class BookkeepingIntegrationService {
    * Get financial reports from bookkeeping system
    */
   async getFinancialReports(
-    connectionId: string, 
-    reportType: string, 
-    startDate: string, 
+    connectionId: string,
+    reportType: string,
+    startDate: string,
     endDate: string
   ): Promise<any> {
     const connection = this.connections.get(connectionId);
@@ -612,7 +632,7 @@ export class BookkeepingIntegrationService {
       throw new Error(`Connection ${connectionId} not found`);
     }
 
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
@@ -621,7 +641,11 @@ export class BookkeepingIntegrationService {
   }
 
   // Private helper methods
-  private getAdapter(providerId: string): BookkeepingAdapter | undefined {
+  private async getAdapter(providerId: string): Promise<BookkeepingAdapter | undefined> {
+    if (!this.adaptersInitialized) {
+      await this.initializeAdapters();
+      this.adaptersInitialized = true;
+    }
     return this.adapters.get(providerId);
   }
 
