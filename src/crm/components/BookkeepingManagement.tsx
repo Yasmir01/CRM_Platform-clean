@@ -66,8 +66,8 @@ import {
   SyncResult,
   bookkeepingIntegrationService 
 } from "../services/BookkeepingIntegrationService";
-import { PaymentService } from "../services/PaymentService";
-import { TenantFinancialService } from "../services/TenantFinancialService";
+import { paymentService } from "../services/PaymentService";
+import { tenantFinancialService } from "../services/TenantFinancialService";
 
 interface ReconciliationRecord {
   id: string;
