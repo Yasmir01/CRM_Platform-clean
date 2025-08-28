@@ -641,7 +641,11 @@ export class BookkeepingIntegrationService {
   }
 
   // Private helper methods
-  private getAdapter(providerId: string): BookkeepingAdapter | undefined {
+  private async getAdapter(providerId: string): Promise<BookkeepingAdapter | undefined> {
+    if (!this.adaptersInitialized) {
+      await this.initializeAdapters();
+      this.adaptersInitialized = true;
+    }
     return this.adapters.get(providerId);
   }
 
