@@ -859,6 +859,141 @@ const originalArticles: HelpArticle[] = [
     readTime: "7 min",
     helpful: 91,
     lastUpdated: "2024-01-12"
+  },
+
+  // Bookkeeping & Accounting Articles
+  {
+    id: "bookkeeping-overview",
+    title: "Bookkeeping & Accounting Integrations Overview",
+    summary: "Overview of how to connect your CRM to accounting software (QuickBooks, Xero, Sage) and what to expect from syncs",
+    content: [
+      "This CRM supports direct integrations with QuickBooks Online, Xero, Sage, FreshBooks, Wave and Zoho Books.",
+      "Supported features include invoices, payments, customers, journal entries, bank transactions, and financial reports.",
+      "Connect by navigating to Integrations → Bookkeeping Integrations → Connect Provider. Use OAuth for QuickBooks and Xero, and provide Company/Organization IDs when requested.",
+      "Configure sync frequency (real_time/hourly/daily/weekly/manual) and sync direction (CRM → Bookkeeping, Bookkeeping → CRM, or bidirectional).",
+      "Map CRM transaction types (rent, fees, expenses) to your bookkeeping account codes using the Account Mappings setting in the connection configuration.",
+      "Use the Test Connection button before enabling the integration and review reconciliation logs for any sync errors."
+    ],
+    category: "bookkeeping",
+    tags: ["bookkeeping", "quickbooks", "xero", "integration", "setup", "account-mapping"],
+    difficulty: "Intermediate",
+    readTime: "6 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
+  },
+  {
+    id: "quickbooks-setup",
+    title: "Setting Up QuickBooks Online Integration",
+    summary: "Step-by-step guide to connecting QuickBooks Online with OAuth authentication",
+    content: [
+      "Navigate to Integrations → Bookkeeping Integrations and click 'Add Integration'",
+      "Select 'QuickBooks Online' from the provider list",
+      "You'll need your QuickBooks Company ID (found in QuickBooks under Settings → Company)",
+      "Click 'Test Connection' to start the OAuth authentication process",
+      "Sign in to your QuickBooks account and authorize the connection",
+      "Configure account mappings: map Rent Income to your rental income account",
+      "Set Security Deposits to your liability account for deposits",
+      "Map Late Fees to your fee income account",
+      "Choose your preferred sync frequency (daily recommended for automated workflows)",
+      "Enable the integration and perform a test sync to verify everything works"
+    ],
+    category: "bookkeeping",
+    tags: ["quickbooks", "oauth", "setup", "authentication", "company-id"],
+    difficulty: "Intermediate",
+    readTime: "8 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
+  },
+  {
+    id: "xero-setup",
+    title: "Setting Up Xero Accounting Integration",
+    summary: "Complete guide to connecting Xero with your property management CRM",
+    content: [
+      "Go to Integrations → Bookkeeping Integrations and select 'Add Integration'",
+      "Choose 'Xero' from the available providers",
+      "You'll need your Xero Organization ID (found in Settings → General Settings)",
+      "Click 'Test Connection' to begin OAuth authentication with Xero",
+      "Authorize the application in your Xero account when prompted",
+      "Set up account mappings in the configuration step:",
+      "Map rent income to your rental income tracking category",
+      "Set up security deposit handling with appropriate liability accounts",
+      "Configure late fee and maintenance expense account mappings",
+      "Choose sync frequency and direction based on your workflow needs",
+      "Test the connection and run a sample sync to verify data flows correctly"
+    ],
+    category: "bookkeeping",
+    tags: ["xero", "oauth", "organization-id", "setup", "configuration"],
+    difficulty: "Intermediate",
+    readTime: "7 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
+  },
+  {
+    id: "account-mappings-guide",
+    title: "Configuring Account Mappings for Bookkeeping",
+    summary: "Detailed guide on mapping CRM transactions to accounting software accounts",
+    content: [
+      "Account mappings ensure CRM transactions sync to the correct accounts in your bookkeeping software.",
+      "Rent Income Account: Map to your primary rental income account (typically 4000-4999 range)",
+      "Security Deposit Account: Use a current liability account to track tenant deposits",
+      "Late Fee Account: Map to a separate income account for fees and penalties",
+      "Maintenance Expense Account: Use your property maintenance/repair expense account",
+      "Bank Account: Select the checking account where rent payments are deposited",
+      "Accounts Receivable: Map to your AR account for tracking outstanding tenant balances",
+      "You can find account codes in your bookkeeping software's Chart of Accounts",
+      "Test mappings with a small transaction before enabling full synchronization",
+      "Update mappings if you reorganize your chart of accounts in your bookkeeping system"
+    ],
+    category: "bookkeeping",
+    tags: ["account-mapping", "chart-of-accounts", "configuration", "sync", "financial"],
+    difficulty: "Advanced",
+    readTime: "10 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
+  },
+  {
+    id: "sync-troubleshooting",
+    title: "Troubleshooting Bookkeeping Sync Issues",
+    summary: "Common sync problems and how to resolve them quickly",
+    content: [
+      "If sync fails, first check the connection status in Bookkeeping Management",
+      "Test the connection using the 'Test Connection' button to verify credentials",
+      "Common issues include expired OAuth tokens - re-authenticate if needed",
+      "Check that account codes in your mappings still exist in your bookkeeping software",
+      "Verify you have the required permissions in QuickBooks/Xero for creating transactions",
+      "Review error messages in the reconciliation dialog for specific failure reasons",
+      "Duplicate transactions may indicate timing issues - check sync frequency settings",
+      "For OAuth errors, try disconnecting and reconnecting the integration",
+      "Contact support if sync errors persist after checking these common causes"
+    ],
+    category: "bookkeeping",
+    tags: ["troubleshooting", "sync-errors", "oauth", "connection", "support"],
+    difficulty: "Intermediate",
+    readTime: "5 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
+  },
+  {
+    id: "reconciliation-best-practices",
+    title: "Bookkeeping Reconciliation Best Practices",
+    summary: "How to maintain accurate financial records with automated bookkeeping sync",
+    content: [
+      "Review reconciliation reports monthly to catch any sync discrepancies",
+      "Use the reconciliation dialog to compare CRM transactions with bookkeeping entries",
+      "Set up daily or weekly sync frequency for timely financial record updates",
+      "Create a backup of your bookkeeping data before making major configuration changes",
+      "Monitor the sync status dashboard regularly for any failed transactions",
+      "Keep your CRM and bookkeeping software chart of accounts aligned",
+      "Document any manual journal entries made outside the CRM system",
+      "Run financial reports from both systems monthly to verify consistency",
+      "Train team members on proper transaction entry to maintain data quality"
+    ],
+    category: "bookkeeping",
+    tags: ["reconciliation", "best-practices", "financial-reports", "data-quality"],
+    difficulty: "Intermediate",
+    readTime: "6 min",
+    helpful: 0,
+    lastUpdated: "2024-01-20"
   }
 ];
 
