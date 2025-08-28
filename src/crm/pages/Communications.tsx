@@ -486,16 +486,20 @@ export default function Communications() {
   };
 
   const handleSendFax = () => {
+    // Use a real contact from CRM for more realistic demo
+    const allContacts = [...tenants, ...propertyManagers, ...contacts];
+    const randomContact = allContacts[Math.floor(Math.random() * allContacts.length)];
+
     const newFax: FaxDocument = {
       id: `fax_${Date.now()}`,
-      fileName: "new_document.pdf",
-      recipientNumber: "+1-555-1234",
+      fileName: `document_${randomContact?.firstName?.toLowerCase() || 'new'}_${new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' })}.pdf`,
+      recipientNumber: randomContact?.phone ? randomContact.phone.replace(/[^\d]/g, '').replace(/^(\d{3})(\d{3})(\d{4})$/, '+1-$1-$2-$3') : "+1-555-1234",
       senderNumber: "+1-555-0101",
       direction: "Outbound",
-      pages: 1,
+      pages: Math.floor(Math.random() * 5) + 1,
       timestamp: new Date().toISOString(),
       status: "Processing",
-      fileSize: "1.5 MB",
+      fileSize: `${(Math.random() * 2 + 0.5).toFixed(1)} MB`,
     };
     setFaxDocuments(prev => [newFax, ...prev]);
 
