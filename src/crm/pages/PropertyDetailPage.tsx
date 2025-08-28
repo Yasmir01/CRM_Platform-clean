@@ -92,6 +92,7 @@ import WorkOrderDialog from "../components/WorkOrderDialog";
 import TenantDialog from "../components/TenantDialog";
 import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 import FormFixesSummary from "../components/FormFixesSummary";
+import PropertyBankAccountSection from "../components/PropertyBankAccountSection";
 import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
@@ -1849,6 +1850,14 @@ export default function PropertyDetailPage({
                 </Grid>
               </CardContent>
             </Card>
+          </Grid>
+
+          {/* Payment Routing Configuration */}
+          <Grid item xs={12}>
+            <PropertyBankAccountSection
+              property={property}
+              onUpdate={updateProperty}
+            />
           </Grid>
 
           {/* Income and Expenses Tables */}
