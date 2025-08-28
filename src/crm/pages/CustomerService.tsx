@@ -1148,7 +1148,10 @@ export default function CustomerService() {
                         <Box>
                           <Typography variant="body2" color="text.secondary">Status</Typography>
                           <FormControl size="small" sx={{ minWidth: 120 }}>
-                            <Select value={selectedTicket.status}>
+                            <Select
+                              value={selectedTicket.status}
+                              onChange={(e) => handleUpdateTicketField(selectedTicket.id, 'status', e.target.value)}
+                            >
                               <MenuItem value="Open">Open</MenuItem>
                               <MenuItem value="In Progress">In Progress</MenuItem>
                               <MenuItem value="Pending">Pending</MenuItem>
@@ -1172,7 +1175,10 @@ export default function CustomerService() {
                         <Box>
                           <Typography variant="body2" color="text.secondary">Assigned To</Typography>
                           <FormControl size="small" fullWidth>
-                            <Select value={selectedTicket.assignedTo || ""}>
+                            <Select
+                              value={selectedTicket.assignedTo || ""}
+                              onChange={(e) => handleUpdateTicketField(selectedTicket.id, 'assignedTo', e.target.value || undefined)}
+                            >
                               <MenuItem value="">Unassigned</MenuItem>
                               <MenuItem value="Mike Wilson">Mike Wilson</MenuItem>
                               <MenuItem value="Emily Davis">Emily Davis</MenuItem>
