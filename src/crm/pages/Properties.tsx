@@ -371,6 +371,7 @@ export default function Properties() {
     maxPetsAllowed: 0,
     parkingSpaces: 0,
     tags: [] as string[],
+    assignedBusinessBankAccountId: "",
   });
   const [typeDialogOpen, setTypeDialogOpen] = React.useState(false);
   const [listingFormData, setListingFormData] = React.useState({
