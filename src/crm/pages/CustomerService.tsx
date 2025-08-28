@@ -327,6 +327,17 @@ export default function CustomerService() {
   const [openArticleDialog, setOpenArticleDialog] = React.useState(false);
   const [selectedTicket, setSelectedTicket] = React.useState<SupportTicket | null>(null);
   const [selectedArticle, setSelectedArticle] = React.useState<KnowledgeBaseArticle | null>(null);
+  const [newTicketFormData, setNewTicketFormData] = React.useState({
+    title: "",
+    priority: "Medium" as SupportTicket["priority"],
+    category: "General" as SupportTicket["category"],
+    customerEmail: "",
+    customerName: "",
+    customerPhone: "",
+    customerCompany: "",
+    description: "",
+    assignedTo: ""
+  });
   const [articleFormData, setArticleFormData] = React.useState({
     title: "",
     content: "",
