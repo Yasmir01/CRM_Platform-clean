@@ -151,6 +151,11 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
   const [openTaskDialog, setOpenTaskDialog] = React.useState(false);
   const [messageType, setMessageType] = React.useState<"SMS" | "Email">("SMS");
   const [editingNote, setEditingNote] = React.useState<Note | null>(null);
+  const [uploadingDocument, setUploadingDocument] = React.useState(false);
+  const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
+  const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+  const [deleteDocumentDialogOpen, setDeleteDocumentDialogOpen] = React.useState(false);
+  const [documentToDelete, setDocumentToDelete] = React.useState<any>(null);
 
   // Mock manager data
   const manager = {
