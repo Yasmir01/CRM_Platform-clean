@@ -1229,6 +1229,34 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       addProperty(newPropertyData);
     }
     setOpenDialog(false);
+    // Reset form when closing
+    setSelectedProperty(null);
+    setFormData({
+      name: "",
+      address: "",
+      type: "Apartment" as Property["type"],
+      customType: "",
+      units: 1,
+      monthlyRent: 0,
+      securityDeposit: 0,
+      managerId: "",
+      managerIds: [] as string[],
+      tenantIds: [] as string[],
+      assignedTenants: [] as string[],
+      description: "",
+      amenities: [] as string[],
+      squareFootage: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      petPolicy: "",
+      petDeposit: 0,
+      petFee: 0,
+      petDepositRefundable: true,
+      maxPetsAllowed: 0,
+      parkingSpaces: 0,
+      tags: [] as string[],
+      assignedBusinessBankAccountId: "",
+    });
   };
 
   const handleDeleteProperty = (id: string) => {
