@@ -1250,13 +1250,19 @@ export default function CustomerService() {
                     label="Title"
                     fullWidth
                     required
+                    value={newTicketFormData.title}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, title: e.target.value })}
                     placeholder="Brief description of the issue"
                   />
                 </Grid>
                 <Grid item xs={12} md={3}>
                   <FormControl fullWidth required>
                     <InputLabel>Priority</InputLabel>
-                    <Select value="" label="Priority">
+                    <Select
+                      value={newTicketFormData.priority}
+                      label="Priority"
+                      onChange={(e) => setNewTicketFormData({ ...newTicketFormData, priority: e.target.value as SupportTicket["priority"] })}
+                    >
                       <MenuItem value="Low">Low</MenuItem>
                       <MenuItem value="Medium">Medium</MenuItem>
                       <MenuItem value="High">High</MenuItem>
@@ -1267,7 +1273,11 @@ export default function CustomerService() {
                 <Grid item xs={12} md={3}>
                   <FormControl fullWidth required>
                     <InputLabel>Category</InputLabel>
-                    <Select value="" label="Category">
+                    <Select
+                      value={newTicketFormData.category}
+                      label="Category"
+                      onChange={(e) => setNewTicketFormData({ ...newTicketFormData, category: e.target.value as SupportTicket["category"] })}
+                    >
                       <MenuItem value="Technical">Technical</MenuItem>
                       <MenuItem value="Billing">Billing</MenuItem>
                       <MenuItem value="Feature Request">Feature Request</MenuItem>
@@ -1278,13 +1288,50 @@ export default function CustomerService() {
                 </Grid>
               </Grid>
 
-              <TextField
-                label="Customer Email"
-                fullWidth
-                required
-                type="email"
-                placeholder="customer@example.com"
-              />
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Email"
+                    fullWidth
+                    required
+                    type="email"
+                    value={newTicketFormData.customerEmail}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerEmail: e.target.value })}
+                    placeholder="customer@example.com"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Name"
+                    fullWidth
+                    value={newTicketFormData.customerName}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerName: e.target.value })}
+                    placeholder="John Smith"
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Phone (Optional)"
+                    fullWidth
+                    type="tel"
+                    value={newTicketFormData.customerPhone}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerPhone: e.target.value })}
+                    placeholder="(555) 123-4567"
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Customer Company (Optional)"
+                    fullWidth
+                    value={newTicketFormData.customerCompany}
+                    onChange={(e) => setNewTicketFormData({ ...newTicketFormData, customerCompany: e.target.value })}
+                    placeholder="Company Name"
+                  />
+                </Grid>
+              </Grid>
 
               <TextField
                 label="Description"
@@ -1292,12 +1339,18 @@ export default function CustomerService() {
                 multiline
                 rows={6}
                 required
+                value={newTicketFormData.description}
+                onChange={(e) => setNewTicketFormData({ ...newTicketFormData, description: e.target.value })}
                 placeholder="Detailed description of the issue..."
               />
 
               <FormControl fullWidth>
                 <InputLabel>Assign To</InputLabel>
-                <Select value="" label="Assign To">
+                <Select
+                  value={newTicketFormData.assignedTo}
+                  label="Assign To"
+                  onChange={(e) => setNewTicketFormData({ ...newTicketFormData, assignedTo: e.target.value })}
+                >
                   <MenuItem value="">Auto-assign</MenuItem>
                   <MenuItem value="Mike Wilson">Mike Wilson</MenuItem>
                   <MenuItem value="Emily Davis">Emily Davis</MenuItem>
