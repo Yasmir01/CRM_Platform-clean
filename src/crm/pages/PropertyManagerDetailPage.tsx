@@ -360,14 +360,11 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
       addDocument(document);
 
       // Track document upload activity
-      trackPropertyActivity({
-        userId: 'current-user',
-        userDisplayName: 'Current User',
-        action: 'create',
-        entityType: 'property-manager',
-        entityId: managerId,
-        entityName: `${manager.firstName} ${manager.lastName}`,
-        changes: [
+      trackPropertyActivity(
+        'create',
+        managerId,
+        `${manager.firstName} ${manager.lastName}`,
+        [
           {
             field: 'documents',
             oldValue: '',
@@ -375,15 +372,13 @@ export default function PropertyManagerDetailPage({ managerId, onBack }: Propert
             displayName: 'Document Added'
           }
         ],
-        description: `Document uploaded: ${newDocument.file.name}`,
-        metadata: {
+        `Document uploaded: ${newDocument.file.name}`,
+        {
           category: newDocument.category,
           fileSize: newDocument.file.size,
           fileType: newDocument.file.type
-        },
-        severity: 'low',
-        category: 'operational'
-      });
+        }
+      );
 
       alert(`Document "${newDocument.file.name}" uploaded successfully!`);
       // Reset form and close dialog
