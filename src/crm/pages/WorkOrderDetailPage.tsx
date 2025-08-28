@@ -92,6 +92,8 @@ interface Document {
   uploadedBy: string;
   category: "Before Photo" | "After Photo" | "Invoice" | "Receipt" | "Permit" | "Other";
   url: string;
+  dataUrl?: string; // Base64 data for file storage
+  preview?: string; // Preview/thumbnail for images
 }
 
 interface WorkOrderDetailProps {
