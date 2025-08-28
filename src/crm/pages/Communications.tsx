@@ -339,6 +339,92 @@ const generateFaxDocumentsFromCRMData = (tenants: any[], managers: any[]): FaxDo
   return faxDocuments.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
 
+// Generate call recordings from real communications
+const generateCallRecordingsFromCRMData = (tenants: any[], managers: any[], contacts: any[]): CallRecording[] => {
+  const recordings: CallRecording[] = [];
+  const dispositions: CallRecording['disposition'][] = ["Sale", "Follow-up", "No Interest", "Callback", "Information", "Complaint", "Other"];
+  const qualities: CallRecording['quality'][] = ["Excellent", "Good", "Fair", "Poor"];
+  const callPurposes = [
+    "lease_inquiry", "maintenance_request", "payment_inquiry", "property_showing",
+    "lease_renewal", "move_out_notice", "emergency_repair", "noise_complaint"
+  ];
+
+  let recordingId = 1;
+
+  // Generate recordings for recent communications (only voice calls)
+  const allContacts = [...tenants, ...managers, ...contacts.filter(c => c.type === "ServiceProvider")];
+
+  allContacts.forEach((contact, index) => {
+    // 40% chance this contact has recent recorded calls
+    if (Math.random() > 0.6) {
+      const callCount = Math.floor(Math.random() * 3) + 1;
+
+      for (let i = 0; i < callCount; i++) {
+        const duration = Math.floor(Math.random() * 1200) + 30; // 30 seconds to 20 minutes
+        const callDate = new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000);
+        const purpose = callPurposes[Math.floor(Math.random() * callPurposes.length)];
+
+        recordings.push({
+          id: `rec_${recordingId++}`,
+          callId: `call_${Date.now()}_${index}_${i}`,
+          contactName: `${contact.firstName} ${contact.lastName}`,
+          contactNumber: contact.phone,
+          direction: Math.random() > 0.7 ? "Outbound" : "Inbound",
+          duration,
+          timestamp: callDate.toISOString(),
+          recordingUrl: `https://recordings.example.com/calls/rec_${recordingId}_${purpose}.mp3`,
+          fileSize: `${(duration * 0.5 / 60).toFixed(1)} MB`, // Rough estimate
+          transcription: generateCallTranscription(contact, purpose, duration),
+          tags: [purpose, contact.type === "ServiceProvider" ? "vendor" : "client"],
+          notes: generateCallNotes(purpose),
+          quality: qualities[Math.floor(Math.random() * qualities.length)],
+          agentId: "agent_001",
+          agentName: "Property Manager",
+          disposition: dispositions[Math.floor(Math.random() * dispositions.length)],
+          isStarred: Math.random() > 0.8,
+          isArchived: Math.random() > 0.9
+        });
+      }
+    }
+  });
+
+  return recordings.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+};
+
+// Generate realistic call transcriptions based on purpose
+const generateCallTranscription = (contact: any, purpose: string, duration: number): string => {
+  const transcripts = {
+    lease_inquiry: `Agent: Hello, thank you for calling about the property listing. How can I help you today?\n${contact.firstName}: Hi, I'm interested in the apartment listing. Can you tell me more about the availability?\nAgent: Absolutely! The unit is currently available and we can schedule a viewing at your convenience.\n${contact.firstName}: That sounds great. What are the lease terms?\nAgent: We offer 12-month leases starting at $${Math.floor(Math.random() * 1000) + 1500} per month...`,
+
+    maintenance_request: `${contact.firstName}: Hello, I need to report a maintenance issue in my unit.\nAgent: I'd be happy to help you with that. Can you describe the issue?\n${contact.firstName}: The kitchen faucet is leaking and it's gotten worse over the past few days.\nAgent: I understand. Let me schedule a maintenance technician to take a look. Are you available tomorrow between 10 AM and 2 PM?\n${contact.firstName}: Yes, that works for me.`,
+
+    payment_inquiry: `Agent: Good morning! I see you called about your rent payment.\n${contact.firstName}: Yes, I wanted to confirm that my payment went through for this month.\nAgent: Let me check your account... Yes, I can confirm your payment was received on time. Thank you!\n${contact.firstName}: Perfect, thank you for confirming.`,
+
+    property_showing: `Agent: Hi ${contact.firstName}, I'm calling to confirm your property viewing appointment today at 2 PM.\n${contact.firstName}: Yes, I'll be there. Can you remind me of the address?\nAgent: Certainly, it's at 123 Main Street. I'll meet you in the lobby.\n${contact.firstName}: Great, see you then!`,
+
+    default: `Agent: Thank you for calling. How can I assist you today?\n${contact.firstName}: I had a question about my lease agreement.\nAgent: I'd be happy to help clarify any questions you have about your lease.`
+  };
+
+  return transcripts[purpose as keyof typeof transcripts] || transcripts.default;
+};
+
+// Generate call notes based on purpose
+const generateCallNotes = (purpose: string): string => {
+  const notes = {
+    lease_inquiry: "Potential tenant showed strong interest. Scheduled property viewing for next week.",
+    maintenance_request: "Emergency repair needed. Scheduled technician for next business day.",
+    payment_inquiry: "Routine payment confirmation. Customer satisfied with response.",
+    property_showing: "Confirmed showing appointment. Customer very punctual and professional.",
+    lease_renewal: "Discussed lease renewal options. Customer needs time to consider terms.",
+    move_out_notice: "Received 30-day notice. Discussed move-out procedures and deposit return.",
+    emergency_repair: "URGENT: Plumbing emergency reported. Dispatched emergency technician immediately.",
+    noise_complaint: "Noise complaint filed. Investigated and resolved with neighboring tenant.",
+    default: "General inquiry handled successfully. Customer satisfied with resolution."
+  };
+
+  return notes[purpose as keyof typeof notes] || notes.default;
+};
+
 export default function Communications() {
   const { isTenantMode } = useMode();
   const { state } = useCrmData();
