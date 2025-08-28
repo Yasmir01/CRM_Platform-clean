@@ -1,0 +1,6 @@
+type,name,address,units,monthlyRent,securityDeposit,description,amenities,squareFootage,bedrooms,bathrooms,petPolicy,petDeposit,petFee,parkingSpaces,firstName,lastName,email,phone,propertyName,unit,leaseStart,leaseEnd,emergencyContact,emergencyPhone
+Apartment,Sunset Apartments,123 Main St Los Angeles CA 90210,24,2500,2500,Beautiful apartment complex with modern amenities,"Pool, Gym, Parking, Laundry",850,2,1,Cats allowed,500,50,1,,,,,,,,,,,
+House,Ocean View Villa,456 Beach Blvd Santa Monica CA 90401,1,4500,4500,Luxurious villa with breathtaking ocean views,"Private Beach, Garage, Garden",2200,3,2,Pets allowed with deposit,1000,75,2,,,,,,,,,,,
+,,,,,,,,,,,,,,,Jane,Smith,jane.smith@email.com,(555) 987-6543,Sunset Apartments,2A,2024-01-01,2024-12-31,Mike Smith,(555) 999-8888
+,,,,,,,,,,,,,,,Michael,Johnson,mike.johnson@email.com,(555) 123-4567,Sunset Apartments,1B,2024-02-01,2025-01-31,Sarah Johnson,(555) 111-2222
+,,,,,,,,,,,,,,,David,Brown,david.brown@email.com,(555) 456-7890,Ocean View Villa,,2024-01-15,2024-12-15,Lisa Brown,(555) 333-4444
