@@ -64,6 +64,7 @@ import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import ReceiptRoundedIcon from "@mui/icons-material/ReceiptRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 interface WorkOrderUpdate {
   id: string;
