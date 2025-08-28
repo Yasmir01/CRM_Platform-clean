@@ -440,7 +440,7 @@ export class BookkeepingIntegrationService {
    * Test connection to bookkeeping provider
    */
   async testConnection(connection: BookkeepingConnection): Promise<{ success: boolean; message: string }> {
-    const adapter = this.getAdapter(connection.providerId);
+    const adapter = await this.getAdapter(connection.providerId);
     if (!adapter) {
       throw new Error(`Adapter for ${connection.providerId} not available`);
     }
