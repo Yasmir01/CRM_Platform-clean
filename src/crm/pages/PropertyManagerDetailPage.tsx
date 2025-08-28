@@ -139,6 +139,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function PropertyManagerDetailPage({ managerId, onBack }: PropertyManagerDetailProps) {
+  const { state, addDocument, deleteDocument } = useCrmData();
+  const { trackPropertyActivity } = useActivityTracking();
   const [currentTab, setCurrentTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterType, setFilterType] = React.useState("All");
