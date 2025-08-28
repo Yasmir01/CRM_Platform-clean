@@ -465,6 +465,7 @@ export default function Properties() {
   const [backgroundPreferencesOpen, setBackgroundPreferencesOpen] = React.useState(false);
   const [addressBackgroundColor, setAddressBackgroundColor] = React.useState('secondary.main'); // Default pink/secondary color
   const [globalBackgroundSettings, setGlobalBackgroundSettings] = React.useState(false);
+  const [bulkUploadDialogOpen, setBulkUploadDialogOpen] = React.useState(false);
 
   // Load saved background color from localStorage on component mount
   React.useEffect(() => {
