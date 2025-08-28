@@ -730,6 +730,36 @@ export default function Communications() {
     return Math.round((callStats.successfulCalls / callStats.callsMade) * 100);
   };
 
+  // Call Recording Functions
+  const handlePlayRecording = (recording: CallRecording) => {
+    setSelectedRecording(recording);
+    setRecordingPlayerOpen(true);
+  };
+
+  const handleStarRecording = (recordingId: string) => {
+    setCallRecordings(prev => prev.map(rec =>
+      rec.id === recordingId ? { ...rec, isStarred: !rec.isStarred } : rec
+    ));
+  };
+
+  const handleArchiveRecording = (recordingId: string) => {
+    setCallRecordings(prev => prev.map(rec =>
+      rec.id === recordingId ? { ...rec, isArchived: !rec.isArchived } : rec
+    ));
+  };
+
+  const handleUpdateRecordingNotes = (recordingId: string, notes: string) => {
+    setCallRecordings(prev => prev.map(rec =>
+      rec.id === recordingId ? { ...rec, notes } : rec
+    ));
+  };
+
+  const handleUpdateRecordingTags = (recordingId: string, tags: string[]) => {
+    setCallRecordings(prev => prev.map(rec =>
+      rec.id === recordingId ? { ...rec, tags } : rec
+    ));
+  };
+
   const filteredCommunications = communications.filter(comm =>
     comm.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     comm.contact.number.includes(searchTerm) ||
