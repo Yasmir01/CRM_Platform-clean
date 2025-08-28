@@ -27,6 +27,13 @@ import {
   Warning as WarningIcon
 } from '@mui/icons-material';
 
+import AddBankAccountDialog from '../components/AddBankAccountDialog';
+import EditBankAccountDialog from '../components/EditBankAccountDialog';
+import ViewTransactionsDialog from '../components/ViewTransactionsDialog';
+import RemoveBankAccountDialog from '../components/RemoveBankAccountDialog';
+import PaymentRoutingDialog from '../components/PaymentRoutingDialog';
+import { BusinessBankAccount } from '../types/BankAccountTypes';
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
