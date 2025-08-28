@@ -417,8 +417,10 @@ export default function ContactManagement() {
       city: "", // Not in unified interface
       state: "", // Not in unified interface
       zipCode: "", // Not in unified interface
-      source: "CRM", // Default for synced contacts
+      source: contact.source || "CRM", // Default for synced contacts
       status: contact.status,
+      statusDescription: contact.statusDescription || "",
+      sourceDescription: contact.sourceDescription || "",
       tags: contact.tags,
       nextFollowUp: "", // Not in unified interface
       assignedTo: "", // Not in unified interface
