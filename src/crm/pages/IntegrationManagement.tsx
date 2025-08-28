@@ -1516,6 +1516,125 @@ export default function IntegrationManagement() {
         </CardContent>
       </Card>
 
+      {/* Bookkeeping Integrations Section */}
+      <Card sx={{ mb: 3, bgcolor: 'success.50', border: '2px solid', borderColor: 'success.main' }}>
+        <CardContent>
+          <Stack spacing={3}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Avatar sx={{ bgcolor: "success.main", width: 56, height: 56 }}>
+                <PaymentRoundedIcon sx={{ fontSize: 28 }} />
+              </Avatar>
+              <Box flex={1}>
+                <Typography variant="h5" fontWeight="600" color="success.main">
+                  Bookkeeping & Accounting Integrations
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Sync your rent payments and financial data with major accounting platforms
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1}>
+                <Button
+                  variant="outlined"
+                  startIcon={<SyncRoundedIcon />}
+                  disabled={!bookkeepingInitialized || bookkeepingConnections.length === 0}
+                >
+                  Sync All
+                </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<IntegrationInstructionsRoundedIcon />}
+                >
+                  Manage Bookkeeping
+                </Button>
+              </Stack>
+            </Stack>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="success.main">
+                    6
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Available Platforms
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="success.main">
+                    {bookkeepingConnections.length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Connected
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="info.main">
+                    {bookkeepingConnections.filter(c => c.isActive).length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Active Syncs
+                  </Typography>
+                </Stack>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Stack alignItems="center" spacing={1}>
+                  <Typography variant="h6" color="warning.main">
+                    {bookkeepingConnections.filter(c => c.syncStatus === 'error').length}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" align="center">
+                    Sync Errors
+                  </Typography>
+                </Stack>
+              </Grid>
+            </Grid>
+
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Supported Platforms:
+              </Typography>
+              <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+                {['QuickBooks Online', 'Xero', 'Sage', 'FreshBooks', 'Wave', 'Zoho Books'].map((platform, index) => {
+                  const isConnected = bookkeepingConnections.some(c => c.providerId === platform.toLowerCase().replace(/\s+/g, ''));
+                  return (
+                    <Chip
+                      key={platform}
+                      label={platform}
+                      size="small"
+                      variant={isConnected ? "filled" : "outlined"}
+                      color={isConnected ? "success" : "default"}
+                      sx={{
+                        borderColor: isConnected ? 'success.main' : 'success.main',
+                        color: isConnected ? 'success.contrastText' : 'success.main',
+                        '&:hover': { bgcolor: isConnected ? 'success.light' : 'success.50' }
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+            </Box>
+
+            <Alert severity="info" sx={{ bgcolor: 'transparent', border: '1px solid', borderColor: 'info.main' }}>
+              <Typography variant="body2">
+                <strong>Financial Integration!</strong> Connected to {bookkeepingConnections.length} accounting platforms.
+                {bookkeepingConnections.length === 0 ? ' Start by connecting your first accounting system!' : ' Your rent payments are automatically synced.'}
+              </Typography>
+            </Alert>
+
+            {/* Render the actual BookkeepingManagement component */}
+            {bookkeepingInitialized && (
+              <Box sx={{ mt: 2 }}>
+                <BookkeepingManagement />
+              </Box>
+            )}
+          </Stack>
+        </CardContent>
+      </Card>
+
       {/* Property Publishing Dialog */}
       {publishingDialogOpen && selectedProperty && (
         <PropertyPublishingInterface
