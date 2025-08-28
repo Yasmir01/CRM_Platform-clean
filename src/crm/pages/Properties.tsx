@@ -89,6 +89,7 @@ import PropertyDetailPage from "./PropertyDetailPage";
 import ExportDialog from "../components/ExportDialog";
 import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
+import { CombinedImportData } from "../utils/bulkUploadUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 import BulkUploadDialog from "../components/BulkUploadDialog";
@@ -659,7 +660,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     
     <div class="property-details">
         <div class="detail-item"><strong>🛏�� Bedrooms:</strong> ${property.bedrooms || 'TBD'}</div>
-        <div class="detail-item"><strong>���� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
+        <div class="detail-item"><strong>�� Bathrooms:</strong> ${property.bathrooms || 'TBD'}</div>
         <div class="detail-item"><strong>�� Square Footage:</strong> ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}</div>
         <div class="detail-item"><strong>�� Parking:</strong> ${property.parkingSpaces || 0} space(s)</div>
         <div class="detail-item"><strong>�� Pet Policy:</strong> ${property.petPolicy || 'Contact for details'}</div>
@@ -3271,7 +3272,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                           target.style.alignItems = 'center';
                           target.style.justifyContent = 'center';
                           target.style.color = '#666';
-                          target.alt = `�� ${image.alt} (failed to load)`;
+                          target.alt = `���� ${image.alt} (failed to load)`;
                         }}
                       />
 
