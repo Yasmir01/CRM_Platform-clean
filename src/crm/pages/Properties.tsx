@@ -92,6 +92,7 @@ import { copyToClipboard } from "../utils/clipboardUtils";
 import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 import BulkUploadDialog from "../components/BulkUploadDialog";
+import CombinedBulkUploadDialog from "../components/CombinedBulkUploadDialog";
 
 interface PropertyImage {
   id: string;
