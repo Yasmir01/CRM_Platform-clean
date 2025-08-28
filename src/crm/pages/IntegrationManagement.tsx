@@ -74,10 +74,12 @@ import { RealEstatePlatformService } from "../services/RealEstatePlatformService
 import { PlatformBundleService } from "../services/PlatformBundleService";
 import { useCrmData } from "../contexts/CrmDataContext";
 import PropertyPublishingInterface from "../components/PropertyPublishingInterface";
+import BookkeepingManagement from "../components/BookkeepingManagement";
 import { useNavigate } from "react-router-dom";
 import PublishRoundedIcon from "@mui/icons-material/PublishRounded";
 import HomeWorkRoundedIcon from "@mui/icons-material/HomeWorkRounded";
 import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
+import { bookkeepingIntegrationService } from "../services/BookkeepingIntegrationService";
 
 interface Integration {
   id: string;
