@@ -1345,7 +1345,7 @@ export default function Marketplace() {
                       </IconButton>
                     </Tooltip>
 
-                    {isSuperAdmin() && user?.id && item.createdById === user.id && (
+                    {isSuperAdmin() && (
                       <Tooltip
                         title="Delete Item"
                         componentsProps={{ tooltip: { sx: uniformTooltipStyles } }}
