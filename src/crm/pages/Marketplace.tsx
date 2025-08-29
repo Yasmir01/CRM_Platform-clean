@@ -1320,6 +1320,7 @@ export default function Marketplace() {
                     >
                       <IconButton
                         size="small"
+                        onClick={() => toggleItemStatus(item)}
                         sx={{
                           bgcolor: 'action.hover',
                           '&:hover': { bgcolor: 'warning.light', color: 'warning.main' }
