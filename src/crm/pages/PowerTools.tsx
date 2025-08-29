@@ -85,6 +85,7 @@ import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useCompanyInfo } from "../components/CompanySettings";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 // QR Code interfaces
 interface QRCodeData {
@@ -1089,10 +1090,6 @@ export default function PowerTools() {
     setSelectedQR(null);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
-  };
 
   const downloadQR = async (qrCode: QRCodeData) => {
     try {
