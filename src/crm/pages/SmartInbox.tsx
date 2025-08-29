@@ -100,6 +100,7 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import TelegramIcon from "@mui/icons-material/Telegram";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -577,6 +578,7 @@ export default function SmartInbox() {
       <Drawer
         variant="permanent"
         sx={{
+          display: { xs: "none", md: "block" },
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: {
@@ -700,10 +702,132 @@ export default function SmartInbox() {
         </Box>
       </Drawer>
 
+      {/* Mobile Sidebar */}
+      <Drawer
+        variant="temporary"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onOpen={() => setDrawerOpen(true)}
+        ModalProps={{ keepMounted: true }}
+        sx={{ display: { xs: "block", md: "none" }, [`& .MuiDrawer-paper`]: { width: drawerWidth } }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<SendRoundedIcon />}
+            onClick={() => { setOpenComposeDialog(true); setDrawerOpen(false); }}
+          >
+            Compose
+          </Button>
+        </Box>
+
+        <List>
+          <ListItemButton selected={selectedTab === 0} onClick={() => { setSelectedTab(0); setDrawerOpen(false); }}>
+            <ListItemIcon>
+              <Badge badgeContent={unreadCount} color="primary">
+                <InboxRoundedIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary="Inbox" />
+          </ListItemButton>
+          <ListItemButton selected={selectedTab === 1} onClick={() => { setSelectedTab(1); setDrawerOpen(false); }}>
+            <ListItemIcon>
+              <Badge badgeContent={starredCount} color="warning">
+                <StarRoundedIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary="Starred" />
+          </ListItemButton>
+          <ListItemButton selected={selectedTab === 2} onClick={() => { setSelectedTab(2); setDrawerOpen(false); }}>
+            <ListItemIcon>
+              <Badge badgeContent={urgentCount} color="error">
+                <PriorityHighRoundedIcon />
+              </Badge>
+            </ListItemIcon>
+            <ListItemText primary="Urgent" />
+          </ListItemButton>
+          <ListItemButton selected={selectedTab === 3} onClick={() => { setSelectedTab(3); setDrawerOpen(false); }}>
+            <ListItemIcon>
+              <ArchiveRoundedIcon />
+            </ListItemIcon>
+            <ListItemText primary="Archived" />
+          </ListItemButton>
+        </List>
+
+        <Divider />
+
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            AI Features
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={aiSuggestionsEnabled}
+                onChange={(e) => setAiSuggestionsEnabled(e.target.checked)}
+                size="small"
+              />
+            }
+            label="Smart Suggestions"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={autoTranslateEnabled}
+                onChange={(e) => setAutoTranslateEnabled(e.target.checked)}
+                size="small"
+              />
+            }
+            label="Auto Translate"
+          />
+        </Box>
+
+        <Divider />
+
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            Message Types
+          </Typography>
+          <List dense>
+            <ListItem>
+              <ListItemIcon>
+                <EmailRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Email"
+                secondary={messages.filter(m => m.type === "email").length}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <SmsRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary="SMS"
+                secondary={messages.filter(m => m.type === "sms").length}
+              />
+            </ListItem>
+            <ListItem>
+              <ListItemIcon>
+                <ChatRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Social Media"
+                secondary={messages.filter(m => m.type === "social").length}
+              />
+            </ListItem>
+          </List>
+        </Box>
+      </Drawer>
+
       {/* Main Content */}
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
         {/* Toolbar */}
-        <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <Paper sx={{ p: 2, display: "flex", alignItems: "center", gap: 2, flexWrap: 'wrap' }}>
+          <IconButton sx={{ display: { xs: 'inline-flex', md: 'none' } }} onClick={() => setDrawerOpen(true)} aria-label="Open menu">
+            <MenuRoundedIcon />
+          </IconButton>
           <TextField
             placeholder="Search messages..."
             value={searchTerm}
@@ -715,7 +839,7 @@ export default function SmartInbox() {
                 </InputAdornment>
               ),
             }}
-            sx={{ minWidth: 300 }}
+            sx={{ minWidth: { xs: 0, sm: 300 }, flex: { xs: '1 1 100%', sm: '0 0 auto' } }}
           />
           
           <Button
@@ -759,9 +883,9 @@ export default function SmartInbox() {
           </Button>
         </Paper>
 
-        <Box sx={{ display: "flex", flexGrow: 1 }}>
+        <Box sx={{ display: "flex", flexGrow: 1, flexDirection: { xs: 'column', md: 'row' } }}>
           {/* Message List */}
-          <Paper sx={{ width: "40%", borderRadius: 0 }}>
+          <Paper sx={{ width: { xs: '100%', md: '40%' }, borderRadius: 0, mb: { xs: 2, md: 0 } }}>
             <List sx={{ height: "100%", overflow: "auto" }}>
               {filteredMessages.map((message) => (
                 <ListItemButton
