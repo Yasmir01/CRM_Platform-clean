@@ -447,6 +447,8 @@ export default function Marketplace() {
       salesCount: 0,
       rating: 0,
       reviewCount: 0,
+      createdById: user?.id,
+      createdByName: user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     } as MarketplaceItem;
 
     persistItems(prev => [...prev, item]);
