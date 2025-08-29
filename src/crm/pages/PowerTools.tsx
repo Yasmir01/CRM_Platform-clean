@@ -750,7 +750,7 @@ export default function PowerTools() {
     type: "Survey" as Pool["type"],
     customTypeDescription: "",
     endDate: "",
-    questions: [{ question: "", type: "Multiple Choice" as PoolQuestion["type"], options: [""], required: true }]
+    questions: [{ id: `q_${Date.now()}_0`, question: "", type: "Multiple Choice" as PoolQuestion["type"], options: [""], required: true }]
   });
 
   const persistPools = (updater: Pool[] | ((prev: Pool[]) => Pool[])) => {
@@ -1300,7 +1300,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
       endDate: poolFormData.endDate,
       participants: 0,
       totalContributions: 0,
-      questions: poolFormData.questions.filter(q => q.question.trim()),
+      questions: poolFormData.questions.filter(q => q.question.trim()).map((q, idx) => ({ ...q, id: (q as any).id || `q_${Date.now()}_${idx}` })),
       results: []
     };
 
@@ -1312,7 +1312,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
       type: "Survey",
       customTypeDescription: "",
       endDate: "",
-      questions: [{ question: "", type: "Multiple Choice", options: [""], required: true }]
+      questions: [{ id: `q_${Date.now()}_0`, question: "", type: "Multiple Choice", options: [""], required: true }]
     });
   };
 
@@ -2756,8 +2756,8 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                       <InputLabel>Choose</InputLabel>
                       <Select
                         label="Choose"
-                        value={previewResponses[q.id] || ''}
-                        onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })}
+                        value={previewResponses[q.id || `idx-${idx}`] || ''}
+                        onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })}
                       >
                         {(q.options || []).map(opt => (
                           <MenuItem key={opt} value={opt}>{opt}</MenuItem>
@@ -2768,21 +2768,21 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                   {q.type === 'Yes/No' && (
                     <RadioGroup
                       row
-                      value={previewResponses[q.id] || ''}
-                      onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })}
+                      value={previewResponses[q.id || `idx-${idx}`] || ''}
+                      onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })}
                     >
                       <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
                       <FormControlLabel value="No" control={<Radio />} label="No" />
                     </RadioGroup>
                   )}
                   {q.type === 'Text' && (
-                    <TextField fullWidth placeholder="Your answer" value={previewResponses[q.id] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })} />
+                    <TextField fullWidth placeholder="Your answer" value={previewResponses[q.id || `idx-${idx}`] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })} />
                   )}
                   {q.type === 'Rating' && (
-                    <Slider value={Number(previewResponses[q.id] || 0)} onChange={(_, v) => setPreviewResponses({ ...previewResponses, [q.id]: v })} min={0} max={10} step={1} />
+                    <Slider value={Number(previewResponses[q.id || `idx-${idx}`] || 0)} onChange={(_, v) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: v })} min={0} max={10} step={1} />
                   )}
                   {q.type === 'Number' && (
-                    <TextField type="number" fullWidth placeholder="0" value={previewResponses[q.id] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })} />
+                    <TextField type="number" fullWidth placeholder="0" value={previewResponses[q.id || `idx-${idx}`] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })} />
                   )}
                 </Box>
               ))}
@@ -4833,7 +4833,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
               variant="outlined"
               onClick={() => setPoolFormData({
                 ...poolFormData,
-                questions: [...poolFormData.questions, { question: "", type: "Multiple Choice", options: [""], required: true }]
+                questions: [...poolFormData.questions, { id: `q_${Date.now()}_${poolFormData.questions.length}`, question: "", type: "Multiple Choice", options: [""], required: true }]
               })}
             >
               Add Question
