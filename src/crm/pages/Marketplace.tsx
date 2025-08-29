@@ -1467,9 +1467,9 @@ export default function Marketplace() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setSelectedItem(null)}>Close</Button>
-              <Button 
-                variant="outlined" 
-                onClick={() => setEditMode(true)}
+              <Button
+                variant="outlined"
+                onClick={() => startEditItem(selectedItem)}
                 startIcon={<EditRoundedIcon />}
               >
                 Edit Item
