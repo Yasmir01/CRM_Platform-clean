@@ -8,8 +8,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "prisma db push --schema prisma/schema.prisma && vite build",
+    "preview": "vite preview",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
