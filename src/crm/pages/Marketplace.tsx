@@ -981,6 +981,21 @@ export default function Marketplace() {
     </Stack>
   );
 
+  const updateItem = (updated: MarketplaceItem) => {
+    const now = new Date().toISOString().split('T')[0];
+    setItems(prev => prev.map(i => i.id === updated.id ? { ...updated, lastUpdated: now } : i));
+  };
+
+  const toggleItemStatus = (item: MarketplaceItem) => {
+    const nextStatus: ItemStatus = item.status === 'Active' ? 'Draft' : 'Active';
+    updateItem({ ...item, status: nextStatus });
+  };
+
+  const startEditItem = (item: MarketplaceItem) => {
+    setSelectedItem(item);
+    setEditMode(true);
+  };
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
