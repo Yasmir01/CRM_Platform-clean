@@ -55,7 +55,9 @@ import {
   formElementWidths,
   layoutSpacing
 } from "../utils/formStyles";
+import { LocalStorageService } from "../services/LocalStorageService";
 import SubscriptionBackupControls from '../components/SubscriptionBackupControls';
+import { useRoleManagement } from "../hooks/useRoleManagement";
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
@@ -119,6 +121,8 @@ interface MarketplaceItem {
   salesCount: number;
   rating: number;
   reviewCount: number;
+  createdById?: string;
+  createdByName?: string;
   metadata: {
     estimatedSetupTime: string;
     minimumProperties?: number;
@@ -380,9 +384,10 @@ const mockMarketplaceItems: MarketplaceItem[] = [
 
 export default function Marketplace() {
   const theme = useTheme();
+  const { user, isSuperAdmin } = useRoleManagement();
   const [activeTab, setActiveTab] = React.useState(0);
   const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
-  const [items, setItems] = React.useState<MarketplaceItem[]>(mockMarketplaceItems);
+  const [items, setItems] = React.useState<MarketplaceItem[]>(() => LocalStorageService.getData<MarketplaceItem[]>("marketplaceItems", mockMarketplaceItems));
   const [addItemOpen, setAddItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MarketplaceItem | null>(null);
   const [editMode, setEditMode] = React.useState(false);
@@ -422,6 +427,14 @@ export default function Marketplace() {
     }
   });
 
+  const persistItems = (updater: MarketplaceItem[] | ((prev: MarketplaceItem[]) => MarketplaceItem[])) => {
+    setItems(prev => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      LocalStorageService.saveData('marketplaceItems', next);
+      return next;
+    });
+  };
+
   const handleAddItem = () => {
     const id = `item-${Date.now()}`;
     const now = new Date().toISOString().split('T')[0];
@@ -434,9 +447,11 @@ export default function Marketplace() {
       salesCount: 0,
       rating: 0,
       reviewCount: 0,
+      createdById: user?.id,
+      createdByName: user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     } as MarketplaceItem;
 
-    setItems(prev => [...prev, item]);
+    persistItems(prev => [...prev, item]);
     setAddItemOpen(false);
     setActiveStep(0);
     setNewItem({
@@ -981,6 +996,21 @@ export default function Marketplace() {
     </Stack>
   );
 
+  const updateItem = (updated: MarketplaceItem) => {
+    const now = new Date().toISOString().split('T')[0];
+    persistItems(prev => prev.map(i => i.id === updated.id ? { ...updated, lastUpdated: now } : i));
+  };
+
+  const toggleItemStatus = (item: MarketplaceItem) => {
+    const nextStatus: ItemStatus = item.status === 'Active' ? 'Draft' : 'Active';
+    updateItem({ ...item, status: nextStatus });
+  };
+
+  const startEditItem = (item: MarketplaceItem) => {
+    setSelectedItem(item);
+    setEditMode(true);
+  };
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
@@ -1283,10 +1313,7 @@ export default function Marketplace() {
                     >
                       <IconButton
                         size="small"
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setEditMode(true);
-                        }}
+                        onClick={() => startEditItem(item)}
                         sx={{
                           bgcolor: 'action.hover',
                           '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
@@ -1305,6 +1332,7 @@ export default function Marketplace() {
                     >
                       <IconButton
                         size="small"
+                        onClick={() => toggleItemStatus(item)}
                         sx={{
                           bgcolor: 'action.hover',
                           '&:hover': { bgcolor: 'warning.light', color: 'warning.main' }
@@ -1316,6 +1344,27 @@ export default function Marketplace() {
                         }
                       </IconButton>
                     </Tooltip>
+
+                    {isSuperAdmin() && (
+                      <Tooltip
+                        title="Delete Item"
+                        componentsProps={{ tooltip: { sx: uniformTooltipStyles } }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Delete ${item.name}? This cannot be undone.`)) {
+                              persistItems(prev => prev.filter(i => i.id !== item.id));
+                              if (selectedItem?.id === item.id) setSelectedItem(null);
+                              if (editMode && selectedItem?.id === item.id) setEditMode(false);
+                            }
+                          }}
+                          sx={{ bgcolor: 'action.hover', '&:hover': { bgcolor: 'error.light', color: 'error.main' } }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </Stack>
                 </Stack>
               </CardContent>
@@ -1454,9 +1503,9 @@ export default function Marketplace() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setSelectedItem(null)}>Close</Button>
-              <Button 
-                variant="outlined" 
-                onClick={() => setEditMode(true)}
+              <Button
+                variant="outlined"
+                onClick={() => startEditItem(selectedItem)}
                 startIcon={<EditRoundedIcon />}
               >
                 Edit Item
@@ -1467,6 +1516,102 @@ export default function Marketplace() {
       </Dialog>
         </>
       )}
+
+      {/* Edit Item Dialog */}
+      <Dialog
+        open={Boolean(selectedItem) && editMode}
+        onClose={() => setEditMode(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedItem && (
+          <>
+            <DialogTitle>Edit {selectedItem.name}</DialogTitle>
+            <DialogContent>
+              <Stack spacing={3} sx={{ mt: 1 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Item Name"
+                      value={selectedItem.name}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, name: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={selectedItem.status}
+                        label="Status"
+                        onChange={(e) => setSelectedItem({ ...selectedItem, status: e.target.value as ItemStatus })}
+                      >
+                        <MenuItem value="Active">Active</MenuItem>
+                        <MenuItem value="Draft">Draft</MenuItem>
+                        <MenuItem value="Coming Soon">Coming Soon</MenuItem>
+                        <MenuItem value="Discontinued">Discontinued</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Short Description"
+                      multiline
+                      rows={2}
+                      value={selectedItem.description}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, description: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Detailed Description"
+                      multiline
+                      rows={4}
+                      value={selectedItem.longDescription}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, longDescription: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Base Price"
+                      value={selectedItem.basePrice}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, basePrice: parseFloat(e.target.value) || 0 })}
+                      InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={selectedItem.featured}
+                          onChange={(e) => setSelectedItem({ ...selectedItem, featured: e.target.checked })}
+                        />
+                      }
+                      label="Featured Item"
+                    />
+                  </Grid>
+                </Grid>
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setEditMode(false)}>Cancel</Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  updateItem(selectedItem);
+                  setEditMode(false);
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Box>
   );
 }

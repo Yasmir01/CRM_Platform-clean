@@ -84,6 +84,8 @@ import QRCodeGenerator from "../components/QRCodeGenerator";
 import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import { useCompanyInfo } from "../components/CompanySettings";
+import { copyToClipboard } from "../utils/clipboardUtils";
 
 // QR Code interfaces
 interface QRCodeData {
@@ -741,7 +743,7 @@ export default function PowerTools() {
   });
 
   // Pool states
-  const [pools, setPools] = React.useState<Pool[]>(mockPools);
+  const [pools, setPools] = React.useState<Pool[]>(() => LocalStorageService.getData<Pool[]>("pools", mockPools));
   const [openPoolDialog, setOpenPoolDialog] = React.useState(false);
   const [poolFormData, setPoolFormData] = React.useState({
     title: "",
@@ -749,8 +751,16 @@ export default function PowerTools() {
     type: "Survey" as Pool["type"],
     customTypeDescription: "",
     endDate: "",
-    questions: [{ question: "", type: "Multiple Choice" as PoolQuestion["type"], options: [""], required: true }]
+    questions: [{ id: `q_${Date.now()}_0`, question: "", type: "Multiple Choice" as PoolQuestion["type"], options: [""], required: true }]
   });
+
+  const persistPools = (updater: Pool[] | ((prev: Pool[]) => Pool[])) => {
+    setPools(prev => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      LocalStorageService.saveData('pools', next);
+      return next;
+    });
+  };
 
   // New Power Tools states
   const [openFundraiseDialog, setOpenFundraiseDialog] = React.useState(false);
@@ -758,6 +768,9 @@ export default function PowerTools() {
   const [openDesignDialog, setOpenDesignDialog] = React.useState(false);
   const [openRewardDialog, setOpenRewardDialog] = React.useState(false);
   const [openWishlistDialog, setOpenWishlistDialog] = React.useState(false);
+  const [openPoolPreview, setOpenPoolPreview] = React.useState(false);
+  const [previewPool, setPreviewPool] = React.useState<Pool | null>(null);
+  const [previewResponses, setPreviewResponses] = React.useState<Record<string, any>>({});
 
   // Design Studio states
   const [selectedDesignCategory, setSelectedDesignCategory] = React.useState<string>("");
@@ -901,12 +914,12 @@ export default function PowerTools() {
     }
   ]);
 
-  const [smartLinks, setSmartLinks] = React.useState<SmartLink[]>([
+  const defaultSmartLinks: SmartLink[] = [
     {
       id: "link_1",
       title: "Property Listing - Downtown",
       originalUrl: "https://properties.example.com/downtown-apartment",
-      shortUrl: "link.property.com/downtown-apartment",
+      shortUrl: "https://link.property.com/downtown-apartment",
       description: "Modern downtown apartment listing",
       isActive: true,
       clickCount: 1247,
@@ -914,32 +927,32 @@ export default function PowerTools() {
       createdAt: "2024-01-15",
       tags: ["property", "downtown"],
       analytics: {
-      clicksByDate: [
-        { date: "2024-01-15", clicks: 45 },
-        { date: "2024-01-16", clicks: 62 },
-        { date: "2024-01-17", clicks: 38 },
-        { date: "2024-01-18", clicks: 71 },
-        { date: "2024-01-19", clicks: 55 }
-      ],
-      clicksByLocation: [
-        { country: "United States", clicks: 723 },
-        { country: "Canada", clicks: 298 },
-        { country: "United Kingdom", clicks: 156 },
-        { country: "Australia", clicks: 70 }
-      ],
-      clicksByDevice: [
-        { device: "Desktop", clicks: 612 },
-        { device: "Mobile", clicks: 455 },
-        { device: "Tablet", clicks: 180 }
-      ],
-      clicksByReferrer: [
-        { referrer: "Google", clicks: 543 },
-        { referrer: "Facebook", clicks: 289 },
-        { referrer: "Direct", clicks: 234 },
-        { referrer: "Twitter", clicks: 181 }
-      ],
-      conversionRate: 3.4
-    },
+        clicksByDate: [
+          { date: "2024-01-15", clicks: 45 },
+          { date: "2024-01-16", clicks: 62 },
+          { date: "2024-01-17", clicks: 38 },
+          { date: "2024-01-18", clicks: 71 },
+          { date: "2024-01-19", clicks: 55 }
+        ],
+        clicksByLocation: [
+          { country: "United States", clicks: 723 },
+          { country: "Canada", clicks: 298 },
+          { country: "United Kingdom", clicks: 156 },
+          { country: "Australia", clicks: 70 }
+        ],
+        clicksByDevice: [
+          { device: "Desktop", clicks: 612 },
+          { device: "Mobile", clicks: 455 },
+          { device: "Tablet", clicks: 180 }
+        ],
+        clicksByReferrer: [
+          { referrer: "Google", clicks: 543 },
+          { referrer: "Facebook", clicks: 289 },
+          { referrer: "Direct", clicks: 234 },
+          { referrer: "Twitter", clicks: 181 }
+        ],
+        conversionRate: 3.4
+      },
       customization: {
         backgroundColor: "#ffffff",
         textColor: "#000000",
@@ -953,7 +966,7 @@ export default function PowerTools() {
       id: "link_2",
       title: "Contact Form",
       originalUrl: "https://properties.example.com/contact-us",
-      shortUrl: "link.property.com/contact-us",
+      shortUrl: "https://link.property.com/contact-us",
       description: "Property contact form for inquiries",
       isActive: true,
       clickCount: 756,
@@ -996,7 +1009,65 @@ export default function PowerTools() {
         }
       }
     }
-  ]);
+  ];
+
+  const [smartLinks, setSmartLinks] = React.useState<SmartLink[]>(() => {
+    return LocalStorageService.getData<SmartLink[]>("smartLinks", defaultSmartLinks);
+  });
+
+  // Company info for branding the short domain
+  const { companyInfo } = useCompanyInfo();
+
+  // Link-it form state
+  const [linkForm, setLinkForm] = React.useState({
+    title: "",
+    originalUrl: "",
+    domain: "",
+    customAlias: "",
+    description: "",
+    trackingEnabled: true,
+    passwordEnabled: false,
+    password: ""
+  });
+
+  React.useEffect(() => {
+    // Initialize branded domain suggestion when dialog opens or company info changes
+    if (openLinkDialog) {
+      const derived = deriveBrandDomain(companyInfo);
+      setLinkForm(prev => ({ ...prev, domain: derived }));
+    }
+  }, [openLinkDialog, companyInfo]);
+
+  const slugify = (input: string) => input.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+
+  function extractHostname(urlOrHost: string): string | null {
+    try {
+      const u = urlOrHost.includes("://") ? new URL(urlOrHost) : new URL(`https://${urlOrHost}`);
+      return u.hostname;
+    } catch {
+      return null;
+    }
+  }
+
+  function rootDomain(hostname: string): string {
+    const parts = hostname.split(".");
+    if (parts.length <= 2) return hostname;
+    return parts.slice(-2).join(".");
+  }
+
+  function deriveBrandDomain(ci: any): string {
+    if (ci?.website) {
+      const host = extractHostname(ci.website);
+      if (host) return `go.${rootDomain(host)}`;
+    }
+    const base = ci?.name ? slugify(ci.name).replace(/[^a-z0-9-]/g, "") : "brand";
+    return `${base}.link`;
+  }
+
+  const persistSmartLinks = (links: SmartLink[]) => {
+    setSmartLinks(links);
+    LocalStorageService.saveData("smartLinks", links);
+  };
 
   // QR Code functions
   const handleEditQR = (qr: QRCodeData) => {
@@ -1019,10 +1090,6 @@ export default function PowerTools() {
     setSelectedQR(null);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
-  };
 
   const downloadQR = async (qrCode: QRCodeData) => {
     try {
@@ -1230,7 +1297,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
       endDate: poolFormData.endDate,
       participants: 0,
       totalContributions: 0,
-      questions: poolFormData.questions.filter(q => q.question.trim()),
+      questions: poolFormData.questions.filter(q => q.question.trim()).map((q, idx) => ({ ...q, id: (q as any).id || `q_${Date.now()}_${idx}` })),
       results: []
     };
 
@@ -1242,7 +1309,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
       type: "Survey",
       customTypeDescription: "",
       endDate: "",
-      questions: [{ question: "", type: "Multiple Choice", options: [""], required: true }]
+      questions: [{ id: `q_${Date.now()}_0`, question: "", type: "Multiple Choice", options: [""], required: true }]
     });
   };
 
@@ -1799,6 +1866,27 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                         {index + 1}. {question.question}
                       </Typography>
                     ))}
+
+                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                      <Button size="small" variant="outlined" onClick={() => {
+                        setPreviewPool(pool);
+                        setPreviewResponses({});
+                        setOpenPoolPreview(true);
+                      }}>Preview</Button>
+                      <Button size="small" variant="outlined" onClick={() => {
+                        const domain = deriveBrandDomain(companyInfo);
+                        const shortUrl = `https://${domain}/pool/${pool.id}`;
+                        copyToClipboard(shortUrl);
+                      }}>Share</Button>
+                      <Button size="small" variant="contained" onClick={() => {
+                        persistPools(prev => prev.map(p => p.id === pool.id ? {
+                          ...p,
+                          participants: (p.participants || 0) + 1,
+                          totalContributions: (p.totalContributions || 0) + ((p.questions?.length) || 0)
+                        } : p));
+                        alert('Test submission recorded.');
+                      }}>Test</Button>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
@@ -1921,7 +2009,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                     <Chip label="Active" color="success" size="small" />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    link.property.com/downtown-apartment
+                    {smartLinks[0]?.shortUrl}
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Typography variant="caption">🔗 1,247 clicks</Typography>
@@ -1959,7 +2047,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                     <Chip label="Active" color="success" size="small" />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    link.property.com/contact-us
+                    {smartLinks[1]?.shortUrl}
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Typography variant="caption">🔗 756 clicks</Typography>
@@ -1989,6 +2077,35 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
             </Card>
           </Grid>
         </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>All Smart Links</Typography>
+        <Grid container spacing={3}>
+          {smartLinks.map((link) => (
+            <Grid item xs={12} md={6} key={link.id}>
+              <Card>
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="h6">{link.title}</Typography>
+                      <Chip label="Active" color="success" size="small" />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary">{link.shortUrl}</Typography>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="caption">🔗 {link.clickCount} clicks</Typography>
+                      <Typography variant="caption">👥 {link.uniqueClicks} unique</Typography>
+                      <Typography variant="caption">📈 CTR {link.analytics.conversionRate || 0}%</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Button size="small" variant="outlined" startIcon={<AnalyticsRoundedIcon />} onClick={() => handleLinkAnalytics(link)}>Analytics</Button>
+                      <Button size="small" variant="outlined" startIcon={<ContentCopyIcon />} onClick={() => handleCopyShortLink(link)}>Copy</Button>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       </TabPanel>
 
       {/* Design-it Tab */}
@@ -2621,25 +2738,190 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
         </DialogActions>
       </Dialog>
 
+      {/* Pool Preview/Test Dialog */}
+      <Dialog open={openPoolPreview} onClose={() => setOpenPoolPreview(false)} maxWidth="md" fullWidth>
+        <DialogTitle>{previewPool ? `Preview: ${previewPool.title}` : 'Preview Pool'}</DialogTitle>
+        <DialogContent>
+          {previewPool && (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary">{previewPool.description}</Typography>
+              {previewPool.questions.map((q, idx) => (
+                <Box key={q.id || idx}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>{idx + 1}. {q.question}</Typography>
+                  {q.type === 'Multiple Choice' && (
+                    <FormControl fullWidth>
+                      <InputLabel>Choose</InputLabel>
+                      <Select
+                        label="Choose"
+                        value={previewResponses[q.id || `idx-${idx}`] || ''}
+                        onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })}
+                      >
+                        {(q.options || []).map(opt => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                  {q.type === 'Yes/No' && (
+                    <RadioGroup
+                      row
+                      value={previewResponses[q.id || `idx-${idx}`] || ''}
+                      onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })}
+                    >
+                      <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                      <FormControlLabel value="No" control={<Radio />} label="No" />
+                    </RadioGroup>
+                  )}
+                  {q.type === 'Text' && (
+                    <TextField fullWidth placeholder="Your answer" value={previewResponses[q.id || `idx-${idx}`] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })} />
+                  )}
+                  {q.type === 'Rating' && (
+                    <Slider value={Number(previewResponses[q.id || `idx-${idx}`] || 0)} onChange={(_, v) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: v })} min={0} max={10} step={1} />
+                  )}
+                  {q.type === 'Number' && (
+                    <TextField type="number" fullWidth placeholder="0" value={previewResponses[q.id || `idx-${idx}`] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id || `idx-${idx}`]: e.target.value })} />
+                  )}
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPoolPreview(false)}>Close</Button>
+          <Button variant="contained" onClick={() => {
+            if (!previewPool) return;
+            persistPools(prev => prev.map(p => p.id === previewPool.id ? {
+              ...p,
+              participants: (p.participants || 0) + 1,
+              totalContributions: (p.totalContributions || 0) + ((p.questions?.length) || 0)
+            } : p));
+            setOpenPoolPreview(false);
+            alert('Responses submitted (test).');
+          }}>Submit Test</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Link-it Dialog */}
       <Dialog open={openLinkDialog} onClose={() => setOpenLinkDialog(false)} maxWidth="md" fullWidth>
         <DialogTitle>Create Smart Link</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField label="Link Title" fullWidth placeholder="e.g., Property Listing - Downtown" />
-            <TextField label="Original URL" fullWidth placeholder="https://example.com/your-long-url" />
-            <TextField label="Custom Short URL (Optional)" fullWidth placeholder="link.property.com/custom-name" />
-            <TextField label="Description" fullWidth multiline rows={2} placeholder="Brief description of this link..." />
-            <FormControlLabel control={<Switch />} label="Enable Click Tracking" />
-            <FormControlLabel control={<Switch />} label="Password Protection" />
+            <TextField
+              label="Link Title"
+              fullWidth
+              placeholder="e.g., Property Listing - Downtown"
+              value={linkForm.title}
+              onChange={(e) => setLinkForm({ ...linkForm, title: e.target.value })}
+            />
+            <TextField
+              label="Original URL"
+              fullWidth
+              placeholder="https://example.com/your-long-url"
+              value={linkForm.originalUrl}
+              onChange={(e) => setLinkForm({ ...linkForm, originalUrl: e.target.value })}
+            />
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Branded Domain"
+                  fullWidth
+                  placeholder="go.yourcompany.com or propcrm.link"
+                  value={linkForm.domain}
+                  onChange={(e) => setLinkForm({ ...linkForm, domain: e.target.value })}
+                  helperText="Editable. We'll use HTTPS automatically."
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Custom Path"
+                  fullWidth
+                  placeholder="e.g., downtown-apartment"
+                  value={linkForm.customAlias}
+                  onChange={(e) => setLinkForm({ ...linkForm, customAlias: slugify(e.target.value) })}
+                  helperText="Leave blank to auto-generate"
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={2}
+              placeholder="Brief description of this link..."
+              value={linkForm.description}
+              onChange={(e) => setLinkForm({ ...linkForm, description: e.target.value })}
+            />
+            <FormControlLabel
+              control={<Switch checked={linkForm.trackingEnabled} onChange={(e) => setLinkForm({ ...linkForm, trackingEnabled: e.target.checked })} />}
+              label="Enable Click Tracking"
+            />
+            <FormControlLabel
+              control={<Switch checked={linkForm.passwordEnabled} onChange={(e) => setLinkForm({ ...linkForm, passwordEnabled: e.target.checked })} />}
+              label="Password Protection"
+            />
+            {linkForm.passwordEnabled && (
+              <TextField
+                label="Password"
+                type="password"
+                fullWidth
+                value={linkForm.password}
+                onChange={(e) => setLinkForm({ ...linkForm, password: e.target.value })}
+              />
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenLinkDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            setOpenLinkDialog(false);
-            alert("Smart link created successfully!");
-          }}>Create Link</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              const title = linkForm.title.trim();
+              const original = linkForm.originalUrl.trim();
+              const domain = (linkForm.domain || "").trim();
+              if (!title || !original || !domain) {
+                alert("Please provide title, original URL, and branded domain.");
+                return;
+              }
+              const alias = linkForm.customAlias || slugify(title).slice(0, 48) || Math.random().toString(36).slice(2, 10);
+              const hostname = extractHostname(domain) || domain;
+              const shortUrl = `https://${hostname}/${alias}`;
+
+              const newLink: SmartLink = {
+                id: Date.now().toString(),
+                title,
+                originalUrl: original,
+                shortUrl,
+                description: linkForm.description.trim() || undefined,
+                isActive: true,
+                clickCount: 0,
+                uniqueClicks: 0,
+                createdAt: new Date().toISOString().split('T')[0],
+                tags: [],
+                analytics: {
+                  clicksByDate: [],
+                  clicksByLocation: [],
+                  clicksByDevice: [],
+                  clicksByReferrer: [],
+                  conversionRate: 0,
+                },
+                customization: {
+                  backgroundColor: "#ffffff",
+                  textColor: "#000000",
+                  socialMetaTags: { title, description: linkForm.description || "" },
+                  customDomain: hostname,
+                },
+                password: linkForm.passwordEnabled ? linkForm.password : undefined,
+              } as SmartLink;
+
+              const updated = [newLink, ...smartLinks];
+              persistSmartLinks(updated);
+              setOpenLinkDialog(false);
+              alert("Smart link created successfully!");
+              setLinkForm({ title: "", originalUrl: "", domain: deriveBrandDomain(companyInfo), customAlias: "", description: "", trackingEnabled: true, passwordEnabled: false, password: "" });
+            }}
+          >
+            Create Link
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -4548,7 +4830,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
               variant="outlined"
               onClick={() => setPoolFormData({
                 ...poolFormData,
-                questions: [...poolFormData.questions, { question: "", type: "Multiple Choice", options: [""], required: true }]
+                questions: [...poolFormData.questions, { id: `q_${Date.now()}_${poolFormData.questions.length}`, question: "", type: "Multiple Choice", options: [""], required: true }]
               })}
             >
               Add Question
