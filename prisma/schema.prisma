@@ -24,10 +24,10 @@ model SubscriptionPlan {
   userLimit     Int          @default(1)
   propertyLimit Int          @default(10)
   isActive      Boolean      @default(true)
-  features      String[]     @default(ARRAY[])
-  pages         String[]     @default(ARRAY[])
-  tools         String[]     @default(ARRAY[])
-  services      String[]     @default(ARRAY[])
+  features      String[]
+  pages         String[]
+  tools         String[]
+  services      String[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
