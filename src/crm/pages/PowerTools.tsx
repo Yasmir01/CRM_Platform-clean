@@ -1882,7 +1882,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                         persistPools(prev => prev.map(p => p.id === pool.id ? {
                           ...p,
                           participants: (p.participants || 0) + 1,
-                          totalContributions: (p.totalContributions || 0) + p.questions.length
+                          totalContributions: (p.totalContributions || 0) + ((p.questions?.length) || 0)
                         } : p));
                         alert('Test submission recorded.');
                       }}>Test</Button>
@@ -2793,7 +2793,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
             persistPools(prev => prev.map(p => p.id === previewPool.id ? {
               ...p,
               participants: (p.participants || 0) + 1,
-              totalContributions: (p.totalContributions || 0) + p.questions.length
+              totalContributions: (p.totalContributions || 0) + ((p.questions?.length) || 0)
             } : p));
             setOpenPoolPreview(false);
             alert('Responses submitted (test).');
