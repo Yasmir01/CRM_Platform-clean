@@ -146,6 +146,20 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
   const [planDialogOpen, setPlanDialogOpen] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<SubscriptionPlan | null>(null);
 
+  const loadPlans = React.useCallback(async () => {
+    try {
+      const res = await fetch('/api/subscription-plans');
+      if (!res.ok) throw new Error('Failed to load plans');
+      const data = await res.json();
+      setPlans(data);
+    } catch (e) {
+      console.warn('Falling back to local mock plans:', e);
+      setPlans(mockPlans);
+    }
+  }, []);
+
+  React.useEffect(() => { loadPlans(); }, [loadPlans]);
+
   const availablePages = React.useMemo(() => [
     'Dashboard', 'Calendar', 'Contacts', 'Sales', 'Marketing', 'Properties', 'Tenants', 'Property Managers',
     'Service Providers', 'Customer Service', 'Communications', 'Work Orders', 'Tasks', 'Analytics', 'Reports',
@@ -670,8 +684,13 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
         </DialogContent>
         <DialogActions>
           {selectedPlan && (
-            <Button color="error" onClick={() => {
-              setPlans((prev) => prev.filter(p => p.id !== selectedPlan.id));
+            <Button color="error" onClick={async () => {
+              try {
+                await fetch(`/api/subscription-plans?id=${encodeURIComponent(selectedPlan.id)}` , { method: 'DELETE' });
+                setPlans((prev) => prev.filter(p => p.id !== selectedPlan.id));
+              } catch (e) {
+                alert('Failed to delete plan');
+              }
               setPlanDialogOpen(false);
               setSelectedPlan(null);
             }}>
@@ -681,19 +700,37 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
           <Button onClick={() => setPlanDialogOpen(false)}>Cancel</Button>
           <Button
             variant="contained"
-            onClick={() => {
+            onClick={async () => {
               if (!planForm.name.trim()) {
                 alert('Please enter a plan name.');
                 return;
               }
-              if (selectedPlan) {
-                setPlans((prev) => prev.map(p => p.id === selectedPlan.id ? { ...planForm, id: selectedPlan.id } : p));
-              } else {
-                const newId = planForm.name.toLowerCase().replace(/\s+/g, '-');
-                setPlans((prev) => [{ ...planForm, id: newId }, ...prev]);
+              try {
+                if (selectedPlan) {
+                  const res = await fetch(`/api/subscription-plans?id=${encodeURIComponent(selectedPlan.id)}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...planForm, id: selectedPlan.id })
+                  });
+                  if (!res.ok) throw new Error('Failed to update');
+                  const updated = await res.json();
+                  setPlans((prev) => prev.map(p => p.id === updated.id ? updated : p));
+                } else {
+                  const { id, ...payload } = planForm;
+                  const res = await fetch('/api/subscription-plans', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                  });
+                  if (!res.ok) throw new Error('Failed to create');
+                  const created = await res.json();
+                  setPlans((prev) => [created, ...prev]);
+                }
+                setPlanDialogOpen(false);
+                setSelectedPlan(null);
+              } catch (e) {
+                alert('Failed to save plan');
               }
-              setPlanDialogOpen(false);
-              setSelectedPlan(null);
             }}
           >
             {selectedPlan ? 'Save Changes' : 'Create Plan'}
