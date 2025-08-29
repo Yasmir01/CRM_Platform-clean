@@ -742,7 +742,7 @@ export default function PowerTools() {
   });
 
   // Pool states
-  const [pools, setPools] = React.useState<Pool[]>(mockPools);
+  const [pools, setPools] = React.useState<Pool[]>(() => LocalStorageService.getData<Pool[]>("pools", mockPools));
   const [openPoolDialog, setOpenPoolDialog] = React.useState(false);
   const [poolFormData, setPoolFormData] = React.useState({
     title: "",
@@ -753,12 +753,23 @@ export default function PowerTools() {
     questions: [{ question: "", type: "Multiple Choice" as PoolQuestion["type"], options: [""], required: true }]
   });
 
+  const persistPools = (updater: Pool[] | ((prev: Pool[]) => Pool[])) => {
+    setPools(prev => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      LocalStorageService.saveData('pools', next);
+      return next;
+    });
+  };
+
   // New Power Tools states
   const [openFundraiseDialog, setOpenFundraiseDialog] = React.useState(false);
   const [openLinkDialog, setOpenLinkDialog] = React.useState(false);
   const [openDesignDialog, setOpenDesignDialog] = React.useState(false);
   const [openRewardDialog, setOpenRewardDialog] = React.useState(false);
   const [openWishlistDialog, setOpenWishlistDialog] = React.useState(false);
+  const [openPoolPreview, setOpenPoolPreview] = React.useState(false);
+  const [previewPool, setPreviewPool] = React.useState<Pool | null>(null);
+  const [previewResponses, setPreviewResponses] = React.useState<Record<string, any>>({});
 
   // Design Studio states
   const [selectedDesignCategory, setSelectedDesignCategory] = React.useState<string>("");
