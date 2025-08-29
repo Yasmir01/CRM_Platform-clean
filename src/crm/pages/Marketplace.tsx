@@ -1480,6 +1480,102 @@ export default function Marketplace() {
       </Dialog>
         </>
       )}
+
+      {/* Edit Item Dialog */}
+      <Dialog
+        open={Boolean(selectedItem) && editMode}
+        onClose={() => setEditMode(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        {selectedItem && (
+          <>
+            <DialogTitle>Edit {selectedItem.name}</DialogTitle>
+            <DialogContent>
+              <Stack spacing={3} sx={{ mt: 1 }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Item Name"
+                      value={selectedItem.name}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, name: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={selectedItem.status}
+                        label="Status"
+                        onChange={(e) => setSelectedItem({ ...selectedItem, status: e.target.value as ItemStatus })}
+                      >
+                        <MenuItem value="Active">Active</MenuItem>
+                        <MenuItem value="Draft">Draft</MenuItem>
+                        <MenuItem value="Coming Soon">Coming Soon</MenuItem>
+                        <MenuItem value="Discontinued">Discontinued</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Short Description"
+                      multiline
+                      rows={2}
+                      value={selectedItem.description}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, description: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Detailed Description"
+                      multiline
+                      rows={4}
+                      value={selectedItem.longDescription}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, longDescription: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="number"
+                      label="Base Price"
+                      value={selectedItem.basePrice}
+                      onChange={(e) => setSelectedItem({ ...selectedItem, basePrice: parseFloat(e.target.value) || 0 })}
+                      InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={selectedItem.featured}
+                          onChange={(e) => setSelectedItem({ ...selectedItem, featured: e.target.checked })}
+                        />
+                      }
+                      label="Featured Item"
+                    />
+                  </Grid>
+                </Grid>
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setEditMode(false)}>Cancel</Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  updateItem(selectedItem);
+                  setEditMode(false);
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Box>
   );
 }
