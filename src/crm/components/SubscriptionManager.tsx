@@ -28,7 +28,11 @@ import {
   FormControlLabel,
   Grid,
   IconButton,
-  Tooltip
+  Tooltip,
+  Checkbox,
+  FormGroup,
+  FormLabel,
+  Divider
 } from '@mui/material';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import CancelRoundedIcon from '@mui/icons-material/CancelRoundedIcon';
@@ -46,6 +50,11 @@ interface SubscriptionPlan {
   userLimit: number;
   propertyLimit: number;
   isActive: boolean;
+  billingCycle?: 'monthly' | 'yearly';
+  description?: string;
+  pages?: string[];
+  tools?: string[];
+  services?: string[];
 }
 
 interface PaymentEvent {
@@ -131,12 +140,43 @@ const mockPaymentEvents: PaymentEvent[] = [
 
 export default function SubscriptionManager({ open, onClose }: SubscriptionManagerProps) {
   const [plans, setPlans] = React.useState<SubscriptionPlan[]>(mockPlans);
-  const [paymentEvents, setPaymentEvents] = React.useState<PaymentEvent[]>(mockPaymentEvents);
+  const [paymentEvents] = React.useState<PaymentEvent[]>(mockPaymentEvents);
   const [autoDeactivation, setAutoDeactivation] = React.useState(true);
   const [graceperiod, setGracePeriod] = React.useState(3);
   const [autoNotifications, setAutoNotifications] = React.useState(true);
   const [planDialogOpen, setPlanDialogOpen] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<SubscriptionPlan | null>(null);
+
+  const availablePages = React.useMemo(() => [
+    'Dashboard', 'Calendar', 'Contacts', 'Sales', 'Marketing', 'Properties', 'Tenants', 'Property Managers',
+    'Service Providers', 'Customer Service', 'Communications', 'Work Orders', 'Tasks', 'Analytics', 'Reports',
+    'AI Tools', 'News Board', 'Email Marketing', 'SMS Marketing', 'Templates', 'Landing Pages', 'Promotions',
+    'Prospects', 'Applications', 'Settings', 'Marketplace', 'Integration Management'
+  ], []);
+
+  const availableTools = React.useMemo(() => [
+    'Power Tools', 'AI Assistant', 'Power Dialer', 'Backup Management', 'Subscription Controls',
+    'Role Management', 'Performance Monitor'
+  ], []);
+
+  const availableServices = React.useMemo(() => [
+    'Stripe Billing', 'QuickBooks', 'Xero', 'Cloud Backups', 'Webhook API', 'Real Estate Platform Integrations'
+  ], []);
+
+  const [planForm, setPlanForm] = React.useState<SubscriptionPlan>({
+    id: '',
+    name: '',
+    price: 0,
+    features: [],
+    userLimit: 1,
+    propertyLimit: 10,
+    isActive: true,
+    billingCycle: 'monthly',
+    description: '',
+    pages: [],
+    tools: [],
+    services: []
+  });
 
   const handleProcessFailedPayments = () => {
     // Simulate processing failed payments
@@ -342,6 +382,20 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
                     variant="outlined" 
                     onClick={() => {
                       setSelectedPlan(null);
+                      setPlanForm({
+                        id: '',
+                        name: '',
+                        price: 0,
+                        features: [],
+                        userLimit: 1,
+                        propertyLimit: 10,
+                        isActive: true,
+                        billingCycle: 'monthly',
+                        description: '',
+                        pages: [],
+                        tools: [],
+                        services: []
+                      });
                       setPlanDialogOpen(true);
                     }}
                   >
@@ -364,7 +418,7 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
                           </Stack>
                           
                           <Typography variant="h4" color="primary" gutterBottom>
-                            ${plan.price}<Typography component="span" variant="body2">/month</Typography>
+                            ${plan.price}<Typography component="span" variant="body2">/{plan.billingCycle || 'month'}</Typography>
                           </Typography>
 
                           <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -381,6 +435,9 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
                                 {feature}
                               </Typography>
                             ))}
+                            <Typography variant="caption" color="text.secondary">
+                              {`${plan.pages?.length || 0} pages • ${plan.tools?.length || 0} tools • ${plan.services?.length || 0} services`}
+                            </Typography>
                             {plan.features.length > 3 && (
                               <Typography variant="caption" color="text.secondary">
                                 +{plan.features.length - 3} more features
@@ -395,6 +452,20 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
                             sx={{ mt: 2 }}
                             onClick={() => {
                               setSelectedPlan(plan);
+                              setPlanForm({
+                                id: plan.id,
+                                name: plan.name,
+                                price: plan.price,
+                                features: plan.features || [],
+                                userLimit: plan.userLimit,
+                                propertyLimit: plan.propertyLimit,
+                                isActive: plan.isActive,
+                                billingCycle: plan.billingCycle || 'monthly',
+                                description: plan.description || '',
+                                pages: plan.pages || [],
+                                tools: plan.tools || [],
+                                services: plan.services || []
+                              });
                               setPlanDialogOpen(true);
                             }}
                           >
@@ -434,6 +505,202 @@ export default function SubscriptionManager({ open, onClose }: SubscriptionManag
           Save Settings
         </Button>
       </DialogActions>
+
+      {/* Plan Create/Edit Dialog */}
+      <Dialog open={planDialogOpen} onClose={() => setPlanDialogOpen(false)} maxWidth="lg" fullWidth>
+        <DialogTitle>{selectedPlan ? 'Edit Subscription Plan' : 'Create Subscription Plan'}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 0 }}>
+            <Grid item xs={12} md={4}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Stack spacing={2}>
+                    <TextField
+                      label="Plan Name"
+                      fullWidth
+                      value={planForm.name}
+                      onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                    />
+                    <TextField
+                      label="Description"
+                      fullWidth
+                      multiline
+                      minRows={3}
+                      value={planForm.description}
+                      onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                    />
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Price"
+                          type="number"
+                          fullWidth
+                          value={planForm.price}
+                          onChange={(e) => setPlanForm({ ...planForm, price: Number(e.target.value) })}
+                          inputProps={{ min: 0, step: 1 }}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <FormControl fullWidth>
+                          <InputLabel>Billing</InputLabel>
+                          <Select
+                            label="Billing"
+                            value={planForm.billingCycle || 'monthly'}
+                            onChange={(e) => setPlanForm({ ...planForm, billingCycle: e.target.value as 'monthly' | 'yearly' })}
+                          >
+                            <MenuItem value="monthly">Monthly</MenuItem>
+                            <MenuItem value="yearly">Yearly</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="User Limit"
+                          type="number"
+                          fullWidth
+                          value={planForm.userLimit}
+                          onChange={(e) => setPlanForm({ ...planForm, userLimit: Number(e.target.value) })}
+                          inputProps={{ min: 1 }}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="Property Limit"
+                          type="number"
+                          fullWidth
+                          value={planForm.propertyLimit}
+                          onChange={(e) => setPlanForm({ ...planForm, propertyLimit: Number(e.target.value) })}
+                          inputProps={{ min: 1 }}
+                        />
+                      </Grid>
+                    </Grid>
+                    <FormControlLabel
+                      control={<Switch checked={planForm.isActive} onChange={(e) => setPlanForm({ ...planForm, isActive: e.target.checked })} />}
+                      label="Plan is active"
+                    />
+                    <TextField
+                      label="Feature (press Enter to add)"
+                      fullWidth
+                      onKeyDown={(e) => {
+                        const input = e.target as HTMLInputElement;
+                        if (e.key === 'Enter' && input.value.trim()) {
+                          e.preventDefault();
+                          setPlanForm({ ...planForm, features: [...planForm.features, input.value.trim()] });
+                          input.value = '';
+                        }
+                      }}
+                    />
+                    <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                      {planForm.features.map((f, idx) => (
+                        <Chip key={`${f}-${idx}`} label={f} onDelete={() => setPlanForm({ ...planForm, features: planForm.features.filter((_, i) => i !== idx) })} />
+                      ))}
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <Card variant="outlined">
+                <CardContent>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={4}>
+                      <FormLabel component="legend">Pages</FormLabel>
+                      <FormGroup>
+                        {availablePages.map((p) => (
+                          <FormControlLabel
+                            key={p}
+                            control={<Checkbox checked={planForm.pages?.includes(p) || false} onChange={(e) => {
+                              const checked = e.target.checked;
+                              setPlanForm((prev) => ({
+                                ...prev,
+                                pages: checked ? [...(prev.pages || []), p] : (prev.pages || []).filter(x => x !== p)
+                              }));
+                            }} />}
+                            label={p}
+                          />
+                        ))}
+                      </FormGroup>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormLabel component="legend">Tools</FormLabel>
+                      <FormGroup>
+                        {availableTools.map((t) => (
+                          <FormControlLabel
+                            key={t}
+                            control={<Checkbox checked={planForm.tools?.includes(t) || false} onChange={(e) => {
+                              const checked = e.target.checked;
+                              setPlanForm((prev) => ({
+                                ...prev,
+                                tools: checked ? [...(prev.tools || []), t] : (prev.tools || []).filter(x => x !== t)
+                              }));
+                            }} />}
+                            label={t}
+                          />
+                        ))}
+                      </FormGroup>
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <FormLabel component="legend">Services</FormLabel>
+                      <FormGroup>
+                        {availableServices.map((s) => (
+                          <FormControlLabel
+                            key={s}
+                            control={<Checkbox checked={planForm.services?.includes(s) || false} onChange={(e) => {
+                              const checked = e.target.checked;
+                              setPlanForm((prev) => ({
+                                ...prev,
+                                services: checked ? [...(prev.services || []), s] : (prev.services || []).filter(x => x !== s)
+                              }));
+                            }} />}
+                            label={s}
+                          />
+                        ))}
+                      </FormGroup>
+                    </Grid>
+                  </Grid>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="caption" color="text.secondary">
+                    Select which CRM pages, tools, and services are included in this plan.
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          {selectedPlan && (
+            <Button color="error" onClick={() => {
+              setPlans((prev) => prev.filter(p => p.id !== selectedPlan.id));
+              setPlanDialogOpen(false);
+              setSelectedPlan(null);
+            }}>
+              Delete Plan
+            </Button>
+          )}
+          <Button onClick={() => setPlanDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!planForm.name.trim()) {
+                alert('Please enter a plan name.');
+                return;
+              }
+              if (selectedPlan) {
+                setPlans((prev) => prev.map(p => p.id === selectedPlan.id ? { ...planForm, id: selectedPlan.id } : p));
+              } else {
+                const newId = planForm.name.toLowerCase().replace(/\s+/g, '-');
+                setPlans((prev) => [{ ...planForm, id: newId }, ...prev]);
+              }
+              setPlanDialogOpen(false);
+              setSelectedPlan(null);
+            }}
+          >
+            {selectedPlan ? 'Save Changes' : 'Create Plan'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }
