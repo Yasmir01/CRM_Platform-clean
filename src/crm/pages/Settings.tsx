@@ -32,6 +32,14 @@ import {
   Switch,
   FormControlLabel,
   Alert,
+  RadioGroup,
+  Radio,
+  FormLabel,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
@@ -42,7 +50,13 @@ import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import SubscriptionsRoundedIcon from "@mui/icons-material/SubscriptionsRounded";
+import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 import CompanySettings, { useCompanyInfo } from "../components/CompanySettings";
+import SubscriptionBackupControls from "../components/SubscriptionBackupControls";
+import { Link as RouterLink } from "react-router-dom";
 
 // Mock user data and types (would normally come from AuthContext)
 type UserRole = 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
@@ -122,11 +136,74 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+type BillingCycle = "Monthly" | "Quarterly" | "Annually";
+
+type PaymentMethodType = "Credit Card" | "Bank Transfer" | "ACH";
+
+interface BillingAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+interface PaymentMethod {
+  id: string;
+  type: PaymentMethodType;
+  last4: string;
+  expiryDate?: string;
+  bankName?: string;
+  isDefault: boolean;
+  autoPayEnabled: boolean;
+}
+
 export default function Settings() {
   const [users, setUsers] = React.useState<User[]>(mockUsers);
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
+
+  // Subscription & Billing state
+  const [accountType, setAccountType] = React.useState<"individual" | "company">(() => (localStorage.getItem("accountType") as any) || "company");
+  const [billingAddress, setBillingAddress] = React.useState<BillingAddress>(() => {
+    const saved = localStorage.getItem("billingAddress");
+    return saved ? JSON.parse(saved) : { street: "", city: "", state: "", zipCode: "", country: "USA" };
+  });
+  const [paymentMethods, setPaymentMethods] = React.useState<PaymentMethod[]>(() => {
+    const saved = localStorage.getItem("paymentMethods");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false);
+  const [paymentForm, setPaymentForm] = React.useState({
+    type: "Credit Card" as PaymentMethodType,
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    nameOnCard: "",
+    bankName: "",
+    autoPayEnabled: true,
+  });
+  const [openCompanyDialog, setOpenCompanyDialog] = React.useState(false);
+  const [individualProfile, setIndividualProfile] = React.useState<{ fullName: string; email: string; phone: string }>(() => {
+    const saved = localStorage.getItem("individualProfile");
+    return saved ? JSON.parse(saved) : { fullName: "", email: "", phone: "" };
+  });
+
+  const { companyInfo, updateCompanyInfo } = useCompanyInfo();
+
+  React.useEffect(() => {
+    localStorage.setItem("accountType", accountType);
+  }, [accountType]);
+  React.useEffect(() => {
+    localStorage.setItem("billingAddress", JSON.stringify(billingAddress));
+  }, [billingAddress]);
+  React.useEffect(() => {
+    localStorage.setItem("paymentMethods", JSON.stringify(paymentMethods));
+  }, [paymentMethods]);
+  React.useEffect(() => {
+    localStorage.setItem("individualProfile", JSON.stringify(individualProfile));
+  }, [individualProfile]);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
   const [userFormData, setUserFormData] = React.useState({
     firstName: "",
@@ -228,6 +305,7 @@ export default function Settings() {
           <Tab label="User Management" icon={<PeopleRoundedIcon />} iconPosition="start" />
           <Tab label="Security" icon={<SecurityRoundedIcon />} iconPosition="start" />
           <Tab label="System" icon={<SettingsRoundedIcon />} iconPosition="start" />
+          <Tab label="Subscription & Billing" icon={<SubscriptionsRoundedIcon />} iconPosition="start" />
           <Tab label="Notifications" icon={<NotificationsRoundedIcon />} iconPosition="start" />
         </Tabs>
       </Box>
@@ -474,41 +552,175 @@ export default function Settings() {
       </TabPanel>
 
       <TabPanel value={selectedTab} index={3}>
+        <Typography variant="h5" sx={{ mb: 2 }}>Subscription & Billing</Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <BusinessRoundedIcon color="primary" />
+                    <Typography variant="h6">Account Type</Typography>
+                  </Stack>
+                  <FormLabel id="account-type-label">Choose account type</FormLabel>
+                  <RadioGroup row aria-labelledby="account-type-label" value={accountType} onChange={(e) => setAccountType(e.target.value as any)}>
+                    <FormControlLabel value="individual" control={<Radio />} label="Individual" />
+                    <FormControlLabel value="company" control={<Radio />} label="Company" />
+                  </RadioGroup>
+
+                  {accountType === "individual" && (
+                    <Stack spacing={2}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <TextField label="Full Name" fullWidth value={individualProfile.fullName} onChange={(e) => setIndividualProfile({ ...individualProfile, fullName: e.target.value })} />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField label="Email" type="email" fullWidth value={individualProfile.email} onChange={(e) => setIndividualProfile({ ...individualProfile, email: e.target.value })} />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <TextField label="Phone" fullWidth value={individualProfile.phone} onChange={(e) => setIndividualProfile({ ...individualProfile, phone: e.target.value })} />
+                        </Grid>
+                      </Grid>
+                    </Stack>
+                  )}
+
+                  {accountType === "company" && (
+                    <Stack spacing={1}>
+                      <Typography variant="body2" color="text.secondary">
+                        Manage your company information, branding and compliance.
+                      </Typography>
+                      <List>
+                        <ListItem>
+                          <ListItemIcon>
+                            <BusinessRoundedIcon />
+                          </ListItemIcon>
+                          <ListItemText primary={companyInfo.name} secondary={`${companyInfo.phone} • ${companyInfo.email}`} />
+                        </ListItem>
+                      </List>
+                      <Button variant="outlined" onClick={() => setOpenCompanyDialog(true)}>Edit Company Information</Button>
+                    </Stack>
+                  )}
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <PaymentRoundedIcon color="primary" />
+                    <Typography variant="h6">Billing Address</Typography>
+                  </Stack>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField label="Street" fullWidth value={billingAddress.street} onChange={(e) => setBillingAddress({ ...billingAddress, street: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <TextField label="City" fullWidth value={billingAddress.city} onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <TextField label="State" fullWidth value={billingAddress.state} onChange={(e) => setBillingAddress({ ...billingAddress, state: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <TextField label="ZIP Code" fullWidth value={billingAddress.zipCode} onChange={(e) => setBillingAddress({ ...billingAddress, zipCode: e.target.value })} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Country" fullWidth value={billingAddress.country} onChange={(e) => setBillingAddress({ ...billingAddress, country: e.target.value })} />
+                    </Grid>
+                  </Grid>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <CreditCardRoundedIcon color="primary" />
+                    <Typography variant="h6">Payment Methods</Typography>
+                  </Stack>
+                  {paymentMethods.length === 0 && (<Alert severity="info">No payment methods added yet.</Alert>)}
+                  <Grid container spacing={2}>
+                    {paymentMethods.map((pm) => (
+                      <Grid item xs={12} md={6} key={pm.id}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Stack spacing={1}>
+                              <Typography variant="subtitle1">{pm.type} ending in {pm.last4}</Typography>
+                              <Typography variant="body2" color="text.secondary">{pm.bankName || pm.expiryDate}</Typography>
+                              <Stack direction="row" spacing={1}>
+                                {pm.isDefault && <Chip label="Default" size="small" />}
+                                {pm.autoPayEnabled && <Chip label="Auto-pay" size="small" color="success" />}
+                              </Stack>
+                              <Stack direction="row" spacing={1}>
+                                <Button size="small" onClick={() => setPaymentMethods(ms => ms.map(m => ({ ...m, isDefault: m.id === pm.id })))}>Set Default</Button>
+                                <Button size="small" color="error" onClick={() => setPaymentMethods(ms => ms.filter(m => m.id !== pm.id))}>Remove</Button>
+                              </Stack>
+                            </Stack>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                  <Button variant="outlined" startIcon={<AddRoundedIcon />} onClick={() => setPaymentDialogOpen(true)}>Add Payment Method</Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12}>
+            <SubscriptionBackupControls />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                      <SubscriptionsRoundedIcon color="primary" />
+                      <Typography variant="h6">Manage Subscription</Typography>
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      View plans, invoices, and update your subscription details.
+                    </Typography>
+                    <Button variant="contained" component={RouterLink} to="/crm/subscriptions">Go to Subscription Management</Button>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                      <AccountBalanceRoundedIcon color="primary" />
+                      <Typography variant="h6">Bank & Payment Routing</Typography>
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Configure business bank accounts and payment routing rules.
+                    </Typography>
+                    <Button variant="outlined" component={RouterLink} to="/crm/bank-account-settings">Open Bank Account Settings</Button>
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </TabPanel>
+
+      <TabPanel value={selectedTab} index={4}>
         <Typography variant="h5" sx={{ mb: 2 }}>Notification Settings</Typography>
         <Card>
           <CardContent>
             <Stack spacing={3}>
               <Typography variant="h6">Email Notifications</Typography>
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="Email notifications for new tenants"
-              />
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="Email alerts for maintenance requests"
-              />
-              <FormControlLabel
-                control={<Switch />}
-                label="Daily reports"
-              />
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="Rent collection reminders"
-              />
-              
+              <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for new tenants" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for maintenance requests" />
+              <FormControlLabel control={<Switch />} label="Daily reports" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Rent collection reminders" />
               <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="SMS alerts for urgent maintenance"
-              />
-              <FormControlLabel
-                control={<Switch />}
-                label="SMS rent reminders"
-              />
-              <FormControlLabel
-                control={<Switch defaultChecked />}
-                label="SMS security alerts"
-              />
+              <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent maintenance" />
+              <FormControlLabel control={<Switch />} label="SMS rent reminders" />
+              <FormControlLabel control={<Switch defaultChecked />} label="SMS security alerts" />
             </Stack>
           </CardContent>
         </Card>
@@ -598,6 +810,74 @@ export default function Settings() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Payment Method Dialog */}
+      <Dialog open={paymentDialogOpen} onClose={() => setPaymentDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Add Payment Method</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <FormControl fullWidth>
+              <InputLabel>Payment Method</InputLabel>
+              <Select value={paymentForm.type} label="Payment Method" onChange={(e) => setPaymentForm({ ...paymentForm, type: e.target.value as PaymentMethodType })}>
+                <MenuItem value="Credit Card">Credit Card</MenuItem>
+                <MenuItem value="Bank Transfer">Bank Transfer</MenuItem>
+                <MenuItem value="ACH">ACH</MenuItem>
+              </Select>
+            </FormControl>
+            {paymentForm.type === "Credit Card" && (
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField label="Card Number" fullWidth value={paymentForm.cardNumber} onChange={(e) => setPaymentForm({ ...paymentForm, cardNumber: e.target.value })} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField label="Expiry Date (MM/YY)" fullWidth value={paymentForm.expiryDate} onChange={(e) => setPaymentForm({ ...paymentForm, expiryDate: e.target.value })} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField label="CVV" fullWidth value={paymentForm.cvv} onChange={(e) => setPaymentForm({ ...paymentForm, cvv: e.target.value })} />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField label="Name on Card" fullWidth value={paymentForm.nameOnCard} onChange={(e) => setPaymentForm({ ...paymentForm, nameOnCard: e.target.value })} />
+                </Grid>
+              </Grid>
+            )}
+            {paymentForm.type !== "Credit Card" && (
+              <TextField label="Bank Name" fullWidth value={paymentForm.bankName} onChange={(e) => setPaymentForm({ ...paymentForm, bankName: e.target.value })} />
+            )}
+            <FormControlLabel control={<Switch checked={paymentForm.autoPayEnabled} onChange={(e) => setPaymentForm({ ...paymentForm, autoPayEnabled: e.target.checked })} />} label="Enable automatic payments" />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPaymentDialogOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              const last4 = paymentForm.type === "Credit Card" ? paymentForm.cardNumber.slice(-4) : (paymentForm.bankName || "").slice(-4);
+              const newPm: PaymentMethod = {
+                id: Date.now().toString(),
+                type: paymentForm.type,
+                last4,
+                expiryDate: paymentForm.expiryDate || undefined,
+                bankName: paymentForm.type !== "Credit Card" ? paymentForm.bankName : undefined,
+                isDefault: paymentMethods.length === 0,
+                autoPayEnabled: paymentForm.autoPayEnabled,
+              };
+              setPaymentMethods((prev) => [...prev, newPm]);
+              setPaymentDialogOpen(false);
+              setPaymentForm({ type: "Credit Card", cardNumber: "", expiryDate: "", cvv: "", nameOnCard: "", bankName: "", autoPayEnabled: true });
+            }}
+          >
+            Save Payment Method
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Company Settings Dialog */}
+      <CompanySettings
+        open={openCompanyDialog}
+        onClose={() => setOpenCompanyDialog(false)}
+        onSave={updateCompanyInfo}
+        currentInfo={companyInfo}
+      />
     </Box>
   );
 }
