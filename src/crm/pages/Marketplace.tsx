@@ -384,6 +384,7 @@ const mockMarketplaceItems: MarketplaceItem[] = [
 
 export default function Marketplace() {
   const theme = useTheme();
+  const { user, isSuperAdmin } = useRoleManagement();
   const [activeTab, setActiveTab] = React.useState(0);
   const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
   const [items, setItems] = React.useState<MarketplaceItem[]>(() => LocalStorageService.getData<MarketplaceItem[]>("marketplaceItems", mockMarketplaceItems));
