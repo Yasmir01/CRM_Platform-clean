@@ -84,6 +84,7 @@ import QRCodeGenerator from "../components/QRCodeGenerator";
 import QRAnalyticsDashboard from "../components/QRAnalyticsDashboard";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import { useCompanyInfo } from "../components/CompanySettings";
 
 // QR Code interfaces
 interface QRCodeData {
@@ -901,12 +902,12 @@ export default function PowerTools() {
     }
   ]);
 
-  const [smartLinks, setSmartLinks] = React.useState<SmartLink[]>([
+  const defaultSmartLinks: SmartLink[] = [
     {
       id: "link_1",
       title: "Property Listing - Downtown",
       originalUrl: "https://properties.example.com/downtown-apartment",
-      shortUrl: "link.property.com/downtown-apartment",
+      shortUrl: "https://link.property.com/downtown-apartment",
       description: "Modern downtown apartment listing",
       isActive: true,
       clickCount: 1247,
@@ -914,32 +915,32 @@ export default function PowerTools() {
       createdAt: "2024-01-15",
       tags: ["property", "downtown"],
       analytics: {
-      clicksByDate: [
-        { date: "2024-01-15", clicks: 45 },
-        { date: "2024-01-16", clicks: 62 },
-        { date: "2024-01-17", clicks: 38 },
-        { date: "2024-01-18", clicks: 71 },
-        { date: "2024-01-19", clicks: 55 }
-      ],
-      clicksByLocation: [
-        { country: "United States", clicks: 723 },
-        { country: "Canada", clicks: 298 },
-        { country: "United Kingdom", clicks: 156 },
-        { country: "Australia", clicks: 70 }
-      ],
-      clicksByDevice: [
-        { device: "Desktop", clicks: 612 },
-        { device: "Mobile", clicks: 455 },
-        { device: "Tablet", clicks: 180 }
-      ],
-      clicksByReferrer: [
-        { referrer: "Google", clicks: 543 },
-        { referrer: "Facebook", clicks: 289 },
-        { referrer: "Direct", clicks: 234 },
-        { referrer: "Twitter", clicks: 181 }
-      ],
-      conversionRate: 3.4
-    },
+        clicksByDate: [
+          { date: "2024-01-15", clicks: 45 },
+          { date: "2024-01-16", clicks: 62 },
+          { date: "2024-01-17", clicks: 38 },
+          { date: "2024-01-18", clicks: 71 },
+          { date: "2024-01-19", clicks: 55 }
+        ],
+        clicksByLocation: [
+          { country: "United States", clicks: 723 },
+          { country: "Canada", clicks: 298 },
+          { country: "United Kingdom", clicks: 156 },
+          { country: "Australia", clicks: 70 }
+        ],
+        clicksByDevice: [
+          { device: "Desktop", clicks: 612 },
+          { device: "Mobile", clicks: 455 },
+          { device: "Tablet", clicks: 180 }
+        ],
+        clicksByReferrer: [
+          { referrer: "Google", clicks: 543 },
+          { referrer: "Facebook", clicks: 289 },
+          { referrer: "Direct", clicks: 234 },
+          { referrer: "Twitter", clicks: 181 }
+        ],
+        conversionRate: 3.4
+      },
       customization: {
         backgroundColor: "#ffffff",
         textColor: "#000000",
@@ -953,7 +954,7 @@ export default function PowerTools() {
       id: "link_2",
       title: "Contact Form",
       originalUrl: "https://properties.example.com/contact-us",
-      shortUrl: "link.property.com/contact-us",
+      shortUrl: "https://link.property.com/contact-us",
       description: "Property contact form for inquiries",
       isActive: true,
       clickCount: 756,
@@ -996,7 +997,65 @@ export default function PowerTools() {
         }
       }
     }
-  ]);
+  ];
+
+  const [smartLinks, setSmartLinks] = React.useState<SmartLink[]>(() => {
+    return LocalStorageService.getData<SmartLink[]>("smartLinks", defaultSmartLinks);
+  });
+
+  // Company info for branding the short domain
+  const { companyInfo } = useCompanyInfo();
+
+  // Link-it form state
+  const [linkForm, setLinkForm] = React.useState({
+    title: "",
+    originalUrl: "",
+    domain: "",
+    customAlias: "",
+    description: "",
+    trackingEnabled: true,
+    passwordEnabled: false,
+    password: ""
+  });
+
+  React.useEffect(() => {
+    // Initialize branded domain suggestion when dialog opens or company info changes
+    if (openLinkDialog) {
+      const derived = deriveBrandDomain(companyInfo);
+      setLinkForm(prev => ({ ...prev, domain: derived }));
+    }
+  }, [openLinkDialog, companyInfo]);
+
+  const slugify = (input: string) => input.toLowerCase().trim().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+
+  function extractHostname(urlOrHost: string): string | null {
+    try {
+      const u = urlOrHost.includes("://") ? new URL(urlOrHost) : new URL(`https://${urlOrHost}`);
+      return u.hostname;
+    } catch {
+      return null;
+    }
+  }
+
+  function rootDomain(hostname: string): string {
+    const parts = hostname.split(".");
+    if (parts.length <= 2) return hostname;
+    return parts.slice(-2).join(".");
+  }
+
+  function deriveBrandDomain(ci: any): string {
+    if (ci?.website) {
+      const host = extractHostname(ci.website);
+      if (host) return `go.${rootDomain(host)}`;
+    }
+    const base = ci?.name ? slugify(ci.name).replace(/[^a-z0-9-]/g, "") : "brand";
+    return `${base}.link`;
+  }
+
+  const persistSmartLinks = (links: SmartLink[]) => {
+    setSmartLinks(links);
+    LocalStorageService.saveData("smartLinks", links);
+  };
 
   // QR Code functions
   const handleEditQR = (qr: QRCodeData) => {
@@ -1921,7 +1980,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                     <Chip label="Active" color="success" size="small" />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    link.property.com/downtown-apartment
+                    {smartLinks[0]?.shortUrl}
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Typography variant="caption">🔗 1,247 clicks</Typography>
@@ -1959,7 +2018,7 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                     <Chip label="Active" color="success" size="small" />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    link.property.com/contact-us
+                    {smartLinks[1]?.shortUrl}
                   </Typography>
                   <Stack direction="row" spacing={2}>
                     <Typography variant="caption">🔗 756 clicks</Typography>
@@ -2626,20 +2685,122 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
         <DialogTitle>Create Smart Link</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
-            <TextField label="Link Title" fullWidth placeholder="e.g., Property Listing - Downtown" />
-            <TextField label="Original URL" fullWidth placeholder="https://example.com/your-long-url" />
-            <TextField label="Custom Short URL (Optional)" fullWidth placeholder="link.property.com/custom-name" />
-            <TextField label="Description" fullWidth multiline rows={2} placeholder="Brief description of this link..." />
-            <FormControlLabel control={<Switch />} label="Enable Click Tracking" />
-            <FormControlLabel control={<Switch />} label="Password Protection" />
+            <TextField
+              label="Link Title"
+              fullWidth
+              placeholder="e.g., Property Listing - Downtown"
+              value={linkForm.title}
+              onChange={(e) => setLinkForm({ ...linkForm, title: e.target.value })}
+            />
+            <TextField
+              label="Original URL"
+              fullWidth
+              placeholder="https://example.com/your-long-url"
+              value={linkForm.originalUrl}
+              onChange={(e) => setLinkForm({ ...linkForm, originalUrl: e.target.value })}
+            />
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Branded Domain"
+                  fullWidth
+                  placeholder="go.yourcompany.com or propcrm.link"
+                  value={linkForm.domain}
+                  onChange={(e) => setLinkForm({ ...linkForm, domain: e.target.value })}
+                  helperText="Editable. We'll use HTTPS automatically."
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Custom Path"
+                  fullWidth
+                  placeholder="e.g., downtown-apartment"
+                  value={linkForm.customAlias}
+                  onChange={(e) => setLinkForm({ ...linkForm, customAlias: slugify(e.target.value) })}
+                  helperText="Leave blank to auto-generate"
+                />
+              </Grid>
+            </Grid>
+            <TextField
+              label="Description"
+              fullWidth
+              multiline
+              rows={2}
+              placeholder="Brief description of this link..."
+              value={linkForm.description}
+              onChange={(e) => setLinkForm({ ...linkForm, description: e.target.value })}
+            />
+            <FormControlLabel
+              control={<Switch checked={linkForm.trackingEnabled} onChange={(e) => setLinkForm({ ...linkForm, trackingEnabled: e.target.checked })} />}
+              label="Enable Click Tracking"
+            />
+            <FormControlLabel
+              control={<Switch checked={linkForm.passwordEnabled} onChange={(e) => setLinkForm({ ...linkForm, passwordEnabled: e.target.checked })} />}
+              label="Password Protection"
+            />
+            {linkForm.passwordEnabled && (
+              <TextField
+                label="Password"
+                type="password"
+                fullWidth
+                value={linkForm.password}
+                onChange={(e) => setLinkForm({ ...linkForm, password: e.target.value })}
+              />
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenLinkDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            setOpenLinkDialog(false);
-            alert("Smart link created successfully!");
-          }}>Create Link</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              const title = linkForm.title.trim();
+              const original = linkForm.originalUrl.trim();
+              const domain = (linkForm.domain || "").trim();
+              if (!title || !original || !domain) {
+                alert("Please provide title, original URL, and branded domain.");
+                return;
+              }
+              const alias = linkForm.customAlias || slugify(title).slice(0, 48) || Math.random().toString(36).slice(2, 10);
+              const hostname = extractHostname(domain) || domain;
+              const shortUrl = `https://${hostname}/${alias}`;
+
+              const newLink: SmartLink = {
+                id: Date.now().toString(),
+                title,
+                originalUrl: original,
+                shortUrl,
+                description: linkForm.description.trim() || undefined,
+                isActive: true,
+                clickCount: 0,
+                uniqueClicks: 0,
+                createdAt: new Date().toISOString().split('T')[0],
+                tags: [],
+                analytics: {
+                  clicksByDate: [],
+                  clicksByLocation: [],
+                  clicksByDevice: [],
+                  clicksByReferrer: [],
+                  conversionRate: 0,
+                },
+                customization: {
+                  backgroundColor: "#ffffff",
+                  textColor: "#000000",
+                  socialMetaTags: { title, description: linkForm.description || "" },
+                  customDomain: hostname,
+                },
+                password: linkForm.passwordEnabled ? linkForm.password : undefined,
+              } as SmartLink;
+
+              const updated = [newLink, ...smartLinks];
+              persistSmartLinks(updated);
+              setOpenLinkDialog(false);
+              alert("Smart link created successfully!");
+              setLinkForm({ title: "", originalUrl: "", domain: deriveBrandDomain(companyInfo), customAlias: "", description: "", trackingEnabled: true, passwordEnabled: false, password: "" });
+            }}
+          >
+            Create Link
+          </Button>
         </DialogActions>
       </Dialog>
 
