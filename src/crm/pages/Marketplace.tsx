@@ -1298,10 +1298,7 @@ export default function Marketplace() {
                     >
                       <IconButton
                         size="small"
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setEditMode(true);
-                        }}
+                        onClick={() => startEditItem(item)}
                         sx={{
                           bgcolor: 'action.hover',
                           '&:hover': { bgcolor: 'primary.light', color: 'primary.main' }
