@@ -8,8 +8,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "prisma db push --schema prisma/schema.prisma && vite build",
+    "preview": "vite preview",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -20,7 +22,6 @@
     "@mui/x-charts": "^8.3.1",
     "@mui/x-data-grid": "^8.9.1",
     "@mui/x-date-pickers": "^8.10.2",
-    "@prisma/client": "^6.15.0",
     "@types/crypto-js": "^4.2.2",
     "@types/qrcode": "^1.5.5",
     "@types/uuid": "^10.0.0",
@@ -40,7 +41,6 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.2.1",
-    "prisma": "^6.15.0",
     "terser": "^5.43.1",
     "typescript": "^5.2.2",
     "vite": "^6.3.5"
