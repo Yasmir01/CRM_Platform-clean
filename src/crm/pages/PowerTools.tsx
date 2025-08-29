@@ -1858,6 +1858,27 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
                         {index + 1}. {question.question}
                       </Typography>
                     ))}
+
+                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
+                      <Button size="small" variant="outlined" onClick={() => {
+                        setPreviewPool(pool);
+                        setPreviewResponses({});
+                        setOpenPoolPreview(true);
+                      }}>Preview</Button>
+                      <Button size="small" variant="outlined" onClick={() => {
+                        const domain = deriveBrandDomain(companyInfo);
+                        const shortUrl = `https://${domain}/pool/${pool.id}`;
+                        copyToClipboard(shortUrl);
+                      }}>Share</Button>
+                      <Button size="small" variant="contained" onClick={() => {
+                        persistPools(prev => prev.map(p => p.id === pool.id ? {
+                          ...p,
+                          participants: (p.participants || 0) + 1,
+                          totalContributions: (p.totalContributions || 0) + p.questions.length
+                        } : p));
+                        alert('Test submission recorded.');
+                      }}>Test</Button>
+                    </Stack>
                   </Stack>
                 </CardContent>
               </Card>
@@ -2677,6 +2698,69 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
           >
             Create Campaign
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Pool Preview/Test Dialog */}
+      <Dialog open={openPoolPreview} onClose={() => setOpenPoolPreview(false)} maxWidth="md" fullWidth>
+        <DialogTitle>{previewPool ? `Preview: ${previewPool.title}` : 'Preview Pool'}</DialogTitle>
+        <DialogContent>
+          {previewPool && (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Typography variant="body2" color="text.secondary">{previewPool.description}</Typography>
+              {previewPool.questions.map((q, idx) => (
+                <Box key={q.id || idx}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>{idx + 1}. {q.question}</Typography>
+                  {q.type === 'Multiple Choice' && (
+                    <FormControl fullWidth>
+                      <InputLabel>Choose</InputLabel>
+                      <Select
+                        label="Choose"
+                        value={previewResponses[q.id] || ''}
+                        onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })}
+                      >
+                        {(q.options || []).map(opt => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                  {q.type === 'Yes/No' && (
+                    <RadioGroup
+                      row
+                      value={previewResponses[q.id] || ''}
+                      onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })}
+                    >
+                      <FormControlLabel value="Yes" control={<Radio />} label="Yes" />
+                      <FormControlLabel value="No" control={<Radio />} label="No" />
+                    </RadioGroup>
+                  )}
+                  {q.type === 'Text' && (
+                    <TextField fullWidth placeholder="Your answer" value={previewResponses[q.id] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })} />
+                  )}
+                  {q.type === 'Rating' && (
+                    <Slider value={Number(previewResponses[q.id] || 0)} onChange={(_, v) => setPreviewResponses({ ...previewResponses, [q.id]: v })} min={0} max={10} step={1} />
+                  )}
+                  {q.type === 'Number' && (
+                    <TextField type="number" fullWidth placeholder="0" value={previewResponses[q.id] || ''} onChange={(e) => setPreviewResponses({ ...previewResponses, [q.id]: e.target.value })} />
+                  )}
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenPoolPreview(false)}>Close</Button>
+          <Button variant="contained" onClick={() => {
+            if (!previewPool) return;
+            persistPools(prev => prev.map(p => p.id === previewPool.id ? {
+              ...p,
+              participants: (p.participants || 0) + 1,
+              totalContributions: (p.totalContributions || 0) + p.questions.length
+            } : p));
+            setOpenPoolPreview(false);
+            alert('Responses submitted (test).');
+          }}>Submit Test</Button>
         </DialogActions>
       </Dialog>
 
