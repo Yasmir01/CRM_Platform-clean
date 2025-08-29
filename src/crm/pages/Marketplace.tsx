@@ -121,6 +121,8 @@ interface MarketplaceItem {
   salesCount: number;
   rating: number;
   reviewCount: number;
+  createdById?: string;
+  createdByName?: string;
   metadata: {
     estimatedSetupTime: string;
     minimumProperties?: number;
