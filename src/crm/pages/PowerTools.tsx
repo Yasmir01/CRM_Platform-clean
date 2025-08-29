@@ -2080,6 +2080,35 @@ ${link.analytics.clicksByDevice.map(device => `• ${device.device}: ${device.cl
             </Card>
           </Grid>
         </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>All Smart Links</Typography>
+        <Grid container spacing={3}>
+          {smartLinks.map((link) => (
+            <Grid item xs={12} md={6} key={link.id}>
+              <Card>
+                <CardContent>
+                  <Stack spacing={2}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                      <Typography variant="h6">{link.title}</Typography>
+                      <Chip label="Active" color="success" size="small" />
+                    </Stack>
+                    <Typography variant="body2" color="text.secondary">{link.shortUrl}</Typography>
+                    <Stack direction="row" spacing={2}>
+                      <Typography variant="caption">🔗 {link.clickCount} clicks</Typography>
+                      <Typography variant="caption">👥 {link.uniqueClicks} unique</Typography>
+                      <Typography variant="caption">📈 CTR {link.analytics.conversionRate || 0}%</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                      <Button size="small" variant="outlined" startIcon={<AnalyticsRoundedIcon />} onClick={() => handleLinkAnalytics(link)}>Analytics</Button>
+                      <Button size="small" variant="outlined" startIcon={<ContentCopyIcon />} onClick={() => handleCopyShortLink(link)}>Copy</Button>
+                    </Stack>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       </TabPanel>
 
       {/* Design-it Tab */}
