@@ -1344,6 +1344,27 @@ export default function Marketplace() {
                         }
                       </IconButton>
                     </Tooltip>
+
+                    {isSuperAdmin() && user?.id && item.createdById === user.id && (
+                      <Tooltip
+                        title="Delete Item"
+                        componentsProps={{ tooltip: { sx: uniformTooltipStyles } }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            if (confirm(`Delete ${item.name}? This cannot be undone.`)) {
+                              persistItems(prev => prev.filter(i => i.id !== item.id));
+                              if (selectedItem?.id === item.id) setSelectedItem(null);
+                              if (editMode && selectedItem?.id === item.id) setEditMode(false);
+                            }
+                          }}
+                          sx={{ bgcolor: 'action.hover', '&:hover': { bgcolor: 'error.light', color: 'error.main' } }}
+                        >
+                          <DeleteRoundedIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </Stack>
                 </Stack>
               </CardContent>
