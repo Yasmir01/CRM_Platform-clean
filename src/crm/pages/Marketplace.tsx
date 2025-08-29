@@ -55,6 +55,7 @@ import {
   formElementWidths,
   layoutSpacing
 } from "../utils/formStyles";
+import { LocalStorageService } from "../services/LocalStorageService";
 import SubscriptionBackupControls from '../components/SubscriptionBackupControls';
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
@@ -382,7 +383,7 @@ export default function Marketplace() {
   const theme = useTheme();
   const [activeTab, setActiveTab] = React.useState(0);
   const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
-  const [items, setItems] = React.useState<MarketplaceItem[]>(mockMarketplaceItems);
+  const [items, setItems] = React.useState<MarketplaceItem[]>(() => LocalStorageService.getData<MarketplaceItem[]>("marketplaceItems", mockMarketplaceItems));
   const [addItemOpen, setAddItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MarketplaceItem | null>(null);
   const [editMode, setEditMode] = React.useState(false);
@@ -422,6 +423,14 @@ export default function Marketplace() {
     }
   });
 
+  const persistItems = (updater: MarketplaceItem[] | ((prev: MarketplaceItem[]) => MarketplaceItem[])) => {
+    setItems(prev => {
+      const next = typeof updater === 'function' ? (updater as any)(prev) : updater;
+      LocalStorageService.saveData('marketplaceItems', next);
+      return next;
+    });
+  };
+
   const handleAddItem = () => {
     const id = `item-${Date.now()}`;
     const now = new Date().toISOString().split('T')[0];
@@ -436,7 +445,7 @@ export default function Marketplace() {
       reviewCount: 0,
     } as MarketplaceItem;
 
-    setItems(prev => [...prev, item]);
+    persistItems(prev => [...prev, item]);
     setAddItemOpen(false);
     setActiveStep(0);
     setNewItem({
@@ -983,7 +992,7 @@ export default function Marketplace() {
 
   const updateItem = (updated: MarketplaceItem) => {
     const now = new Date().toISOString().split('T')[0];
-    setItems(prev => prev.map(i => i.id === updated.id ? { ...updated, lastUpdated: now } : i));
+    persistItems(prev => prev.map(i => i.id === updated.id ? { ...updated, lastUpdated: now } : i));
   };
 
   const toggleItemStatus = (item: MarketplaceItem) => {
