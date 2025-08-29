@@ -53,6 +53,7 @@ const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformP
 const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
 const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
 const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
+const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 
 // Loading component
@@ -331,6 +332,11 @@ function AppRoutes() {
         <Route path="settings" element={
           <React.Suspense fallback={<PageLoader />}>
             <Settings />
+          </React.Suspense>
+        } />
+        <Route path="subscriptions" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SubscriptionManagement />
           </React.Suspense>
         } />
         <Route path="help" element={
