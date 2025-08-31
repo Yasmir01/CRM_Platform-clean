@@ -1,4 +1,4 @@
-name: Prisma DB Push (Neon)
+name: neo_prisma_push.yml
 
 # Run on pushes to main (or any branch you like)
 on:
