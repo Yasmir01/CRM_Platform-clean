@@ -1,9 +1,5 @@
-import { PrismaClient, BillingCycle } from '@prisma/client';
-
-// Ensure a single PrismaClient instance across hot reloads/serverless invocations
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+import { BillingCycle } from '@prisma/client';
+import { prisma } from './_db';
 
 export default async function handler(req: any, res: any) {
   try {
