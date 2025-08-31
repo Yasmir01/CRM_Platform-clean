@@ -1,3 +1,5 @@
+name: Prisma DB Push (Neon)
+
 # Run on pushes to main (or any branch you like)
 on:
   push:
