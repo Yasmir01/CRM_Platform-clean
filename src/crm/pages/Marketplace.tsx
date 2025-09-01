@@ -1444,7 +1444,7 @@ export default function Marketplace() {
                       >
                         <IconButton
                           size="small"
-                          onClick={() => {
+                          onClick={async () => {
                             if (confirm(`Delete ${item.name}? This cannot be undone.`)) {
                               try{ await deleteProductForItem(item); }catch(e){ /* ignore */ }
                               persistItems(prev => prev.filter(i => i.id !== item.id));
