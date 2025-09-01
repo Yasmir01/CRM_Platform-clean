@@ -181,6 +181,10 @@ interface SuperAdminDashboardProps {
 }
 
 export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminDashboardProps) {
+  const { isSuperAdmin } = require('../hooks/useRoleManagement').useRoleManagement();
+  React.useEffect(() => {
+    try { if (!isSuperAdmin()) { console.warn('Access denied: Super Admin only'); } } catch {}
+  }, [isSuperAdmin]);
   const [subscribers, setSubscribers] = React.useState<SubscriberAccount[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("All");
