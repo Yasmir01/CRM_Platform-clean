@@ -293,7 +293,7 @@ export default function RentCollection() {
         cashPayment.locationId,
         cashPayment.confirmationCode
       );
-      
+
       if (success) {
         setCashPaymentDialogOpen(false);
         loadPaymentData();
@@ -306,6 +306,27 @@ export default function RentCollection() {
       }
     } catch (error) {
       console.error('Error recording cash payment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAutoPay = async () => {
+    if (!selectedTenant || !selectedAutoPayMethod) return;
+    try {
+      setLoading(true);
+      await paymentService.setupAutoPay({
+        tenantId: selectedTenant,
+        paymentMethodId: selectedAutoPayMethod,
+        isActive: true,
+        retryAttempts: 3,
+        retryDays: [3, 5],
+        failureNotifications: true
+      });
+      setAutoPayActive(true);
+      setAutoPayDialogOpen(false);
+    } catch (error) {
+      console.error('Error setting up auto-pay:', error);
     } finally {
       setLoading(false);
     }
