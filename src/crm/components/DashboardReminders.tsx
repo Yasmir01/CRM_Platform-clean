@@ -27,6 +27,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useNavigate } from "react-router-dom";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useTenantScope } from "../hooks/useTenantScope";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
 interface Reminder {
   id: string;
@@ -162,6 +163,7 @@ export default function DashboardReminders() {
   const navigate = useNavigate();
   const { state } = useCrmData();
   const { isTenant, tenantPropertyId } = useTenantScope();
+  const { isServiceProvider, propertiesWithAssignments } = useServiceProviderScope();
   const [dismissedReminders, setDismissedReminders] = React.useState<string[]>([]);
   const [isExpanded, setIsExpanded] = React.useState(() => {
     // Load expansion state from localStorage, default to true if not found
@@ -187,8 +189,16 @@ export default function DashboardReminders() {
         return notLeaseExpiry && (isInspectionToday || isMaintenanceToday);
       });
     }
+    if (isServiceProvider) {
+      const propNames = new Set(
+        state.properties
+          .filter(p => propertiesWithAssignments.has(p.id))
+          .map(p => p.name)
+      );
+      return base.filter(r => r.property && Array.from(propNames).some(name => r.property!.includes(name)));
+    }
     return base;
-  }, [state, isTenant, tenantPropertyId]);
+  }, [state, isTenant, tenantPropertyId, isServiceProvider, propertiesWithAssignments]);
 
   // Save expansion state to localStorage whenever it changes
   React.useEffect(() => {
