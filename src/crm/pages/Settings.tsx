@@ -161,7 +161,7 @@ interface PaymentMethod {
 
 export default function Settings() {
   const [users, setUsers] = React.useState<User[]>(mockUsers);
-  const { user } = useAuth();
+  const { user, updateUser, resetPassword } = useAuth();
   const isServiceProvider = user?.role === 'Service Provider';
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -297,29 +297,115 @@ export default function Settings() {
     }
   };
 
-  if (isServiceProvider) {
+  if (isServiceProvider && user) {
+    const [profile, setProfile] = React.useState({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      preferredLanguage: user.preferredLanguage || "en",
+      timezone: user.timezone || "UTC",
+    });
+
+    React.useEffect(() => {
+      setProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        preferredLanguage: user.preferredLanguage || "en",
+        timezone: user.timezone || "UTC",
+      });
+    }, [user.id]);
+
+    const handleSaveProfile = () => {
+      updateUser(user.id, {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        phone: profile.phone,
+        preferredLanguage: profile.preferredLanguage as any,
+        timezone: profile.timezone,
+      });
+      alert("Profile updated");
+    };
+
+    const handleResetPassword = async () => {
+      const res = await resetPassword(user.email);
+      alert(res.message);
+    };
+
     return (
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
         <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
           Settings
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Manage your notification preferences.
-        </Typography>
-        <Card>
-          <CardContent>
-            <Stack spacing={3}>
-              <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
-              <Typography variant="h6">Email Notifications</Typography>
-              <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for assigned work orders" />
-              <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for schedule changes" />
-              <FormControlLabel control={<Switch />} label="Daily summaries" />
-              <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
-              <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent assignments" />
-              <FormControlLabel control={<Switch />} label="SMS reminders for upcoming appointments" />
-            </Stack>
-          </CardContent>
-        </Card>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Typography variant="h5">Profile</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="First Name" fullWidth value={profile.firstName} onChange={(e) => setProfile(p => ({ ...p, firstName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Last Name" fullWidth value={profile.lastName} onChange={(e) => setProfile(p => ({ ...p, lastName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Email" fullWidth value={profile.email} disabled />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Phone" fullWidth value={profile.phone} onChange={(e) => setProfile(p => ({ ...p, phone: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Language</InputLabel>
+                        <Select label="Language" value={profile.preferredLanguage} onChange={(e) => setProfile(p => ({ ...p, preferredLanguage: e.target.value }))}>
+                          <MenuItem value="en">English</MenuItem>
+                          <MenuItem value="es">Spanish</MenuItem>
+                          <MenuItem value="fr">French</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Timezone</InputLabel>
+                        <Select label="Timezone" value={profile.timezone} onChange={(e) => setProfile(p => ({ ...p, timezone: e.target.value }))}>
+                          <MenuItem value="UTC">UTC</MenuItem>
+                          <MenuItem value="America/New_York">America/New_York</MenuItem>
+                          <MenuItem value="America/Chicago">America/Chicago</MenuItem>
+                          <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button variant="outlined" onClick={handleResetPassword}>Reset Password</Button>
+                    <Button variant="contained" onClick={handleSaveProfile}>Save Changes</Button>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
+                  <Typography variant="h6">Email Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for assigned work orders" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for schedule changes" />
+                  <FormControlLabel control={<Switch />} label="Daily summaries" />
+                  <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent assignments" />
+                  <FormControlLabel control={<Switch />} label="SMS reminders for upcoming appointments" />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </Box>
     );
   }
