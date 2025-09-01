@@ -632,7 +632,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* Billing Management Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={4}>
         <Alert severity="info" sx={{ mb: 3 }}>
           Billing management system for processing payments, managing subscriptions, and handling billing disputes.
         </Alert>
@@ -641,9 +641,10 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Billing Overview</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Comprehensive billing management tools would be implemented here.
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Comprehensive billing management tools and revenue analytics.
                 </Typography>
+                <SuperAdminRevenueDashboard />
               </CardContent>
             </Card>
           </Grid>
@@ -651,7 +652,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* System Settings Tab */}
-      <TabPanel value={currentTab} index={4}>
+      <TabPanel value={currentTab} index={5}>
         <Alert severity="warning" sx={{ mb: 3 }}>
           <Typography variant="h6">System-Wide Configuration</Typography>
           <Typography variant="body2">
