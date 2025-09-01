@@ -1623,25 +1623,27 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       </Stack>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
-          <Tab
-            icon={<HomeWorkRoundedIcon />}
-            label="All Properties"
-            iconPosition="start"
-          />
-          <Tab
-            icon={<PublicRoundedIcon />}
-            label={`Listings (${activeListings})`}
-            iconPosition="start"
-          />
-          <Tab
-            icon={<SearchRoundedIcon />}
-            label={`Unlisted (${unlistedProperties.length})`}
-            iconPosition="start"
-          />
-        </Tabs>
-      </Box>
+      {!isServiceProvider && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+            <Tab
+              icon={<HomeWorkRoundedIcon />}
+              label="All Properties"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<PublicRoundedIcon />}
+              label={`Listings (${activeListings})`}
+              iconPosition="start"
+            />
+            <Tab
+              icon={<SearchRoundedIcon />}
+              label={`Unlisted (${unlistedProperties.length})`}
+              iconPosition="start"
+            />
+          </Tabs>
+        </Box>
+      )}
 
       {/* All Properties Tab */}
       <TabPanel value={currentTab} index={0}>
@@ -4309,7 +4311,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const showingDateTime = new Date(`${showingData.date}T${showingData.time}`);
               const formattedDateTime = showingDateTime.toLocaleString();
 
-              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
+              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n��� Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
 
               setShowingDialogOpen(false);
             }}
