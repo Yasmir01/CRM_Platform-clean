@@ -912,14 +912,52 @@ export default function Settings() {
                     <Button variant="contained" component={RouterLink} to="/crm/subscriptions">Go to Subscription Management</Button>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                      <AccountBalanceRoundedIcon color="primary" />
-                      <Typography variant="h6">Bank & Payment Routing</Typography>
+                    <Stack spacing={2}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <AccountBalanceRoundedIcon color="primary" />
+                        <Typography variant="h6">Rent Payments</Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect a bank account to receive rent payments and configure auto-pay or record manual payments.
+                      </Typography>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <Button variant="contained" onClick={() => setAddBankDialogOpen(true)}>Connect Bank Account</Button>
+                        <FormControlLabel control={<Switch checked={rentAutoPayEnabled} onChange={(e) => setRentAutoPayEnabled(e.target.checked)} />} label="Enable Auto-Pay" />
+                      </Stack>
+                      <Divider />
+                      <Typography variant="subtitle1">Record Manual Payment</Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <TextField label="Amount" value={manualPayment.amount} onChange={(e) => setManualPayment({ ...manualPayment, amount: e.target.value })} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <TextField label="Date" type="date" value={manualPayment.date} onChange={(e) => setManualPayment({ ...manualPayment, date: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth>
+                            <InputLabel>Method</InputLabel>
+                            <Select value={manualPayment.method} label="Method" onChange={(e) => setManualPayment({ ...manualPayment, method: e.target.value as any })}>
+                              <MenuItem value="ACH">ACH</MenuItem>
+                              <MenuItem value="Card">Card</MenuItem>
+                              <MenuItem value="Cash">Cash</MenuItem>
+                              <MenuItem value="Check">Check</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField label="Note (optional)" value={manualPayment.note} onChange={(e) => setManualPayment({ ...manualPayment, note: e.target.value })} fullWidth />
+                        </Grid>
+                      </Grid>
+                      <Stack direction="row" justifyContent="flex-end">
+                        <Button variant="outlined" onClick={() => {
+                          const list = JSON.parse(localStorage.getItem('manual_rent_payments') || '[]');
+                          list.push({ ...manualPayment, createdAt: new Date().toISOString() });
+                          localStorage.setItem('manual_rent_payments', JSON.stringify(list));
+                          setManualPayment({ amount: '', date: new Date().toISOString().slice(0,10), method: 'ACH', note: '' });
+                          alert('Payment recorded');
+                        }}>Record Payment</Button>
+                      </Stack>
                     </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      Configure business bank accounts and payment routing rules.
-                    </Typography>
-                    <Button variant="outlined" component={RouterLink} to="/crm/bank-account-settings">Open Bank Account Settings</Button>
                   </Grid>
                 </Grid>
               </CardContent>
