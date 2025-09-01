@@ -118,7 +118,6 @@ const serviceProviderMenuItems = [
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
-  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
 
 export default function CrmMenuContent() {
