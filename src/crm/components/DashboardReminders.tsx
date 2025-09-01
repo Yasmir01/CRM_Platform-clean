@@ -175,17 +175,16 @@ export default function DashboardReminders() {
     if (!state?.initialized) return [];
     const base = generateRealReminders(state);
     if (isTenant && tenantPropertyId) {
-      // Only show today's maintenance/inspections/payments for tenant's property
-      const today = new Date().toDateString();
+      const property = state.properties.find(p => p.id === tenantPropertyId);
+      const propText = property?.name || property?.address || '';
       return base.filter(r => {
-        const matchesProperty = !r.property || r.property === (state.properties.find(p => p.id === tenantPropertyId)?.name || r.property);
+        const matchesProperty = !r.property || r.property.includes(propText);
         if (!matchesProperty) return false;
-        const isMaintenance = r.id.startsWith('maintenance-') || r.title.toLowerCase().includes('maintenance') || r.type === 'Task';
         const isInspectionToday = r.id.startsWith('inspection-today-');
-        const isPaymentFollowUp = r.id.startsWith('payment-') || r.title.toLowerCase().includes('payment');
-        const isToday = r.time === 'Urgent' || true; // keep present items; generation ensures inspection-today; others are time-based
+        const isMaintenanceToday = r.id.startsWith('maintenance-') && !r.isOverdue; // due today from generator
         const notLeaseExpiry = !r.id.startsWith('lease-exp');
-        return notLeaseExpiry && (isInspectionToday || isPaymentFollowUp || isMaintenance) && isToday;
+        // Exclude generic payment follow-ups for tenants (not day-specific)
+        return notLeaseExpiry && (isInspectionToday || isMaintenanceToday);
       });
     }
     return base;
