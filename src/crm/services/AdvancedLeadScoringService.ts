@@ -1,5 +1,5 @@
 import { LocalStorageService } from './LocalStorageService';
-import { ActivityTrackingService } from './ActivityTrackingService';
+import activityTracker from './ActivityTrackingService';
 
 interface LeadScoringCriteria {
   id: string;
