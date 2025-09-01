@@ -225,11 +225,7 @@ function AppRoutes() {
             <Suggestions />
           </React.Suspense>
         } />
-        <Route path="news" element={
-          <React.Suspense fallback={<PageLoader />}>
-            <NewsBoard />
-          </React.Suspense>
-        } />
+        <Route path="news" element={<NewsBoard />} />
         <Route path="power-tools" element={
           <React.Suspense fallback={<PageLoader />}>
             <PowerTools />
