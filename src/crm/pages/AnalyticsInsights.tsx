@@ -41,6 +41,8 @@ import {
   ResponsiveContainer,
   ComposedChart
 } from 'recharts';
+import * as React from 'react';
+import { useCrmData } from '../contexts/CrmDataContext';
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
