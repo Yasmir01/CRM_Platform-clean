@@ -610,20 +610,22 @@ export default function RentCollection() {
               <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
                 <Box>
                   <Typography variant="h6">Payment Methods</Typography>
-                  <FormControl sx={{ mt: 2, minWidth: 200 }}>
-                    <InputLabel>Select Tenant</InputLabel>
-                    <Select
-                      value={selectedTenant}
-                      onChange={(e) => setSelectedTenant(e.target.value)}
-                      label="Select Tenant"
-                    >
-                      {tenants.map((tenant) => (
-                        <MenuItem key={tenant.id} value={tenant.id}>
-                          {tenant.firstName} {tenant.lastName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  {!isTenant && (
+                    <FormControl sx={{ mt: 2, minWidth: 200 }}>
+                      <InputLabel>Select Tenant</InputLabel>
+                      <Select
+                        value={selectedTenant}
+                        onChange={(e) => setSelectedTenant(e.target.value)}
+                        label="Select Tenant"
+                      >
+                        {tenants.map((tenant) => (
+                          <MenuItem key={tenant.id} value={tenant.id}>
+                            {tenant.firstName} {tenant.lastName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 </Box>
                 <Button
                   variant="contained"
