@@ -1137,6 +1137,19 @@ export default function Settings() {
         onSave={updateCompanyInfo}
         currentInfo={companyInfo}
       />
+
+      <AddBankAccountDialog
+        open={addBankDialogOpen}
+        onClose={() => setAddBankDialogOpen(false)}
+        onAccountAdded={(account) => {
+          const accounts = JSON.parse(localStorage.getItem('business_bank_accounts') || '[]');
+          accounts.push(account);
+          localStorage.setItem('business_bank_accounts', JSON.stringify(accounts));
+          setAddBankDialogOpen(false);
+          alert('Bank account connected');
+        }}
+        organizationId={user?.id || 'org_main'}
+      />
     </Box>
   );
 }
