@@ -103,7 +103,26 @@ export default function SuperAdminMarketplaceManager() {
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
         <Typography variant="h6">Marketplace Management</Typography>
-        <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={openCreate}>Add Item</Button>
+        <Stack direction="row" spacing={1}>
+          <Button variant="outlined" onClick={async () => {
+            try{
+              const local = JSON.parse(localStorage.getItem('marketplaceItems') || '[]');
+              if(!Array.isArray(local) || local.length===0){ alert('No local items found to backfill.'); return; }
+              const existing = new Map(items.map(i => [i.name, i]));
+              let created = 0;
+              for(const it of local){
+                if(!existing.has(it.name)){
+                  const payload = { name: it.name, description: it.description, type: it.category === 'Add-on' ? 'addon' : it.category === 'Service' ? 'service' : 'product', price: it.basePrice || 0, isActive: it.status === 'Active', category: it.category, tags: it.tags || [] };
+                  const r = await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                  if(r.ok){ created++; }
+                }
+              }
+              await load();
+              alert(`Backfill completed. Created ${created} new items.`);
+            }catch(e){ alert('Backfill failed'); }
+          }}>Backfill from Local</Button>
+          <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={openCreate}>Add Item</Button>
+        </Stack>
       </Stack>
 
       <Card>
