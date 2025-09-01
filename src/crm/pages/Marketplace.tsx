@@ -1103,6 +1103,17 @@ export default function Marketplace() {
     setEditMode(true);
   };
 
+  const [subscribeOpen, setSubscribeOpen] = React.useState(false);
+  const [availablePlans, setAvailablePlans] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (subscribeOpen) {
+      (async () => {
+        try { const r = await fetch('/api/subscription-plans'); const data = await r.json(); setAvailablePlans(Array.isArray(data) ? data.filter((p:any)=>p.isActive) : []);} catch {}
+      })();
+    }
+  }, [subscribeOpen]);
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
@@ -1110,14 +1121,19 @@ export default function Marketplace() {
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Marketplace Administration
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={() => setAddItemOpen(true)}
-          disabled={mainTab === 'subscription'}
-        >
-          Add New Item
-        </Button>
+        <Stack direction="row" spacing={1}>
+          {!isSuperAdmin() && (
+            <Button variant="outlined" onClick={() => setSubscribeOpen(true)}>Subscribe / Upgrade</Button>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={() => setAddItemOpen(true)}
+            disabled={mainTab === 'subscription'}
+          >
+            Add New Item
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Main Tab Navigation */}
@@ -1704,6 +1720,41 @@ export default function Marketplace() {
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Subscribe / Upgrade Dialog */}
+      <Dialog open={subscribeOpen} onClose={() => setSubscribeOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Select a Plan</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            {availablePlans.map((p) => (
+              <Card key={p.id} variant="outlined">
+                <CardContent>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Typography variant="h6">{p.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">${p.price}/{p.billingCycle || 'monthly'}</Typography>
+                      <Typography variant="caption" color="text.secondary">{(p.features||[]).slice(0,3).join(', ')}</Typography>
+                    </Box>
+                    <Button variant="contained" onClick={async () => {
+                      try {
+                        const r = await fetch('/api/stripe-create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId: p.id, quantity: 1, customerEmail: user?.email }) });
+                        const data = await r.json();
+                        if (data?.url) window.location.href = data.url; else alert('Checkout not available');
+                      } catch { alert('Failed to start checkout'); }
+                    }}>Subscribe</Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+            {availablePlans.length === 0 && (
+              <Typography variant="body2" color="text.secondary">No active plans available.</Typography>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubscribeOpen(false)}>Close</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
