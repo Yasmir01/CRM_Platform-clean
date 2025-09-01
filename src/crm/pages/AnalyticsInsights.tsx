@@ -89,6 +89,132 @@ const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'
 export default function AnalyticsInsights() {
   const [currentTab, setCurrentTab] = React.useState(0);
   const [timeRange, setTimeRange] = React.useState("6months");
+  const { state } = useCrmData();
+
+  const [payments, setPayments] = React.useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = React.useState<any[]>([]);
+  const [plans, setPlans] = React.useState<any[]>([]);
+
+  const refresh = React.useCallback(async () => {
+    try {
+      const [pRes, sRes, plRes] = await Promise.all([
+        fetch('/api/payments'),
+        fetch('/api/subscriptions'),
+        fetch('/api/subscription-plans'),
+      ]);
+      const [p, s, pl] = await Promise.all([pRes.json(), sRes.json(), plRes.json()]);
+      setPayments(Array.isArray(p) ? p : []);
+      setSubscriptions(Array.isArray(s) ? s : []);
+      setPlans(Array.isArray(pl) ? pl : []);
+    } catch {
+      setPayments([]); setSubscriptions([]); setPlans([]);
+    }
+  }, []);
+
+  React.useEffect(() => { refresh(); }, [refresh]);
+
+  const revenueData = React.useMemo(() => {
+    const now = new Date();
+    const months: { key: string; month: string; year: number; revenue: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, month: monthLabels[d.getMonth()], year: d.getFullYear(), revenue: 0 });
+    }
+    const map = new Map(months.map(m => [m.key, m]));
+    for (const pay of payments) {
+      const dt = new Date(pay.createdAt);
+      const k = `${dt.getFullYear()}-${dt.getMonth()}`;
+      const target = map.get(k);
+      if (target) target.revenue += Number(pay.amount || 0);
+    }
+    return months.map(m => ({ month: m.month, revenue: m.revenue, properties: state.properties.length, tenants: state.tenants.length }));
+  }, [payments, state.properties.length, state.tenants.length]);
+
+  const salesFunnelData = React.useMemo(() => {
+    const stages = ['Lead','Qualified','Proposal','Negotiation','Closed Won','Closed Lost'] as const;
+    const counts: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
+    const values: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
+    state.deals.forEach(d => { counts[d.stage] = (counts[d.stage]||0)+1; values[d.stage] = (values[d.stage]||0) + (Number(d.value)||0); });
+    return stages.map(s => ({ stage: s, count: counts[s], value: values[s] }));
+  }, [state.deals]);
+
+  const leadSourceData = React.useMemo(() => {
+    const colors = ['#0088FE','#00C49F','#FFBB28','#FF8042','#8884D8','#AA66CC'];
+    const bySource = new Map<string, number>();
+    state.contacts.forEach(c => { const src = c.source || 'Other'; bySource.set(src, (bySource.get(src)||0)+1); });
+    const entries = Array.from(bySource.entries());
+    const total = entries.reduce((s,[,v])=>s+v,0) || 1;
+    return entries.map(([name, v], i) => ({ name, value: Math.round((v/total)*100), color: colors[i % colors.length] }));
+  }, [state.contacts]);
+
+  const marketingMetrics = React.useMemo(() => {
+    const agg: Record<string, { channel: string; sent: number; opened: number; clicked: number; converted: number }>= {};
+    state.campaigns.forEach(c => {
+      const key = c.type;
+      if (!agg[key]) agg[key] = { channel: key, sent: 0, opened: 0, clicked: 0, converted: 0 } as any;
+      agg[key].sent += c.metrics?.sent || 0;
+      agg[key].opened += c.metrics?.opened || 0;
+      agg[key].clicked += c.metrics?.clicked || 0;
+      agg[key].converted += c.metrics?.converted || 0;
+    });
+    return Object.values(agg);
+  }, [state.campaigns]);
+
+  const propertyPerformance = React.useMemo(() => {
+    return state.properties.slice(0, 9).map(p => ({
+      property: p.name,
+      occupancy: Math.max(0, Math.min(100, Number(p.occupancy) || 0)),
+      revenue: Number(p.monthlyRent) || 0,
+      satisfaction: Math.max(1, Math.min(5, 3 + (Number(p.occupancy)||0)/25)),
+    }));
+  }, [state.properties]);
+
+  const customerLifetimeValue = React.useMemo(() => {
+    const planMap = new Map(plans.map((pl: any) => [pl.id, pl]));
+    const byPlan: Record<string, { segment: string; customers: number; clv: number; canceled: number }>= {};
+    const payBySubId = new Map<string, number>();
+    payments.forEach(p => { const k = p.subscriptionId; if (k) payBySubId.set(k, (payBySubId.get(k)||0) + Number(p.amount||0)); });
+    subscriptions.forEach(sub => {
+      const plan = sub.planId ? planMap.get(sub.planId) : undefined;
+      const seg = plan?.name || 'Unknown';
+      if (!byPlan[seg]) byPlan[seg] = { segment: seg, customers: 0, clv: 0, canceled: 0 };
+      byPlan[seg].customers += 1;
+      byPlan[seg].clv += payBySubId.get(sub.id) || 0;
+      if (sub.status === 'canceled') byPlan[seg].canceled += 1;
+    });
+    return Object.values(byPlan).map(x => ({ segment: x.segment, customers: x.customers, clv: x.clv, retention: x.customers ? Math.round(((x.customers - x.canceled)/x.customers)*100) : 0 }));
+  }, [subscriptions, payments, plans]);
+
+  const kpiMetrics = React.useMemo(() => {
+    const totalRevenue = payments.reduce((s,p)=>s+Number(p.amount||0),0);
+    const now = new Date();
+    const lastMonthKey = `${now.getFullYear()}-${now.getMonth()-1}`;
+    const prevMonthKey = `${now.getFullYear()}-${now.getMonth()-2}`;
+    const sumForKey = (key:string) => payments.filter(p=>{ const d=new Date(p.createdAt); return `${d.getFullYear()}-${d.getMonth()}`===key; }).reduce((s,p)=>s+Number(p.amount||0),0);
+    const lm = sumForKey(lastMonthKey); const pm = sumForKey(prevMonthKey);
+    const revenueGrowth = pm ? ((lm-pm)/pm)*100 : 0;
+    const totalCustomers = state.contacts.filter(c=>['Customer','Active'].includes(c.status)).length;
+    const avgDealSize = state.deals.length ? state.deals.reduce((s,d)=>s+Number(d.value||0),0)/state.deals.length : 0;
+    const closed = state.deals.filter(d=>d.stage==='Closed Won');
+    const salesCycleLength = closed.length ? Math.round(closed.reduce((s,d)=>s+(new Date(d.updatedAt).getTime()-new Date(d.createdAt).getTime()),0)/closed.length/ (1000*60*60*24)) : 0;
+    const active = subscriptions.filter((s:any)=>s.status==='active').length;
+    const canceled30 = subscriptions.filter((s:any)=>s.status==='canceled' && s.endDate && (Date.now()-new Date(s.endDate).getTime())<=30*24*60*60*1000).length;
+    const churnRate = active ? (canceled30/(active+canceled30))*100 : 0;
+    return {
+      totalRevenue,
+      revenueGrowth,
+      totalCustomers,
+      customerGrowth: 0,
+      avgDealSize,
+      dealSizeGrowth: 0,
+      salesCycleLength,
+      cycleGrowth: 0,
+      churnRate,
+      churnChange: 0,
+      netPromoterScore: 0,
+      npsChange: 0,
+    };
+  }, [payments, state.contacts, state.deals, subscriptions]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
