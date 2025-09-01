@@ -747,7 +747,7 @@ export default function RentCollection() {
                       
                       {location.hours && (
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          ���� {location.hours}
+                          🕒 {location.hours}
                         </Typography>
                       )}
 
@@ -1144,6 +1144,39 @@ export default function RentCollection() {
               disabled={!cashPayment.paymentId || !cashPayment.locationId || !cashPayment.confirmationCode}
             >
               Record Payment
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Auto-Pay Setup Dialog */}
+        <Dialog open={autoPayDialogOpen} onClose={() => setAutoPayDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Auto-Pay Setup</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 1 }}>
+              {paymentMethods.length === 0 ? (
+                <Alert severity="info">Add a payment method first in the Payment Methods tab.</Alert>
+              ) : (
+                <FormControl fullWidth>
+                  <InputLabel>Payment Method</InputLabel>
+                  <Select
+                    value={selectedAutoPayMethod}
+                    onChange={(e) => setSelectedAutoPayMethod(e.target.value)}
+                    label="Payment Method"
+                  >
+                    {paymentMethods.map((m) => (
+                      <MenuItem key={m.id} value={m.id}>
+                        {m.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAutoPayDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveAutoPay} variant="contained" disabled={paymentMethods.length === 0 || !selectedAutoPayMethod}>
+              Save
             </Button>
           </DialogActions>
         </Dialog>
