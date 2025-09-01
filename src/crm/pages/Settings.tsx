@@ -297,42 +297,48 @@ export default function Settings() {
     }
   };
 
-  if (isServiceProvider && user) {
-    const [profile, setProfile] = React.useState({
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      email: user.email || "",
-      phone: user.phone || "",
-      preferredLanguage: user.preferredLanguage || "en",
-      timezone: user.timezone || "UTC",
-    });
+  // Service Provider profile state and handlers (hooks must be top-level)
+  const [spProfile, setSpProfile] = React.useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    preferredLanguage: (user as any)?.preferredLanguage || "en",
+    timezone: (user as any)?.timezone || "UTC",
+  });
 
-    React.useEffect(() => {
-      setProfile({
+  React.useEffect(() => {
+    if (user) {
+      setSpProfile({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
         phone: user.phone || "",
-        preferredLanguage: user.preferredLanguage || "en",
-        timezone: user.timezone || "UTC",
+        preferredLanguage: (user as any)?.preferredLanguage || "en",
+        timezone: (user as any)?.timezone || "UTC",
       });
-    }, [user.id]);
+    }
+  }, [user?.id]);
 
-    const handleSaveProfile = () => {
-      updateUser(user.id, {
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        phone: profile.phone,
-        preferredLanguage: profile.preferredLanguage as any,
-        timezone: profile.timezone,
-      });
-      alert("Profile updated");
-    };
+  const handleSaveProfile = React.useCallback(() => {
+    if (!user) return;
+    updateUser(user.id, {
+      firstName: spProfile.firstName,
+      lastName: spProfile.lastName,
+      phone: spProfile.phone,
+      preferredLanguage: spProfile.preferredLanguage as any,
+      timezone: spProfile.timezone,
+    });
+    alert("Profile updated");
+  }, [user, updateUser, spProfile]);
 
-    const handleResetPassword = async () => {
-      const res = await resetPassword(user.email);
-      alert(res.message);
-    };
+  const handleResetPassword = React.useCallback(async () => {
+    if (!user) return;
+    const res = await resetPassword(user.email);
+    alert(res.message);
+  }, [user, resetPassword]);
+
+  if (isServiceProvider && user) {
 
     return (
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -347,21 +353,21 @@ export default function Settings() {
                   <Typography variant="h5">Profile</Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <TextField label="First Name" fullWidth value={profile.firstName} onChange={(e) => setProfile(p => ({ ...p, firstName: e.target.value }))} />
+                      <TextField label="First Name" fullWidth value={spProfile.firstName} onChange={(e) => setSpProfile(p => ({ ...p, firstName: e.target.value }))} />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <TextField label="Last Name" fullWidth value={profile.lastName} onChange={(e) => setProfile(p => ({ ...p, lastName: e.target.value }))} />
+                      <TextField label="Last Name" fullWidth value={spProfile.lastName} onChange={(e) => setSpProfile(p => ({ ...p, lastName: e.target.value }))} />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField label="Email" fullWidth value={profile.email} disabled />
+                      <TextField label="Email" fullWidth value={spProfile.email} disabled />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField label="Phone" fullWidth value={profile.phone} onChange={(e) => setProfile(p => ({ ...p, phone: e.target.value }))} />
+                      <TextField label="Phone" fullWidth value={spProfile.phone} onChange={(e) => setSpProfile(p => ({ ...p, phone: e.target.value }))} />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
                         <InputLabel>Language</InputLabel>
-                        <Select label="Language" value={profile.preferredLanguage} onChange={(e) => setProfile(p => ({ ...p, preferredLanguage: e.target.value }))}>
+                        <Select label="Language" value={spProfile.preferredLanguage} onChange={(e) => setSpProfile(p => ({ ...p, preferredLanguage: e.target.value }))}>
                           <MenuItem value="en">English</MenuItem>
                           <MenuItem value="es">Spanish</MenuItem>
                           <MenuItem value="fr">French</MenuItem>
@@ -371,7 +377,7 @@ export default function Settings() {
                     <Grid item xs={12} sm={6}>
                       <FormControl fullWidth>
                         <InputLabel>Timezone</InputLabel>
-                        <Select label="Timezone" value={profile.timezone} onChange={(e) => setProfile(p => ({ ...p, timezone: e.target.value }))}>
+                        <Select label="Timezone" value={spProfile.timezone} onChange={(e) => setSpProfile(p => ({ ...p, timezone: e.target.value }))}>
                           <MenuItem value="UTC">UTC</MenuItem>
                           <MenuItem value="America/New_York">America/New_York</MenuItem>
                           <MenuItem value="America/Chicago">America/Chicago</MenuItem>
