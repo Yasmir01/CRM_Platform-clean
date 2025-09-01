@@ -33,6 +33,8 @@ import {
   Stack,
   Badge,
   Tooltip,
+  FormControlLabel,
+  Switch,
   useTheme
 } from '@mui/material';
 import {
@@ -66,6 +68,8 @@ import dayjs from 'dayjs';
 import { paymentService } from '../services/PaymentService';
 import { RentPayment, PaymentMethod, CashPaymentLocation, PaymentSchedule } from '../types/PaymentTypes';
 import { useCrmData } from '../contexts/CrmDataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useTenantScope } from '../hooks/useTenantScope';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -92,6 +96,8 @@ export default function RentCollection() {
   const theme = useTheme();
   const { state } = useCrmData();
   const { tenants, properties } = state;
+  const { user } = useAuth();
+  const { isTenant, currentTenant } = useTenantScope();
 
   const [tabValue, setTabValue] = useState(0);
   const [payments, setPayments] = useState<RentPayment[]>([]);
@@ -103,6 +109,11 @@ export default function RentCollection() {
   const [cashPaymentDialogOpen, setCashPaymentDialogOpen] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [tenantAutoPayAllowed, setTenantAutoPayAllowed] = useState<boolean>(() => localStorage.getItem('allowTenantAutoPay') === 'true');
+  const [autoPayDialogOpen, setAutoPayDialogOpen] = useState(false);
+  const [selectedAutoPayMethod, setSelectedAutoPayMethod] = useState('');
+  const [autoPayActive, setAutoPayActive] = useState(false);
 
   const [newPaymentMethod, setNewPaymentMethod] = useState({
     type: 'card' as PaymentMethod['type'],
@@ -137,6 +148,13 @@ export default function RentCollection() {
     loadPaymentData();
   }, []);
 
+  useEffect(() => {
+    if (isTenant && currentTenant?.id) {
+      setSelectedTenant(currentTenant.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTenant, currentTenant?.id]);
+
   const loadPaymentData = async () => {
     setLoading(true);
     try {
@@ -150,6 +168,11 @@ export default function RentCollection() {
       
       const locationsData = await paymentService.getCashPaymentLocations();
       setCashLocations(locationsData);
+
+      if (isTenant && currentTenant?.id) {
+        const ap = await paymentService.getAutoPaySetup(currentTenant.id);
+        setAutoPayActive(!!ap);
+      }
     } catch (error) {
       console.error('Error loading payment data:', error);
     } finally {
@@ -270,7 +293,7 @@ export default function RentCollection() {
         cashPayment.locationId,
         cashPayment.confirmationCode
       );
-      
+
       if (success) {
         setCashPaymentDialogOpen(false);
         loadPaymentData();
@@ -283,6 +306,27 @@ export default function RentCollection() {
       }
     } catch (error) {
       console.error('Error recording cash payment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAutoPay = async () => {
+    if (!selectedTenant || !selectedAutoPayMethod) return;
+    try {
+      setLoading(true);
+      await paymentService.setupAutoPay({
+        tenantId: selectedTenant,
+        paymentMethodId: selectedAutoPayMethod,
+        isActive: true,
+        retryAttempts: 3,
+        retryDays: [3, 5],
+        failureNotifications: true
+      });
+      setAutoPayActive(true);
+      setAutoPayDialogOpen(false);
+    } catch (error) {
+      console.error('Error setting up auto-pay:', error);
     } finally {
       setLoading(false);
     }
@@ -566,20 +610,22 @@ export default function RentCollection() {
               <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center">
                 <Box>
                   <Typography variant="h6">Payment Methods</Typography>
-                  <FormControl sx={{ mt: 2, minWidth: 200 }}>
-                    <InputLabel>Select Tenant</InputLabel>
-                    <Select
-                      value={selectedTenant}
-                      onChange={(e) => setSelectedTenant(e.target.value)}
-                      label="Select Tenant"
-                    >
-                      {tenants.map((tenant) => (
-                        <MenuItem key={tenant.id} value={tenant.id}>
-                          {tenant.firstName} {tenant.lastName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  {!isTenant && (
+                    <FormControl sx={{ mt: 2, minWidth: 200 }}>
+                      <InputLabel>Select Tenant</InputLabel>
+                      <Select
+                        value={selectedTenant}
+                        onChange={(e) => setSelectedTenant(e.target.value)}
+                        label="Select Tenant"
+                      >
+                        {tenants.map((tenant) => (
+                          <MenuItem key={tenant.id} value={tenant.id}>
+                            {tenant.firstName} {tenant.lastName}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 </Box>
                 <Button
                   variant="contained"
@@ -759,6 +805,30 @@ export default function RentCollection() {
             </Box>
 
             <Grid container spacing={3}>
+              {!isTenant && (
+                <Grid item xs={12}>
+                  <Card>
+                    <CardContent>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="subtitle1">Allow tenants to set up Auto-Pay</Typography>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={tenantAutoPayAllowed}
+                              onChange={(e) => {
+                                setTenantAutoPayAllowed(e.target.checked);
+                                localStorage.setItem('allowTenantAutoPay', String(e.target.checked));
+                              }}
+                            />
+                          }
+                          label={tenantAutoPayAllowed ? 'Enabled' : 'Disabled'}
+                        />
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              )}
+
               <Grid item xs={12} md={6}>
                 <Card>
                   <CardContent>
@@ -799,9 +869,14 @@ export default function RentCollection() {
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                       Allow tenants to set up automatic payments for hassle-free rent collection.
                     </Typography>
-                    <Button variant="outlined" fullWidth>
-                      Configure Auto-Pay Settings
+                    <Button variant="outlined" fullWidth onClick={() => setAutoPayDialogOpen(true)} disabled={isTenant && !tenantAutoPayAllowed}>
+                      {autoPayActive ? 'Manage Auto-Pay' : 'Set Up Auto-Pay'}
                     </Button>
+                    {isTenant && !tenantAutoPayAllowed && (
+                      <Alert severity="warning" sx={{ mt: 2 }}>
+                        Auto-Pay is disabled by management.
+                      </Alert>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
@@ -1069,6 +1144,39 @@ export default function RentCollection() {
               disabled={!cashPayment.paymentId || !cashPayment.locationId || !cashPayment.confirmationCode}
             >
               Record Payment
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Auto-Pay Setup Dialog */}
+        <Dialog open={autoPayDialogOpen} onClose={() => setAutoPayDialogOpen(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Auto-Pay Setup</DialogTitle>
+          <DialogContent>
+            <Stack spacing={3} sx={{ mt: 1 }}>
+              {paymentMethods.length === 0 ? (
+                <Alert severity="info">Add a payment method first in the Payment Methods tab.</Alert>
+              ) : (
+                <FormControl fullWidth>
+                  <InputLabel>Payment Method</InputLabel>
+                  <Select
+                    value={selectedAutoPayMethod}
+                    onChange={(e) => setSelectedAutoPayMethod(e.target.value)}
+                    label="Payment Method"
+                  >
+                    {paymentMethods.map((m) => (
+                      <MenuItem key={m.id} value={m.id}>
+                        {m.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setAutoPayDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveAutoPay} variant="contained" disabled={paymentMethods.length === 0 || !selectedAutoPayMethod}>
+              Save
             </Button>
           </DialogActions>
         </Dialog>

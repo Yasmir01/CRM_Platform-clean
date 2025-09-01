@@ -52,6 +52,7 @@ import RichTextEditor from '../components/RichTextEditor';
 import { useMode } from '../contexts/ModeContext';
 import { useCrmData } from '../contexts/CrmDataContext';
 import { LocalStorageService } from '../services/LocalStorageService';
+import { useTenantScope } from '../hooks/useTenantScope';
 
 interface NewsPost {
   id: string;
@@ -150,10 +151,11 @@ export default function NewsBoard() {
   const { isManagementMode, isTenantMode } = useMode();
   const { state, addPropertyGroup, addAnnouncement, updateAnnouncement, deleteAnnouncement } = useCrmData();
   const { properties, tenants, propertyGroups, announcements } = state;
+  const { tenantPropertyId, isTenant } = useTenantScope();
   const [posts, setPosts] = React.useState<NewsPost[]>(() => {
     // First try to get from CRM context, then fallback to localStorage, then mock data
     if (announcements && announcements.length > 0) {
-      return announcements.map(ann => ({
+      const mapped = announcements.map(ann => ({
         id: ann.id,
         title: ann.title,
         content: ann.content,
@@ -162,14 +164,17 @@ export default function NewsBoard() {
         author: ann.createdBy,
         publishDate: ann.publishDate,
         expiryDate: ann.expiryDate,
-        isPinned: false, // Add this field to Announcement interface if needed
+        isPinned: false,
         isActive: ann.isActive,
-        targetAudience: 'all' as NewsPost['targetAudience'], // Map this properly if needed
-        targetProperties: ann.propertyIds,
-        notifications: { email: true, sms: false, push: true }, // Default values
+        targetAudience: 'all' as NewsPost['targetAudience'],
+        targetProperties: ann.propertyIds || [],
+        notifications: { email: true, sms: false, push: true },
         views: 0,
         engagement: { views: 0, clicks: 0, acknowledged: 0 }
       }));
+      return (isTenant && tenantPropertyId)
+        ? mapped.filter(p => (p.targetProperties.length ? p.targetProperties.includes(tenantPropertyId) : true))
+        : mapped;
     }
     const saved = LocalStorageService.getNews();
     return saved.length > 0 ? saved : mockNewsPosts;
@@ -216,7 +221,10 @@ export default function NewsBoard() {
         views: 0,
         engagement: { views: 0, clicks: 0, acknowledged: 0 }
       }));
-      setPosts(mappedPosts);
+      setPosts((isTenant && tenantPropertyId)
+        ? mappedPosts.filter(p => (p.targetProperties.length ? p.targetProperties.includes(tenantPropertyId) : true))
+        : mappedPosts
+      );
     }
   }, [announcements]);
 

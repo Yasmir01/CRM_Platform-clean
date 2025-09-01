@@ -37,6 +37,7 @@ import WorkOrderDetailPage from "./WorkOrderDetailPage";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { useAuth } from "../contexts/AuthContext";
 import { LocalStorageService } from "../services/LocalStorageService";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
@@ -213,6 +214,7 @@ export default function WorkOrders() {
   const { state } = useCrmData();
   const { properties, tenants } = state;
   const { user } = useAuth();
+  const { isServiceProvider, filterWorkOrders: spFilter } = useServiceProviderScope();
 
   // Helper function to check if tenant can interact with a work order
   const canTenantInteractWithWorkOrder = (workOrder: WorkOrder): boolean => {
@@ -609,6 +611,11 @@ export default function WorkOrders() {
       }
     }
 
+    // If user is a service provider, show only assigned work orders
+    if (isServiceProvider) {
+      filtered = spFilter(filtered);
+    }
+
     // Apply search term filter
     if (searchTerm) {
       filtered = filtered.filter(workOrder =>
@@ -620,7 +627,7 @@ export default function WorkOrders() {
     }
 
     return filtered;
-  }, [workOrders, user, tenants, searchTerm]);
+  }, [workOrders, user, tenants, searchTerm, isServiceProvider, spFilter]);
 
   const getStatusColor = (status: WorkOrder["status"]) => {
     switch (status) {
@@ -673,6 +680,7 @@ export default function WorkOrders() {
           variant="contained"
           startIcon={<AddRoundedIcon />}
           onClick={handleCreateWorkOrder}
+          disabled={isServiceProvider}
         >
           Create Work Order
         </Button>
@@ -916,7 +924,7 @@ export default function WorkOrders() {
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={1}>
-                    {canTenantInteractWithWorkOrder(workOrder) && (
+                    {canTenantInteractWithWorkOrder(workOrder) && !isServiceProvider && (
                       <>
                         <Tooltip title="Edit Work Order">
                           <IconButton
@@ -938,6 +946,18 @@ export default function WorkOrders() {
                             </IconButton>
                           </Tooltip>
                         )}
+                      </>
+                    )}
+                    {isServiceProvider && spFilter([workOrder]).length > 0 && (
+                      <>
+                        <Tooltip title="Edit Work Order">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditWorkOrder(workOrder)}
+                          >
+                            <EditRoundedIcon />
+                          </IconButton>
+                        </Tooltip>
                       </>
                     )}
                     {!canTenantInteractWithWorkOrder(workOrder) && user?.role === 'Tenant' && (

@@ -71,7 +71,7 @@ export default function CrmHeader() {
           </Typography>
           <Chip
             icon={isManagementMode ? <BusinessRoundedIcon /> : <HomeRoundedIcon />}
-            label={isManagementMode ? "Management Mode" : "Tenant Mode"}
+            label={user?.role === 'Service Provider' ? "Service Provider Mode" : (isManagementMode ? "Management Mode" : "Tenant Mode")}
             color={isManagementMode ? "primary" : "secondary"}
             variant="outlined"
             size="small"

@@ -26,6 +26,8 @@ import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useNavigate } from "react-router-dom";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { useTenantScope } from "../hooks/useTenantScope";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
 interface Reminder {
   id: string;
@@ -160,6 +162,8 @@ const generateRealReminders = (crmData: any): Reminder[] => {
 export default function DashboardReminders() {
   const navigate = useNavigate();
   const { state } = useCrmData();
+  const { isTenant, tenantPropertyId } = useTenantScope();
+  const { isServiceProvider, propertiesWithAssignments } = useServiceProviderScope();
   const [dismissedReminders, setDismissedReminders] = React.useState<string[]>([]);
   const [isExpanded, setIsExpanded] = React.useState(() => {
     // Load expansion state from localStorage, default to true if not found
@@ -171,8 +175,30 @@ export default function DashboardReminders() {
 
   const reminders = React.useMemo(() => {
     if (!state?.initialized) return [];
-    return generateRealReminders(state);
-  }, [state]);
+    const base = generateRealReminders(state);
+    if (isTenant && tenantPropertyId) {
+      const property = state.properties.find(p => p.id === tenantPropertyId);
+      const propText = property?.name || property?.address || '';
+      return base.filter(r => {
+        const matchesProperty = !r.property || r.property.includes(propText);
+        if (!matchesProperty) return false;
+        const isInspectionToday = r.id.startsWith('inspection-today-');
+        const isMaintenanceToday = r.id.startsWith('maintenance-') && !r.isOverdue; // due today from generator
+        const notLeaseExpiry = !r.id.startsWith('lease-exp');
+        // Exclude generic payment follow-ups for tenants (not day-specific)
+        return notLeaseExpiry && (isInspectionToday || isMaintenanceToday);
+      });
+    }
+    if (isServiceProvider) {
+      const propNames = new Set(
+        state.properties
+          .filter(p => propertiesWithAssignments.has(p.id))
+          .map(p => p.name)
+      );
+      return base.filter(r => r.property && Array.from(propNames).some(name => r.property!.includes(name)));
+    }
+    return base;
+  }, [state, isTenant, tenantPropertyId, isServiceProvider, propertiesWithAssignments]);
 
   // Save expansion state to localStorage whenever it changes
   React.useEffect(() => {

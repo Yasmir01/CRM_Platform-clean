@@ -86,6 +86,7 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import WebRoundedIcon from "@mui/icons-material/WebRounded";
 import PropertyDetailPage from "./PropertyDetailPage";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 import ExportDialog from "../components/ExportDialog";
 import { exportPropertiesData } from "../utils/exportUtils";
 import { copyToClipboard } from "../utils/clipboardUtils";
@@ -338,6 +339,7 @@ export default function Properties() {
   const navigate = useNavigate();
   const { trackPropertyActivity, trackPropertyStatusChange } = useActivityTracking();
   const { state, addProperty, updateProperty, deleteProperty, addTenant, updateTenant } = useCrmData();
+  const { isServiceProvider, propertiesWithAssignments } = useServiceProviderScope();
 
   // All useState hooks must be called before any early returns
   const [listings, setListings] = React.useState<PropertyListing[]>([]);
@@ -497,13 +499,16 @@ export default function Properties() {
   const filteredProperties = React.useMemo(() => {
     if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
     const searchLower = (searchTerm || '').toLowerCase();
-    return properties.filter(property =>
+    const base = isServiceProvider
+      ? properties.filter(p => p && propertiesWithAssignments.has(p.id))
+      : properties;
+    return base.filter(property =>
       property && (
         property.name?.toLowerCase().includes(searchLower) ||
         property.address?.toLowerCase().includes(searchLower)
       )
     );
-  }, [state?.initialized, properties, searchTerm]);
+  }, [state?.initialized, properties, searchTerm, isServiceProvider, propertiesWithAssignments]);
 
   // Stats calculations
   const totalProperties = React.useMemo(() => {
@@ -1540,7 +1545,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         >
           Property Management
         </Typography>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ display: isServiceProvider ? 'none' : 'flex' }}>
           <Tooltip
             title="Export property data to Excel or CSV format"
             componentsProps={{
@@ -1618,25 +1623,27 @@ ${property.description || 'Beautiful property available for rent. Contact us for
       </Stack>
 
       {/* Tabs */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
-          <Tab
-            icon={<HomeWorkRoundedIcon />}
-            label="All Properties"
-            iconPosition="start"
-          />
-          <Tab
-            icon={<PublicRoundedIcon />}
-            label={`Listings (${activeListings})`}
-            iconPosition="start"
-          />
-          <Tab
-            icon={<SearchRoundedIcon />}
-            label={`Unlisted (${unlistedProperties.length})`}
-            iconPosition="start"
-          />
-        </Tabs>
-      </Box>
+      {!isServiceProvider && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
+            <Tab
+              icon={<HomeWorkRoundedIcon />}
+              label="All Properties"
+              iconPosition="start"
+            />
+            <Tab
+              icon={<PublicRoundedIcon />}
+              label={`Listings (${activeListings})`}
+              iconPosition="start"
+            />
+            <Tab
+              icon={<SearchRoundedIcon />}
+              label={`Unlisted (${unlistedProperties.length})`}
+              iconPosition="start"
+            />
+          </Tabs>
+        </Box>
+      )}
 
       {/* All Properties Tab */}
       <TabPanel value={currentTab} index={0}>
@@ -4304,7 +4311,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const showingDateTime = new Date(`${showingData.date}T${showingData.time}`);
               const formattedDateTime = showingDateTime.toLocaleString();
 
-              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n• Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
+              alert(`Showing scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${showingData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Agent: ${showingData.agent}\n• Prospect: ${showingData.prospectName || 'TBD'}\n��� Duration: ${showingData.estimatedDuration} minutes\n�� Tenant Notice: ${showingData.requireNotice ? 'Yes' : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${showingData.agent}\n• ${showingData.prospectName ? `Prospect ${showingData.prospectName} will be contacted` : 'Ready for prospect assignment'}\n• ${showingData.requireNotice ? 'Tenant notification will be sent' : 'Property access arranged'}\n\nThe showing is now saved in your CRM system.`);
 
               setShowingDialogOpen(false);
             }}

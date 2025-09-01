@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
+import { LocaleProvider } from "./crm/contexts/LocaleContext";
 import SuperAdminApp from "./crm/SuperAdminApp";
 import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
@@ -41,7 +42,7 @@ const UserRoles = React.lazy(() => import("./crm/pages/UserRoles"));
 const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
-const NewsBoard = React.lazy(() => import("./crm/pages/NewsBoard"));
+import NewsBoard from "./crm/pages/NewsBoard";
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
@@ -225,11 +226,7 @@ function AppRoutes() {
             <Suggestions />
           </React.Suspense>
         } />
-        <Route path="news" element={
-          <React.Suspense fallback={<PageLoader />}>
-            <NewsBoard />
-          </React.Suspense>
-        } />
+        <Route path="news" element={<NewsBoard />} />
         <Route path="power-tools" element={
           <React.Suspense fallback={<PageLoader />}>
             <PowerTools />
@@ -376,11 +373,13 @@ export default function App() {
   return (
     <AppTheme>
       <CssBaseline enableColorScheme />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <LocaleProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </LocaleProvider>
     </AppTheme>
   );
 }

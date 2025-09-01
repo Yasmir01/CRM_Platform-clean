@@ -54,9 +54,11 @@ import SubscriptionsRoundedIcon from "@mui/icons-material/SubscriptionsRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
+import AddBankAccountDialog from "../components/AddBankAccountDialog";
 import CompanySettings, { useCompanyInfo } from "../components/CompanySettings";
 import SubscriptionBackupControls from "../components/SubscriptionBackupControls";
 import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 // Mock user data and types (would normally come from AuthContext)
 type UserRole = 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
@@ -160,6 +162,9 @@ interface PaymentMethod {
 
 export default function Settings() {
   const [users, setUsers] = React.useState<User[]>(mockUsers);
+  const { user, updateUser, resetPassword } = useAuth();
+  const isServiceProvider = user?.role === 'Service Provider';
+  const isTenant = user?.role === 'Tenant';
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
@@ -175,6 +180,9 @@ export default function Settings() {
     return saved ? JSON.parse(saved) : [];
   });
   const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false);
+  const [addBankDialogOpen, setAddBankDialogOpen] = React.useState(false);
+  const [rentAutoPayEnabled, setRentAutoPayEnabled] = React.useState<boolean>(() => localStorage.getItem('rentAutoPayEnabled') === 'true');
+  const [manualPayment, setManualPayment] = React.useState({ amount: '', date: new Date().toISOString().slice(0,10), method: 'ACH', note: '' });
   const [paymentForm, setPaymentForm] = React.useState({
     type: "Credit Card" as PaymentMethodType,
     cardNumber: "",
@@ -201,6 +209,9 @@ export default function Settings() {
   React.useEffect(() => {
     localStorage.setItem("paymentMethods", JSON.stringify(paymentMethods));
   }, [paymentMethods]);
+  React.useEffect(() => {
+    localStorage.setItem('rentAutoPayEnabled', rentAutoPayEnabled ? 'true' : 'false');
+  }, [rentAutoPayEnabled]);
   React.useEffect(() => {
     localStorage.setItem("individualProfile", JSON.stringify(individualProfile));
   }, [individualProfile]);
@@ -293,6 +304,216 @@ export default function Settings() {
       default: return "default";
     }
   };
+
+  // Service Provider profile state and handlers (hooks must be top-level)
+  const [spProfile, setSpProfile] = React.useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    preferredLanguage: (user as any)?.preferredLanguage || "en",
+    timezone: (user as any)?.timezone || "UTC",
+  });
+
+  React.useEffect(() => {
+    if (user) {
+      setSpProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        preferredLanguage: (user as any)?.preferredLanguage || "en",
+        timezone: (user as any)?.timezone || "UTC",
+      });
+    }
+  }, [user?.id]);
+
+  const handleSaveProfile = React.useCallback(() => {
+    if (!user) return;
+    updateUser(user.id, {
+      firstName: spProfile.firstName,
+      lastName: spProfile.lastName,
+      phone: spProfile.phone,
+      preferredLanguage: spProfile.preferredLanguage as any,
+      timezone: spProfile.timezone,
+    });
+    alert("Profile updated");
+  }, [user, updateUser, spProfile]);
+
+  const handleResetPassword = React.useCallback(async () => {
+    if (!user) return;
+    const res = await resetPassword(user.email);
+    alert(res.message);
+  }, [user, resetPassword]);
+
+  // Tenant profile state and handlers (top-level hooks)
+  const [tenantProfile, setTenantProfile] = React.useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+  });
+
+  React.useEffect(() => {
+    if (user) {
+      setTenantProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user?.id]);
+
+  const handleSaveTenantProfile = React.useCallback(() => {
+    if (!user) return;
+    updateUser(user.id, {
+      firstName: tenantProfile.firstName,
+      lastName: tenantProfile.lastName,
+      phone: tenantProfile.phone,
+    });
+    alert("Profile updated");
+  }, [user, updateUser, tenantProfile]);
+
+  const handleResetTenantPassword = React.useCallback(async () => {
+    if (!user) return;
+    const res = await resetPassword(user.email);
+    alert(res.message);
+  }, [user, resetPassword]);
+
+  if (isServiceProvider && user) {
+
+    return (
+      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+          Settings
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Typography variant="h5">Profile</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="First Name" fullWidth value={spProfile.firstName} onChange={(e) => setSpProfile(p => ({ ...p, firstName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Last Name" fullWidth value={spProfile.lastName} onChange={(e) => setSpProfile(p => ({ ...p, lastName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Email" fullWidth value={spProfile.email} disabled />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Phone" fullWidth value={spProfile.phone} onChange={(e) => setSpProfile(p => ({ ...p, phone: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Language</InputLabel>
+                        <Select label="Language" value={spProfile.preferredLanguage} onChange={(e) => setSpProfile(p => ({ ...p, preferredLanguage: e.target.value }))}>
+                          <MenuItem value="en">English</MenuItem>
+                          <MenuItem value="es">Spanish</MenuItem>
+                          <MenuItem value="fr">French</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Timezone</InputLabel>
+                        <Select label="Timezone" value={spProfile.timezone} onChange={(e) => setSpProfile(p => ({ ...p, timezone: e.target.value }))}>
+                          <MenuItem value="UTC">UTC</MenuItem>
+                          <MenuItem value="America/New_York">America/New_York</MenuItem>
+                          <MenuItem value="America/Chicago">America/Chicago</MenuItem>
+                          <MenuItem value="America/Los_Angeles">America/Los_Angeles</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button variant="outlined" onClick={handleResetPassword}>Reset Password</Button>
+                    <Button variant="contained" onClick={handleSaveProfile}>Save Changes</Button>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
+                  <Typography variant="h6">Email Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for assigned work orders" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for schedule changes" />
+                  <FormControlLabel control={<Switch />} label="Daily summaries" />
+                  <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent assignments" />
+                  <FormControlLabel control={<Switch />} label="SMS reminders for upcoming appointments" />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+
+  if (isTenant && user) {
+    return (
+      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+          Settings
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Typography variant="h5">Profile</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="First Name" fullWidth value={tenantProfile.firstName} onChange={(e) => setTenantProfile(p => ({ ...p, firstName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Last Name" fullWidth value={tenantProfile.lastName} onChange={(e) => setTenantProfile(p => ({ ...p, lastName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Email" fullWidth value={tenantProfile.email} disabled />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Phone" fullWidth value={tenantProfile.phone} onChange={(e) => setTenantProfile(p => ({ ...p, phone: e.target.value }))} />
+                    </Grid>
+                  </Grid>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button variant="outlined" onClick={handleResetTenantPassword}>Reset Password</Button>
+                    <Button variant="contained" onClick={handleSaveTenantProfile}>Save Changes</Button>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
+                  <Typography variant="h6">Email Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for new messages from management" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for maintenance request updates" />
+                  <FormControlLabel control={<Switch />} label="Email receipts for rent payments" />
+                  <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
+                  <FormControlLabel control={<Switch />} label="SMS rent reminders" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent building notices" />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -691,14 +912,52 @@ export default function Settings() {
                     <Button variant="contained" component={RouterLink} to="/crm/subscriptions">Go to Subscription Management</Button>
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                      <AccountBalanceRoundedIcon color="primary" />
-                      <Typography variant="h6">Bank & Payment Routing</Typography>
+                    <Stack spacing={2}>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <AccountBalanceRoundedIcon color="primary" />
+                        <Typography variant="h6">Rent Payments</Typography>
+                      </Stack>
+                      <Typography variant="body2" color="text.secondary">
+                        Connect a bank account to receive rent payments and configure auto-pay or record manual payments.
+                      </Typography>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <Button variant="contained" onClick={() => setAddBankDialogOpen(true)}>Connect Bank Account</Button>
+                        <FormControlLabel control={<Switch checked={rentAutoPayEnabled} onChange={(e) => setRentAutoPayEnabled(e.target.checked)} />} label="Enable Auto-Pay" />
+                      </Stack>
+                      <Divider />
+                      <Typography variant="subtitle1">Record Manual Payment</Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} sm={4}>
+                          <TextField label="Amount" value={manualPayment.amount} onChange={(e) => setManualPayment({ ...manualPayment, amount: e.target.value })} fullWidth />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <TextField label="Date" type="date" value={manualPayment.date} onChange={(e) => setManualPayment({ ...manualPayment, date: e.target.value })} fullWidth InputLabelProps={{ shrink: true }} />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <FormControl fullWidth>
+                            <InputLabel>Method</InputLabel>
+                            <Select value={manualPayment.method} label="Method" onChange={(e) => setManualPayment({ ...manualPayment, method: e.target.value as any })}>
+                              <MenuItem value="ACH">ACH</MenuItem>
+                              <MenuItem value="Card">Card</MenuItem>
+                              <MenuItem value="Cash">Cash</MenuItem>
+                              <MenuItem value="Check">Check</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <TextField label="Note (optional)" value={manualPayment.note} onChange={(e) => setManualPayment({ ...manualPayment, note: e.target.value })} fullWidth />
+                        </Grid>
+                      </Grid>
+                      <Stack direction="row" justifyContent="flex-end">
+                        <Button variant="outlined" onClick={() => {
+                          const list = JSON.parse(localStorage.getItem('manual_rent_payments') || '[]');
+                          list.push({ ...manualPayment, createdAt: new Date().toISOString() });
+                          localStorage.setItem('manual_rent_payments', JSON.stringify(list));
+                          setManualPayment({ amount: '', date: new Date().toISOString().slice(0,10), method: 'ACH', note: '' });
+                          alert('Payment recorded');
+                        }}>Record Payment</Button>
+                      </Stack>
                     </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      Configure business bank accounts and payment routing rules.
-                    </Typography>
-                    <Button variant="outlined" component={RouterLink} to="/crm/bank-account-settings">Open Bank Account Settings</Button>
                   </Grid>
                 </Grid>
               </CardContent>
@@ -877,6 +1136,19 @@ export default function Settings() {
         onClose={() => setOpenCompanyDialog(false)}
         onSave={updateCompanyInfo}
         currentInfo={companyInfo}
+      />
+
+      <AddBankAccountDialog
+        open={addBankDialogOpen}
+        onClose={() => setAddBankDialogOpen(false)}
+        onAccountAdded={(account) => {
+          const accounts = JSON.parse(localStorage.getItem('business_bank_accounts') || '[]');
+          accounts.push(account);
+          localStorage.setItem('business_bank_accounts', JSON.stringify(accounts));
+          setAddBankDialogOpen(false);
+          alert('Bank account connected');
+        }}
+        organizationId={user?.id || 'org_main'}
       />
     </Box>
   );

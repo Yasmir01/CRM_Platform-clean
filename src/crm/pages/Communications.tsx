@@ -61,6 +61,8 @@ import RecordingSettingsDialog from "../components/RecordingSettingsDialog";
 import { useMode } from "../contexts/ModeContext";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { formatPhoneDisplay, getCleanPhoneNumber } from "../components/PhoneNumberField";
+import { useAuth } from "../contexts/AuthContext";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -432,6 +434,8 @@ export default function Communications() {
   const { isTenantMode } = useMode();
   const { state } = useCrmData();
   const { tenants, propertyManagers, contacts } = state;
+  const { user } = useAuth();
+  const { isServiceProvider } = useServiceProviderScope();
 
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -887,6 +891,87 @@ export default function Communications() {
                   </Stack>
                 </Paper>
               ))}
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
+  // Service Provider mode - simplified internal messaging
+  if (user?.role === 'Service Provider') {
+    return (
+      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+          <Typography variant="h4" component="h1">
+            Communications
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Send updates to management and view your recent communications
+          </Typography>
+        </Stack>
+
+        <Card>
+          <CardContent>
+            <Stack spacing={3}>
+              <Typography variant="h6">Send Update to Management</Typography>
+              <Alert severity="info">
+                Use this form to provide quick updates or ask questions. Messages will sync when you're back online.
+              </Alert>
+
+              <TextField fullWidth label="Subject" placeholder="Brief description" variant="outlined" />
+              <TextField fullWidth label="Message" placeholder="Write your update..." multiline rows={6} variant="outlined" />
+
+              <Stack direction="row" spacing={2} justifyContent="flex-end">
+                <Button variant="outlined">Cancel</Button>
+                <Button variant="contained" startIcon={<SendRoundedIcon />} onClick={() => alert("Message sent to management successfully!")}>Send Update</Button>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
+
+        <Card sx={{ mt: 3 }}>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 2 }}>Your Recent Communications</Typography>
+            <Stack spacing={2}>
+              {communications
+                .filter(comm => {
+                  const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
+                  const email = (user.email || '').toLowerCase();
+                  return (
+                    comm.contact.name.toLowerCase() === fullName ||
+                    (comm.contact.email || '').toLowerCase() === email
+                  );
+                })
+                .slice(0, 5)
+                .map((comm) => (
+                  <Paper key={comm.id} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
+                    <Stack spacing={1}>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="subtitle2">{comm.type} {comm.direction === 'Inbound' ? 'from' : 'to'} {comm.contact.name}</Typography>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(comm.timestamp).toLocaleString()}
+                          </Typography>
+                          <Chip label={comm.status} size="small" color={getStatusColor(comm.status) as any} />
+                        </Stack>
+                      </Stack>
+                      {comm.message && (
+                        <Typography variant="body2" color="text.secondary">{comm.message}</Typography>
+                      )}
+                    </Stack>
+                  </Paper>
+              ))}
+              {communications.filter(comm => {
+                const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
+                const email = (user.email || '').toLowerCase();
+                return (
+                  comm.contact.name.toLowerCase() === fullName ||
+                  (comm.contact.email || '').toLowerCase() === email
+                );
+              }).length === 0 && (
+                <Alert severity="info">No recent communications found.</Alert>
+              )}
             </Stack>
           </CardContent>
         </Card>

@@ -224,37 +224,48 @@ export default function CrmMainDashboard() {
               </Stack>
 
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleAddProperty}
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.2)",
-                    backdropFilter: "blur(10px)",
-                    "&:hover": {
-                      bgcolor: "rgba(255,255,255,0.3)",
-                    }
-                  }}
-                >
-                  Add Property
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleAddTenant}
-                  sx={{
-                    borderColor: "rgba(255,255,255,0.5)",
-                    color: "white",
-                    "&:hover": {
-                      borderColor: "white",
-                      bgcolor: "rgba(255,255,255,0.1)",
-                    }
-                  }}
-                >
-                  Add Tenant
-                </Button>
-              </Stack>
+              {user?.role !== 'Tenant' && user?.role !== 'Service Provider' && (
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddRoundedIcon />}
+                    onClick={handleAddProperty}
+                    sx={{
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      backdropFilter: "blur(10px)",
+                      "&:hover": {
+                        bgcolor: "rgba(255,255,255,0.3)",
+                      }
+                    }}
+                  >
+                    Add Property
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddRoundedIcon />}
+                    onClick={handleAddTenant}
+                    sx={{
+                      borderColor: "rgba(255,255,255,0.5)",
+                      color: "white",
+                      "&:hover": {
+                        borderColor: "white",
+                        bgcolor: "rgba(255,255,255,0.1)",
+                      }
+                    }}
+                  >
+                    Add Tenant
+                  </Button>
+                </Stack>
+              )}
+
+              {user?.role === 'Tenant' && (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                  <Button variant="contained" onClick={() => navigate('/crm/rent-collection')}>Pay Rent</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/work-orders')}>Submit Task</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/suggestions')}>Share Suggestion</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/communications')}>Communicate</Button>
+                </Stack>
+              )}
             </Stack>
           </Stack>
         </Box>
@@ -266,6 +277,7 @@ export default function CrmMainDashboard() {
       {/* Dashboard Notifications Panel */}
       <DashboardNotificationsPanel />
 
+      {user?.role !== 'Tenant' && user?.role !== 'Service Provider' && (<>
       {/* Stats Cards row with enhanced spacing */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {statCardsData.map((card, index) => (
@@ -336,6 +348,7 @@ export default function CrmMainDashboard() {
           <CrmQuickInsights maxHeight={350} />
         </div>
       </UniversalDashboardLayout>
+      </>)}
 
       <Copyright sx={{ mt: 3, mb: 4 }} />
     </Box>

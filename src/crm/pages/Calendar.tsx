@@ -70,6 +70,7 @@ import CalendarIntegrations from "../components/CalendarIntegrations";
 import EnhancedEventForm from "../components/EnhancedEventForm";
 import ConflictDetection from "../components/ConflictDetection";
 import DragDropCalendar from "../components/DragDropCalendar";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
 type EventType = "Task" | "Call" | "Email" | "SMS" | "Appointment" | "Inspection" | "Meeting";
 type CalendarView = "month" | "week" | "day";
@@ -209,6 +210,7 @@ export default function Calendar() {
     assignedTo: "All"
   });
   const [searchTerm, setSearchTerm] = React.useState("");
+  const { isServiceProvider, filterEvents } = useServiceProviderScope();
 
   // Get events for the current view
   const getEventsForView = () => {
@@ -241,7 +243,8 @@ export default function Calendar() {
       }
     }
 
-    return events.filter(event => {
+    const scoped = isServiceProvider ? filterEvents(events) : events;
+    return scoped.filter(event => {
       const eventDate = new Date(event.date);
       const matchesDate = eventDate >= startDate && eventDate <= endDate;
       const matchesType = filters.type === "All" || event.type === filters.type;
