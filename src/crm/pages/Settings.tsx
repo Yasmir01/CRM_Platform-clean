@@ -57,6 +57,7 @@ import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
 import CompanySettings, { useCompanyInfo } from "../components/CompanySettings";
 import SubscriptionBackupControls from "../components/SubscriptionBackupControls";
 import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 // Mock user data and types (would normally come from AuthContext)
 type UserRole = 'Admin' | 'Property Manager' | 'Tenant' | 'Service Provider';
@@ -160,6 +161,8 @@ interface PaymentMethod {
 
 export default function Settings() {
   const [users, setUsers] = React.useState<User[]>(mockUsers);
+  const { user } = useAuth();
+  const isServiceProvider = user?.role === 'Service Provider';
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
@@ -293,6 +296,33 @@ export default function Settings() {
       default: return "default";
     }
   };
+
+  if (isServiceProvider) {
+    return (
+      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+          Settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Manage your notification preferences.
+        </Typography>
+        <Card>
+          <CardContent>
+            <Stack spacing={3}>
+              <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
+              <Typography variant="h6">Email Notifications</Typography>
+              <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for assigned work orders" />
+              <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for schedule changes" />
+              <FormControlLabel control={<Switch />} label="Daily summaries" />
+              <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
+              <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent assignments" />
+              <FormControlLabel control={<Switch />} label="SMS reminders for upcoming appointments" />
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
