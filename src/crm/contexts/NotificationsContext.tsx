@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useMemo } from 'react';
 import { useCrmData, CrmDataContext } from './CrmDataContext';
 import { suggestionService } from '../services/SuggestionService';
+import { useTenantScope } from '../hooks/useTenantScope';
 
 export interface Notification {
   id: string;
@@ -208,6 +209,7 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   // Safely get CRM data - it might not be available during initial render
   const crmContext = useContext(CrmDataContext);
   const state = crmContext?.state;
+  const { isTenant, tenantPropertyId } = useTenantScope();
   const [manualNotifications, setManualNotifications] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Record<string, boolean>>({});
   const [removedIds, setRemovedIds] = useState<Record<string, boolean>>({});
@@ -223,9 +225,33 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
     const realNotifications = generateRealNotifications(state);
 
     // Apply overrides to both real and manual notifications
-    const realWithOverrides = realNotifications
+    let realWithOverrides = realNotifications
       .filter(n => !removedIds[n.id])
       .map(n => ({ ...n, read: readIds[n.id] !== undefined ? readIds[n.id] : n.read }));
+
+    // Tenant scoping: only notifications related to their property or generic suggestion/admin notices
+    if (isTenant && tenantPropertyId && state) {
+      realWithOverrides = realWithOverrides.filter(n => {
+        // Allow suggestion notifications (no sensitive data)
+        if (n.type === 'suggestion' || n.type === 'suggestion_vote' || n.type === 'suggestion_status') return true;
+        // If related to a tenant, verify tenant's property
+        if (n.relatedEntity?.type === 'tenant') {
+          const t = state.tenants.find(tt => tt.id === n.relatedEntity?.id);
+          return t?.propertyId === tenantPropertyId;
+        }
+        // If related to a work order, verify work order property
+        if (n.relatedEntity?.type === 'workOrder') {
+          const wo = state.workOrders.find(w => w.id === n.relatedEntity?.id);
+          return wo?.propertyId === tenantPropertyId;
+        }
+        // If related to a property, check id match
+        if (n.relatedEntity?.type === 'property') {
+          return n.relatedEntity.id === tenantPropertyId;
+        }
+        // Default: hide
+        return false;
+      });
+    }
 
     const manualWithOverrides = manualNotifications
       .filter(n => !removedIds[n.id])
