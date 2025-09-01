@@ -116,29 +116,31 @@ export default function SuperAdminRevenueDashboard(){
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>Recent Payments</Typography>
-              <Table size="small" component={Paper} variant="outlined">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Amount</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Provider</TableCell>
-                    <TableCell>Date</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentPayments.map(p => (
-                    <TableRow key={p.id}>
-                      <TableCell>${p.amount.toFixed(2)}</TableCell>
-                      <TableCell><Chip label={p.status} size="small" color={p.status === 'succeeded' ? 'success' : 'default'} /></TableCell>
-                      <TableCell>{p.provider}</TableCell>
-                      <TableCell>{new Date(p.createdAt).toLocaleString()}</TableCell>
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Amount</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Provider</TableCell>
+                      <TableCell>Date</TableCell>
                     </TableRow>
-                  ))}
-                  {recentPayments.length === 0 && (
-                    <TableRow><TableCell colSpan={4} align="center">No payments</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {recentPayments.map(p => (
+                      <TableRow key={p.id}>
+                        <TableCell>${p.amount.toFixed(2)}</TableCell>
+                        <TableCell><Chip label={p.status} size="small" color={p.status === 'succeeded' ? 'success' : 'default'} /></TableCell>
+                        <TableCell>{p.provider}</TableCell>
+                        <TableCell>{new Date(p.createdAt).toLocaleString()}</TableCell>
+                      </TableRow>
+                    ))}
+                    {recentPayments.length === 0 && (
+                      <TableRow><TableCell colSpan={4} align="center">No payments</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </Card>
         </Grid>
