@@ -1,5 +1,6 @@
 import { BillingCycle } from '@prisma/client';
 import { prisma } from './_db';
+import { requireAdminOr403 } from './_auth';
 
 export default async function handler(req: any, res: any) {
   try {
@@ -9,6 +10,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'POST') {
+      if (!requireAdminOr403(req, res)) return;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const plan = await prisma.subscriptionPlan.create({
         data: {
@@ -29,6 +31,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
+      if (!requireAdminOr403(req, res)) return;
       const q = (req && req.query) || {};
       const id = (q.id as string) || (req.body && (req.body as any).id);
       if (!id) return res.status(400).json({ error: 'Missing id' });
@@ -53,6 +56,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'DELETE') {
+      if (!requireAdminOr403(req, res)) return;
       const q = (req && req.query) || {};
       const id = q.id as string;
       if (!id) return res.status(400).json({ error: 'Missing id' });
