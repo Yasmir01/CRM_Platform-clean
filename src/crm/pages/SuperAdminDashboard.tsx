@@ -386,6 +386,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
           <Tab label="Subscriber Accounts" />
           <Tab label="Role Management" />
+          <Tab label="Marketplace Management" />
           <Tab label="System Analytics" />
           <Tab label="Billing Management" />
           <Tab label="System Settings" />
