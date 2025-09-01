@@ -182,7 +182,7 @@ interface SuperAdminDashboardProps {
 }
 
 export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminDashboardProps) {
-  const { isSuperAdmin } = require('../hooks/useRoleManagement').useRoleManagement();
+  const { isSuperAdmin } = useRoleManagement();
   React.useEffect(() => {
     try { if (!isSuperAdmin()) { console.warn('Access denied: Super Admin only'); } } catch {}
   }, [isSuperAdmin]);
@@ -300,7 +300,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
               Super Admin Dashboard
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Welcome back, {adminData.username} • Master Control Panel
+              Welcome back, {adminData.username} ��� Master Control Panel
             </Typography>
           </Box>
         </Stack>
