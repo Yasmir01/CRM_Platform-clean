@@ -26,6 +26,7 @@ import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useNavigate } from "react-router-dom";
 import { useCrmData } from "../contexts/CrmDataContext";
+import { useTenantScope } from "../hooks/useTenantScope";
 
 interface Reminder {
   id: string;
@@ -160,6 +161,7 @@ const generateRealReminders = (crmData: any): Reminder[] => {
 export default function DashboardReminders() {
   const navigate = useNavigate();
   const { state } = useCrmData();
+  const { isTenant, tenantPropertyId } = useTenantScope();
   const [dismissedReminders, setDismissedReminders] = React.useState<string[]>([]);
   const [isExpanded, setIsExpanded] = React.useState(() => {
     // Load expansion state from localStorage, default to true if not found
@@ -171,8 +173,23 @@ export default function DashboardReminders() {
 
   const reminders = React.useMemo(() => {
     if (!state?.initialized) return [];
-    return generateRealReminders(state);
-  }, [state]);
+    const base = generateRealReminders(state);
+    if (isTenant && tenantPropertyId) {
+      // Only show today's maintenance/inspections/payments for tenant's property
+      const today = new Date().toDateString();
+      return base.filter(r => {
+        const matchesProperty = !r.property || r.property === (state.properties.find(p => p.id === tenantPropertyId)?.name || r.property);
+        if (!matchesProperty) return false;
+        const isMaintenance = r.id.startsWith('maintenance-') || r.title.toLowerCase().includes('maintenance') || r.type === 'Task';
+        const isInspectionToday = r.id.startsWith('inspection-today-');
+        const isPaymentFollowUp = r.id.startsWith('payment-') || r.title.toLowerCase().includes('payment');
+        const isToday = r.time === 'Urgent' || true; // keep present items; generation ensures inspection-today; others are time-based
+        const notLeaseExpiry = !r.id.startsWith('lease-exp');
+        return notLeaseExpiry && (isInspectionToday || isPaymentFollowUp || isMaintenance) && isToday;
+      });
+    }
+    return base;
+  }, [state, isTenant, tenantPropertyId]);
 
   // Save expansion state to localStorage whenever it changes
   React.useEffect(() => {
