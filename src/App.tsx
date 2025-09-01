@@ -41,7 +41,7 @@ const UserRoles = React.lazy(() => import("./crm/pages/UserRoles"));
 const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
-const NewsBoard = React.lazy(() => import("./crm/pages/NewsBoard"));
+import NewsBoard from "./crm/pages/NewsBoard";
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
