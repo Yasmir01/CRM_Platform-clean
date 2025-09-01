@@ -1545,7 +1545,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         >
           Property Management
         </Typography>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ display: isServiceProvider ? 'none' : 'flex' }}>
           <Tooltip
             title="Export property data to Excel or CSV format"
             componentsProps={{
