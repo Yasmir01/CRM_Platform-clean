@@ -104,6 +104,7 @@ const tenantMenuItems = [
   { text: "News & Announcements", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Billing", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "Profile", icon: <PersonRoundedIcon />, path: "/crm/profile" },
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
