@@ -592,8 +592,16 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
         <SuperAdminRoleManager />
       </TabPanel>
 
-      {/* System Analytics Tab */}
+      {/* Marketplace Management Tab */}
       <TabPanel value={currentTab} index={2}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Manage marketplace products, add-ons, services, and subscriptions.
+        </Alert>
+        <SuperAdminMarketplaceManager />
+      </TabPanel>
+
+      {/* System Analytics Tab */}
+      <TabPanel value={currentTab} index={3}>
         <Alert severity="info" sx={{ mb: 3 }}>
           System analytics dashboard showing platform usage, performance metrics, and subscriber insights.
         </Alert>
