@@ -83,68 +83,8 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Mock data for analytics
-const revenueData = [
-  { month: 'Jan', revenue: 45000, properties: 28, tenants: 145 },
-  { month: 'Feb', revenue: 52000, properties: 32, tenants: 168 },
-  { month: 'Mar', revenue: 48000, properties: 30, tenants: 156 },
-  { month: 'Apr', revenue: 61000, properties: 38, tenants: 201 },
-  { month: 'May', revenue: 55000, properties: 35, tenants: 185 },
-  { month: 'Jun', revenue: 67000, properties: 42, tenants: 223 },
-];
-
-const salesFunnelData = [
-  { stage: 'Leads', count: 1250, value: 2500000 },
-  { stage: 'Qualified', count: 425, value: 1850000 },
-  { stage: 'Proposals', count: 185, value: 920000 },
-  { stage: 'Negotiations', count: 78, value: 650000 },
-  { stage: 'Closed Won', count: 32, value: 480000 },
-];
-
-const marketingMetrics = [
-  { channel: 'Email', sent: 15420, opened: 6842, clicked: 1368, converted: 274 },
-  { channel: 'Social Media', sent: 8960, opened: 4032, clicked: 896, converted: 179 },
-  { channel: 'Google Ads', sent: 5240, opened: 2095, clicked: 472, converted: 118 },
-  { channel: 'Direct Mail', sent: 2850, opened: 1140, clicked: 171, converted: 57 },
-];
-
-const propertyPerformance = [
-  { property: 'Sunset Apartments', occupancy: 95, revenue: 45000, satisfaction: 4.8 },
-  { property: 'Ocean View Villa', occupancy: 88, revenue: 38000, satisfaction: 4.6 },
-  { property: 'Downtown Lofts', occupancy: 92, revenue: 52000, satisfaction: 4.7 },
-  { property: 'Garden Heights', occupancy: 78, revenue: 28000, satisfaction: 4.2 },
-  { property: 'Harbor Bay', occupancy: 85, revenue: 41000, satisfaction: 4.5 },
-];
-
-const leadSourceData = [
-  { name: 'Website', value: 35, color: '#0088FE' },
-  { name: 'Referrals', value: 28, color: '#00C49F' },
-  { name: 'Social Media', value: 18, color: '#FFBB28' },
-  { name: 'Cold Calls', value: 12, color: '#FF8042' },
-  { name: 'Events', value: 7, color: '#8884D8' },
-];
-
-const customerLifetimeValue = [
-  { segment: 'Enterprise', customers: 45, clv: 125000, retention: 95 },
-  { segment: 'Mid-Market', customers: 128, clv: 65000, retention: 88 },
-  { segment: 'Small Business', customers: 267, clv: 28000, retention: 72 },
-  { segment: 'Startup', customers: 89, clv: 15000, retention: 65 },
-];
-
-const kpiMetrics = {
-  totalRevenue: 298000,
-  revenueGrowth: 12.5,
-  totalCustomers: 529,
-  customerGrowth: 8.3,
-  avgDealSize: 45000,
-  dealSizeGrowth: -2.1,
-  salesCycleLength: 45,
-  cycleGrowth: -5.2,
-  churnRate: 3.2,
-  churnChange: -0.8,
-  netPromoterScore: 72,
-  npsChange: 4.1,
-};
+// Month labels for charts
+const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export default function AnalyticsInsights() {
   const [currentTab, setCurrentTab] = React.useState(0);
