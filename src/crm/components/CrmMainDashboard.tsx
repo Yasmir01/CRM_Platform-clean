@@ -257,6 +257,15 @@ export default function CrmMainDashboard() {
                   </Button>
                 </Stack>
               )}
+
+              {user?.role === 'Tenant' && (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                  <Button variant="contained" onClick={() => navigate('/crm/rent-collection')}>Pay Rent</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/work-orders')}>Submit Task</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/suggestions')}>Share Suggestion</Button>
+                  <Button variant="outlined" onClick={() => navigate('/crm/communications')}>Communicate</Button>
+                </Stack>
+              )}
             </Stack>
           </Stack>
         </Box>
