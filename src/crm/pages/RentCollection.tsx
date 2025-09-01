@@ -110,6 +110,11 @@ export default function RentCollection() {
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [tenantAutoPayAllowed, setTenantAutoPayAllowed] = useState<boolean>(() => localStorage.getItem('allowTenantAutoPay') === 'true');
+  const [autoPayDialogOpen, setAutoPayDialogOpen] = useState(false);
+  const [selectedAutoPayMethod, setSelectedAutoPayMethod] = useState('');
+  const [autoPayActive, setAutoPayActive] = useState(false);
+
   const [newPaymentMethod, setNewPaymentMethod] = useState({
     type: 'card' as PaymentMethod['type'],
     name: '',
