@@ -50,6 +50,8 @@ import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
+import { useAuth } from "../contexts/AuthContext";
+import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -110,16 +112,41 @@ const tenantMenuItems = [
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
 
+const serviceProviderMenuItems = [
+  { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
+  { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
+  { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
+  { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
+];
+
 export default function CrmMenuContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isTenantMode, isManagementMode } = useMode();
   const { isSuperAdmin } = useRoleManagement();
+  const { user } = useAuth();
+  const { filterWorkOrders } = useServiceProviderScope();
 
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
   const [newTasksCount, setNewTasksCount] = React.useState(0);
   const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
+
+  const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
+
+  const recomputeAssignedPropsCount = React.useCallback(() => {
+    try {
+      const workOrders = LocalStorageService.getWorkOrders();
+      const filtered = filterWorkOrders(workOrders || []);
+      const active = (filtered || []).filter((wo: any) => ['Open', 'Assigned', 'In Progress'].includes(wo.status));
+      const props = new Set(active.map((wo: any) => wo.propertyId).filter(Boolean));
+      setAssignedPropsCount(props.size);
+    } catch (_) {
+      setAssignedPropsCount(0);
+    }
+  }, [filterWorkOrders]);
 
   React.useEffect(() => {
     const updateApplicationCount = () => {
@@ -182,12 +209,14 @@ export default function CrmMenuContent() {
     updateApplicationCount();
     updateTaskCount();
     updateSuggestionCount();
+    if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
     // Set up an interval to check for updates every 5 seconds
     const interval = setInterval(() => {
       updateApplicationCount();
       updateTaskCount();
       updateSuggestionCount();
+      if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
     }, 5000);
 
     // Also listen for storage events (when localStorage is updated in another tab)
@@ -197,6 +226,7 @@ export default function CrmMenuContent() {
       }
       if (e.key === 'crm_work_orders' || e.key === 'crm_tenants') {
         updateTaskCount();
+        if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
       }
       if (e.key === 'crm_suggestion_notifications' || e.key === 'crm_suggestions') {
         updateSuggestionCount();
@@ -221,7 +251,7 @@ export default function CrmMenuContent() {
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <Box>
         <List dense>
-          {(isTenantMode ? tenantMenuItems : mainListItems).map((item, index) => (
+          {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 selected={location.pathname === item.path}
@@ -238,6 +268,10 @@ export default function CrmMenuContent() {
                     </Badge>
                   ) : item.badge && item.text === "Suggestions" ? (
                     <Badge badgeContent={newSuggestionsCount} color="error">
+                      {item.icon}
+                    </Badge>
+                  ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
+                    <Badge badgeContent={assignedPropsCount} color="warning">
                       {item.icon}
                     </Badge>
                   ) : (
