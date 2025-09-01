@@ -1,9 +1,8 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { PrismaClient, BillingCycle } from '@prisma/client';
+import { BillingCycle } from '@prisma/client';
+import { prisma } from './_db';
+import { requireAdminOr403 } from './_auth';
 
-const prisma = new PrismaClient();
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   try {
     if (req.method === 'GET') {
       const plans = await prisma.subscriptionPlan.findMany({ orderBy: { createdAt: 'desc' } });
@@ -11,6 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (req.method === 'POST') {
+      if (!requireAdminOr403(req, res)) return;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const plan = await prisma.subscriptionPlan.create({
         data: {
@@ -25,13 +25,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pages: Array.isArray(body.pages) ? body.pages : [],
           tools: Array.isArray(body.tools) ? body.tools : [],
           services: Array.isArray(body.services) ? body.services : [],
-        }
+          paymentTypes: Array.isArray(body.paymentTypes) ? body.paymentTypes : [],
+          backupTypes: Array.isArray(body.backupTypes) ? body.backupTypes : [],
+        },
       });
       return res.status(201).json(plan);
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
-      const id = (req.query.id as string) || (req.body && (req.body as any).id);
+      if (!requireAdminOr403(req, res)) return;
+      const q = (req && req.query) || {};
+      const id = (q.id as string) || (req.body && (req.body as any).id);
       if (!id) return res.status(400).json({ error: 'Missing id' });
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const updated = await prisma.subscriptionPlan.update({
@@ -39,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         data: {
           name: body.name,
           price: body.price !== undefined ? Number(body.price) : undefined,
-          billingCycle: body.billingCycle as BillingCycle | undefined,
+          billingCycle: (body.billingCycle as BillingCycle | undefined),
           description: body.description ?? undefined,
           userLimit: body.userLimit !== undefined ? Number(body.userLimit) : undefined,
           propertyLimit: body.propertyLimit !== undefined ? Number(body.propertyLimit) : undefined,
@@ -48,19 +52,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           pages: Array.isArray(body.pages) ? body.pages : undefined,
           tools: Array.isArray(body.tools) ? body.tools : undefined,
           services: Array.isArray(body.services) ? body.services : undefined,
-        }
+          paymentTypes: Array.isArray(body.paymentTypes) ? body.paymentTypes : undefined,
+          backupTypes: Array.isArray(body.backupTypes) ? body.backupTypes : undefined,
+        },
       });
       return res.status(200).json(updated);
     }
 
     if (req.method === 'DELETE') {
-      const id = req.query.id as string;
+      if (!requireAdminOr403(req, res)) return;
+      const q = (req && req.query) || {};
+      const id = q.id as string;
       if (!id) return res.status(400).json({ error: 'Missing id' });
       await prisma.subscriptionPlan.delete({ where: { id } });
       return res.status(204).end();
     }
 
-    res.setHeader('Allow', 'GET,POST,PUT,PATCH,DELETE');
+    if (res && typeof res.setHeader === 'function') {
+      res.setHeader('Allow', 'GET,POST,PUT,PATCH,DELETE');
+    }
     return res.status(405).json({ error: 'Method Not Allowed' });
   } catch (error: any) {
     console.error('API error:', error);

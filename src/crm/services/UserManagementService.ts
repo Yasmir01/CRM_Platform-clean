@@ -1,5 +1,5 @@
 import { LocalStorageService } from './LocalStorageService';
-import { ActivityTrackingService } from './ActivityTrackingService';
+import activityTracker from './ActivityTrackingService';
 
 export interface User {
   id: string;
@@ -170,7 +170,7 @@ export class UserManagementService {
     });
 
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: activatedBy,
       activityType: 'user_management',
       entityType: 'user',
@@ -226,7 +226,7 @@ export class UserManagementService {
     });
 
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: deactivatedBy,
       activityType: 'user_management',
       entityType: 'user',
@@ -280,7 +280,7 @@ export class UserManagementService {
     });
 
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: suspendedBy,
       activityType: 'user_management',
       entityType: 'user',
@@ -329,7 +329,7 @@ export class UserManagementService {
     });
 
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: unsuspendedBy,
       activityType: 'user_management',
       entityType: 'user',
@@ -453,7 +453,7 @@ export class UserManagementService {
     });
 
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: changedBy,
       activityType: 'user_management',
       entityType: 'user',

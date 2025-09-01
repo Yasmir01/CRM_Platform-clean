@@ -56,6 +56,81 @@ import {
   layoutSpacing
 } from "../utils/formStyles";
 import { LocalStorageService } from "../services/LocalStorageService";
+
+async function fetchProductsFromApi(){
+  try{
+    const res = await fetch('/api/products');
+    if(!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  }catch(e){
+    console.warn('Products API unavailable, using local data');
+    return [];
+  }
+}
+
+function mapProductToMarketplaceItem(p:any): MarketplaceItem{
+  const categoryMap: Record<string, ItemCategory> = {
+    addon: 'Add-on',
+    service: 'Service',
+    subscription: 'Software',
+    product: 'Software'
+  };
+  return {
+    id: p.id,
+    name: p.name || '',
+    category: categoryMap[p.type] || 'Software',
+    description: p.description || '',
+    longDescription: p.description || '',
+    icon: '🧩',
+    status: p.isActive ? 'Active' : 'Draft',
+    featured: false,
+    pricingModel: 'Monthly',
+    basePrice: typeof p.price === 'number' ? p.price : 0,
+    features: [],
+    benefits: [],
+    compatibility: [],
+    vendor: 'PropertyCRM',
+    supportLevel: 'Basic',
+    installationRequired: false,
+    trialAvailable: false,
+    tags: p.tags || [],
+    createdDate: new Date().toISOString().split('T')[0],
+    lastUpdated: new Date().toISOString().split('T')[0],
+    salesCount: 0,
+    rating: 5,
+    reviewCount: 0,
+    metadata: { estimatedSetupTime: 'Instant', requiresIntegration: false, apiAccess: false }
+  } as MarketplaceItem;
+}
+
+async function createOrUpdateProductFromItem(item: MarketplaceItem){
+  const type = item.category === 'Add-on' ? 'addon' : item.category === 'Service' ? 'service' : 'product';
+  const payload = {
+    name: item.name,
+    description: item.description,
+    type,
+    price: item.basePrice,
+    isActive: item.status === 'Active',
+    category: item.category,
+    tags: item.tags
+  };
+  if(item.id && item.id.startsWith('item-')){
+    const r = await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const created = await r.json();
+    return created;
+  }else if(item.id){
+    const r = await fetch(`/api/products?id=${encodeURIComponent(item.id)}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const updated = await r.json();
+    return updated;
+  }
+}
+
+async function deleteProductForItem(item: MarketplaceItem){
+  if(item.id && !item.id.startsWith('item-')){
+    await fetch(`/api/products?id=${encodeURIComponent(item.id)}`, { method:'DELETE' });
+  }
+}
 import SubscriptionBackupControls from '../components/SubscriptionBackupControls';
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
@@ -388,6 +463,17 @@ export default function Marketplace() {
   const [activeTab, setActiveTab] = React.useState(0);
   const [mainTab, setMainTab] = React.useState<'marketplace' | 'subscription'>('marketplace');
   const [items, setItems] = React.useState<MarketplaceItem[]>(() => LocalStorageService.getData<MarketplaceItem[]>("marketplaceItems", mockMarketplaceItems));
+
+  React.useEffect(() => {
+    (async () => {
+      const apiProducts = await fetchProductsFromApi();
+      if(apiProducts.length){
+        const mapped = apiProducts.map(mapProductToMarketplaceItem);
+        setItems(mapped);
+        LocalStorageService.saveData('marketplaceItems', mapped);
+      }
+    })();
+  }, []);
   const [addItemOpen, setAddItemOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MarketplaceItem | null>(null);
   const [editMode, setEditMode] = React.useState(false);
@@ -435,11 +521,11 @@ export default function Marketplace() {
     });
   };
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
     const id = `item-${Date.now()}`;
     const now = new Date().toISOString().split('T')[0];
     
-    const item: MarketplaceItem = {
+    let item: MarketplaceItem = {
       ...newItem,
       id,
       createdDate: now,
@@ -450,6 +536,11 @@ export default function Marketplace() {
       createdById: user?.id,
       createdByName: user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim(),
     } as MarketplaceItem;
+
+    try{
+      const saved = await createOrUpdateProductFromItem(item);
+      if(saved?.id){ item = { ...item, id: saved.id } as MarketplaceItem; }
+    }catch(e){ console.warn('Failed to save to API, keeping local only'); }
 
     persistItems(prev => [...prev, item]);
     setAddItemOpen(false);
@@ -996,8 +1087,9 @@ export default function Marketplace() {
     </Stack>
   );
 
-  const updateItem = (updated: MarketplaceItem) => {
+  const updateItem = async (updated: MarketplaceItem) => {
     const now = new Date().toISOString().split('T')[0];
+    try{ await createOrUpdateProductFromItem(updated); }catch(e){ /* ignore */ }
     persistItems(prev => prev.map(i => i.id === updated.id ? { ...updated, lastUpdated: now } : i));
   };
 
@@ -1011,6 +1103,17 @@ export default function Marketplace() {
     setEditMode(true);
   };
 
+  const [subscribeOpen, setSubscribeOpen] = React.useState(false);
+  const [availablePlans, setAvailablePlans] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    if (subscribeOpen) {
+      (async () => {
+        try { const r = await fetch('/api/subscription-plans'); const data = await r.json(); setAvailablePlans(Array.isArray(data) ? data.filter((p:any)=>p.isActive) : []);} catch {}
+      })();
+    }
+  }, [subscribeOpen]);
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       {/* Header */}
@@ -1018,14 +1121,19 @@ export default function Marketplace() {
         <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
           Marketplace Administration
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddRoundedIcon />}
-          onClick={() => setAddItemOpen(true)}
-          disabled={mainTab === 'subscription'}
-        >
-          Add New Item
-        </Button>
+        <Stack direction="row" spacing={1}>
+          {!isSuperAdmin() && (
+            <Button variant="outlined" onClick={() => setSubscribeOpen(true)}>Subscribe / Upgrade</Button>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<AddRoundedIcon />}
+            onClick={() => setAddItemOpen(true)}
+            disabled={mainTab === 'subscription'}
+          >
+            Add New Item
+          </Button>
+        </Stack>
       </Stack>
 
       {/* Main Tab Navigation */}
@@ -1352,8 +1460,9 @@ export default function Marketplace() {
                       >
                         <IconButton
                           size="small"
-                          onClick={() => {
+                          onClick={async () => {
                             if (confirm(`Delete ${item.name}? This cannot be undone.`)) {
+                              try{ await deleteProductForItem(item); }catch(e){ /* ignore */ }
                               persistItems(prev => prev.filter(i => i.id !== item.id));
                               if (selectedItem?.id === item.id) setSelectedItem(null);
                               if (editMode && selectedItem?.id === item.id) setEditMode(false);
@@ -1611,6 +1720,41 @@ export default function Marketplace() {
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Subscribe / Upgrade Dialog */}
+      <Dialog open={subscribeOpen} onClose={() => setSubscribeOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Select a Plan</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            {availablePlans.map((p) => (
+              <Card key={p.id} variant="outlined">
+                <CardContent>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Box>
+                      <Typography variant="h6">{p.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">${p.price}/{p.billingCycle || 'monthly'}</Typography>
+                      <Typography variant="caption" color="text.secondary">{(p.features||[]).slice(0,3).join(', ')}</Typography>
+                    </Box>
+                    <Button variant="contained" onClick={async () => {
+                      try {
+                        const r = await fetch('/api/stripe-create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ planId: p.id, quantity: 1, customerEmail: user?.email }) });
+                        const data = await r.json();
+                        if (data?.url) window.location.href = data.url; else alert('Checkout not available');
+                      } catch { alert('Failed to start checkout'); }
+                    }}>Subscribe</Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            ))}
+            {availablePlans.length === 0 && (
+              <Typography variant="body2" color="text.secondary">No active plans available.</Typography>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubscribeOpen(false)}>Close</Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

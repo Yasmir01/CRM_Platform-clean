@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
+import SuperAdminApp from "./crm/SuperAdminApp";
 import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
 // Test the new authentication system
@@ -339,6 +340,7 @@ function AppRoutes() {
             <SubscriptionManagement />
           </React.Suspense>
         } />
+        <Route path="super-admin" element={<SuperAdminApp />} />
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
             <HelpSupport />

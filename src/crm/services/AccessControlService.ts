@@ -1,5 +1,5 @@
 import { LocalStorageService } from './LocalStorageService';
-import { ActivityTrackingService } from './ActivityTrackingService';
+import activityTracker from './ActivityTrackingService';
 
 interface User {
   id: string;
@@ -855,7 +855,7 @@ export class AccessControlService {
     this.saveData();
 
     // Track in activity service
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: log.userId,
       activityType: 'access_control',
       entityType: 'security',

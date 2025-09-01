@@ -48,6 +48,8 @@ import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
 import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import { useRoleManagement } from "../hooks/useRoleManagement";
 
 const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -111,6 +113,7 @@ export default function CrmMenuContent() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isTenantMode, isManagementMode } = useMode();
+  const { isSuperAdmin } = useRoleManagement();
 
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
@@ -253,7 +256,11 @@ export default function CrmMenuContent() {
       <Box>
         <Divider sx={{ my: 1 }} />
         <List dense>
-          {(isTenantMode ? tenantSecondaryItems : secondaryListItems).map((item, index) => (
+          {(() => {
+            const base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
+            const computed = isSuperAdmin() ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }] : base;
+            return computed;
+          })().map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 selected={location.pathname === item.path}

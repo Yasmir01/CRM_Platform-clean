@@ -1,4 +1,4 @@
-// Prisma schema for CRM Subscription Plans
+// Prisma schema for CRM Subscription Plans and Monetization
 // Provider: PostgreSQL (Neon)
 
 datasource db {
@@ -15,6 +15,24 @@ enum BillingCycle {
   yearly
 }
 
+enum ProductType {
+  product
+  addon
+  service
+  subscription
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  incomplete
+  incomplete_expired
+  unpaid
+  paused
+}
+
 model SubscriptionPlan {
   id            String       @id @default(uuid())
   name          String
@@ -28,6 +46,71 @@ model SubscriptionPlan {
   pages         String[]
   tools         String[]
   services      String[]
+  paymentTypes  String[]
+  backupTypes   String[]
+  subscriptions Subscription[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  type        ProductType @default(product)
+  price       Float       @default(0)
+  isActive    Boolean     @default(true)
+  category    String?
+  tags        String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Subscriber {
+  id          String         @id @default(uuid())
+  email       String         @unique
+  companyName String?
+  subscriptions Subscription[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Subscription {
+  id                   String              @id @default(uuid())
+  subscriberId         String
+  subscriber           Subscriber          @relation(fields: [subscriberId], references: [id])
+  planId               String?
+  plan                 SubscriptionPlan?   @relation(fields: [planId], references: [id])
+  status               SubscriptionStatus  @default(active)
+  startDate            DateTime            @default(now())
+  endDate              DateTime?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  cancelAtPeriodEnd    Boolean             @default(false)
+  payments             Payment[]
+  revenueEvents        RevenueEvent[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  subscriptionId String
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+  amount         Float
+  currency       String        @default("usd")
+  status         String
+  provider       String        @default("stripe")
+  externalId     String?
+  createdAt      DateTime      @default(now())
+}
+
+model RevenueEvent {
+  id             String        @id @default(uuid())
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  type           String
+  amount         Float
+  metadata       Json?
+  createdAt      DateTime      @default(now())
 }

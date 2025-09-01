@@ -41,6 +41,8 @@ import {
   ResponsiveContainer,
   ComposedChart
 } from 'recharts';
+import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import { useCrmData } from '../contexts/CrmDataContext';
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
 import TrendingDownRoundedIcon from "@mui/icons-material/TrendingDownRounded";
 import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
@@ -61,7 +63,7 @@ import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
@@ -81,72 +83,138 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-// Mock data for analytics
-const revenueData = [
-  { month: 'Jan', revenue: 45000, properties: 28, tenants: 145 },
-  { month: 'Feb', revenue: 52000, properties: 32, tenants: 168 },
-  { month: 'Mar', revenue: 48000, properties: 30, tenants: 156 },
-  { month: 'Apr', revenue: 61000, properties: 38, tenants: 201 },
-  { month: 'May', revenue: 55000, properties: 35, tenants: 185 },
-  { month: 'Jun', revenue: 67000, properties: 42, tenants: 223 },
-];
-
-const salesFunnelData = [
-  { stage: 'Leads', count: 1250, value: 2500000 },
-  { stage: 'Qualified', count: 425, value: 1850000 },
-  { stage: 'Proposals', count: 185, value: 920000 },
-  { stage: 'Negotiations', count: 78, value: 650000 },
-  { stage: 'Closed Won', count: 32, value: 480000 },
-];
-
-const marketingMetrics = [
-  { channel: 'Email', sent: 15420, opened: 6842, clicked: 1368, converted: 274 },
-  { channel: 'Social Media', sent: 8960, opened: 4032, clicked: 896, converted: 179 },
-  { channel: 'Google Ads', sent: 5240, opened: 2095, clicked: 472, converted: 118 },
-  { channel: 'Direct Mail', sent: 2850, opened: 1140, clicked: 171, converted: 57 },
-];
-
-const propertyPerformance = [
-  { property: 'Sunset Apartments', occupancy: 95, revenue: 45000, satisfaction: 4.8 },
-  { property: 'Ocean View Villa', occupancy: 88, revenue: 38000, satisfaction: 4.6 },
-  { property: 'Downtown Lofts', occupancy: 92, revenue: 52000, satisfaction: 4.7 },
-  { property: 'Garden Heights', occupancy: 78, revenue: 28000, satisfaction: 4.2 },
-  { property: 'Harbor Bay', occupancy: 85, revenue: 41000, satisfaction: 4.5 },
-];
-
-const leadSourceData = [
-  { name: 'Website', value: 35, color: '#0088FE' },
-  { name: 'Referrals', value: 28, color: '#00C49F' },
-  { name: 'Social Media', value: 18, color: '#FFBB28' },
-  { name: 'Cold Calls', value: 12, color: '#FF8042' },
-  { name: 'Events', value: 7, color: '#8884D8' },
-];
-
-const customerLifetimeValue = [
-  { segment: 'Enterprise', customers: 45, clv: 125000, retention: 95 },
-  { segment: 'Mid-Market', customers: 128, clv: 65000, retention: 88 },
-  { segment: 'Small Business', customers: 267, clv: 28000, retention: 72 },
-  { segment: 'Startup', customers: 89, clv: 15000, retention: 65 },
-];
-
-const kpiMetrics = {
-  totalRevenue: 298000,
-  revenueGrowth: 12.5,
-  totalCustomers: 529,
-  customerGrowth: 8.3,
-  avgDealSize: 45000,
-  dealSizeGrowth: -2.1,
-  salesCycleLength: 45,
-  cycleGrowth: -5.2,
-  churnRate: 3.2,
-  churnChange: -0.8,
-  netPromoterScore: 72,
-  npsChange: 4.1,
-};
+// Month labels for charts
+const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export default function AnalyticsInsights() {
-  const [currentTab, setCurrentTab] = React.useState(0);
-  const [timeRange, setTimeRange] = React.useState("6months");
+  const [currentTab, setCurrentTab] = useState(0);
+  const [timeRange, setTimeRange] = useState("6months");
+  const { state } = useCrmData();
+
+  const [payments, setPayments] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
+
+  const refresh = useCallback(async () => {
+    try {
+      const [pRes, sRes, plRes] = await Promise.all([
+        fetch('/api/payments'),
+        fetch('/api/subscriptions'),
+        fetch('/api/subscription-plans'),
+      ]);
+      const [p, s, pl] = await Promise.all([pRes.json(), sRes.json(), plRes.json()]);
+      setPayments(Array.isArray(p) ? p : []);
+      setSubscriptions(Array.isArray(s) ? s : []);
+      setPlans(Array.isArray(pl) ? pl : []);
+    } catch {
+      setPayments([]); setSubscriptions([]); setPlans([]);
+    }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const revenueData = useMemo(() => {
+    const now = new Date();
+    const months: { key: string; month: string; year: number; revenue: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: `${d.getFullYear()}-${d.getMonth()}`, month: monthLabels[d.getMonth()], year: d.getFullYear(), revenue: 0 });
+    }
+    const map = new Map(months.map(m => [m.key, m]));
+    for (const pay of payments) {
+      const dt = new Date(pay.createdAt);
+      const k = `${dt.getFullYear()}-${dt.getMonth()}`;
+      const target = map.get(k);
+      if (target) target.revenue += Number(pay.amount || 0);
+    }
+    return months.map(m => ({ month: m.month, revenue: m.revenue, properties: state.properties.length, tenants: state.tenants.length }));
+  }, [payments, state.properties.length, state.tenants.length]);
+
+  const salesFunnelData = useMemo(() => {
+    const stages = ['Lead','Qualified','Proposal','Negotiation','Closed Won','Closed Lost'] as const;
+    const counts: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
+    const values: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
+    state.deals.forEach(d => { counts[d.stage] = (counts[d.stage]||0)+1; values[d.stage] = (values[d.stage]||0) + (Number(d.value)||0); });
+    return stages.map(s => ({ stage: s, count: counts[s], value: values[s] }));
+  }, [state.deals]);
+
+  const leadSourceData = useMemo(() => {
+    const colors = ['#0088FE','#00C49F','#FFBB28','#FF8042','#8884D8','#AA66CC'];
+    const bySource = new Map<string, number>();
+    state.contacts.forEach(c => { const src = c.source || 'Other'; bySource.set(src, (bySource.get(src)||0)+1); });
+    const entries = Array.from(bySource.entries());
+    const total = entries.reduce((s,[,v])=>s+v,0) || 1;
+    return entries.map(([name, v], i) => ({ name, value: Math.round((v/total)*100), color: colors[i % colors.length] }));
+  }, [state.contacts]);
+
+  const marketingMetrics = useMemo(() => {
+    const agg: Record<string, { channel: string; sent: number; opened: number; clicked: number; converted: number }>= {};
+    state.campaigns.forEach(c => {
+      const key = c.type;
+      if (!agg[key]) agg[key] = { channel: key, sent: 0, opened: 0, clicked: 0, converted: 0 } as any;
+      agg[key].sent += c.metrics?.sent || 0;
+      agg[key].opened += c.metrics?.opened || 0;
+      agg[key].clicked += c.metrics?.clicked || 0;
+      agg[key].converted += c.metrics?.converted || 0;
+    });
+    return Object.values(agg);
+  }, [state.campaigns]);
+
+  const propertyPerformance = useMemo(() => {
+    return state.properties.slice(0, 9).map(p => ({
+      property: p.name,
+      occupancy: Math.max(0, Math.min(100, Number(p.occupancy) || 0)),
+      revenue: Number(p.monthlyRent) || 0,
+      satisfaction: Math.max(1, Math.min(5, 3 + (Number(p.occupancy)||0)/25)),
+    }));
+  }, [state.properties]);
+
+  const customerLifetimeValue = useMemo(() => {
+    const planMap = new Map(plans.map((pl: any) => [pl.id, pl]));
+    const byPlan: Record<string, { segment: string; customers: number; clv: number; canceled: number }>= {};
+    const payBySubId = new Map<string, number>();
+    payments.forEach(p => { const k = p.subscriptionId; if (k) payBySubId.set(k, (payBySubId.get(k)||0) + Number(p.amount||0)); });
+    subscriptions.forEach(sub => {
+      const plan = sub.planId ? planMap.get(sub.planId) : undefined;
+      const seg = plan?.name || 'Unknown';
+      if (!byPlan[seg]) byPlan[seg] = { segment: seg, customers: 0, clv: 0, canceled: 0 };
+      byPlan[seg].customers += 1;
+      byPlan[seg].clv += payBySubId.get(sub.id) || 0;
+      if (sub.status === 'canceled') byPlan[seg].canceled += 1;
+    });
+    return Object.values(byPlan).map(x => ({ segment: x.segment, customers: x.customers, clv: x.clv, retention: x.customers ? Math.round(((x.customers - x.canceled)/x.customers)*100) : 0 }));
+  }, [subscriptions, payments, plans]);
+
+  const kpiMetrics = useMemo(() => {
+    const totalRevenue = payments.reduce((s,p)=>s+Number(p.amount||0),0);
+    const now = new Date();
+    const lastMonthKey = `${now.getFullYear()}-${now.getMonth()-1}`;
+    const prevMonthKey = `${now.getFullYear()}-${now.getMonth()-2}`;
+    const sumForKey = (key:string) => payments.filter(p=>{ const d=new Date(p.createdAt); return `${d.getFullYear()}-${d.getMonth()}`===key; }).reduce((s,p)=>s+Number(p.amount||0),0);
+    const lm = sumForKey(lastMonthKey); const pm = sumForKey(prevMonthKey);
+    const revenueGrowth = pm ? ((lm-pm)/pm)*100 : 0;
+    const totalCustomers = state.contacts.filter(c=>['Customer','Active'].includes(c.status)).length;
+    const avgDealSize = state.deals.length ? state.deals.reduce((s,d)=>s+Number(d.value||0),0)/state.deals.length : 0;
+    const closed = state.deals.filter(d=>d.stage==='Closed Won');
+    const salesCycleLength = closed.length ? Math.round(closed.reduce((s,d)=>s+(new Date(d.updatedAt).getTime()-new Date(d.createdAt).getTime()),0)/closed.length/ (1000*60*60*24)) : 0;
+    const active = subscriptions.filter((s:any)=>s.status==='active').length;
+    const canceled30 = subscriptions.filter((s:any)=>s.status==='canceled' && s.endDate && (Date.now()-new Date(s.endDate).getTime())<=30*24*60*60*1000).length;
+    const churnRate = active ? (canceled30/(active+canceled30))*100 : 0;
+    return {
+      totalRevenue,
+      revenueGrowth,
+      totalCustomers,
+      customerGrowth: 0,
+      avgDealSize,
+      dealSizeGrowth: 0,
+      salesCycleLength,
+      cycleGrowth: 0,
+      churnRate,
+      churnChange: 0,
+      netPromoterScore: 0,
+      npsChange: 0,
+    };
+  }, [payments, state.contacts, state.deals, subscriptions]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -208,7 +276,7 @@ export default function AnalyticsInsights() {
           <Button
             variant="outlined"
             startIcon={<RefreshRoundedIcon />}
-            onClick={() => console.log('Refresh data')}
+            onClick={refresh}
           >
             Refresh
           </Button>
@@ -510,19 +578,25 @@ export default function AnalyticsInsights() {
             <Typography variant="h6" gutterBottom>
               Marketing Channel Performance
             </Typography>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={marketingMetrics}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="channel" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="sent" fill="#8884d8" name="Sent" />
-                <Bar dataKey="opened" fill="#82ca9d" name="Opened" />
-                <Bar dataKey="clicked" fill="#ffc658" name="Clicked" />
-                <Bar dataKey="converted" fill="#ff7300" name="Converted" />
-              </BarChart>
-            </ResponsiveContainer>
+            {marketingMetrics.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={marketingMetrics}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="channel" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="sent" fill="#8884d8" name="Sent" />
+                  <Bar dataKey="opened" fill="#82ca9d" name="Opened" />
+                  <Bar dataKey="clicked" fill="#ffc658" name="Clicked" />
+                  <Bar dataKey="converted" fill="#ff7300" name="Converted" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
+                No marketing data available
+              </Box>
+            )}
           </CardContent>
         </Card>
       </TabPanel>
@@ -594,24 +668,30 @@ export default function AnalyticsInsights() {
             <Typography variant="h6" gutterBottom>
               Customer Lifetime Value by Segment
             </Typography>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={customerLifetimeValue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="segment" />
-                <YAxis yAxisId="clv" orientation="left" />
-                <YAxis yAxisId="retention" orientation="right" />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'clv' ? formatCurrency(Number(value)) : `${value}%`,
-                    name === 'clv' ? 'CLV' : name === 'retention' ? 'Retention' : 'Customers'
-                  ]}
-                />
-                <Legend />
-                <Bar yAxisId="clv" dataKey="clv" fill="#8884d8" name="clv" />
-                <Bar yAxisId="clv" dataKey="customers" fill="#82ca9d" name="customers" />
-                <Line yAxisId="retention" type="monotone" dataKey="retention" stroke="#ffc658" name="retention" />
-              </BarChart>
-            </ResponsiveContainer>
+            {customerLifetimeValue.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={customerLifetimeValue}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="segment" />
+                  <YAxis yAxisId="clv" orientation="left" />
+                  <YAxis yAxisId="retention" orientation="right" />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      name === 'clv' ? formatCurrency(Number(value)) : `${value}%`,
+                      name === 'clv' ? 'CLV' : name === 'retention' ? 'Retention' : 'Customers'
+                    ]}
+                  />
+                  <Legend />
+                  <Bar yAxisId="clv" dataKey="clv" fill="#8884d8" name="clv" />
+                  <Bar yAxisId="clv" dataKey="customers" fill="#82ca9d" name="customers" />
+                  <Line yAxisId="retention" type="monotone" dataKey="retention" stroke="#ffc658" name="retention" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
+                No customer analytics available
+              </Box>
+            )}
           </CardContent>
         </Card>
       </TabPanel>

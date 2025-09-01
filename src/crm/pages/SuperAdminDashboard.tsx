@@ -54,6 +54,9 @@ import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded';
 import { SuperAdminData } from './SuperAdminLogin';
 import SubscriptionManager from '../components/SubscriptionManager';
 import SuperAdminRoleManager from '../components/SuperAdminRoleManager';
+import SuperAdminMarketplaceManager from '../components/SuperAdminMarketplaceManager';
+import SuperAdminRevenueDashboard from '../components/SuperAdminRevenueDashboard';
+import { useRoleManagement } from '../hooks/useRoleManagement';
 import { LocalStorageService } from '../services/LocalStorageService';
 
 interface SubscriberAccount {
@@ -179,6 +182,10 @@ interface SuperAdminDashboardProps {
 }
 
 export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminDashboardProps) {
+  const { isSuperAdmin } = useRoleManagement();
+  React.useEffect(() => {
+    try { if (!isSuperAdmin()) { console.warn('Access denied: Super Admin only'); } } catch {}
+  }, [isSuperAdmin]);
   const [subscribers, setSubscribers] = React.useState<SubscriberAccount[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("All");
@@ -293,7 +300,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
               Super Admin Dashboard
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Welcome back, {adminData.username} • Master Control Panel
+              Welcome back, {adminData.username} ��� Master Control Panel
             </Typography>
           </Box>
         </Stack>
@@ -386,6 +393,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
         <Tabs value={currentTab} onChange={(_, newValue) => setCurrentTab(newValue)}>
           <Tab label="Subscriber Accounts" />
           <Tab label="Role Management" />
+          <Tab label="Marketplace Management" />
           <Tab label="System Analytics" />
           <Tab label="Billing Management" />
           <Tab label="System Settings" />
@@ -591,8 +599,16 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
         <SuperAdminRoleManager />
       </TabPanel>
 
-      {/* System Analytics Tab */}
+      {/* Marketplace Management Tab */}
       <TabPanel value={currentTab} index={2}>
+        <Alert severity="info" sx={{ mb: 3 }}>
+          Manage marketplace products, add-ons, services, and subscriptions.
+        </Alert>
+        <SuperAdminMarketplaceManager />
+      </TabPanel>
+
+      {/* System Analytics Tab */}
+      <TabPanel value={currentTab} index={3}>
         <Alert severity="info" sx={{ mb: 3 }}>
           System analytics dashboard showing platform usage, performance metrics, and subscriber insights.
         </Alert>
@@ -621,7 +637,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* Billing Management Tab */}
-      <TabPanel value={currentTab} index={3}>
+      <TabPanel value={currentTab} index={4}>
         <Alert severity="info" sx={{ mb: 3 }}>
           Billing management system for processing payments, managing subscriptions, and handling billing disputes.
         </Alert>
@@ -630,9 +646,10 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>Billing Overview</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Comprehensive billing management tools would be implemented here.
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  Comprehensive billing management tools and revenue analytics.
                 </Typography>
+                <SuperAdminRevenueDashboard />
               </CardContent>
             </Card>
           </Grid>
@@ -640,7 +657,7 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
       </TabPanel>
 
       {/* System Settings Tab */}
-      <TabPanel value={currentTab} index={4}>
+      <TabPanel value={currentTab} index={5}>
         <Alert severity="warning" sx={{ mb: 3 }}>
           <Typography variant="h6">System-Wide Configuration</Typography>
           <Typography variant="body2">
