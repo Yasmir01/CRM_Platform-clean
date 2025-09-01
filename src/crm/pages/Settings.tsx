@@ -452,6 +452,62 @@ export default function Settings() {
     );
   }
 
+  if (isTenant && user) {
+    return (
+      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+        <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
+          Settings
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Typography variant="h5">Profile</Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="First Name" fullWidth value={tenantProfile.firstName} onChange={(e) => setTenantProfile(p => ({ ...p, firstName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField label="Last Name" fullWidth value={tenantProfile.lastName} onChange={(e) => setTenantProfile(p => ({ ...p, lastName: e.target.value }))} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Email" fullWidth value={tenantProfile.email} disabled />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField label="Phone" fullWidth value={tenantProfile.phone} onChange={(e) => setTenantProfile(p => ({ ...p, phone: e.target.value }))} />
+                    </Grid>
+                  </Grid>
+                  <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button variant="outlined" onClick={handleResetTenantPassword}>Reset Password</Button>
+                    <Button variant="contained" onClick={handleSaveTenantProfile}>Save Changes</Button>
+                  </Stack>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Typography variant="h5" sx={{ mb: 1 }}>Notification Settings</Typography>
+                  <Typography variant="h6">Email Notifications</Typography>
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email notifications for new messages from management" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="Email alerts for maintenance request updates" />
+                  <FormControlLabel control={<Switch />} label="Email receipts for rent payments" />
+                  <Typography variant="h6" sx={{ mt: 3 }}>SMS Notifications</Typography>
+                  <FormControlLabel control={<Switch />} label="SMS rent reminders" />
+                  <FormControlLabel control={<Switch defaultChecked />} label="SMS alerts for urgent building notices" />
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Typography variant="h4" component="h1" sx={{ mb: 3 }}>
