@@ -339,6 +339,41 @@ export default function Settings() {
     alert(res.message);
   }, [user, resetPassword]);
 
+  // Tenant profile state and handlers (top-level hooks)
+  const [tenantProfile, setTenantProfile] = React.useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+  });
+
+  React.useEffect(() => {
+    if (user) {
+      setTenantProfile({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
+    }
+  }, [user?.id]);
+
+  const handleSaveTenantProfile = React.useCallback(() => {
+    if (!user) return;
+    updateUser(user.id, {
+      firstName: tenantProfile.firstName,
+      lastName: tenantProfile.lastName,
+      phone: tenantProfile.phone,
+    });
+    alert("Profile updated");
+  }, [user, updateUser, tenantProfile]);
+
+  const handleResetTenantPassword = React.useCallback(async () => {
+    if (!user) return;
+    const res = await resetPassword(user.email);
+    alert(res.message);
+  }, [user, resetPassword]);
+
   if (isServiceProvider && user) {
 
     return (
