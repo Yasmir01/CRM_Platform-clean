@@ -210,6 +210,9 @@ export default function Settings() {
     localStorage.setItem("paymentMethods", JSON.stringify(paymentMethods));
   }, [paymentMethods]);
   React.useEffect(() => {
+    localStorage.setItem('rentAutoPayEnabled', rentAutoPayEnabled ? 'true' : 'false');
+  }, [rentAutoPayEnabled]);
+  React.useEffect(() => {
     localStorage.setItem("individualProfile", JSON.stringify(individualProfile));
   }, [individualProfile]);
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
