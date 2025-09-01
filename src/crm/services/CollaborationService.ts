@@ -1,5 +1,5 @@
 import { LocalStorageService } from './LocalStorageService';
-import { ActivityTrackingService } from './ActivityTrackingService';
+import activityTracker from './ActivityTrackingService';
 
 interface CollaborationSession {
   id: string;
@@ -212,7 +212,7 @@ export class CollaborationService {
     this.broadcastSessionUpdate(sessionId, 'session_started');
     
     // Track activity
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: user.userId,
       activityType: 'collaboration_started',
       entityType: 'collaboration_session',
