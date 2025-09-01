@@ -578,19 +578,25 @@ export default function AnalyticsInsights() {
             <Typography variant="h6" gutterBottom>
               Marketing Channel Performance
             </Typography>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={marketingMetrics}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="channel" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="sent" fill="#8884d8" name="Sent" />
-                <Bar dataKey="opened" fill="#82ca9d" name="Opened" />
-                <Bar dataKey="clicked" fill="#ffc658" name="Clicked" />
-                <Bar dataKey="converted" fill="#ff7300" name="Converted" />
-              </BarChart>
-            </ResponsiveContainer>
+            {marketingMetrics.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={marketingMetrics}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="channel" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="sent" fill="#8884d8" name="Sent" />
+                  <Bar dataKey="opened" fill="#82ca9d" name="Opened" />
+                  <Bar dataKey="clicked" fill="#ffc658" name="Clicked" />
+                  <Bar dataKey="converted" fill="#ff7300" name="Converted" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
+                No marketing data available
+              </Box>
+            )}
           </CardContent>
         </Card>
       </TabPanel>
