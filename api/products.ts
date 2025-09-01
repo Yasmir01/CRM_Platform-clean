@@ -1,5 +1,6 @@
 import { ProductType } from '@prisma/client';
 import { prisma } from './_db';
+import { isMutatingMethod, requireAdminOr403 } from './_auth';
 
 export default async function handler(req: any, res: any) {
   try {
@@ -11,6 +12,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'POST') {
+      if (!requireAdminOr403(req, res)) return;
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
       const item = await prisma.product.create({
         data: {
@@ -27,6 +29,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'PUT' || req.method === 'PATCH') {
+      if (!requireAdminOr403(req, res)) return;
       const id = (req.query.id as string) || (req.body && (req.body as any).id);
       if (!id) return res.status(400).json({ error: 'Missing id' });
       const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -46,6 +49,7 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === 'DELETE') {
+      if (!requireAdminOr403(req, res)) return;
       const id = req.query.id as string;
       if (!id) return res.status(400).json({ error: 'Missing id' });
       await prisma.product.delete({ where: { id } });
