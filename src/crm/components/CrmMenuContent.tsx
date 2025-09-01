@@ -292,8 +292,17 @@ export default function CrmMenuContent() {
         <Divider sx={{ my: 1 }} />
         <List dense>
           {(() => {
-            const base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
-            const computed = isSuperAdmin() ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }] : base;
+            const serviceProviderSecondaryItems = [
+              { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
+              { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
+            ];
+            let base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
+            if (user?.role === 'Service Provider') {
+              base = serviceProviderSecondaryItems;
+            }
+            const computed = isSuperAdmin() && user?.role !== 'Service Provider'
+              ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }]
+              : base;
             return computed;
           })().map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
