@@ -668,24 +668,30 @@ export default function AnalyticsInsights() {
             <Typography variant="h6" gutterBottom>
               Customer Lifetime Value by Segment
             </Typography>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={customerLifetimeValue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="segment" />
-                <YAxis yAxisId="clv" orientation="left" />
-                <YAxis yAxisId="retention" orientation="right" />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'clv' ? formatCurrency(Number(value)) : `${value}%`,
-                    name === 'clv' ? 'CLV' : name === 'retention' ? 'Retention' : 'Customers'
-                  ]}
-                />
-                <Legend />
-                <Bar yAxisId="clv" dataKey="clv" fill="#8884d8" name="clv" />
-                <Bar yAxisId="clv" dataKey="customers" fill="#82ca9d" name="customers" />
-                <Line yAxisId="retention" type="monotone" dataKey="retention" stroke="#ffc658" name="retention" />
-              </BarChart>
-            </ResponsiveContainer>
+            {customerLifetimeValue.length > 0 ? (
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart data={customerLifetimeValue}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="segment" />
+                  <YAxis yAxisId="clv" orientation="left" />
+                  <YAxis yAxisId="retention" orientation="right" />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      name === 'clv' ? formatCurrency(Number(value)) : `${value}%`,
+                      name === 'clv' ? 'CLV' : name === 'retention' ? 'Retention' : 'Customers'
+                    ]}
+                  />
+                  <Legend />
+                  <Bar yAxisId="clv" dataKey="clv" fill="#8884d8" name="clv" />
+                  <Bar yAxisId="clv" dataKey="customers" fill="#82ca9d" name="customers" />
+                  <Line yAxisId="retention" type="monotone" dataKey="retention" stroke="#ffc658" name="retention" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'text.secondary', border: '1px dashed', borderColor: 'divider', borderRadius: 1 }}>
+                No customer analytics available
+              </Box>
+            )}
           </CardContent>
         </Card>
       </TabPanel>
