@@ -1,5 +1,5 @@
 import { LocalStorageService } from './LocalStorageService';
-import { ActivityTrackingService } from './ActivityTrackingService';
+import activityTracker from './ActivityTrackingService';
 
 interface MaintenanceTemplate {
   id: string;
@@ -273,7 +273,7 @@ export class PreventiveMaintenanceService {
     this.templates.set(maintenanceTemplate.id, maintenanceTemplate);
     this.saveData();
 
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: 'current_user',
       activityType: 'maintenance_template_created',
       entityType: 'maintenance_template',
@@ -333,7 +333,7 @@ export class PreventiveMaintenanceService {
     this.updateAssetNextMaintenance(options.assetId, scheduledDate);
     this.saveData();
 
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: 'current_user',
       activityType: 'maintenance_scheduled',
       entityType: 'maintenance_schedule',
@@ -385,7 +385,7 @@ export class PreventiveMaintenanceService {
 
     this.saveData();
 
-    ActivityTrackingService.trackActivity({
+    activityTracker.trackActivity({
       userId: 'current_user',
       activityType: 'maintenance_completed',
       entityType: 'maintenance_schedule',
