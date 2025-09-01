@@ -63,7 +63,7 @@ import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   index: number;
   value: number;
 }
@@ -87,15 +87,15 @@ function TabPanel(props: TabPanelProps) {
 const monthLabels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export default function AnalyticsInsights() {
-  const [currentTab, setCurrentTab] = React.useState(0);
-  const [timeRange, setTimeRange] = React.useState("6months");
+  const [currentTab, setCurrentTab] = useState(0);
+  const [timeRange, setTimeRange] = useState("6months");
   const { state } = useCrmData();
 
-  const [payments, setPayments] = React.useState<any[]>([]);
-  const [subscriptions, setSubscriptions] = React.useState<any[]>([]);
-  const [plans, setPlans] = React.useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
 
-  const refresh = React.useCallback(async () => {
+  const refresh = useCallback(async () => {
     try {
       const [pRes, sRes, plRes] = await Promise.all([
         fetch('/api/payments'),
@@ -111,9 +111,9 @@ export default function AnalyticsInsights() {
     }
   }, []);
 
-  React.useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => { refresh(); }, [refresh]);
 
-  const revenueData = React.useMemo(() => {
+  const revenueData = useMemo(() => {
     const now = new Date();
     const months: { key: string; month: string; year: number; revenue: number }[] = [];
     for (let i = 5; i >= 0; i--) {
@@ -130,7 +130,7 @@ export default function AnalyticsInsights() {
     return months.map(m => ({ month: m.month, revenue: m.revenue, properties: state.properties.length, tenants: state.tenants.length }));
   }, [payments, state.properties.length, state.tenants.length]);
 
-  const salesFunnelData = React.useMemo(() => {
+  const salesFunnelData = useMemo(() => {
     const stages = ['Lead','Qualified','Proposal','Negotiation','Closed Won','Closed Lost'] as const;
     const counts: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
     const values: Record<string, number> = Object.fromEntries(stages.map(s => [s, 0]));
@@ -138,7 +138,7 @@ export default function AnalyticsInsights() {
     return stages.map(s => ({ stage: s, count: counts[s], value: values[s] }));
   }, [state.deals]);
 
-  const leadSourceData = React.useMemo(() => {
+  const leadSourceData = useMemo(() => {
     const colors = ['#0088FE','#00C49F','#FFBB28','#FF8042','#8884D8','#AA66CC'];
     const bySource = new Map<string, number>();
     state.contacts.forEach(c => { const src = c.source || 'Other'; bySource.set(src, (bySource.get(src)||0)+1); });
@@ -147,7 +147,7 @@ export default function AnalyticsInsights() {
     return entries.map(([name, v], i) => ({ name, value: Math.round((v/total)*100), color: colors[i % colors.length] }));
   }, [state.contacts]);
 
-  const marketingMetrics = React.useMemo(() => {
+  const marketingMetrics = useMemo(() => {
     const agg: Record<string, { channel: string; sent: number; opened: number; clicked: number; converted: number }>= {};
     state.campaigns.forEach(c => {
       const key = c.type;
@@ -160,7 +160,7 @@ export default function AnalyticsInsights() {
     return Object.values(agg);
   }, [state.campaigns]);
 
-  const propertyPerformance = React.useMemo(() => {
+  const propertyPerformance = useMemo(() => {
     return state.properties.slice(0, 9).map(p => ({
       property: p.name,
       occupancy: Math.max(0, Math.min(100, Number(p.occupancy) || 0)),
@@ -169,7 +169,7 @@ export default function AnalyticsInsights() {
     }));
   }, [state.properties]);
 
-  const customerLifetimeValue = React.useMemo(() => {
+  const customerLifetimeValue = useMemo(() => {
     const planMap = new Map(plans.map((pl: any) => [pl.id, pl]));
     const byPlan: Record<string, { segment: string; customers: number; clv: number; canceled: number }>= {};
     const payBySubId = new Map<string, number>();
@@ -185,7 +185,7 @@ export default function AnalyticsInsights() {
     return Object.values(byPlan).map(x => ({ segment: x.segment, customers: x.customers, clv: x.clv, retention: x.customers ? Math.round(((x.customers - x.canceled)/x.customers)*100) : 0 }));
   }, [subscriptions, payments, plans]);
 
-  const kpiMetrics = React.useMemo(() => {
+  const kpiMetrics = useMemo(() => {
     const totalRevenue = payments.reduce((s,p)=>s+Number(p.amount||0),0);
     const now = new Date();
     const lastMonthKey = `${now.getFullYear()}-${now.getMonth()-1}`;
