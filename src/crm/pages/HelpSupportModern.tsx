@@ -60,6 +60,7 @@ import SmartToyRoundedIcon from "@mui/icons-material/SmartToyRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { helpCategories, helpArticles, quickActions } from "../data/helpArticles";
 import type { HelpCategory, HelpArticle } from "../data/helpTypes";
+import { useMode } from "../contexts/ModeContext";
 
 // Icon mapping for the help categories
 const iconMap: Record<string, React.ReactNode> = {
@@ -81,6 +82,7 @@ export default function HelpSupportModern() {
   const theme = useTheme();
   const location = useLocation();
   const { isSuperAdmin } = useRoleManagement();
+  const { isTenantMode } = useMode();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [selectedCategory, setSelectedCategory] = React.useState<string>("");
   const [selectedDifficulty, setSelectedDifficulty] = React.useState<string>("");
@@ -114,37 +116,32 @@ export default function HelpSupportModern() {
   // Filter articles based on search and filters
   const filteredArticles = React.useMemo(() => {
     return helpArticles.filter(article => {
-      // Filter out super admin only articles for non-super admins
-      if (article.superAdminOnly && !isUserSuperAdmin) {
+      if (article.superAdminOnly && !isUserSuperAdmin) return false;
+      // Tenant mode: restrict to tenant-relevant categories only
+      if (isTenantMode && !['tenants','payments','maintenance','communications','getting-started'].includes(article.category)) {
         return false;
       }
-
-      // Search filter
       const matchesSearch = !searchTerm ||
         article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         article.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
         article.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      // Category filter
       const matchesCategory = !selectedCategory || article.category === selectedCategory;
-
-      // Difficulty filter
       const matchesDifficulty = !selectedDifficulty || article.difficulty === selectedDifficulty;
-
       return matchesSearch && matchesCategory && matchesDifficulty;
     });
-  }, [searchTerm, selectedCategory, selectedDifficulty, isUserSuperAdmin]);
+  }, [searchTerm, selectedCategory, selectedDifficulty, isUserSuperAdmin, isTenantMode]);
 
   // Filter categories based on search
   const filteredCategories = React.useMemo(() => {
-    if (!searchTerm) return helpCategories;
-    
-    return helpCategories.filter(category => 
+    const base = helpCategories;
+    const scoped = isTenantMode ? base.filter(c => ['tenants','payments','maintenance','communications','getting-started'].includes(c.id)) : base;
+    if (!searchTerm) return scoped;
+    return scoped.filter(category =>
       category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.popularTags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  }, [searchTerm]);
+  }, [searchTerm, isTenantMode]);
 
   const handleQuickAction = (tag: string) => {
     setSearchTerm(tag);
