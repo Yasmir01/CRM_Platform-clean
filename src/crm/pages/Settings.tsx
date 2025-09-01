@@ -54,6 +54,7 @@ import SubscriptionsRoundedIcon from "@mui/icons-material/SubscriptionsRounded";
 import PaymentRoundedIcon from "@mui/icons-material/PaymentRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
+import AddBankAccountDialog from "../components/AddBankAccountDialog";
 import CompanySettings, { useCompanyInfo } from "../components/CompanySettings";
 import SubscriptionBackupControls from "../components/SubscriptionBackupControls";
 import { Link as RouterLink } from "react-router-dom";
