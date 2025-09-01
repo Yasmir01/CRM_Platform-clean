@@ -224,37 +224,39 @@ export default function CrmMainDashboard() {
               </Stack>
 
               {/* Action Buttons */}
-              <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleAddProperty}
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.2)",
-                    backdropFilter: "blur(10px)",
-                    "&:hover": {
-                      bgcolor: "rgba(255,255,255,0.3)",
-                    }
-                  }}
-                >
-                  Add Property
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleAddTenant}
-                  sx={{
-                    borderColor: "rgba(255,255,255,0.5)",
-                    color: "white",
-                    "&:hover": {
-                      borderColor: "white",
-                      bgcolor: "rgba(255,255,255,0.1)",
-                    }
-                  }}
-                >
-                  Add Tenant
-                </Button>
-              </Stack>
+              {user?.role !== 'Tenant' && (
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    startIcon={<AddRoundedIcon />}
+                    onClick={handleAddProperty}
+                    sx={{
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      backdropFilter: "blur(10px)",
+                      "&:hover": {
+                        bgcolor: "rgba(255,255,255,0.3)",
+                      }
+                    }}
+                  >
+                    Add Property
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddRoundedIcon />}
+                    onClick={handleAddTenant}
+                    sx={{
+                      borderColor: "rgba(255,255,255,0.5)",
+                      color: "white",
+                      "&:hover": {
+                        borderColor: "white",
+                        bgcolor: "rgba(255,255,255,0.1)",
+                      }
+                    }}
+                  >
+                    Add Tenant
+                  </Button>
+                </Stack>
+              )}
             </Stack>
           </Stack>
         </Box>
