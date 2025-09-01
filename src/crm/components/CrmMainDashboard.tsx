@@ -224,7 +224,7 @@ export default function CrmMainDashboard() {
               </Stack>
 
               {/* Action Buttons */}
-              {user?.role !== 'Tenant' && (
+              {user?.role !== 'Tenant' && user?.role !== 'Service Provider' && (
                 <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
@@ -268,7 +268,7 @@ export default function CrmMainDashboard() {
       {/* Dashboard Notifications Panel */}
       <DashboardNotificationsPanel />
 
-      {user?.role !== 'Tenant' && (<>
+      {user?.role !== 'Tenant' && user?.role !== 'Service Provider' && (<>
       {/* Stats Cards row with enhanced spacing */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {statCardsData.map((card, index) => (
