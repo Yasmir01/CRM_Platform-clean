@@ -7,6 +7,7 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
 import CrmDashboard from "./crm/CrmDashboard";
+import { LocaleProvider } from "./crm/contexts/LocaleContext";
 import SuperAdminApp from "./crm/SuperAdminApp";
 import CrmLogin from "./crm/pages/CrmLogin";
 import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
@@ -372,11 +373,13 @@ export default function App() {
   return (
     <AppTheme>
       <CssBaseline enableColorScheme />
-      <AuthProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
+      <LocaleProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </LocaleProvider>
     </AppTheme>
   );
 }
