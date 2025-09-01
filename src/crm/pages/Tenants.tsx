@@ -55,7 +55,6 @@ import AutoModeIcon from "@mui/icons-material/AutoMode";
 import PaymentIcon from "@mui/icons-material/Payment";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import CreditCardRoundedIcon from "@mui/icons-material/CreditCardRounded";
-import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import BulkUploadDialog from "../components/BulkUploadDialog";
 
 interface CommunicationPreferences {
