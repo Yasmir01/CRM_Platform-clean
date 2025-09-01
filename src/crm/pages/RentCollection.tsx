@@ -168,6 +168,11 @@ export default function RentCollection() {
       
       const locationsData = await paymentService.getCashPaymentLocations();
       setCashLocations(locationsData);
+
+      if (isTenant && currentTenant?.id) {
+        const ap = await paymentService.getAutoPaySetup(currentTenant.id);
+        setAutoPayActive(!!ap);
+      }
     } catch (error) {
       console.error('Error loading payment data:', error);
     } finally {
