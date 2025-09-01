@@ -25,6 +25,8 @@ export default async function handler(req: any, res: any) {
           pages: Array.isArray(body.pages) ? body.pages : [],
           tools: Array.isArray(body.tools) ? body.tools : [],
           services: Array.isArray(body.services) ? body.services : [],
+          paymentTypes: Array.isArray(body.paymentTypes) ? body.paymentTypes : [],
+          backupTypes: Array.isArray(body.backupTypes) ? body.backupTypes : [],
         },
       });
       return res.status(201).json(plan);
@@ -50,6 +52,8 @@ export default async function handler(req: any, res: any) {
           pages: Array.isArray(body.pages) ? body.pages : undefined,
           tools: Array.isArray(body.tools) ? body.tools : undefined,
           services: Array.isArray(body.services) ? body.services : undefined,
+          paymentTypes: Array.isArray(body.paymentTypes) ? body.paymentTypes : undefined,
+          backupTypes: Array.isArray(body.backupTypes) ? body.backupTypes : undefined,
         },
       });
       return res.status(200).json(updated);

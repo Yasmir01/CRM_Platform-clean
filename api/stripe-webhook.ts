@@ -32,13 +32,52 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const customerEmail = session.customer_details?.email || undefined;
-        console.log('Checkout completed', session.id, customerEmail);
+        try {
+          if (customerEmail) {
+            let subscriber = await prisma.subscriber.findUnique({ where: { email: customerEmail } });
+            if (!subscriber) {
+              subscriber = await prisma.subscriber.create({ data: { email: customerEmail, companyName: null } });
+            }
+            // Create a placeholder subscription if none exists for this customer
+            if (session.customer) {
+              const existing = await prisma.subscription.findFirst({ where: { stripeCustomerId: session.customer as string, subscriberId: subscriber.id } });
+              if (!existing) {
+                await prisma.subscription.create({ data: { subscriberId: subscriber.id, planId: null, status: 'active', stripeCustomerId: session.customer as string, stripeSubscriptionId: null, cancelAtPeriodEnd: false } });
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to upsert subscriber/subscription from checkout.session.completed', err);
+        }
         break;
       }
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         const amount = (invoice.amount_paid || 0) / 100;
-        console.log('Payment succeeded', invoice.id, amount);
+        try {
+          const stripeSubId = (invoice.subscription as string) || null;
+          let subscription = null as any;
+          if (stripeSubId) {
+            subscription = await prisma.subscription.findFirst({ where: { stripeSubscriptionId: stripeSubId } });
+          }
+          if (subscription) {
+            await prisma.payment.create({
+              data: {
+                subscriptionId: subscription.id,
+                amount: amount,
+                currency: (invoice.currency || 'usd').toLowerCase(),
+                status: 'succeeded',
+                provider: 'stripe',
+                externalId: invoice.id
+              }
+            });
+            await prisma.revenueEvent.create({ data: { subscriptionId: subscription.id, type: 'invoice.payment_succeeded', amount, metadata: { invoiceId: invoice.id } } });
+          } else {
+            await prisma.revenueEvent.create({ data: { subscriptionId: null, type: 'invoice.payment_succeeded', amount, metadata: { invoiceId: invoice.id } } });
+          }
+        } catch (err) {
+          console.warn('Failed to persist payment invoice.payment_succeeded', err);
+        }
         break;
       }
       default:
