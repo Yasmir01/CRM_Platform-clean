@@ -68,6 +68,8 @@ import dayjs from 'dayjs';
 import { paymentService } from '../services/PaymentService';
 import { RentPayment, PaymentMethod, CashPaymentLocation, PaymentSchedule } from '../types/PaymentTypes';
 import { useCrmData } from '../contexts/CrmDataContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useTenantScope } from '../hooks/useTenantScope';
 
 interface TabPanelProps {
   children?: React.ReactNode;
