@@ -747,7 +747,7 @@ export default function RentCollection() {
                       
                       {location.hours && (
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                          🕒 {location.hours}
+                          ���� {location.hours}
                         </Typography>
                       )}
 
@@ -805,6 +805,30 @@ export default function RentCollection() {
             </Box>
 
             <Grid container spacing={3}>
+              {!isTenant && (
+                <Grid item xs={12}>
+                  <Card>
+                    <CardContent>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Typography variant="subtitle1">Allow tenants to set up Auto-Pay</Typography>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={tenantAutoPayAllowed}
+                              onChange={(e) => {
+                                setTenantAutoPayAllowed(e.target.checked);
+                                localStorage.setItem('allowTenantAutoPay', String(e.target.checked));
+                              }}
+                            />
+                          }
+                          label={tenantAutoPayAllowed ? 'Enabled' : 'Disabled'}
+                        />
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              )}
+
               <Grid item xs={12} md={6}>
                 <Card>
                   <CardContent>
@@ -845,9 +869,14 @@ export default function RentCollection() {
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                       Allow tenants to set up automatic payments for hassle-free rent collection.
                     </Typography>
-                    <Button variant="outlined" fullWidth>
-                      Configure Auto-Pay Settings
+                    <Button variant="outlined" fullWidth onClick={() => setAutoPayDialogOpen(true)} disabled={isTenant && !tenantAutoPayAllowed}>
+                      {autoPayActive ? 'Manage Auto-Pay' : 'Set Up Auto-Pay'}
                     </Button>
+                    {isTenant && !tenantAutoPayAllowed && (
+                      <Alert severity="warning" sx={{ mt: 2 }}>
+                        Auto-Pay is disabled by management.
+                      </Alert>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
