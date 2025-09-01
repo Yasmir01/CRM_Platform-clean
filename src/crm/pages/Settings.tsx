@@ -163,6 +163,7 @@ export default function Settings() {
   const [users, setUsers] = React.useState<User[]>(mockUsers);
   const { user, updateUser, resetPassword } = useAuth();
   const isServiceProvider = user?.role === 'Service Provider';
+  const isTenant = user?.role === 'Tenant';
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openUserDialog, setOpenUserDialog] = React.useState(false);
