@@ -32,14 +32,13 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         const customerEmail = session.customer_details?.email || undefined;
-        // TODO: map session to subscriber/subscription; for now, just log
         console.log('Checkout completed', session.id, customerEmail);
         break;
       }
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         const amount = (invoice.amount_paid || 0) / 100;
-        await prisma.payment.create({ data: { subscriptionId: '', amount, currency: invoice.currency || 'usd', status: 'succeeded', provider: 'stripe', externalId: invoice.id } });
+        console.log('Payment succeeded', invoice.id, amount);
         break;
       }
       default:
