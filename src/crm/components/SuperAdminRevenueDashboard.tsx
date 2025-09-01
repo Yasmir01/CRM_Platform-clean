@@ -86,27 +86,29 @@ export default function SuperAdminRevenueDashboard(){
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>Plan Mix</Typography>
-              <Table size="small" component={Paper} variant="outlined">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Plan</TableCell>
-                    <TableCell align="right">Subscribers</TableCell>
-                    <TableCell align="right">MRR</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {Object.entries(planMix).map(([name, v]) => (
-                    <TableRow key={name}>
-                      <TableCell>{name}</TableCell>
-                      <TableCell align="right">{v.count}</TableCell>
-                      <TableCell align="right">${v.mrr.toFixed(2)}</TableCell>
+              <TableContainer component={Paper} variant="outlined">
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Plan</TableCell>
+                      <TableCell align="right">Subscribers</TableCell>
+                      <TableCell align="right">MRR</TableCell>
                     </TableRow>
-                  ))}
-                  {Object.keys(planMix).length === 0 && (
-                    <TableRow><TableCell colSpan={3} align="center">No data</TableCell></TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(planMix).map(([name, v]) => (
+                      <TableRow key={name}>
+                        <TableCell>{name}</TableCell>
+                        <TableCell align="right">{v.count}</TableCell>
+                        <TableCell align="right">${v.mrr.toFixed(2)}</TableCell>
+                      </TableRow>
+                    ))}
+                    {Object.keys(planMix).length === 0 && (
+                      <TableRow><TableCell colSpan={3} align="center">No data</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </CardContent>
           </Card>
         </Grid>
