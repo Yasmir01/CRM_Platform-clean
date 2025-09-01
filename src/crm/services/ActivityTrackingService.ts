@@ -441,6 +441,4 @@ class ActivityTrackingService {
 
 // Export singleton instance
 export const activityTracker = new ActivityTrackingService();
-// Backward-compatible named export used in several modules
-export const ActivityTrackingService = activityTracker;
 export default activityTracker;
