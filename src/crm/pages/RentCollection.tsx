@@ -96,6 +96,8 @@ export default function RentCollection() {
   const theme = useTheme();
   const { state } = useCrmData();
   const { tenants, properties } = state;
+  const { user } = useAuth();
+  const { isTenant, currentTenant } = useTenantScope();
 
   const [tabValue, setTabValue] = useState(0);
   const [payments, setPayments] = useState<RentPayment[]>([]);
