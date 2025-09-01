@@ -266,6 +266,7 @@ export default function CrmMainDashboard() {
       {/* Dashboard Notifications Panel */}
       <DashboardNotificationsPanel />
 
+      {user?.role !== 'Tenant' && (<>
       {/* Stats Cards row with enhanced spacing */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {statCardsData.map((card, index) => (
@@ -336,6 +337,7 @@ export default function CrmMainDashboard() {
           <CrmQuickInsights maxHeight={350} />
         </div>
       </UniversalDashboardLayout>
+      </>)}
 
       <Copyright sx={{ mt: 3, mb: 4 }} />
     </Box>
