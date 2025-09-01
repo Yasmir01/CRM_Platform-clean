@@ -276,7 +276,7 @@ export default function AnalyticsInsights() {
           <Button
             variant="outlined"
             startIcon={<RefreshRoundedIcon />}
-            onClick={() => console.log('Refresh data')}
+            onClick={refresh}
           >
             Refresh
           </Button>
