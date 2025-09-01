@@ -180,6 +180,9 @@ export default function Settings() {
     return saved ? JSON.parse(saved) : [];
   });
   const [paymentDialogOpen, setPaymentDialogOpen] = React.useState(false);
+  const [addBankDialogOpen, setAddBankDialogOpen] = React.useState(false);
+  const [rentAutoPayEnabled, setRentAutoPayEnabled] = React.useState<boolean>(() => localStorage.getItem('rentAutoPayEnabled') === 'true');
+  const [manualPayment, setManualPayment] = React.useState({ amount: '', date: new Date().toISOString().slice(0,10), method: 'ACH', note: '' });
   const [paymentForm, setPaymentForm] = React.useState({
     type: "Credit Card" as PaymentMethodType,
     cardNumber: "",
