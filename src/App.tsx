@@ -340,9 +340,7 @@ function AppRoutes() {
             <SubscriptionManagement />
           </React.Suspense>
         } />
-        <Route path="super-admin" element={<CrmDashboard />}>
-          <Route index element={<div />} />
-        </Route>
+        <Route path="super-admin" element={<SuperAdminApp />} />
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
             <HelpSupport />
