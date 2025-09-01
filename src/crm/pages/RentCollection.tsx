@@ -148,6 +148,13 @@ export default function RentCollection() {
     loadPaymentData();
   }, []);
 
+  useEffect(() => {
+    if (isTenant && currentTenant?.id) {
+      setSelectedTenant(currentTenant.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTenant, currentTenant?.id]);
+
   const loadPaymentData = async () => {
     setLoading(true);
     try {
