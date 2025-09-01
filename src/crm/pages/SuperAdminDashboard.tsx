@@ -55,6 +55,7 @@ import { SuperAdminData } from './SuperAdminLogin';
 import SubscriptionManager from '../components/SubscriptionManager';
 import SuperAdminRoleManager from '../components/SuperAdminRoleManager';
 import SuperAdminMarketplaceManager from '../components/SuperAdminMarketplaceManager';
+import SuperAdminRevenueDashboard from '../components/SuperAdminRevenueDashboard';
 import { LocalStorageService } from '../services/LocalStorageService';
 
 interface SubscriberAccount {
