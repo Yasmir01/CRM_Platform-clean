@@ -216,10 +216,10 @@ export class AdvancedLeadScoringService {
    * Analyze behavioral patterns for all prospects
    */
   analyzeBehavioralPatterns(prospectId?: string): BehavioralPattern[] {
-    const activities = ActivityTrackingService.getActivitiesByEntity(
-      prospectId || 'all',
-      prospectId ? 'prospect' : undefined
-    );
+    const activities = activityTracker.getActivities({
+      entityType: prospectId ? 'prospect' : undefined,
+      entityId: prospectId
+    });
 
     const patterns: BehavioralPattern[] = [];
 
