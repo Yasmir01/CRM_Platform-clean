@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Grid, Card, CardContent, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
+import { Box, Grid, Card, CardContent, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Paper, TableContainer } from '@mui/material';
 
 interface Subscription {
   id: string;
