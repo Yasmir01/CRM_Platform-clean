@@ -1890,6 +1890,15 @@ export default function PropertyDetailPage({
             </Card>
           </Grid>
 
+          {/* Owners & Distribution + Snapshot */}
+          <Grid item xs={12}>
+            {/* Lazy import-friendly: inline require to avoid circulars */}
+            {(() => {
+              const OwnersDistribution = require('../components/OwnersDistribution').default;
+              return <OwnersDistribution propertyId={property.id} />;
+            })()}
+          </Grid>
+
           {/* Payment Routing Configuration */}
           <Grid item xs={12}>
             <PropertyBankAccountSection
