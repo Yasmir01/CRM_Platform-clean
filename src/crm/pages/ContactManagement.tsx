@@ -418,6 +418,7 @@ export default function ContactManagement() {
       city: "",
       state: "",
       zipCode: "",
+      type: "Prospect",
       source: "Website",
       status: "Lead",
       tags: [],
@@ -441,6 +442,7 @@ export default function ContactManagement() {
       city: "", // Not in unified interface
       state: "", // Not in unified interface
       zipCode: "", // Not in unified interface
+      type: contact.type || "Prospect",
       source: contact.source || "CRM", // Default for synced contacts
       status: contact.status,
       statusDescription: contact.statusDescription || "",
@@ -468,6 +470,7 @@ export default function ContactManagement() {
       // Add new contact
       const newContactData = {
         ...formData,
+        type: formData.type || "Prospect",
         lastContact: new Date().toISOString().split('T')[0],
         notes: '', // Add missing required field
         ...(formData.status === "Other" && { statusDescription: formData.statusDescription }),
@@ -952,20 +955,45 @@ export default function ContactManagement() {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={formData.type || 'Prospect'}
+                  label="Type"
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                >
+                  <MenuItem value="Tenant">Tenant</MenuItem>
+                  <MenuItem value="PropertyManager">PropertyManager</MenuItem>
+                  <MenuItem value="ServiceProvider">ServiceProvider</MenuItem>
+                  <MenuItem value="Prospect">Prospect</MenuItem>
+                  <MenuItem value="Vendor">Vendor</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
                   value={formData.status}
                   label="Status"
                   onChange={(e) => setFormData({...formData, status: e.target.value as any})}
                 >
-                  <MenuItem value="Lead">Lead</MenuItem>
-                  <MenuItem value="Qualified">Qualified</MenuItem>
-                  <MenuItem value="Prospect">Prospect</MenuItem>
-                  <MenuItem value="Customer">Customer</MenuItem>
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
-                  <MenuItem value="Vendor">Vendor</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
+                  {formData.type === 'PropertyManager' ? (
+                    <>
+                      <MenuItem value="Active">Active</MenuItem>
+                      <MenuItem value="Inactive">Inactive</MenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <MenuItem value="Lead">Lead</MenuItem>
+                      <MenuItem value="Qualified">Qualified</MenuItem>
+                      <MenuItem value="Prospect">Prospect</MenuItem>
+                      <MenuItem value="Customer">Customer</MenuItem>
+                      <MenuItem value="Active">Active</MenuItem>
+                      <MenuItem value="Inactive">Inactive</MenuItem>
+                      <MenuItem value="Vendor">Vendor</MenuItem>
+                      <MenuItem value="Other">Other</MenuItem>
+                    </>
+                  )}
                 </Select>
               </FormControl>
             </Grid>
