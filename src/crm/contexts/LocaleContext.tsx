@@ -38,7 +38,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const browserLang = (navigator.language || "en").toLowerCase();
     const saved = (localStorage.getItem("preferredLocale") || undefined)?.toLowerCase();
-    const { locale: valid } = useValidatedLocale(saved ?? browserLang, {
+    const { locale: valid } = validateLocale(saved ?? browserLang, {
       supportedLocales,
       fallbackLocale: "en",
     });
