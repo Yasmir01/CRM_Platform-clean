@@ -1,0 +1,45 @@
+/* Dark-mode adjustments for calendar and board */
+
+/* Use MUI color-scheme attribute set in AppTheme */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-calendar,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-view,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-month-view,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-agenda-view {
+  background-color: transparent;
+  color: rgba(255,255,255,0.87);
+}
+
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar {
+  background-color: transparent;
+  color: rgba(255,255,255,0.87);
+}
+
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.87);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button.rbc-active,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button:focus,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button:hover {
+  background: rgba(255,255,255,0.16);
+}
+
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-header,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-header {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+}
+
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-selected {
+  background-color: #1976d2;
+  border: none;
+  color: #fff;
+}
+
+/* Subtle grid lines */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content > * + * > * {
+  border-color: rgba(255,255,255,0.12);
+}
