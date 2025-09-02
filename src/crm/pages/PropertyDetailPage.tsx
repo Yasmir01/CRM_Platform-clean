@@ -94,6 +94,7 @@ import TenantDialog from "../components/TenantDialog";
 import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 import FormFixesSummary from "../components/FormFixesSummary";
 import PropertyBankAccountSection from "../components/PropertyBankAccountSection";
+import OwnersDistribution from "../components/OwnersDistribution";
 import { LateFeeService } from "../services/LateFeeService";
 import { activityTracker } from "../services/ActivityTrackingService";
 
@@ -1888,6 +1889,11 @@ export default function PropertyDetailPage({
                 </Grid>
               </CardContent>
             </Card>
+          </Grid>
+
+          {/* Owners & Distribution + Snapshot */}
+          <Grid item xs={12}>
+            <OwnersDistribution propertyId={property.id} />
           </Grid>
 
           {/* Payment Routing Configuration */}

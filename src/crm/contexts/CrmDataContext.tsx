@@ -97,7 +97,7 @@ export interface Tenant {
 
 export interface Contact {
   id: string;
-  type: "Tenant" | "PropertyManager" | "ServiceProvider" | "Prospect" | "Vendor";
+  type: "Tenant" | "PropertyManager" | "Owner" | "ServiceProvider" | "Prospect" | "Vendor";
   firstName: string;
   lastName: string;
   email: string;

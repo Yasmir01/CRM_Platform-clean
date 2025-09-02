@@ -42,6 +42,7 @@ import {
 
 import { BusinessBankAccount, ProcessingSchedule, BusinessAccountFees } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';
+import { useI18nFormat } from "../utils/i18nFormat";
 
 interface BusinessBankAccountManagementProps {
   organizationId: string;
@@ -173,12 +174,8 @@ const BusinessBankAccountManagement: React.FC<BusinessBankAccountManagementProps
     handleMenuClose();
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount / 100);
-  };
+  const { formatCurrency } = useI18nFormat();
+  const formatCurrencyCents = (amount: number) => formatCurrency(amount / 100);
 
   const formatAccountNumber = (accountNumber: string) => {
     return accountNumber.includes('*') ? accountNumber : `****${accountNumber.slice(-4)}`;
@@ -404,7 +401,7 @@ const BusinessBankAccountManagement: React.FC<BusinessBankAccountManagementProps
                         Daily Limit
                       </Typography>
                       <Typography variant="body1">
-                        {formatCurrency(account.dailyReceiveLimit)}
+                        {formatCurrencyCents(account.dailyReceiveLimit)}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
@@ -412,7 +409,7 @@ const BusinessBankAccountManagement: React.FC<BusinessBankAccountManagementProps
                         Monthly Limit
                       </Typography>
                       <Typography variant="body1">
-                        {formatCurrency(account.monthlyReceiveLimit)}
+                        {formatCurrencyCents(account.monthlyReceiveLimit)}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
@@ -420,7 +417,7 @@ const BusinessBankAccountManagement: React.FC<BusinessBankAccountManagementProps
                         ACH Receive Fee
                       </Typography>
                       <Typography variant="body1">
-                        {formatCurrency(account.fees.achReceive)}
+                        {formatCurrencyCents(account.fees.achReceive)}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>

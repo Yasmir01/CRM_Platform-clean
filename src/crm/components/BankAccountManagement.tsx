@@ -45,6 +45,7 @@ import { BankConnection, BankTransaction } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';
 import BankLinkDialog from './BankLinkDialog';
 import BankVerificationDialog from './BankVerificationDialog';
+import { useI18nFormat } from "../utils/i18nFormat";
 
 interface BankAccountManagementProps {
   tenantId: string;
@@ -155,12 +156,8 @@ const BankAccountManagement: React.FC<BankAccountManagementProps> = ({ tenantId 
     return accountNumber.includes('*') ? accountNumber : `****${accountNumber.slice(-4)}`;
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount / 100);
-  };
+  const { formatCurrency } = useI18nFormat();
+  const formatCurrencyCents = (amount: number) => formatCurrency(amount / 100);
 
   if (loading) {
     return (
@@ -254,7 +251,7 @@ const BankAccountManagement: React.FC<BankAccountManagementProps> = ({ tenantId 
                         Daily Limit
                       </Typography>
                       <Typography variant="body1">
-                        {connection.dailyLimit ? formatCurrency(connection.dailyLimit) : 'No limit'}
+                        {connection.dailyLimit ? formatCurrencyCents(connection.dailyLimit) : 'No limit'}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
