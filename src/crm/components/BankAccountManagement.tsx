@@ -45,6 +45,7 @@ import { BankConnection, BankTransaction } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';
 import BankLinkDialog from './BankLinkDialog';
 import BankVerificationDialog from './BankVerificationDialog';
+import { useI18nFormat } from "../utils/i18nFormat";
 
 interface BankAccountManagementProps {
   tenantId: string;
@@ -155,8 +156,8 @@ const BankAccountManagement: React.FC<BankAccountManagementProps> = ({ tenantId 
     return accountNumber.includes('*') ? accountNumber : `****${accountNumber.slice(-4)}`;
   };
 
-  const { formatCurrency } = require('../utils/i18nFormat');
-  const formatCurrencyCents = (amount: number) => formatCurrency.useI18nFormat ? formatCurrency.useI18nFormat().formatCurrency(amount / 100) : new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(amount / 100);
+  const { formatCurrency } = useI18nFormat();
+  const formatCurrencyCents = (amount: number) => formatCurrency(amount / 100);
 
   if (loading) {
     return (
