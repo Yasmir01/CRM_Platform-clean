@@ -49,6 +49,7 @@ import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
 import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
