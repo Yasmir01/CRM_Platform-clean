@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "prisma db push --schema prisma/schema.prisma && vite build",
+    "build": "if [ -n \"$DATABASE_URL\" ]; then prisma db push --schema prisma/schema.prisma; else echo \"Skipping Prisma db push: DATABASE_URL not set\"; fi && prisma generate --schema prisma/schema.prisma && vite build",
     "preview": "vite preview",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:push": "prisma db push --schema prisma/schema.prisma"
