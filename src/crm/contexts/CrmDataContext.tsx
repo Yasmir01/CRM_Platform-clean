@@ -11,6 +11,13 @@ export interface Property {
   units: number;
   occupancy: number;
   monthlyRent: number;
+  // Late fee override fields (optional per-property)
+  lateFeeOverrideEnabled?: boolean;
+  lateFeeBaseFee?: number;
+  lateFeeDailyRate?: number;
+  lateFeePercentageRate?: number;
+  lateFeeGraceDays?: number;
+  lateFeeMode?: 'flat' | 'percent';
   securityDeposit?: number;
   status: "Unlisted" | "Listed" | "Available" | "Occupied" | "Maintenance" | "Pending";
   managerId?: string; // Keep for backwards compatibility
