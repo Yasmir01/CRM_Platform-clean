@@ -33,11 +33,14 @@ import {
   DialogContent,
   TextField,
   IconButton,
+  Tooltip,
 } from "@mui/material";
+import "./leasingFunnel.css";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import { format, parseISO } from "date-fns";
 import { Calendar, momentLocalizer, Views, Event as RBCEvent } from "react-big-calendar";
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -148,21 +151,29 @@ function DraggableCard({
           </Typography>
         )}
         <Box mt={1} display="flex" gap={1}>
-          <IconButton size="small" onClick={() => onEdit(lead)}>
-            <Edit fontSize="inherit" />
-          </IconButton>
-          <IconButton size="small" onClick={() => onDelete(lead.id)}>
-            <Delete fontSize="inherit" />
-          </IconButton>
+          <Tooltip title="Edit">
+            <IconButton size="small" onPointerDown={(e)=>e.stopPropagation()} onClick={() => onEdit(lead)}>
+              <Edit fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Delete">
+            <IconButton size="small" onPointerDown={(e)=>e.stopPropagation()} onClick={() => onDelete(lead.id)}>
+              <Delete fontSize="inherit" />
+            </IconButton>
+          </Tooltip>
           {lead.stage === "Lead" && (
-            <Button size="small" variant="outlined" onClick={() => onSchedule(lead)}>
-              Schedule Show
-            </Button>
+            <Tooltip title="Schedule showing">
+              <Button size="small" variant="outlined" onPointerDown={(e)=>e.stopPropagation()} onClick={() => onSchedule(lead)}>
+                Schedule Show
+              </Button>
+            </Tooltip>
           )}
           {lead.stage !== "Tenant" && (
-            <Button size="small" variant="contained" onClick={() => onConvert(lead)}>
-              Convert to {nextStage(lead.stage)}
-            </Button>
+            <Tooltip title="Advance to next stage">
+              <Button size="small" variant="contained" onPointerDown={(e)=>e.stopPropagation()} onClick={() => onConvert(lead)}>
+                Convert to {nextStage(lead.stage)}
+              </Button>
+            </Tooltip>
           )}
         </Box>
       </CardContent>
@@ -174,7 +185,7 @@ function DraggableCard({
 function DroppableColumn({ id, children }: { id: Stage; children: React.ReactNode }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <Box ref={setNodeRef} sx={{ p: 0.5, borderRadius: 2, bgcolor: isOver ? "#f0f7ff" : "#fafafa", minHeight: 80 }}>
+    <Box ref={setNodeRef} sx={{ p: 0.5, borderRadius: 2, bgcolor: isOver ? 'action.hover' : 'background.default', minHeight: 80 }}>
       {children}
     </Box>
   );
@@ -233,7 +244,7 @@ export default function LeasingFunnel() {
 
   // DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor)
   );
 
@@ -248,8 +259,26 @@ export default function LeasingFunnel() {
     const targetStage = over.id as Stage;
     const movingLead = leads.find((l) => l.id === active.id);
     if (!movingLead) return;
+
     if (movingLead.stage !== targetStage) {
       await upsertLead({ ...movingLead, stage: targetStage });
+      return;
+    }
+
+    // Reorder within the same stage
+    const idsInStage = leads.filter((l) => l.stage === targetStage).map((l) => l.id);
+    const oldIndex = idsInStage.indexOf(active.id);
+    const newIndex = idsInStage.indexOf(over.id);
+    if (oldIndex !== -1 && newIndex !== -1 && oldIndex !== newIndex) {
+      const reorderedIds = arrayMove(idsInStage, oldIndex, newIndex);
+      setLeads((prev) => {
+        const byId = new Map(prev.map((l) => [l.id, l] as const));
+        const reordered = prev
+          .filter((l) => l.stage !== targetStage)
+          .concat(reorderedIds.map((id) => byId.get(id)!).filter(Boolean) as Lead[]);
+        // Keep relative order of other stages
+        return reordered;
+      });
     }
   };
 
@@ -333,20 +362,25 @@ export default function LeasingFunnel() {
       {/* Kanban */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <Box display="flex" gap={2} overflow="auto">
-          {stages.map((stage) => (
-            <Box key={stage} sx={{ minWidth: 260, border: "1px solid #e0e0e0", borderRadius: 2, p: 1, bgcolor: "#fafafa" }}>
-              <Typography variant="h6" align="center" gutterBottom>
-                {stage}
-              </Typography>
-              <DroppableColumn id={stage}>
-                {leads
-                  .filter((l) => l.stage === stage)
-                  .map((lead) => (
-                    <DraggableCard key={lead.id} lead={lead} onEdit={openLeadDialog} onDelete={deleteLead} onSchedule={openScheduler} onConvert={convertLead} />
-                  ))}
-              </DroppableColumn>
-            </Box>
-          ))}
+          {stages.map((stage) => {
+            const items = leads.filter((l) => l.stage === stage).map((l) => l.id);
+            return (
+              <Box key={stage} sx={{ minWidth: 260, border: 1, borderColor: 'divider', borderRadius: 2, p: 1, bgcolor: 'background.paper' }}>
+                <Typography variant="h6" align="center" gutterBottom>
+                  {stage}
+                </Typography>
+                <DroppableColumn id={stage}>
+                  <SortableContext items={items} strategy={verticalListSortingStrategy}>
+                    {leads
+                      .filter((l) => l.stage === stage)
+                      .map((lead) => (
+                        <DraggableCard key={lead.id} lead={lead} onEdit={openLeadDialog} onDelete={deleteLead} onSchedule={openScheduler} onConvert={convertLead} />
+                      ))}
+                  </SortableContext>
+                </DroppableColumn>
+              </Box>
+            );
+          })}
         </Box>
 
         <DragOverlay>
@@ -361,7 +395,7 @@ export default function LeasingFunnel() {
       </DndContext>
 
       {/* Calendar */}
-      <Box mt={4}>
+      <Box mt={4} className="leasing-calendar">
         <Typography variant="h5" gutterBottom>
           Upcoming Showings
         </Typography>
