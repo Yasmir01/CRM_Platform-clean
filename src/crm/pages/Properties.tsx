@@ -396,6 +396,9 @@ export default function Properties() {
   });
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [selectedListingSite, setSelectedListingSite] = React.useState("");
+  const [selectedPlatform, setSelectedPlatform] = React.useState<RealEstatePlatform | null>(null);
+  const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [authPlatform, setAuthPlatform] = React.useState<RealEstatePlatform | null>(null);
   const [propertyDetailOpen, setPropertyDetailOpen] = React.useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = React.useState<string | null>(null);
   const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
