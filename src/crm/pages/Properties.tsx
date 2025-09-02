@@ -348,6 +348,23 @@ export default function Properties() {
   // All useState hooks must be called before any early returns
   const [listings, setListings] = React.useState<PropertyListing[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
+
+  // Load saved listings on mount
+  React.useEffect(() => {
+    try {
+      const saved = LocalStorageService.getItem<PropertyListing[]>("property_listings", [] as any);
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        setListings(saved);
+      }
+    } catch {}
+  }, []);
+
+  // Persist listings on change
+  React.useEffect(() => {
+    try {
+      LocalStorageService.setItem("property_listings", listings);
+    } catch {}
+  }, [listings]);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [openPictureDialog, setOpenPictureDialog] = React.useState(false);
   const [openListingDialog, setOpenListingDialog] = React.useState(false);
@@ -573,7 +590,6 @@ export default function Properties() {
     if (realListings && Array.isArray(realListings) && realListings.length > 0) {
       setListings((prev) => {
         const previous = prev || [];
-        if (previous.length === 0) return realListings;
         const byProp = new Map(previous.map((l) => [l.propertyId, l]));
         const merged = [...previous];
         realListings.forEach((sim) => {
@@ -3897,7 +3913,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);
