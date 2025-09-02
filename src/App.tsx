@@ -57,6 +57,7 @@ const BackupManagement = React.lazy(() => import("./crm/components/BackupManagem
 const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
+const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 
 // Loading component
 function PageLoader() {
