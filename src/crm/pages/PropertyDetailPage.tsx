@@ -75,6 +75,7 @@ import AttachFileRoundedIcon from "@mui/icons-material/AttachFileRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AttachMoneyRoundedIcon from "@mui/icons-material/AttachMoneyRounded";
+import InputAdornment from "@mui/material/InputAdornment";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
@@ -93,6 +94,7 @@ import TenantDialog from "../components/TenantDialog";
 import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 import FormFixesSummary from "../components/FormFixesSummary";
 import PropertyBankAccountSection from "../components/PropertyBankAccountSection";
+import { LateFeeService } from "../services/LateFeeService";
 import { activityTracker } from "../services/ActivityTrackingService";
 
 const VisuallyHiddenInput = styled('input')({
@@ -124,6 +126,8 @@ interface PropertyDetailPageProps {
   onOpenMaintenance?: () => void;
   backgroundColorOverride?: string;
   onBackgroundColorChange?: (color: string) => void;
+  autoOpenApplication?: boolean;
+  autoOpenTenantDialog?: boolean;
 }
 
 interface PropertyImage {
@@ -171,6 +175,12 @@ interface Property {
   manager: string;
   tenant?: string;
   images: PropertyImage[];
+  lateFeeOverrideEnabled?: boolean;
+  lateFeeBaseFee?: number;
+  lateFeeDailyRate?: number;
+  lateFeePercentageRate?: number;
+  lateFeeGraceDays?: number;
+  lateFeeMode?: 'flat' | 'percent';
   mainImageId?: string;
   description?: string;
   amenities?: string[];
@@ -360,7 +370,9 @@ export default function PropertyDetailPage({
   onOpenTenantManagement,
   onOpenMaintenance,
   backgroundColorOverride,
-  onBackgroundColorChange
+  onBackgroundColorChange,
+  autoOpenApplication,
+  autoOpenTenantDialog
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
   const { state, updateProperty, addDocument, deleteDocument } = useCrmData();
@@ -400,6 +412,11 @@ export default function PropertyDetailPage({
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
   const [documentUploadDialogOpen, setDocumentUploadDialogOpen] = React.useState(false);
   const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (autoOpenApplication) setApplicationDialogOpen(true);
+    if (autoOpenTenantDialog) setTenantDialogOpen(true);
+  }, [autoOpenApplication, autoOpenTenantDialog]);
   const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
   const [uploadingDocument, setUploadingDocument] = React.useState(false);
   const [documentUploadData, setDocumentUploadData] = React.useState({
@@ -429,6 +446,39 @@ export default function PropertyDetailPage({
   const [backgroundPickerOpen, setBackgroundPickerOpen] = React.useState(false);
   const [savedHeaderColor, setSavedHeaderColor] = React.useState<string | null>(null);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
+
+  // Late fee override state (synced to current property)
+  const effectiveLateFee = LateFeeService.getEffectiveConfig(property);
+  const [lateOverrideEnabled, setLateOverrideEnabled] = React.useState<boolean>(!!property.lateFeeOverrideEnabled);
+  const [lateMode, setLateMode] = React.useState<'flat' | 'percent'>(property.lateFeeMode ?? effectiveLateFee.mode);
+  const [lateBase, setLateBase] = React.useState<string>(property.lateFeeBaseFee != null ? String(property.lateFeeBaseFee) : '');
+  const [lateDaily, setLateDaily] = React.useState<string>(property.lateFeeDailyRate != null ? String(property.lateFeeDailyRate) : '');
+  const [latePct, setLatePct] = React.useState<string>(property.lateFeePercentageRate != null ? String(property.lateFeePercentageRate * 100) : '');
+  const [lateGrace, setLateGrace] = React.useState<string>(property.lateFeeGraceDays != null ? String(property.lateFeeGraceDays) : '');
+
+  React.useEffect(() => {
+    const eff = LateFeeService.getEffectiveConfig(property);
+    setLateOverrideEnabled(!!property.lateFeeOverrideEnabled);
+    setLateMode(property.lateFeeMode ?? eff.mode);
+    setLateBase(property.lateFeeBaseFee != null ? String(property.lateFeeBaseFee) : '');
+    setLateDaily(property.lateFeeDailyRate != null ? String(property.lateFeeDailyRate) : '');
+    setLatePct(property.lateFeePercentageRate != null ? String(property.lateFeePercentageRate * 100) : '');
+    setLateGrace(property.lateFeeGraceDays != null ? String(property.lateFeeGraceDays) : '');
+  }, [property.id]);
+
+  const saveLateOverride = () => {
+    const updated = {
+      ...property,
+      lateFeeOverrideEnabled: lateOverrideEnabled,
+      lateFeeMode: lateOverrideEnabled ? lateMode : undefined,
+      lateFeeBaseFee: lateOverrideEnabled && lateBase !== '' ? parseFloat(lateBase) : undefined,
+      lateFeeDailyRate: lateOverrideEnabled && lateDaily !== '' ? parseFloat(lateDaily) : undefined,
+      lateFeePercentageRate: lateOverrideEnabled && latePct !== '' ? parseFloat(latePct) / 100 : undefined,
+      lateFeeGraceDays: lateOverrideEnabled && lateGrace !== '' ? parseInt(lateGrace, 10) : undefined,
+    } as Property;
+    updateProperty(updated);
+    alert('Late fee settings saved for this property.');
+  };
 
   // Load saved header color from localStorage
   React.useEffect(() => {
@@ -1919,6 +1969,78 @@ export default function PropertyDetailPage({
                     </TableBody>
                   </Table>
                 </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Late Fee Policy & Overrides */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  <AttachMoneyRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                  Rent, Deposit & Late Fee Policy
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2 }}>
+                      <Typography variant="subtitle2" color="text.secondary">Monthly Rent</Typography>
+                      <Typography variant="h6">${property.monthlyRent.toLocaleString()}</Typography>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography variant="subtitle2" color="text.secondary">Security Deposit</Typography>
+                      <Typography variant="h6">${(property.securityDeposit || 0).toLocaleString()}</Typography>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography variant="subtitle2" color="text.secondary">Effective Late Fee Policy</Typography>
+                      <Typography variant="body2">
+                        Mode: {effectiveLateFee.mode === 'flat' ? 'Flat (base + daily)' : 'Percent (base + % once)'}
+                      </Typography>
+                      <Typography variant="body2">Base: ${effectiveLateFee.baseFee}</Typography>
+                      {effectiveLateFee.mode === 'flat' ? (
+                        <Typography variant="body2">Daily: ${effectiveLateFee.dailyRate}/day after {effectiveLateFee.graceDays} day(s)</Typography>
+                      ) : (
+                        <Typography variant="body2">Percent: {(effectiveLateFee.percentageRate * 100).toFixed(2)}% after {effectiveLateFee.graceDays} day(s)</Typography>
+                      )}
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="subtitle1">Per-Property Override</Typography>
+                        <FormControlLabel
+                          control={<Switch checked={lateOverrideEnabled} onChange={(e) => setLateOverrideEnabled(e.target.checked)} />}
+                          label={lateOverrideEnabled ? 'Enabled' : 'Disabled'}
+                        />
+                      </Stack>
+                      <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12}>
+                          <FormControl fullWidth size="small" disabled={!lateOverrideEnabled}>
+                            <InputLabel>Mode</InputLabel>
+                            <Select value={lateMode} label="Mode" onChange={(e) => setLateMode(e.target.value as any)}>
+                              <MenuItem value="flat">Flat (base + daily)</MenuItem>
+                              <MenuItem value="percent">Percent (base + % once)</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField label="Base Fee" size="small" type="number" value={lateBase} onChange={(e) => setLateBase(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
+                        </Grid>
+                        <Grid item xs={6}>
+                          {lateMode === 'flat' ? (
+                            <TextField label="Daily Rate" size="small" type="number" value={lateDaily} onChange={(e) => setLateDaily(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
+                          ) : (
+                            <TextField label="Percentage" size="small" type="number" value={latePct} onChange={(e) => setLatePct(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }} />
+                          )}
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField label="Grace Days" size="small" type="number" value={lateGrace} onChange={(e) => setLateGrace(e.target.value)} fullWidth disabled={!lateOverrideEnabled} />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Button variant="contained" onClick={saveLateOverride} disabled={!lateOverrideEnabled}>Save Override</Button>
+                        </Grid>
+                      </Grid>
+                    </Paper>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>

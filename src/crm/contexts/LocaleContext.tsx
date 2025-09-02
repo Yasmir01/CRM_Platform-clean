@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { validateLocale } from "../hooks/useValidatedLocale";
 
 export type TranslationsMap = Record<string, string>;
 
@@ -31,18 +32,28 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocale] = useState<string>("en");
   const [translations, setTranslations] = useState<TranslationsMap>({});
 
+  // Determine supported locales from available translation files
+  const supportedLocales = ["en", "fr"] as const;
+
   useEffect(() => {
-    const browserLang = (navigator.language || "en").split("-")[0];
-    const saved = localStorage.getItem("preferredLocale");
-    const chosen = saved || browserLang;
-    setLocale(chosen);
-    fetchTranslations(chosen).then(setTranslations);
+    const browserLang = (navigator.language || "en").toLowerCase();
+    const saved = (localStorage.getItem("preferredLocale") || undefined)?.toLowerCase();
+    const { locale: valid } = validateLocale(saved ?? browserLang, {
+      supportedLocales,
+      fallbackLocale: "en",
+    });
+    setLocale(valid);
+    fetchTranslations(valid).then(setTranslations);
   }, []);
 
   const switchLocale = async (newLang: string) => {
-    localStorage.setItem("preferredLocale", newLang);
-    setLocale(newLang);
-    setTranslations(await fetchTranslations(newLang));
+    const { locale: valid } = validateLocale(newLang, {
+      supportedLocales,
+      fallbackLocale: "en",
+    });
+    localStorage.setItem("preferredLocale", valid);
+    setLocale(valid);
+    setTranslations(await fetchTranslations(valid));
   };
 
   const value = useMemo<LocaleContextValue>(

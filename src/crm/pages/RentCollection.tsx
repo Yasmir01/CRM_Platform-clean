@@ -64,6 +64,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { LateFeeService } from '../services/LateFeeService';
 
 import { paymentService } from '../services/PaymentService';
 import { RentPayment, PaymentMethod, CashPaymentLocation, PaymentSchedule } from '../types/PaymentTypes';
@@ -359,15 +360,25 @@ export default function RentCollection() {
   const calculateCollectionMetrics = () => {
     const currentMonth = dayjs().format('YYYY-MM');
     const monthlyPayments = payments.filter(p => p.dueDate.startsWith(currentMonth));
-    
-    const totalDue = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+
+    const globalCfg = LateFeeService.getGlobalConfig();
+    const computeWithLate = (p: RentPayment) => {
+      const prop = properties.find(pr => pr.id === p.propertyId);
+      const eff = LateFeeService.getEffectiveConfig(prop, globalCfg);
+      const late = LateFeeService.calculateLateFee(p.amount, p.dueDate, dayjs().format('YYYY-MM-DD'), eff);
+      const isLate = dayjs().isAfter(dayjs(p.dueDate));
+      return isLate ? p.amount + late : p.amount;
+    };
+
+    const totalDueBase = monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+    const totalDue = monthlyPayments.reduce((sum, p) => sum + computeWithLate(p), 0);
     const totalCollected = monthlyPayments
       .filter(p => p.status === 'completed')
       .reduce((sum, p) => sum + p.amount, 0);
-    
+
     const collectionRate = totalDue > 0 ? (totalCollected / totalDue) * 100 : 0;
     const pendingAmount = totalDue - totalCollected;
-    const overduePayments = monthlyPayments.filter(p => 
+    const overduePayments = monthlyPayments.filter(p =>
       p.status === 'overdue' || (p.status === 'pending' && dayjs(p.dueDate).isBefore(dayjs()))
     ).length;
 
@@ -548,6 +559,16 @@ export default function RentCollection() {
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             ${payment.amount.toLocaleString()}
                           </Typography>
+                          {dayjs().isAfter(dayjs(payment.dueDate)) && (payment.status === 'pending' || payment.status === 'overdue' || payment.status === 'partial') && (
+                            (() => {
+                              const prop = properties.find(p => p.id === payment.propertyId);
+                              const eff = LateFeeService.getEffectiveConfig(prop);
+                              const late = LateFeeService.calculateLateFee(payment.amount, payment.dueDate, dayjs().format('YYYY-MM-DD'), eff);
+                              return late > 0 ? (
+                                <Typography variant="caption" color="error.main">Due with late fee: ${(payment.amount + late).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Typography>
+                              ) : null;
+                            })()
+                          )}
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">

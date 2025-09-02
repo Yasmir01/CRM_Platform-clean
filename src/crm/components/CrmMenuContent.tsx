@@ -28,6 +28,7 @@ import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import ViewKanbanRoundedIcon from "@mui/icons-material/ViewKanbanRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
@@ -49,6 +50,7 @@ import BackupRoundedIcon from "@mui/icons-material/BackupRounded";
 import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
@@ -62,10 +64,12 @@ const mainListItems = [
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
   { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
   { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
+  { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
   { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
   { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
   { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
   { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
+  { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },

@@ -1,0 +1,98 @@
+/* Dark-mode adjustments for calendar and board */
+
+/* Fixed height utility for the calendar element */
+.calendar-fixed-height { height: 500px; }
+
+/* Use MUI color-scheme attribute set in AppTheme */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-calendar,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-month-view,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-week-view,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-day-view,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-view,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-calendar,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-month-view,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-week-view,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-day-view,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-view {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+/* Header (month name, navigation arrows) */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-header,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-header,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-toolbar button {
+  background: #2b2b2b;
+  color: #e0e0e0;
+}
+
+/* Day‑grid cells and grid borders */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-date-cell,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-day-bg,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-slot-selection,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content > * > * ,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-date-cell,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-day-bg,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-slot-selection,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content > * > * {
+  border-color: #444;
+}
+
+/* Today highlight */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-today,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-today {
+  background: #28323e;
+}
+
+/* Events */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event {
+  background: #37474f;
+  border: 1px solid #455a64;
+  color: #e0e0e0;
+}
+
+/* Selected event */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-selected,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event.rbc-selected,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-selected,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event.rbc-selected {
+  background: #3b5c8a;
+  border: 1px solid #5c9bd1;
+}
+
+/* Hover */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event:hover,
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-slot-select:hover,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-event:hover,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-slot-select:hover {
+  background: #455a64;
+}
+
+/* Pop‑over tooltip */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-tooltip,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-tooltip {
+  background: #2b2b2b;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+
+/* Scrollbars – optional */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content::-webkit-scrollbar,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content::-webkit-scrollbar {
+  width: 8px;
+}
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content::-webkit-scrollbar-thumb,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+}
+
+/* Subtle grid lines for time view */
+:root[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content > * + * > * ,
+html[data-mui-color-scheme='dark'] .leasing-calendar .rbc-time-content > * + * > * {
+  border-color: rgba(255,255,255,0.12);
+}

@@ -57,6 +57,8 @@ const BackupManagement = React.lazy(() => import("./crm/components/BackupManagem
 const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
+const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
+const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 
 // Loading component
 function PageLoader() {
@@ -181,6 +183,11 @@ function AppRoutes() {
             <Prospects />
           </React.Suspense>
         } />
+        <Route path="leasing-funnel" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LeasingFunnel />
+          </React.Suspense>
+        } />
         <Route path="applications" element={
           <React.Suspense fallback={<PageLoader />}>
             <Applications />
@@ -204,6 +211,11 @@ function AppRoutes() {
         <Route path="rent-collection" element={
           <React.Suspense fallback={<PageLoader />}>
             <RentCollection />
+          </React.Suspense>
+        } />
+        <Route path="late-fees" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LateFees />
           </React.Suspense>
         } />
         <Route path="work-orders" element={
