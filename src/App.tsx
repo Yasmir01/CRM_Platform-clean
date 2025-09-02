@@ -207,6 +207,11 @@ function AppRoutes() {
             <RentCollection />
           </React.Suspense>
         } />
+        <Route path="late-fees" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LateFees />
+          </React.Suspense>
+        } />
         <Route path="work-orders" element={
           <React.Suspense fallback={<PageLoader />}>
             <WorkOrders />
