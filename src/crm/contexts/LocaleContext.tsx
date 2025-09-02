@@ -47,7 +47,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const switchLocale = async (newLang: string) => {
-    const { locale: valid } = useValidatedLocale(newLang, {
+    const { locale: valid } = validateLocale(newLang, {
       supportedLocales,
       fallbackLocale: "en",
     });
