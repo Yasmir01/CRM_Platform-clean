@@ -38,13 +38,13 @@ import {
   Tooltip,
   MenuItem,
 } from "@mui/material";
-import "./leasingFunnel.css";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import { format, parseISO } from "date-fns";
 import { Calendar, momentLocalizer, Views, Event as RBCEvent } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "./leasingFunnel.css";
 import { LocalStorageService } from "../services/LocalStorageService";
 import PropertyDetailPage from "./PropertyDetailPage";
 
@@ -436,7 +436,7 @@ export default function LeasingFunnel() {
           events={calendarEvents}
           defaultView={Views.DAY}
           views={[Views.DAY, Views.WEEK, Views.MONTH]}
-          style={{ height: 500 }}
+          className="calendar-fixed-height"
           selectable={false}
           onSelectEvent={(event: any) => {
             const app = (event as any).resource as Appointment;
