@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useValidatedLocale } from "../hooks/useValidatedLocale";
+import { validateLocale } from "../hooks/useValidatedLocale";
 
 export type TranslationsMap = Record<string, string>;
 
