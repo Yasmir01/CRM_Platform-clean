@@ -76,6 +76,8 @@ import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";
 import BulkUploadDialog from "../components/BulkUploadDialog";
+import useApiRequest from "../hooks/useApiRequest";
+import CircularProgress from "@mui/material/CircularProgress";
 
 // Using unified Contact interface from CrmDataContext
 
@@ -228,17 +230,12 @@ export default function ContactManagement() {
   const [showContactDetail, setShowContactDetail] = React.useState(false);
   const [selectedDetailContact, setSelectedDetailContact] = React.useState<Contact | null>(null);
 
-  // Generate contacts from CRM data (tenants, property managers, service providers)
-  const allContacts = React.useMemo(() => {
+  // Generate contacts asynchronously using the shared hook (enables loading/error/empty states)
+  const { data: asyncContacts, error: contactsError, loading: contactsLoading, refetch: refetchContacts } = useApiRequest<Contact[]>(async () => {
     const generatedContacts: Contact[] = [];
 
-    // Add contacts from tenants - always sync status and tags
     tenants?.forEach((tenant) => {
-      // Check if contact already exists
-      const existingContact = contacts?.find(c =>
-        c.email === tenant.email || c.relatedEntityId === tenant.id
-      );
-
+      const existingContact = contacts?.find(c => c.email === tenant.email || c.relatedEntityId === tenant.id);
       const tenantContact = {
         id: existingContact?.id || `tenant-${tenant.id}`,
         type: "Tenant" as const,
@@ -253,7 +250,6 @@ export default function ContactManagement() {
         relatedEntityId: tenant.id,
         createdAt: existingContact?.createdAt || tenant.createdAt,
         updatedAt: tenant.updatedAt,
-        // Preserve existing contact data if it exists
         ...(existingContact && {
           company: existingContact.company,
           position: existingContact.position,
@@ -270,18 +266,12 @@ export default function ContactManagement() {
           socialProfiles: existingContact.socialProfiles,
           assignedTo: existingContact.assignedTo
         })
-      };
-
-      // Always add/update tenant contact to ensure real-time status sync
+      } as any;
       generatedContacts.push(tenantContact);
     });
 
-    // Add contacts from property managers
     propertyManagers?.forEach((manager) => {
-      const existingContact = contacts?.find(c =>
-        c.email === manager.email || c.relatedEntityId === manager.id
-      );
-
+      const existingContact = contacts?.find(c => c.email === manager.email || c.relatedEntityId === manager.id);
       if (!existingContact) {
         generatedContacts.push({
           id: `manager-${manager.id}`,
@@ -298,21 +288,16 @@ export default function ContactManagement() {
           relatedEntityId: manager.id,
           createdAt: manager.createdAt,
           updatedAt: manager.updatedAt
-        });
+        } as any);
       }
     });
 
-    // Add service providers from work orders (if available)
     if (state.workOrders) {
       const serviceProviders = new Set<string>();
       state.workOrders.forEach((workOrder: any) => {
         if (workOrder.assignedTo && !serviceProviders.has(workOrder.assignedTo)) {
           serviceProviders.add(workOrder.assignedTo);
-
-          const existingContact = contacts?.find(c =>
-            c.firstName === workOrder.assignedTo || c.company === workOrder.assignedTo
-          );
-
+          const existingContact = contacts?.find(c => c.firstName === workOrder.assignedTo || c.company === workOrder.assignedTo);
           if (!existingContact) {
             generatedContacts.push({
               id: `service-${workOrder.assignedTo.replace(/\s+/g, '-').toLowerCase()}`,
@@ -329,21 +314,18 @@ export default function ContactManagement() {
               relatedEntityId: `workorder-${workOrder.id}`,
               createdAt: workOrder.createdAt,
               updatedAt: workOrder.updatedAt || workOrder.createdAt
-            });
+            } as any);
           }
         }
       });
     }
 
-    // Add any existing manual contacts
     const manualContacts = contacts?.filter(c => !c.relatedEntityId) || [];
-
-    // Get existing contacts that don't have updated versions in generatedContacts
-    const existingContacts = contacts?.filter(c => c.relatedEntityId &&
-      !generatedContacts.some(gc => gc.relatedEntityId === c.relatedEntityId)) || [];
-
+    const existingContacts = contacts?.filter(c => c.relatedEntityId && !generatedContacts.some(gc => gc.relatedEntityId === c.relatedEntityId)) || [];
     return [...generatedContacts, ...manualContacts, ...existingContacts];
-  }, [contacts, tenants, propertyManagers]);
+  }, [contacts, tenants, propertyManagers, state.workOrders]);
+
+  const allContacts = asyncContacts || [];
   const [searchTerm, setSearchTerm] = React.useState("");
   const [filterStatus, setFilterStatus] = React.useState("All");
   const [filterSource, setFilterSource] = React.useState("All");
@@ -502,6 +484,35 @@ export default function ContactManagement() {
   const managerContacts = allContacts.filter(c => c.type === "PropertyManager").length;
   const serviceProviders = allContacts.filter(c => c.type === "ServiceProvider").length;
   const prospects = allContacts.filter(c => c.type === "Prospect").length;
+
+  // Async state handling for list
+  if (contactsLoading) {
+    return (
+      <Box sx={{ py: 6, textAlign: 'center' }}>
+        <CircularProgress size={32} />
+        <Typography variant="body2" sx={{ mt: 1 }}>Loading contacts…</Typography>
+      </Box>
+    );
+  }
+  if (contactsError) {
+    return (
+      <Box sx={{ py: 6, maxWidth: 520, mx: 'auto' }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Unable to load contacts: {contactsError.message}
+        </Alert>
+        <Button variant="contained" onClick={refetchContacts}>Retry</Button>
+      </Box>
+    );
+  }
+  if (allContacts.length === 0) {
+    return (
+      <Box sx={{ py: 6, textAlign: 'center' }}>
+        <Typography variant="h6" sx={{ mb: 1 }}>No Contacts Found</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Try adding a new contact or check your filters.</Typography>
+        <Button variant="contained" onClick={handleAddContact}>Create Contact</Button>
+      </Box>
+    );
+  }
 
   // Show contact detail page if a contact is selected
   if (showContactDetail && selectedDetailContact) {
