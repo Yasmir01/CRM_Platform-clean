@@ -962,9 +962,10 @@ export default function ContactManagement() {
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
                 >
                   <MenuItem value="Tenant">Tenant</MenuItem>
-                  <MenuItem value="PropertyManager">PropertyManager</MenuItem>
-                  <MenuItem value="ServiceProvider">ServiceProvider</MenuItem>
+                  <MenuItem value="PropertyManager">Property Manager</MenuItem>
+                  <MenuItem value="ServiceProvider">Service Provider</MenuItem>
                   <MenuItem value="Prospect">Prospect</MenuItem>
+                  <MenuItem value="Owner">Property Owner</MenuItem>
                   <MenuItem value="Vendor">Vendor</MenuItem>
                 </Select>
               </FormControl>
@@ -977,7 +978,7 @@ export default function ContactManagement() {
                   label="Status"
                   onChange={(e) => setFormData({...formData, status: e.target.value as any})}
                 >
-                  {formData.type === 'PropertyManager' ? (
+                  {(formData.type === 'PropertyManager' || formData.type === 'Owner') ? (
                     <>
                       <MenuItem value="Active">Active</MenuItem>
                       <MenuItem value="Inactive">Inactive</MenuItem>
