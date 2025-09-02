@@ -555,55 +555,16 @@ export default function Properties() {
     return properties.reduce((sum, p) => sum + (p && p.status === "Occupied" ? (p.monthlyRent || 0) : 0), 0);
   }, [state?.initialized, properties]);
 
-  // Generate real listings from actual properties
-  const realListings = React.useMemo(() => {
-    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
+  // Derived list of actual active listings from saved state
+  const listedListings = React.useMemo(() => {
+    if (!Array.isArray(listings)) return [];
+    return listings.filter(l => l && l.status === "Listed");
+  }, [listings]);
 
-    // Create listings for available properties (simulating that they have listings)
-    const availableProps = properties.filter(p => p && p.status === "Available");
-
-    return availableProps.map((property, index) => ({
-      id: `listing-${property.id}`,
-      propertyId: property.id,
-      title: `${property.name} - Available Now!`,
-      description: property.description || 'Beautiful property available for rent.',
-      customContent: `🏠 ${property.name} - Available Now!\n\n📍 Location: ${property.address}\n💰 Rent: $${property.monthlyRent?.toLocaleString()}/month\n🛏️ Bedrooms: ${property.bedrooms || 'TBD'}\n🚿 Bathrooms: ${property.bathrooms || 'TBD'}\n📐 Square Footage: ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}\n🚗 Parking: ${property.parkingSpaces || 0} space(s)\n🐕 Pet Policy: ${property.petPolicy || 'Contact for details'}\n\n✨ Amenities:\n${property.amenities?.map(amenity => `• ${amenity}`).join('\n') || '• Contact for amenities list'}\n\n📝 Description:\n${property.description || 'Beautiful property available for rent. Contact us for more details!'}\n\n📞 Contact us today to schedule a viewing!\n🕐 Available for immediate move-in`,
-      listingSites: {
-        craigslist: index === 0, // First property listed on Craigslist
-        zillow: true, // All properties on Zillow
-        realtorsCom: true, // All properties on Realtor.com
-        apartments: index < 2, // First two properties on Apartments.com
-        rentCom: false
-      },
-      status: "Listed" as const,
-      viewCount: Math.floor(Math.random() * 200) + 50, // Random view count 50-250
-      inquiries: Math.floor(Math.random() * 15) + 2, // Random inquiries 2-17
-      lastUpdated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last week
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last month
-      expirationDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // Expires in 60 days
-      promotionId: index === 0 ? 'promo1' : undefined // First property has promotion
-    }));
-  }, [state?.initialized, properties]);
-
-  // Initialize/merge listings from simulated data without overwriting user edits
-  React.useEffect(() => {
-    if (realListings && Array.isArray(realListings) && realListings.length > 0) {
-      setListings((prev) => {
-        const previous = prev || [];
-        const byProp = new Map(previous.map((l) => [l.propertyId, l]));
-        const merged = [...previous];
-        realListings.forEach((sim) => {
-          if (!byProp.has(sim.propertyId)) merged.push(sim);
-        });
-        return merged;
-      });
-    }
-  }, [realListings]);
 
   const activeListings = React.useMemo(() => {
-    if (!state?.initialized || !realListings || !Array.isArray(realListings)) return 0;
-    return realListings.filter(l => l && l.status === "Listed").length;
-  }, [state?.initialized, realListings]);
+    return listedListings.length;
+  }, [listedListings]);
 
   const totalListingViews = React.useMemo(() => {
     if (!state?.initialized || !listings || !Array.isArray(listings)) return 0;
@@ -615,14 +576,11 @@ export default function Properties() {
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
-  // Calculate unlisted properties (properties with Unlisted status or Available but not listed)
+  // Calculate unlisted properties: any property without a corresponding active listing
   const unlistedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !Array.isArray(listings)) return [];
     return properties.filter(property =>
-      property && (
-        property.status === "Unlisted" ||
-        (property.status === "Available" && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed"))
-      )
+      property && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
     );
   }, [state?.initialized, properties, listings]);
 
@@ -785,16 +743,6 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         lastUpdated: new Date().toISOString().split('T')[0]
       };
       setListings(prev => [...(prev || []), newListing]);
-
-      // Update property status to Listed
-      if (selectedProperty.status === 'Unlisted') {
-        const updatedProperty = {
-          ...selectedProperty,
-          status: 'Listed' as Property['status'],
-          updatedAt: new Date().toISOString()
-        };
-        updateProperty(updatedProperty);
-      }
 
       // Track property listing creation
       trackPropertyActivity(
@@ -2232,7 +2180,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
           Listed Properties
         </Typography>
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {(realListings || []).map((listing) => {
+          {(listedListings || []).map((listing) => {
             const property = properties.find(p => p && p.id === listing.propertyId);
             if (!property) return null;
             
@@ -3018,14 +2966,13 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                               order: 0,
                             };
 
-                            setProperties(prev => prev.map(property =>
-                              property.id === selectedProperty.id
-                                ? {
-                                    ...property,
-                                    images: [...(property.images || []), newImage]
-                                  }
-                                : property
-                            ));
+                            const existingImages = selectedProperty.images || [];
+                            const updatedProp = {
+                              ...selectedProperty,
+                              images: [...existingImages, newImage],
+                              mainImageId: selectedProperty.mainImageId || newImage.id
+                            };
+                            updateProperty(updatedProp);
                           };
                           reader.readAsDataURL(file);
                         });
