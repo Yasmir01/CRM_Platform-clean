@@ -95,6 +95,9 @@ import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 import BulkUploadDialog from "../components/BulkUploadDialog";
 import CombinedBulkUploadDialog from "../components/CombinedBulkUploadDialog";
+import PlatformAuthenticationFlow from "../components/PlatformAuthenticationFlow";
+import { RealEstatePlatformService } from "../services/RealEstatePlatformService";
+import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
 
 interface PropertyImage {
   id: string;
