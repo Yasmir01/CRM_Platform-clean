@@ -98,6 +98,7 @@ import CombinedBulkUploadDialog from "../components/CombinedBulkUploadDialog";
 import PlatformAuthenticationFlow from "../components/PlatformAuthenticationFlow";
 import { RealEstatePlatformService } from "../services/RealEstatePlatformService";
 import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 interface PropertyImage {
   id: string;
