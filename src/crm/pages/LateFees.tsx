@@ -29,6 +29,7 @@ import CalculateRoundedIcon from '@mui/icons-material/CalculateRounded';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LateFeeService, LateFeeConfig } from '../services/LateFeeService';
 import dayjs, { Dayjs } from 'dayjs';
 
 // Calculate a late‑fee for a given invoice.
@@ -70,11 +71,12 @@ export default function LateFees() {
   const [dueDate, setDueDate] = useState<Dayjs | null>(dayjs().subtract(15, 'day'));
   const [paymentDate, setPaymentDate] = useState<Dayjs | null>(dayjs());
 
-  const [baseFee, setBaseFee] = useState<string>('10');
-  const [dailyRate, setDailyRate] = useState<string>('2');
-  const [percentageRate, setPercentageRate] = useState<string>('5'); // displayed as %
-  const [graceDays, setGraceDays] = useState<string>('5');
-  const [mode, setMode] = useState<'flat' | 'percent'>('flat');
+  const global = LateFeeService.getGlobalConfig();
+  const [baseFee, setBaseFee] = useState<string>(String(global.baseFee));
+  const [dailyRate, setDailyRate] = useState<string>(String(global.dailyRate));
+  const [percentageRate, setPercentageRate] = useState<string>(String(global.percentageRate * 100));
+  const [graceDays, setGraceDays] = useState<string>(String(global.graceDays));
+  const [mode, setMode] = useState<'flat' | 'percent'>(global.mode);
 
   const fee = useMemo(() => {
     if (!dueDate || !paymentDate) return 0;
