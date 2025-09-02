@@ -28,6 +28,7 @@ import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
 import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import ViewKanbanRoundedIcon from "@mui/icons-material/ViewKanbanRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import PublicRoundedIcon from "@mui/icons-material/PublicRounded";
@@ -63,6 +64,7 @@ const mainListItems = [
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
   { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
   { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
+  { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
   { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
   { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
   { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
