@@ -16,6 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import Button from "@mui/material/Button";
+import { useI18nFormat } from "../utils/i18nFormat";
 
 // Sample data for recent deals
 const recentDeals = [
@@ -84,26 +85,10 @@ const getStageColor = (
   }
 };
 
-// Format currency
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-// Format date
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
-  return new Date(dateString).toLocaleDateString("en-US", options);
-};
+// i18n formatting provided by LocaleContext
 
 export default function CrmRecentDealsTable() {
+  const { formatCurrency, formatDate } = useI18nFormat();
   return (
     <Card
       variant="outlined"
