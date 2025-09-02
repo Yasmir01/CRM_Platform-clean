@@ -567,10 +567,19 @@ export default function Properties() {
     }));
   }, [state?.initialized, properties]);
 
-  // Update listings when real listings change
+  // Initialize/merge listings from simulated data without overwriting user edits
   React.useEffect(() => {
     if (realListings && Array.isArray(realListings) && realListings.length > 0) {
-      setListings(realListings);
+      setListings((prev) => {
+        const previous = prev || [];
+        if (previous.length === 0) return realListings;
+        const byProp = new Map(previous.map((l) => [l.propertyId, l]));
+        const merged = [...previous];
+        realListings.forEach((sim) => {
+          if (!byProp.has(sim.propertyId)) merged.push(sim);
+        });
+        return merged;
+      });
     }
   }, [realListings]);
 
