@@ -126,6 +126,8 @@ interface PropertyDetailPageProps {
   onOpenMaintenance?: () => void;
   backgroundColorOverride?: string;
   onBackgroundColorChange?: (color: string) => void;
+  autoOpenApplication?: boolean;
+  autoOpenTenantDialog?: boolean;
 }
 
 interface PropertyImage {
@@ -368,7 +370,9 @@ export default function PropertyDetailPage({
   onOpenTenantManagement,
   onOpenMaintenance,
   backgroundColorOverride,
-  onBackgroundColorChange
+  onBackgroundColorChange,
+  autoOpenApplication,
+  autoOpenTenantDialog
 }: PropertyDetailPageProps) {
   const navigate = useNavigate();
   const { state, updateProperty, addDocument, deleteDocument } = useCrmData();
@@ -408,6 +412,11 @@ export default function PropertyDetailPage({
   const [documentsDialogOpen, setDocumentsDialogOpen] = React.useState(false);
   const [documentUploadDialogOpen, setDocumentUploadDialogOpen] = React.useState(false);
   const [documentViewModalOpen, setDocumentViewModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (autoOpenApplication) setApplicationDialogOpen(true);
+    if (autoOpenTenantDialog) setTenantDialogOpen(true);
+  }, [autoOpenApplication, autoOpenTenantDialog]);
   const [selectedDocument, setSelectedDocument] = React.useState<any>(null);
   const [uploadingDocument, setUploadingDocument] = React.useState(false);
   const [documentUploadData, setDocumentUploadData] = React.useState({
