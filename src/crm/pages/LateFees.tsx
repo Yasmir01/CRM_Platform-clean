@@ -262,7 +262,7 @@ export default function LateFees() {
                         ? `${effectiveDaysLate} billable day(s) after grace. Days late: ${daysLate}.`
                         : 'Within grace period or not past due. No fee applies.'}
                     </Alert>
-                    <Stack direction="row" alignItems="center" spacing={2}>
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ flexWrap: 'wrap' }}>
                       <Typography variant="h5" sx={{ fontWeight: 700 }}>
                         Late‑fee: ${fee.toFixed(2)}
                       </Typography>
@@ -280,6 +280,22 @@ export default function LateFees() {
                         }}
                       >
                         Reset Example
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          const cfg: LateFeeConfig = {
+                            baseFee: parseFloat(baseFee || '0') || 0,
+                            dailyRate: parseFloat(dailyRate || '0') || 0,
+                            percentageRate: (parseFloat(percentageRate || '0') || 0) / 100,
+                            graceDays: parseInt(graceDays || '0', 10) || 0,
+                            mode
+                          };
+                          LateFeeService.saveGlobalConfig(cfg);
+                          alert('Global late fee settings saved.');
+                        }}
+                      >
+                        Save Global Settings
                       </Button>
                     </Stack>
                   </Grid>
