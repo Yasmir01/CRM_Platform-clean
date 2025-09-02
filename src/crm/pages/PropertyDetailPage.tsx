@@ -438,6 +438,39 @@ export default function PropertyDetailPage({
   const [savedHeaderColor, setSavedHeaderColor] = React.useState<string | null>(null);
   const [editFormData, setEditFormData] = React.useState<Partial<Property>>(property);
 
+  // Late fee override state (synced to current property)
+  const effectiveLateFee = LateFeeService.getEffectiveConfig(property);
+  const [lateOverrideEnabled, setLateOverrideEnabled] = React.useState<boolean>(!!property.lateFeeOverrideEnabled);
+  const [lateMode, setLateMode] = React.useState<'flat' | 'percent'>(property.lateFeeMode ?? effectiveLateFee.mode);
+  const [lateBase, setLateBase] = React.useState<string>(property.lateFeeBaseFee != null ? String(property.lateFeeBaseFee) : '');
+  const [lateDaily, setLateDaily] = React.useState<string>(property.lateFeeDailyRate != null ? String(property.lateFeeDailyRate) : '');
+  const [latePct, setLatePct] = React.useState<string>(property.lateFeePercentageRate != null ? String(property.lateFeePercentageRate * 100) : '');
+  const [lateGrace, setLateGrace] = React.useState<string>(property.lateFeeGraceDays != null ? String(property.lateFeeGraceDays) : '');
+
+  React.useEffect(() => {
+    const eff = LateFeeService.getEffectiveConfig(property);
+    setLateOverrideEnabled(!!property.lateFeeOverrideEnabled);
+    setLateMode(property.lateFeeMode ?? eff.mode);
+    setLateBase(property.lateFeeBaseFee != null ? String(property.lateFeeBaseFee) : '');
+    setLateDaily(property.lateFeeDailyRate != null ? String(property.lateFeeDailyRate) : '');
+    setLatePct(property.lateFeePercentageRate != null ? String(property.lateFeePercentageRate * 100) : '');
+    setLateGrace(property.lateFeeGraceDays != null ? String(property.lateFeeGraceDays) : '');
+  }, [property.id]);
+
+  const saveLateOverride = () => {
+    const updated = {
+      ...property,
+      lateFeeOverrideEnabled: lateOverrideEnabled,
+      lateFeeMode: lateOverrideEnabled ? lateMode : undefined,
+      lateFeeBaseFee: lateOverrideEnabled && lateBase !== '' ? parseFloat(lateBase) : undefined,
+      lateFeeDailyRate: lateOverrideEnabled && lateDaily !== '' ? parseFloat(lateDaily) : undefined,
+      lateFeePercentageRate: lateOverrideEnabled && latePct !== '' ? parseFloat(latePct) / 100 : undefined,
+      lateFeeGraceDays: lateOverrideEnabled && lateGrace !== '' ? parseInt(lateGrace, 10) : undefined,
+    } as Property;
+    updateProperty(updated);
+    alert('Late fee settings saved for this property.');
+  };
+
   // Load saved header color from localStorage
   React.useEffect(() => {
     const savedColor = localStorage.getItem('propertyHeaderColor');
@@ -1939,97 +1972,66 @@ export default function PropertyDetailPage({
                   <AttachMoneyRoundedIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   Rent, Deposit & Late Fee Policy
                 </Typography>
-                {(() => {
-                  // Late fee effective config display + override controls
-                  import { LateFeeService } from "../services/LateFeeService";
-                  // LateFeeService used below
-                  const effective = LateFeeService.getEffectiveConfig(property);
-                  const [overrideEnabled, setOverrideEnabled] = React.useState<boolean>(!!(property as any).lateFeeOverrideEnabled);
-                  const [overrideMode, setOverrideMode] = React.useState<'flat' | 'percent'>(((property as any).lateFeeMode || effective.mode) as 'flat' | 'percent');
-                  const [overrideBase, setOverrideBase] = React.useState<string>(String((property as any).lateFeeBaseFee ?? ''));
-                  const [overrideDaily, setOverrideDaily] = React.useState<string>(String((property as any).lateFeeDailyRate ?? ''));
-                  const [overridePct, setOverridePct] = React.useState<string>(
-                    ((property as any).lateFeePercentageRate != null ? String(((property as any).lateFeePercentageRate) * 100) : '')
-                  );
-                  const [overrideGrace, setOverrideGrace] = React.useState<string>(String((property as any).lateFeeGraceDays ?? ''));
-
-                  const saveOverride = () => {
-                    const updated = {
-                      ...property,
-                      lateFeeOverrideEnabled: overrideEnabled,
-                      lateFeeMode: overrideEnabled ? overrideMode : undefined,
-                      lateFeeBaseFee: overrideEnabled && overrideBase !== '' ? parseFloat(overrideBase) : undefined,
-                      lateFeeDailyRate: overrideEnabled && overrideDaily !== '' ? parseFloat(overrideDaily) : undefined,
-                      lateFeePercentageRate: overrideEnabled && overridePct !== '' ? (parseFloat(overridePct) / 100) : undefined,
-                      lateFeeGraceDays: overrideEnabled && overrideGrace !== '' ? parseInt(overrideGrace, 10) : undefined,
-                    } as any;
-                    updateProperty(updated);
-                    alert('Late fee settings saved for this property.');
-                  };
-
-                  return (
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
-                        <Paper sx={{ p: 2 }}>
-                          <Typography variant="subtitle2" color="text.secondary">Monthly Rent</Typography>
-                          <Typography variant="h6">${property.monthlyRent.toLocaleString()}</Typography>
-                          <Divider sx={{ my: 1.5 }} />
-                          <Typography variant="subtitle2" color="text.secondary">Security Deposit</Typography>
-                          <Typography variant="h6">${(property.securityDeposit || 0).toLocaleString()}</Typography>
-                          <Divider sx={{ my: 1.5 }} />
-                          <Typography variant="subtitle2" color="text.secondary">Effective Late Fee Policy</Typography>
-                          <Typography variant="body2">
-                            Mode: {effective.mode === 'flat' ? 'Flat (base + daily)' : 'Percent (base + % once)'}
-                          </Typography>
-                          <Typography variant="body2">Base: ${effective.baseFee}</Typography>
-                          {effective.mode === 'flat' ? (
-                            <Typography variant="body2">Daily: ${effective.dailyRate}/day after {effective.graceDays} day(s)</Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2 }}>
+                      <Typography variant="subtitle2" color="text.secondary">Monthly Rent</Typography>
+                      <Typography variant="h6">${property.monthlyRent.toLocaleString()}</Typography>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography variant="subtitle2" color="text.secondary">Security Deposit</Typography>
+                      <Typography variant="h6">${(property.securityDeposit || 0).toLocaleString()}</Typography>
+                      <Divider sx={{ my: 1.5 }} />
+                      <Typography variant="subtitle2" color="text.secondary">Effective Late Fee Policy</Typography>
+                      <Typography variant="body2">
+                        Mode: {effectiveLateFee.mode === 'flat' ? 'Flat (base + daily)' : 'Percent (base + % once)'}
+                      </Typography>
+                      <Typography variant="body2">Base: ${effectiveLateFee.baseFee}</Typography>
+                      {effectiveLateFee.mode === 'flat' ? (
+                        <Typography variant="body2">Daily: ${effectiveLateFee.dailyRate}/day after {effectiveLateFee.graceDays} day(s)</Typography>
+                      ) : (
+                        <Typography variant="body2">Percent: {(effectiveLateFee.percentageRate * 100).toFixed(2)}% after {effectiveLateFee.graceDays} day(s)</Typography>
+                      )}
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="subtitle1">Per-Property Override</Typography>
+                        <FormControlLabel
+                          control={<Switch checked={lateOverrideEnabled} onChange={(e) => setLateOverrideEnabled(e.target.checked)} />}
+                          label={lateOverrideEnabled ? 'Enabled' : 'Disabled'}
+                        />
+                      </Stack>
+                      <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12}>
+                          <FormControl fullWidth size="small" disabled={!lateOverrideEnabled}>
+                            <InputLabel>Mode</InputLabel>
+                            <Select value={lateMode} label="Mode" onChange={(e) => setLateMode(e.target.value as any)}>
+                              <MenuItem value="flat">Flat (base + daily)</MenuItem>
+                              <MenuItem value="percent">Percent (base + % once)</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField label="Base Fee" size="small" type="number" value={lateBase} onChange={(e) => setLateBase(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
+                        </Grid>
+                        <Grid item xs={6}>
+                          {lateMode === 'flat' ? (
+                            <TextField label="Daily Rate" size="small" type="number" value={lateDaily} onChange={(e) => setLateDaily(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
                           ) : (
-                            <Typography variant="body2">Percent: {(effective.percentageRate * 100).toFixed(2)}% after {effective.graceDays} day(s)</Typography>
+                            <TextField label="Percentage" size="small" type="number" value={latePct} onChange={(e) => setLatePct(e.target.value)} fullWidth disabled={!lateOverrideEnabled} InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }} />
                           )}
-                        </Paper>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <TextField label="Grace Days" size="small" type="number" value={lateGrace} onChange={(e) => setLateGrace(e.target.value)} fullWidth disabled={!lateOverrideEnabled} />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Button variant="contained" onClick={saveLateOverride} disabled={!lateOverrideEnabled}>Save Override</Button>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={12} md={6}>
-                        <Paper sx={{ p: 2 }}>
-                          <Stack direction="row" alignItems="center" justifyContent="space-between">
-                            <Typography variant="subtitle1">Per-Property Override</Typography>
-                            <FormControlLabel
-                              control={<Switch checked={overrideEnabled} onChange={(e) => setOverrideEnabled(e.target.checked)} />}
-                              label={overrideEnabled ? 'Enabled' : 'Disabled'}
-                            />
-                          </Stack>
-                          <Grid container spacing={2} sx={{ mt: 1 }}>
-                            <Grid item xs={12}>
-                              <FormControl fullWidth size="small" disabled={!overrideEnabled}>
-                                <InputLabel>Mode</InputLabel>
-                                <Select value={overrideMode} label="Mode" onChange={(e) => setOverrideMode(e.target.value as any)}>
-                                  <MenuItem value="flat">Flat (base + daily)</MenuItem>
-                                  <MenuItem value="percent">Percent (base + % once)</MenuItem>
-                                </Select>
-                              </FormControl>
-                            </Grid>
-                            <Grid item xs={6}>
-                              <TextField label="Base Fee" size="small" type="number" value={overrideBase} onChange={(e) => setOverrideBase(e.target.value)} fullWidth disabled={!overrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
-                            </Grid>
-                            <Grid item xs={6}>
-                              {overrideMode === 'flat' ? (
-                                <TextField label="Daily Rate" size="small" type="number" value={overrideDaily} onChange={(e) => setOverrideDaily(e.target.value)} fullWidth disabled={!overrideEnabled} InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }} />
-                              ) : (
-                                <TextField label="Percentage" size="small" type="number" value={overridePct} onChange={(e) => setOverridePct(e.target.value)} fullWidth disabled={!overrideEnabled} InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }} />
-                              )}
-                            </Grid>
-                            <Grid item xs={6}>
-                              <TextField label="Grace Days" size="small" type="number" value={overrideGrace} onChange={(e) => setOverrideGrace(e.target.value)} fullWidth disabled={!overrideEnabled} />
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Button variant="contained" onClick={saveOverride} disabled={!overrideEnabled}>Save Override</Button>
-                            </Grid>
-                          </Grid>
-                        </Paper>
-                      </Grid>
-                    </Grid>
-                  );
-                })()}
+                    </Paper>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
