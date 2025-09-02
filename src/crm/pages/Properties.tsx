@@ -664,7 +664,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     <div class="property-header">
         <h1 class="property-title">${property.name}</h1>
         <p><strong>📍 ${property.address}</strong></p>
-        <p><strong>����� $${property.monthlyRent.toLocaleString()}/month</strong></p>
+        <p><strong>������ $${property.monthlyRent.toLocaleString()}/month</strong></p>
     </div>
     
     ${mainImage ? `<img src="${mainImage.url}" alt="${mainImage.alt}" style="width: 100%; max-width: 600px; height: auto; margin-bottom: 20px;">` : ''}
@@ -960,14 +960,74 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     });
   };
 
+  const labelToPlatform = (site: string): RealEstatePlatform | null => {
+    switch (site) {
+      case 'Craigslist':
+        return 'craigslist';
+      case 'Zillow':
+        return 'zillow';
+      case 'Realtor.com':
+        return 'realtors_com';
+      case 'Apartments.com':
+        return 'apartments_com';
+      // Rent.com is not configured in the platform list yet
+      default:
+        return null;
+    }
+  };
+
   const handleListingSiteLogin = (site: string) => {
     setSelectedListingSite(site);
+    const platform = labelToPlatform(site);
+    setSelectedPlatform(platform);
     setLoginDialogOpen(true);
   };
 
-  const handleLoginAndPost = () => {
+  const publishToSelectedPlatform = async (platform: RealEstatePlatform) => {
+    if (!selectedProperty) return;
+    await RealEstatePlatformService.initialize();
+
+    // If not authenticated, open auth flow
+    if (!RealEstatePlatformService.isPlatformAuthenticated(platform)) {
+      setAuthPlatform(platform);
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    const contentText = listingFormData.customContent || selectedProperty.description || '';
+    const htmlContent = generateHTMLContent(selectedProperty, contentText);
+
+    const propertyPayload: any = {
+      id: selectedProperty.id,
+      propertyId: selectedProperty.id,
+      name: selectedProperty.name,
+      title: selectedProperty.name,
+      description: contentText,
+      htmlContent,
+      price: selectedProperty.monthlyRent,
+      address: selectedProperty.address,
+      bedrooms: selectedProperty.bedrooms || 0,
+      bathrooms: selectedProperty.bathrooms || 0,
+      squareFootage: selectedProperty.squareFootage || undefined,
+      images: selectedProperty.images || [],
+      type: selectedProperty.type,
+    };
+
+    const job = await RealEstatePlatformService.publishProperty(propertyPayload, [platform], 'admin');
+    if (job && job.status !== 'failed') {
+      alert(`Listing posted to ${selectedListingSite}.`);
+    } else {
+      alert(`Failed to post to ${selectedListingSite}. Please try again.`);
+    }
+  };
+
+  const handleLoginAndPost = async () => {
     setLoginDialogOpen(false);
-    alert(`Login functionality for ${selectedListingSite} would be implemented here. This would open a secure authentication window and automatically post the listing.`);
+    if (!selectedPlatform) {
+      alert('This platform is not supported yet.');
+      return;
+    }
+    await publishToSelectedPlatform(selectedPlatform);
   };
 
   // Get available prospects (tenants with Prospective status and contacts marked as Prospect)
