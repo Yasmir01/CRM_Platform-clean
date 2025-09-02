@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 
-/**
- * Validates and normalizes a locale string against BCP‑47 shape and a whitelist.
- */
-export function useValidatedLocale(
+export function validateLocale(
   rawLocale: string | undefined,
   options?: {
     supportedLocales?: readonly string[];
@@ -21,23 +18,32 @@ export function useValidatedLocale(
     return bcp47Regex.test(trimmed);
   };
 
-  const resolved = useMemo(() => {
-    if (!rawLocale) {
-      return { locale: fallbackLocale, isValid: false } as const;
-    }
+  if (!rawLocale) {
+    return { locale: fallbackLocale, isValid: false } as const;
+  }
 
-    const normalized = rawLocale.replace("_", "-").toLowerCase();
+  const normalized = rawLocale.replace("_", "-").toLowerCase();
 
-    if (!isWellFormedBCP47(normalized)) {
-      return { locale: fallbackLocale, isValid: false } as const;
-    }
+  if (!isWellFormedBCP47(normalized)) {
+    return { locale: fallbackLocale, isValid: false } as const;
+  }
 
-    if (supportedLocales.length && !supportedLocales.includes(normalized)) {
-      return { locale: fallbackLocale, isValid: false } as const;
-    }
+  if (supportedLocales.length && !supportedLocales.includes(normalized)) {
+    return { locale: fallbackLocale, isValid: false } as const;
+  }
 
-    return { locale: normalized, isValid: true } as const;
-  }, [rawLocale, supportedLocales, fallbackLocale]);
+  return { locale: normalized, isValid: true } as const;
+}
 
-  return resolved;
+/**
+ * React hook wrapper if you want memoization in components.
+ */
+export function useValidatedLocale(
+  rawLocale: string | undefined,
+  options?: {
+    supportedLocales?: readonly string[];
+    fallbackLocale?: string;
+  }
+) {
+  return useMemo(() => validateLocale(rawLocale, options), [rawLocale, options?.fallbackLocale, Array.isArray(options?.supportedLocales) ? options!.supportedLocales!.join("|") : "no-list"]);
 }
