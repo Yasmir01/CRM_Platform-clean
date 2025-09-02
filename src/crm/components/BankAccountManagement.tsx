@@ -155,12 +155,8 @@ const BankAccountManagement: React.FC<BankAccountManagementProps> = ({ tenantId 
     return accountNumber.includes('*') ? accountNumber : `****${accountNumber.slice(-4)}`;
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount / 100);
-  };
+  const { formatCurrency } = require('../utils/i18nFormat');
+  const formatCurrencyCents = (amount: number) => formatCurrency.useI18nFormat ? formatCurrency.useI18nFormat().formatCurrency(amount / 100) : new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(amount / 100);
 
   if (loading) {
     return (
@@ -254,7 +250,7 @@ const BankAccountManagement: React.FC<BankAccountManagementProps> = ({ tenantId 
                         Daily Limit
                       </Typography>
                       <Typography variant="body1">
-                        {connection.dailyLimit ? formatCurrency(connection.dailyLimit) : 'No limit'}
+                        {connection.dailyLimit ? formatCurrencyCents(connection.dailyLimit) : 'No limit'}
                       </Typography>
                     </Grid>
                     <Grid item xs={6}>
