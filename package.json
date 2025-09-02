@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:push": "prisma db push --schema prisma/schema.prisma",
-    "prisma:seed": "node prisma/seed.mjs"
+    "prisma:seed": "node prisma/seed.mjs",
+    "prisma:seed-demo": "node prisma/seed-demo.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
