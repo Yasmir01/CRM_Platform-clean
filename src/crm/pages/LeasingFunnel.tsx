@@ -7,6 +7,7 @@
    • Mini‑calendar that lists all scheduled showings
    • “Convert to Tenant” button that moves a card to the final column
    • Mock API layer (replace with real endpoints)
+   • Property linking and sub‑page popups triggered on stage changes
    ----------------------------------------------------------------------- */
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -21,7 +22,7 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useSortable } from "@dnd-kit/sortable";
+import { useSortable, SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import {
   Box,
   Card,
@@ -31,18 +32,21 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   TextField,
   IconButton,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import "./leasingFunnel.css";
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
 import { format, parseISO } from "date-fns";
 import { Calendar, momentLocalizer, Views, Event as RBCEvent } from "react-big-calendar";
-import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { LocalStorageService } from "../services/LocalStorageService";
+import PropertyDetailPage from "./PropertyDetailPage";
 
 /* -------------------------- Types -------------------------------------- */
 
@@ -55,6 +59,7 @@ interface Lead {
   phone: string;
   stage: Stage;
   notes?: string;
+  propertyId?: string;
 }
 
 interface Appointment {
@@ -106,14 +111,6 @@ function nextStage(current: Stage): Stage {
   const order: Stage[] = ["Lead", "Showing", "Applicant", "Tenant"];
   const idx = order.indexOf(current);
   return order[Math.min(idx + 1, order.length - 1)];
-}
-
-function useIsMounted() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  return mounted;
 }
 
 /* Draggable lead card */
@@ -201,6 +198,17 @@ export default function LeasingFunnel() {
   const [showScheduler, setShowScheduler] = useState(false);
   const [draggedLeadId, setDraggedLeadId] = useState<string | null>(null);
 
+  // Property linking + subpage
+  const [propertySelectOpen, setPropertySelectOpen] = useState(false);
+  const [propertyChoice, setPropertyChoice] = useState<string>("");
+  const [pendingMove, setPendingMove] = useState<{ leadId: string; targetStage: Stage; openApp?: boolean; openTenant?: boolean } | null>(null);
+  const [propertyDetailOpen, setPropertyDetailOpen] = useState(false);
+  const [propertyDetailId, setPropertyDetailId] = useState<string>("");
+  const [autoOpenApp, setAutoOpenApp] = useState(false);
+  const [autoOpenTenant, setAutoOpenTenant] = useState(false);
+
+  const properties = useMemo(() => LocalStorageService.getProperties() || [], []);
+
   // Load initial data
   useEffect(() => {
     (async () => {
@@ -252,6 +260,15 @@ export default function LeasingFunnel() {
     setDraggedLeadId(event.active.id);
   };
 
+  const openPropertyFlow = (lead: Lead, targetStage: Stage) => {
+    // Open property page and optionally dialogs
+    if (!lead.propertyId) return; // safety
+    setPropertyDetailId(lead.propertyId);
+    setAutoOpenApp(targetStage === "Applicant");
+    setAutoOpenTenant(targetStage === "Tenant");
+    setPropertyDetailOpen(true);
+  };
+
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
     setDraggedLeadId(null);
@@ -261,7 +278,23 @@ export default function LeasingFunnel() {
     if (!movingLead) return;
 
     if (movingLead.stage !== targetStage) {
-      await upsertLead({ ...movingLead, stage: targetStage });
+      // If moving into stages that require property link and none set, prompt selection first
+      const needsProperty = targetStage === "Showing" || targetStage === "Applicant" || targetStage === "Tenant";
+      if (needsProperty && !movingLead.propertyId) {
+        setPendingMove({ leadId: movingLead.id, targetStage, openApp: targetStage === "Applicant", openTenant: targetStage === "Tenant" });
+        setPropertyChoice("");
+        setPropertySelectOpen(true);
+        return;
+      }
+
+      // Update stage immediately
+      const updated = { ...movingLead, stage: targetStage } as Lead;
+      await upsertLead(updated);
+
+      // Open sub-page flows
+      if (targetStage === "Showing" || targetStage === "Applicant" || targetStage === "Tenant") {
+        openPropertyFlow(updated, targetStage);
+      }
       return;
     }
 
@@ -273,11 +306,9 @@ export default function LeasingFunnel() {
       const reorderedIds = arrayMove(idsInStage, oldIndex, newIndex);
       setLeads((prev) => {
         const byId = new Map(prev.map((l) => [l.id, l] as const));
-        const reordered = prev
-          .filter((l) => l.stage !== targetStage)
-          .concat(reorderedIds.map((id) => byId.get(id)!).filter(Boolean) as Lead[]);
-        // Keep relative order of other stages
-        return reordered;
+        const others = prev.filter((l) => l.stage !== targetStage);
+        const reordered = reorderedIds.map((id) => byId.get(id)!).filter(Boolean) as Lead[];
+        return [...others, ...reordered];
       });
     }
   };
@@ -325,6 +356,7 @@ export default function LeasingFunnel() {
       phone: tempLead.phone ?? "",
       notes: tempLead.notes ?? "",
       stage: (tempLead.stage as Stage) ?? "Lead",
+      propertyId: tempLead.propertyId,
     };
     await upsertLead(leadToSave);
     setShowLeadDialog(false);
@@ -422,11 +454,58 @@ export default function LeasingFunnel() {
             <TextField label="Email" type="email" value={tempLead?.email ?? ""} onChange={(e) => setTempLead((p) => ({ ...p, email: e.target.value }))} />
             <TextField label="Phone" value={tempLead?.phone ?? ""} onChange={(e) => setTempLead((p) => ({ ...p, phone: e.target.value }))} />
             <TextField label="Notes" multiline rows={3} value={tempLead?.notes ?? ""} onChange={(e) => setTempLead((p) => ({ ...p, notes: e.target.value }))} />
+            <TextField select label="Linked Property" value={tempLead?.propertyId ?? ""} onChange={(e) => setTempLead((p)=>({ ...p, propertyId: e.target.value }))}>
+              <MenuItem value="">None</MenuItem>
+              {properties.map((p:any) => (
+                <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+              ))}
+            </TextField>
             <Button variant="contained" onClick={saveLead}>
               Save
             </Button>
           </Box>
         </DialogContent>
+      </Dialog>
+
+      {/* Property Selection (when dragging to a stage that requires it) */}
+      <Dialog open={propertySelectOpen} onClose={() => setPropertySelectOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Select Property</DialogTitle>
+        <DialogContent>
+          <TextField
+            select
+            fullWidth
+            label="Property"
+            value={propertyChoice}
+            onChange={(e) => setPropertyChoice(e.target.value)}
+            sx={{ mt: 1 }}
+          >
+            {properties.map((p:any) => (
+              <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPropertySelectOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            disabled={!propertyChoice || !pendingMove}
+            onClick={async () => {
+              if (!pendingMove) return;
+              const lead = leads.find(l => l.id === pendingMove.leadId);
+              if (!lead) return;
+              const updated: Lead = { ...lead, stage: pendingMove.targetStage, propertyId: propertyChoice };
+              await upsertLead(updated);
+              setPropertySelectOpen(false);
+              setPendingMove(null);
+              setPropertyDetailId(propertyChoice);
+              setAutoOpenApp(!!pendingMove.openApp);
+              setAutoOpenTenant(!!pendingMove.openTenant);
+              setPropertyDetailOpen(true);
+            }}
+          >
+            Continue
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Scheduler */}
@@ -441,6 +520,25 @@ export default function LeasingFunnel() {
             </Button>
           </Box>
         </DialogContent>
+      </Dialog>
+
+      {/* Property Sub-Page Modal */}
+      <Dialog
+        open={propertyDetailOpen}
+        onClose={() => setPropertyDetailOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        fullScreen
+      >
+        {propertyDetailId && (
+          <PropertyDetailPage
+            propertyId={propertyDetailId}
+            isModal
+            onClose={() => setPropertyDetailOpen(false)}
+            autoOpenApplication={autoOpenApp}
+            autoOpenTenantDialog={autoOpenTenant}
+          />
+        )}
       </Dialog>
     </Box>
   );
