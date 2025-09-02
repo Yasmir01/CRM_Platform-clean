@@ -94,6 +94,7 @@ import TenantDialog from "../components/TenantDialog";
 import PropertyApplicationDialog from "../components/PropertyApplicationDialog";
 import FormFixesSummary from "../components/FormFixesSummary";
 import PropertyBankAccountSection from "../components/PropertyBankAccountSection";
+import OwnersDistribution from "../components/OwnersDistribution";
 import { LateFeeService } from "../services/LateFeeService";
 import { activityTracker } from "../services/ActivityTrackingService";
 
