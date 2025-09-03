@@ -318,6 +318,36 @@ model MaintenanceRequest {
   @@index([tenantId])
 }
 
+/// Messaging
+model MessageThread {
+  id         String    @id @default(cuid())
+  orgId      String
+  subject    String
+  propertyId String?
+  createdAt  DateTime  @default(now())
+  messages   Message[]
+
+  org        Organization @relation(fields: [orgId], references: [id])
+  property   Property?    @relation(fields: [propertyId], references: [id])
+
+  @@index([orgId])
+  @@index([propertyId])
+}
+
+model Message {
+  id        String        @id @default(cuid())
+  threadId  String
+  senderId  String
+  content   String
+  createdAt DateTime      @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  sender    User          @relation(fields: [senderId], references: [id])
+
+  @@index([threadId])
+  @@index([senderId])
+}
+
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
