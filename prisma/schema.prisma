@@ -667,3 +667,14 @@ model AutoPay {
   @@index([leaseId])
   @@index([active, dayOfMonth])
 }
+
+model AutoPayRetry {
+  id        String   @id @default(cuid())
+  autoPayId String
+  paymentId String
+  retryAt   DateTime
+  attempted Boolean  @default(false)
+
+  @@index([autoPayId])
+  @@index([retryAt, attempted])
+}
