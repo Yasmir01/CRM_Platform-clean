@@ -12,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { customerId } = body || {};
     if (!customerId) return res.status(400).json({ error: 'Missing customerId' });
 
-    const stripe = new Stripe(secret, { apiVersion: '2024-06-20' });
+    const stripe = new Stripe(secret);
     const session = await stripe.billingPortal.sessions.create({ customer: customerId, return_url: returnUrl });
     return res.status(200).json({ url: session.url });
   } catch (err: any) {
