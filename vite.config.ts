@@ -17,7 +17,8 @@ export default defineConfig({
       "hoist-non-react-statics",
       "use-sync-external-store/shim",
       "use-sync-external-store/shim/with-selector",
-      "use-sync-external-store/with-selector"
+      "use-sync-external-store/with-selector",
+      "bezier-easing"
     ],
     exclude: [
       "@mui/icons-material",
