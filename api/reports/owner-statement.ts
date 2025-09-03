@@ -1,8 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { prisma } from '../_db';
+import { ensurePermission } from '../../src/lib/authorize';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') return res.status(405).end('Method Not Allowed');
+  const user = ensurePermission(req, res, 'reports:read');
+  if (!user) return;
   const ownerId = (req.query.ownerId as string) || '';
   const month = Number(req.query.month || new Date().getMonth() + 1);
   const year = Number(req.query.year || new Date().getFullYear());
