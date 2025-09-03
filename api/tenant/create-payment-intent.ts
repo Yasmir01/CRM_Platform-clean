@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { getUserOr401 } from '../../src/utils/authz';
+import { ensurePermission } from '../../src/lib/authorize';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY as string | undefined;
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2022-11-15' }) : (null as any);
@@ -8,7 +8,7 @@ const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2022-11-15
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const user = getUserOr401(req, res);
+  const user = ensurePermission(req, res, 'payments:create');
   if (!user) return;
 
   if (!stripeSecret || !stripe) return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set' });
