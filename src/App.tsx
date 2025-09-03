@@ -39,6 +39,7 @@ const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplica
 const ApplicationsAdmin = React.lazy(() => import("./crm/pages/ApplicationsAdmin"));
 const ApplicationDetail = React.lazy(() => import("./crm/pages/ApplicationDetail"));
 const PublicApply = React.lazy(() => import("./public/Apply"));
+const ConsentPage = React.lazy(() => import("./public/Consent"));
 const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
 const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
 const Communications = React.lazy(() => import("./crm/pages/Communications"));
@@ -200,6 +201,11 @@ function AppRoutes() {
       <Route path="/help" element={
         <React.Suspense fallback={<PageLoader />}>
           <HelpSupport />
+        </React.Suspense>
+      } />
+      <Route path="/consent/:screeningId" element={
+        <React.Suspense fallback={<PageLoader />}>
+          <ConsentPage />
         </React.Suspense>
       } />
       <Route path="/crm" element={
