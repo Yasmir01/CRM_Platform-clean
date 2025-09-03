@@ -11,6 +11,8 @@ export default function SendLease() {
   const [tenantEmail, setTenantEmail] = useState('');
   const [htmlPreview, setHtmlPreview] = useState('');
   const [leaseDocId, setLeaseDocId] = useState('');
+  const [ownerName, setOwnerName] = useState('');
+  const [ownerEmail, setOwnerEmail] = useState('');
 
   useEffect(() => { (async () => { const r = await fetch('/api/lease-templates/list', { credentials: 'include' }); setTemplates(await r.json()); })(); }, []);
 
@@ -70,6 +72,25 @@ export default function SendLease() {
           </CardContent>
         </Card>
       </Stack>
+      {leaseDocId ? (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>Multi-signer (Tenant + Owner)</Typography>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 1 }}>
+            <TextField label="Owner Name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
+            <TextField label="Owner Email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} />
+            <Button variant="contained" onClick={async () => {
+              const signers = [
+                { name: tenantName, email: tenantEmail, role: 'tenant', order: 1 },
+                { name: ownerName || 'Property Owner', email: ownerEmail || 'owner@example.com', role: 'owner', order: 2 },
+              ];
+              const r = await fetch('/api/leases/send-multi', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseDocumentId: leaseDocId, signers }) });
+              const d = await r.json();
+              console.log('signerLinks', d.signerLinks);
+              alert('Envelope created. (Mock) Open signer links in console for testing.');
+            }}>Send (Multi-signer)</Button>
+          </Stack>
+        </Box>
+      ) : null}
     </Box>
   );
 }
