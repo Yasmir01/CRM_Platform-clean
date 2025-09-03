@@ -1069,6 +1069,12 @@ export default function SalesAutomation() {
           </Grid>
         </Grid>
 
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+          <Button size="small" variant="outlined" href="/api/export/quotes?format=csv">Export Quotes (CSV)</Button>
+          <Box sx={{ width: 8 }} />
+          <Button size="small" variant="outlined" href="/api/export/quotes?format=pdf">Export Quotes (PDF)</Button>
+        </Box>
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
