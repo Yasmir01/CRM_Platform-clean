@@ -53,6 +53,7 @@ import { useMode } from '../contexts/ModeContext';
 import { useCrmData } from '../contexts/CrmDataContext';
 import { LocalStorageService } from '../services/LocalStorageService';
 import { useTenantScope } from '../hooks/useTenantScope';
+import SafeHtml from "../components/SafeHtml";
 
 interface NewsPost {
   id: string;
@@ -682,14 +683,15 @@ export default function NewsBoard() {
                     </Stack>
 
                     {/* Post Content */}
-                    <Box 
-                      sx={{ 
+                    <Box
+                      sx={{
                         '& p': { mb: 1 },
                         '& ul': { pl: 2 },
                         '& li': { mb: 0.5 }
                       }}
-                      dangerouslySetInnerHTML={{ __html: post.content }}
-                    />
+                    >
+                      <SafeHtml html={post.content} />
+                    </Box>
 
                     {/* Post Footer */}
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
