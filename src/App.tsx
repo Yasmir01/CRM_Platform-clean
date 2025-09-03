@@ -80,6 +80,7 @@ const Documents = React.lazy(() => import("./crm/pages/Documents"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
+const SuperAdminLayout = React.lazy(() => import("./crm/components/superadmin/SuperAdminLayout"));
 const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOverview"));
 const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
 const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImpersonate"));
@@ -408,11 +409,13 @@ function AppRoutes() {
             <SubscriptionManagement />
           </React.Suspense>
         } />
-        <Route path="super-admin" element={<SuperAdminApp />} />
-        <Route path="super-admin/overview" element={<React.Suspense fallback={<PageLoader />}><SuperAdminOverview /></React.Suspense>} />
-        <Route path="super-admin/subscribers" element={<React.Suspense fallback={<PageLoader />}><SuperAdminSubscribers /></React.Suspense>} />
-        <Route path="super-admin/impersonate" element={<React.Suspense fallback={<PageLoader />}><SuperAdminImpersonate /></React.Suspense>} />
-        <Route path="super-admin/compliance" element={<React.Suspense fallback={<PageLoader />}><SuperAdminCompliance /></React.Suspense>} />
+        <Route path="super-admin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminLayout /></React.Suspense>}>
+          <Route index element={<React.Suspense fallback={<PageLoader />}><SuperAdminOverview /></React.Suspense>} />
+          <Route path="overview" element={<React.Suspense fallback={<PageLoader />}><SuperAdminOverview /></React.Suspense>} />
+          <Route path="subscribers" element={<React.Suspense fallback={<PageLoader />}><SuperAdminSubscribers /></React.Suspense>} />
+          <Route path="impersonate" element={<React.Suspense fallback={<PageLoader />}><SuperAdminImpersonate /></React.Suspense>} />
+          <Route path="compliance" element={<React.Suspense fallback={<PageLoader />}><SuperAdminCompliance /></React.Suspense>} />
+        </Route>
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
             <HelpSupport />
