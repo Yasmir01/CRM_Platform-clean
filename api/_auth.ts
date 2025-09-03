@@ -4,9 +4,11 @@ export function isMutatingMethod(method?: string) {
 
 export function isAuthorizedAdmin(req: any) {
   const token = process.env.ADMIN_API_TOKEN;
-  if (!token) return true; // if no token configured, allow (development)
   const header = (req.headers?.['x-admin-token'] || req.headers?.['X-Admin-Token'] || '') as string;
-  return header === token;
+  if (process.env.NODE_ENV === 'production') {
+    return Boolean(token) && header === token;
+  }
+  return !token || header === token;
 }
 
 export function requireAdminOr403(req: any, res: any) {
