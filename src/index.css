@@ -97,3 +97,4 @@ body > iframe[src*="metamask"] {
 .card-field { margin-top: 8px; }
 .export-button-group { display: inline-block; margin: 0 8px; }
 .export-actions button + button { margin-left: 8px; }
+.export-actions a + a { margin-left: 8px; }
