@@ -333,9 +333,11 @@ function AppRoutes() {
             <MaintenanceReport />
           </React.Suspense>
         } />
-        <Route path="owner-ledger">
-          <Route path=":" element={<div /> } />
-        </Route>
+        <Route path="owner-ledger" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <OwnerLedger />
+          </React.Suspense>
+        } />
         <Route path="owner-ledger/:propertyId" element={
           <React.Suspense fallback={<PageLoader />}>
             <OwnerLedger />
