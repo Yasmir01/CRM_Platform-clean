@@ -91,6 +91,7 @@ const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
 const LeaseTemplates = React.lazy(() => import("./crm/pages/LeaseTemplates"));
 const SendLease = React.lazy(() => import("./crm/pages/SendLease"));
+const LeaseRenewal = React.lazy(() => import("./crm/pages/LeaseRenewal"));
 const TenantLeaseView = React.lazy(() => import("./portals/TenantLeaseView"));
 const MockSign = React.lazy(() => import("./public/MockSign"));
 const Messages = React.lazy(() => import("./crm/pages/Messages"));
@@ -399,6 +400,11 @@ function AppRoutes() {
         <Route path="send-lease" element={
           <React.Suspense fallback={<PageLoader />}>
             <SendLease />
+          </React.Suspense>
+        } />
+        <Route path="lease-renewal" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LeaseRenewal />
           </React.Suspense>
         } />
         <Route path="email-marketing" element={
