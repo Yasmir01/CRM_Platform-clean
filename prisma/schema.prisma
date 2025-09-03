@@ -484,9 +484,13 @@ model TenantApplication {
   phone          String?
   moveInDate     DateTime?
   status         String               @default("pending") // pending, under_review, approved, denied
+  decisionNote   String?
+  decidedAt      DateTime?
+  decidedBy      String?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   documents      ApplicationDocument[]
+  screenings     TenantScreening[]
 
   @@index([orgId])
   @@index([propertyId])
