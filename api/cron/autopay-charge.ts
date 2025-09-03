@@ -38,8 +38,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         metadata: { tenantId: u.id, orgId: u.orgId, leaseId: lease.id, type: 'rent_autopay' },
       });
       processed += 1;
-    } catch (e) {
-      console.error('autopay failed', u.id, (e as any)?.message || e);
+    } catch (e: any) {
+      const msg = e?.message || 'autopay failed';
+      await prisma.autopayAttempt.create({ data: { tenantId: u.id, leaseId: lease.id, orgId: u.orgId, amount: lease.rentAmount || 0, errorMsg: msg } });
+      await notify({ userId: u.id, type: 'autopay_failed', title: 'Autopay Failed', message: msg });
     }
   }
 
