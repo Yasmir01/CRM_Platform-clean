@@ -48,7 +48,12 @@ export default function ApplicationDetail() {
                 {screenings.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell>{s.provider}</TableCell>
-                    <TableCell>{s.status}</TableCell>
+                    <TableCell>
+                      {s.status}
+                      {s.status === 'awaiting_consent' ? (
+                        <Typography variant="body2" color="warning.main">Awaiting tenant consent</Typography>
+                      ) : null}
+                    </TableCell>
                     <TableCell>{s.reportUrl ? <Link href={s.reportUrl} target="_blank" rel="noopener">View</Link> : ''}</TableCell>
                   </TableRow>
                 ))}
