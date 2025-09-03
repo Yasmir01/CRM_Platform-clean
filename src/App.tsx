@@ -36,6 +36,8 @@ const AutopayFailures = React.lazy(() => import("./crm/pages/AutopayFailures"));
 const AdminReports = React.lazy(() => import("./crm/pages/AdminReports"));
 const Applications = React.lazy(() => import("./crm/pages/Applications"));
 const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
+const ApplicationsAdmin = React.lazy(() => import("./crm/pages/ApplicationsAdmin"));
+const PublicApply = React.lazy(() => import("./public/Apply"));
 const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
 const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
 const Communications = React.lazy(() => import("./crm/pages/Communications"));
@@ -172,6 +174,7 @@ function AppRoutes() {
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
+      <Route path="/apply/:propertyId" element={<React.Suspense fallback={<PageLoader />}><PublicApply /></React.Suspense>} />
       <Route path="/tenant/security" element={<React.Suspense fallback={<PageLoader />}><TenantSecurity /></React.Suspense>} />
       <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
       <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
@@ -247,6 +250,11 @@ function AppRoutes() {
         <Route path="applications" element={
           <React.Suspense fallback={<PageLoader />}>
             <Applications />
+          </React.Suspense>
+        } />
+        <Route path="admin-applications" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <ApplicationsAdmin />
           </React.Suspense>
         } />
         <Route path="applications/apply" element={
