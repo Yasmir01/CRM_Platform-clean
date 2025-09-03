@@ -10,7 +10,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    disabled: true,
+    noDiscovery: true,
+    include: [],
   },
   build: {
     target: 'es2015',
