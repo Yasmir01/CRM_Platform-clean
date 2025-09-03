@@ -9,5 +9,8 @@
       "source": "/((?!api/.*).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    { "path": "/api/maintenance/recurring/run", "schedule": "0 * * * *" }
   ]
 }
