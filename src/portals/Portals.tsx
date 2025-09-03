@@ -155,6 +155,7 @@ export function AdminUsers() {
         <>
           <UserPermissionsGrid />
           <ExportSchedule />
+          <ImpersonationToggle />
         </>
       )}
     </RoleLayout>
