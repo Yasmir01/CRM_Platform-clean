@@ -75,6 +75,7 @@ const BackupManagement = React.lazy(() => import("./crm/components/BackupManagem
 const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
+const Documents = React.lazy(() => import("./crm/pages/Documents"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
@@ -305,6 +306,11 @@ function AppRoutes() {
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
+          </React.Suspense>
+        } />
+        <Route path="documents" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Documents />
           </React.Suspense>
         } />
         <Route path="email-marketing" element={
