@@ -638,13 +638,8 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConnectDialog({ open: false, step: "provider" })}>
-            Cancel
+            Close
           </Button>
-          {connectDialog.step === "auth" && (
-            <Button variant="contained" onClick={handleCompleteConnection}>
-              Complete Connection
-            </Button>
-          )}
         </DialogActions>
       </Dialog>
     </>
