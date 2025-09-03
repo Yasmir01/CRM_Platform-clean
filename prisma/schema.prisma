@@ -200,10 +200,15 @@ enum EntryType {
 
 model Property {
   id        String   @id @default(uuid())
+  orgId     String?
+  ownerId   String?
   address   String
   units     Unit[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([ownerId])
 }
 
 model Unit {
@@ -316,6 +321,38 @@ model MaintenanceRequest {
   @@index([status])
   @@index([orgId])
   @@index([tenantId])
+}
+
+/// Owner Ledger models
+model OwnerPayment {
+  id         String   @id @default(cuid())
+  tenantId   String
+  orgId      String?
+  propertyId String
+  amount     Float
+  date       DateTime @default(now())
+  type       String
+
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+  @@index([orgId])
+  @@index([tenantId])
+}
+
+model OwnerExpense {
+  id          String   @id @default(cuid())
+  orgId       String?
+  propertyId  String
+  amount      Float
+  category    String
+  description String?
+  date        DateTime @default(now())
+
+  property    Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+  @@index([orgId])
 }
 
 /// Messaging
