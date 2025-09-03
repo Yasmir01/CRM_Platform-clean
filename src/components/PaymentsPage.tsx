@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { ExportButton } from './ExportButton';
 
 declare global { interface Window { __STRIPE_PUBLIC_KEY?: string } }
 
