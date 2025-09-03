@@ -45,6 +45,7 @@ const Profile = React.lazy(() => import("./crm/pages/Profile"));
 import NewsBoard from "./crm/pages/NewsBoard";
 const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
+const Portals = React.lazy(() => import("./portals/Portals"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
@@ -137,6 +138,24 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<CrmLogin />} />
+      {/* Role-based portals */}
+      <Route path="/tenant" element={<React.Suspense fallback={<PageLoader />}><Portals.TenantDashboard /></React.Suspense>} />
+      <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><Portals.TenantPayments /></React.Suspense>} />
+      <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><Portals.TenantMaintenance /></React.Suspense>} />
+      <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><Portals.TenantLease /></React.Suspense>} />
+      <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><Portals.OwnerDashboard /></React.Suspense>} />
+      <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><Portals.OwnerStatements /></React.Suspense>} />
+      <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><Portals.OwnerProperties /></React.Suspense>} />
+      <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><Portals.VendorDashboard /></React.Suspense>} />
+      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><Portals.VendorWorkOrders /></React.Suspense>} />
+      <Route path="/vendor/profile" element={<React.Suspense fallback={<PageLoader />}><Portals.VendorProfile /></React.Suspense>} />
+      <Route path="/manager" element={<React.Suspense fallback={<PageLoader />}><Portals.ManagerDashboard /></React.Suspense>} />
+      <Route path="/manager/tenants" element={<React.Suspense fallback={<PageLoader />}><Portals.ManagerTenants /></React.Suspense>} />
+      <Route path="/manager/owners" element={<React.Suspense fallback={<PageLoader />}><Portals.ManagerOwners /></React.Suspense>} />
+      <Route path="/manager/maintenance" element={<React.Suspense fallback={<PageLoader />}><Portals.ManagerMaintenance /></React.Suspense>} />
+      <Route path="/admin" element={<React.Suspense fallback={<PageLoader />}><Portals.AdminDashboard /></React.Suspense>} />
+      <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><Portals.AdminUsers /></React.Suspense>} />
+      <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><Portals.AdminLogs /></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
           <TenantPortal />
