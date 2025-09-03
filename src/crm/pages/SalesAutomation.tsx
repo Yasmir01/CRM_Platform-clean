@@ -469,7 +469,7 @@ export default function SalesAutomation() {
   const [filterStage, setFilterStage] = React.useState("All");
   const [filterProduct, setFilterProduct] = React.useState("All");
   const [deals] = React.useState<AddOnDeal[]>(mockAddOnDeals);
-  const [quotes, setQuotes] = React.useState<AddOnQuote[]>(mockAddOnQuotes);
+  const [quotes, setQuotes] = React.useState<AddOnQuote[]>(addOnQuotes as any);
   const [openDealDialog, setOpenDealDialog] = React.useState(false);
   const [openQuoteDialog, setOpenQuoteDialog] = React.useState(false);
   const [selectedDeal, setSelectedDeal] = React.useState<AddOnDeal | null>(null);
