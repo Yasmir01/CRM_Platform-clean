@@ -50,6 +50,7 @@ export default function AdminPayments() {
                     <TableCell align="right">Amount</TableCell>
                     <TableCell>Method</TableCell>
                     <TableCell>Status</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -61,6 +62,22 @@ export default function AdminPayments() {
                       <TableCell align="right">${p.amount}</TableCell>
                       <TableCell>{p.method}</TableCell>
                       <TableCell sx={{ color: p.status === 'succeeded' ? 'success.main' : p.status === 'failed' ? 'error.main' : 'text.secondary' }}>{p.status}</TableCell>
+                      <TableCell align="right">
+                        {p.status === 'succeeded' ? (
+                          <button
+                            onClick={async () => {
+                              if (!window.confirm('Refund this payment?')) return;
+                              const r = await fetch('/api/payments/refund', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ paymentId: p.id }) });
+                              const d = await r.json();
+                              if (d.ok) alert('Refund processed'); else alert('Error: ' + (d.error || 'Unknown'));
+                              await (async () => { const res = await fetch(`/api/payments/admin/list${status ? `?status=${encodeURIComponent(status)}` : ''}`, { credentials: 'include' }); const dd = await res.json(); setPayments(Array.isArray(dd) ? dd : []); })();
+                            }}
+                            style={{ padding: '6px 10px', background: '#d32f2f', color: '#fff', borderRadius: 4, border: 0, cursor: 'pointer' }}
+                          >
+                            Refund
+                          </button>
+                        ) : null}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
