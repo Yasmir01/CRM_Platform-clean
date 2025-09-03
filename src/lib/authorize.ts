@@ -5,10 +5,17 @@ import { getUserOr401 } from '../utils/authz';
 export function userHasPermissions(user: any, needed: string | string[]): boolean {
   if (!user) return false;
   const role: Role = normalizeRole(user.role || (Array.isArray(user.roles) ? user.roles[0] : 'TENANT'));
-  const rolePerms = permissions[role] || [];
-  if (rolePerms.includes('*')) return true;
   const required = Array.isArray(needed) ? needed : [needed];
-  return required.every((p) => rolePerms.includes(p));
+
+  // Per-user overrides via comma-separated permissions
+  let perms: string[] | null = null;
+  if (typeof user.permissions === 'string' && user.permissions.length > 0) {
+    perms = user.permissions.split(',').map((p: string) => p.trim());
+  }
+
+  const effective = perms ?? (permissions[role] || []);
+  if (effective.includes('*')) return true;
+  return required.every((p) => effective.includes(p));
 }
 
 export function authorize(user: any, needed: string | string[]) {
