@@ -352,9 +352,24 @@ export default function Properties() {
   // Load saved listings on mount
   React.useEffect(() => {
     try {
-      const saved = LocalStorageService.getItem<PropertyListing[]>("property_listings", [] as any);
+      const saved = LocalStorageService.getItem<PropertyListing>("property_listings", [] as any) as unknown as PropertyListing[];
       if (saved && Array.isArray(saved) && saved.length > 0) {
-        setListings(saved);
+        // Remove previously auto-simulated listings (ids like "listing-<propertyId>")
+        const withoutSimulated = saved.filter(l => l && typeof l.id === 'string' && !l.id.startsWith('listing-'));
+        // Dedupe by propertyId keeping the most recently updated
+        const byProp = new Map<string, PropertyListing>();
+        for (const l of withoutSimulated) {
+          const existing = l && byProp.get(l.propertyId);
+          if (!existing) {
+            byProp.set(l.propertyId, l);
+          } else {
+            const a = new Date(existing.lastUpdated || 0).getTime();
+            const b = new Date(l.lastUpdated || 0).getTime();
+            byProp.set(l.propertyId, b >= a ? l : existing);
+          }
+        }
+        const cleaned = Array.from(byProp.values());
+        setListings(cleaned);
       }
     } catch {}
   }, []);
@@ -3873,7 +3888,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n���� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);
