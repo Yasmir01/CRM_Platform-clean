@@ -386,6 +386,11 @@ model PaymentPlan {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   installments PaymentPlanInstallment[]
+
+  tenant     User     @relation(fields: [tenantId], references: [id])
+
+  @@index([orgId])
+  @@index([tenantId])
 }
 
 model PaymentPlanInstallment {
@@ -416,6 +421,8 @@ model AutopayAttempt {
   errorMsg  String?
   tryCount  Int      @default(1)
   createdAt DateTime @default(now())
+
+  tenant    User     @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
   @@index([leaseId])
