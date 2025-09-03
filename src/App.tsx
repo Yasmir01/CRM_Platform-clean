@@ -77,6 +77,7 @@ const SubscriptionManagement = React.lazy(() => import("./crm/pages/Subscription
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
+const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
 
 // Loading component
 function PageLoader() {
