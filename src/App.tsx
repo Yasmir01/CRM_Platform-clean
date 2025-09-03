@@ -58,6 +58,7 @@ const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantDashboard })));
 const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantPayments })));
+const TenantPaymentsSimple = React.lazy(() => import("./portals/TenantPaymentsSimple"));
 const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
 const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
 const TenantSecurity = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantSecurity })));
@@ -179,6 +180,7 @@ function AppRoutes() {
       {/* Role-based portals */}
       <Route path="/tenant" element={<React.Suspense fallback={<PageLoader />}><TenantDashboard /></React.Suspense>} />
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
+      <Route path="/tenant/payments/simple" element={<React.Suspense fallback={<PageLoader />}><TenantPaymentsSimple /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
       <Route path="/tenant/leases/:id" element={<React.Suspense fallback={<PageLoader />}><TenantLeaseView /></React.Suspense>} />
