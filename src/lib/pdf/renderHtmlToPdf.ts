@@ -1,5 +1,5 @@
 import type { Browser } from 'puppeteer-core';
-import chromium from '@sparticuz/chromium-aws-lambda';
+import chromium from '@sparticuz/chromium';
 
 let _browser: Browser | null = null;
 
