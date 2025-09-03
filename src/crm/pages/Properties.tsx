@@ -2168,12 +2168,14 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         </Grid>
 
         {/* Alert for vacant properties not listed */}
-        {(vacantProperties?.length || 0) > (listings || []).length && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            You have {(vacantProperties?.length || 0) - (listings || []).length} vacant property(ies) that haven't been listed yet. 
-            Consider creating listings to attract potential tenants.
-          </Alert>
-        )}
+        {(() => {
+          const count = (vacantProperties || []).filter(p => !(listings || []).some(l => l && l.propertyId === p.id && l.status === "Listed")).length;
+          return count > 0 ? (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              You have {count} vacant propert{count > 1 ? 'ies' : 'y'} that haven't been listed yet. Consider creating listings to attract potential tenants.
+            </Alert>
+          ) : null;
+        })()}
 
         {/* Properties with Listings */}
         <Typography variant="h6" sx={{ mb: 2 }}>
@@ -4104,7 +4106,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
               const inspectionDateTime = new Date(`${inspectionData.date}T${inspectionData.time}`);
               const formattedDateTime = inspectionDateTime.toLocaleString();
 
-              alert(`Inspection scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${inspectionData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Inspector: ${inspectionData.inspector}\n• Tenant Notification: ${inspectionData.notifyTenant ? `Yes (${inspectionData.reminderDays} days notice)` : 'No'}\n\n✅ Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${inspectionData.inspector}\n�� ${inspectionData.notifyTenant ? 'Tenant notification scheduled' : 'No tenant notification'}\n\nThe inspection is now saved in your CRM system.`);
+              alert(`Inspection scheduled successfully! 🎉\n\n📋 Details:\n• Type: ${inspectionData.type}\n• Property: ${managingProperty?.name}\n• Date & Time: ${formattedDateTime}\n• Inspector: ${inspectionData.inspector}\n• Tenant Notification: ${inspectionData.notifyTenant ? `Yes (${inspectionData.reminderDays} days notice)` : 'No'}\n\n��� Created:\n• Calendar event for ${formattedDateTime}\n• Task assigned to ${inspectionData.inspector}\n�� ${inspectionData.notifyTenant ? 'Tenant notification scheduled' : 'No tenant notification'}\n\nThe inspection is now saved in your CRM system.`);
 
               setInspectionDialogOpen(false);
             }}
