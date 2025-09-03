@@ -34,7 +34,9 @@ export default defineConfig({
       "dayjs/plugin/weekOfYear.js",
       "dayjs/plugin/isBetween.js",
       // App usage
-      "dayjs/plugin/isSameOrBefore.js"
+      "dayjs/plugin/isSameOrBefore.js",
+      // CJS library interop
+      "crypto-js"
     ],
     exclude: [
       "@mui/icons-material",
