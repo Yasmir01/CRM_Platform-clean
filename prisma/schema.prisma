@@ -260,14 +260,15 @@ model Lease {
   startDate     DateTime
   endDate       DateTime?
   status        LeaseStatus   @default(ACTIVE)
-  archived      Boolean       @default(false)   // hide from active UI if desired
+  archived      Boolean       @default(false)
   rentAmount    Float?
-  dueDay        Int?          // 1..31, day of the month rent is due
+  dueDay        Int?
   unit          Unit          @relation(fields: [unitId], references: [id])
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
   ledgerEntries LedgerEntry[]
+  renewalSettings LeaseRenewalSetting[]
 
-  @@index([status])                     // fast lookup of terminated leases
+  @@index([status])
   @@index([tenantId])
   @@index([unitId])
 }
@@ -538,6 +539,53 @@ model TenantScreeningConsent {
 
   @@index([screeningId])
   @@index([appId])
+}
+
+model LeaseTemplate {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LeaseDocument {
+  id            String   @id @default(cuid())
+  orgId         String
+  propertyId    String
+  tenantId      String
+  templateId    String?
+  title         String
+  html          String
+  signedPdfUrl  String?
+  status        String   @default("draft")
+  envelopeId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model SignatureEvent {
+  id          String   @id @default(cuid())
+  envelopeId  String
+  type        String
+  payload     Json?
+  createdAt   DateTime @default(now())
+}
+
+model LeaseRenewalSetting {
+  id          String   @id @default(cuid())
+  leaseId     String
+  notify60    Boolean  @default(true)
+  notify30    Boolean  @default(true)
+  notify15    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lease       Lease    @relation(fields: [leaseId], references: [id])
+
+  @@index([leaseId])
 }
 
 /// Document Management System
