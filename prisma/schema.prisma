@@ -55,11 +55,21 @@ model OrgSettings {
 }
 
 model ImpersonationLog {
-  id           String   @id @default(cuid())
-  superAdminId String
-  targetUserId String
-  startedAt    DateTime @default(now())
-  endedAt      DateTime?
+  id             String   @id @default(cuid())
+  superAdminId   String?
+  adminId        String?
+  targetUserId   String
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+  notified       Boolean  @default(false)
+}
+
+model UserNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
 }
 
 enum BillingCycle {
