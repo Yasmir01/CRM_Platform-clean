@@ -16,6 +16,22 @@ export default function SendLease() {
 
   useEffect(() => { (async () => { const r = await fetch('/api/lease-templates/list', { credentials: 'include' }); setTemplates(await r.json()); })(); }, []);
 
+  useEffect(() => {
+    (async () => {
+      const sp = new URLSearchParams(window.location.search);
+      const lid = sp.get('leaseId');
+      if (lid) {
+        const resp = await fetch(`/api/leases/get?id=${encodeURIComponent(lid)}`, { credentials: 'include' });
+        const doc = await resp.json();
+        if (!doc?.error) {
+          setLeaseDocId(doc.id);
+          setHtmlPreview(doc.html || '');
+          setTitle(doc.title || title);
+        }
+      }
+    })();
+  }, []);
+
   const preview = async () => {
     const variables = {
       tenant: { name: tenantName, email: tenantEmail },
