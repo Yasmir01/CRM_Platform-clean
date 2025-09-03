@@ -424,12 +424,15 @@ function AppRoutes() {
   );
 }
 
+import ImpersonationBanner from './components/ImpersonationBanner';
+
 export default function App() {
   return (
     <AppTheme>
       <CssBaseline enableColorScheme />
       <LocaleProvider>
         <AuthProvider>
+          <ImpersonationBanner />
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>
