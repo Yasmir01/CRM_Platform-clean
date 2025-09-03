@@ -18,16 +18,11 @@ function walk(dir, files = []) {
 }
 
 function transform(content) {
-  const re = /import\s*\{([\s\S]*?)\}\s*from\s*['"]@mui\/icons-material['"];?/g;
+  const re = /import\s*\{([^}]*)\}\s*from\s*["']@mui\/icons-material["']/gm;
   const before = content;
-  const after = content.replace(re, (match, specifiersBlock) => {
-    const specifiers = specifiersBlock
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    if (specifiers.length === 0) return match;
-
+  const after = content.replace(re, (_, block) => {
+    const specifiers = block.split(',').map(s => s.trim()).filter(Boolean);
+    if (specifiers.length === 0) return _;
     const lines = specifiers.map(spec => {
       const parts = spec.split(/\s+as\s+/i).map(p => p.trim());
       const sourceName = parts[0];
@@ -37,11 +32,7 @@ function transform(content) {
       }
       return `import ${localName} from '@mui/icons-material/${sourceName}';`;
     });
-
-    if (lines.some(l => l === null)) {
-      return match;
-    }
-
+    if (lines.some(l => l === null)) return _;
     return lines.join('\n');
   });
   return { content: after, changed: after !== before };
@@ -57,15 +48,9 @@ function run() {
 
   const files = walk(srcDir);
   let modifiedCount = 0;
-  let checked = 0; let candidates = 0;
-
-  const pattern = /import\s*\{([\s\S]*?)\}\s*from\s*['"]@mui\/icons-material['"];?/;
-
   for (const file of files) {
-    checked++;
-    let text = fs.readFileSync(file, 'utf8');
-    if (!pattern.test(text)) continue;
-    candidates++;
+    const text = fs.readFileSync(file, 'utf8');
+    if (!text.includes("@mui/icons-material")) continue;
     const { content: out, changed } = transform(text);
     if (changed) {
       fs.writeFileSync(file, out, 'utf8');
@@ -73,11 +58,7 @@ function run() {
       console.log('Transformed:', path.relative(projectRoot, file));
     }
   }
-
-  console.log(`Scanned ${checked} files, candidates: ${candidates}`);
   console.log(`Rewrote imports in ${modifiedCount} files.`);
 }
 
-if (require.main === module) {
-  run();
-}
+if (require.main === module) run();
