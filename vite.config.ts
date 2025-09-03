@@ -11,7 +11,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
-    include: ["react-is", "prop-types"],
+    include: ["react-is", "prop-types", "hoist-non-react-statics"],
     exclude: [
       "@mui/icons-material",
       "@mui/x-charts"
