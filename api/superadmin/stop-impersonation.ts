@@ -28,6 +28,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       data: { endedAt: new Date() },
     });
 
+    try {
+      const { notifyImpersonationEnd } = await import('../../src/lib/impersonationNotify');
+      await notifyImpersonationEnd(payload.impersonating, payload.originalEmail);
+    } catch {}
+
     const restored: any = {
       sub: payload.originalUserId,
       email: payload.originalEmail,
