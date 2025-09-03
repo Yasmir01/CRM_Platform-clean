@@ -6,7 +6,7 @@ import { permissions as roleDefaults } from '../../src/lib/permissions';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (req.method === 'GET') {
-      const user = ensurePermission(req, res, '*');
+      const user = ensurePermission(req, res, 'users:manage');
       if (!user) return;
 
       const id = (req.query.id as string | undefined) || undefined;
