@@ -14,9 +14,29 @@ export type SignEnvelopeResult = {
   status: 'created' | 'sent';
 };
 
+export type Signer = { name: string; email: string; role: string; order: number };
+
+export type MultiEnvelopeInput = {
+  title: string;
+  html: string;
+  signers: Signer[];
+  ccEmails?: string[];
+  redirectUrl?: string;
+};
+
+export type MultiEnvelopeResult = {
+  envelopeId: string;
+  signerLinks?: { email: string; url: string }[];
+  status: 'created' | 'sent';
+};
+
 export interface SignProvider {
   createEnvelope(input: SignEnvelopeInput): Promise<SignEnvelopeResult>;
   voidEnvelope(envelopeId: string): Promise<void>;
+}
+
+export interface MultiSignProvider extends SignProvider {
+  createEnvelopeMulti(input: MultiEnvelopeInput): Promise<MultiEnvelopeResult>;
 }
 
 export async function getSignProvider(): Promise<SignProvider> {
@@ -27,4 +47,9 @@ export async function getSignProvider(): Promise<SignProvider> {
   }
   const mod = await import('./providers/mock');
   return mod.mockProvider();
+}
+
+export async function getMultiSignProvider(): Promise<MultiSignProvider> {
+  const mod = await import('./providers/multi-mock');
+  return mod.multiMockProvider();
 }
