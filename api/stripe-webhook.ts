@@ -107,6 +107,16 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         }
         break;
       }
+      case 'payment_intent.payment_failed': {
+        const pi = event.data.object as Stripe.PaymentIntent;
+        const meta = (pi.metadata || {}) as Record<string, string>;
+        try {
+          await prisma.autopayAttempt.create({ data: { tenantId: String(meta.tenantId || ''), leaseId: String(meta.leaseId || ''), orgId: (meta.orgId as any) || null, amount: (pi.amount || 0) / 100, errorMsg: (pi.last_payment_error as any)?.message || 'Payment failed', status: 'failed' } });
+        } catch (err) {
+          console.warn('Failed to record payment_intent.payment_failed', err);
+        }
+        break;
+      }
       default:
         break;
     }
