@@ -125,6 +125,7 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
   });
 
   const [syncingIntegrations, setSyncingIntegrations] = React.useState<Set<string>>(new Set());
+  const [settingsDialog, setSettingsDialog] = React.useState<{ open: boolean; integration?: CalendarIntegration }>({ open: false });
 
   const getProviderIcon = (provider: string) => {
     switch (provider) {
