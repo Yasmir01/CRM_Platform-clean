@@ -140,6 +140,7 @@ export function AdminDashboard() {
 
 import PermissionEditor from '../components/admin/PermissionEditor';
 import UserPermissionsGrid from '../components/admin/UserPermissionsGrid';
+import ExportSchedule from '../components/admin/ExportSchedule';
 
 export function AdminUsers() {
   const params = new URLSearchParams(window.location.search);
@@ -150,7 +151,10 @@ export function AdminUsers() {
       {userId ? (
         <PermissionEditor userId={userId} />
       ) : (
-        <UserPermissionsGrid />
+        <>
+          <UserPermissionsGrid />
+          <ExportSchedule />
+        </>
       )}
     </RoleLayout>
   );
