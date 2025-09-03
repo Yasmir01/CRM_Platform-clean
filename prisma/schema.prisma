@@ -474,6 +474,37 @@ model AccountingIntegration {
   @@index([provider])
 }
 
+/// Tenant Applications
+model TenantApplication {
+  id             String               @id @default(cuid())
+  orgId          String
+  propertyId     String
+  applicantName  String
+  email          String
+  phone          String?
+  moveInDate     DateTime?
+  status         String               @default("pending") // pending, under_review, approved, denied
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  documents      ApplicationDocument[]
+
+  @@index([orgId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model ApplicationDocument {
+  id        String   @id @default(cuid())
+  appId     String
+  type      String
+  url       String
+  createdAt DateTime @default(now())
+
+  application TenantApplication @relation(fields: [appId], references: [id])
+
+  @@index([appId])
+}
+
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
