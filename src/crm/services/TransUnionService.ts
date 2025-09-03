@@ -93,12 +93,12 @@ class TransUnionServiceClass {
    * Initialize the TransUnion service with configuration
    */
   initialize(config?: Partial<TransUnionConfig>) {
-    // In a real implementation, this would come from environment variables
+    // Client must not hold vendor credentials; use server endpoint instead
     this.config = {
-      apiKey: import.meta.env.VITE_TRANSUNION_API_KEY || 'demo_key',
-      apiSecret: import.meta.env.VITE_TRANSUNION_API_SECRET || 'demo_secret',
-      environment: (import.meta.env.VITE_TRANSUNION_ENV as 'sandbox' | 'production') || 'sandbox',
-      baseUrl: import.meta.env.VITE_TRANSUNION_BASE_URL || 'https://api-sandbox.transunion.com',
+      apiKey: 'client_disabled',
+      apiSecret: 'client_disabled',
+      environment: 'sandbox',
+      baseUrl: '',
       ...config
     };
     this.initialized = true;
@@ -118,30 +118,16 @@ class TransUnionServiceClass {
    * Request a credit report from TransUnion
    */
   async requestCreditReport(request: CreditReportRequest): Promise<CreditReportResponse> {
-    if (!this.isConfigured()) {
-      console.warn('TransUnion service not properly configured. Using mock response.');
-      return this.getMockCreditReportResponse();
-    }
-
     try {
-      // In a real implementation, this would make an actual API call to TransUnion
-      const response = await this.makeTransUnionAPICall('/credit-reports', 'POST', {
-        applicant: {
-          firstName: request.firstName,
-          lastName: request.lastName,
-          dateOfBirth: request.dateOfBirth,
-          ssn: request.socialSecurityNumber,
-          address: request.currentAddress,
-          email: request.email,
-          phone: request.phone
-        },
-        permissiblePurpose: request.permissiblePurpose,
-        reportType: 'full_credit_report'
+      const res = await fetch('/api/screening/transunion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicantId: `${request.firstName}-${request.lastName}`.toLowerCase(), ssn: request.socialSecurityNumber })
       });
-
-      return response;
+      if (!res.ok) throw new Error('Screening request failed');
+      await res.json();
+      return { reportId: `req_${Date.now()}`, status: 'pending' };
     } catch (error) {
-      console.error('Error requesting credit report:', error);
       return {
         reportId: `error_${Date.now()}`,
         status: 'failed',
@@ -154,30 +140,16 @@ class TransUnionServiceClass {
    * Request a background check from TransUnion
    */
   async requestBackgroundCheck(request: BackgroundCheckRequest): Promise<BackgroundCheckResponse> {
-    if (!this.isConfigured()) {
-      console.warn('TransUnion service not properly configured. Using mock response.');
-      return this.getMockBackgroundCheckResponse();
-    }
-
     try {
-      // In a real implementation, this would make an actual API call to TransUnion
-      const response = await this.makeTransUnionAPICall('/background-checks', 'POST', {
-        applicant: {
-          firstName: request.firstName,
-          lastName: request.lastName,
-          dateOfBirth: request.dateOfBirth,
-          ssn: request.socialSecurityNumber,
-          address: request.currentAddress,
-          email: request.email,
-          phone: request.phone
-        },
-        searchType: request.searchType,
-        components: ['criminal', 'eviction', 'identity_verification']
+      const res = await fetch('/api/screening/transunion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicantId: `${request.firstName}-${request.lastName}`.toLowerCase(), ssn: request.socialSecurityNumber })
       });
-
-      return response;
+      if (!res.ok) throw new Error('Screening request failed');
+      await res.json();
+      return { reportId: `req_${Date.now()}`, status: 'pending' };
     } catch (error) {
-      console.error('Error requesting background check:', error);
       return {
         reportId: `error_${Date.now()}`,
         status: 'failed',
@@ -232,30 +204,7 @@ class TransUnionServiceClass {
    * Make an API call to TransUnion (placeholder implementation)
    */
   private async makeTransUnionAPICall(endpoint: string, method: string, data?: any): Promise<any> {
-    if (!this.config) {
-      throw new Error('TransUnion service not initialized');
-    }
-
-    const url = `${this.config.baseUrl}${endpoint}`;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.config.apiKey}`,
-      'X-API-Secret': this.config.apiSecret
-    };
-
-    // Note: In a production environment, these API calls should go through a secure backend
-    // to protect API credentials and handle sensitive PII data properly
-    console.log(`[TransUnion API Call] ${method} ${url}`, { headers: { ...headers, 'Authorization': '[REDACTED]' } });
-    
-    // For now, return mock responses since this is a frontend implementation
-    // In production, replace this with actual fetch() calls
-    if (endpoint.includes('/credit-reports')) {
-      return this.getMockCreditReportResponse();
-    } else if (endpoint.includes('/background-checks')) {
-      return this.getMockBackgroundCheckResponse();
-    }
-    
-    throw new Error('Endpoint not implemented');
+    throw new Error('Client-side TransUnion API calls are disabled');
   }
 
   /**
