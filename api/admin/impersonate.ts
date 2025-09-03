@@ -38,7 +38,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({ error: 'Cannot impersonate this role' });
   }
 
-  await prisma.impersonationLog.create({ data: { superAdminId: String((admin as any).sub || (admin as any).id), targetUserId } });
+  await prisma.impersonationLog.create({ data: { adminId: String((admin as any).sub || (admin as any).id), targetUserId } });
+
+  // Notify target user by email and in-app
+  try {
+    const { notifyImpersonation } = await import('../../src/lib/impersonationNotify');
+    await notifyImpersonation(target.id, String((admin as any).email || ''));
+  } catch {}
 
   const payload: any = {
     sub: target.id,
