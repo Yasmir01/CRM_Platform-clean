@@ -31,6 +31,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     data: { superAdminId, targetUserId },
   });
 
+  // Notify target user
+  try {
+    const { notifyImpersonation } = await import('../../src/lib/impersonationNotify');
+    await notifyImpersonation(target.id, superAdminEmail);
+  } catch {}
+
   const payload: any = {
     sub: target.id,
     email: target.email,
