@@ -621,8 +621,7 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
                 Connecting to {connectDialog.provider?.charAt(0).toUpperCase()}{connectDialog.provider?.slice(1)} Calendar
               </Typography>
               <Typography variant="body2" color="text.secondary" textAlign="center">
-                You will be redirected to {connectDialog.provider} to authorize the connection.
-                This allows the CRM to read and write calendar events.
+                Authorizing connection… this may take a few seconds.
               </Typography>
               <Alert severity="info" sx={{ width: '100%' }}>
                 <Typography variant="body2">
