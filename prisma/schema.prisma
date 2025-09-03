@@ -552,18 +552,19 @@ model LeaseTemplate {
 }
 
 model LeaseDocument {
-  id            String   @id @default(cuid())
-  orgId         String
-  propertyId    String
-  tenantId      String
-  templateId    String?
-  title         String
-  html          String
-  signedPdfUrl  String?
-  status        String   @default("draft")
-  envelopeId    String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  orgId           String
+  propertyId      String
+  tenantId        String
+  templateId      String?
+  title           String
+  html            String
+  signedPdfUrl    String?
+  generatedPdfUrl String?
+  status          String   @default("draft")
+  envelopeId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model SignatureEvent {
@@ -572,6 +573,22 @@ model SignatureEvent {
   type        String
   payload     Json?
   createdAt   DateTime @default(now())
+}
+
+model LeaseSigner {
+  id              String   @id @default(cuid())
+  leaseDocumentId String
+  role            String
+  name            String
+  email           String
+  order           Int      @default(1)
+  status          String   @default("pending")
+  signedAt        DateTime?
+  createdAt       DateTime @default(now())
+
+  leaseDocument   LeaseDocument @relation(fields: [leaseDocumentId], references: [id])
+
+  @@index([leaseDocumentId])
 }
 
 model LeaseRenewalSetting {
