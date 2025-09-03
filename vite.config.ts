@@ -11,6 +11,7 @@ export default defineConfig({
       warning: path.resolve(__dirname, "./src/shims/warning.ts"),
       'lodash/chunk': path.resolve(__dirname, "./src/shims/lodash-chunk.ts"),
       'lodash/defaults': path.resolve(__dirname, "./src/shims/lodash-defaults.ts"),
+      'lodash/findIndex': path.resolve(__dirname, "./src/shims/lodash-findIndex.ts"),
     },
   },
   optimizeDeps: {
@@ -44,7 +45,8 @@ export default defineConfig({
       "invariant",
       "warning",
       "lodash/chunk",
-      "lodash/defaults"
+      "lodash/defaults",
+      "lodash/findIndex"
     ],
     exclude: [
       "@mui/icons-material",
