@@ -21,24 +21,36 @@ enum Role {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
+  id          String         @id @default(cuid())
+  email       String         @unique
   name        String?
-  role        Role     @default(TENANT)
+  role        Role           @default(TENANT)
   permissions String?
-  orgId       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  orgId       String
+  org         Organization   @relation(fields: [orgId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   @@index([orgId])
 }
 
+model Organization {
+  id        String        @id @default(cuid())
+  name      String
+  plan      String        @default("basic")
+  users     User[]
+  settings  OrgSettings?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
 model OrgSettings {
-  id             String   @id @default(cuid())
-  orgId          String   @unique
-  exportSchedule String   @default("daily")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id             String        @id @default(cuid())
+  orgId          String        @unique
+  exportSchedule String        @default("daily")
+  organization   Organization  @relation(fields: [orgId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 }
 
 enum BillingCycle {
