@@ -37,6 +37,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';;
 import RichTextEditor from "./RichTextEditor";
+import SafeHtml from "./SafeHtml";
 
 interface TermsSection {
   id: string;
@@ -339,16 +340,15 @@ export default function TermsAndConditions({
                 </Stack>
               </Stack>
               
-              <Box 
-                dangerouslySetInnerHTML={{ 
-                  __html: replaceVariables(section.content) 
-                }} 
-                sx={{ 
-                  "& ul": { pl: 2 }, 
+              <Box
+                sx={{
+                  "& ul": { pl: 2 },
                   "& li": { mb: 0.5 },
                   "& p": { mb: 1 }
                 }}
-              />
+              >
+                <SafeHtml html={replaceVariables(section.content)} />
+              </Box>
             </CardContent>
           </Card>
         ))}
@@ -501,16 +501,15 @@ export default function TermsAndConditions({
           
           <AccordionDetails>
             <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
-              <Box 
-                dangerouslySetInnerHTML={{ 
-                  __html: replaceVariables(section.content) 
-                }} 
-                sx={{ 
-                  "& ul": { pl: 2 }, 
+              <Box
+                sx={{
+                  "& ul": { pl: 2 },
                   "& li": { mb: 0.5 },
                   "& p": { mb: 1 }
                 }}
-              />
+              >
+                <SafeHtml html={replaceVariables(section.content)} />
+              </Box>
             </Paper>
           </AccordionDetails>
         </Accordion>
