@@ -54,6 +54,7 @@ import { getDisplayApplicantName } from "../utils/nameUtils";
 import { useAutoSave } from "../hooks/useAutoSave";
 import EnhancedFileUploadField from "./EnhancedFileUploadField";
 import { StoredFile } from "../services/FileStorageService";
+import SafeHtml from "./SafeHtml";
 
 interface FormField {
   id: string;
@@ -990,7 +991,9 @@ export default function ApplicationFormRenderer({
       <DialogContent sx={{ minHeight: "400px" }}>
         {template.content && currentStep === 0 && (
           <Alert severity="info" sx={{ mb: 3 }}>
-            <Box dangerouslySetInnerHTML={{ __html: template.content }} />
+            <Box>
+              <SafeHtml html={template.content} />
+            </Box>
           </Alert>
         )}
         
