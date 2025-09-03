@@ -16,16 +16,14 @@ import {
   Chip,
   useTheme
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  Business as BusinessIcon,
-  Route as RouteIcon,
-  Security as SecurityIcon,
-  Analytics as AnalyticsIcon,
-  Add as AddIcon,
-  CheckCircle as VerifiedIcon,
-  Warning as WarningIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import BusinessIcon from '@mui/icons-material/Business';
+import RouteIcon from '@mui/icons-material/Route';
+import SecurityIcon from '@mui/icons-material/Security';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import AddIcon from '@mui/icons-material/Add';
+import VerifiedIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';;
 
 import AddBankAccountDialog from '../components/AddBankAccountDialog';
 import EditBankAccountDialog from '../components/EditBankAccountDialog';

@@ -23,14 +23,12 @@ import {
   Chip,
   InputAdornment
 } from '@mui/material';
-import {
-  Route as RouteIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  AccountBalance as BankIcon
-} from '@mui/icons-material';
+import RouteIcon from '@mui/icons-material/Route';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import BankIcon from '@mui/icons-material/AccountBalance';;
 import { BusinessBankAccount, PaymentRoute, RoutingRule } from '../types/BankAccountTypes';
 
 interface PaymentRoutingDialogProps {

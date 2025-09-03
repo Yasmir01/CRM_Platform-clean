@@ -29,24 +29,22 @@ import {
   DialogContent,
   Snackbar
 } from '@mui/material';
-import {
-  Publish,
-  CheckCircle,
-  Error,
-  Warning,
-  Settings,
-  Analytics,
-  Help,
-  Launch,
-  MonetizationOn,
-  Security,
-  Refresh,
-  TrendingUp,
-  Speed,
-  Group,
-  Assignment,
-  Close
-} from '@mui/icons-material';
+import Publish from '@mui/icons-material/Publish';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Warning from '@mui/icons-material/Warning';
+import Settings from '@mui/icons-material/Settings';
+import Analytics from '@mui/icons-material/Analytics';
+import Help from '@mui/icons-material/Help';
+import Launch from '@mui/icons-material/Launch';
+import MonetizationOn from '@mui/icons-material/MonetizationOn';
+import Security from '@mui/icons-material/Security';
+import Refresh from '@mui/icons-material/Refresh';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Speed from '@mui/icons-material/Speed';
+import Group from '@mui/icons-material/Group';
+import Assignment from '@mui/icons-material/Assignment';
+import Close from '@mui/icons-material/Close';;
 
 import { useNavigate } from 'react-router-dom';
 import { useCrmData } from '../contexts/CrmDataContext';

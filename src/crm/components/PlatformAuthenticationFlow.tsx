@@ -43,24 +43,22 @@ import {
   AccordionDetails,
   Tooltip
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  CheckCircle,
-  Error,
-  Warning,
-  Info,
-  Launch,
-  ContentCopy,
-  Refresh,
-  Security,
-  Key,
-  AccountCircle,
-  VpnKey,
-  ExpandMore,
-  Help,
-  OpenInNew
-} from '@mui/icons-material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Warning from '@mui/icons-material/Warning';
+import Info from '@mui/icons-material/Info';
+import Launch from '@mui/icons-material/Launch';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import Refresh from '@mui/icons-material/Refresh';
+import Security from '@mui/icons-material/Security';
+import Key from '@mui/icons-material/Key';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import VpnKey from '@mui/icons-material/VpnKey';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Help from '@mui/icons-material/Help';
+import OpenInNew from '@mui/icons-material/OpenInNew';;
 
 import { RealEstatePlatformService } from '../services/RealEstatePlatformService';
 import {

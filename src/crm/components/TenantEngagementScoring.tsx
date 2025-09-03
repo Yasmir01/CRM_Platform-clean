@@ -17,16 +17,14 @@ import {
   Paper,
   Divider
 } from '@mui/material';
-import {
-  Psychology as PsychologyIcon,
-  TrendingUp as TrendingUpIcon,
-  Star as StarIcon,
-  Timeline as TimelineIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  EmojiEvents as EmojiEventsIcon
-} from '@mui/icons-material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import StarIcon from '@mui/icons-material/Star';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';;
 
 interface TenantEngagement {
   id: string;

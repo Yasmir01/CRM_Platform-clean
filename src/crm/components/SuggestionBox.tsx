@@ -26,29 +26,27 @@ import {
   Badge,
   LinearProgress
 } from '@mui/material';
-import {
-  ThumbUp,
-  ThumbDown,
-  Add,
-  FilterList,
-  Sort,
-  Comment,
-  Visibility,
-  Edit,
-  Delete,
-  TrendingUp,
-  Schedule,
-  CheckCircle,
-  Cancel,
-  Lightbulb,
-  BugReport,
-  Speed,
-  IntegrationInstructions,
-  Palette,
-  AutoAwesome,
-  Assessment,
-  PhoneAndroid
-} from '@mui/icons-material';
+import ThumbUp from '@mui/icons-material/ThumbUp';
+import ThumbDown from '@mui/icons-material/ThumbDown';
+import Add from '@mui/icons-material/Add';
+import FilterList from '@mui/icons-material/FilterList';
+import Sort from '@mui/icons-material/Sort';
+import Comment from '@mui/icons-material/Comment';
+import Visibility from '@mui/icons-material/Visibility';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Schedule from '@mui/icons-material/Schedule';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import Lightbulb from '@mui/icons-material/Lightbulb';
+import BugReport from '@mui/icons-material/BugReport';
+import Speed from '@mui/icons-material/Speed';
+import IntegrationInstructions from '@mui/icons-material/IntegrationInstructions';
+import Palette from '@mui/icons-material/Palette';
+import AutoAwesome from '@mui/icons-material/AutoAwesome';
+import Assessment from '@mui/icons-material/Assessment';
+import PhoneAndroid from '@mui/icons-material/PhoneAndroid';;
 import { suggestionService } from '../services/SuggestionService';
 import {
   Suggestion,

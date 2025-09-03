@@ -29,18 +29,16 @@ import {
   Divider,
   Alert,
 } from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Download as DownloadIcon,
-  Refresh as RefreshIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/FilterList';
+import DownloadIcon from '@mui/icons-material/Download';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import InfoIcon from '@mui/icons-material/Info';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';;
 import { useActivityTracking } from '../hooks/useActivityTracking';
 import { ActivityEvent, ActivityFilter } from '../services/ActivityTrackingService';
 

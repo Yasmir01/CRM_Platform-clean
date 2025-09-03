@@ -21,20 +21,18 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import {
-  Add,
-  Close,
-  Lightbulb,
-  BugReport,
-  TrendingUp,
-  IntegrationInstructions,
-  Speed,
-  Palette,
-  AutoAwesome,
-  Assessment,
-  PhoneAndroid,
-  HelpOutline
-} from '@mui/icons-material';
+import Add from '@mui/icons-material/Add';
+import Close from '@mui/icons-material/Close';
+import Lightbulb from '@mui/icons-material/Lightbulb';
+import BugReport from '@mui/icons-material/BugReport';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import IntegrationInstructions from '@mui/icons-material/IntegrationInstructions';
+import Speed from '@mui/icons-material/Speed';
+import Palette from '@mui/icons-material/Palette';
+import AutoAwesome from '@mui/icons-material/AutoAwesome';
+import Assessment from '@mui/icons-material/Assessment';
+import PhoneAndroid from '@mui/icons-material/PhoneAndroid';
+import HelpOutline from '@mui/icons-material/HelpOutline';;
 import { suggestionService } from '../services/SuggestionService';
 import {
   SuggestionCategory,

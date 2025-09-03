@@ -10,13 +10,11 @@ import {
   CircularProgress,
   Divider
 } from '@mui/material';
-import {
-  Email,
-  CheckCircle,
-  Error as ErrorIcon,
-  Send,
-  Refresh
-} from '@mui/icons-material';
+import Email from '@mui/icons-material/Email';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import Send from '@mui/icons-material/Send';
+import Refresh from '@mui/icons-material/Refresh';;
 import { EmailVerificationService } from '../services/EmailVerificationService';
 
 interface EmailVerificationProps {

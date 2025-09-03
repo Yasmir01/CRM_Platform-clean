@@ -10,11 +10,9 @@ import {
   Box,
   Chip,
 } from "@mui/material";
-import {
-  PersonRounded as PersonIcon,
-  Business as BusinessIcon,
-  Home as TenantIcon,
-} from "@mui/icons-material";
+import PersonIcon from '@mui/icons-material/PersonRounded';
+import BusinessIcon from '@mui/icons-material/Business';
+import TenantIcon from '@mui/icons-material/Home';;
 import { useCrmData } from "../contexts/CrmDataContext";
 import type { PropertyManager, Tenant, Contact } from "../contexts/CrmDataContext";
 

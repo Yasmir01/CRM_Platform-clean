@@ -8,17 +8,15 @@ import {
   Typography,
   CircularProgress
 } from '@mui/material';
-import {
-  AutoMode as AutoPayIcon,
-  Sms as SmsIcon,
-  Email as EmailIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  Warning as WarningIcon,
-  Payment as PaymentIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon
-} from '@mui/icons-material';
+import AutoPayIcon from '@mui/icons-material/AutoMode';
+import SmsIcon from '@mui/icons-material/Sms';
+import EmailIcon from '@mui/icons-material/Email';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import PaymentIcon from '@mui/icons-material/Payment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';;
 import { useTheme } from '@mui/material/styles';
 
 import { tenantFinancialService } from '../services/TenantFinancialService';

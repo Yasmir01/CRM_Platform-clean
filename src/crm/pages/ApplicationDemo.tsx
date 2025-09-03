@@ -15,13 +15,11 @@ import {
   Chip,
   Divider,
 } from "@mui/material";
-import {
-  CheckCircle as CheckCircleIcon,
-  Payment as PaymentIcon,
-  Description as DescriptionIcon,
-  Security as SecurityIcon,
-  Send as SendIcon,
-} from "@mui/icons-material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SecurityIcon from '@mui/icons-material/Security';
+import SendIcon from '@mui/icons-material/Send';;
 import { LocalStorageService } from "../services/LocalStorageService";
 
 interface DemoStep {

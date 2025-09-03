@@ -43,34 +43,32 @@ import {
   AccordionDetails,
   CircularProgress
 } from '@mui/material';
-import {
-  Router as RouterIcon,
-  Psychology as PsychologyIcon,
-  Person as PersonIcon,
-  Group as GroupIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Assignment as AssignmentIcon,
-  Star as StarIcon,
-  Schedule as ScheduleIcon,
-  Settings as SettingsIcon,
-  ExpandMore as ExpandMoreIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  Analytics as AnalyticsIcon,
-  Balance as BalanceIcon,
-  Timeline as TimelineIcon,
-  LocationOn as LocationOnIcon,
-  Language as LanguageIcon,
-  Home as HomeIcon,
-  AttachMoney as AttachMoneyIcon,
-  School as SchoolIcon,
-  WorkOutline as WorkOutlineIcon,
-  EmojiEvents as EmojiEventsIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
+import RouterIcon from '@mui/icons-material/Router';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SpeedIcon from '@mui/icons-material/Speed';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import StarIcon from '@mui/icons-material/Star';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import BalanceIcon from '@mui/icons-material/Balance';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LanguageIcon from '@mui/icons-material/Language';
+import HomeIcon from '@mui/icons-material/Home';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import SchoolIcon from '@mui/icons-material/School';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import RefreshIcon from '@mui/icons-material/Refresh';;
 
 interface Agent {
   id: string;

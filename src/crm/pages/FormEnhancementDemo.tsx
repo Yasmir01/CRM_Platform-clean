@@ -13,12 +13,10 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
-import {
-  CheckCircle as CheckCircleIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
-  BugReport as BugIcon,
-} from "@mui/icons-material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PhoneIcon from '@mui/icons-material/Phone';
+import LocationIcon from '@mui/icons-material/LocationOn';
+import BugIcon from '@mui/icons-material/BugReport';;
 import PhoneNumberField, { isValidPhoneNumber, formatPhoneDisplay } from "../components/PhoneNumberField";
 import StateSelectionField from "../components/StateSelectionField";
 import { useNotifications } from "../components/GlobalNotificationProvider";

@@ -25,14 +25,12 @@ import {
   Grid,
   Divider
 } from '@mui/material';
-import {
-  Receipt as TransactionIcon,
-  TrendingUp as IncomeIcon,
-  TrendingDown as ExpenseIcon,
-  Schedule as PendingIcon,
-  CheckCircle as CompletedIcon,
-  Error as FailedIcon
-} from '@mui/icons-material';
+import TransactionIcon from '@mui/icons-material/Receipt';
+import IncomeIcon from '@mui/icons-material/TrendingUp';
+import ExpenseIcon from '@mui/icons-material/TrendingDown';
+import PendingIcon from '@mui/icons-material/Schedule';
+import CompletedIcon from '@mui/icons-material/CheckCircle';
+import FailedIcon from '@mui/icons-material/Error';;
 import { BusinessBankAccount, BankTransaction } from '../types/BankAccountTypes';
 
 interface ViewTransactionsDialogProps {

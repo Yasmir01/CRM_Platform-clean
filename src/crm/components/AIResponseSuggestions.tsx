@@ -16,15 +16,13 @@ import {
   Paper,
   TextField
 } from '@mui/material';
-import {
-  Psychology as PsychologyIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  ThumbUp as ThumbUpIcon,
-  ThumbDown as ThumbDownIcon,
-  Send as SendIcon,
-  ContentCopy as ContentCopyIcon,
-  Lightbulb as LightbulbIcon
-} from '@mui/icons-material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import SendIcon from '@mui/icons-material/Send';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';;
 
 interface AISuggestion {
   id: string;

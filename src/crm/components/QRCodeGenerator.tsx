@@ -48,36 +48,34 @@ import {
   TableRow,
   Badge,
 } from "@mui/material";
-import {
-  QrCodeRounded as QrCodeRoundedIcon,
-  Download as DownloadIcon,
-  Share as ShareIcon,
-  ContentCopy as CopyIcon,
-  Edit as EditIcon,
-  Analytics as AnalyticsIcon,
-  Palette as PaletteIcon,
-  PhotoCamera as PhotoCameraIcon,
-  CloudUpload as CloudUploadIcon,
-  ExpandMore as ExpandMoreIcon,
-  Person as PersonIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Business as BusinessIcon,
-  Wifi as WifiIcon,
-  Link as LinkIcon,
-  Payment as PaymentIcon,
-  LocationOn as LocationIcon,
-  Event as EventIcon,
-  Visibility as VisibilityIcon,
-  TrendingUp as TrendingUpIcon,
-  Public as PublicIcon,
-  WhatsApp as WhatsAppIcon,
-  Twitter as TwitterIcon,
-  Facebook as FacebookIcon,
-  LinkedIn as LinkedInIcon,
-  Telegram as TelegramIcon,
-  Instagram as InstagramIcon,
-} from "@mui/icons-material";
+import QrCodeRoundedIcon from '@mui/icons-material/QrCodeRounded';
+import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
+import CopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import PaletteIcon from '@mui/icons-material/Palette';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BusinessIcon from '@mui/icons-material/Business';
+import WifiIcon from '@mui/icons-material/Wifi';
+import LinkIcon from '@mui/icons-material/Link';
+import PaymentIcon from '@mui/icons-material/Payment';
+import LocationIcon from '@mui/icons-material/LocationOn';
+import EventIcon from '@mui/icons-material/Event';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import PublicIcon from '@mui/icons-material/Public';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import InstagramIcon from '@mui/icons-material/Instagram';;
 import { uniformTooltipStyles } from "../utils/formStyles";
 import { useCrmData } from "../contexts/CrmDataContext";
 import { LocalStorageService } from "../services/LocalStorageService";

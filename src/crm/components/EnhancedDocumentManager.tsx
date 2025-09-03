@@ -51,38 +51,36 @@ import {
   StepLabel,
   StepContent
 } from '@mui/material';
-import {
-  Upload as UploadIcon,
-  Security as SecurityIcon,
-  History as HistoryIcon,
-  Share as ShareIcon,
-  Download as DownloadIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  Shield as ShieldIcon,
-  Fingerprint as FingerprintIcon,
-  VpnKey as VpnKeyIcon,
-  Timeline as TimelineIcon,
-  Assessment as AssessmentIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  ExpandMore as ExpandMoreIcon,
-  MoreVert as MoreVertIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ContentCopy as ContentCopyIcon,
-  AdminPanelSettings as AdminPanelSettingsIcon,
-  Group as GroupIcon,
-  Person as PersonIcon,
-  FilePresent as FilePresentIcon,
-  InsertDriveFile as InsertDriveFileIcon,
-  PictureAsPdf as PictureAsPdfIcon,
-  Image as ImageIcon,
-  Description as DescriptionIcon
-} from '@mui/icons-material';
+import UploadIcon from '@mui/icons-material/Upload';
+import SecurityIcon from '@mui/icons-material/Security';
+import HistoryIcon from '@mui/icons-material/History';
+import ShareIcon from '@mui/icons-material/Share';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import ShieldIcon from '@mui/icons-material/Shield';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
+import FilePresentIcon from '@mui/icons-material/FilePresent';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import DescriptionIcon from '@mui/icons-material/Description';;
 import { useDropzone } from 'react-dropzone';
 import { documentSecurityService } from '../services/DocumentSecurityService';
 import { uniformTooltipStyles } from '../utils/formStyles';

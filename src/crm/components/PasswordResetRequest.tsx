@@ -12,12 +12,10 @@ import {
   CircularProgress,
   Link
 } from '@mui/material';
-import {
-  Email,
-  ArrowBack,
-  Lock,
-  Send
-} from '@mui/icons-material';
+import Email from '@mui/icons-material/Email';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Lock from '@mui/icons-material/Lock';
+import Send from '@mui/icons-material/Send';;
 import { PasswordResetService } from '../services/PasswordResetService';
 
 interface PasswordResetRequestProps {

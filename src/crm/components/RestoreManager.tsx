@@ -40,22 +40,20 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import {
-  Restore as RestoreIcon,
-  Security as SecurityIcon,
-  VerifiedUser as VerifiedUserIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Schedule as ScheduleIcon,
-  Storage as StorageIcon,
-  Lock as LockIcon,
-  Visibility as VisibilityIcon,
-  Send as SendIcon,
-  Timer as TimerIcon,
-  Shield as ShieldIcon
-} from '@mui/icons-material';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SecurityIcon from '@mui/icons-material/Security';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import StorageIcon from '@mui/icons-material/Storage';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import SendIcon from '@mui/icons-material/Send';
+import TimerIcon from '@mui/icons-material/Timer';
+import ShieldIcon from '@mui/icons-material/Shield';;
 import { BackupRestoreService, BackupMetadata, RestoreOptions } from '../services/BackupRestoreService';
 
 interface RestoreManagerProps {

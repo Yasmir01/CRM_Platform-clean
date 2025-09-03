@@ -15,17 +15,15 @@ import {
   Divider,
   LinearProgress
 } from '@mui/material';
-import {
-  CheckCircle as CheckIcon,
-  Security as SecurityIcon,
-  Payment as PaymentIcon,
-  AccountBalance as BankIcon,
-  Shield as ShieldIcon,
-  Assessment as ComplianceIcon,
-  Integration as IntegrationIcon,
-  Speed as PerformanceIcon,
-  Verified as VerifiedIcon
-} from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import SecurityIcon from '@mui/icons-material/Security';
+import PaymentIcon from '@mui/icons-material/Payment';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import ShieldIcon from '@mui/icons-material/Shield';
+import ComplianceIcon from '@mui/icons-material/Assessment';
+import IntegrationIcon from '@mui/icons-material/Integration';
+import PerformanceIcon from '@mui/icons-material/Speed';
+import VerifiedIcon from '@mui/icons-material/Verified';;
 
 export const PaymentSystemSummary: React.FC = () => {
   const completedFeatures = [

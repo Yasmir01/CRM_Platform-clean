@@ -45,26 +45,24 @@ import {
   Switch,
   Snackbar
 } from '@mui/material';
-import {
-  Publish,
-  CheckCircle,
-  Error,
-  Warning,
-  Info,
-  Edit,
-  Visibility,
-  ExpandMore,
-  Launch,
-  Refresh,
-  Schedule,
-  MonetizationOn,
-  Security,
-  Speed,
-  TrendingUp,
-  Close,
-  Add,
-  Remove
-} from '@mui/icons-material';
+import Publish from '@mui/icons-material/Publish';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Warning from '@mui/icons-material/Warning';
+import Info from '@mui/icons-material/Info';
+import Edit from '@mui/icons-material/Edit';
+import Visibility from '@mui/icons-material/Visibility';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Launch from '@mui/icons-material/Launch';
+import Refresh from '@mui/icons-material/Refresh';
+import Schedule from '@mui/icons-material/Schedule';
+import MonetizationOn from '@mui/icons-material/MonetizationOn';
+import Security from '@mui/icons-material/Security';
+import Speed from '@mui/icons-material/Speed';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Close from '@mui/icons-material/Close';
+import Add from '@mui/icons-material/Add';
+import Remove from '@mui/icons-material/Remove';;
 
 import { useCrmData, Property } from '../contexts/CrmDataContext';
 import { useAuth } from '../contexts/AuthContext';

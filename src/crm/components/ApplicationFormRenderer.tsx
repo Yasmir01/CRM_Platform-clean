@@ -36,16 +36,14 @@ import {
   LinearProgress,
   Autocomplete,
 } from "@mui/material";
-import {
-  Send as SendIcon,
-  Payment as PaymentIcon,
-  Security as SecurityIcon,
-  CloudUpload as UploadIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  AttachFile as AttachFileIcon,
-} from "@mui/icons-material";
+import SendIcon from '@mui/icons-material/Send';
+import PaymentIcon from '@mui/icons-material/Payment';
+import SecurityIcon from '@mui/icons-material/Security';
+import UploadIcon from '@mui/icons-material/CloudUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import AttachFileIcon from '@mui/icons-material/AttachFile';;
 import { useDropzone } from "react-dropzone";
 import ApplicationPaymentForm from "./ApplicationPaymentForm";
 import TermsAndConditions from "./TermsAndConditions";

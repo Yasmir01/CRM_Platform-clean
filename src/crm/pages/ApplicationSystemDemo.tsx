@@ -27,22 +27,20 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import {
-  CheckCircle as CheckCircleIcon,
-  Payment as PaymentIcon,
-  Description as DescriptionIcon,
-  Security as SecurityIcon,
-  Send as SendIcon,
-  PlayArrow as PlayArrowIcon,
-  Settings as SettingsIcon,
-  Code as CodeIcon,
-  Refresh as RefreshIcon,
-  Star as StarIcon,
-  ExpandMore as ExpandMoreIcon,
-  Home as HomeIcon,
-  Person as PersonIcon,
-  Business as BusinessIcon,
-} from "@mui/icons-material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PaymentIcon from '@mui/icons-material/Payment';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SecurityIcon from '@mui/icons-material/Security';
+import SendIcon from '@mui/icons-material/Send';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CodeIcon from '@mui/icons-material/Code';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import StarIcon from '@mui/icons-material/Star';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import BusinessIcon from '@mui/icons-material/Business';;
 import { LocalStorageService } from "../services/LocalStorageService";
 import { PropertyCodeService } from "../services/PropertyCodeService";
 import { PropertyCodeGenerator } from "../utils/propertyCodeGenerator";

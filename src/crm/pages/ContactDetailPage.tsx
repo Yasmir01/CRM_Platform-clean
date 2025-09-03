@@ -44,26 +44,24 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import {
-  ArrowBack,
-  Email,
-  Phone,
-  Edit,
-  Delete,
-  Add,
-  Business,
-  Person,
-  Schedule,
-  Note,
-  Tag,
-  Message,
-  Event,
-  Task,
-  Assignment,
-  ExpandMore,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Email from '@mui/icons-material/Email';
+import Phone from '@mui/icons-material/Phone';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
+import Add from '@mui/icons-material/Add';
+import Business from '@mui/icons-material/Business';
+import Person from '@mui/icons-material/Person';
+import Schedule from '@mui/icons-material/Schedule';
+import Note from '@mui/icons-material/Note';
+import Tag from '@mui/icons-material/Tag';
+import Message from '@mui/icons-material/Message';
+import Event from '@mui/icons-material/Event';
+import Task from '@mui/icons-material/Task';
+import Assignment from '@mui/icons-material/Assignment';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';;
 import { useState, useEffect } from "react";
 import { useCrmData, Contact } from "../contexts/CrmDataContext";
 import CommunicationDialog from "../components/CommunicationDialog";

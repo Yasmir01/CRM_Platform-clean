@@ -30,16 +30,14 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import {
-  CreditCard as CreditCardIcon,
-  AccountBalance as BankIcon,
-  Payment as PaymentIcon,
-  Receipt as ReceiptIcon,
-  Security as SecurityIcon,
-  CheckCircle as CheckCircleIcon,
-  Info as InfoIcon,
-  Lock as LockIcon,
-} from "@mui/icons-material";
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import PaymentIcon from '@mui/icons-material/Payment';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SecurityIcon from '@mui/icons-material/Security';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
+import LockIcon from '@mui/icons-material/Lock';;
 import { PaymentService } from "../services/PaymentService";
 
 interface PaymentMethod {

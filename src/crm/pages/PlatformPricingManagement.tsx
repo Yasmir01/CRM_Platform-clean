@@ -36,16 +36,14 @@ import {
   FormControlLabel,
   InputAdornment
 } from '@mui/material';
-import {
-  ArrowBack,
-  Edit as EditIcon,
-  Add as AddIcon,
-  MonetizationOn,
-  TrendingUp,
-  Assessment,
-  Category,
-  Save as SaveIcon
-} from '@mui/icons-material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import MonetizationOn from '@mui/icons-material/MonetizationOn';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Assessment from '@mui/icons-material/Assessment';
+import Category from '@mui/icons-material/Category';
+import SaveIcon from '@mui/icons-material/Save';;
 import { useNavigate } from 'react-router-dom';
 
 import { RealEstatePlatformService } from '../services/RealEstatePlatformService';

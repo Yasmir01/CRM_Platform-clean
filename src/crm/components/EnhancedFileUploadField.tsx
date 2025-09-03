@@ -19,19 +19,17 @@ import {
   Tooltip,
   Grid
 } from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  AttachFile as AttachFileIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  Download as DownloadIcon,
-  PictureAsPdf as PdfIcon,
-  Description as DocumentIcon,
-  Image as ImageIcon,
-  Close as CloseIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon
-} from '@mui/icons-material';
+import UploadIcon from '@mui/icons-material/CloudUpload';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ViewIcon from '@mui/icons-material/Visibility';
+import DownloadIcon from '@mui/icons-material/Download';
+import PdfIcon from '@mui/icons-material/PictureAsPdf';
+import DocumentIcon from '@mui/icons-material/Description';
+import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandIcon from '@mui/icons-material/ExpandMore';
+import CollapseIcon from '@mui/icons-material/ExpandLess';;
 import { useDropzone } from 'react-dropzone';
 import { FileStorageService, StoredFile } from '../services/FileStorageService';
 

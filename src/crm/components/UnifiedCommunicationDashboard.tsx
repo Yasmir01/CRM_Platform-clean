@@ -39,26 +39,24 @@ import {
   TableRow,
   Paper
 } from '@mui/material';
-import {
-  Email as EmailIcon,
-  Sms as SmsIcon,
-  Phone as PhoneIcon,
-  VideoCall as VideoCallIcon,
-  Fax as FaxIcon,
-  Chat as ChatIcon,
-  Reply as ReplyIcon,
-  Forward as ForwardIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  Schedule as ScheduleIcon,
-  Notifications as NotificationsIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Psychology as PsychologyIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  Analytics as AnalyticsIcon,
-  Timeline as TimelineIcon
-} from '@mui/icons-material';
+import EmailIcon from '@mui/icons-material/Email';
+import SmsIcon from '@mui/icons-material/Sms';
+import PhoneIcon from '@mui/icons-material/Phone';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import FaxIcon from '@mui/icons-material/Fax';
+import ChatIcon from '@mui/icons-material/Chat';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ForwardIcon from '@mui/icons-material/Forward';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SpeedIcon from '@mui/icons-material/Speed';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import TimelineIcon from '@mui/icons-material/Timeline';;
 import { formatDistanceToNow } from 'date-fns';
 
 interface CommunicationItem {

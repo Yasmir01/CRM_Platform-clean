@@ -39,35 +39,33 @@ import {
   AccordionDetails,
   Tooltip
 } from '@mui/material';
-import {
-  AutoAwesome as AutoAwesomeIcon,
-  PlayArrow as PlayArrowIcon,
-  Pause as PauseIcon,
-  Stop as StopIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Schedule as ScheduleIcon,
-  Email as EmailIcon,
-  Sms as SmsIcon,
-  Phone as PhoneIcon,
-  Assignment as AssignmentIcon,
-  Notifications as NotificationsIcon,
-  Psychology as PsychologyIcon,
-  Timeline as TimelineIcon,
-  Settings as SettingsIcon,
-  ExpandMore as ExpandMoreIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  Speed as SpeedIcon,
-  Group as GroupIcon,
-  FilterAlt as FilterAltIcon,
-  Transform as TransformIcon,
-  Router as RouterIcon,
-  Flag as FlagIcon
-} from '@mui/icons-material';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import StopIcon from '@mui/icons-material/Stop';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import EmailIcon from '@mui/icons-material/Email';
+import SmsIcon from '@mui/icons-material/Sms';
+import PhoneIcon from '@mui/icons-material/Phone';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import SpeedIcon from '@mui/icons-material/Speed';
+import GroupIcon from '@mui/icons-material/Group';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import TransformIcon from '@mui/icons-material/Transform';
+import RouterIcon from '@mui/icons-material/Router';
+import FlagIcon from '@mui/icons-material/Flag';;
 
 interface WorkflowTrigger {
   id: string;

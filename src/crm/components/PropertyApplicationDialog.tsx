@@ -20,18 +20,16 @@ import {
   Paper,
   Snackbar,
 } from "@mui/material";
-import {
-  Home as HomeIcon,
-  LocationOn as LocationIcon,
-  AttachMoney as MoneyIcon,
-  Person as PersonIcon,
-  Security as SecurityIcon,
-  Payment as PaymentIcon,
-  Send as SendIcon,
-  Close as CloseIcon,
-  CheckCircle as CheckCircleIcon,
-  Info as InfoIcon,
-} from "@mui/icons-material";
+import HomeIcon from '@mui/icons-material/Home';
+import LocationIcon from '@mui/icons-material/LocationOn';
+import MoneyIcon from '@mui/icons-material/AttachMoney';
+import PersonIcon from '@mui/icons-material/Person';
+import SecurityIcon from '@mui/icons-material/Security';
+import PaymentIcon from '@mui/icons-material/Payment';
+import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';;
 import { LocalStorageService } from "../services/LocalStorageService";
 import { PropertyCodeGenerator } from "../utils/propertyCodeGenerator";
 import { useNotifications } from "./GlobalNotificationProvider";

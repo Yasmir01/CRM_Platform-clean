@@ -27,19 +27,17 @@ import {
   Switch,
   useTheme
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  MoreVert as MoreIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Security as SecurityIcon,
-  CheckCircle as VerifiedIcon,
-  Warning as WarningIcon,
-  Add as AddIcon,
-  SwapHoriz as TransactionIcon,
-  TrendingUp as TrendingIcon,
-  Schedule as ScheduleIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import MoreIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SecurityIcon from '@mui/icons-material/Security';
+import VerifiedIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import AddIcon from '@mui/icons-material/Add';
+import TransactionIcon from '@mui/icons-material/SwapHoriz';
+import TrendingIcon from '@mui/icons-material/TrendingUp';
+import ScheduleIcon from '@mui/icons-material/Schedule';;
 
 import { BankConnection, BankTransaction } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';

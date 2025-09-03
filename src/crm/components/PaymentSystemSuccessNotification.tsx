@@ -10,12 +10,10 @@ import {
   Stack,
   Typography
 } from '@mui/material';
-import {
-  CheckCircle as CheckIcon,
-  Close as CloseIcon,
-  Launch as LaunchIcon,
-  Help as HelpIcon
-} from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import CloseIcon from '@mui/icons-material/Close';
+import LaunchIcon from '@mui/icons-material/Launch';
+import HelpIcon from '@mui/icons-material/Help';;
 import { useNavigate } from 'react-router-dom';
 
 export const PaymentSystemSuccessNotification: React.FC = () => {
