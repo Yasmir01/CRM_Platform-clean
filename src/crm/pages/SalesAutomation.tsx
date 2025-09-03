@@ -546,11 +546,12 @@ export default function SalesAutomation() {
   const [filterStage, setFilterStage] = React.useState("All");
   const [filterProduct, setFilterProduct] = React.useState("All");
   const [deals] = React.useState<AddOnDeal[]>(mockAddOnDeals);
-  const [quotes] = React.useState<AddOnQuote[]>(mockAddOnQuotes);
+  const [quotes, setQuotes] = React.useState<AddOnQuote[]>(mockAddOnQuotes);
   const [openDealDialog, setOpenDealDialog] = React.useState(false);
   const [openQuoteDialog, setOpenQuoteDialog] = React.useState(false);
   const [selectedDeal, setSelectedDeal] = React.useState<AddOnDeal | null>(null);
   const [selectedQuote, setSelectedQuote] = React.useState<AddOnQuote | null>(null);
+  const [quoteFormData, setQuoteFormData] = React.useState<AddOnQuote | null>(null);
 
   // Form state for new opportunities
   const [dealFormData, setDealFormData] = React.useState({
@@ -647,11 +648,35 @@ export default function SalesAutomation() {
   };
 
   const handleAddQuote = () => {
+    const now = new Date();
+    const in30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const newQuote: AddOnQuote = {
+      id: `quote_addon_${Date.now()}`,
+      dealId: "",
+      quoteNumber: `AO-${now.getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`,
+      productName: "",
+      customerName: "",
+      customerEmail: "",
+      items: [],
+      subtotal: 0,
+      discount: 0,
+      total: 0,
+      status: "Draft",
+      validUntil: in30.toISOString().split("T")[0],
+      createdBy: "Account Manager",
+      dateCreated: now.toISOString().split("T")[0],
+      dateModified: now.toISOString().split("T")[0],
+      notes: "",
+      trialOffered: false
+    };
+    setSelectedQuote(null);
+    setQuoteFormData(newQuote);
     setOpenQuoteDialog(true);
   };
 
   const handleEditQuote = (quote: AddOnQuote) => {
     setSelectedQuote(quote);
+    setQuoteFormData({ ...quote });
     setOpenQuoteDialog(true);
   };
 
@@ -1695,21 +1720,161 @@ export default function SalesAutomation() {
           {selectedQuote ? "Edit Quote" : "Create New Quote"}
         </DialogTitle>
         <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Enhanced quote creation with pricing tiers, discounts, and trial offers will be implemented here.
-            Features will include:
-            • Product selection from marketplace
-            • Volume discounts for multiple licenses
-            • Trial period offerings
-            • Custom pricing for enterprise deals
-          </Alert>
-          <Typography variant="body2" color="text.secondary">
-            This will integrate with the opportunity data and support all billing cycles (monthly, yearly, one-time).
-          </Typography>
+          {quoteFormData && (
+            <Box sx={{ mt: 1 }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Quote #"
+                    value={quoteFormData.quoteNumber}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, quoteNumber: e.target.value } : prev)}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                      label="Status"
+                      value={quoteFormData.status}
+                      onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, status: e.target.value as AddOnQuote["status"] } : prev)}
+                    >
+                      <MenuItem value="Draft">Draft</MenuItem>
+                      <MenuItem value="Sent">Sent</MenuItem>
+                      <MenuItem value="Accepted">Accepted</MenuItem>
+                      <MenuItem value="Rejected">Rejected</MenuItem>
+                      <MenuItem value="Expired">Expired</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Product Name"
+                    value={quoteFormData.productName}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, productName: e.target.value } : prev)}
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Valid Until"
+                    type="date"
+                    value={quoteFormData.validUntil}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, validUntil: e.target.value } : prev)}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Customer Name"
+                    value={quoteFormData.customerName}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, customerName: e.target.value } : prev)}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Customer Email"
+                    type="email"
+                    value={quoteFormData.customerEmail}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, customerEmail: e.target.value } : prev)}
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Subtotal"
+                    type="number"
+                    value={quoteFormData.subtotal}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, subtotal: parseFloat(e.target.value) || 0 } : prev)}
+                    InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Discount"
+                    type="number"
+                    value={quoteFormData.discount}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, discount: parseFloat(e.target.value) || 0 } : prev)}
+                    InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Total"
+                    type="number"
+                    value={quoteFormData.total}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, total: parseFloat(e.target.value) || 0 } : prev)}
+                    InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={quoteFormData.trialOffered}
+                        onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, trialOffered: e.target.checked } : prev)}
+                      />
+                    }
+                    label="Offer Trial"
+                  />
+                </Grid>
+                {quoteFormData.trialOffered && (
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Trial Duration"
+                      type="number"
+                      value={quoteFormData.trialDuration || 7}
+                      onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, trialDuration: parseInt(e.target.value) || 7 } : prev)}
+                      InputProps={{ endAdornment: <InputAdornment position="end">days</InputAdornment> }}
+                    />
+                  </Grid>
+                )}
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Notes"
+                    multiline
+                    rows={3}
+                    value={quoteFormData.notes}
+                    onChange={(e) => setQuoteFormData(prev => prev ? { ...prev, notes: e.target.value } : prev)}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenQuoteDialog(false)}>Cancel</Button>
-          <Button variant="contained" startIcon={<QuoteIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<QuoteIcon />}
+            onClick={() => {
+              if (!quoteFormData) return;
+              const now = new Date().toISOString().split("T")[0];
+              const updated: AddOnQuote = { ...quoteFormData, dateModified: now };
+              if (selectedQuote) {
+                setQuotes(prev => prev.map(q => q.id === updated.id ? updated : q));
+              } else {
+                setQuotes(prev => [updated, ...prev]);
+              }
+              setSelectedQuote(null);
+              setQuoteFormData(null);
+              setOpenQuoteDialog(false);
+            }}
+          >
             {selectedQuote ? "Update Quote" : "Create Quote"}
           </Button>
         </DialogActions>
