@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
     if (!plan || !plan.isActive) return res.status(404).json({ error: 'Plan not found or inactive' });
 
-    const stripe = new Stripe(secret, { apiVersion: '2024-06-20' });
+    const stripe = new Stripe(secret);
     const priceAmount = Math.round((plan.price || 0) * 100);
 
     const session = await stripe.checkout.sessions.create({
