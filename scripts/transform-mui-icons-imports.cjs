@@ -59,10 +59,12 @@ function run() {
   let modifiedCount = 0;
   let checked = 0; let candidates = 0;
 
+  const pattern = /import\s*\{([\s\S]*?)\}\s*from\s*['"]@mui\/icons-material['"];?/;
+
   for (const file of files) {
     checked++;
     let text = fs.readFileSync(file, 'utf8');
-    if (!text.includes("@mui/icons-material")) continue;
+    if (!pattern.test(text)) continue;
     candidates++;
     const { content: out, changed } = transform(text);
     if (changed) {
