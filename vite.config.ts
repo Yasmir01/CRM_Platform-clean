@@ -10,15 +10,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: [
-      "@mui/material",
-      "@mui/icons-material",
-      "@mui/system",
-      "@mui/x-data-grid",
-      "@mui/x-date-pickers",
-      "@mui/x-charts",
-    ],
-    force: true,
+    disabled: true,
   },
   build: {
     target: 'es2015',
