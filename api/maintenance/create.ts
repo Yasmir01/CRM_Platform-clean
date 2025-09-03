@@ -1,30 +1,57 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import crypto from 'crypto';
 import { ensurePermission } from '../../src/lib/authorize';
-import { maintenanceStore, type MaintenanceRecord } from './_store';
+import { prisma } from '../_db';
+import { notify } from '../../src/lib/notify';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const user = ensurePermission(req, res, 'maintenance:create');
-  if (!user) return;
+  const auth = ensurePermission(req, res, 'maintenance:create');
+  if (!auth) return;
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  const { title, description, s3Key } = body as { title?: string; description?: string; s3Key?: string | null };
+  const { title, description, priority, propertyId, unitId, s3Key } = body as {
+    title?: string; description?: string; priority?: string; propertyId?: string; unitId?: string; s3Key?: string | null;
+  };
   if (!title || !description) return res.status(400).json({ error: 'missing' });
 
-  const now = new Date().toISOString();
-  const rec: MaintenanceRecord = {
-    id: crypto.randomUUID(),
-    tenantId: String((user as any).sub || (user as any).id),
-    title,
-    description,
-    attachmentKey: s3Key || null,
-    status: 'open',
-    createdAt: now,
-    updatedAt: now,
-  };
+  const tenantId = String((auth as any).sub || (auth as any).id);
+  const user = await prisma.user.findUnique({ where: { id: tenantId } });
+  const orgId = user?.orgId || null;
 
-  maintenanceStore.unshift(rec);
-  return res.status(201).json(rec);
+  const reqRec = await prisma.maintenanceRequest.create({
+    data: {
+      tenantId,
+      orgId: orgId || undefined,
+      propertyId: propertyId || (await (async () => {
+        // If propertyId not provided, try to infer from active lease
+        try {
+          const lease = await prisma.lease.findFirst({ where: { tenantId, status: 'ACTIVE' as any }, include: { unit: true } });
+          return lease?.unit?.propertyId || undefined;
+        } catch { return undefined; }
+      })()),
+      unitId: unitId || undefined,
+      title,
+      description,
+      priority: priority || 'normal',
+      // attachment key can be stored via a separate Document; for now keep in description/meta
+    },
+  });
+
+  // Notify org admins/managers
+  if (orgId) {
+    const admins = await prisma.user.findMany({ where: { orgId, role: { in: ['ADMIN','MANAGER'] as any } }, select: { id: true, email: true } });
+    for (const admin of admins) {
+      await notify({
+        userId: admin.id,
+        email: admin.email || undefined,
+        type: 'maintenance_request',
+        title: 'New Maintenance Request',
+        message: `${user?.email || 'Tenant'} submitted: ${title}`,
+        meta: { requestId: reqRec.id },
+      });
+    }
+  }
+
+  return res.status(201).json(reqRec);
 }
