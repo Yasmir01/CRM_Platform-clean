@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
   });
   const buf = Buffer.concat(chunks);
 
-  const stripe = new Stripe(secret, { apiVersion: '2024-06-20' });
+  const stripe = new Stripe(secret);
   let event: Stripe.Event;
   try {
     const sig = (req.headers['stripe-signature'] || '') as string;
@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         const invoice = event.data.object as Stripe.Invoice;
         const amount = (invoice.amount_paid || 0) / 100;
         try {
-          const stripeSubId = (invoice.subscription as string) || null;
+          const stripeSubId = ((invoice as any).subscription as string) || null;
           let subscription = null as any;
           if (stripeSubId) {
             subscription = await prisma.subscription.findFirst({ where: { stripeSubscriptionId: stripeSubId } });
