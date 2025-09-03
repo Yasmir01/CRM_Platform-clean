@@ -84,6 +84,29 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         }
         break;
       }
+      case 'charge.succeeded': {
+        const charge = event.data.object as Stripe.Charge;
+        const pi = (charge.payment_intent as string) || undefined;
+        const meta = (charge.metadata || {}) as Record<string, string>;
+        const amount = (charge.amount || 0) / 100;
+        try {
+          const installmentId = meta.installmentId || undefined;
+          if (installmentId) {
+            const inst = await prisma.paymentPlanInstallment.findUnique({ where: { id: installmentId } });
+            if (inst) {
+              const newPaid = (inst.paidAmount || 0) + amount;
+              const status = newPaid >= inst.amount ? 'paid' : 'partial';
+              await prisma.paymentPlanInstallment.update({ where: { id: inst.id }, data: { paidAmount: newPaid, status } });
+              const remaining = await prisma.paymentPlanInstallment.count({ where: { planId: inst.planId, status: { in: ['due', 'partial', 'late'] } } });
+              if (remaining === 0) await prisma.paymentPlan.update({ where: { id: inst.planId }, data: { status: 'completed' } });
+            }
+          }
+          // No-op for subscription Payment model to avoid conflicts
+        } catch (err) {
+          console.warn('Failed to update payment plan from charge.succeeded', err);
+        }
+        break;
+      }
       default:
         break;
     }
