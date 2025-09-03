@@ -4,7 +4,7 @@ import { ensurePermission } from '../../../src/lib/authorize';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'PUT') return res.status(405).end('Method Not Allowed');
-  const user = ensurePermission(req, res, '*');
+  const user = ensurePermission(req, res, 'users:manage');
   if (!user) return;
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
