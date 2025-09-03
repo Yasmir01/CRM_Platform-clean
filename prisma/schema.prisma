@@ -30,6 +30,8 @@ model User {
   org              Organization       @relation(fields: [orgId], references: [id])
   stripeCustomerId String?
   defaultPmId      String?
+  twoFactorEnabled Boolean            @default(false)
+  twoFactorSecret  String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 
@@ -370,6 +372,54 @@ model OwnerExpense {
 
   @@index([propertyId])
   @@index([orgId])
+}
+
+/// Payment Plans
+model PaymentPlan {
+  id         String   @id @default(cuid())
+  orgId      String
+  tenantId   String
+  leaseId    String
+  title      String
+  total      Float
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  installments PaymentPlanInstallment[]
+}
+
+model PaymentPlanInstallment {
+  id            String   @id @default(cuid())
+  planId        String
+  dueDate       DateTime
+  amount        Float
+  paidAmount    Float   @default(0)
+  status        String  @default("due")
+  createdAt     DateTime @default(now())
+
+  plan PaymentPlan @relation(fields: [planId], references: [id])
+
+  @@index([planId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+/// Autopay Attempts
+model AutopayAttempt {
+  id        String   @id @default(cuid())
+  tenantId  String
+  leaseId   String
+  orgId     String?
+  amount    Float
+  runAt     DateTime @default(now())
+  status    String   @default("failed")
+  errorMsg  String?
+  tryCount  Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([leaseId])
+  @@index([status])
 }
 
 /// Messaging
