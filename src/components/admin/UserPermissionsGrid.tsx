@@ -18,9 +18,11 @@ import { exportToCSV, exportToPDF } from '@/lib/exportUtils';
      fetch('/api/admin/users', { credentials: 'include' })
        .then((r) => r.json())
        .then((d) => {
-         setUsers(Array.isArray(d) ? d : []);
-         setLoading(false);
-       })
+        const list = Array.isArray(d) ? d : [];
+        const visible = list.filter((u: any) => u.role !== 'SUPER_ADMIN');
+        setUsers(visible);
+        setLoading(false);
+      })
        .catch(() => setLoading(false));
    }, []);
 
