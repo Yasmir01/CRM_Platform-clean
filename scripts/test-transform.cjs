@@ -15,3 +15,5 @@ const out=s.replace(re,(m,block)=>{
 });
 console.log('matched?', re.test(s));
 console.log('changed?', out!==s);
+fs.writeFileSync(file+'.out', out, 'utf8');
+console.log('Wrote', file+'.out');
