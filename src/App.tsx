@@ -27,6 +27,7 @@ const Templates = React.lazy(() => import("./crm/pages/Templates"));
 const Settings = React.lazy(() => import("./crm/pages/Settings"));
 const Reports = React.lazy(() => import("./crm/pages/Reports"));
 const WorkOrders = React.lazy(() => import("./crm/pages/WorkOrders"));
+const MaintenanceRequests = React.lazy(() => import("./crm/pages/MaintenanceRequests"));
 const Applications = React.lazy(() => import("./crm/pages/Applications"));
 const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
 const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
@@ -265,6 +266,11 @@ function AppRoutes() {
         <Route path="work-orders" element={
           <React.Suspense fallback={<PageLoader />}>
             <WorkOrders />
+          </React.Suspense>
+        } />
+        <Route path="maintenance-requests" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MaintenanceRequests />
           </React.Suspense>
         } />
         <Route path="customer-service" element={
