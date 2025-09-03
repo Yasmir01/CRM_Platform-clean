@@ -55,7 +55,26 @@ export default function SuperAdminDashboard() {
               </td>
               <td className="p-2 border">{org.settings?.exportSchedule || 'daily'}</td>
               <td className="p-2 border text-center">
-                <button className="px-2 py-1 bg-indigo-600 text-white rounded text-xs">Manage</button>
+                <button className="px-2 py-1 bg-indigo-600 text-white rounded text-xs mr-2">Manage</button>
+                <button
+                  onClick={async () => {
+                    const targetId = org.users?.[0]?.id;
+                    if (!targetId) return alert('No Admin user to impersonate');
+                    const res = await fetch('/api/superadmin/impersonate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({ targetUserId: targetId }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) return alert(data?.error || 'Failed to impersonate');
+                    alert(`Now impersonating: ${data.impersonating}`);
+                    window.location.href = '/';
+                  }}
+                  className="px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-700"
+                >
+                  Impersonate
+                </button>
               </td>
             </tr>
           ))}
