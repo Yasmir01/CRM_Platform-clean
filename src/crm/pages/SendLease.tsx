@@ -53,6 +53,12 @@ export default function SendLease() {
               <Stack direction="row" spacing={1}>
                 <Button variant="outlined" onClick={preview}>Preview</Button>
                 <Button variant="contained" disabled={!leaseDocId} onClick={sendForSign}>Send for Signature</Button>
+                {leaseDocId ? (
+                  <>
+                    <Button component="a" href={`/api/leases/pdf?id=${leaseDocId}`} target="_blank" rel="noreferrer">Download PDF</Button>
+                    <Button component="a" href={`/api/leases/pdf?id=${leaseDocId}&store=1`} target="_blank" rel="noreferrer">Store PDF</Button>
+                  </>
+                ) : null}
               </Stack>
             </Stack>
           </CardContent>
