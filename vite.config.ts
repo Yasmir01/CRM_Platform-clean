@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
+      warning: path.resolve(__dirname, "./src/shims/warning.ts"),
     },
   },
   optimizeDeps: {
@@ -38,7 +39,8 @@ export default defineConfig({
       "dayjs/plugin/isSameOrBefore.js",
       // CJS library interop
       "crypto-js",
-      "invariant"
+      "invariant",
+      "warning"
     ],
     exclude: [
       "@mui/icons-material",
