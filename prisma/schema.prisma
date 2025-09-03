@@ -21,15 +21,19 @@ enum Role {
 }
 
 model User {
-  id          String         @id @default(cuid())
-  email       String         @unique
-  name        String?
-  role        Role           @default(TENANT)
-  permissions String?
-  orgId       String
-  org         Organization   @relation(fields: [orgId], references: [id])
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id               String             @id @default(cuid())
+  email            String             @unique
+  name             String?
+  role             Role               @default(TENANT)
+  permissions      String?
+  orgId            String
+  org              Organization       @relation(fields: [orgId], references: [id])
+  stripeCustomerId String?
+  defaultPmId      String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  preferences      TenantPreferences?
 
   @@index([orgId])
 }
@@ -231,6 +235,19 @@ model Tenant {
   leases    Lease[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model TenantPreferences {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  smsOptIn           Boolean  @default(false)
+  emailOptIn         Boolean  @default(true)
+  autopayEnabled     Boolean  @default(false)
+  autopayDayOverride Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user               User     @relation(fields: [userId], references: [id])
 }
 
 model Lease {
