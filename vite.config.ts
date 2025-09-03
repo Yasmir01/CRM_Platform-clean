@@ -11,13 +11,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
-    include: ["react-is"],
+    include: ["react-is", "prop-types"],
     exclude: [
-      "@mui/material",
-      "@mui/system",
       "@mui/icons-material",
-      "@mui/x-data-grid",
-      "@mui/x-date-pickers",
       "@mui/x-charts"
     ],
     force: true,
