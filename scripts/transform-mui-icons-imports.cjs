@@ -81,6 +81,7 @@ function run() {
     if (changed) {
       fs.writeFileSync(file, out, 'utf8');
       modifiedCount++;
+      console.log('Transformed:', path.relative(projectRoot, file));
     }
   }
 
