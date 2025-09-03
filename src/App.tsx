@@ -173,6 +173,7 @@ function AppRoutes() {
       <Route path="/admin" element={<React.Suspense fallback={<PageLoader />}><AdminDashboard /></React.Suspense>} />
       <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><AdminUsers /></React.Suspense>} />
       <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><AdminLogs /></React.Suspense>} />
+      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
           <TenantPortal />
