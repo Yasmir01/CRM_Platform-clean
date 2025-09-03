@@ -576,11 +576,12 @@ export default function Properties() {
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
-  // Calculate unlisted properties: any property without a corresponding active listing
+  // Calculate unlisted properties: only Available or Unlisted properties without an active listing
   const unlistedProperties = React.useMemo(() => {
     if (!state?.initialized || !properties || !Array.isArray(properties) || !Array.isArray(listings)) return [];
     return properties.filter(property =>
-      property && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
+      property && (property.status === "Available" || property.status === "Unlisted") &&
+      !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
     );
   }, [state?.initialized, properties, listings]);
 
@@ -3872,7 +3873,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n���� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);
