@@ -9,6 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
       warning: path.resolve(__dirname, "./src/shims/warning.ts"),
+      'lodash/chunk': path.resolve(__dirname, "./src/shims/lodash-chunk.ts"),
     },
   },
   optimizeDeps: {
@@ -40,7 +41,8 @@ export default defineConfig({
       // CJS library interop
       "crypto-js",
       "invariant",
-      "warning"
+      "warning",
+      "lodash/chunk"
     ],
     exclude: [
       "@mui/icons-material",
