@@ -2603,13 +2603,13 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                       )}
                     </Stack>
 
-                    {/* Vacancy Alert */}
+                    {/* Listing Status Alert */}
                     <Alert severity="warning" sx={{ py: 1 }}>
                       <Typography variant="body2" fontWeight="medium">
-                        This property is vacant and not listed
+                        This property is not currently listed
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Create a listing to start attracting potential tenants and reduce vacancy time.
+                        Create a listing to start attracting potential tenants when it's available.
                       </Typography>
                     </Alert>
 
