@@ -16,6 +16,7 @@ export type PaymentResult = {
 export interface PaymentProvider {
   createPayment(input: PaymentInput): Promise<PaymentResult>;
   handleWebhook(req: Request): Promise<void>;
+  refundPayment(transactionId: string, amount?: number): Promise<{ refundId: string }>;
 }
 
 export async function getPaymentProvider(method: string): Promise<PaymentProvider> {
