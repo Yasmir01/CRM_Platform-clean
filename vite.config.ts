@@ -22,7 +22,21 @@ export default defineConfig({
       "react",
       "react-dom",
       "react-dom/client",
-      "scheduler"
+      "scheduler",
+      // Ensure mispackaged ESM/CJS deps are pre-bundled to valid ESM
+      "attr-accept",
+      "react-dropzone",
+      // Dayjs core and plugins used by MUI AdapterDayjs
+      "dayjs",
+      "dayjs/plugin/advancedFormat.js",
+      "dayjs/plugin/localizedFormat.js",
+      "dayjs/plugin/customParseFormat.js",
+      "dayjs/plugin/weekOfYear.js",
+      "dayjs/plugin/isBetween.js",
+      // App usage
+      "dayjs/plugin/isSameOrBefore.js",
+      // CJS library interop
+      "crypto-js"
     ],
     exclude: [
       "@mui/icons-material",

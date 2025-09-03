@@ -43,7 +43,25 @@ const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
 import NewsBoard from "./crm/pages/NewsBoard";
+const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
+const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantDashboard })));
+const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantPayments })));
+const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
+const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
+const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
+const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
+const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
+const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
+const VendorWorkOrders = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrders })));
+const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
+const ManagerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerDashboard })));
+const ManagerTenants = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerTenants })));
+const ManagerOwners = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerOwners })));
+const ManagerMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerMaintenance })));
+const AdminDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminDashboard })));
+const AdminUsers = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminUsers })));
+const AdminLogs = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminLogs })));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
@@ -59,6 +77,7 @@ const SubscriptionManagement = React.lazy(() => import("./crm/pages/Subscription
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
+const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
 
 // Loading component
 function PageLoader() {
@@ -136,6 +155,30 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<CrmLogin />} />
+      {/* Role-based portals */}
+      <Route path="/tenant" element={<React.Suspense fallback={<PageLoader />}><TenantDashboard /></React.Suspense>} />
+      <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
+      <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
+      <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
+      <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
+      <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
+      <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><OwnerProperties /></React.Suspense>} />
+      <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><VendorDashboard /></React.Suspense>} />
+      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrders /></React.Suspense>} />
+      <Route path="/vendor/profile" element={<React.Suspense fallback={<PageLoader />}><VendorProfile /></React.Suspense>} />
+      <Route path="/manager" element={<React.Suspense fallback={<PageLoader />}><ManagerDashboard /></React.Suspense>} />
+      <Route path="/manager/tenants" element={<React.Suspense fallback={<PageLoader />}><ManagerTenants /></React.Suspense>} />
+      <Route path="/manager/owners" element={<React.Suspense fallback={<PageLoader />}><ManagerOwners /></React.Suspense>} />
+      <Route path="/manager/maintenance" element={<React.Suspense fallback={<PageLoader />}><ManagerMaintenance /></React.Suspense>} />
+      <Route path="/admin" element={<React.Suspense fallback={<PageLoader />}><AdminDashboard /></React.Suspense>} />
+      <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><AdminUsers /></React.Suspense>} />
+      <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><AdminLogs /></React.Suspense>} />
+      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></React.Suspense>} />
+      <Route path="/tenant-portal" element={
+        <React.Suspense fallback={<PageLoader />}>
+          <TenantPortal />
+        </React.Suspense>
+      } />
       {/* Public help route - accessible without authentication */}
       <Route path="/help" element={
         <React.Suspense fallback={<PageLoader />}>
@@ -381,12 +424,15 @@ function AppRoutes() {
   );
 }
 
+import ImpersonationBanner from './components/ImpersonationBanner';
+
 export default function App() {
   return (
     <AppTheme>
       <CssBaseline enableColorScheme />
       <LocaleProvider>
         <AuthProvider>
+          <ImpersonationBanner />
           <BrowserRouter>
             <AppRoutes />
           </BrowserRouter>

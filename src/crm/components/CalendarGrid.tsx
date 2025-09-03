@@ -144,7 +144,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         p: 2,
         borderRadius: 2,
         border: `1px solid ${theme.palette.divider}`,
-        bgcolor: theme.palette.background.paper,
+        bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.02) : theme.palette.background.paper,
       }}
     >
       {/* Header */}

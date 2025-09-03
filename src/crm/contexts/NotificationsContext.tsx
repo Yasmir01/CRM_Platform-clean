@@ -65,7 +65,7 @@ const generateRealNotifications = (crmData: any): Notification[] => {
         priority: 'medium',
         read: false,
         createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        actionUrl: `/crm/properties/${hawkinsProperty.id}`,
+        actionUrl: `/crm/tenants?tenant=${encodeURIComponent(hawkinsTenant.firstName + ' ' + hawkinsTenant.lastName)}`,
         actionLabel: 'View Tenant',
         relatedEntity: {
           type: 'tenant',

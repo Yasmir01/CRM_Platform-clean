@@ -125,6 +125,7 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
   });
 
   const [syncingIntegrations, setSyncingIntegrations] = React.useState<Set<string>>(new Set());
+  const [settingsDialog, setSettingsDialog] = React.useState<{ open: boolean; integration?: CalendarIntegration }>({ open: false });
 
   const getProviderIcon = (provider: string) => {
     switch (provider) {
@@ -252,6 +253,13 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
 
   const connectedProviders = integrations.filter(int => int.isConnected).map(int => int.provider);
   const availableToConnect = availableProviders.filter(provider => !connectedProviders.includes(provider.id as any));
+
+  React.useEffect(() => {
+    if (connectDialog.open && connectDialog.step === 'auth' && connectDialog.provider) {
+      const t = setTimeout(() => handleCompleteConnection(), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [connectDialog.open, connectDialog.step, connectDialog.provider]);
 
   return (
     <>
@@ -386,9 +394,11 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
                               >
                                 {syncingIntegrations.has(integration.id) ? "Syncing..." : "Sync Now"}
                               </Button>
-                              <IconButton size="small">
-                                <SettingsRoundedIcon />
-                              </IconButton>
+                              <Tooltip title="Settings">
+                                <IconButton size="small" onClick={() => setSettingsDialog({ open: true, integration })}>
+                                  <SettingsRoundedIcon />
+                                </IconButton>
+                              </Tooltip>
                             </Stack>
                           </Stack>
                         </Stack>
@@ -518,6 +528,51 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
         </DialogActions>
       </Dialog>
 
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsDialog.open}
+        onClose={() => setSettingsDialog({ open: false })}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Integration Settings</DialogTitle>
+        <DialogContent>
+          {settingsDialog.integration && (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Typography variant="subtitle1">{settingsDialog.integration.name}</Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settingsDialog.integration.twoWaySync}
+                    onChange={(e) => {
+                      const updated = { ...settingsDialog.integration!, twoWaySync: e.target.checked };
+                      setIntegrations(prev => prev.map(i => i.id === updated.id ? updated : i));
+                      onUpdateIntegration?.(updated);
+                      setSettingsDialog({ open: true, integration: updated });
+                    }}
+                  />
+                }
+                label="Enable two-way sync"
+              />
+              <TextField
+                label="Calendar ID"
+                value={settingsDialog.integration.calendarId || ""}
+                onChange={(e) => {
+                  const updated = { ...settingsDialog.integration!, calendarId: e.target.value };
+                  setIntegrations(prev => prev.map(i => i.id === updated.id ? updated : i));
+                  onUpdateIntegration?.(updated);
+                  setSettingsDialog({ open: true, integration: updated });
+                }}
+                fullWidth
+              />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSettingsDialog({ open: false })}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Connect Calendar Dialog */}
       <Dialog
         open={connectDialog.open}
@@ -573,8 +628,7 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
                 Connecting to {connectDialog.provider?.charAt(0).toUpperCase()}{connectDialog.provider?.slice(1)} Calendar
               </Typography>
               <Typography variant="body2" color="text.secondary" textAlign="center">
-                You will be redirected to {connectDialog.provider} to authorize the connection.
-                This allows the CRM to read and write calendar events.
+                Authorizing connection… this may take a few seconds.
               </Typography>
               <Alert severity="info" sx={{ width: '100%' }}>
                 <Typography variant="body2">
@@ -591,13 +645,8 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConnectDialog({ open: false, step: "provider" })}>
-            Cancel
+            Close
           </Button>
-          {connectDialog.step === "auth" && (
-            <Button variant="contained" onClick={handleCompleteConnection}>
-              Complete Connection
-            </Button>
-          )}
         </DialogActions>
       </Dialog>
     </>

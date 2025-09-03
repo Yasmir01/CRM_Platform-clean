@@ -13,7 +13,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const payload = jwt.verify(raw, JWT_SECRET) as any;
-    res.status(200).json({ authenticated: true, user: { id: payload.sub, email: payload.email, roles: payload.roles } });
+    res.status(200).json({ authenticated: true, impersonating: payload.impersonating || null, user: { id: payload.sub, email: payload.email, role: payload.role, roles: payload.roles } });
   } catch {
     res.status(401).json({ authenticated: false });
   }
