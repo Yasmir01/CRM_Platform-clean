@@ -232,6 +232,7 @@ model Lease {
   id            String        @id @default(uuid())
   unitId        String
   tenantId      String
+  orgId         String?
   startDate     DateTime
   endDate       DateTime?
   status        LeaseStatus   @default(ACTIVE)
