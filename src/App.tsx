@@ -34,6 +34,7 @@ const OwnerPortfolio = React.lazy(() => import("./crm/pages/OwnerPortfolio"));
 const PlansAdmin = React.lazy(() => import("./crm/pages/PlansAdmin"));
 const AutopayFailures = React.lazy(() => import("./crm/pages/AutopayFailures"));
 const AdminReports = React.lazy(() => import("./crm/pages/AdminReports"));
+const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
 const Applications = React.lazy(() => import("./crm/pages/Applications"));
 const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
 const ApplicationsAdmin = React.lazy(() => import("./crm/pages/ApplicationsAdmin"));
@@ -487,6 +488,11 @@ function AppRoutes() {
         <Route path="admin-reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <AdminReports />
+          </React.Suspense>
+        } />
+        <Route path="admin-payments" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AdminPayments />
           </React.Suspense>
         } />
         <Route path="automation" element={
