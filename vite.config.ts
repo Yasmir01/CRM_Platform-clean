@@ -9,6 +9,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    exclude: [
+      "@mui/material",
+      "@mui/icons-material",
+      "@mui/system",
+      "@mui/x-data-grid",
+      "@mui/x-date-pickers",
+      "@mui/x-charts",
+    ],
+    force: true,
+  },
   build: {
     target: 'es2015',
     minify: 'terser'
