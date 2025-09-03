@@ -102,6 +102,7 @@ import { useActivityTracking } from "../hooks/useActivityTracking";
 import { useCrmData, Deal, Quote, Contact } from "../contexts/CrmDataContext";
 import NumberInput from "../components/NumberInput";
 import addOnQuotes from "../data/addOnQuotes";
+import { ExportButton } from "../../components/ExportButton";
 
 // CRM Add-on Sale specific interfaces
 interface AddOnDeal {
