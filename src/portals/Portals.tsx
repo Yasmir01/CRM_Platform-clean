@@ -139,6 +139,7 @@ export function AdminDashboard() {
 }
 
 import PermissionEditor from '../components/admin/PermissionEditor';
+import UserPermissionsGrid from '../components/admin/UserPermissionsGrid';
 
 export function AdminUsers() {
   const params = new URLSearchParams(window.location.search);
@@ -149,7 +150,7 @@ export function AdminUsers() {
       {userId ? (
         <PermissionEditor userId={userId} />
       ) : (
-        <p>Pass ?id=USER_ID to edit permissions.</p>
+        <UserPermissionsGrid />
       )}
     </RoleLayout>
   );
