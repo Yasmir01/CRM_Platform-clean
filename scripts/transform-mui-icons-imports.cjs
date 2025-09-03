@@ -26,11 +26,9 @@ function walk(dir, files = []) {
 }
 
 function transform(content) {
-  const importRegex = /import\s*\{([\s\S]*?)\}\s*from\s*['"]@mui\/icons-material['"];?/g;
-  let changed = false;
-  let result = content;
-
-  result = result.replace(importRegex, (match, specifiersBlock) => {
+  const re = /import\s*\{([\s\S]*?)\}\s*from\s*['"]@mui\/icons-material['"];?/g;
+  const before = content;
+  const after = content.replace(re, (match, specifiersBlock) => {
     const specifiers = specifiersBlock
       .split(',')
       .map(s => s.trim())
@@ -52,11 +50,9 @@ function transform(content) {
       return match;
     }
 
-    changed = true;
     return lines.join('\n');
   });
-
-  return { content: result, changed, matched: importRegex.test(content) };
+  return { content: after, changed: after !== before };
 }
 
 function run() {
@@ -69,25 +65,16 @@ function run() {
 
   const files = walk(srcDir);
   let modifiedCount = 0;
-  let unmatched = [];
 
   for (const file of files) {
     let text = fs.readFileSync(file, 'utf8');
-    if (text.includes("@mui/icons-material")) {
-      const { content: out, changed, matched } = transform(text);
-      if (!matched) {
-        unmatched.push(path.relative(projectRoot, file));
-      }
-      if (changed) {
-        fs.writeFileSync(file, out, 'utf8');
-        modifiedCount++;
-        console.log('Transformed:', path.relative(projectRoot, file));
-      }
+    if (!text.includes("@mui/icons-material")) continue;
+    const { content: out, changed } = transform(text);
+    if (changed) {
+      fs.writeFileSync(file, out, 'utf8');
+      modifiedCount++;
+      console.log('Transformed:', path.relative(projectRoot, file));
     }
-  }
-
-  if (unmatched.length) {
-    console.log('Found @mui/icons-material but regex did not match in:\n' + unmatched.join('\n'));
   }
 
   console.log(`Rewrote imports in ${modifiedCount} files.`);
