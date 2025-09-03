@@ -30,6 +30,7 @@ const WorkOrders = React.lazy(() => import("./crm/pages/WorkOrders"));
 const MaintenanceRequests = React.lazy(() => import("./crm/pages/MaintenanceRequests"));
 const MaintenanceReport = React.lazy(() => import("./crm/pages/MaintenanceReport"));
 const OwnerLedger = React.lazy(() => import("./crm/pages/OwnerLedger"));
+const OwnerPortfolio = React.lazy(() => import("./crm/pages/OwnerPortfolio"));
 const Applications = React.lazy(() => import("./crm/pages/Applications"));
 const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
 const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
@@ -342,6 +343,16 @@ function AppRoutes() {
         <Route path="owner-ledger/:propertyId" element={
           <React.Suspense fallback={<PageLoader />}>
             <OwnerLedger />
+          </React.Suspense>
+        } />
+        <Route path="owner-portfolio" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <OwnerPortfolio />
+          </React.Suspense>
+        } />
+        <Route path="owner-portfolio/:ownerId" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <OwnerPortfolio />
           </React.Suspense>
         } />
         <Route path="documents" element={
