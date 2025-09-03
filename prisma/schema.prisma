@@ -631,3 +631,21 @@ model Document {
   @@index([leaseId])
   @@index([uploadedBy])
 }
+
+model RentPayment {
+  id            String   @id @default(cuid())
+  leaseId       String
+  tenantId      String
+  amount        Float
+  method        String
+  status        String   @default("pending")
+  transactionId String?
+  paidAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  lease         LeaseDocument @relation(fields: [leaseId], references: [id])
+
+  @@index([leaseId])
+  @@index([tenantId])
+  @@index([status])
+}
