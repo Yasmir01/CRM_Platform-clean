@@ -312,3 +312,26 @@ model MaintenanceRequest {
   @@index([unitId])
   @@index([status])
 }
+
+/// Document Management System
+model Document {
+  id          String        @id @default(cuid())
+  orgId       String
+  uploadedBy  String
+  tenantId    String?
+  leaseId     String?
+  type        String
+  name        String
+  url         String
+  createdAt   DateTime      @default(now())
+
+  org         Organization  @relation(fields: [orgId], references: [id])
+  uploader    User          @relation(fields: [uploadedBy], references: [id])
+  tenant      Tenant?       @relation(fields: [tenantId], references: [id])
+  lease       Lease?        @relation(fields: [leaseId], references: [id])
+
+  @@index([orgId])
+  @@index([tenantId])
+  @@index([leaseId])
+  @@index([uploadedBy])
+}
