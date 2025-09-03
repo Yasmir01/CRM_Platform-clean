@@ -1,4 +1,3 @@
-/* Global styles */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -92,3 +91,7 @@ body > iframe[src*="metamask"] {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* Tenant Portal styles */
+.tenant-tab-content { margin-top: 20px; }
+.card-field { margin-top: 8px; }
