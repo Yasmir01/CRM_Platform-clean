@@ -27,18 +27,16 @@ import {
   useTheme,
   InputAdornment
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  MoreVert as MoreIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Business as BusinessIcon,
-  TrendingUp as TrendingIcon,
-  Schedule as ScheduleIcon,
-  Security as SecurityIcon,
-  AttachMoney as MoneyIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import MoreIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import BusinessIcon from '@mui/icons-material/Business';
+import TrendingIcon from '@mui/icons-material/TrendingUp';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SecurityIcon from '@mui/icons-material/Security';
+import MoneyIcon from '@mui/icons-material/AttachMoney';;
 
 import { BusinessBankAccount, ProcessingSchedule, BusinessAccountFees } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';

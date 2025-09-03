@@ -22,30 +22,28 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-import {
-  Notifications as NotificationsIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-  Email as EmailIcon,
-  Payment as PaymentIcon,
-  Build as BuildIcon,
-  Campaign as CampaignIcon,
-  Assignment as AssignmentIcon,
-  Home as HomeIcon,
-  Person as PersonIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-  Close as CloseIcon,
-  MarkEmailRead as MarkEmailReadIcon,
-  ClearAll as ClearAllIcon,
-  Edit as EditIcon,
-  Lightbulb as LightbulbIcon,
-  ThumbUp as ThumbUpIcon,
-  Flag as FlagIcon,
-} from '@mui/icons-material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import EmailIcon from '@mui/icons-material/Email';
+import PaymentIcon from '@mui/icons-material/Payment';
+import BuildIcon from '@mui/icons-material/Build';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import HomeIcon from '@mui/icons-material/Home';
+import PersonIcon from '@mui/icons-material/Person';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import CloseIcon from '@mui/icons-material/Close';
+import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import EditIcon from '@mui/icons-material/Edit';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import FlagIcon from '@mui/icons-material/Flag';;
 import { useNotifications, Notification } from '../contexts/NotificationsContext';
 
 const NotificationIcon: React.FC<{ type: Notification['type']; priority: Notification['priority'] }> = ({ type, priority }) => {

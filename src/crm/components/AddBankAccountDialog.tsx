@@ -19,11 +19,9 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  AccountBalance as BankIcon
-} from '@mui/icons-material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import BankIcon from '@mui/icons-material/AccountBalance';;
 import { BusinessBankAccount } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';
 

@@ -26,21 +26,19 @@ import {
   Alert,
   LinearProgress,
 } from "@mui/material";
-import {
-  Analytics as AnalyticsIcon,
-  TrendingUp as TrendingUpIcon,
-  Visibility as VisibilityIcon,
-  LocationOn as LocationIcon,
-  Devices as DevicesIcon,
-  Schedule as ScheduleIcon,
-  Person as PersonIcon,
-  Download as DownloadIcon,
-  Share as ShareIcon,
-  Close as CloseIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Business as BusinessIcon,
-} from "@mui/icons-material";
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LocationIcon from '@mui/icons-material/LocationOn';
+import DevicesIcon from '@mui/icons-material/Devices';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import PersonIcon from '@mui/icons-material/Person';
+import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
+import CloseIcon from '@mui/icons-material/Close';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BusinessIcon from '@mui/icons-material/Business';;
 
 interface QRCodeData {
   id: string;

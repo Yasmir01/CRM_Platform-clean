@@ -9,6 +9,27 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    noDiscovery: true,
+    include: [
+      "react-is",
+      "prop-types",
+      "hoist-non-react-statics",
+      "use-sync-external-store/shim",
+      "use-sync-external-store/shim/with-selector",
+      "use-sync-external-store/with-selector",
+      "bezier-easing",
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "scheduler"
+    ],
+    exclude: [
+      "@mui/icons-material",
+      "@mui/x-charts"
+    ],
+    force: true,
+  },
   build: {
     target: 'es2015',
     minify: 'terser'

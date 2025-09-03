@@ -23,14 +23,12 @@ import {
   ListItemText,
   useTheme
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  Security as SecurityIcon,
-  VerifiedUser as VerifiedIcon,
-  Speed as SpeedIcon,
-  Close as CloseIcon,
-  CheckCircle as CheckIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import SecurityIcon from '@mui/icons-material/Security';
+import VerifiedIcon from '@mui/icons-material/VerifiedUser';
+import SpeedIcon from '@mui/icons-material/Speed';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/CheckCircle';;
 
 import { BankConnection, PlaidLinkResult } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';

@@ -38,7 +38,9 @@ import {
   Tooltip,
   MenuItem,
 } from "@mui/material";
-import { Add, Delete, Edit } from "@mui/icons-material";
+import Add from '@mui/icons-material/Add';
+import Delete from '@mui/icons-material/Delete';
+import Edit from '@mui/icons-material/Edit';;
 import { v4 as uuidv4 } from "uuid";
 import { format, parseISO } from "date-fns";
 import { Calendar, momentLocalizer, Views, Event as RBCEvent } from "react-big-calendar";

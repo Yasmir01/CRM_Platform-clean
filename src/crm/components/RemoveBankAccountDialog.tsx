@@ -16,11 +16,9 @@ import {
   ListItemIcon,
   ListItemText
 } from '@mui/material';
-import {
-  Warning as WarningIcon,
-  Delete as DeleteIcon,
-  CheckCircle as CheckIcon
-} from '@mui/icons-material';
+import WarningIcon from '@mui/icons-material/Warning';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/CheckCircle';;
 import { BusinessBankAccount } from '../types/BankAccountTypes';
 
 interface RemoveBankAccountDialogProps {

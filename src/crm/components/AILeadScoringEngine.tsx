@@ -35,27 +35,25 @@ import {
   Slider,
   TextField
 } from '@mui/material';
-import {
-  Psychology as PsychologyIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Star as StarIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  Analytics as AnalyticsIcon,
-  Timeline as TimelineIcon,
-  Assignment as AssignmentIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon,
-  School as SchoolIcon,
-  Money as MoneyIcon,
-  Schedule as ScheduleIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Home as HomeIcon
-} from '@mui/icons-material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StarIcon from '@mui/icons-material/Star';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SchoolIcon from '@mui/icons-material/School';
+import MoneyIcon from '@mui/icons-material/Money';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import HomeIcon from '@mui/icons-material/Home';;
 
 interface LeadScoringFactor {
   id: string;

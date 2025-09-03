@@ -34,21 +34,19 @@ import {
   Tab,
   LinearProgress
 } from '@mui/material';
-import {
-  Edit,
-  Delete,
-  CheckCircle,
-  Cancel,
-  Schedule,
-  Assignment,
-  TrendingUp,
-  GetApp,
-  Refresh,
-  EditNote,
-  Analytics,
-  FilterList,
-  Sort
-} from '@mui/icons-material';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import Schedule from '@mui/icons-material/Schedule';
+import Assignment from '@mui/icons-material/Assignment';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import GetApp from '@mui/icons-material/GetApp';
+import Refresh from '@mui/icons-material/Refresh';
+import EditNote from '@mui/icons-material/EditNote';
+import Analytics from '@mui/icons-material/Analytics';
+import FilterList from '@mui/icons-material/FilterList';
+import Sort from '@mui/icons-material/Sort';;
 import { suggestionService } from '../services/SuggestionService';
 import {
   Suggestion,

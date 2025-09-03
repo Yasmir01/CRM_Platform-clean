@@ -11,11 +11,9 @@ import {
   Button,
   CircularProgress
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  Add as AddIcon,
-  CheckCircle as VerifiedIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import AddIcon from '@mui/icons-material/Add';
+import VerifiedIcon from '@mui/icons-material/CheckCircle';;
 import { bankAccountService } from '../services/BankAccountService';
 import { BusinessBankAccount } from '../types/BankAccountTypes';
 

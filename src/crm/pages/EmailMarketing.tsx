@@ -64,6 +64,7 @@ import AnalyticsRoundedIcon from "@mui/icons-material/AnalyticsRounded";
 import PixelIcon from "@mui/icons-material/MonitorRounded";
 import RichTextEditor from "../components/RichTextEditor";
 import NewsletterAnalytics from "../components/NewsletterAnalytics";
+import SafeHtml from "../components/SafeHtml";
 
 interface EmailCampaign {
   id: string;
@@ -1393,9 +1394,6 @@ export default function EmailMarketing() {
               }}
             >
               <Box
-                dangerouslySetInnerHTML={{
-                  __html: previewTemplate?.content || ''
-                }}
                 sx={{
                   '& h1, & h2, & h3': {
                     color: 'primary.main',
@@ -1415,7 +1413,9 @@ export default function EmailMarketing() {
                     fontWeight: 600
                   }
                 }}
-              />
+              >
+                <SafeHtml html={previewTemplate?.content || ''} />
+              </Box>
             </Paper>
 
             <Box>
@@ -1452,9 +1452,8 @@ export default function EmailMarketing() {
             startIcon={<EditRoundedIcon />}
             onClick={() => {
               if (previewTemplate) {
-                // This would call the edit function passed down from parent
                 setPreviewDialogOpen(false);
-                // onEdit(previewTemplate); // This would be called if available
+                handleEditTemplate(previewTemplate);
               }
             }}
           >

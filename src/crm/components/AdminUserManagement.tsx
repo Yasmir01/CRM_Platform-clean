@@ -34,23 +34,21 @@ import {
   ListItemText,
   Divider
 } from '@mui/material';
-import {
-  PersonAdd,
-  Edit,
-  Delete,
-  MoreVert,
-  Block,
-  CheckCircle,
-  Email,
-  Phone,
-  Business,
-  AccessTime,
-  Language,
-  Security,
-  Refresh,
-  Download,
-  Search
-} from '@mui/icons-material';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
+import MoreVert from '@mui/icons-material/MoreVert';
+import Block from '@mui/icons-material/Block';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Email from '@mui/icons-material/Email';
+import Phone from '@mui/icons-material/Phone';
+import Business from '@mui/icons-material/Business';
+import AccessTime from '@mui/icons-material/AccessTime';
+import Language from '@mui/icons-material/Language';
+import Security from '@mui/icons-material/Security';
+import Refresh from '@mui/icons-material/Refresh';
+import Download from '@mui/icons-material/Download';
+import Search from '@mui/icons-material/Search';;
 import { DatabaseUserService, DatabaseUser, CreateUserData } from '../services/DatabaseUserService';
 import { PasswordService } from '../services/PasswordService';
 import UserRegistration from './UserRegistration';

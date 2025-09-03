@@ -8,13 +8,11 @@ import Portal from "@mui/material/Portal";
 import Slide from "@mui/material/Slide";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import {
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  Close as CloseIcon,
-} from "@mui/icons-material";
+import SuccessIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
 import { NotificationService, Notification } from "../services/NotificationService";
 
 interface GlobalNotificationProviderProps {

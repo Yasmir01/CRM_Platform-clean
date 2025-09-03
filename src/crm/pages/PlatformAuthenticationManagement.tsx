@@ -39,20 +39,18 @@ import {
   Link,
   CircularProgress
 } from '@mui/material';
-import {
-  ArrowBack,
-  CheckCircle,
-  Error,
-  Warning,
-  Security,
-  VpnKey,
-  Settings,
-  Launch,
-  Visibility,
-  VisibilityOff,
-  Refresh,
-  Add as AddIcon
-} from '@mui/icons-material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Warning from '@mui/icons-material/Warning';
+import Security from '@mui/icons-material/Security';
+import VpnKey from '@mui/icons-material/VpnKey';
+import Settings from '@mui/icons-material/Settings';
+import Launch from '@mui/icons-material/Launch';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Refresh from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';;
 import { useNavigate } from 'react-router-dom';
 
 import { RealEstatePlatformService } from '../services/RealEstatePlatformService';

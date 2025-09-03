@@ -46,24 +46,22 @@ import {
   ListItemSecondaryAction,
   Snackbar
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Settings as SettingsIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Refresh as RefreshIcon,
-  Analytics as AnalyticsIcon,
-  AttachMoney as MoneyIcon,
-  Category as BundleIcon,
-  Hub as PlatformIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon
-} from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SettingsIcon from '@mui/icons-material/Settings';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import MoneyIcon from '@mui/icons-material/AttachMoney';
+import BundleIcon from '@mui/icons-material/Category';
+import PlatformIcon from '@mui/icons-material/Hub';
+import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';;
 
 import { RealEstatePlatformService } from '../services/RealEstatePlatformService';
 import { PlatformBundleService } from '../services/PlatformBundleService';

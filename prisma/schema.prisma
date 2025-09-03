@@ -114,3 +114,80 @@ model RevenueEvent {
   metadata       Json?
   createdAt      DateTime      @default(now())
 }
+
+/// ----------------------------------------------------------
+///  NEW MODELS FOR TENANT‑LEDGER / PAST BALANCES
+/// ----------------------------------------------------------
+
+enum LeaseStatus {
+  ACTIVE
+  TERMINATED   // tenant moved out but balance may still exist
+  CLOSED       // all balances settled, can be archived
+}
+
+enum EntryType {
+  RENT
+  DEPOSIT
+  FEE
+  PAYMENT
+  ADJUSTMENT
+}
+
+model Property {
+  id        String   @id @default(uuid())
+  address   String
+  units     Unit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Unit {
+  id         String   @id @default(uuid())
+  number     String
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  leases     Lease[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([propertyId])
+  @@unique([propertyId, number])
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  leases    Lease[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lease {
+  id            String        @id @default(uuid())
+  unitId        String
+  tenantId      String
+  startDate     DateTime
+  endDate       DateTime?
+  status        LeaseStatus   @default(ACTIVE)
+  archived      Boolean       @default(false)   // hide from active UI if desired
+  unit          Unit          @relation(fields: [unitId], references: [id])
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  ledgerEntries LedgerEntry[]
+
+  @@index([status])                     // fast lookup of terminated leases
+  @@index([tenantId])
+  @@index([unitId])
+}
+
+model LedgerEntry {
+  id          String    @id @default(uuid())
+  leaseId     String
+  lease       Lease     @relation(fields: [leaseId], references: [id])
+  date        DateTime  @default(now())
+  description String
+  amountCents Int       // positive = charge, negative = payment
+  type        EntryType
+
+  @@index([leaseId])
+}

@@ -19,20 +19,18 @@ import {
   Divider,
   CircularProgress
 } from '@mui/material';
-import {
-  Analytics as AnalyticsIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Email as EmailIcon,
-  Sms as SmsIcon,
-  Phone as PhoneIcon,
-  Timeline as TimelineIcon,
-  Notifications as NotificationsIcon,
-  Error as ErrorIcon,
-  CheckCircle as CheckCircleIcon,
-  Warning as WarningIcon,
-  AccessTime as AccessTimeIcon
-} from '@mui/icons-material';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SpeedIcon from '@mui/icons-material/Speed';
+import EmailIcon from '@mui/icons-material/Email';
+import SmsIcon from '@mui/icons-material/Sms';
+import PhoneIcon from '@mui/icons-material/Phone';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';;
 
 interface RealTimeMetric {
   channel: 'email' | 'sms' | 'phone' | 'chat';

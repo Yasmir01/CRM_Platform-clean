@@ -26,19 +26,18 @@ import {
   MenuItem,
   Alert,
 } from "@mui/material";
-import {
-  ExpandMore as ExpandMoreIcon,
-  Gavel as GavelIcon,
-  Security as SecurityIcon,
-  Home as HomeIcon,
-  Payment as PaymentIcon,
-  Policy as PolicyIcon,
-  Edit as EditIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Save as SaveIcon,
-} from "@mui/icons-material";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import GavelIcon from '@mui/icons-material/Gavel';
+import SecurityIcon from '@mui/icons-material/Security';
+import HomeIcon from '@mui/icons-material/Home';
+import PaymentIcon from '@mui/icons-material/Payment';
+import PolicyIcon from '@mui/icons-material/Policy';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';;
 import RichTextEditor from "./RichTextEditor";
+import SafeHtml from "./SafeHtml";
 
 interface TermsSection {
   id: string;
@@ -341,16 +340,15 @@ export default function TermsAndConditions({
                 </Stack>
               </Stack>
               
-              <Box 
-                dangerouslySetInnerHTML={{ 
-                  __html: replaceVariables(section.content) 
-                }} 
-                sx={{ 
-                  "& ul": { pl: 2 }, 
+              <Box
+                sx={{
+                  "& ul": { pl: 2 },
                   "& li": { mb: 0.5 },
                   "& p": { mb: 1 }
                 }}
-              />
+              >
+                <SafeHtml html={replaceVariables(section.content)} />
+              </Box>
             </CardContent>
           </Card>
         ))}
@@ -503,16 +501,15 @@ export default function TermsAndConditions({
           
           <AccordionDetails>
             <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
-              <Box 
-                dangerouslySetInnerHTML={{ 
-                  __html: replaceVariables(section.content) 
-                }} 
-                sx={{ 
-                  "& ul": { pl: 2 }, 
+              <Box
+                sx={{
+                  "& ul": { pl: 2 },
                   "& li": { mb: 0.5 },
                   "& p": { mb: 1 }
                 }}
-              />
+              >
+                <SafeHtml html={replaceVariables(section.content)} />
+              </Box>
             </Paper>
           </AccordionDetails>
         </Accordion>

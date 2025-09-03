@@ -95,6 +95,10 @@ import { useActivityTracking } from "../hooks/useActivityTracking";
 import BusinessBankAccountSelector from "../components/BusinessBankAccountSelector";
 import BulkUploadDialog from "../components/BulkUploadDialog";
 import CombinedBulkUploadDialog from "../components/CombinedBulkUploadDialog";
+import PlatformAuthenticationFlow from "../components/PlatformAuthenticationFlow";
+import { RealEstatePlatformService } from "../services/RealEstatePlatformService";
+import { RealEstatePlatform } from "../types/RealEstatePlatformTypes";
+import { LocalStorageService } from "../services/LocalStorageService";
 
 interface PropertyImage {
   id: string;
@@ -344,6 +348,38 @@ export default function Properties() {
   // All useState hooks must be called before any early returns
   const [listings, setListings] = React.useState<PropertyListing[]>([]);
   const [searchTerm, setSearchTerm] = React.useState("");
+
+  // Load saved listings on mount
+  React.useEffect(() => {
+    try {
+      const saved = LocalStorageService.getItem<PropertyListing>("property_listings", [] as any) as unknown as PropertyListing[];
+      if (saved && Array.isArray(saved) && saved.length > 0) {
+        // Remove previously auto-simulated listings (ids like "listing-<propertyId>")
+        const withoutSimulated = saved.filter(l => l && typeof l.id === 'string' && !l.id.startsWith('listing-'));
+        // Dedupe by propertyId keeping the most recently updated
+        const byProp = new Map<string, PropertyListing>();
+        for (const l of withoutSimulated) {
+          const existing = l && byProp.get(l.propertyId);
+          if (!existing) {
+            byProp.set(l.propertyId, l);
+          } else {
+            const a = new Date(existing.lastUpdated || 0).getTime();
+            const b = new Date(l.lastUpdated || 0).getTime();
+            byProp.set(l.propertyId, b >= a ? l : existing);
+          }
+        }
+        const cleaned = Array.from(byProp.values());
+        setListings(cleaned);
+      }
+    } catch {}
+  }, []);
+
+  // Persist listings on change
+  React.useEffect(() => {
+    try {
+      LocalStorageService.setItem("property_listings", listings);
+    } catch {}
+  }, [listings]);
   const [openDialog, setOpenDialog] = React.useState(false);
   const [openPictureDialog, setOpenPictureDialog] = React.useState(false);
   const [openListingDialog, setOpenListingDialog] = React.useState(false);
@@ -393,6 +429,9 @@ export default function Properties() {
   });
   const [loginDialogOpen, setLoginDialogOpen] = React.useState(false);
   const [selectedListingSite, setSelectedListingSite] = React.useState("");
+  const [selectedPlatform, setSelectedPlatform] = React.useState<RealEstatePlatform | null>(null);
+  const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [authPlatform, setAuthPlatform] = React.useState<RealEstatePlatform | null>(null);
   const [propertyDetailOpen, setPropertyDetailOpen] = React.useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = React.useState<string | null>(null);
   const [exportDialogOpen, setExportDialogOpen] = React.useState(false);
@@ -531,47 +570,16 @@ export default function Properties() {
     return properties.reduce((sum, p) => sum + (p && p.status === "Occupied" ? (p.monthlyRent || 0) : 0), 0);
   }, [state?.initialized, properties]);
 
-  // Generate real listings from actual properties
-  const realListings = React.useMemo(() => {
-    if (!state?.initialized || !properties || !Array.isArray(properties)) return [];
+  // Derived list of actual active listings from saved state
+  const listedListings = React.useMemo(() => {
+    if (!Array.isArray(listings)) return [];
+    return listings.filter(l => l && l.status === "Listed");
+  }, [listings]);
 
-    // Create listings for available properties (simulating that they have listings)
-    const availableProps = properties.filter(p => p && p.status === "Available");
-
-    return availableProps.map((property, index) => ({
-      id: `listing-${property.id}`,
-      propertyId: property.id,
-      title: `${property.name} - Available Now!`,
-      description: property.description || 'Beautiful property available for rent.',
-      customContent: `🏠 ${property.name} - Available Now!\n\n📍 Location: ${property.address}\n💰 Rent: $${property.monthlyRent?.toLocaleString()}/month\n🛏️ Bedrooms: ${property.bedrooms || 'TBD'}\n🚿 Bathrooms: ${property.bathrooms || 'TBD'}\n📐 Square Footage: ${property.squareFootage ? `${property.squareFootage} sq ft` : 'TBD'}\n🚗 Parking: ${property.parkingSpaces || 0} space(s)\n🐕 Pet Policy: ${property.petPolicy || 'Contact for details'}\n\n✨ Amenities:\n${property.amenities?.map(amenity => `• ${amenity}`).join('\n') || '• Contact for amenities list'}\n\n📝 Description:\n${property.description || 'Beautiful property available for rent. Contact us for more details!'}\n\n📞 Contact us today to schedule a viewing!\n🕐 Available for immediate move-in`,
-      listingSites: {
-        craigslist: index === 0, // First property listed on Craigslist
-        zillow: true, // All properties on Zillow
-        realtorsCom: true, // All properties on Realtor.com
-        apartments: index < 2, // First two properties on Apartments.com
-        rentCom: false
-      },
-      status: "Listed" as const,
-      viewCount: Math.floor(Math.random() * 200) + 50, // Random view count 50-250
-      inquiries: Math.floor(Math.random() * 15) + 2, // Random inquiries 2-17
-      lastUpdated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last week
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last month
-      expirationDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // Expires in 60 days
-      promotionId: index === 0 ? 'promo1' : undefined // First property has promotion
-    }));
-  }, [state?.initialized, properties]);
-
-  // Update listings when real listings change
-  React.useEffect(() => {
-    if (realListings && Array.isArray(realListings) && realListings.length > 0) {
-      setListings(realListings);
-    }
-  }, [realListings]);
 
   const activeListings = React.useMemo(() => {
-    if (!state?.initialized || !realListings || !Array.isArray(realListings)) return 0;
-    return realListings.filter(l => l && l.status === "Listed").length;
-  }, [state?.initialized, realListings]);
+    return listedListings.length;
+  }, [listedListings]);
 
   const totalListingViews = React.useMemo(() => {
     if (!state?.initialized || !listings || !Array.isArray(listings)) return 0;
@@ -583,14 +591,12 @@ export default function Properties() {
     return listings.reduce((sum, l) => sum + (l && l.inquiries ? l.inquiries : 0), 0);
   }, [state?.initialized, listings]);
 
-  // Calculate unlisted properties (properties with Unlisted status or Available but not listed)
+  // Calculate unlisted properties: only Available or Unlisted properties without an active listing
   const unlistedProperties = React.useMemo(() => {
-    if (!state?.initialized || !properties || !Array.isArray(properties) || !listings || !Array.isArray(listings)) return [];
+    if (!state?.initialized || !properties || !Array.isArray(properties) || !Array.isArray(listings)) return [];
     return properties.filter(property =>
-      property && (
-        property.status === "Unlisted" ||
-        (property.status === "Available" && !listings.some(l => l && l.propertyId === property.id && l.status === "Listed"))
-      )
+      property && (property.status === "Available" || property.status === "Unlisted") &&
+      !listings.some(l => l && l.propertyId === property.id && l.status === "Listed")
     );
   }, [state?.initialized, properties, listings]);
 
@@ -753,16 +759,6 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         lastUpdated: new Date().toISOString().split('T')[0]
       };
       setListings(prev => [...(prev || []), newListing]);
-
-      // Update property status to Listed
-      if (selectedProperty.status === 'Unlisted') {
-        const updatedProperty = {
-          ...selectedProperty,
-          status: 'Listed' as Property['status'],
-          updatedAt: new Date().toISOString()
-        };
-        updateProperty(updatedProperty);
-      }
 
       // Track property listing creation
       trackPropertyActivity(
@@ -954,14 +950,74 @@ ${property.description || 'Beautiful property available for rent. Contact us for
     });
   };
 
+  const labelToPlatform = (site: string): RealEstatePlatform | null => {
+    switch (site) {
+      case 'Craigslist':
+        return 'craigslist';
+      case 'Zillow':
+        return 'zillow';
+      case 'Realtor.com':
+        return 'realtors_com';
+      case 'Apartments.com':
+        return 'apartments_com';
+      // Rent.com is not configured in the platform list yet
+      default:
+        return null;
+    }
+  };
+
   const handleListingSiteLogin = (site: string) => {
     setSelectedListingSite(site);
+    const platform = labelToPlatform(site);
+    setSelectedPlatform(platform);
     setLoginDialogOpen(true);
   };
 
-  const handleLoginAndPost = () => {
+  const publishToSelectedPlatform = async (platform: RealEstatePlatform) => {
+    if (!selectedProperty) return;
+    await RealEstatePlatformService.initialize();
+
+    // If not authenticated, open auth flow
+    if (!RealEstatePlatformService.isPlatformAuthenticated(platform)) {
+      setAuthPlatform(platform);
+      setAuthDialogOpen(true);
+      return;
+    }
+
+    const contentText = listingFormData.customContent || selectedProperty.description || '';
+    const htmlContent = generateHTMLContent(selectedProperty, contentText);
+
+    const propertyPayload: any = {
+      id: selectedProperty.id,
+      propertyId: selectedProperty.id,
+      name: selectedProperty.name,
+      title: selectedProperty.name,
+      description: contentText,
+      htmlContent,
+      price: selectedProperty.monthlyRent,
+      address: selectedProperty.address,
+      bedrooms: selectedProperty.bedrooms || 0,
+      bathrooms: selectedProperty.bathrooms || 0,
+      squareFootage: selectedProperty.squareFootage || undefined,
+      images: selectedProperty.images || [],
+      type: selectedProperty.type,
+    };
+
+    const job = await RealEstatePlatformService.publishProperty(propertyPayload, [platform], 'admin');
+    if (job && job.status !== 'failed') {
+      alert(`Listing posted to ${selectedListingSite}.`);
+    } else {
+      alert(`Failed to post to ${selectedListingSite}. Please try again.`);
+    }
+  };
+
+  const handleLoginAndPost = async () => {
     setLoginDialogOpen(false);
-    alert(`Login functionality for ${selectedListingSite} would be implemented here. This would open a secure authentication window and automatically post the listing.`);
+    if (!selectedPlatform) {
+      alert('This platform is not supported yet.');
+      return;
+    }
+    await publishToSelectedPlatform(selectedPlatform);
   };
 
   // Get available prospects (tenants with Prospective status and contacts marked as Prospect)
@@ -2128,19 +2184,21 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         </Grid>
 
         {/* Alert for vacant properties not listed */}
-        {(vacantProperties?.length || 0) > (listings || []).length && (
-          <Alert severity="info" sx={{ mb: 3 }}>
-            You have {(vacantProperties?.length || 0) - (listings || []).length} vacant property(ies) that haven't been listed yet. 
-            Consider creating listings to attract potential tenants.
-          </Alert>
-        )}
+        {(() => {
+          const count = (vacantProperties || []).filter(p => !(listings || []).some(l => l && l.propertyId === p.id && l.status === "Listed")).length;
+          return count > 0 ? (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              You have {count} vacant propert{count > 1 ? 'ies' : 'y'} that haven't been listed yet. Consider creating listings to attract potential tenants.
+            </Alert>
+          ) : null;
+        })()}
 
         {/* Properties with Listings */}
         <Typography variant="h6" sx={{ mb: 2 }}>
           Listed Properties
         </Typography>
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {(realListings || []).map((listing) => {
+          {(listedListings || []).map((listing) => {
             const property = properties.find(p => p && p.id === listing.propertyId);
             if (!property) return null;
             
@@ -2563,13 +2621,13 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                       )}
                     </Stack>
 
-                    {/* Vacancy Alert */}
+                    {/* Listing Status Alert */}
                     <Alert severity="warning" sx={{ py: 1 }}>
                       <Typography variant="body2" fontWeight="medium">
-                        This property is vacant and not listed
+                        This property is not currently listed
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Create a listing to start attracting potential tenants and reduce vacancy time.
+                        Create a listing to start attracting potential tenants when it's available.
                       </Typography>
                     </Alert>
 
@@ -2624,6 +2682,16 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                         onClick={() => handleEditProperty(property)}
                       >
                         Update Details
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => {
+                          setManagingProperty(property);
+                          setTenantManageDialogOpen(true);
+                        }}
+                      >
+                        Manage
                       </Button>
                       <Button
                         size="small"
@@ -2926,14 +2994,13 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                               order: 0,
                             };
 
-                            setProperties(prev => prev.map(property =>
-                              property.id === selectedProperty.id
-                                ? {
-                                    ...property,
-                                    images: [...(property.images || []), newImage]
-                                  }
-                                : property
-                            ));
+                            const existingImages = selectedProperty.images || [];
+                            const updatedProp = {
+                              ...selectedProperty,
+                              images: [...existingImages, newImage],
+                              mainImageId: selectedProperty.mainImageId || newImage.id
+                            };
+                            updateProperty(updatedProp);
                           };
                           reader.readAsDataURL(file);
                         });
@@ -3571,6 +3638,21 @@ ${property.description || 'Beautiful property available for rent. Contact us for
         </DialogActions>
       </Dialog>
 
+      {/* Platform Authentication Flow */}
+      {authPlatform && (
+        <PlatformAuthenticationFlow
+          platform={authPlatform}
+          config={RealEstatePlatformService.getPlatformConfig(authPlatform)!}
+          isOpen={authDialogOpen}
+          onClose={() => setAuthDialogOpen(false)}
+          onSuccess={async (p) => {
+            setAuthDialogOpen(false);
+            await publishToSelectedPlatform(p);
+          }}
+          userId={"admin"}
+        />
+      )}
+
       {/* Property Detail Dialog */}
       <Dialog
         open={propertyDetailOpen}
@@ -3806,7 +3888,7 @@ ${property.description || 'Beautiful property available for rent. Contact us for
                     };
 
                     // Create detailed form dialog
-                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n• Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
+                    const dialogContent = `Adding new tenant to ${managingProperty?.name}\n\nPlease fill out tenant information:\n��� Personal Details\n• Contact Information\n• Lease Terms\n�� Emergency Contacts\n• Employment Verification\n\nThis will create a comprehensive tenant profile and lease agreement.`;
 
                     alert(dialogContent);
                     console.log('Tenant creation form would open with data:', tenantData);

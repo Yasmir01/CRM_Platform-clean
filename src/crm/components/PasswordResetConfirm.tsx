@@ -14,14 +14,12 @@ import {
   Chip,
   CircularProgress
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Lock,
-  Check,
-  Error as ErrorIcon,
-  Save
-} from '@mui/icons-material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Lock from '@mui/icons-material/Lock';
+import Check from '@mui/icons-material/Check';
+import ErrorIcon from '@mui/icons-material/Error';
+import Save from '@mui/icons-material/Save';;
 import { PasswordResetService } from '../services/PasswordResetService';
 import { PasswordService } from '../services/PasswordService';
 

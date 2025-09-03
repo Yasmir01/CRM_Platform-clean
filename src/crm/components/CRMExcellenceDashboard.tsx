@@ -24,36 +24,34 @@ import {
   Tooltip,
   CircularProgress
 } from '@mui/material';
-import {
-  EmojiEvents as ExcellenceIcon,
-  TrendingUp as TrendingUpIcon,
-  Speed as SpeedIcon,
-  Psychology as PsychologyIcon,
-  Router as RouterIcon,
-  Timeline as TimelineIcon,
-  Analytics as AnalyticsIcon,
-  Star as StarIcon,
-  CheckCircle as CheckCircleIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  Group as GroupIcon,
-  Email as EmailIcon,
-  Sms as SmsIcon,
-  Phone as PhoneIcon,
-  Assignment as AssignmentIcon,
-  Notifications as NotificationsIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  AttachMoney as AttachMoneyIcon,
-  BusinessCenter as BusinessCenterIcon,
-  Home as HomeIcon,
-  People as PeopleIcon,
-  Handshake as HandshakeIcon,
-  SupportAgent as SupportAgentIcon,
-  Campaign as CampaignIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
+import ExcellenceIcon from '@mui/icons-material/EmojiEvents';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SpeedIcon from '@mui/icons-material/Speed';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import RouterIcon from '@mui/icons-material/Router';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import StarIcon from '@mui/icons-material/Star';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import GroupIcon from '@mui/icons-material/Group';
+import EmailIcon from '@mui/icons-material/Email';
+import SmsIcon from '@mui/icons-material/Sms';
+import PhoneIcon from '@mui/icons-material/Phone';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import HomeIcon from '@mui/icons-material/Home';
+import PeopleIcon from '@mui/icons-material/People';
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RefreshIcon from '@mui/icons-material/Refresh';;
 import UnifiedCommunicationDashboard from './UnifiedCommunicationDashboard';
 import AILeadScoringEngine from './AILeadScoringEngine';
 import AdvancedWorkflowEngine from './AdvancedWorkflowEngine';

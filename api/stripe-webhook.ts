@@ -61,16 +61,20 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
             subscription = await prisma.subscription.findFirst({ where: { stripeSubscriptionId: stripeSubId } });
           }
           if (subscription) {
-            await prisma.payment.create({
-              data: {
-                subscriptionId: subscription.id,
-                amount: amount,
-                currency: (invoice.currency || 'usd').toLowerCase(),
-                status: 'succeeded',
-                provider: 'stripe',
-                externalId: invoice.id
-              }
-            });
+            // Idempotency: avoid duplicate payments for the same invoice
+            const existing = await prisma.payment.findFirst({ where: { externalId: invoice.id, provider: 'stripe' } });
+            if (!existing) {
+              await prisma.payment.create({
+                data: {
+                  subscriptionId: subscription.id,
+                  amount: amount,
+                  currency: (invoice.currency || 'usd').toLowerCase(),
+                  status: 'succeeded',
+                  provider: 'stripe',
+                  externalId: invoice.id
+                }
+              });
+            }
             await prisma.revenueEvent.create({ data: { subscriptionId: subscription.id, type: 'invoice.payment_succeeded', amount, metadata: { invoiceId: invoice.id } } });
           } else {
             await prisma.revenueEvent.create({ data: { subscriptionId: null, type: 'invoice.payment_succeeded', amount, metadata: { invoiceId: invoice.id } } });

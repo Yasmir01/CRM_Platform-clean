@@ -18,9 +18,7 @@ import {
   Switch,
   InputAdornment
 } from '@mui/material';
-import {
-  Edit as EditIcon
-} from '@mui/icons-material';
+import EditIcon from '@mui/icons-material/Edit';;
 import { BusinessBankAccount } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';
 

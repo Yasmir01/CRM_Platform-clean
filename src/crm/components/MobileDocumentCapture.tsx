@@ -40,37 +40,35 @@ import {
   Badge,
   Avatar
 } from '@mui/material';
-import {
-  CameraAlt as CameraIcon,
-  PhotoCamera as PhotoCameraIcon,
-  Smartphone as SmartphoneIcon,
-  Scanner as ScannerIcon,
-  CropFree as CropIcon,
-  Straighten as StraightenIcon,
-  Brightness6 as BrightnessIcon,
-  Contrast as ContrastIcon,
-  FilterBAndW as FilterIcon,
-  Rotate90DegreesCcw as RotateIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  Save as SaveIcon,
-  Close as CloseIcon,
-  Check as CheckIcon,
-  Refresh as RefreshIcon,
-  Upload as UploadIcon,
-  CloudUpload as CloudUploadIcon,
-  QrCodeScanner as QrCodeScannerIcon,
-  DocumentScanner as DocumentScannerIcon,
-  CameraEnhance as CameraEnhanceIcon,
-  AutoFixHigh as AutoFixHighIcon,
-  Fullscreen as FullscreenIcon,
-  FullscreenExit as FullscreenExitIcon,
-  FlipCameraAndroid as FlipCameraIcon,
-  FlashOn as FlashOnIcon,
-  FlashOff as FlashOffIcon,
-  GridOn as GridOnIcon,
-  GridOff as GridOffIcon
-} from '@mui/icons-material';
+import CameraIcon from '@mui/icons-material/CameraAlt';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import SmartphoneIcon from '@mui/icons-material/Smartphone';
+import ScannerIcon from '@mui/icons-material/Scanner';
+import CropIcon from '@mui/icons-material/CropFree';
+import StraightenIcon from '@mui/icons-material/Straighten';
+import BrightnessIcon from '@mui/icons-material/Brightness6';
+import ContrastIcon from '@mui/icons-material/Contrast';
+import FilterIcon from '@mui/icons-material/FilterBAndW';
+import RotateIcon from '@mui/icons-material/Rotate90DegreesCcw';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import UploadIcon from '@mui/icons-material/Upload';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import DocumentScannerIcon from '@mui/icons-material/DocumentScanner';
+import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import FlipCameraIcon from '@mui/icons-material/FlipCameraAndroid';
+import FlashOnIcon from '@mui/icons-material/FlashOn';
+import FlashOffIcon from '@mui/icons-material/FlashOff';
+import GridOnIcon from '@mui/icons-material/GridOn';
+import GridOffIcon from '@mui/icons-material/GridOff';;
 import { documentSecurityService } from '../services/DocumentSecurityService';
 import { uniformTooltipStyles } from '../utils/formStyles';
 

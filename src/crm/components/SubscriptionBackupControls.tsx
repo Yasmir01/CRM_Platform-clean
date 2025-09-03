@@ -34,20 +34,18 @@ import {
   IconButton,
   Tooltip
 } from '@mui/material';
-import {
-  Backup as BackupIcon,
-  Schedule as ScheduleIcon,
-  Security as SecurityIcon,
-  Storage as StorageIcon,
-  Upgrade as UpgradeIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Star as StarIcon,
-  Business as BusinessIcon,
-  Settings as SettingsIcon
-} from '@mui/icons-material';
+import BackupIcon from '@mui/icons-material/Backup';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SecurityIcon from '@mui/icons-material/Security';
+import StorageIcon from '@mui/icons-material/Storage';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import InfoIcon from '@mui/icons-material/Info';
+import WarningIcon from '@mui/icons-material/Warning';
+import StarIcon from '@mui/icons-material/Star';
+import BusinessIcon from '@mui/icons-material/Business';
+import SettingsIcon from '@mui/icons-material/Settings';;
 import { BackupRestoreService, BackupFrequency, SubscriptionLevel } from '../services/BackupRestoreService';
 
 interface SubscriptionPlan {

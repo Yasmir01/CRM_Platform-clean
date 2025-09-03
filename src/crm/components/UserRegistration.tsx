@@ -18,17 +18,15 @@ import {
   Chip,
   Grid
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  PersonAdd,
-  Email,
-  Lock,
-  Phone,
-  Business,
-  Language,
-  AccessTime
-} from '@mui/icons-material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import Email from '@mui/icons-material/Email';
+import Lock from '@mui/icons-material/Lock';
+import Phone from '@mui/icons-material/Phone';
+import Business from '@mui/icons-material/Business';
+import Language from '@mui/icons-material/Language';
+import AccessTime from '@mui/icons-material/AccessTime';;
 import { PasswordService } from '../services/PasswordService';
 import { DatabaseUserService, CreateUserData } from '../services/DatabaseUserService';
 

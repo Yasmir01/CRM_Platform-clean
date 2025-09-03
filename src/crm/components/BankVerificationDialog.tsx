@@ -19,13 +19,11 @@ import {
   Grid,
   useTheme
 } from '@mui/material';
-import {
-  Security as SecurityIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
-  AttachMoney as DollarIcon,
-  Close as CloseIcon
-} from '@mui/icons-material';
+import SecurityIcon from '@mui/icons-material/Security';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import DollarIcon from '@mui/icons-material/AttachMoney';
+import CloseIcon from '@mui/icons-material/Close';;
 
 import { BankConnection, BankVerification, MicroDeposit } from '../types/BankAccountTypes';
 import { bankAccountService } from '../services/BankAccountService';

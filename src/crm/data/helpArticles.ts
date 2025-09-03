@@ -1001,7 +1001,7 @@ const originalArticles: HelpArticle[] = [
     content: [
       "This CRM supports direct integrations with QuickBooks Online, Xero, Sage, FreshBooks, Wave and Zoho Books.",
       "Supported features include invoices, payments, customers, journal entries, bank transactions, and financial reports.",
-      "Connect by navigating to Integrations → Bookkeeping Integrations → Connect Provider. Use OAuth for QuickBooks and Xero, and provide Company/Organization IDs when requested.",
+      "Connect by navigating to Integrations → Bookkeeping Integrations ��� Connect Provider. Use OAuth for QuickBooks and Xero, and provide Company/Organization IDs when requested.",
       "Configure sync frequency (real_time/hourly/daily/weekly/manual) and sync direction (CRM → Bookkeeping, Bookkeeping → CRM, or bidirectional).",
       "Map CRM transaction types (rent, fees, expenses) to your bookkeeping account codes using the Account Mappings setting in the connection configuration.",
       "Use the Test Connection button before enabling the integration and review reconciliation logs for any sync errors."
@@ -1126,6 +1126,26 @@ const originalArticles: HelpArticle[] = [
     readTime: "6 min",
     helpful: 0,
     lastUpdated: "2024-01-20"
+  }
+,
+  {
+    id: "tenant-move-out-with-balance",
+    title: "Handling Move-Out with Outstanding Balance",
+    summary: "How to move out a tenant who still owes money, record payments after move-out, and where to find these records in the CRM",
+    content: [
+      "Open Tenants → select the tenant → Manage Tenants → Terminate Lease. Set the move-out date, reason, and any final charges. Confirm to move the tenant to Past Tenant status.",
+      "After termination, the remaining balance is preserved in the tenant’s ledger as a past-tenant balance. You’ll see it on the tenant’s detail page under Financials → Outstanding Balance.",
+      "To record a payment after move-out: go to the same tenant’s detail page and click Record Payment. Enter the amount, method, and a note (e.g., ‘Move-out balance’), then save.",
+      "Recorded payments appear immediately in the tenant’s Payment History and reduce the Outstanding Balance. Partial payments are supported.",
+      "Where to review balances: use Rent Collection to see tenants with outstanding amounts, and the tenant’s Outstanding Charges list for itemized entries. Past-tenant balances are visible even after move-out.",
+      "Accounting: if bookkeeping is connected, these payments sync to your accounting system based on your mapping. Use Bookkeeping Integration settings to review mappings."
+    ],
+    category: "tenants",
+    tags: ["move-out", "past-tenants", "payments", "ledger", "collections"],
+    difficulty: "Beginner",
+    readTime: "6 min",
+    helpful: 0,
+    lastUpdated: "2025-09-03"
   }
 ];
 

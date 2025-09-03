@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Button, Tab, Tabs, Alert } from '@mui/material';
-import { Add, AdminPanelSettings } from '@mui/icons-material';
+import Add from '@mui/icons-material/Add';
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings';;
 import SuggestionBox from '../components/SuggestionBox';
 import SuggestionSubmissionForm from '../components/SuggestionSubmissionForm';
 import SuggestionAdminPanel from '../components/SuggestionAdminPanel';

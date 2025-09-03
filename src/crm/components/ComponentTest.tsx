@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box, Typography, Alert, Card, CardContent, Button, Stack } from '@mui/material';
-import { CheckCircle, Error, Warning } from '@mui/icons-material';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Warning from '@mui/icons-material/Warning';;
 
 interface ComponentTestProps {
   componentName: string;

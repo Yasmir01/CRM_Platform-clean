@@ -100,6 +100,21 @@ export default function Tenants() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { state, addTenant, updateTenant, dispatch } = useCrmData();
   const { tenants, properties } = state;
+
+  const DEFAULT_COMM_PREFS: CommunicationPreferences = {
+    smsEnabled: true,
+    emailEnabled: true,
+    phoneEnabled: true,
+    achOptIn: false,
+    autoPayEnabled: false,
+  };
+
+  const normalizedTenants = React.useMemo(() =>
+    (tenants || []).map((t: any) => ({
+      ...t,
+      communicationPrefs: t?.communicationPrefs || DEFAULT_COMM_PREFS,
+    })),
+  [tenants]);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedTenant, setSelectedTenant] = React.useState<any | null>(null);
@@ -226,7 +241,7 @@ export default function Tenants() {
       monthlyRent: tenant.monthlyRent,
       emergencyContact: tenant.emergencyContact,
       emergencyPhone: tenant.emergencyPhone,
-      communicationPrefs: tenant.communicationPrefs,
+      communicationPrefs: tenant.communicationPrefs || DEFAULT_COMM_PREFS,
       paymentInfo: tenant.paymentInfo || {
         bankAccountLast4: "",
         routingNumber: "",
@@ -343,7 +358,7 @@ export default function Tenants() {
     setDetailTenantId("");
   };
 
-  const filteredTenants = tenants.filter(tenant => {
+  const filteredTenants = normalizedTenants.filter(tenant => {
     const property = properties.find(p => p.id === tenant.propertyId);
     const propertyName = property ? property.name : '';
 
@@ -362,10 +377,10 @@ export default function Tenants() {
     }
   };
 
-  const totalTenants = tenants.length;
-  const activeTenants = tenants.filter(t => t.status === "Active").length;
-  const latePayments = tenants.filter(t => t.status === "Late Payment").length;
-  const totalRevenue = tenants.filter(t => t.status === "Active").reduce((sum, t) => sum + t.monthlyRent, 0);
+  const totalTenants = normalizedTenants.length;
+  const activeTenants = normalizedTenants.filter(t => t.status === "Active").length;
+  const latePayments = normalizedTenants.filter(t => t.status === "Late Payment").length;
+  const totalRevenue = normalizedTenants.filter(t => t.status === "Active").reduce((sum, t) => sum + t.monthlyRent, 0);
 
   // Show tenant detail page if selected
   if (showTenantDetail && detailTenantId) {

@@ -44,23 +44,21 @@ import {
   CircularProgress,
   Snackbar
 } from '@mui/material';
-import {
-  Backup as BackupIcon,
-  Restore as RestoreIcon,
-  Download as DownloadIcon,
-  Delete as DeleteIcon,
-  Schedule as ScheduleIcon,
-  Security as SecurityIcon,
-  Storage as StorageIcon,
-  CloudDownload as CloudDownloadIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  ExpandMore as ExpandMoreIcon,
-  Settings as SettingsIcon,
-  History as HistoryIcon,
-  VerifiedUser as VerifiedUserIcon,
-  Lock as LockIcon
-} from '@mui/icons-material';
+import BackupIcon from '@mui/icons-material/Backup';
+import RestoreIcon from '@mui/icons-material/Restore';
+import DownloadIcon from '@mui/icons-material/Download';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SecurityIcon from '@mui/icons-material/Security';
+import StorageIcon from '@mui/icons-material/Storage';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HistoryIcon from '@mui/icons-material/History';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import LockIcon from '@mui/icons-material/Lock';;
 import { BackupRestoreService, BackupMetadata, BackupFrequency, BackupSchedule, SubscriptionLevel, RestoreOptions } from '../services/BackupRestoreService';
 import SubscriptionBackupControls from './SubscriptionBackupControls';
 

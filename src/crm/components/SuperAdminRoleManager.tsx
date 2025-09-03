@@ -53,32 +53,30 @@ import {
   LinearProgress,
   CircularProgress
 } from '@mui/material';
-import {
-  Security as SecurityIcon,
-  AdminPanelSettings as AdminIcon,
-  Person as PersonIcon,
-  Group as GroupIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  VpnKey as VpnKeyIcon,
-  Assignment as AssignmentIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  Warning as WarningIcon,
-  Search as SearchIcon,
-  FilterList as FilterListIcon,
-  Refresh as RefreshIcon,
-  MoreVert as MoreVertIcon,
-  ExpandMore as ExpandMoreIcon,
-  ContentCopy as ContentCopyIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-  Settings as SettingsIcon
-} from '@mui/icons-material';
+import SecurityIcon from '@mui/icons-material/Security';
+import AdminIcon from '@mui/icons-material/AdminPanelSettings';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
+import SettingsIcon from '@mui/icons-material/Settings';;
 import { accessControlService } from '../services/AccessControlService';
 import { userManagementService, User as UserMgmtUser, UserAction } from '../services/UserManagementService';
 import { uniformTooltipStyles } from '../utils/formStyles';

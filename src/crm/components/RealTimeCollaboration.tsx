@@ -41,40 +41,38 @@ import {
   ButtonGroup,
   ClickAwayListener
 } from '@mui/material';
-import {
-  Comment as CommentIcon,
-  Person as PersonIcon,
-  Circle as CircleIcon,
-  Visibility as VisibilityIcon,
-  Edit as EditIcon,
-  Share as ShareIcon,
-  Notifications as NotificationsIcon,
-  NotificationsOff as NotificationsOffIcon,
-  MoreVert as MoreVertIcon,
-  Close as CloseIcon,
-  Send as SendIcon,
-  Reply as ReplyIcon,
-  Resolve as ResolveIcon,
-  ThumbUp as ThumbUpIcon,
-  Favorite as FavoriteIcon,
-  EmojiEmotions as EmojiEmotionsIcon,
-  Highlight as HighlightIcon,
-  Brush as BrushIcon,
-  FormatUnderlined as UnderlineIcon,
-  RadioButtonUnchecked as CircleAnnotationIcon,
-  TrendingFlat as ArrowIcon,
-  CropDin as RectangleIcon,
-  Gesture as FreehandIcon,
-  Palette as PaletteIcon,
-  LineStyle as LineStyleIcon,
-  Opacity as OpacityIcon,
-  Add as AddIcon,
-  Check as CheckIcon,
-  Schedule as ScheduleIcon,
-  Group as GroupIcon,
-  Link as LinkIcon,
-  ContentCopy as CopyIcon
-} from '@mui/icons-material';
+import CommentIcon from '@mui/icons-material/Comment';
+import PersonIcon from '@mui/icons-material/Person';
+import CircleIcon from '@mui/icons-material/Circle';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import ShareIcon from '@mui/icons-material/Share';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CloseIcon from '@mui/icons-material/Close';
+import SendIcon from '@mui/icons-material/Send';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ResolveIcon from '@mui/icons-material/Resolve';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import HighlightIcon from '@mui/icons-material/Highlight';
+import BrushIcon from '@mui/icons-material/Brush';
+import UnderlineIcon from '@mui/icons-material/FormatUnderlined';
+import CircleAnnotationIcon from '@mui/icons-material/RadioButtonUnchecked';
+import ArrowIcon from '@mui/icons-material/TrendingFlat';
+import RectangleIcon from '@mui/icons-material/CropDin';
+import FreehandIcon from '@mui/icons-material/Gesture';
+import PaletteIcon from '@mui/icons-material/Palette';
+import LineStyleIcon from '@mui/icons-material/LineStyle';
+import OpacityIcon from '@mui/icons-material/Opacity';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import GroupIcon from '@mui/icons-material/Group';
+import LinkIcon from '@mui/icons-material/Link';
+import CopyIcon from '@mui/icons-material/ContentCopy';;
 import { collaborationService } from '../services/CollaborationService';
 import { uniformTooltipStyles } from '../utils/formStyles';
 

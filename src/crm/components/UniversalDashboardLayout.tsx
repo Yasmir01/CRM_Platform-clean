@@ -17,14 +17,12 @@ import {
   Fab,
   useTheme,
 } from '@mui/material';
-import {
-  DragIndicator as DragIcon,
-  Settings as SettingsIcon,
-  AspectRatio as ResizeIcon,
-  Save as SaveIcon,
-  Restore as RestoreIcon,
-  Edit as EditIcon,
-} from '@mui/icons-material';
+import DragIcon from '@mui/icons-material/DragIndicator';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ResizeIcon from '@mui/icons-material/AspectRatio';
+import SaveIcon from '@mui/icons-material/Save';
+import RestoreIcon from '@mui/icons-material/Restore';
+import EditIcon from '@mui/icons-material/Edit';;
 
 interface WidgetLayout {
   id: string;

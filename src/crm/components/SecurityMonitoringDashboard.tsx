@@ -23,18 +23,16 @@ import {
   Badge,
   useTheme
 } from '@mui/material';
-import {
-  Security as SecurityIcon,
-  Shield as ShieldIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Visibility as ViewIcon,
-  Refresh as RefreshIcon,
-  Assessment as ReportIcon,
-  VpnLock as EncryptionIcon,
-  AdminPanelSettings as ComplianceIcon
-} from '@mui/icons-material';
+import SecurityIcon from '@mui/icons-material/Security';
+import ShieldIcon from '@mui/icons-material/Shield';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import ViewIcon from '@mui/icons-material/Visibility';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ReportIcon from '@mui/icons-material/Assessment';
+import EncryptionIcon from '@mui/icons-material/VpnLock';
+import ComplianceIcon from '@mui/icons-material/AdminPanelSettings';;
 import { SecurityAuditLogger, FraudDetection, PCICompliance } from '../utils/paymentSecurity';
 import { PCIComplianceValidator } from '../utils/pciComplianceValidator';
 

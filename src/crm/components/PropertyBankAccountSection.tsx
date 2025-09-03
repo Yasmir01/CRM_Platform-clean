@@ -10,13 +10,11 @@ import {
   Stack,
   CircularProgress
 } from '@mui/material';
-import {
-  AccountBalance as BankIcon,
-  Edit as EditIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  Add as AddIcon
-} from '@mui/icons-material';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import AddIcon from '@mui/icons-material/Add';;
 import { bankAccountService } from '../services/BankAccountService';
 import { BusinessBankAccount } from '../types/BankAccountTypes';
 import { Property } from '../contexts/CrmDataContext';

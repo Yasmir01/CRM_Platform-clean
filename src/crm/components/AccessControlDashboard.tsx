@@ -51,41 +51,39 @@ import {
   ListItemButton,
   CheckboxTree
 } from '@mui/material';
-import {
-  Security as SecurityIcon,
-  AdminPanelSettings as AdminIcon,
-  Person as PersonIcon,
-  Group as GroupIcon,
-  Key as KeyIcon,
-  Shield as ShieldIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  Assignment as AssignmentIcon,
-  History as HistoryIcon,
-  Report as ReportIcon,
-  Settings as SettingsIcon,
-  NotificationImportant as AlertIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  VpnKey as VpnKeyIcon,
-  Fingerprint as FingerprintIcon,
-  Schedule as ScheduleIcon,
-  Gavel as GavelIcon,
-  Assessment as AssessmentIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  ExpandMore as ExpandMoreIcon,
-  MoreVert as MoreVertIcon,
-  FilterList as FilterListIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon
-} from '@mui/icons-material';
+import SecurityIcon from '@mui/icons-material/Security';
+import AdminIcon from '@mui/icons-material/AdminPanelSettings';
+import PersonIcon from '@mui/icons-material/Person';
+import GroupIcon from '@mui/icons-material/Group';
+import KeyIcon from '@mui/icons-material/Key';
+import ShieldIcon from '@mui/icons-material/Shield';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import HistoryIcon from '@mui/icons-material/History';
+import ReportIcon from '@mui/icons-material/Report';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AlertIcon from '@mui/icons-material/NotificationImportant';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import GavelIcon from '@mui/icons-material/Gavel';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';;
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer } from 'recharts';
 import { accessControlService } from '../services/AccessControlService';
 import { uniformTooltipStyles } from '../utils/formStyles';

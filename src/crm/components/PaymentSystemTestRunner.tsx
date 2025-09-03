@@ -19,18 +19,16 @@ import {
   Paper,
   Divider
 } from '@mui/material';
-import {
-  PlayArrow as PlayIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  ExpandMore as ExpandMoreIcon,
-  Security as SecurityIcon,
-  Payment as PaymentIcon,
-  AccountBalance as BankIcon,
-  Assessment as ComplianceIcon,
-  IntegrationInstructions as IntegrationIcon
-} from '@mui/icons-material';
+import PlayIcon from '@mui/icons-material/PlayArrow';
+import CheckIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SecurityIcon from '@mui/icons-material/Security';
+import PaymentIcon from '@mui/icons-material/Payment';
+import BankIcon from '@mui/icons-material/AccountBalance';
+import ComplianceIcon from '@mui/icons-material/Assessment';
+import IntegrationIcon from '@mui/icons-material/IntegrationInstructions';;
 import { PaymentSystemTester, TestSuite, TestResult } from '../utils/paymentSystemTests';
 
 interface TestRunnerProps {
