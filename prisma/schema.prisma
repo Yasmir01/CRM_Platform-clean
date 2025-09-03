@@ -385,6 +385,21 @@ model Message {
   @@index([senderId])
 }
 
+/// Accounting Integration per org
+model AccountingIntegration {
+  id           String   @id @default(cuid())
+  orgId        String
+  provider     String   // quickbooks | xero | freshbooks
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([orgId])
+  @@index([provider])
+}
+
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
