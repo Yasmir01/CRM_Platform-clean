@@ -141,6 +141,7 @@ export function AdminDashboard() {
 import PermissionEditor from '../components/admin/PermissionEditor';
 import UserPermissionsGrid from '../components/admin/UserPermissionsGrid';
 import ExportSchedule from '../components/admin/ExportSchedule';
+import ImpersonationToggle from '../components/admin/ImpersonationToggle';
 
 export function AdminUsers() {
   const params = new URLSearchParams(window.location.search);
