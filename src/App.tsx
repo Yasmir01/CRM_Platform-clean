@@ -43,6 +43,7 @@ const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
 import NewsBoard from "./crm/pages/NewsBoard";
+const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
@@ -136,6 +137,11 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<CrmLogin />} />
+      <Route path="/tenant-portal" element={
+        <React.Suspense fallback={<PageLoader />}>
+          <TenantPortal />
+        </React.Suspense>
+      } />
       {/* Public help route - accessible without authentication */}
       <Route path="/help" element={
         <React.Suspense fallback={<PageLoader />}>
