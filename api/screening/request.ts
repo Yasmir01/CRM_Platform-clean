@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { prisma } from '../_db';
 import { getUserOr401 } from '../../src/utils/authz';
-import { startTransUnionScreening } from '../../src/lib/screening/transunion';
+import { notify } from '../../src/lib/notify';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method Not Allowed' }); }
@@ -16,8 +16,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const provider = String(body.provider || 'transunion');
   if (!appId) return res.status(400).json({ error: 'appId required' });
 
-  const screening = await prisma.tenantScreening.create({ data: { appId, provider, status: 'pending' } });
-  if (provider === 'transunion') await startTransUnionScreening(screening.id, appId);
+  const screening = await prisma.tenantScreening.create({ data: { appId, provider, status: 'awaiting_consent' } });
+
+  const application = await prisma.tenantApplication.findUnique({ where: { id: appId } });
+  try {
+    if (application?.email) {
+      const xfProto = (req.headers['x-forwarded-proto'] as string) || 'https';
+      const xfHost = (req.headers['x-forwarded-host'] as string) || (req.headers.host as string) || '';
+      const baseUrl = (process.env as any).PUBLIC_BASE_URL || (xfHost ? `${xfProto}://${xfHost}` : '');
+      const consentUrl = `${baseUrl}/consent/${screening.id}`;
+
+      await notify({
+        email: application.email,
+        title: 'Consent Required for Tenant Screening',
+        message: `A background/credit screening is required for your application. Please review and consent here: ${consentUrl}`,
+        type: 'TENANT_SCREENING_CONSENT',
+        meta: { appId, screeningId: screening.id, provider }
+      });
+
+      await prisma.tenantScreeningConsent.create({
+        data: { screeningId: screening.id, appId, tenantEmail: application.email }
+      });
+    }
+  } catch (e) {
+    console.error('screening request notify error', (e as any)?.message || e);
+  }
 
   return res.status(200).json({ ok: true, screening });
 }
