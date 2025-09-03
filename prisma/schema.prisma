@@ -53,6 +53,14 @@ model OrgSettings {
   updatedAt      DateTime      @updatedAt
 }
 
+model ImpersonationLog {
+  id           String   @id @default(cuid())
+  superAdminId String
+  targetUserId String
+  startedAt    DateTime @default(now())
+  endedAt      DateTime?
+}
+
 enum BillingCycle {
   monthly
   yearly
