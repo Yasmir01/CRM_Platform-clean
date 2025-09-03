@@ -12,6 +12,15 @@ export default defineConfig({
   optimizeDeps: {
     noDiscovery: true,
     include: ["react-is"],
+    exclude: [
+      "@mui/material",
+      "@mui/system",
+      "@mui/icons-material",
+      "@mui/x-data-grid",
+      "@mui/x-date-pickers",
+      "@mui/x-charts"
+    ],
+    force: true,
   },
   build: {
     target: 'es2015',
