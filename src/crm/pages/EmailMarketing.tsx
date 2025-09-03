@@ -1452,9 +1452,8 @@ export default function EmailMarketing() {
             startIcon={<EditRoundedIcon />}
             onClick={() => {
               if (previewTemplate) {
-                // This would call the edit function passed down from parent
                 setPreviewDialogOpen(false);
-                // onEdit(previewTemplate); // This would be called if available
+                handleEditTemplate(previewTemplate);
               }
             }}
           >
