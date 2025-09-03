@@ -31,6 +31,9 @@ const MaintenanceRequests = React.lazy(() => import("./crm/pages/MaintenanceRequ
 const MaintenanceReport = React.lazy(() => import("./crm/pages/MaintenanceReport"));
 const OwnerLedger = React.lazy(() => import("./crm/pages/OwnerLedger"));
 const OwnerPortfolio = React.lazy(() => import("./crm/pages/OwnerPortfolio"));
+const PlansAdmin = React.lazy(() => import("./crm/pages/PlansAdmin"));
+const AutopayFailures = React.lazy(() => import("./crm/pages/AutopayFailures"));
+const AdminReports = React.lazy(() => import("./crm/pages/AdminReports"));
 const Applications = React.lazy(() => import("./crm/pages/Applications"));
 const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
 const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
@@ -423,6 +426,21 @@ function AppRoutes() {
         <Route path="accounting" element={
           <React.Suspense fallback={<PageLoader />}>
             <AccountingSettings />
+          </React.Suspense>
+        } />
+        <Route path="payment-plans-admin" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PlansAdmin />
+          </React.Suspense>
+        } />
+        <Route path="autopay-failures" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AutopayFailures />
+          </React.Suspense>
+        } />
+        <Route path="admin-reports" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AdminReports />
           </React.Suspense>
         } />
         <Route path="automation" element={
