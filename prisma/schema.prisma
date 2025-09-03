@@ -10,6 +10,25 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// --- RBAC Users ---
+enum Role {
+  TENANT
+  OWNER
+  VENDOR
+  MANAGER
+  ADMIN
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String?
+  role        Role     @default(TENANT)
+  permissions String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum BillingCycle {
   monthly
   yearly
