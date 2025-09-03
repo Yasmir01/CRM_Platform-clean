@@ -505,6 +505,23 @@ model ApplicationDocument {
   @@index([appId])
 }
 
+model TenantScreening {
+  id        String   @id @default(cuid())
+  appId     String
+  provider  String
+  status    String   // pending, in_progress, completed, failed
+  reportUrl String?
+  rawData   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  application TenantApplication @relation(fields: [appId], references: [id])
+
+  @@index([appId])
+  @@index([provider])
+  @@index([status])
+}
+
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
