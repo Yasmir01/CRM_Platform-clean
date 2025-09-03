@@ -232,6 +232,7 @@ model Lease {
   id            String        @id @default(uuid())
   unitId        String
   tenantId      String
+  orgId         String?
   startDate     DateTime
   endDate       DateTime?
   status        LeaseStatus   @default(ACTIVE)
@@ -293,12 +294,15 @@ model RecurringTask {
 
 model MaintenanceRequest {
   id          String   @id @default(cuid())
+  tenantId    String?
+  orgId       String?
   propertyId  String
   unitId      String?
   title       String
   description String?
-  priority    String   @default("normal")
   status      String   @default("open") // open, in_progress, completed, canceled
+  priority    String   @default("normal")  // low, normal, high, emergency
+  assignedTo  String?
   vendorId    String?
   createdById String?
   createdAt   DateTime @default(now())
@@ -310,4 +314,29 @@ model MaintenanceRequest {
   @@index([propertyId])
   @@index([unitId])
   @@index([status])
+  @@index([orgId])
+  @@index([tenantId])
+}
+
+/// Document Management System
+model Document {
+  id          String        @id @default(cuid())
+  orgId       String
+  uploadedBy  String
+  tenantId    String?
+  leaseId     String?
+  type        String
+  name        String
+  url         String
+  createdAt   DateTime      @default(now())
+
+  org         Organization  @relation(fields: [orgId], references: [id])
+  uploader    User          @relation(fields: [uploadedBy], references: [id])
+  tenant      Tenant?       @relation(fields: [tenantId], references: [id])
+  lease       Lease?        @relation(fields: [leaseId], references: [id])
+
+  @@index([orgId])
+  @@index([tenantId])
+  @@index([leaseId])
+  @@index([uploadedBy])
 }
