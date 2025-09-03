@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { getUserOr401 } from '../../src/utils/authz';
+import { ensurePermission } from '../../src/lib/authorize';
 import { maintenanceStore, type MaintenanceRecord } from './_store';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  const user = getUserOr401(req, res);
+  const user = ensurePermission(req, res, 'maintenance:create');
   if (!user) return;
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
