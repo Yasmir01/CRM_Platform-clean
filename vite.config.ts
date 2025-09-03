@@ -11,7 +11,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
-    include: [],
+    include: ["react-is"],
   },
   build: {
     target: 'es2015',
