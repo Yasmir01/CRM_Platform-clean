@@ -51,13 +51,26 @@ export function stripeProvider(): PaymentProvider {
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object as any;
-        const txId = String(session.id);
+        const sessionId = String(session.id);
+        const piId = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id;
         try {
-          await prisma.rentPayment.updateMany({ where: { transactionId: txId }, data: { status: 'succeeded', paidAt: new Date() } });
+          if (piId) {
+            await prisma.rentPayment.updateMany({ where: { transactionId: sessionId }, data: { status: 'succeeded', paidAt: new Date(), transactionId: String(piId) } });
+          } else {
+            await prisma.rentPayment.updateMany({ where: { transactionId: sessionId }, data: { status: 'succeeded', paidAt: new Date() } });
+          }
         } catch (e) {
           console.error('rentPayment update error', (e as any)?.message || e);
         }
       }
+    },
+
+    async refundPayment(transactionId: string, amount?: number) {
+      const refund = await stripe.refunds.create({
+        payment_intent: transactionId,
+        amount: amount ? Math.round(amount * 100) : undefined,
+      });
+      return { refundId: refund.id };
     },
   };
 }
