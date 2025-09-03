@@ -254,6 +254,13 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
   const connectedProviders = integrations.filter(int => int.isConnected).map(int => int.provider);
   const availableToConnect = availableProviders.filter(provider => !connectedProviders.includes(provider.id as any));
 
+  React.useEffect(() => {
+    if (connectDialog.open && connectDialog.step === 'auth' && connectDialog.provider) {
+      const t = setTimeout(() => handleCompleteConnection(), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [connectDialog.open, connectDialog.step, connectDialog.provider]);
+
   return (
     <>
       <Dialog 
