@@ -7,6 +7,9 @@ import { rateLimit } from "../../src/utils/rateLimit";
 
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 
+const ALLOWED_MIME = ["image/jpeg", "image/png", "application/pdf"];
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") return res.status(405).end("Method Not Allowed");
 
@@ -21,17 +24,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const bucket = process.env.S3_BUCKET as string;
   if (!bucket) return res.status(500).json({ error: "S3_BUCKET not set" });
 
-  const { contentType, ext } = (req.body || {}) as { contentType?: string; ext?: string };
-  const key = `uploads/${user.sub || user.id}/${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext ? `.${ext.replace(".", "")}` : ""}`;
+  const { contentType, ext, fileName } = (req.body || {}) as { contentType?: string; ext?: string; fileName?: string };
+  if (!contentType || !ALLOWED_MIME.includes(contentType)) {
+    return res.status(400).json({ error: "invalid file type" });
+  }
+
+  const key = `uploads/${user.sub || (user as any).id}/${Date.now()}-${crypto.randomBytes(8).toString("hex")}${ext ? `.${ext.replace(".", "")}` : fileName ? `-${fileName}` : ""}`;
 
   const cmd = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
-    ContentType: contentType || "application/octet-stream",
+    ContentType: contentType,
     ACL: "private",
-    Metadata: { uploadedBy: String(user.sub || user.id) },
+    Metadata: { uploadedBy: String((user as any).sub || (user as any).id) },
   });
 
   const url = await getSignedUrl(s3, cmd, { expiresIn: 60 });
-  res.status(200).json({ uploadUrl: url, key });
+  res.status(200).json({ uploadUrl: url, key, allowedMime: ALLOWED_MIME, maxSize: MAX_UPLOAD_SIZE });
 }
