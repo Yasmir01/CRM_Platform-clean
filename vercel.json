@@ -17,6 +17,7 @@
     { "path": "/api/cron/lease-expiry", "schedule": "0 1 * * *" },
     { "path": "/api/owner-statements/generate", "schedule": "0 0 1 * *" },
     { "path": "/api/cron/autopay-charge", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/autopay-retry", "schedule": "0 7 * * *" }
+    { "path": "/api/cron/autopay-retry", "schedule": "0 7 * * *" },
+    { "path": "/api/reports/payment-plans/auto-export", "schedule": "0 0 1 * *" }
   ]
 }
