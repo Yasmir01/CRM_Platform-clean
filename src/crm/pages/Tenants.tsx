@@ -211,6 +211,14 @@ export default function Tenants() {
     }
   };
 
+  const DEFAULT_COMM_PREFS: CommunicationPreferences = {
+    smsEnabled: true,
+    emailEnabled: true,
+    phoneEnabled: true,
+    achOptIn: false,
+    autoPayEnabled: false,
+  };
+
   const handleEditTenant = (tenant: any) => {
     setSelectedTenant(tenant);
     setProfilePicture(tenant.profilePicture || "");
@@ -226,7 +234,7 @@ export default function Tenants() {
       monthlyRent: tenant.monthlyRent,
       emergencyContact: tenant.emergencyContact,
       emergencyPhone: tenant.emergencyPhone,
-      communicationPrefs: tenant.communicationPrefs,
+      communicationPrefs: tenant.communicationPrefs || DEFAULT_COMM_PREFS,
       paymentInfo: tenant.paymentInfo || {
         bankAccountLast4: "",
         routingNumber: "",
