@@ -77,6 +77,8 @@ const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSett
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
+const Messages = React.lazy(() => import("./crm/pages/Messages"));
+const ThreadView = React.lazy(() => import("./crm/pages/ThreadView"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
@@ -281,6 +283,16 @@ function AppRoutes() {
         <Route path="communications" element={
           <React.Suspense fallback={<PageLoader />}>
             <Communications />
+          </React.Suspense>
+        } />
+        <Route path="messages" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Messages />
+          </React.Suspense>
+        } />
+        <Route path="messages/:id" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <ThreadView />
           </React.Suspense>
         } />
         <Route path="suggestions" element={
