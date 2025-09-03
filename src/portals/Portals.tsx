@@ -39,6 +39,39 @@ export function TenantLease() {
   );
 }
 
+export function TenantSecurity() {
+  const [qr, setQr] = React.useState<string | null>(null);
+  const [code, setCode] = React.useState('');
+
+  async function start() {
+    const r = await fetch('/api/2fa/setup', { method: 'POST', credentials: 'include' });
+    const d = await r.json(); setQr(d.qr || null);
+  }
+  async function verify() {
+    await fetch('/api/2fa/verify', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: code }) });
+    alert('2FA enabled');
+  }
+  async function disable2fa() {
+    await fetch('/api/2fa/disable', { method: 'POST', credentials: 'include' });
+    alert('2FA disabled'); setQr(null);
+  }
+
+  return (
+    <RoleLayout>
+      <h1>Security</h1>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 360 }}>
+        <button onClick={start}>Start 2FA Setup</button>
+        {qr && <img src={qr} alt="2FA QR" style={{ border: '1px solid #ccc', borderRadius: 8, padding: 8 }} />}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <input value={code} onChange={(e) => setCode((e.target as HTMLInputElement).value)} placeholder="123456" />
+          <button onClick={verify}>Verify</button>
+        </div>
+        <button onClick={disable2fa}>Disable 2FA</button>
+      </div>
+    </RoleLayout>
+  );
+}
+
 export function OwnerDashboard() {
   return (
     <RoleLayout>
