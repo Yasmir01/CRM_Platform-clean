@@ -89,6 +89,9 @@ const AccountingSettings = React.lazy(() => import("./crm/pages/AccountingSettin
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
+const LeaseTemplates = React.lazy(() => import("./crm/pages/LeaseTemplates"));
+const SendLease = React.lazy(() => import("./crm/pages/SendLease"));
+const TenantLeaseView = React.lazy(() => import("./portals/TenantLeaseView"));
 const Messages = React.lazy(() => import("./crm/pages/Messages"));
 const ThreadView = React.lazy(() => import("./crm/pages/ThreadView"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
@@ -176,6 +179,7 @@ function AppRoutes() {
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
+      <Route path="/tenant/leases/:id" element={<React.Suspense fallback={<PageLoader />}><TenantLeaseView /></React.Suspense>} />
       <Route path="/apply/:propertyId" element={<React.Suspense fallback={<PageLoader />}><PublicApply /></React.Suspense>} />
       <Route path="/tenant/security" element={<React.Suspense fallback={<PageLoader />}><TenantSecurity /></React.Suspense>} />
       <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
@@ -383,6 +387,16 @@ function AppRoutes() {
         <Route path="documents" element={
           <React.Suspense fallback={<PageLoader />}>
             <Documents />
+          </React.Suspense>
+        } />
+        <Route path="lease-templates" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LeaseTemplates />
+          </React.Suspense>
+        } />
+        <Route path="send-lease" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SendLease />
           </React.Suspense>
         } />
         <Route path="email-marketing" element={
