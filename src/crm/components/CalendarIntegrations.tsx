@@ -387,9 +387,11 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
                               >
                                 {syncingIntegrations.has(integration.id) ? "Syncing..." : "Sync Now"}
                               </Button>
-                              <IconButton size="small">
-                                <SettingsRoundedIcon />
-                              </IconButton>
+                              <Tooltip title="Settings">
+                                <IconButton size="small" onClick={() => setSettingsDialog({ open: true, integration })}>
+                                  <SettingsRoundedIcon />
+                                </IconButton>
+                              </Tooltip>
                             </Stack>
                           </Stack>
                         </Stack>
