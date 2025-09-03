@@ -138,11 +138,19 @@ export function AdminDashboard() {
   );
 }
 
+import PermissionEditor from '../components/admin/PermissionEditor';
+
 export function AdminUsers() {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('id') || '';
   return (
     <RoleLayout>
       <h1>Users</h1>
-      <p>User management.</p>
+      {userId ? (
+        <PermissionEditor userId={userId} />
+      ) : (
+        <p>Pass ?id=USER_ID to edit permissions.</p>
+      )}
     </RoleLayout>
   );
 }
