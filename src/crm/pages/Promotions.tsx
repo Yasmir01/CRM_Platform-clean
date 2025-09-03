@@ -62,6 +62,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
 import { quickCopy } from "../utils/clipboardUtils";
+import SafeHtml from "../components/SafeHtml";
 
 interface Promotion {
   id: string;
@@ -767,8 +768,9 @@ export default function Promotions() {
                         variant="body2"
                         color="text.secondary"
                         component="div"
-                        dangerouslySetInnerHTML={{ __html: template.description }}
-                      />
+                      >
+                        <SafeHtml html={template.description} />
+                      </Typography>
                     </Box>
                     
                     <Box>
@@ -794,8 +796,9 @@ export default function Promotions() {
                             variant="body2"
                             color="text.secondary"
                             component="div"
-                            dangerouslySetInnerHTML={{ __html: template.terms }}
-                          />
+                          >
+                            <SafeHtml html={template.terms} />
+                          </Typography>
                         </Box>
                       </AccordionDetails>
                     </Accordion>
