@@ -95,3 +95,5 @@ body > iframe[src*="metamask"] {
 /* Tenant Portal styles */
 .tenant-tab-content { margin-top: 20px; }
 .card-field { margin-top: 8px; }
+.export-button-group { display: inline-block; margin: 0 8px; }
+.export-actions button + button { margin-left: 8px; }

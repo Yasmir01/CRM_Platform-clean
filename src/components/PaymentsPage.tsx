@@ -61,6 +61,10 @@ function PaymentsInner() {
       {status && <p>{status}</p>}
 
       <h3>Your Payments</h3>
+      <div className="export-actions">
+        <a href="/api/export/payments?format=csv"><button>Export Payments (CSV)</button></a>
+        <a href="/api/export/payments?format=pdf" style={{ marginLeft: 8 }}><button>Export Payments (PDF)</button></a>
+      </div>
       <ul>
         {payments.map((p) => <li key={p.id}>{(p.amount / 100).toFixed(2)} {p.currency} — {p.status}</li>)}
       </ul>
