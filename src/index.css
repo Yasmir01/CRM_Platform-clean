@@ -98,3 +98,10 @@ body > iframe[src*="metamask"] {
 .export-button-group { display: inline-block; margin: 0 8px; }
 .export-actions button + button { margin-left: 8px; }
 .export-actions a + a { margin-left: 8px; }
+
+/* Recurring task form styles */
+.recurring-task-form { display: grid; gap: 8px; max-width: 560px; }
+.rt-row { display: flex; gap: 8px; align-items: center; }
+.rt-input, .rt-textarea, .rt-select, .rt-number, .rt-datetime { border: 1px solid #ccc; padding: 8px; border-radius: 6px; }
+.rt-textarea { min-height: 80px; }
+.rt-button { padding: 8px 14px; border-radius: 6px; border: 1px solid #333; background: #111; color: #fff; }
