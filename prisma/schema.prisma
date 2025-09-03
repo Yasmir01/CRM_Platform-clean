@@ -68,6 +68,9 @@ model UserNotification {
   id        String   @id @default(cuid())
   userId    String
   message   String
+  type      String?
+  title     String?
+  meta      Json?
   createdAt DateTime @default(now())
   read      Boolean  @default(false)
 }
@@ -233,6 +236,8 @@ model Lease {
   endDate       DateTime?
   status        LeaseStatus   @default(ACTIVE)
   archived      Boolean       @default(false)   // hide from active UI if desired
+  rentAmount    Float?
+  dueDay        Int?          // 1..31, day of the month rent is due
   unit          Unit          @relation(fields: [unitId], references: [id])
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
   ledgerEntries LedgerEntry[]
