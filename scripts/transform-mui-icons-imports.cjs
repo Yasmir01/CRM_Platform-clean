@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-/*
-  Rewrite imports like:
-    import { A as AIcon, B } from '@mui/icons-material';
-  into:
-    import AIcon from '@mui/icons-material/A';
-    import B from '@mui/icons-material/B';
-*/
-
 const fs = require('fs');
 const path = require('path');
 
@@ -65,10 +57,13 @@ function run() {
 
   const files = walk(srcDir);
   let modifiedCount = 0;
+  let checked = 0; let candidates = 0;
 
   for (const file of files) {
+    checked++;
     let text = fs.readFileSync(file, 'utf8');
     if (!text.includes("@mui/icons-material")) continue;
+    candidates++;
     const { content: out, changed } = transform(text);
     if (changed) {
       fs.writeFileSync(file, out, 'utf8');
@@ -77,6 +72,7 @@ function run() {
     }
   }
 
+  console.log(`Scanned ${checked} files, candidates: ${candidates}`);
   console.log(`Rewrote imports in ${modifiedCount} files.`);
 }
 
