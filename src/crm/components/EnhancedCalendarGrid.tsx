@@ -283,7 +283,7 @@ const EnhancedCalendarGrid: React.FC<EnhancedCalendarGridProps> = ({
                     ? alpha(theme.palette.primary.main, 0.1)
                     : dayInfo.isToday
                     ? alpha(theme.palette.primary.main, 0.05)
-                    : 'transparent',
+                    : (theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.03) : 'transparent'),
                   borderColor: dayInfo.isSelected
                     ? theme.palette.primary.main
                     : dayInfo.isToday
@@ -556,7 +556,7 @@ const EnhancedCalendarGrid: React.FC<EnhancedCalendarGridProps> = ({
           p: isMobile ? 1 : 2,
           borderRadius: 2,
           border: `1px solid ${theme.palette.divider}`,
-          bgcolor: theme.palette.background.paper,
+          bgcolor: theme.palette.mode === 'dark' ? alpha(theme.palette.common.white, 0.02) : theme.palette.background.paper,
         }}
       >
         {/* Header */}
