@@ -191,3 +191,56 @@ model LedgerEntry {
 
   @@index([leaseId])
 }
+
+// --- Recurring maintenance automation ---
+enum RecurrenceFrequency {
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+model RecurringTask {
+  id          String               @id @default(cuid())
+  propertyId  String
+  unitId      String?
+  title       String
+  description String?
+  frequency   RecurrenceFrequency
+  interval    Int                  @default(1)
+  nextRunAt   DateTime
+  lastRunAt   DateTime?
+  vendorId    String?
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  property    Property             @relation(fields: [propertyId], references: [id])
+  unit        Unit?                @relation(fields: [unitId], references: [id])
+
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([isActive, nextRunAt])
+}
+
+model MaintenanceRequest {
+  id          String   @id @default(cuid())
+  propertyId  String
+  unitId      String?
+  title       String
+  description String?
+  priority    String   @default("normal")
+  status      String   @default("open") // open, in_progress, completed, canceled
+  vendorId    String?
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property    Property @relation(fields: [propertyId], references: [id])
+  unit        Unit?    @relation(fields: [unitId], references: [id])
+
+  @@index([propertyId])
+  @@index([unitId])
+  @@index([status])
+}
