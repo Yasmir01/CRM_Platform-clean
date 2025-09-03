@@ -39,6 +39,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
+    "docusign-esign": "^8.4.0",
     "dompurify": "^3.2.6",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
