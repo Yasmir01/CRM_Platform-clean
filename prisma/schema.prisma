@@ -563,8 +563,12 @@ model LeaseDocument {
   generatedPdfUrl String?
   status          String   @default("draft")
   envelopeId      String?
+  renewalOfId     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  renewalOf       LeaseDocument? @relation("RenewalChain", fields: [renewalOfId], references: [id])
+  renewals        LeaseDocument[] @relation("RenewalChain")
 }
 
 model SignatureEvent {
