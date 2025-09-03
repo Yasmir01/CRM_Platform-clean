@@ -521,6 +521,51 @@ const CalendarIntegrations: React.FC<CalendarIntegrationsProps> = ({
         </DialogActions>
       </Dialog>
 
+      {/* Settings Dialog */}
+      <Dialog
+        open={settingsDialog.open}
+        onClose={() => setSettingsDialog({ open: false })}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Integration Settings</DialogTitle>
+        <DialogContent>
+          {settingsDialog.integration && (
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <Typography variant="subtitle1">{settingsDialog.integration.name}</Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={settingsDialog.integration.twoWaySync}
+                    onChange={(e) => {
+                      const updated = { ...settingsDialog.integration!, twoWaySync: e.target.checked };
+                      setIntegrations(prev => prev.map(i => i.id === updated.id ? updated : i));
+                      onUpdateIntegration?.(updated);
+                      setSettingsDialog({ open: true, integration: updated });
+                    }}
+                  />
+                }
+                label="Enable two-way sync"
+              />
+              <TextField
+                label="Calendar ID"
+                value={settingsDialog.integration.calendarId || ""}
+                onChange={(e) => {
+                  const updated = { ...settingsDialog.integration!, calendarId: e.target.value };
+                  setIntegrations(prev => prev.map(i => i.id === updated.id ? updated : i));
+                  onUpdateIntegration?.(updated);
+                  setSettingsDialog({ open: true, integration: updated });
+                }}
+                fullWidth
+              />
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSettingsDialog({ open: false })}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Connect Calendar Dialog */}
       <Dialog
         open={connectDialog.open}
