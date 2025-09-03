@@ -76,6 +76,7 @@ const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformP
 const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
 const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
 const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
+const AccountingSettings = React.lazy(() => import("./crm/pages/AccountingSettings"));
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
@@ -406,6 +407,11 @@ function AppRoutes() {
         <Route path="bank-account-settings" element={
           <React.Suspense fallback={<PageLoader />}>
             <BankAccountSettings />
+          </React.Suspense>
+        } />
+        <Route path="accounting" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AccountingSettings />
           </React.Suspense>
         } />
         <Route path="automation" element={
