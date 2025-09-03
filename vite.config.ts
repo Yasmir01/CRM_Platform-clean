@@ -18,7 +18,11 @@ export default defineConfig({
       "use-sync-external-store/shim",
       "use-sync-external-store/shim/with-selector",
       "use-sync-external-store/with-selector",
-      "bezier-easing"
+      "bezier-easing",
+      "react",
+      "react-dom",
+      "react-dom/client",
+      "scheduler"
     ],
     exclude: [
       "@mui/icons-material",
