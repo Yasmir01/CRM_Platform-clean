@@ -22,7 +22,10 @@ export default defineConfig({
       "react",
       "react-dom",
       "react-dom/client",
-      "scheduler"
+      "scheduler",
+      // Ensure mispackaged ESM/CJS deps are pre-bundled to valid ESM
+      "attr-accept",
+      "react-dropzone"
     ],
     exclude: [
       "@mui/icons-material",
