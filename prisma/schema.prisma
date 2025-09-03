@@ -522,6 +522,20 @@ model TenantScreening {
   @@index([status])
 }
 
+model TenantScreeningConsent {
+  id          String   @id @default(cuid())
+  screeningId String
+  appId       String
+  tenantEmail String
+  consented   Boolean  @default(false)
+  consentedAt DateTime?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([screeningId])
+  @@index([appId])
+}
+
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
