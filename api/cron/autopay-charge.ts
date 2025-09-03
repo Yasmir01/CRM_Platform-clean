@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { prisma } from '../_db';
 import { stripe } from '../../src/lib/stripe';
 import { isAuthorizedAdmin } from '../_auth';
+import { notify } from '../../src/lib/notify';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const isCron = Boolean((req.headers['x-vercel-cron'] as string) || (req.headers['X-Vercel-Cron'] as any));
