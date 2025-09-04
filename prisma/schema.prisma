@@ -514,3 +514,41 @@ model PaymentDispute {
   openedAt   DateTime @default(now())
   resolvedAt DateTime?
 }
+
+// --- Messaging ---
+model MessageThread {
+  id           String               @id @default(cuid())
+  subject      String
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  messages     Message[]
+  participants MessageParticipant[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  senderId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  sender    User          @relation(fields: [senderId], references: [id])
+
+  @@index([threadId])
+  @@index([senderId])
+}
+
+model MessageParticipant {
+  id        String   @id @default(cuid())
+  threadId  String
+  userId    String
+  role      String   // tenant, manager, owner, admin, superadmin
+  joinedAt  DateTime @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
