@@ -54,12 +54,16 @@ export default function MaintenanceKanban() {
   React.useEffect(() => { load(); }, [load]);
 
   const updateStatus = React.useCallback(async (id: string, newStatus: string) => {
-    await fetch(`/api/maintenance/${id}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ status: newStatus }),
-    });
+    if (newStatus === 'closed') {
+      await fetch(`/api/admin/maintenance/${id}/close`, { method: 'POST', credentials: 'include' });
+    } else {
+      await fetch(`/api/maintenance/${id}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+    }
     load();
   }, [load]);
 
