@@ -355,6 +355,9 @@ model MaintenanceRequest {
   assignedTo  String?
   vendorId    String?
   createdById String?
+  deadline    DateTime?
+  escalated   Boolean  @default(false)
+  escalatedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -368,6 +371,8 @@ model MaintenanceRequest {
   @@index([status])
   @@index([orgId])
   @@index([tenantId])
+  @@index([deadline])
+  @@index([escalated])
 }
 
 /// Document Management System
