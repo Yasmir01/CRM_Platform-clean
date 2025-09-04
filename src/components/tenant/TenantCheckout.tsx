@@ -10,7 +10,7 @@ import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-interface Policy { allowPartial: boolean; allowSplit: boolean; minPartialUsd: number }
+interface Policy { allowPartial: boolean; allowSplit: boolean; minPartialUsd: number; allowAutopay?: boolean }
 interface Props { leaseId: string; tenantId: string }
 
 export default function TenantCheckout({ leaseId, tenantId }: Props) {
@@ -18,6 +18,8 @@ export default function TenantCheckout({ leaseId, tenantId }: Props) {
   const [amountDue, setAmountDue] = useState(0);
   const [payAmount, setPayAmount] = useState<number | ''>('');
   const [splitEmails, setSplitEmails] = useState<string[]>(['']);
+  const [autopayEnabled, setAutopayEnabled] = useState(false);
+  const [autopayFrequency, setAutopayFrequency] = useState('monthly');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
