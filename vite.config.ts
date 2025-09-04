@@ -39,6 +39,7 @@ export default defineConfig({
       "dayjs/plugin/isLeapYear",
       // App usage
       "dayjs/plugin/isSameOrBefore",
+      "dayjs/plugin/isSameOrAfter",
       // CJS library interop
       "crypto-js"
     ],
