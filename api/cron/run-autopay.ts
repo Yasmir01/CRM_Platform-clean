@@ -47,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           off_session: true,
           confirm: true,
         });
-        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'success' } });
+        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'success', autopay: true } });
         success++;
       } catch (err) {
         await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'failed' } });
