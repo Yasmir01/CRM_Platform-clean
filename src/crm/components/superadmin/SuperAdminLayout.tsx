@@ -41,6 +41,32 @@ export default function SuperAdminLayout() {
               </ListItemButton>
             );
           })}
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="caption" sx={{ px: 2, color: 'text.secondary', textTransform: 'uppercase', fontWeight: 700 }}>Compliance & Escalations</Typography>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-logs"
+            selected={location.pathname === '/crm/escalation-logs'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Escalation Logs" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/sla-policies"
+            selected={location.pathname === '/crm/sla-policies'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="SLA Policies" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-matrix"
+            selected={location.pathname === '/crm/escalation-matrix'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Escalation Matrix" />
+          </ListItemButton>
         </List>
       </Paper>
       <Box sx={{ flex: 1 }}>
