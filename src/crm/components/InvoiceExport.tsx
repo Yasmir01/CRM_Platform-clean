@@ -100,13 +100,44 @@ export default function InvoiceExportControls() {
         </select>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="block font-medium">From</label>
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="border p-2 rounded w-full" />
+      <div>
+        <label className="block font-medium">Date Range</label>
+        <div className="flex space-x-2">
+          <select
+            onChange={(e) => {
+              const val = e.target.value;
+              const now = new Date();
+              const todayStr = new Date().toISOString().split('T')[0];
+              let from = '';
+              let to = todayStr;
+              if (val === 'this_month') {
+                from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+              } else if (val === 'last_month') {
+                const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                const end = new Date(now.getFullYear(), now.getMonth(), 0);
+                from = start.toISOString().split('T')[0];
+                to = end.toISOString().split('T')[0];
+              } else if (val === 'last_90') {
+                const d = new Date();
+                d.setDate(d.getDate() - 90);
+                from = d.toISOString().split('T')[0];
+              } else if (val === 'ytd') {
+                from = new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+              }
+              setDateFrom(from);
+              setDateTo(to);
+            }}
+            className="border p-2 rounded w-full"
+          >
+            <option value="">Custom</option>
+            <option value="this_month">This Month</option>
+            <option value="last_month">Last Month</option>
+            <option value="last_90">Last 90 Days</option>
+            <option value="ytd">Year to Date</option>
+          </select>
         </div>
-        <div>
-          <label className="block font-medium">To</label>
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="border p-2 rounded w-full" />
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="border p-2 rounded w-full" />
         </div>
       </div>
