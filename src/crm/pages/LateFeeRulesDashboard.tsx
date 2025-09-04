@@ -98,6 +98,10 @@ export default function LateFeeRulesDashboard() {
           <Typography variant="body2" color="text.secondary">No rules configured.</Typography>
         ) : (
           <Stack spacing={1}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Checkbox checked={selected.size === rules.length && rules.length > 0} indeterminate={selected.size>0 && selected.size<rules.length} onChange={selectAll as any} />
+              <Typography variant="body2" sx={{ ml: 1, fontWeight: 600 }}>Select All</Typography>
+            </Box>
             {rules.map((r) => {
               const e = editing[r.id];
               const isEditing = !!e;
