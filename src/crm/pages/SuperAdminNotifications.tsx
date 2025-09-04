@@ -13,16 +13,20 @@ export default function SuperAdminNotifications() {
   const [rows, setRows] = React.useState<NotifRow[]>([]);
   const [search, setSearch] = React.useState('');
   const [audience, setAudience] = React.useState('ALL');
+  const [from, setFrom] = React.useState('');
+  const [to, setTo] = React.useState('');
 
   const load = React.useCallback(() => {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (audience) params.set('audience', audience);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
     fetch('/api/superadmin/notifications?' + params.toString())
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => setRows(d || []))
       .catch(() => setRows([]));
-  }, [search, audience]);
+  }, [search, audience, from, to]);
 
   React.useEffect(() => {
     load();
@@ -61,6 +65,20 @@ export default function SuperAdminNotifications() {
               <MenuItem value="OWNERS">Owners</MenuItem>
             </Select>
           </FormControl>
+          <TextField
+            label="From"
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="To"
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+          />
           <Button variant="outlined" onClick={load}>Apply</Button>
         </Stack>
       </Paper>
