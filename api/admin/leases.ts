@@ -1,5 +1,6 @@
 import { prisma } from '../_db';
 import { ensurePermission } from '../../src/lib/authorize';
+import { prisma } from '../_db';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'GET') {
@@ -32,6 +33,7 @@ export default async function handler(req: any, res: any) {
       return {
         id: l.id,
         name: `${l.unit?.number || 'Unit'} — ${primaryName}`,
+        propertyId: l.unit?.propertyId || '',
         tenantNames: [primaryName, ...roommates.filter(Boolean)],
       };
     });
