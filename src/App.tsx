@@ -364,6 +364,16 @@ function AppRoutes() {
             <EscalationMatrixEditor />
           </React.Suspense>
         } />
+        <Route path="escalation-logs" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EscalationLogsTable />
+          </React.Suspense>
+        } />
+        <Route path="escalation-logs/:requestId" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EscalationRequestView />
+          </React.Suspense>
+        } />
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
