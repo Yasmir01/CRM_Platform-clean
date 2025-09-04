@@ -461,6 +461,19 @@ model MaintenanceAssignment {
   @@index([assigneeId])
 }
 
+model EscalationLog {
+  id          String   @id @default(cuid())
+  requestId   String
+  level       Int
+  role        String
+  triggeredAt DateTime @default(now())
+
+  request     MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  @@unique([requestId, level])
+  @@index([requestId])
+}
+
 model MaintenanceInvoice {
   id         String   @id @default(cuid())
   requestId  String
