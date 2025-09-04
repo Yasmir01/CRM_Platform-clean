@@ -41,14 +41,8 @@ import InvoiceExportControls from '../components/InvoiceExport';
          <MenuItem value="overdue">Overdue</MenuItem>
          <MenuItem value="closed">Closed</MenuItem>
        </Select>
-       <Select size="small" displayEmpty value={propertyId} onChange={(e) => setPropertyId(String(e.target.value))} sx={{ minWidth: 180 }}>
-         <MenuItem value=""><em>All Properties</em></MenuItem>
-         {/* For brevity, input ID manually; could be populated by API filters */}
-       </Select>
-       <Select size="small" displayEmpty value={vendorId} onChange={(e) => setVendorId(String(e.target.value))} sx={{ minWidth: 180 }}>
-         <MenuItem value=""><em>All Vendors</em></MenuItem>
-         {/* Optionally populate with /api/users/vendors */}
-       </Select>
+       <TextField size="small" label="Property ID" value={propertyId} onChange={(e) => setPropertyId(String(e.target.value))} sx={{ minWidth: 220 }} />
+       <TextField size="small" label="Vendor ID" value={vendorId} onChange={(e) => setVendorId(String(e.target.value))} sx={{ minWidth: 220 }} />
        <Button variant="outlined" onClick={load}>Refresh</Button>
        <InvoiceExportControls />
      </Stack>
