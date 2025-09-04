@@ -405,6 +405,7 @@ model Lease {
   ledgerEntries LedgerEntry[]
   allowSplit    Boolean       @default(true)
   allowPartial  Boolean       @default(true)
+  minPartialUsd Float?
 
   participants  LeaseParticipant[]
   invoices      Invoice[]
