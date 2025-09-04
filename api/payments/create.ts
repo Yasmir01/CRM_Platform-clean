@@ -20,16 +20,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const amount = Number(body.amount || 0);
   const provider = String(body.provider || 'stripe');
   const methodId = body.methodId ? String(body.methodId) : undefined;
+  const propertyId = body.propertyId ? String(body.propertyId) : undefined;
 
   try {
+    // calculate late fee if applicable
+    let total = amount;
+    try {
+      if (propertyId) {
+        const { calculateLateFee } = await import('../../src/lib/payments/fees');
+        const { isLate, lateFee } = await calculateLateFee(propertyId, new Date());
+        if (isLate) total += lateFee;
+      }
+    } catch (e) {
+      console.error('late fee calc error', (e as any)?.message || e);
+    }
+
     const providerImpl = getPaymentProvider(provider as any);
     const customerId = provider === 'stripe' || provider === 'applepay' ? (dbUser.stripeCustomerId || '') : String(dbUser.id);
-    const result = await providerImpl.createPayment(amount, customerId, methodId);
+    const result = await providerImpl.createPayment(total, customerId, methodId);
 
     const payment = await prisma.rentPayment.create({
       data: {
         tenantId: dbUser.id,
-        amount,
+        amount: total,
         status: 'success',
         gateway: provider,
         methodId: methodId || null,

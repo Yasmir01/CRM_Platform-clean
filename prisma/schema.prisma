@@ -474,3 +474,23 @@ model PaymentReceipt {
   status    String   // sent | failed
   createdAt DateTime @default(now())
 }
+
+// --- Global / Property Payment Settings ---
+model GlobalPaymentSetting {
+  id          String   @id @default(cuid())
+  dueDay      Int      @default(1)    // rent due date (e.g., 1st of month)
+  gracePeriod Int      @default(3)    // days after due date
+  lateFee     Float    @default(50.0) // default fee
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PropertyPaymentSetting {
+  id          String   @id @default(cuid())
+  propertyId  String   @unique
+  dueDay      Int?
+  gracePeriod Int?
+  lateFee     Float?
+
+  property    Property @relation(fields: [propertyId], references: [id])
+}
