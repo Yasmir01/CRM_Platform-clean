@@ -60,6 +60,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         status: 'success',
         gateway: provider,
         methodId: methodId || null,
+        externalId: (result && typeof result === 'object' && (result as any).id) ? String((result as any).id) : null,
       },
     });
 
