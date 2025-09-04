@@ -83,6 +83,45 @@ export default function AutoPayOversight() {
     });
   }, [rows, filterText, propertyFilter, leaseFilter]);
 
+  const exportCSV = React.useCallback(() => {
+    const headers = ['Tenant','Property','Lease','Amount','Frequency','Split With','Status'];
+    const csvRows = filteredRows.map((r) => {
+      const tenantLabel = r.tenantName || r.tenant?.name || r.tenant?.email || r.tenantId;
+      const propertyLabel = r.propertyName || r.property?.address || r.propertyId || '';
+      const leaseLabel = r.leaseName || (r.lease?.unit?.number ? String(r.lease.unit.number) : r.leaseId || '');
+      const amountDisplay = typeof r.amount === 'number' ? r.amount : (typeof r.amountValue === 'number' ? r.amountValue : 0);
+      const frequency = r.frequency || 'monthly';
+      const split = Array.isArray(r.splitEmails) && r.splitEmails.length ? r.splitEmails.join(' | ') : '';
+      const status = r.active ? 'Active' : 'Suspended';
+      return [tenantLabel, propertyLabel, leaseLabel, `$${Number(amountDisplay).toFixed(2)}`, frequency, split, status];
+    });
+    const content = [headers, ...csvRows].map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'autopay_report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [filteredRows]);
+
+  const exportPDF = React.useCallback(async () => {
+    const res = await fetch('/api/admin/autopay/export-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ autopays: filteredRows }),
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'autopay_report.pdf';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }, [filteredRows]);
+
   function onFieldChange(id: string, patch: Partial<AutoPayItem>) {
     setEdited((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } as AutoPayItem : r)));
@@ -153,6 +192,8 @@ export default function AutoPayOversight() {
             </Select>
           </FormControl>
           <Button variant="outlined" onClick={load} disabled={loading}>Refresh</Button>
+          <Button variant="outlined" onClick={exportCSV}>Export CSV</Button>
+          <Button variant="outlined" onClick={exportPDF}>Export PDF</Button>
         </Stack>
       </Box>
 
