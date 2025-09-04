@@ -16,6 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const search = (req.query?.search as string) || '';
     const audience = (req.query?.audience as string) || '';
+    const fromStr = (req.query?.from as string) || '';
+    const toStr = (req.query?.to as string) || '';
 
     const and: any[] = [];
     if (search) {
@@ -27,11 +29,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (audience && audience !== 'ALL') {
       and.push({ audience });
     }
+    if (fromStr) {
+      const from = new Date(fromStr);
+      if (!isNaN(from.getTime())) and.push({ createdAt: { gte: from } });
+    }
+    if (toStr) {
+      const to = new Date(toStr);
+      if (!isNaN(to.getTime())) and.push({ createdAt: { lte: to } });
+    }
 
     const notifications = await prisma.notification.findMany({
       where: and.length ? { AND: and } : undefined,
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      take: 100,
     });
     return res.status(200).json(notifications);
   } catch (e: any) {
