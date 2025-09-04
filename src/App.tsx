@@ -85,6 +85,7 @@ const GatewayManagement = React.lazy(() => import("./crm/pages/GatewayManagement
 const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
 const AutoPayOversight = React.lazy(() => import("./crm/pages/AutoPayOversight"));
 const RefundDashboard = React.lazy(() => import("./crm/pages/RefundDashboard"));
+const PaymentReportingDashboard = React.lazy(() => import("./crm/pages/PaymentReportingDashboard"));
 const LateFeeRulesDashboard = React.lazy(() => import("./crm/pages/LateFeeRulesDashboard"));
 const AccountingSettings = React.lazy(() => import("./crm/pages/AccountingSettings"));
 const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
@@ -400,6 +401,11 @@ function AppRoutes() {
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
+          </React.Suspense>
+        } />
+        <Route path="reports/payments" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <PaymentReportingDashboard />
           </React.Suspense>
         } />
         <Route path="notifications" element={
