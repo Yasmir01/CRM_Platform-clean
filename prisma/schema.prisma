@@ -349,6 +349,7 @@ model MaintenanceRequest {
   unitId      String?
   title       String
   description String?
+  category    String?
   status      String   @default("open") // open, in_progress, completed, canceled
   priority    String   @default("normal")  // low, normal, high, emergency
   assignedTo  String?
@@ -359,6 +360,8 @@ model MaintenanceRequest {
 
   property    Property @relation(fields: [propertyId], references: [id])
   unit        Unit?    @relation(fields: [unitId], references: [id])
+  attachments MaintenanceAttachment[]
+  assignments MaintenanceAssignment[]
 
   @@index([propertyId])
   @@index([unitId])
@@ -388,6 +391,33 @@ model Document {
   @@index([tenantId])
   @@index([leaseId])
   @@index([uploadedBy])
+}
+
+model MaintenanceAttachment {
+  id         String   @id @default(cuid())
+  requestId  String
+  fileUrl    String
+  fileName   String
+  fileType   String
+  uploadedAt DateTime @default(now())
+
+  request    MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  @@index([requestId])
+}
+
+model MaintenanceAssignment {
+  id          String   @id @default(cuid())
+  requestId   String
+  assigneeId  String
+  role        String   // manager | vendor | staff
+  assignedAt  DateTime @default(now())
+  completedAt DateTime?
+
+  request     MaintenanceRequest @relation(fields: [requestId], references: [id])
+
+  @@index([requestId])
+  @@index([assigneeId])
 }
 
 // --- Platform Notifications ---
