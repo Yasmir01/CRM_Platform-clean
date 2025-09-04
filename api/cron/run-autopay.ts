@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const customer = ap.tenant.stripeCustomerId;
       const pm = ap.tenant.defaultPaymentMethodId;
       if (!customer || !pm) {
-        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'failed' } });
+        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'failed', autopay: true } });
         failed++;
         continue;
       }
@@ -50,7 +50,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'success', autopay: true } });
         success++;
       } catch (err) {
-        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'failed' } });
+        await prisma.rentPayment.create({ data: { tenantId: ap.tenantId, amount: ap.amount, status: 'failed', autopay: true } });
         failed++;
       }
     }
