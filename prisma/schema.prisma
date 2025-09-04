@@ -525,6 +525,29 @@ model MessageThread {
   participants MessageParticipant[]
 }
 
+model MessageEscalation {
+  id        String   @id @default(cuid())
+  threadId  String
+  fromRole  String
+  toRole    String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+
+  @@index([threadId])
+}
+
+model ArchivedThread {
+  id         String   @id @default(cuid())
+  threadId   String   @unique
+  archivedBy String
+  archivedAt DateTime @default(now())
+  reason     String?
+
+  thread     MessageThread @relation(fields: [threadId], references: [id])
+}
+
 model Message {
   id        String   @id @default(cuid())
   threadId  String
