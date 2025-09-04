@@ -351,6 +351,12 @@ function AppRoutes() {
             <AnalyticsInsights />
           </React.Suspense>
         } />
+        <Route path="sla-policies" element={
+          <React.Suspense fallback={<PageLoader />}>
+            {/* Eager import to keep simple */}
+            <SLAPolicyManager />
+          </React.Suspense>
+        } />
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
