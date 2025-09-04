@@ -1,0 +1,53 @@
+import * as React from 'react';
+import { Box, Typography, Paper, Stack, TextField, Button } from '@mui/material';
+import { useParams } from 'react-router-dom';
+
+export default function MessageThreadPage() {
+  const params = useParams();
+  const threadId = String(params.threadId || '');
+  const [messages, setMessages] = React.useState<any[]>([]);
+  const [body, setBody] = React.useState('');
+
+  const load = React.useCallback(() => {
+    if (!threadId) return;
+    fetch(`/api/messages/${threadId}`, { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setMessages)
+      .catch(() => setMessages([]));
+  }, [threadId]);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  const send = async () => {
+    if (!body.trim()) return;
+    await fetch(`/api/messages/${threadId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ body }),
+    });
+    setBody('');
+    load();
+  };
+
+  return (
+    <Box sx={{ p: 2, maxWidth: 900, mx: 'auto' }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Thread</Typography>
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack spacing={1}>
+          {messages.map((m) => (
+            <Box key={m.id} sx={{ pb: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{m.sender?.name || m.sender?.email || 'User'}</Typography>
+              <Typography variant="body1">{m.body}</Typography>
+              <Typography variant="caption" color="text.secondary">{new Date(m.createdAt).toLocaleString()}</Typography>
+            </Box>
+          ))}
+        </Stack>
+      </Paper>
+      <Stack spacing={1}>
+        <TextField value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write a reply..." multiline minRows={3} fullWidth />
+        <Button variant="contained" onClick={send}>Send</Button>
+      </Stack>
+    </Box>
+  );
+}
