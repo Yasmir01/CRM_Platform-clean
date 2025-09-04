@@ -3,7 +3,7 @@ import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography
 import AssignVendor from '../components/AssignVendor';
 import InvoiceExportControls from '../components/InvoiceExport';
 
- type Request = { id: string; title: string; description: string; status: string; priority: string; createdAt: string; category?: string; tenant?: { name?: string; email?: string }; property?: { address?: string }; vendorId?: string | null; vendor?: { id: string; name?: string | null; email?: string | null } | null; deadline?: string | null };
+ type Request = { id: string; title: string; description: string; status: string; priority: string; createdAt: string; category?: string; tenant?: { name?: string; email?: string }; property?: { address?: string }; vendorId?: string | null; vendor?: { id: string; name?: string | null; email?: string | null } | null; deadline?: string | null; escalated?: boolean; escalatedAt?: string | null };
 
  function StatusDropdown({ id, current, onChange }: { id: string; current: string; onChange: () => void }) {
   const [loading, setLoading] = useState(false);
