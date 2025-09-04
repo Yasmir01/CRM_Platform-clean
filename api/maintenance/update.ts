@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           type: 'maintenance_update',
           title: 'Maintenance Update',
           message: `Your request "${updated.title}" status is now: ${updated.status}`,
-          meta: { requestId: updated.id },
+          meta: { requestId: updated.id, link: `/tenant/maintenance?id=${updated.id}` },
         });
       }
     } catch {}
