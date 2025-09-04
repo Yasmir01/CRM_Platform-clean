@@ -81,13 +81,23 @@ export default function InvoiceExportControls() {
       </div>
 
       <div>
-        <label className="block font-medium">Vendor ID</label>
-        <input type="text" value={vendorId} onChange={(e) => setVendorId(e.target.value)} placeholder="Enter Vendor ID" className="border p-2 rounded w-full" />
+        <label className="block font-medium">Vendor</label>
+        <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="border p-2 rounded w-full">
+          <option value="">All Vendors</option>
+          {vendors.map((v) => (
+            <option key={v.id} value={v.id}>{v.name}</option>
+          ))}
+        </select>
       </div>
 
       <div>
-        <label className="block font-medium">Property ID</label>
-        <input type="text" value={propertyId} onChange={(e) => setPropertyId(e.target.value)} placeholder="Enter Property ID" className="border p-2 rounded w-full" />
+        <label className="block font-medium">Property</label>
+        <select value={propertyId} onChange={(e) => setPropertyId(e.target.value)} className="border p-2 rounded w-full">
+          <option value="">All Properties</option>
+          {properties.map((p) => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
