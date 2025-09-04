@@ -34,6 +34,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const text = String(body.body || '').trim();
       if (!text) return res.status(400).json({ error: 'Missing body' });
 
+      const { canMessage, normalizeRoleString } = await import('../../src/lib/messages/rules');
+      const senderRole = normalizeRoleString(String((user as any).role || (Array.isArray((user as any).roles) ? (user as any).roles[0] : 'tenant')));
+
+      const thr = await prisma.messageThread.findUnique({ where: { id: threadId }, include: { participants: true } });
+      if (!thr) return res.status(404).json({ error: 'Thread not found' });
+
+      for (const p of thr.participants) {
+        if (p.userId !== userId) {
+          if (!canMessage(senderRole, p.role)) {
+            return res.status(403).json({ error: 'Messaging not allowed' });
+          }
+        }
+      }
+
       const message = await prisma.message.create({ data: { threadId, senderId: userId, body: text } });
       const thread = await prisma.messageThread.update({ where: { id: threadId }, data: { updatedAt: new Date() } });
 
