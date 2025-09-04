@@ -1,11 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, Stack, Select, MenuItem, Button, TextField } from '@mui/material';
+import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, Stack, Select, MenuItem, Button, TextField, CircularProgress } from '@mui/material';
 import AssignVendor from '../components/AssignVendor';
 import InvoiceExportControls from '../components/InvoiceExport';
 
  type Request = { id: string; title: string; description: string; status: string; priority: string; createdAt: string; category?: string; tenant?: { name?: string; email?: string }; property?: { address?: string }; vendorId?: string | null; vendor?: { id: string; name?: string | null; email?: string | null } | null; deadline?: string | null };
 
- export default function MaintenanceRequests() {
+ function StatusDropdown({ id, current, onChange }: { id: string; current: string; onChange: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [ok, setOk] = useState(false);
+
+  const updateStatus = async (newStatus: string) => {
+    try {
+      setLoading(true);
+      setOk(false);
+      await fetch(`/api/maintenance/status/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      });
+      setOk(true);
+      onChange();
+      setTimeout(() => setOk(false), 1500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Stack direction="row" spacing={1} alignItems="center">
+      <Select size="small" value={current} disabled={loading} onChange={(e) => updateStatus(String(e.target.value))}>
+        <MenuItem value="open">Open</MenuItem>
+        <MenuItem value="in_progress">In Progress</MenuItem>
+        <MenuItem value="completed">Completed</MenuItem>
+        <MenuItem value="overdue">Overdue</MenuItem>
+        <MenuItem value="closed">Closed</MenuItem>
+      </Select>
+      {loading ? <CircularProgress size={16} /> : ok ? <span aria-label="saved" title="Saved">✅</span> : null}
+    </Stack>
+  );
+}
+
+export default function MaintenanceRequests() {
    const [items, setItems] = useState<Request[]>([]);
    const [status, setStatus] = useState('');
   const [propertyId, setPropertyId] = useState('');
@@ -75,7 +111,9 @@ import InvoiceExportControls from '../components/InvoiceExport';
               <TableCell>{r.vendor?.name || r.vendor?.email || r.vendorId || 'Unassigned'}</TableCell>
               <TableCell>{r.category || '—'}</TableCell>
               <TableCell><Chip size="small" label={r.priority} /></TableCell>
-              <TableCell><Chip size="small" color={r.status === 'completed' ? 'success' : r.status === 'in_progress' ? 'warning' : r.status === 'overdue' ? 'error' : 'default'} label={r.status} /></TableCell>
+              <TableCell>
+                <StatusDropdown id={r.id} current={r.status} onChange={load} />
+              </TableCell>
               <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
               <TableCell>{r.deadline ? new Date(r.deadline).toLocaleDateString() : '—'}</TableCell>
               <TableCell><AssignVendor requestId={r.id} /></TableCell>
