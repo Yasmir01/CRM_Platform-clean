@@ -108,7 +108,7 @@ const tenantMenuItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "News & Announcements", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "Profile", icon: <PersonRoundedIcon />, path: "/crm/profile" },
 ];
@@ -118,7 +118,7 @@ const serviceProviderMenuItems = [
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
 ];
 
 export default function CrmMenuContent() {
