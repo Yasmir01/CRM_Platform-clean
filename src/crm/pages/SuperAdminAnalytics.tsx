@@ -33,10 +33,25 @@ export default function SuperAdminAnalytics() {
         </ResponsiveContainer>
       </Paper>
 
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Delinquency Rate</Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
+        <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">Delinquency Rate</Typography>
+          <Typography variant="h5">{Number(data.delinquencyRate || 0).toFixed(1)}%</Typography>
+        </Paper>
+        <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">Occupancy Rate</Typography>
+          <Typography variant="h5">{Number(data.occupancyRate || 0).toFixed(1)}%</Typography>
+        </Paper>
+        <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="text.secondary">AutoPay Adoption</Typography>
+          <Typography variant="h5">{Number(data.autopayRate || 0).toFixed(1)}%</Typography>
+        </Paper>
+      </Box>
+
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Delinquency</Typography>
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={[{ label: 'Delinquency', value: data.delinquencyRate }] }>
+          <BarChart data={[{ label: 'Delinquency', value: data.delinquencyRate }]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="label" />
             <YAxis domain={[0, 100]} />
@@ -44,7 +59,11 @@ export default function SuperAdminAnalytics() {
             <Bar dataKey="value" fill="#dc2626" />
           </BarChart>
         </ResponsiveContainer>
-        <Typography sx={{ mt: 1 }} color="text.secondary">Current delinquency rate: {Number(data.delinquencyRate || 0).toFixed(1)}%</Typography>
+      </Paper>
+
+      <Paper sx={{ p: 2 }}>
+        <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>Total Units Managed</Typography>
+        <Typography variant="h4">{Number(data.totalUnits || 0).toLocaleString()}</Typography>
       </Paper>
     </Box>
   );
