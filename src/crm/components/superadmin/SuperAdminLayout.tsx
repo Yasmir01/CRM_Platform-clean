@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Divider, Typography, List, ListItemButton, ListItemText, Paper, Button, Stack } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import NotificationModal from './NotificationModal';
 
 const navItems = [
   { label: 'Dashboard', to: '/crm/super-admin/overview' },
@@ -16,9 +17,7 @@ export default function SuperAdminLayout() {
     window.location.href = '/api/superadmin/compliance/export';
   };
 
-  const sendNotification = () => {
-    alert('Future: Open Notification Modal to send broadcast.');
-  };
+  const [showModal, setShowModal] = React.useState(false);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '70vh', width: '100%' }}>
@@ -47,12 +46,13 @@ export default function SuperAdminLayout() {
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>SuperAdmin Control</Typography>
           <Stack direction="row" spacing={1}>
             <Button onClick={exportCompliance} variant="contained" color="success">Export Compliance</Button>
-            <Button onClick={sendNotification} variant="contained">Send Notification</Button>
+            <Button onClick={() => setShowModal(true)} variant="contained">Send Notification</Button>
             <Button component={Link} to="/crm" variant="outlined">Exit SU</Button>
           </Stack>
         </Paper>
         <Outlet />
       </Box>
+      <NotificationModal open={showModal} onClose={() => setShowModal(false)} />
     </Box>
   );
 }
