@@ -17,9 +17,13 @@ export const PayPalProvider: PaymentProvider = {
     const order = await client.execute(request);
     return order.result;
   },
-  async refundPayment(paymentId: string) {
+  async refundPayment(paymentId: string, amount?: number) {
     const request = new (paypal.payments as any).CapturesRefundRequest(paymentId);
-    request.requestBody({ amount: { currency_code: "USD" } });
+    const body: any = { amount: { currency_code: "USD" } };
+    if (typeof amount === 'number' && Number.isFinite(amount) && amount > 0) {
+      body.amount.value = amount.toFixed(2);
+    }
+    request.requestBody(body);
     return await client.execute(request);
   },
 };
