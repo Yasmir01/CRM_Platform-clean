@@ -20,10 +20,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     if (method === 'GET') {
       const list = await prisma.autoPay.findMany({
-        include: { tenant: true, property: true },
+        include: { tenant: true, property: true, lease: { include: { unit: true } } },
         orderBy: { createdAt: 'desc' },
-      });
-      return res.status(200).json(list);
+      } as any);
+      const enriched = list.map((a: any) => ({
+        ...a,
+        tenantName: a.tenant?.name || a.tenant?.email || a.tenantId,
+        propertyName: a.property?.address || a.propertyId || '-',
+        leaseName: a.lease?.unit ? `${a.lease.unit.number}` : (a.leaseId || '-'),
+        amount: Number(a.amountValue ?? a.amount ?? 0),
+        frequency: a.frequency || 'monthly',
+        splitEmails: Array.isArray(a.splitEmails) ? a.splitEmails : [],
+      }));
+      return res.status(200).json(enriched);
     }
 
     if (method === 'PUT') {
