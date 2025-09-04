@@ -28,7 +28,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const role = String((user as any).role || (Array.isArray((user as any).roles) ? (user as any).roles[0] : '')).toUpperCase();
     const isSuper = role === 'SUPER_ADMIN';
     const isAdminish = role === 'ADMIN' || role === 'MANAGER' || role === 'OWNER';
-    const allowed = isSuper || reqRec.tenantId === userId || (isAdminish && dbUser && reqRec.orgId && dbUser.orgId === reqRec.orgId);
+    const isVendor = role === 'VENDOR';
+    let allowed = false;
+
+    if (isVendor) {
+      const assignment = await prisma.maintenanceAssignment.findFirst({ where: { requestId: threadId, assigneeId: userId } });
+      allowed = Boolean(assignment);
+    } else {
+      allowed = isSuper || reqRec.tenantId === userId || (isAdminish && dbUser && reqRec.orgId && dbUser.orgId === reqRec.orgId);
+    }
+
     if (!allowed) return res.status(403).json({ error: 'Forbidden' });
 
     const fileUrl = key;
