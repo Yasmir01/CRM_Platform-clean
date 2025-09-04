@@ -25,7 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const assignee = await prisma.user.findUnique({ where: { id: assigneeId } });
       if (assignee) {
-        await notify({ userId: assignee.id, email: assignee.email || undefined, type: 'maintenance_assign', title: 'New Maintenance Assignment', message: `You have been assigned to request ${id}` });
+        await notify({ userId: assignee.id, email: assignee.email || undefined, type: 'maintenance_update', title: 'New Maintenance Assignment', message: `You have been assigned to request ${id}` , meta: { requestId: id, link: `/crm/maintenance-requests?id=${id}` }});
       }
     } catch {}
 
