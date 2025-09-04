@@ -106,7 +106,8 @@ export default function LateFeeRulesDashboard() {
               const e = editing[r.id];
               const isEditing = !!e;
               return (
-                <Box key={r.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                <Box key={r.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, gap: 1.5 }}>
+                  <Checkbox checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} />
                   <Box sx={{ flex: 1, mr: 2 }}>
                     {isEditing ? (
                       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
