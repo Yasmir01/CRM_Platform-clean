@@ -21,16 +21,18 @@ enum Role {
 }
 
 model User {
-  id              String         @id @default(cuid())
-  email           String         @unique
-  name            String?
-  role            Role           @default(TENANT)
-  permissions     String?
-  autopayEnabled  Boolean        @default(false)
-  orgId           String
-  org             Organization   @relation(fields: [orgId], references: [id])
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                     String         @id @default(cuid())
+  email                  String         @unique
+  name                   String?
+  role                   Role           @default(TENANT)
+  permissions            String?
+  autopayEnabled         Boolean        @default(false)
+  stripeCustomerId       String?
+  defaultPaymentMethodId String?
+  orgId                  String
+  org                    Organization   @relation(fields: [orgId], references: [id])
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   @@index([orgId])
 }
@@ -193,6 +195,18 @@ model RentPayment {
   tenant    User     @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
+}
+
+model AutoPay {
+  id         String   @id @default(cuid())
+  tenantId   String   @unique
+  amount     Float
+  frequency  String
+  dayOfMonth Int
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  tenant     User     @relation(fields: [tenantId], references: [id])
 }
 
 /// ----------------------------------------------------------
