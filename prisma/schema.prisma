@@ -252,6 +252,27 @@ model SLAConfig {
   @@unique([category, propertyId])
 }
 
+model EscalationMatrix {
+  id                 String   @id @default(cuid())
+  level              Int
+  role               String
+  hoursAfterDeadline Int
+
+  // Scope
+  propertyId         String?
+  subscriptionPlanId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  property          Property?         @relation(fields: [propertyId], references: [id])
+  subscriptionPlan  SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+
+  @@index([propertyId])
+  @@index([subscriptionPlanId])
+  @@unique([level, propertyId, subscriptionPlanId])
+}
+
 model OwnerLedger {
   id         String    @id @default(cuid())
   ownerId    String
