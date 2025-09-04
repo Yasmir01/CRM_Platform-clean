@@ -97,6 +97,26 @@ export default function TenantCheckout({ leaseId, tenantId }: Props) {
             </Stack>
           )}
 
+          {policy?.allowAutopay && (
+            <Stack spacing={1} sx={{ border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 1 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <input type="checkbox" id="autopay" checked={autopayEnabled} onChange={(e) => setAutopayEnabled(e.target.checked)} />
+                <label htmlFor="autopay">Enable Autopay</label>
+              </Stack>
+              {autopayEnabled && (
+                <Stack spacing={1}>
+                  <label htmlFor="apfreq">Autopay Frequency</label>
+                  <select id="apfreq" value={autopayFrequency} onChange={(e) => setAutopayFrequency(e.target.value)}>
+                    <option value="monthly">Monthly</option>
+                    <option value="biweekly">Bi-Weekly</option>
+                    <option value="weekly">Weekly</option>
+                  </select>
+                  <Typography variant="body2" color="text.secondary">Autopay will automatically process ${typeof payAmount === 'number' ? payAmount : Number(payAmount || 0)} every {autopayFrequency}.</Typography>
+                </Stack>
+              )}
+            </Stack>
+          )}
+
           {error && <Alert severity="error">{error}</Alert>}
 
           <Button variant="contained" onClick={handlePayment} disabled={loading}>{loading ? 'Processing...' : 'Pay Now'}</Button>
