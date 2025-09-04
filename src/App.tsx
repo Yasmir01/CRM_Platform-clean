@@ -109,6 +109,7 @@ const SUPaymentPoliciesGlobal = React.lazy(() => import("./crm/pages/SUPaymentPo
 const SUPaymentPoliciesProperty = React.lazy(() => import("./crm/pages/SUPaymentPoliciesProperty"));
 const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPoliciesLease"));
 const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
+const SUPolicyMatrixStandalone = React.lazy(() => import("./crm/pages/SUPolicyMatrixStandalone"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
@@ -538,6 +539,7 @@ function AppRoutes() {
             <Route path="global" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesGlobal /></React.Suspense>} />
             <Route path="property" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesProperty /></React.Suspense>} />
             <Route path="lease" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesLease /></React.Suspense>} />
+            <Route path="matrix" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesMatrix /></React.Suspense>} />
           </Route>
         </Route>
         <Route path="help" element={
@@ -566,6 +568,7 @@ function AppRoutes() {
       <Route path="/contacts" element={<Navigate to="/crm/contacts" replace />} />
       <Route path="/tasks" element={<Navigate to="/crm/tasks" replace />} />
       <Route path="/reports" element={<Navigate to="/crm/reports" replace />} />
+      <Route path="/su/payment-policies/matrix" element={<React.Suspense fallback={<PageLoader />}><SUPolicyMatrixStandalone /></React.Suspense>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
