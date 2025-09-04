@@ -403,6 +403,11 @@ function AppRoutes() {
             <AdminPayments />
           </React.Suspense>
         } />
+        <Route path="admin/autopay" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AutoPayOversight />
+          </React.Suspense>
+        } />
         <Route path="admin/accounting" element={
           <React.Suspense fallback={<PageLoader />}>
             <AccountingSettings />
