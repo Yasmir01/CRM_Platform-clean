@@ -47,10 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await notify({
         userId: admin.id,
         email: admin.email || undefined,
-        type: 'maintenance_request',
+        type: 'maintenance_new',
         title: 'New Maintenance Request',
-        message: `${user?.email || 'Tenant'} submitted: ${title}`,
-        meta: { requestId: reqRec.id },
+        message: `${user?.email || 'Tenant'} submitted: ${finalTitle}`,
+        meta: { requestId: reqRec.id, link: `/crm/maintenance-requests?id=${reqRec.id}` },
       });
     }
   }
