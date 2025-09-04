@@ -26,7 +26,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const now = new Date();
     await prisma.maintenanceAttachment.updateMany({ where: { requestId: id }, data: { archivedAt: now } });
     try {
-      await prisma.maintenanceInvoice.updateMany({ where: { requestId: id }, data: { archivedAt: now } });
+      const invoices = await prisma.maintenanceInvoice.findMany({ where: { requestId: id }, select: { id: true } });
+      const invoiceIds = invoices.map((i) => i.id);
+      if (invoiceIds.length > 0) {
+        await prisma.maintenanceInvoice.updateMany({ where: { id: { in: invoiceIds } }, data: { archivedAt: now } });
+        await prisma.invoiceFile.updateMany({ where: { invoiceId: { in: invoiceIds } }, data: { archivedAt: now } });
+      }
     } catch {}
 
     // Notify tenant if present
