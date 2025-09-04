@@ -209,8 +209,19 @@ model AutoPay {
   dayOfMonth Int
   active     Boolean  @default(true)
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // New fields for gateway-scoped rules
+  propertyId  String?
+  gatewayId   String?
+  methodId    String?
+  amountType  String?   @default("FULL_RENT") // FULL_RENT | FIXED | PERCENTAGE
+  amountValue Float?
 
   tenant     User     @relation(fields: [tenantId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
 }
 
 /// ----------------------------------------------------------
