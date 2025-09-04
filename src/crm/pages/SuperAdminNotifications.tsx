@@ -46,7 +46,13 @@ export default function SuperAdminNotifications() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Notification History</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>Notification History</Typography>
+        <Box>
+          <Button href="/api/superadmin/notifications/export/csv" variant="contained" color="success" sx={{ mr: 1 }}>Export CSV</Button>
+          <Button href="/api/superadmin/notifications/export/pdf" variant="contained" color="secondary">Export PDF</Button>
+        </Box>
+      </Box>
 
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
