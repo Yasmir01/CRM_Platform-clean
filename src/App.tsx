@@ -70,6 +70,7 @@ const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
+const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
 const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
 const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformPricingManagement"));
 const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
@@ -321,6 +322,11 @@ function AppRoutes() {
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
+          </React.Suspense>
+        } />
+        <Route path="admin/payments" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AdminPayments />
           </React.Suspense>
         } />
         <Route path="documents" element={
