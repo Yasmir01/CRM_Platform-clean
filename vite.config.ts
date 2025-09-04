@@ -41,6 +41,7 @@ export default defineConfig({
       "dayjs/plugin/isSameOrBefore",
       "dayjs/plugin/isSameOrAfter",
       "dayjs/plugin/localeData",
+      "dayjs/plugin/minMax",
       // CJS library interop
       "crypto-js"
     ],
