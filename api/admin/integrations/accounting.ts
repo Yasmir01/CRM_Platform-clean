@@ -41,7 +41,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lastSync = recent ? recent.createdAt.toISOString() : undefined;
       const apiKey = conn?.accessToken && !conn.refreshToken ? conn.accessToken : undefined;
       const name = p === 'quickbooks' ? 'QuickBooks' : p === 'xero' ? 'Xero' : 'Wave';
-      return { provider: name, enabled, apiKey, lastSync, status };
+      const autoSync = (conn?.autoSync as any) || 'manual';
+      const alertOnError = Boolean(conn?.alertOnError);
+      const providerId = p;
+      return { provider: name, providerId, enabled, apiKey, lastSync, status, autoSync, alertOnError };
     });
 
     return res.status(200).json(items);
