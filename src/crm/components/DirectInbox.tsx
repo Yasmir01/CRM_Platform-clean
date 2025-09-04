@@ -76,7 +76,16 @@ export default function DirectInbox() {
       <h2 className="text-lg font-bold">Inbox</h2>
       <div className="space-y-2">
         {messages.map((m) => (
-          <div key={m.id} className="border rounded p-2 bg-gray-50">
+          <div
+            key={m.id}
+            onClick={async () => {
+              try {
+                await fetch(`/api/messages/read/${m.id}`, { method: 'PATCH', credentials: 'include' });
+                setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, isRead: true } : x)));
+              } catch {}
+            }}
+            className={`border rounded p-2 cursor-pointer ${m.isRead ? 'bg-white' : 'bg-blue-50 font-semibold'}`}
+          >
             <p className="font-semibold">{m.sender?.name || m.sender?.email || 'Unknown'}</p>
             <p>{m.content}</p>
             {Array.isArray(m.attachments) && m.attachments.length > 0 && (
