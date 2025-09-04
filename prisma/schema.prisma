@@ -464,3 +464,13 @@ model PaymentMethod {
 
   tenant User @relation(fields: [tenantId], references: [id])
 }
+
+// --- Payment Receipt Audit Log ---
+model PaymentReceipt {
+  id        String   @id @default(cuid())
+  paymentId String
+  tenantId  String
+  type      String   // email | sms
+  status    String   // sent | failed
+  createdAt DateTime @default(now())
+}
