@@ -32,8 +32,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } catch { return undefined; }
       })()),
       unitId: unitId || undefined,
-      title,
+      title: finalTitle,
       description,
+      category: category || undefined,
       priority: priority || 'normal',
       // attachment key can be stored via a separate Document; for now keep in description/meta
     },
