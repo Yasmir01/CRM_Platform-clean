@@ -185,14 +185,16 @@ model RevenueEvent {
 
 // --- Tenant Rent Payments ---
 model RentPayment {
-  id        String   @id @default(cuid())
-  tenantId  String
-  amount    Float
-  status    String   // pending | success | failed | refunded
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  tenantId     String
+  amount       Float
+  status       String   // pending | success | failed | refunded
+  autopay      Boolean  @default(false)
+  refundReason String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  tenant    User     @relation(fields: [tenantId], references: [id])
+  tenant       User     @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
 }
