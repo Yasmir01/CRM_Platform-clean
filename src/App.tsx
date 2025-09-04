@@ -344,6 +344,11 @@ function AppRoutes() {
             <Reports />
           </React.Suspense>
         } />
+        <Route path="notifications" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Notifications />
+          </React.Suspense>
+        } />
         <Route path="admin/payments" element={
           <React.Suspense fallback={<PageLoader />}>
             <AdminPayments />
