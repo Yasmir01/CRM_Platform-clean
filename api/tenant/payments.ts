@@ -7,7 +7,7 @@ export default async function handler(req: any, res: any) {
   }
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const { leaseId, tenantId, amount } = body as { leaseId: string; tenantId: string; amount: number; splitEmails?: string[] };
+    const { leaseId, tenantId, amount, autopay } = body as { leaseId: string; tenantId: string; amount: number; splitEmails?: string[]; autopay?: { enabled: boolean; frequency: string; amount: number; splitEmails?: string[] } | null };
     if (!leaseId || !tenantId || !amount || Number(amount) <= 0) return res.status(400).json({ error: 'Invalid request' });
 
     const lease = await prisma.lease.findUnique({ where: { id: String(leaseId) }, include: { unit: true } } as any);
