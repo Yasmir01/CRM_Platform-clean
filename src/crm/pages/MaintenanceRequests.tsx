@@ -30,7 +30,10 @@ import InvoiceExportControls from '../components/InvoiceExport';
 
    return (
      <Box sx={{ p: 2 }}>
-       <Typography variant="h5" sx={{ mb: 2 }}>Maintenance Requests</Typography>
+       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h5">Maintenance Requests</Typography>
+        <Button variant="text" href="/crm/maintenance-kanban">Open Kanban</Button>
+      </Stack>
 
        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
        <Select size="small" displayEmpty value={status} onChange={(e) => setStatus(String(e.target.value))} sx={{ minWidth: 180 }}>
