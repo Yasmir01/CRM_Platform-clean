@@ -425,9 +425,6 @@ model MaintenanceInvoice {
   id         String   @id @default(cuid())
   requestId  String
   vendorId   String
-  fileUrl    String
-  fileName   String
-  fileType   String
   amount     Float?
   status     String   @default("pending") // pending, approved, rejected
   uploadedAt DateTime @default(now())
@@ -435,9 +432,24 @@ model MaintenanceInvoice {
 
   request    MaintenanceRequest @relation(fields: [requestId], references: [id])
   vendor     User               @relation(fields: [vendorId], references: [id])
+  files      InvoiceFile[]
 
   @@index([requestId])
   @@index([vendorId])
+}
+
+model InvoiceFile {
+  id         String   @id @default(cuid())
+  invoiceId  String
+  fileUrl    String
+  fileName   String
+  fileType   String
+  uploadedAt DateTime @default(now())
+  archivedAt DateTime?
+
+  invoice    MaintenanceInvoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
 }
 
 // --- Platform Notifications ---
