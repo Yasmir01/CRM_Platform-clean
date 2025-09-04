@@ -294,6 +294,11 @@ function AppRoutes() {
             <MaintenanceRequests />
           </React.Suspense>
         } />
+        <Route path="maintenance-kanban" element={
+          <React.Suspense fallback={<PageLoader />}>
+            {(await import('./crm/pages/MaintenanceKanban')).default}
+          </React.Suspense>
+        } />
         <Route path="customer-service" element={
           <React.Suspense fallback={<PageLoader />}>
             <CustomerService />
