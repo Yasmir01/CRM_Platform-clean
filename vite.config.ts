@@ -10,6 +10,7 @@ export default defineConfig({
       invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
       warning: path.resolve(__dirname, "./src/shims/warning.ts"),
       lodash: 'lodash-es',
+      qrcode: path.resolve(__dirname, './src/shims/qrcode.ts'),
       'dayjs/plugin/advancedFormat.js': 'dayjs/plugin/advancedFormat',
       'dayjs/plugin/localizedFormat.js': 'dayjs/plugin/localizedFormat',
       'dayjs/plugin/customParseFormat.js': 'dayjs/plugin/customParseFormat',
