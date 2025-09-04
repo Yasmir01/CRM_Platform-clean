@@ -51,6 +51,7 @@ const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({
 const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
 const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
 const TenantAutopay = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantAutopay })));
+const TenantCheckoutPage = React.lazy(() => import("./portals/TenantCheckoutPage"));
 const PaymentMethodsPage = React.lazy(() => import("./portals/PaymentMethodsPage"));
 const NewPaymentPage = React.lazy(() => import("./portals/NewPaymentPage"));
 const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
