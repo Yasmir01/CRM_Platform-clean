@@ -48,6 +48,7 @@ import AssignVendor from '../components/AssignVendor';
              <TableCell>Priority</TableCell>
              <TableCell>Status</TableCell>
              <TableCell>Created</TableCell>
+             <TableCell>Assign</TableCell>
              <TableCell>Actions</TableCell>
            </TableRow>
          </TableHead>
@@ -61,6 +62,7 @@ import AssignVendor from '../components/AssignVendor';
                <TableCell><Chip size="small" label={r.priority} /></TableCell>
                <TableCell><Chip size="small" color={r.status === 'completed' ? 'success' : r.status === 'in_progress' ? 'warning' : 'default'} label={r.status} /></TableCell>
                <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
+               <TableCell><AssignVendor requestId={r.id} /></TableCell>
                <TableCell>
                  <Stack direction="row" spacing={1}>
                    {(r.status === 'open' || r.status === 'in_progress') && (
