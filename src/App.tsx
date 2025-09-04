@@ -186,6 +186,7 @@ function AppRoutes() {
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
       <Route path="/tenant/payment-methods" element={<React.Suspense fallback={<PageLoader />}><PaymentMethodsPage /></React.Suspense>} />
       <Route path="/tenant/payments/new" element={<React.Suspense fallback={<PageLoader />}><NewPaymentPage /></React.Suspense>} />
+      <Route path="/tenant/checkout" element={<React.Suspense fallback={<PageLoader />}><TenantCheckoutPage /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
       <Route path="/tenant/autopay" element={<React.Suspense fallback={<PageLoader />}><TenantAutopay /></React.Suspense>} />
