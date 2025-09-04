@@ -8,6 +8,23 @@ export default function InvoiceExportControls() {
   const [dateFrom, setDateFrom] = React.useState('');
   const [dateTo, setDateTo] = React.useState('');
   const [busy, setBusy] = React.useState(false);
+  const [vendors, setVendors] = React.useState<any[]>([]);
+  const [properties, setProperties] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const load = async () => {
+      try {
+        const v = await fetch('/api/admin/filters/vendors', { credentials: 'include' }).then((r) => r.ok ? r.json() : []);
+        const p = await fetch('/api/admin/filters/properties', { credentials: 'include' }).then((r) => r.ok ? r.json() : []);
+        setVendors(Array.isArray(v) ? v : []);
+        setProperties(Array.isArray(p) ? p : []);
+      } catch {
+        setVendors([]);
+        setProperties([]);
+      }
+    };
+    load();
+  }, []);
 
   const exportInvoices = async () => {
     setBusy(true);
