@@ -1,5 +1,6 @@
 import { getProvider } from "./factory";
 import { getTokens, saveTokens } from "./store";
+import { getProvider } from "./factory";
 
 export async function ensureValidToken(orgId: string, providerName: "quickbooks"|"xero"|"freshbooks") {
   const tokens = await getTokens(orgId, providerName);
