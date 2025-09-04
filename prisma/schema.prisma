@@ -214,7 +214,7 @@ model AutoPay {
 }
 
 /// ----------------------------------------------------------
-///  NEW MODELS FOR TENANT��LEDGER / PAST BALANCES
+///  NEW MODELS FOR TENANT‑LEDGER / PAST BALANCES
 /// ----------------------------------------------------------
 
 enum LeaseStatus {
@@ -371,6 +371,7 @@ model MaintenanceRequest {
   deadline    DateTime?
   escalated   Boolean  @default(false)
   escalatedAt DateTime?
+  escalationLevel Int  @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
