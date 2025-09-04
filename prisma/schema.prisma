@@ -661,6 +661,25 @@ model PaymentDispute {
   resolvedAt DateTime?
 }
 
+model PaymentGateway {
+  id                 String   @id @default(cuid())
+  name               String
+  enabled            Boolean  @default(false)
+  config             Json
+  propertyId         String?
+  subscriptionPlanId String?
+  global             Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  property           Property?         @relation(fields: [propertyId], references: [id])
+  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
+
+  @@index([propertyId])
+  @@index([subscriptionPlanId])
+  @@index([global])
+}
+
 // --- Messaging ---
 model MessageThread {
   id           String               @id @default(cuid())
