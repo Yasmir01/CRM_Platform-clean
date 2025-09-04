@@ -22,20 +22,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const propertyId = typeof req.query?.property === 'string' ? String(req.query.property) : '';
+    const leaseId = typeof req.query?.lease === 'string' ? String(req.query.lease) : '';
+    const tenantQ = typeof req.query?.tenant === 'string' ? String(req.query.tenant).trim().toLowerCase() : '';
 
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
     const ledgerWhere: any = { date: { gte: start }, type: 'RENT' };
-    if (propertyId) ledgerWhere.lease = { unit: { propertyId } };
+    if (leaseId) ledgerWhere.leaseId = leaseId;
+    if (propertyId && !leaseId) ledgerWhere.lease = { unit: { propertyId } };
 
     const paymentWhere: any = { createdAt: { gte: start } };
     if (propertyId) paymentWhere.propertyId = propertyId;
+    if (leaseId) paymentWhere.leaseId = leaseId;
 
     const [charges, payments] = await Promise.all([
-      prisma.ledgerEntry.findMany({ where: ledgerWhere, select: { date: true, amountCents: true } }),
-      prisma.rentPayment.findMany({ where: paymentWhere, select: { createdAt: true, amount: true, status: true } })
+      prisma.ledgerEntry.findMany({ where: ledgerWhere, include: { lease: { include: { tenant: true, unit: true } } } } as any),
+      prisma.rentPayment.findMany({ where: paymentWhere, include: { tenant: true } })
     ]);
+
+    const filteredCharges = tenantQ
+      ? charges.filter((c: any) => {
+          const name = c.lease?.tenant?.name || '';
+          return name.toLowerCase().includes(tenantQ);
+        })
+      : charges;
+
+    const filteredPayments = tenantQ
+      ? payments.filter((p: any) => {
+          const name = p.tenant?.name || p.tenant?.email || '';
+          return name.toLowerCase().includes(tenantQ);
+        })
+      : payments;
 
     // Initialize last 12 months buckets
     const buckets: Record<string, { month: string; collected: number; outstanding: number }> = {};
@@ -46,14 +64,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Sum charges (rent) per month
-    for (const c of charges) {
+    for (const c of filteredCharges) {
       const k = monthKey(new Date(c.date));
       if (!buckets[k]) continue;
       buckets[k].outstanding += (c.amountCents || 0) / 100;
     }
 
     // Sum collected (successful) per month
-    for (const p of payments) {
+    for (const p of filteredPayments) {
       const k = monthKey(new Date(p.createdAt));
       if (!buckets[k]) continue;
       const ok = String(p.status || '').toLowerCase();
