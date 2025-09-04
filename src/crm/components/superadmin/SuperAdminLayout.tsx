@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Compliance', to: '/crm/super-admin/compliance' },
   { label: 'Analytics', to: '/crm/super-admin/analytics' },
   { label: 'Notifications', to: '/crm/super-admin/notifications' },
+  { label: 'Payment Policies', to: '/crm/super-admin/payment-policies/global' },
 ];
 
 export default function SuperAdminLayout() {
