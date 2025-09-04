@@ -359,6 +359,11 @@ function AppRoutes() {
             <SLAPolicyManager />
           </React.Suspense>
         } />
+        <Route path="escalation-matrix" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <EscalationMatrixEditor />
+          </React.Suspense>
+        } />
         <Route path="reports" element={
           <React.Suspense fallback={<PageLoader />}>
             <Reports />
