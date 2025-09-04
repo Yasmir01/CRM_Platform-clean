@@ -185,22 +185,63 @@ model RevenueEvent {
 
 // --- Tenant Rent Payments ---
 model RentPayment {
-  id           String   @id @default(cuid())
-  tenantId     String
-  amount       Float
-  status       String   // pending | success | failed | refunded
-  gateway      String   // stripe | paypal | plaid | applepay
-  methodId     String?
-  externalId   String?
+  id             String   @id @default(cuid())
+  tenantId       String
+  propertyId     String?
+  amount         Float
+  status         String   // pending | success | failed | refunded | partially_refunded
+  gateway        String   // stripe | paypal | plaid | applepay
+  methodId       String?
+  externalId     String?
   refundedAmount Float   @default(0)
-  autopay      Boolean  @default(false)
-  refundReason String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  autopay        Boolean  @default(false)
+  refundReason   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  tenant       User     @relation(fields: [tenantId], references: [id])
+  tenant       User      @relation(fields: [tenantId], references: [id])
+  property     Property? @relation(fields: [propertyId], references: [id])
 
   @@index([tenantId])
+  @@index([propertyId])
+}
+
+model LateFeeRule {
+  id          String   @id @default(cuid())
+  scope       String   // GLOBAL | PROPERTY
+  propertyId  String?
+  gracePeriod Int
+  feeType     String   // FIXED | PERCENTAGE
+  feeAmount   Float
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  property    Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([isActive])
+  @@index([propertyId])
+}
+
+model LateFee {
+  id         String   @id @default(cuid())
+  tenantId   String
+  paymentId  String?
+  propertyId String
+  amount     Float
+  status     String   // PENDING | APPLIED | WAIVED
+  appliedAt  DateTime?
+  waivedBy   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant     User       @relation(fields: [tenantId], references: [id])
+  payment    RentPayment? @relation(fields: [paymentId], references: [id])
+  property   Property   @relation(fields: [propertyId], references: [id])
+
+  @@index([tenantId])
+  @@index([propertyId])
+  @@index([paymentId])
 }
 
 model Refund {
