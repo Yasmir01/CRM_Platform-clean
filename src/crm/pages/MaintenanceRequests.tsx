@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, Stack, Select, MenuItem, Button, TextField, CircularProgress } from '@mui/material';
+import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, Stack, Select, MenuItem, Button, TextField, CircularProgress, Checkbox } from '@mui/material';
 import AssignVendor from '../components/AssignVendor';
 import InvoiceExportControls from '../components/InvoiceExport';
 
@@ -46,6 +46,7 @@ export default function MaintenanceRequests() {
    const [status, setStatus] = useState('');
   const [propertyId, setPropertyId] = useState('');
   const [vendorId, setVendorId] = useState('');
+  const [selected, setSelected] = useState<string[]>([]);
 
    const load = async () => {
      const params = new URLSearchParams();
@@ -55,23 +56,56 @@ export default function MaintenanceRequests() {
     const res = await fetch(`/api/maintenance/list?${params.toString()}`, { credentials: 'include' });
      const data = await res.json();
      setItems(Array.isArray(data) ? data : []);
+     setSelected([]);
    };
 
    useEffect(() => { load(); }, [status, propertyId, vendorId]);
 
    const updateStatus = async (id: string, newStatus: string) => {
-     await fetch(`/api/maintenance/${id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: newStatus }) });
-     load();
-   };
+    await fetch(`/api/maintenance/${id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: newStatus }) });
+    load();
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const allSelected = selected.length > 0 && selected.length === items.length;
+  const someSelected = selected.length > 0 && selected.length < items.length;
+
+  const bulkUpdate = async (nextStatus: string) => {
+    await fetch('/api/maintenance/status/bulk', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ ids: selected, status: nextStatus }),
+    });
+    await load();
+  };
 
    return (
      <Box sx={{ p: 2 }}>
        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Typography variant="h5">Maintenance Requests</Typography>
-        <Button variant="text" href="/crm/maintenance-kanban">Open Kanban</Button>
-      </Stack>
+       <Typography variant="h5">Maintenance Requests</Typography>
+       <Button variant="text" href="/crm/maintenance-kanban">Open Kanban</Button>
+     </Stack>
 
-       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+      {selected.length > 0 && (
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems="center" sx={{ mb: 2, p: 1.5, borderRadius: 1, bgcolor: 'primary.50', border: '1px solid', borderColor: 'primary.200' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>{selected.length} selected</Typography>
+          <Select size="small" displayEmpty value="" onChange={(e) => { const v = String(e.target.value); if (v) bulkUpdate(v); }} sx={{ minWidth: 220 }}>
+            <MenuItem value=""><em>Bulk Update Status</em></MenuItem>
+            <MenuItem value="open">Open</MenuItem>
+            <MenuItem value="in_progress">In Progress</MenuItem>
+            <MenuItem value="completed">Completed</MenuItem>
+            <MenuItem value="overdue">Overdue</MenuItem>
+            <MenuItem value="closed">Closed</MenuItem>
+          </Select>
+          <Button size="small" onClick={() => setSelected([])}>Clear</Button>
+        </Stack>
+      )}
+
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
        <Select size="small" displayEmpty value={status} onChange={(e) => setStatus(String(e.target.value))} sx={{ minWidth: 180 }}>
          <MenuItem value=""><em>All Status</em></MenuItem>
          <MenuItem value="open">Open</MenuItem>
@@ -88,24 +122,37 @@ export default function MaintenanceRequests() {
 
        <Table size="small">
          <TableHead>
-           <TableRow>
-             <TableCell>ID</TableCell>
-             <TableCell>Tenant</TableCell>
-             <TableCell>Property</TableCell>
-             <TableCell>Vendor</TableCell>
-             <TableCell>Category</TableCell>
-             <TableCell>Priority</TableCell>
-             <TableCell>Status</TableCell>
-             <TableCell>Created</TableCell>
-             <TableCell>Deadline</TableCell>
-             <TableCell>Assign</TableCell>
-             <TableCell>Actions</TableCell>
+          <TableRow>
+            <TableCell padding="checkbox">
+              <Checkbox
+                indeterminate={someSelected}
+                checked={allSelected}
+                onChange={() => {
+                  if (allSelected) setSelected([]);
+                  else setSelected(items.map((r) => r.id));
+                }}
+              />
+            </TableCell>
+            <TableCell>ID</TableCell>
+            <TableCell>Tenant</TableCell>
+            <TableCell>Property</TableCell>
+            <TableCell>Vendor</TableCell>
+            <TableCell>Category</TableCell>
+            <TableCell>Priority</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Created</TableCell>
+            <TableCell>Deadline</TableCell>
+            <TableCell>Assign</TableCell>
+            <TableCell>Actions</TableCell>
            </TableRow>
          </TableHead>
          <TableBody>
            {items.map((r) => (
-             <TableRow key={r.id} hover>
-               <TableCell>{r.id.slice(0,6)}…</TableCell>
+            <TableRow key={r.id} hover>
+              <TableCell padding="checkbox">
+                <Checkbox checked={selected.includes(r.id)} onChange={() => toggleSelect(r.id)} />
+              </TableCell>
+              <TableCell>{r.id.slice(0,6)}…</TableCell>
                <TableCell>{r.tenant?.name || r.tenant?.email || '—'}</TableCell>
                <TableCell>{r.property?.address || '—'}</TableCell>
               <TableCell>{r.vendor?.name || r.vendor?.email || r.vendorId || 'Unassigned'}</TableCell>
@@ -130,10 +177,10 @@ export default function MaintenanceRequests() {
              </TableRow>
            ))}
            {items.length === 0 && (
-             <TableRow>
-               <TableCell colSpan={8}><Typography variant="body2" color="text.secondary">No requests found.</Typography></TableCell>
-             </TableRow>
-           )}
+            <TableRow>
+              <TableCell colSpan={12}><Typography variant="body2" color="text.secondary">No requests found.</Typography></TableCell>
+            </TableRow>
+          )}
          </TableBody>
        </Table>
      </Box>
