@@ -97,7 +97,6 @@ const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
 const MessagesSearch = React.lazy(() => import("./crm/pages/MessagesSearch"));
-const MaintenanceRequests = React.lazy(() => import("./crm/pages/MaintenanceRequests"));
 const MaintenanceKanban = React.lazy(() => import("./crm/pages/MaintenanceKanban"));
 
 // Loading component
