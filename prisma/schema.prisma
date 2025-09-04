@@ -191,6 +191,7 @@ model RentPayment {
   status       String   // pending | success | failed | refunded
   gateway      String   // stripe | paypal | plaid | applepay
   methodId     String?
+  externalId   String?
   autopay      Boolean  @default(false)
   refundReason String?
   createdAt    DateTime @default(now())
@@ -199,6 +200,24 @@ model RentPayment {
   tenant       User     @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
+}
+
+model Refund {
+  id         String   @id @default(cuid())
+  paymentId  String
+  tenantId   String
+  amount     Float
+  status     String   // PENDING | COMPLETED | FAILED
+  reason     String?
+  gateway    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant     User        @relation(fields: [tenantId], references: [id])
+  payment    RentPayment @relation(fields: [paymentId], references: [id])
+
+  @@index([tenantId])
+  @@index([paymentId])
 }
 
 model AutoPay {
