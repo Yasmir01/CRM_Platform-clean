@@ -78,6 +78,7 @@ const EscalationRequestView = React.lazy(() => import("./crm/pages/EscalationReq
 const ComplianceExportPage = React.lazy(() => import("./crm/pages/ComplianceExport"));
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
+const GatewayManagement = React.lazy(() => import("./crm/pages/GatewayManagement"));
 const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
 const AccountingSettings = React.lazy(() => import("./crm/pages/AccountingSettings"));
 const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
