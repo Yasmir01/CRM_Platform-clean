@@ -30,7 +30,7 @@ export default async function handler(req: any, res: any) {
       lease = await prisma.lease.findUnique({ where: { id: String(leaseId) } });
     }
 
-    const minPartial = Number(policy?.minPartialUsd ?? 10);
+    const minPartial = Number((lease?.minPartialUsd ?? policy?.minPartialUsd ?? 10));
     const allowPartial = typeof lease?.allowPartial === 'boolean' ? Boolean(lease.allowPartial) : Boolean(policy?.allowPartial ?? true);
     if (!allowPartial && Number(amount) < minPartial) {
       return res.status(400).json({ error: 'Partial payments disabled for this property/lease' });
