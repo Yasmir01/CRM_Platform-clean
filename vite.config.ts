@@ -31,13 +31,13 @@ export default defineConfig({
       "react-dropzone",
       // Dayjs core and plugins used by MUI AdapterDayjs
       "dayjs",
-      "dayjs/plugin/advancedFormat.js",
-      "dayjs/plugin/localizedFormat.js",
-      "dayjs/plugin/customParseFormat.js",
-      "dayjs/plugin/weekOfYear.js",
-      "dayjs/plugin/isBetween.js",
+      "dayjs/plugin/advancedFormat",
+      "dayjs/plugin/localizedFormat",
+      "dayjs/plugin/customParseFormat",
+      "dayjs/plugin/weekOfYear",
+      "dayjs/plugin/isBetween",
       // App usage
-      "dayjs/plugin/isSameOrBefore.js",
+      "dayjs/plugin/isSameOrBefore",
       // CJS library interop
       "crypto-js"
     ],
