@@ -62,7 +62,12 @@ export default function MessageThreadPage() {
       </Paper>
       <Stack spacing={1}>
         <TextField value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write a reply..." multiline minRows={3} fullWidth />
-        <Button variant="contained" onClick={send}>Send</Button>
+        <Stack direction="row" spacing={1}>
+          <Button variant="contained" onClick={send}>Send</Button>
+          <Button variant="contained" color="warning" onClick={async () => { await fetch(`/api/messages/${threadId}/escalate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ toRole: 'admin', reason: 'Issue unresolved' }) }); alert('Escalated to Admin'); }}>Escalate to Admin</Button>
+          <Button variant="contained" color="error" onClick={async () => { await fetch(`/api/messages/${threadId}/escalate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ toRole: 'superadmin', reason: 'Issue unresolved' }) }); alert('Escalated to SuperAdmin'); }}>Escalate to SuperAdmin</Button>
+          <Button variant="outlined" color="secondary" onClick={async () => { await fetch(`/api/messages/${threadId}/archive`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ reason: 'Case closed' }) }); alert('Thread archived'); }}>Archive Thread</Button>
+        </Stack>
       </Stack>
     </Box>
   );
