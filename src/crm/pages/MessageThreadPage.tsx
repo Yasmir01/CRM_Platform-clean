@@ -39,6 +39,15 @@ export default function MessageThreadPage() {
             <Box key={m.id} sx={{ pb: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{m.sender?.name || m.sender?.email || 'User'}</Typography>
               <Typography variant="body1">{m.body}</Typography>
+              {Array.isArray(m.attachments) && m.attachments.length > 0 && (
+                <Box sx={{ mt: 1 }}>
+                  {m.attachments.map((a: any) => (
+                    <Box key={a.id}>
+                      <a href={`/api/storage/download?key=${encodeURIComponent(a.fileUrl)}`} target="_blank" rel="noopener noreferrer">📎 {a.fileName}</a>
+                    </Box>
+                  ))}
+                </Box>
+              )}
               <Typography variant="caption" color="text.secondary">{new Date(m.createdAt).toLocaleString()}</Typography>
             </Box>
           ))}
