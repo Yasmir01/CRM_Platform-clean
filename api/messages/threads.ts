@@ -30,7 +30,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const messageBody = String(body.body || '').trim();
       if (!subject || !messageBody) return res.status(400).json({ error: 'Missing fields' });
 
-      const currentRole = String((user as any).role || (Array.isArray((user as any).roles) ? (user as any).roles[0] : 'tenant'));
+      const { canMessage, normalizeRoleString } = await import('../../src/lib/messages/rules');
+      const currentRoleRaw = String((user as any).role || (Array.isArray((user as any).roles) ? (user as any).roles[0] : 'tenant'));
+      const currentRole = normalizeRoleString(currentRoleRaw);
+
+      for (const p of participants) {
+        const recipientRole = normalizeRoleString(String(p.role || 'tenant'));
+        if (!canMessage(currentRole, recipientRole)) {
+          return res.status(403).json({ error: `Messaging not allowed: ${currentRole} 862 ${recipientRole}` });
+        }
+      }
 
       const thread = await prisma.messageThread.create({
         data: {
@@ -38,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           participants: {
             create: [
               { userId, role: currentRole },
-              ...participants.map((p: any) => ({ userId: String(p.id), role: String(p.role || 'user') })),
+              ...participants.map((p: any) => ({ userId: String(p.id), role: normalizeRoleString(String(p.role || 'tenant')) })),
             ],
           },
           messages: { create: { senderId: userId, body: messageBody } },
