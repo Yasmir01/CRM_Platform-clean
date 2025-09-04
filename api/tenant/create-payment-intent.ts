@@ -42,6 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tenantId,
           amount: rawAmount,
           status: 'pending',
+          autopay: false,
         },
       });
     } catch (e) {
