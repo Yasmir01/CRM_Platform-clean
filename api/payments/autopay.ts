@@ -3,6 +3,19 @@ import { prisma } from '../_db';
 import { ensurePermission } from '../../src/lib/authorize';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'GET') {
+    const user = ensurePermission(req, res, 'payments:read');
+    if (!user) return;
+    const tenantId = String((user as any).sub || (user as any).id);
+    try {
+      const ap = await prisma.autoPay.findUnique({ where: { tenantId } });
+      return res.status(200).json(ap);
+    } catch (e: any) {
+      console.error('autopay get error', e?.message || e);
+      return res.status(500).json({ error: 'failed' });
+    }
+  }
+
   if (req.method === 'POST') {
     const user = ensurePermission(req, res, 'payments:create');
     if (!user) return;
@@ -25,7 +38,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       await prisma.user.update({ where: { id: tenantId }, data: { autopayEnabled: true } });
 
-      return res.status(200).json({ autopay });
+      return res.status(200).json(autopay);
     } catch (e: any) {
       console.error('autopay upsert error', e?.message || e);
       return res.status(500).json({ error: 'failed' });
@@ -47,6 +60,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  res.setHeader('Allow', 'POST, DELETE');
+  res.setHeader('Allow', 'GET, POST, DELETE');
   return res.status(405).json({ error: 'Method Not Allowed' });
 }
