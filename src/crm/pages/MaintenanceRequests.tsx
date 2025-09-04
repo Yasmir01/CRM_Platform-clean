@@ -41,6 +41,46 @@ import InvoiceExportControls from '../components/InvoiceExport';
   );
 }
 
+function VendorDropdown({ requestId, currentVendor, onChange }: { requestId: string; currentVendor?: any; onChange: () => void }) {
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [selected, setSelected] = useState<string>(currentVendor?.id || '');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      const res = await fetch('/api/users/vendors', { credentials: 'include' });
+      const data = await res.json();
+      setVendors(Array.isArray(data) ? data : []);
+    };
+    fetchVendors();
+  }, []);
+
+  const updateVendor = async (vendorId: string) => {
+    try {
+      setLoading(true);
+      await fetch(`/api/maintenance/vendor/${requestId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ vendorId: vendorId || null }),
+      });
+      setSelected(vendorId);
+      onChange();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Select size="small" value={selected} disabled={loading} onChange={(e) => updateVendor(String(e.target.value))} displayEmpty sx={{ minWidth: 180 }}>
+      <MenuItem value=""><em>Unassigned</em></MenuItem>
+      {vendors.map((v) => (
+        <MenuItem key={v.id} value={v.id}>{v.name || v.email || v.id}</MenuItem>
+      ))}
+    </Select>
+  );
+}
+
 export default function MaintenanceRequests() {
    const [items, setItems] = useState<Request[]>([]);
    const [status, setStatus] = useState('');
@@ -155,7 +195,9 @@ export default function MaintenanceRequests() {
               <TableCell>{r.id.slice(0,6)}…</TableCell>
                <TableCell>{r.tenant?.name || r.tenant?.email || '—'}</TableCell>
                <TableCell>{r.property?.address || '—'}</TableCell>
-              <TableCell>{r.vendor?.name || r.vendor?.email || r.vendorId || 'Unassigned'}</TableCell>
+              <TableCell>
+                <VendorDropdown requestId={r.id} currentVendor={r.vendor} onChange={load} />
+              </TableCell>
               <TableCell>{r.category || '—'}</TableCell>
               <TableCell><Chip size="small" label={r.priority} /></TableCell>
               <TableCell>
