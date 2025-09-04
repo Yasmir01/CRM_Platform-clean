@@ -533,6 +533,11 @@ function AppRoutes() {
           <Route path="compliance" element={<React.Suspense fallback={<PageLoader />}><SuperAdminCompliance /></React.Suspense>} />
           <Route path="analytics" element={<React.Suspense fallback={<PageLoader />}><SuperAdminAnalytics /></React.Suspense>} />
           <Route path="notifications" element={<React.Suspense fallback={<PageLoader />}><SuperAdminNotifications /></React.Suspense>} />
+          <Route path="payment-policies">
+            <Route path="global" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesGlobal /></React.Suspense>} />
+            <Route path="property" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesProperty /></React.Suspense>} />
+            <Route path="lease" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesLease /></React.Suspense>} />
+          </Route>
         </Route>
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
