@@ -21,15 +21,16 @@ enum Role {
 }
 
 model User {
-  id          String         @id @default(cuid())
-  email       String         @unique
-  name        String?
-  role        Role           @default(TENANT)
-  permissions String?
-  orgId       String
-  org         Organization   @relation(fields: [orgId], references: [id])
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id              String         @id @default(cuid())
+  email           String         @unique
+  name            String?
+  role            Role           @default(TENANT)
+  permissions     String?
+  autopayEnabled  Boolean        @default(false)
+  orgId           String
+  org             Organization   @relation(fields: [orgId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([orgId])
 }
