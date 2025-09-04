@@ -85,6 +85,7 @@ const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOvervi
 const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
 const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImpersonate"));
 const SuperAdminCompliance = React.lazy(() => import("./crm/pages/SuperAdminCompliance"));
+const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnalytics"));
 
 // Loading component
 function PageLoader() {
@@ -415,6 +416,7 @@ function AppRoutes() {
           <Route path="subscribers" element={<React.Suspense fallback={<PageLoader />}><SuperAdminSubscribers /></React.Suspense>} />
           <Route path="impersonate" element={<React.Suspense fallback={<PageLoader />}><SuperAdminImpersonate /></React.Suspense>} />
           <Route path="compliance" element={<React.Suspense fallback={<PageLoader />}><SuperAdminCompliance /></React.Suspense>} />
+          <Route path="analytics" element={<React.Suspense fallback={<PageLoader />}><SuperAdminAnalytics /></React.Suspense>} />
         </Route>
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
