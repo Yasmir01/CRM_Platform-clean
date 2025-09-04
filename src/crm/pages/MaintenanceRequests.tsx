@@ -231,6 +231,14 @@ export default function MaintenanceRequests() {
               <TableCell><Chip size="small" label={r.priority} /></TableCell>
               <TableCell>
                 <StatusDropdown id={r.id} current={r.status} onChange={load} />
+                {/* Escalation/Overdue visual marker */}
+                <Typography variant="caption" component="div" sx={{ mt: 0.5 }}>
+                  {r.deadline && new Date(r.deadline) < new Date() && r.status !== 'completed' ? (
+                    <span style={{ color: '#b91c1c', fontWeight: 700 }}>Overdue{r.escalated ? ' 🚨' : ''}</span>
+                  ) : r.escalated ? (
+                    <span>Escalated 🚨</span>
+                  ) : null}
+                </Typography>
               </TableCell>
               <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
               <TableCell>{r.deadline ? new Date(r.deadline).toLocaleDateString() : '—'}</TableCell>
