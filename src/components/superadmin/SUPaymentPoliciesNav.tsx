@@ -5,6 +5,7 @@ const navItems = [
   { label: 'Global Policies', to: '/crm/super-admin/payment-policies/global' },
   { label: 'Property Policies', to: '/crm/super-admin/payment-policies/property' },
   { label: 'Lease Policies', to: '/crm/super-admin/payment-policies/lease' },
+  { label: 'Matrix', to: '/crm/super-admin/payment-policies/matrix' },
 ];
 
 export default function SUPaymentPoliciesNav() {

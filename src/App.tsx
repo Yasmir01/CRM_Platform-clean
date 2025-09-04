@@ -108,6 +108,7 @@ const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminN
 const SUPaymentPoliciesGlobal = React.lazy(() => import("./crm/pages/SUPaymentPoliciesGlobal"));
 const SUPaymentPoliciesProperty = React.lazy(() => import("./crm/pages/SUPaymentPoliciesProperty"));
 const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPoliciesLease"));
+const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
