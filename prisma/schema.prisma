@@ -192,6 +192,7 @@ model RentPayment {
   gateway      String   // stripe | paypal | plaid | applepay
   methodId     String?
   externalId   String?
+  refundedAmount Float   @default(0)
   autopay      Boolean  @default(false)
   refundReason String?
   createdAt    DateTime @default(now())
