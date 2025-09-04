@@ -13,7 +13,11 @@ export const StripeProvider: PaymentProvider = {
       confirm: true,
     });
   },
-  async refundPayment(paymentId) {
-    return await stripe.refunds.create({ payment_intent: paymentId });
+  async refundPayment(paymentId, amount?) {
+    const payload: any = { payment_intent: paymentId };
+    if (typeof amount === 'number' && Number.isFinite(amount) && amount > 0) {
+      payload.amount = Math.round(amount * 100);
+    }
+    return await stripe.refunds.create(payload);
   },
 };
