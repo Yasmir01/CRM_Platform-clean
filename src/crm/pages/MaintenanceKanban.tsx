@@ -25,6 +25,9 @@ function KanbanCard({ req }: { req: Req }) {
       <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{req.property?.address || 'Property'}</Typography>
       <Typography variant="body2" color="text.secondary">{req.category || 'general'} • {req.priority || 'normal'}</Typography>
       <Typography variant="caption" color="text.disabled">Tenant: {req.tenant?.name || req.tenant?.email || '—'}</Typography>
+      <Box sx={{ mt: 1 }}>
+        <AssignVendor requestId={req.id} compact />
+      </Box>
     </Paper>
   );
 }
