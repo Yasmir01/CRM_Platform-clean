@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Typography, Paper, Stack, Chip } from '@mui/material';
 import { DndContext, useDraggable, useDroppable, DragEndEvent, closestCenter } from '@dnd-kit/core';
+import AssignVendor from '../components/AssignVendor';
 
 type Req = {
   id: string;
