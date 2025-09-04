@@ -28,12 +28,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const providerRaw = String((req.query as any).provider || '');
     const provider = normProvider(providerRaw);
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const enabled = Boolean(body.enabled);
+
+    const patch: any = {};
+    if (body.enabled !== undefined) patch.enabled = Boolean(body.enabled);
+    if (typeof body.apiKey === 'string') {
+      patch.accessToken = String(body.apiKey);
+      patch.refreshToken = '';
+      if (!body.enabled) patch.enabled = true;
+      patch.expiresAt = new Date(Date.now() + 365 * 24 * 3600 * 1000);
+    }
+    if (typeof body.autoSync === 'string') patch.autoSync = String(body.autoSync);
+    if (typeof body.alertOnError === 'boolean') patch.alertOnError = Boolean(body.alertOnError);
 
     await prisma.accountingConnection.upsert({
       where: { orgId_provider: { orgId: u.orgId, provider } },
-      update: { enabled },
-      create: { orgId: u.orgId, provider, enabled, accessToken: '', refreshToken: '', expiresAt: new Date(Date.now() + 1000) },
+      update: patch,
+      create: { orgId: u.orgId, provider, enabled: Boolean(body.enabled ?? true), accessToken: String(body.apiKey || ''), refreshToken: '', expiresAt: new Date(Date.now() + 365 * 24 * 3600 * 1000), autoSync: patch.autoSync, alertOnError: patch.alertOnError },
     });
 
     return res.status(200).json({ ok: true });
