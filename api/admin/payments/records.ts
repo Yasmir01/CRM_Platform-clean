@@ -14,9 +14,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const propertyId = typeof req.query?.property === 'string' ? String(req.query.property) : '';
+    const leaseId = typeof req.query?.lease === 'string' ? String(req.query.lease) : '';
+    const tenantQ = typeof req.query?.tenant === 'string' ? String(req.query.tenant).trim().toLowerCase() : '';
 
     const where: any = {};
     if (propertyId) where.propertyId = propertyId;
+    if (leaseId) where.leaseId = leaseId;
 
     const list = await prisma.rentPayment.findMany({
       where,
@@ -25,7 +28,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       take: 500,
     } as any);
 
-    const items = list.map((p: any) => {
+    const filtered = tenantQ
+      ? list.filter((p: any) => {
+          const name = p.tenant?.name || p.tenant?.email || p.tenantId || '';
+          return String(name).toLowerCase().includes(tenantQ);
+        })
+      : list;
+
+    const items = filtered.map((p: any) => {
       const statusRaw = String(p.status || '').toLowerCase();
       const status = (statusRaw === 'success' || statusRaw === 'completed') ? 'paid' : 'outstanding';
       const tenantName = p.tenant?.name || p.tenant?.email || p.tenantId;
@@ -34,7 +44,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return {
         id: p.id,
         tenantName,
+        propertyId: p.propertyId || '',
         propertyName,
+        leaseId: p.leaseId || '',
         leaseName,
         amount: Number(p.amount || 0),
         status,
