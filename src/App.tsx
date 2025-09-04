@@ -73,6 +73,8 @@ const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
 import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
 const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
+const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
+const EscalationRequestView = React.lazy(() => import("./crm/pages/EscalationRequestView"));
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
 const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
