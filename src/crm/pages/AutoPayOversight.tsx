@@ -1,18 +1,26 @@
 import * as React from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch, Button, TextField, Select, MenuItem, FormControl, InputLabel, Stack } from '@mui/material';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Switch, Button, TextField, Select, MenuItem, FormControl, InputLabel, Stack, Chip } from '@mui/material';
 
 type AutoPayItem = {
   id: string;
   tenantId: string;
   propertyId?: string | null;
+  leaseId?: string | null;
   dayOfMonth: number;
   active: boolean;
   amountType?: string | null;
   amountValue?: number | null;
+  amount?: number | null;
+  frequency?: string | null;
+  splitEmails?: string[];
+  tenantName?: string;
+  propertyName?: string;
+  leaseName?: string;
   createdAt: string;
   updatedAt: string;
   tenant?: { id: string; name?: string | null; email: string } | null;
   property?: { id: string; address: string } | null;
+  lease?: { id: string; unit?: { number: string } | null } | null;
 };
 
 const AMOUNT_TYPES = [
@@ -25,6 +33,9 @@ export default function AutoPayOversight() {
   const [rows, setRows] = React.useState<AutoPayItem[]>([]);
   const [edited, setEdited] = React.useState<Record<string, Partial<AutoPayItem>>>({});
   const [loading, setLoading] = React.useState(false);
+  const [filterText, setFilterText] = React.useState('');
+  const [propertyFilter, setPropertyFilter] = React.useState<string>('all');
+  const [leaseFilter, setLeaseFilter] = React.useState<string>('all');
 
   const load = React.useCallback(() => {
     setLoading(true);
@@ -36,6 +47,41 @@ export default function AutoPayOversight() {
   }, []);
 
   React.useEffect(() => { load(); }, [load]);
+
+  const uniqueProperties = React.useMemo(() => {
+    const map = new Map<string, string>();
+    rows.forEach((a) => {
+      const id = a.propertyId || '';
+      if (!id) return;
+      const name = a.propertyName || a.property?.address || id;
+      if (!map.has(id)) map.set(id, name);
+    });
+    return Array.from(map.entries());
+  }, [rows]);
+
+  const uniqueLeases = React.useMemo(() => {
+    const map = new Map<string, string>();
+    rows.forEach((a) => {
+      const id = a.leaseId || (a.lease?.id ?? '');
+      if (!id) return;
+      const name = a.leaseName || (a.lease?.unit?.number ? String(a.lease.unit.number) : id);
+      if (!map.has(id)) map.set(id, name);
+    });
+    return Array.from(map.entries());
+  }, [rows]);
+
+  const filteredRows = React.useMemo(() => {
+    const q = filterText.trim().toLowerCase();
+    return rows.filter((a) => {
+      const t = (a.tenantName || a.tenant?.name || a.tenant?.email || a.tenantId).toString().toLowerCase();
+      const p = (a.propertyName || a.property?.address || a.propertyId || '').toString().toLowerCase();
+      const l = (a.leaseName || (a.lease?.unit?.number ? String(a.lease.unit.number) : a.leaseId || '')).toString().toLowerCase();
+      const matchesText = !q || t.includes(q) || p.includes(q) || l.includes(q);
+      const matchesProperty = propertyFilter === 'all' || a.propertyId === propertyFilter;
+      const matchesLease = leaseFilter === 'all' || (a.leaseId || a.lease?.id) === leaseFilter;
+      return matchesText && matchesProperty && matchesLease;
+    });
+  }, [rows, filterText, propertyFilter, leaseFilter]);
 
   function onFieldChange(id: string, patch: Partial<AutoPayItem>) {
     setEdited((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
@@ -81,6 +127,31 @@ export default function AutoPayOversight() {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h5" sx={{ fontWeight: 700 }}>AutoPay Oversight</Typography>
         <Stack direction="row" spacing={1}>
+          <TextField
+            size="small"
+            placeholder="Search by tenant, property, or lease"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            sx={{ minWidth: 280 }}
+          />
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Property</InputLabel>
+            <Select label="Property" value={propertyFilter} onChange={(e) => setPropertyFilter(e.target.value)}>
+              <MenuItem value="all">All Properties</MenuItem>
+              {uniqueProperties.map(([id, name]) => (
+                <MenuItem key={id} value={id}>{name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 200 }}>
+            <InputLabel>Lease</InputLabel>
+            <Select label="Lease" value={leaseFilter} onChange={(e) => setLeaseFilter(e.target.value)}>
+              <MenuItem value="all">All Leases</MenuItem>
+              {uniqueLeases.map(([id, name]) => (
+                <MenuItem key={id} value={id}>{name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <Button variant="outlined" onClick={load} disabled={loading}>Refresh</Button>
         </Stack>
       </Box>
@@ -91,21 +162,35 @@ export default function AutoPayOversight() {
             <TableRow>
               <TableCell>Tenant</TableCell>
               <TableCell>Property</TableCell>
+              <TableCell>Lease</TableCell>
+              <TableCell align="right">Amount</TableCell>
+              <TableCell>Frequency</TableCell>
+              <TableCell>Split With</TableCell>
               <TableCell>Type</TableCell>
               <TableCell align="right">Value</TableCell>
               <TableCell align="right">Day</TableCell>
-              <TableCell align="center">Active</TableCell>
+              <TableCell align="center">Status</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((r) => {
+            {filteredRows.map((r) => {
               const isEdited = Boolean(edited[r.id]);
               const showValue = (r.amountType || 'FULL_RENT') !== 'FULL_RENT';
+              const leaseLabel = r.leaseName || (r.lease?.unit?.number ? String(r.lease.unit.number) : r.leaseId || '—');
+              const tenantLabel = r.tenantName || r.tenant?.name || r.tenant?.email || r.tenantId;
+              const propertyLabel = r.propertyName || r.property?.address || r.propertyId || '—';
+              const amountDisplay = (typeof r.amount === 'number') ? r.amount : (showValue && typeof r.amountValue === 'number' ? r.amountValue : NaN);
+              const splitDisplay = Array.isArray(r.splitEmails) && r.splitEmails.length > 0 ? r.splitEmails.join(', ') : '—';
+              const frequency = (r.frequency || 'monthly');
               return (
                 <TableRow key={r.id} hover>
-                  <TableCell>{r.tenant?.name || r.tenant?.email || r.tenantId}</TableCell>
-                  <TableCell>{r.property?.address || r.propertyId || '-'}</TableCell>
+                  <TableCell>{tenantLabel}</TableCell>
+                  <TableCell>{propertyLabel}</TableCell>
+                  <TableCell>{leaseLabel}</TableCell>
+                  <TableCell align="right">{Number.isFinite(amountDisplay) ? `$${Number(amountDisplay).toFixed(2)}` : '—'}</TableCell>
+                  <TableCell>{frequency}</TableCell>
+                  <TableCell>{splitDisplay}</TableCell>
                   <TableCell sx={{ minWidth: 180 }}>
                     <FormControl size="small" fullWidth>
                       <InputLabel>Type</InputLabel>
@@ -143,12 +228,17 @@ export default function AutoPayOversight() {
                     />
                   </TableCell>
                   <TableCell align="center">
-                    <Switch checked={r.active} onChange={(_, c) => toggleActive(r.id, c)} />
+                    <Chip label={r.active ? 'Active' : 'Suspended'} color={r.active ? 'success' : 'default'} size="small" />
                   </TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                       <Button variant="contained" size="small" onClick={() => saveRow(r.id)} disabled={!isEdited}>Save</Button>
-                      <Button variant="outlined" color="error" size="small" onClick={() => deleteRow(r.id)}>Delete</Button>
+                      {r.active ? (
+                        <Button variant="outlined" size="small" onClick={() => toggleActive(r.id, false)}>Suspend</Button>
+                      ) : (
+                        <Button variant="outlined" size="small" onClick={() => toggleActive(r.id, true)}>Reactivate</Button>
+                      )}
+                      <Button variant="outlined" color="error" size="small" onClick={() => deleteRow(r.id)}>Cancel</Button>
                     </Stack>
                   </TableCell>
                 </TableRow>
