@@ -57,6 +57,31 @@ export default function LateFeeRulesDashboard() {
     }
   }
 
+  async function bulkToggle(active: boolean) {
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+    const res = await fetch('/api/admin/latefees/rules/bulk-toggle', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+      body: JSON.stringify({ ids, isActive: active })
+    });
+    const updated: Rule[] = await res.json();
+    const map = new Map(updated.map((u) => [u.id, u] as const));
+    setRules((prev) => prev.map((r) => map.get(r.id) || r));
+    setSelected(new Set());
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function selectAll() {
+    setSelected((prev) => (prev.size === rules.length ? new Set() : new Set(rules.map((r) => r.id))));
+  }
+
   return (
     <Box sx={{ p: 2, display: 'grid', gap: 2 }}>
       <Paper sx={{ p: 2 }}>
