@@ -302,6 +302,16 @@ function AppRoutes() {
             <Communications />
           </React.Suspense>
         } />
+        <Route path="messages" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MessagesInbox />
+          </React.Suspense>
+        } />
+        <Route path="messages/:threadId" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MessageThreadPage />
+          </React.Suspense>
+        } />
         <Route path="suggestions" element={
           <React.Suspense fallback={<PageLoader />}>
             <Suggestions />
