@@ -279,16 +279,20 @@ model AutoPay {
   updatedAt  DateTime @updatedAt
 
   // New fields for gateway-scoped rules
-  propertyId  String?
-  gatewayId   String?
-  methodId    String?
-  amountType  String?   @default("FULL_RENT") // FULL_RENT | FIXED | PERCENTAGE
-  amountValue Float?
+  propertyId   String?
+  leaseId      String?
+  gatewayId    String?
+  methodId     String?
+  amountType   String?   @default("FULL_RENT") // FULL_RENT | FIXED | PERCENTAGE
+  amountValue  Float?
+  splitEmails  String[]  @default([])
 
-  tenant     User     @relation(fields: [tenantId], references: [id])
+  tenant     User      @relation(fields: [tenantId], references: [id])
   property   Property? @relation(fields: [propertyId], references: [id])
+  lease      Lease?    @relation(fields: [leaseId], references: [id])
 
   @@index([propertyId])
+  @@index([leaseId])
 }
 
 /// ----------------------------------------------------------
