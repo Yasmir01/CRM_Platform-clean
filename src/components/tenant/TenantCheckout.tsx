@@ -65,7 +65,7 @@ export default function TenantCheckout({ leaseId, tenantId }: Props) {
     try {
       const res = await fetch('/api/tenant/payments', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leaseId, tenantId, amount: amt, splitEmails: policy?.allowSplit ? splitEmails.filter(Boolean) : [] })
+        body: JSON.stringify({ leaseId, tenantId, amount: amt, splitEmails: policy?.allowSplit ? splitEmails.filter(Boolean) : [], autopay: policy?.allowAutopay ? { enabled: autopayEnabled, frequency: autopayFrequency, amount: amt, splitEmails: splitEmails.filter(Boolean) } : null })
       });
       if (res.ok) {
         await fetchBalance();
