@@ -51,6 +51,7 @@ const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({
 const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
 const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
 const TenantAutopay = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantAutopay })));
+const PaymentMethodsPage = React.lazy(() => import("./portals/PaymentMethodsPage"));
 const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
 const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
 const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
@@ -171,6 +172,7 @@ function AppRoutes() {
       {/* Role-based portals */}
       <Route path="/tenant" element={<React.Suspense fallback={<PageLoader />}><TenantDashboard /></React.Suspense>} />
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
+      <Route path="/tenant/payment-methods" element={<React.Suspense fallback={<PageLoader />}><PaymentMethodsPage /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
       <Route path="/tenant/autopay" element={<React.Suspense fallback={<PageLoader />}><TenantAutopay /></React.Suspense>} />
