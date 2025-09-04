@@ -11,6 +11,8 @@ const navItems = [
   { label: 'Analytics', to: '/crm/super-admin/analytics' },
   { label: 'Notifications', to: '/crm/super-admin/notifications' },
   { label: 'Payment Policies', to: '/crm/super-admin/payment-policies/global' },
+  { label: 'Accounting Integrations', to: '/crm/super-admin/accounting-integrations' },
+  { label: 'Sync Logs', to: '/crm/super-admin/accounting-sync-logs' },
 ];
 
 export default function SuperAdminLayout() {
