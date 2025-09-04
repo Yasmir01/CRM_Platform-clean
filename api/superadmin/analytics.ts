@@ -37,7 +37,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ]);
     const delinquencyRate = totalPayments ? (failedPayments / totalPayments) * 100 : 0;
 
-    return res.status(200).json({ rentData, delinquencyRate });
+    const totalUnits = await prisma.unit.count();
+    const occupiedUnitIds = await prisma.lease.findMany({
+      where: { status: 'ACTIVE' },
+      select: { unitId: true },
+      distinct: ['unitId'],
+    });
+    const occupiedUnits = occupiedUnitIds.length;
+    const occupancyRate = totalUnits ? (occupiedUnits / totalUnits) * 100 : 0;
+
+    const [totalTenants, autopayTenants] = await Promise.all([
+      prisma.user.count({ where: { role: 'TENANT' as any } }),
+      prisma.user.count({ where: { role: 'TENANT' as any, autopayEnabled: true } }),
+    ]);
+    const autopayRate = totalTenants ? (autopayTenants / totalTenants) * 100 : 0;
+
+    return res.status(200).json({ rentData, delinquencyRate, occupancyRate, autopayRate, totalUnits });
   } catch (e: any) {
     console.error('superadmin/analytics error', e?.message || e);
     return res.status(500).json({ error: 'failed' });
