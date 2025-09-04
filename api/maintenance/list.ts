@@ -27,8 +27,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Filters
   const status = String((req.query as any)?.status || '').trim();
   const propertyId = String((req.query as any)?.propertyId || '').trim();
+  const vendorId = String((req.query as any)?.vendorId || '').trim();
   if (status) where.status = status;
   if (propertyId) where.propertyId = propertyId;
+  if (vendorId) where.vendorId = vendorId;
 
   const items = await prisma.maintenanceRequest.findMany({
     where,
@@ -48,5 +50,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     take: 200,
   });
 
-  return res.status(200).json(items);
+  // Enrich with vendor user info when available
+  const vIds = Array.from(new Set(items.map((i) => i.vendorId).filter(Boolean))) as string[];
+  let vendorMap: Record<string, { id: string; name: string | null; email: string | null }> = {};
+  if (vIds.length) {
+    const vendors = await prisma.user.findMany({ where: { id: { in: vIds } }, select: { id: true, name: true, email: true } });
+    vendorMap = Object.fromEntries(vendors.map((v) => [v.id, v]));
+  }
+  const enriched = items.map((i) => ({
+    ...i,
+    vendor: i.vendorId ? vendorMap[i.vendorId] || null : null,
+  }));
+
+  return res.status(200).json(enriched);
 }
