@@ -17,15 +17,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let where: any = {};
   if (isSuper) {
-    // no filter
+    // no org restriction
   } else if (isOrgAdmin) {
     where.orgId = user.orgId;
   } else {
     where.tenantId = user.id;
   }
 
+  // Filters
+  const status = String((req.query as any)?.status || '').trim();
+  const propertyId = String((req.query as any)?.propertyId || '').trim();
+  if (status) where.status = status;
+  if (propertyId) where.propertyId = propertyId;
+
   const items = await prisma.maintenanceRequest.findMany({
     where,
+    include: {
+      // tenant limited info
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // @ts-ignore
+      tenant: { select: { name: true, email: true } as any },
+      // property address (schema has address field)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // @ts-ignore
+      property: { select: { address: true } as any },
+      attachments: true,
+      assignments: true,
+    },
     orderBy: { createdAt: 'desc' },
     take: 200,
   });
