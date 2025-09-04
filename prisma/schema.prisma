@@ -237,6 +237,22 @@ model Property {
   updatedAt DateTime @updatedAt
 }
 
+model OwnerLedger {
+  id         String    @id @default(cuid())
+  ownerId    String
+  propertyId String?
+  entryType  String    // rent_income, expense, fee, refund
+  amount     Float
+  note       String?
+  createdAt  DateTime  @default(now())
+
+  owner      User      @relation(fields: [ownerId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([ownerId])
+  @@index([propertyId])
+}
+
 model Unit {
   id         String   @id @default(uuid())
   number     String
