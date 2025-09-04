@@ -532,8 +532,9 @@ model Message {
   body      String
   createdAt DateTime @default(now())
 
-  thread    MessageThread @relation(fields: [threadId], references: [id])
-  sender    User          @relation(fields: [senderId], references: [id])
+  thread    MessageThread      @relation(fields: [threadId], references: [id])
+  sender    User               @relation(fields: [senderId], references: [id])
+  attachments MessageAttachment[]
 
   @@index([threadId])
   @@index([senderId])
@@ -565,5 +566,18 @@ model MessageNotification {
   user      User    @relation(fields: [userId], references: [id])
 
   @@index([userId])
+  @@index([messageId])
+}
+
+model MessageAttachment {
+  id         String   @id @default(cuid())
+  messageId  String
+  fileUrl    String
+  fileType   String
+  fileName   String
+  uploadedAt DateTime @default(now())
+
+  message    Message  @relation(fields: [messageId], references: [id])
+
   @@index([messageId])
 }
