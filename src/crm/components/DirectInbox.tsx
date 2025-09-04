@@ -1,4 +1,5 @@
 import * as React from 'react';
+import AttachmentList from './AttachmentList';
 
 export default function DirectInbox() {
   const [messages, setMessages] = React.useState<any[]>([]);
