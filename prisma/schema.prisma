@@ -532,9 +532,10 @@ model Message {
   body      String
   createdAt DateTime @default(now())
 
-  thread    MessageThread      @relation(fields: [threadId], references: [id])
-  sender    User               @relation(fields: [senderId], references: [id])
+  thread      MessageThread       @relation(fields: [threadId], references: [id])
+  sender      User                @relation(fields: [senderId], references: [id])
   attachments MessageAttachment[]
+  reads       MessageRead[]
 
   @@index([threadId])
   @@index([senderId])
@@ -579,5 +580,19 @@ model MessageAttachment {
 
   message    Message  @relation(fields: [messageId], references: [id])
 
+  @@index([messageId])
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message   Message @relation(fields: [messageId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+  @@index([userId])
   @@index([messageId])
 }
