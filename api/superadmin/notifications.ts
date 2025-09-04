@@ -14,7 +14,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (role !== 'SUPER_ADMIN') return res.status(403).json({ error: 'Forbidden' });
 
   try {
+    const search = (req.query?.search as string) || '';
+    const audience = (req.query?.audience as string) || '';
+
+    const and: any[] = [];
+    if (search) {
+      and.push({ OR: [
+        { title: { contains: search, mode: 'insensitive' as any } },
+        { message: { contains: search, mode: 'insensitive' as any } },
+      ]});
+    }
+    if (audience && audience !== 'ALL') {
+      and.push({ audience });
+    }
+
     const notifications = await prisma.notification.findMany({
+      where: and.length ? { AND: and } : undefined,
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
