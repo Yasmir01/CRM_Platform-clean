@@ -447,3 +447,18 @@ model SyncQueue {
   notBefore DateTime @default(now())
   createdAt DateTime @default(now())
 }
+
+// --- Payment Methods ---
+model PaymentMethod {
+  id         String   @id @default(cuid())
+  tenantId   String
+  provider   String   // "stripe", "paypal", etc.
+  methodId   String   // provider method ID
+  type       String   // "card", "ach"
+  last4      String?
+  brand      String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  tenant User @relation(fields: [tenantId], references: [id])
+}
