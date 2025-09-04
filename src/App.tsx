@@ -331,6 +331,11 @@ function AppRoutes() {
             <AdminPayments />
           </React.Suspense>
         } />
+        <Route path="admin/accounting" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AccountingSettings />
+          </React.Suspense>
+        } />
         <Route path="documents" element={
           <React.Suspense fallback={<PageLoader />}>
             <Documents />
