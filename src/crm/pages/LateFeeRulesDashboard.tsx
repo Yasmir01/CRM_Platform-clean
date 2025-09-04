@@ -14,6 +14,7 @@ type Rule = {
 export default function LateFeeRulesDashboard() {
   const [rules, setRules] = React.useState<Rule[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [editing, setEditing] = React.useState<Record<string, Partial<Rule>>>({});
 
   const [form, setForm] = React.useState<Partial<Rule>>({ scope: 'GLOBAL', feeType: 'FIXED', gracePeriod: 3, feeAmount: 50, isActive: true });
   const [submitting, setSubmitting] = React.useState(false);
@@ -65,18 +66,58 @@ export default function LateFeeRulesDashboard() {
           <Typography variant="body2" color="text.secondary">No rules configured.</Typography>
         ) : (
           <Stack spacing={1}>
-            {rules.map((r) => (
-              <Box key={r.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>{r.scope === 'GLOBAL' ? 'Global Rule' : `Property Rule (${r.propertyId})`}</Typography>
-                  <Typography variant="caption" color="text.secondary">Grace Period: {r.gracePeriod} days</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
-                    Fee: {r.feeType === 'FIXED' ? `$${r.feeAmount.toFixed(2)}` : `${r.feeAmount}%`}
-                  </Typography>
+            {rules.map((r) => {
+              const e = editing[r.id];
+              const isEditing = !!e;
+              return (
+                <Box key={r.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+                  <Box sx={{ flex: 1, mr: 2 }}>
+                    {isEditing ? (
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                        <TextField label="Grace" type="number" size="small" value={e.gracePeriod ?? r.gracePeriod} onChange={(ev) => setEditing((prev) => ({ ...prev, [r.id]: { ...e, gracePeriod: Number(ev.target.value) } }))} sx={{ minWidth: 120 }} />
+                        <TextField select label="Type" size="small" value={e.feeType ?? r.feeType} onChange={(ev) => setEditing((prev) => ({ ...prev, [r.id]: { ...e, feeType: ev.target.value as any } }))} sx={{ minWidth: 160 }}>
+                          <MenuItem value="FIXED">Fixed ($)</MenuItem>
+                          <MenuItem value="PERCENTAGE">Percentage (%)</MenuItem>
+                        </TextField>
+                        <TextField label="Amount" type="number" size="small" value={e.feeAmount ?? r.feeAmount} onChange={(ev) => setEditing((prev) => ({ ...prev, [r.id]: { ...e, feeAmount: Number(ev.target.value) } }))} sx={{ minWidth: 140 }} />
+                      </Stack>
+                    ) : (
+                      <>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>{r.scope === 'GLOBAL' ? 'Global Rule' : `Property Rule (${r.propertyId})`}</Typography>
+                        <Typography variant="caption" color="text.secondary">Grace Period: {r.gracePeriod} days</Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
+                          Fee: {r.feeType === 'FIXED' ? `$${r.feeAmount.toFixed(2)}` : `${r.feeAmount}%`}
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Chip size="small" label={r.isActive ? 'Active' : 'Inactive'} color={r.isActive ? 'default' : 'secondary'} />
+                    {isEditing ? (
+                      <>
+                        <Button size="small" variant="contained" onClick={async () => {
+                          const patch = editing[r.id];
+                          const res = await fetch(`/api/admin/latefees/rules/${r.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(patch) });
+                          const updated = await res.json();
+                          setRules((prev) => prev.map((x) => (x.id === r.id ? updated : x)));
+                          setEditing((prev) => { const { [r.id]: _, ...rest } = prev; return rest; });
+                        }}>Save</Button>
+                        <Button size="small" variant="outlined" onClick={() => setEditing((prev) => { const { [r.id]: _, ...rest } = prev; return rest; })}>Cancel</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button size="small" variant="outlined" onClick={() => setEditing((prev) => ({ ...prev, [r.id]: {} }))}>Edit</Button>
+                        <Button size="small" variant={r.isActive ? 'outlined' : 'contained'} color={r.isActive ? 'warning' : 'primary'} onClick={async () => {
+                          const res = await fetch(`/api/admin/latefees/rules/${r.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ isActive: !r.isActive }) });
+                          const updated = await res.json();
+                          setRules((prev) => prev.map((x) => (x.id === r.id ? updated : x)));
+                        }}>{r.isActive ? 'Deactivate' : 'Activate'}</Button>
+                      </>
+                    )}
+                  </Stack>
                 </Box>
-                <Chip size="small" label={r.isActive ? 'Active' : 'Inactive'} color={r.isActive ? 'default' : 'secondary'} />
-              </Box>
-            ))}
+              );
+            })}
           </Stack>
         )}
       </Paper>
