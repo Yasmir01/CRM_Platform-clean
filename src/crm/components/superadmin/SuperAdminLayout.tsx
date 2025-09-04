@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Divider, Typography, List, ListItemButton, ListItemText, Paper } from '@mui/material';
+import { Box, Divider, Typography, List, ListItemButton, ListItemText, Paper, Button, Stack } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const navItems = [
@@ -11,6 +11,14 @@ const navItems = [
 
 export default function SuperAdminLayout() {
   const location = useLocation();
+
+  const exportCompliance = () => {
+    window.location.href = '/api/superadmin/compliance/export';
+  };
+
+  const sendNotification = () => {
+    alert('Future: Open Notification Modal to send broadcast.');
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '70vh', width: '100%' }}>
@@ -35,6 +43,14 @@ export default function SuperAdminLayout() {
         </List>
       </Paper>
       <Box sx={{ flex: 1 }}>
+        <Paper elevation={0} sx={{ p: 2, mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>SuperAdmin Control</Typography>
+          <Stack direction="row" spacing={1}>
+            <Button onClick={exportCompliance} variant="contained" color="success">Export Compliance</Button>
+            <Button onClick={sendNotification} variant="contained">Send Notification</Button>
+            <Button component={Link} to="/crm" variant="outlined">Exit SU</Button>
+          </Stack>
+        </Paper>
         <Outlet />
       </Box>
     </Box>
