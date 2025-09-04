@@ -29,15 +29,16 @@ import InvoiceExportControls from '../components/InvoiceExport';
        <Typography variant="h5" sx={{ mb: 2 }}>Maintenance Requests</Typography>
 
        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
-         <Select size="small" displayEmpty value={status} onChange={(e) => setStatus(String(e.target.value))} sx={{ minWidth: 180 }}>
-           <MenuItem value=""><em>All Status</em></MenuItem>
-           <MenuItem value="open">Open</MenuItem>
-           <MenuItem value="in_progress">In Progress</MenuItem>
-           <MenuItem value="completed">Completed</MenuItem>
-           <MenuItem value="closed">Closed</MenuItem>
-         </Select>
-         <Button variant="outlined" onClick={load}>Refresh</Button>
-       </Stack>
+        <Select size="small" displayEmpty value={status} onChange={(e) => setStatus(String(e.target.value))} sx={{ minWidth: 180 }}>
+          <MenuItem value=""><em>All Status</em></MenuItem>
+          <MenuItem value="open">Open</MenuItem>
+          <MenuItem value="in_progress">In Progress</MenuItem>
+          <MenuItem value="completed">Completed</MenuItem>
+          <MenuItem value="closed">Closed</MenuItem>
+        </Select>
+        <Button variant="outlined" onClick={load}>Refresh</Button>
+        <InvoiceExportControls />
+      </Stack>
 
        <Table size="small">
          <TableHead>
