@@ -20,6 +20,7 @@ export default async function handler(req: any, res: any) {
       allowPartial: typeof (lease as any).allowPartial === 'boolean' ? Boolean((lease as any).allowPartial) : (property?.allowPartial ?? global?.allowPartial ?? true),
       allowSplit: typeof (lease as any).allowSplit === 'boolean' ? Boolean((lease as any).allowSplit) : (property?.allowSplit ?? global?.allowSplit ?? true),
       minPartialUsd: typeof (lease as any).minPartialUsd === 'number' ? Number((lease as any).minPartialUsd) : (property?.minPartialUsd ?? global?.minPartialUsd ?? 10),
+      allowAutopay: true,
     };
 
     return res.status(200).json(effective);
