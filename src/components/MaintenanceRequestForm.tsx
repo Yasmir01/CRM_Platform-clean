@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 
+import React, { useState } from 'react';
+
 export function MaintenanceRequestForm() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [priority, setPriority] = useState('medium');
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
