@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
     },
   },
   optimizeDeps: {
