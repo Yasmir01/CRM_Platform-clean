@@ -36,6 +36,7 @@ export default defineConfig({
       "dayjs/plugin/customParseFormat",
       "dayjs/plugin/weekOfYear",
       "dayjs/plugin/isBetween",
+      "dayjs/plugin/isLeapYear",
       // App usage
       "dayjs/plugin/isSameOrBefore",
       // CJS library interop
