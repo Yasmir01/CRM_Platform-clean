@@ -647,6 +647,8 @@ model AccountingConnection {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   enabled      Boolean  @default(true)
+  autoSync     String?  // manual | daily | weekly
+  alertOnError Boolean? @default(false)
 
   @@unique([orgId, provider])
 }
