@@ -112,6 +112,7 @@ const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPol
 const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
 const SUPolicyMatrixStandalone = React.lazy(() => import("./crm/pages/SUPolicyMatrixStandalone"));
 const SUAccountingIntegrations = React.lazy(() => import("./crm/pages/SUAccountingIntegrations"));
+const SUAccountingIntegrationLogs = React.lazy(() => import("./crm/pages/SUAccountingIntegrationLogs"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
@@ -549,6 +550,7 @@ function AppRoutes() {
             <Route path="matrix" element={<React.Suspense fallback={<PageLoader />}><SUPaymentPoliciesMatrix /></React.Suspense>} />
           </Route>
           <Route path="accounting-integrations" element={<React.Suspense fallback={<PageLoader />}><SUAccountingIntegrations /></React.Suspense>} />
+          <Route path="accounting-integrations/:provider/logs" element={<React.Suspense fallback={<PageLoader />}><SUAccountingIntegrationLogs /></React.Suspense>} />
         </Route>
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
