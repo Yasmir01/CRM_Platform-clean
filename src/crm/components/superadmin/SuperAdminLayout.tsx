@@ -9,6 +9,7 @@ const navItems = [
   { label: 'Impersonation', to: '/crm/super-admin/impersonate' },
   { label: 'Compliance', to: '/crm/super-admin/compliance' },
   { label: 'Analytics', to: '/crm/super-admin/analytics' },
+  { label: 'Notifications', to: '/crm/super-admin/notifications' },
 ];
 
 export default function SuperAdminLayout() {
