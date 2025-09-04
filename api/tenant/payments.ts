@@ -93,8 +93,8 @@ export default async function handler(req: any, res: any) {
       try {
         await prisma.autoPay.upsert({
           where: { tenantId: String(tenantId) },
-          update: { amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined },
-          create: { tenantId: String(tenantId), amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined },
+          update: { amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined, leaseId: String(leaseId), splitEmails: Array.isArray(autopay.splitEmails) ? autopay.splitEmails.map(String) : [] },
+          create: { tenantId: String(tenantId), amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined, leaseId: String(leaseId), splitEmails: Array.isArray(autopay.splitEmails) ? autopay.splitEmails.map(String) : [] },
         });
         await prisma.user.update({ where: { id: String(tenantId) }, data: { autopayEnabled: true } });
       } catch (e) {
