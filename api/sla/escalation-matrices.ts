@@ -13,9 +13,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!['ADMIN','SUPER_ADMIN'].includes(role)) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
+    const q = (req && (req as any).query) || {} as any;
+    const scope = (q.scope as string) || undefined; // global | plan | property
+    const propertyId = (q.propertyId as string) || undefined;
+    const planId = (q.planId as string) || undefined;
+
+    const where = scope === 'property'
+      ? { propertyId, subscriptionPlanId: null }
+      : scope === 'plan'
+      ? { subscriptionPlanId: planId, propertyId: null }
+      : { propertyId: null, subscriptionPlanId: null };
+
     const items = await prisma.escalationMatrix.findMany({
+      where,
       include: { property: { select: { id: true, address: true } }, subscriptionPlan: { select: { id: true, name: true } } },
-      orderBy: [{ propertyId: 'asc' }, { subscriptionPlanId: 'asc' }, { level: 'asc' }],
+      orderBy: [{ level: 'asc' }, { createdAt: 'asc' }],
     });
     return res.status(200).json(items);
   } catch (e: any) {
