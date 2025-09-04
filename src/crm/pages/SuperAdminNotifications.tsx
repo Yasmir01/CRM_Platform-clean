@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, TextField, Select, MenuItem, FormControl, InputLabel, Stack } from '@mui/material';
 
 interface NotifRow {
   id: string;
@@ -11,22 +11,22 @@ interface NotifRow {
 
 export default function SuperAdminNotifications() {
   const [rows, setRows] = React.useState<NotifRow[]>([]);
-
-  React.useEffect(() => {
-    let mounted = true;
-    fetch('/api/superadmin/notifications')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Failed to load'))))
-      .then((list) => { if (mounted) setRows(list || []); })
-      .catch(() => setRows([]));
-    return () => { mounted = false; };
-  }, []);
+  const [search, setSearch] = React.useState('');
+  const [audience, setAudience] = React.useState('ALL');
 
   const load = React.useCallback(() => {
-    fetch('/api/superadmin/notifications')
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (audience) params.set('audience', audience);
+    fetch('/api/superadmin/notifications?' + params.toString())
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((d) => setRows(d || []))
       .catch(() => setRows([]));
-  }, []);
+  }, [search, audience]);
+
+  React.useEffect(() => {
+    load();
+  }, [load]);
 
   const deleteNotif = async (id: string) => {
     if (!confirm('Delete this notification?')) return;
@@ -43,6 +43,28 @@ export default function SuperAdminNotifications() {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>Notification History</Typography>
+
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+          <TextField
+            label="Search title or message"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            fullWidth
+          />
+          <FormControl sx={{ minWidth: 180 }}>
+            <InputLabel>Audience</InputLabel>
+            <Select value={audience} label="Audience" onChange={(e) => setAudience(e.target.value)}>
+              <MenuItem value="ALL">All Audiences</MenuItem>
+              <MenuItem value="ADMINS">Admins</MenuItem>
+              <MenuItem value="TENANTS">Tenants</MenuItem>
+              <MenuItem value="OWNERS">Owners</MenuItem>
+            </Select>
+          </FormControl>
+          <Button variant="outlined" onClick={load}>Apply</Button>
+        </Stack>
+      </Paper>
+
       <TableContainer component={Paper}>
         <Table size="small">
           <TableHead>
@@ -70,6 +92,11 @@ export default function SuperAdminNotifications() {
           </TableBody>
         </Table>
       </TableContainer>
+      {rows.length === 0 && (
+        <Paper sx={{ p: 2, mt: 2, textAlign: 'center', color: 'text.secondary' }}>
+          No notifications found.
+        </Paper>
+      )}
     </Box>
   );
 }
