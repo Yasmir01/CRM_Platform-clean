@@ -27,13 +27,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const amount = Math.round(rawAmount < 100 && rawAmount % 1 !== 0 ? rawAmount * 100 : rawAmount >= 1 && rawAmount < 1000 ? Math.round(rawAmount * 100) : rawAmount);
 
   try {
+    const tenantId = String((user as any).sub || (user as any).id);
     const pi = await stripe.paymentIntents.create({
       amount,
       currency,
       description,
-      metadata: { tenantId: String((user as any).sub || (user as any).id) },
+      metadata: { tenantId },
       automatic_payment_methods: { enabled: true },
     });
+
+    try {
+      await prisma.rentPayment.create({
+        data: {
+          tenantId,
+          amount: rawAmount,
+          status: 'pending',
+        },
+      });
+    } catch (e) {
+      console.warn('failed to persist rentPayment pending record', (e as any)?.message || e);
+    }
 
     return res.status(200).json({ clientSecret: pi.client_secret });
   } catch (err: any) {
