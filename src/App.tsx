@@ -416,6 +416,11 @@ function AppRoutes() {
             <RefundDashboard />
           </React.Suspense>
         } />
+        <Route path="admin/latefee-rules" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <LateFeeRulesDashboard />
+          </React.Suspense>
+        } />
         <Route path="admin/accounting" element={
           <React.Suspense fallback={<PageLoader />}>
             <AccountingSettings />
