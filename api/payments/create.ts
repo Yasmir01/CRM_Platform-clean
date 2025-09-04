@@ -55,7 +55,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const subject = 'Rent Payment Receipt';
         const html = `<h1>Payment Received</h1>
 <p>Hi ${dbUser.name || ''},</p>
-<p>We received your rent payment of <strong>$${amount.toFixed(2)}</strong> via ${provider}.</p>
+<p>We received your rent payment of <strong>$${Number(payment.amount).toFixed(2)}</strong> via ${provider}.</p>
 <p>Date: ${new Date().toLocaleString()}</p>
 <p>Thank you!</p>`;
         const { sendHtmlMail } = await import('../../src/lib/mailer');
@@ -80,7 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const phone = (dbUser as any)?.phone as string | undefined;
       if (phone && process.env.TWILIO_SID && process.env.TWILIO_TOKEN && process.env.TWILIO_FROM) {
         const { sendSMS } = await import('../../src/lib/sms');
-        await sendSMS(phone, `Rent payment of $${amount.toFixed(2)} received via ${provider}. Thank you!`);
+        await sendSMS(phone, `Rent payment of $${Number(payment.amount).toFixed(2)} received via ${provider}. Thank you!`);
         try {
           await prisma.paymentReceipt.create({
             data: { paymentId: payment.id, tenantId: dbUser.id, type: 'sms', status: 'sent' },
@@ -99,7 +99,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Super Admin notification via email + dashboard log
     try {
       const suEmail = process.env.SUPERADMIN_EMAIL;
-      const suMsg = `Tenant ${dbUser.name || dbUser.email} paid $${amount.toFixed(2)} via ${provider}.`;
+      const suMsg = `Tenant ${dbUser.name || dbUser.email} paid $${Number(payment.amount).toFixed(2)} via ${provider}.`;
       if (suEmail && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
         const { sendHtmlMail } = await import('../../src/lib/mailer');
         await sendHtmlMail([suEmail], 'New Rent Payment', `<p>${suMsg}</p>`);
