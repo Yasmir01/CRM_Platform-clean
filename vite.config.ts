@@ -40,6 +40,7 @@ export default defineConfig({
       // App usage
       "dayjs/plugin/isSameOrBefore",
       "dayjs/plugin/isSameOrAfter",
+      "dayjs/plugin/localeData",
       // CJS library interop
       "crypto-js"
     ],
