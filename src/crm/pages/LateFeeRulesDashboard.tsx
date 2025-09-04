@@ -85,7 +85,13 @@ export default function LateFeeRulesDashboard() {
   return (
     <Box sx={{ p: 2, display: 'grid', gap: 2 }}>
       <Paper sx={{ p: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>Late Fee Rules</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>Late Fee Rules</Typography>
+        {selected.size > 0 && (
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Button size="small" variant="contained" onClick={() => bulkToggle(true)}>Activate Selected</Button>
+            <Button size="small" color="warning" variant="outlined" onClick={() => bulkToggle(false)}>Deactivate Selected</Button>
+          </Stack>
+        )}
         {loading ? (
           <Typography variant="body2">Loading late fee rules...</Typography>
         ) : rules.length === 0 ? (
