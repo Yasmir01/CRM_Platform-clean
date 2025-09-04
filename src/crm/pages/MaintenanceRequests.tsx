@@ -232,13 +232,24 @@ export default function MaintenanceRequests() {
               <TableCell>
                 <StatusDropdown id={r.id} current={r.status} onChange={load} />
                 {/* Escalation/Overdue visual marker */}
-                <Typography variant="caption" component="div" sx={{ mt: 0.5 }}>
-                  {r.deadline && new Date(r.deadline) < new Date() && r.status !== 'completed' ? (
-                    <span style={{ color: '#b91c1c', fontWeight: 700 }}>Overdue{r.escalated ? ' 🚨' : ''}</span>
-                  ) : r.escalated ? (
-                    <span>Escalated 🚨</span>
-                  ) : null}
-                </Typography>
+                {r.status !== 'completed' && r.deadline && new Date(r.deadline) < new Date() ? (
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-bold ${
+                      (r.escalationLevel || 0) === 1
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : (r.escalationLevel || 0) === 2
+                        ? 'bg-orange-100 text-orange-800'
+                        : (r.escalationLevel || 0) >= 3
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                    style={{ display: 'inline-block', marginTop: 6 }}
+                  >
+                    Escalated {r.escalationLevel ? `L${r.escalationLevel}` : ''}
+                  </span>
+                ) : (
+                  <span className="text-green-700" style={{ display: 'inline-block', marginTop: 6 }}>On Track</span>
+                )}
               </TableCell>
               <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
               <TableCell>{r.deadline ? new Date(r.deadline).toLocaleDateString() : '—'}</TableCell>
