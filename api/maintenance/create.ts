@@ -10,10 +10,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!auth) return;
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  const { title, description, priority, propertyId, unitId, s3Key } = body as {
-    title?: string; description?: string; priority?: string; propertyId?: string; unitId?: string; s3Key?: string | null;
+  const { title, description, priority, propertyId, unitId, s3Key, category } = body as {
+    title?: string; description?: string; priority?: string; propertyId?: string; unitId?: string; s3Key?: string | null; category?: string;
   };
-  if (!title || !description) return res.status(400).json({ error: 'missing' });
+  if (!description) return res.status(400).json({ error: 'missing description' });
+  const finalTitle = title && title.trim().length ? title : `Maintenance: ${String(category || 'general')}`;
 
   const tenantId = String((auth as any).sub || (auth as any).id);
   const user = await prisma.user.findUnique({ where: { id: tenantId } });
