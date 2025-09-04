@@ -95,6 +95,7 @@ const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnaly
 const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminNotifications"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
+const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
 
 // Loading component
 function PageLoader() {
