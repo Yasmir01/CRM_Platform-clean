@@ -87,6 +87,7 @@ export default function MaintenanceRequests() {
   const [propertyId, setPropertyId] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [selected, setSelected] = useState<string[]>([]);
+  const [vendors, setVendors] = useState<any[]>([]);
 
    const load = async () => {
      const params = new URLSearchParams();
@@ -100,6 +101,18 @@ export default function MaintenanceRequests() {
    };
 
    useEffect(() => { load(); }, [status, propertyId, vendorId]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/vendors/list', { credentials: 'include' });
+        const data = await res.json();
+        setVendors(Array.isArray(data) ? data : []);
+      } catch {
+        setVendors([]);
+      }
+    })();
+  }, []);
 
    const updateStatus = async (id: string, newStatus: string) => {
     await fetch(`/api/maintenance/${id}/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: newStatus }) });
@@ -123,6 +136,16 @@ export default function MaintenanceRequests() {
     await load();
   };
 
+  const bulkReassignVendor = async (newVendorId: string) => {
+    await fetch('/api/maintenance/vendor/bulk', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ ids: selected, vendorId: newVendorId || null }),
+    });
+    await load();
+  };
+
    return (
      <Box sx={{ p: 2 }}>
        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
@@ -140,6 +163,12 @@ export default function MaintenanceRequests() {
             <MenuItem value="completed">Completed</MenuItem>
             <MenuItem value="overdue">Overdue</MenuItem>
             <MenuItem value="closed">Closed</MenuItem>
+          </Select>
+          <Select size="small" displayEmpty value="" onChange={(e) => { const v = String(e.target.value); if (v) bulkReassignVendor(v); }} sx={{ minWidth: 220 }}>
+            <MenuItem value=""><em>Bulk Reassign Vendor</em></MenuItem>
+            {vendors.map((v) => (
+              <MenuItem key={v.id} value={v.id}>{v.name || v.email || v.id}</MenuItem>
+            ))}
           </Select>
           <Button size="small" onClick={() => setSelected([])}>Clear</Button>
         </Stack>
