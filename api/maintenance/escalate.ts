@@ -2,12 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { prisma } from '../_db';
 import { getUserOr401 } from '../../src/utils/authz';
 import { notify } from '../../src/lib/notify';
-
-const ESCALATION_TIERS = [
-  { level: 1, role: 'ADMIN', hoursAfterDeadline: 0 },
-  { level: 2, role: 'MANAGER', hoursAfterDeadline: 24 },
-  { level: 3, role: 'SUPER_ADMIN', hoursAfterDeadline: 48 },
-] as const;
+import { getEscalationPolicy } from '../_lib/escalation';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -30,11 +25,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let escalatedCount = 0;
 
+    // Cache orgId -> planId and planName -> id to reduce queries
+    const orgPlanCache = new Map<string, string | null>();
+    const planNameToId = new Map<string, string | null>();
+
     for (const r of requests) {
       if (!r.deadline) continue;
       const hoursOverdue = (now.getTime() - r.deadline.getTime()) / 36e5;
 
-      for (const tier of ESCALATION_TIERS) {
+      let planId: string | null = null;
+      if (r.orgId) {
+        if (orgPlanCache.has(r.orgId)) {
+          planId = orgPlanCache.get(r.orgId) || null;
+        } else {
+          const org = await prisma.organization.findUnique({ where: { id: r.orgId }, select: { plan: true } });
+          if (org && org.plan) {
+            if (planNameToId.has(org.plan)) {
+              planId = planNameToId.get(org.plan) || null;
+            } else {
+              const plan = await prisma.subscriptionPlan.findFirst({ where: { name: org.plan }, select: { id: true } });
+              planId = plan ? plan.id : null;
+              planNameToId.set(org.plan, planId);
+            }
+          }
+          orgPlanCache.set(r.orgId, planId);
+        }
+      }
+
+      const tiers = await getEscalationPolicy(r.propertyId, planId);
+
+      for (const tier of tiers) {
         if (hoursOverdue >= tier.hoursAfterDeadline && (r.escalationLevel || 0) < tier.level) {
           await prisma.maintenanceRequest.update({
             where: { id: r.id },
