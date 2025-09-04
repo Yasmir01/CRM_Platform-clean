@@ -420,6 +420,24 @@ model MaintenanceAssignment {
   @@index([assigneeId])
 }
 
+model MaintenanceInvoice {
+  id         String   @id @default(cuid())
+  requestId  String
+  vendorId   String
+  fileUrl    String
+  fileName   String
+  fileType   String
+  amount     Float?
+  status     String   @default("pending") // pending, approved, rejected
+  uploadedAt DateTime @default(now())
+
+  request    MaintenanceRequest @relation(fields: [requestId], references: [id])
+  vendor     User               @relation(fields: [vendorId], references: [id])
+
+  @@index([requestId])
+  @@index([vendorId])
+}
+
 // --- Platform Notifications ---
 model Notification {
   id        String   @id @default(cuid())

@@ -167,11 +167,67 @@ export function VendorDashboard() {
                   Mark as Completed
                 </button>
               </div>
+
+              <VendorInvoiceUploader requestId={r.id} onUploaded={load} />
             </div>
           ))}
         </div>
       )}
     </RoleLayout>
+  );
+}
+
+function VendorInvoiceUploader({ requestId, onUploaded }: { requestId: string; onUploaded?: () => void }) {
+  const [file, setFile] = React.useState<File | null>(null);
+  const [amount, setAmount] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const submit = async () => {
+    if (!file || !amount) return;
+    try {
+      setSubmitting(true);
+      setError(null);
+      const presignRes = await fetch('/api/storage/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ fileName: file.name, contentType: file.type })
+      });
+      if (!presignRes.ok) throw new Error('Failed to get upload URL');
+      const { uploadUrl, key } = await presignRes.json();
+      const up = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+      if (!up.ok) throw new Error('Upload failed');
+
+      const res = await fetch(`/api/vendor/requests/${requestId}/invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ key, fileType: file.type, fileName: file.name, amount: parseFloat(amount) })
+      });
+      if (!res.ok) throw new Error('Failed to save invoice');
+      setFile(null);
+      setAmount('');
+      if (onUploaded) onUploaded();
+    } catch (e: any) {
+      setError(e?.message || 'Upload failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t pt-3">
+      <h3 className="font-semibold text-sm mb-2">Upload Invoice</h3>
+      {error && <p className="text-red-600 text-sm mb-1">{error}</p>}
+      <div className="flex items-center gap-2">
+        <input type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="border p-2 rounded" />
+        <button onClick={submit} disabled={submitting} className="px-3 py-1 bg-blue-600 text-white rounded">
+          {submitting ? 'Uploading…' : 'Upload Invoice'}
+        </button>
+      </div>
+    </div>
   );
 }
 
