@@ -56,7 +56,8 @@ export default defineConfig({
       "dayjs/plugin/minMax",
       "dayjs/plugin/utc",
       // CJS library interop
-      "crypto-js"
+      "crypto-js",
+      "qrcode"
     ],
     exclude: [
       "@mui/icons-material",
