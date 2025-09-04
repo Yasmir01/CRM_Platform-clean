@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!allowed) return res.status(403).json({ error: 'Forbidden' });
 
-    const invoices = await prisma.maintenanceInvoice.findMany({ where: { requestId: id }, orderBy: { uploadedAt: 'desc' } });
+    const invoices = await prisma.maintenanceInvoice.findMany({ where: { requestId: id }, orderBy: { uploadedAt: 'desc' }, include: { files: true } });
     return res.status(200).json(invoices);
   } catch (e: any) {
     console.error('request invoices error', e?.message || e);
