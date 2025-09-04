@@ -5,10 +5,13 @@ type ProviderName = 'QuickBooks' | 'Xero' | 'Wave';
 
 type IntegrationConfig = {
   provider: ProviderName;
+  providerId?: 'quickbooks' | 'xero' | 'wave';
   enabled: boolean;
   apiKey?: string;
   lastSync?: string;
   status?: 'ok' | 'error' | 'pending';
+  autoSync?: 'manual' | 'daily' | 'weekly';
+  alertOnError?: boolean;
 };
 
 export default function SUAccountingIntegrations() {
@@ -28,6 +31,13 @@ export default function SUAccountingIntegrations() {
   async function toggle(p: ProviderName, enabled: boolean) {
     await fetch(`/api/admin/integrations/accounting/${encodeURIComponent(p)}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ enabled })
+    });
+    load();
+  }
+
+  async function updateConfig(p: ProviderName, payload: Partial<IntegrationConfig>) {
+    await fetch(`/api/admin/integrations/accounting/${encodeURIComponent(p)}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
     });
     load();
   }
@@ -64,6 +74,18 @@ export default function SUAccountingIntegrations() {
                 <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
                   <TextField type="password" size="small" label="API Key" defaultValue={i.apiKey || ''} onBlur={(e) => saveKey(i.provider, e.target.value.trim())} disabled={!i.enabled} sx={{ maxWidth: 360 }} />
                   <Button variant="outlined" onClick={() => sync(i.provider)} disabled={!i.enabled}>Sync Now</Button>
+                </Stack>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'stretch', sm: 'center' }}>
+                  <TextField select size="small" label="Auto-Sync" value={i.autoSync || 'manual'} onChange={(e) => updateConfig(i.provider, { autoSync: e.target.value as any })} disabled={!i.enabled} sx={{ maxWidth: 200 }}>
+                    <option value="manual">Manual</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                  </TextField>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Switch checked={!!i.alertOnError} onChange={(_, c) => updateConfig(i.provider, { alertOnError: c })} disabled={!i.enabled} />
+                    <Typography variant="body2">Alert on Error</Typography>
+                  </Stack>
+                  <Button variant="text" href={`/crm/super-admin/accounting-integrations/${(i.providerId || i.provider.toLowerCase())}/logs`}>View Logs</Button>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Typography variant="body2" color="text.secondary">Last Sync: {i.lastSync ? new Date(i.lastSync).toLocaleString() : 'Never'}</Typography>
