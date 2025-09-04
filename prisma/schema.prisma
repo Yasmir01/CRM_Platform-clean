@@ -464,9 +464,23 @@ model DirectMessage {
   sender      User     @relation("DirectMessagesSent", fields: [senderId], references: [id])
   receiver    User?    @relation("DirectMessagesReceived", fields: [receiverId], references: [id])
   property    Property? @relation(fields: [propertyId], references: [id])
+  attachments DirectMessageAttachment[]
 
   @@index([receiverId])
   @@index([propertyId])
+}
+
+model DirectMessageAttachment {
+  id         String   @id @default(cuid())
+  messageId  String
+  url        String
+  filename   String
+  mimeType   String
+  createdAt  DateTime @default(now())
+
+  message    DirectMessage @relation(fields: [messageId], references: [id])
+
+  @@index([messageId])
 }
 
 // --- Platform Notifications ---
