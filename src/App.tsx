@@ -443,6 +443,11 @@ function AppRoutes() {
             <IntegrationManagement />
           </React.Suspense>
         } />
+        <Route path="gateways" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <GatewayManagement />
+          </React.Suspense>
+        } />
         <Route path="real-estate-platforms" element={
           <React.Suspense fallback={<PageLoader />}>
             <RealEstatePlatformIntegrations />
