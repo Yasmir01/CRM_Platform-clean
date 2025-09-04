@@ -7,18 +7,28 @@ export default function RefundDashboard() {
   const [amount, setAmount] = React.useState('');
   const [reason, setReason] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
+  const [payments, setPayments] = React.useState<any[]>([]);
 
   const load = React.useCallback(() => {
     fetch('/api/admin/refunds', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then(setRefunds)
       .catch(() => setRefunds([]));
+    fetch('/api/admin/payments', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setPayments)
+      .catch(() => setPayments([]));
   }, []);
 
   React.useEffect(() => { load(); }, [load]);
 
+  const selectedPayment = React.useMemo(() => payments.find((p) => p.id === paymentId), [payments, paymentId]);
+  const refundedAmount = Number(selectedPayment?.refundedAmount || 0);
+  const remaining = selectedPayment ? Math.max(0, Number(selectedPayment.amount) - refundedAmount) : 0;
+
   async function handleRefund() {
     if (!paymentId || Number(amount) <= 0) return;
+    if (selectedPayment && Number(amount) > remaining) { alert('Amount exceeds remaining refundable balance'); return; }
     setSubmitting(true);
     try {
       await fetch('/api/admin/refunds', {
@@ -46,7 +56,7 @@ export default function RefundDashboard() {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }}>
           <TextField label="Payment ID" value={paymentId} onChange={(e) => setPaymentId(e.target.value)} size="small" sx={{ minWidth: 220 }} />
-          <TextField label="Amount" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} size="small" sx={{ minWidth: 160 }} />
+          <TextField label={`Amount (Max: ${remaining || 0})`} type="number" value={amount} onChange={(e) => setAmount(e.target.value)} size="small" sx={{ minWidth: 200 }} />
           <TextField label="Reason" value={reason} onChange={(e) => setReason(e.target.value)} size="small" sx={{ flex: 1 }} />
           <Button variant="contained" onClick={handleRefund} disabled={submitting || !paymentId || !amount}>Process Refund</Button>
           <Button variant="outlined" onClick={load}>Refresh</Button>
