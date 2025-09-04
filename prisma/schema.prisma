@@ -452,6 +452,23 @@ model InvoiceFile {
   @@index([invoiceId])
 }
 
+model DirectMessage {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String?
+  propertyId  String?
+  content     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("DirectMessagesSent", fields: [senderId], references: [id])
+  receiver    User?    @relation("DirectMessagesReceived", fields: [receiverId], references: [id])
+  property    Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([receiverId])
+  @@index([propertyId])
+}
+
 // --- Platform Notifications ---
 model Notification {
   id        String   @id @default(cuid())
