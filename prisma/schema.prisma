@@ -21,15 +21,18 @@ enum Role {
 }
 
 model User {
-  id          String         @id @default(cuid())
-  email       String         @unique
-  name        String?
-  role        Role           @default(TENANT)
-  permissions String?
-  orgId       String
-  org         Organization   @relation(fields: [orgId], references: [id])
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id                     String         @id @default(cuid())
+  email                  String         @unique
+  name                   String?
+  role                   Role           @default(TENANT)
+  permissions            String?
+  autopayEnabled         Boolean        @default(false)
+  stripeCustomerId       String?
+  defaultPaymentMethodId String?
+  orgId                  String
+  org                    Organization   @relation(fields: [orgId], references: [id])
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   @@index([orgId])
 }
@@ -180,6 +183,34 @@ model RevenueEvent {
   createdAt      DateTime      @default(now())
 }
 
+// --- Tenant Rent Payments ---
+model RentPayment {
+  id           String   @id @default(cuid())
+  tenantId     String
+  amount       Float
+  status       String   // pending | success | failed | refunded
+  autopay      Boolean  @default(false)
+  refundReason String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       User     @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+}
+
+model AutoPay {
+  id         String   @id @default(cuid())
+  tenantId   String   @unique
+  amount     Float
+  frequency  String
+  dayOfMonth Int
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  tenant     User     @relation(fields: [tenantId], references: [id])
+}
+
 /// ----------------------------------------------------------
 ///  NEW MODELS FOR TENANT‑LEDGER / PAST BALANCES
 /// ----------------------------------------------------------
@@ -204,6 +235,22 @@ model Property {
   units     Unit[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model OwnerLedger {
+  id         String    @id @default(cuid())
+  ownerId    String
+  propertyId String?
+  entryType  String    // rent_income, expense, fee, refund
+  amount     Float
+  note       String?
+  createdAt  DateTime  @default(now())
+
+  owner      User      @relation(fields: [ownerId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([ownerId])
+  @@index([propertyId])
 }
 
 model Unit {
@@ -339,4 +386,14 @@ model Document {
   @@index([tenantId])
   @@index([leaseId])
   @@index([uploadedBy])
+}
+
+// --- Platform Notifications ---
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  audience  String   // ALL, ADMINS, TENANTS, OWNERS...
+  createdBy String
+  createdAt DateTime @default(now())
 }

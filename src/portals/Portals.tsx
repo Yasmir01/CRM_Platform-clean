@@ -1,4 +1,3 @@
-import React from 'react';
 import RoleLayout from '../components/layout/RoleLayout';
 import { PaymentsPage } from '../components/PaymentsPage';
 import { MaintenanceRequestForm } from '../components/MaintenanceRequestForm';
@@ -167,6 +166,73 @@ export function AdminLogs() {
     <RoleLayout>
       <h1>System Logs</h1>
       <p>View logs.</p>
+    </RoleLayout>
+  );
+}
+
+// --- Tenant AutoPay Settings ---
+import * as React from 'react';
+export function TenantAutopay() {
+  const [autopay, setAutopay] = React.useState<any>(null);
+  const [amount, setAmount] = React.useState('');
+  const [day, setDay] = React.useState(1);
+
+  React.useEffect(() => {
+    fetch('/api/payments/autopay', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setAutopay(d))
+      .catch(() => setAutopay(null));
+  }, []);
+
+  const save = async () => {
+    const res = await fetch('/api/payments/autopay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ amount: parseFloat(amount), dayOfMonth: day, frequency: 'monthly' }),
+    });
+    if (res.ok) setAutopay(await res.json());
+  };
+
+  const cancel = async () => {
+    await fetch('/api/payments/autopay', { method: 'DELETE', credentials: 'include' });
+    setAutopay(null);
+  };
+
+  return (
+    <RoleLayout>
+      <h1>AutoPay Settings</h1>
+      {autopay ? (
+        <div className="space-y-2">
+          <p>
+            AutoPay: <strong>${autopay.amount}</strong> on day {autopay.dayOfMonth} each month
+          </p>
+          <button onClick={cancel} className="w-full bg-red-600 text-white p-2 rounded">
+            Cancel AutoPay
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Rent amount"
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="number"
+            value={day}
+            onChange={(e) => setDay(parseInt(e.target.value))}
+            min={1}
+            max={28}
+            className="border p-2 rounded w-full"
+          />
+          <button onClick={save} className="w-full bg-blue-600 text-white p-2 rounded">
+            Enable AutoPay
+          </button>
+        </div>
+      )}
     </RoleLayout>
   );
 }

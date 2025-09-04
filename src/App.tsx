@@ -50,9 +50,11 @@ const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => (
 const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantPayments })));
 const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
 const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
+const TenantAutopay = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantAutopay })));
 const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
 const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
 const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
+const OwnerLedgerPage = React.lazy(() => import("./portals/OwnerLedgerPage"));
 const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
 const VendorWorkOrders = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrders })));
 const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
@@ -69,6 +71,7 @@ const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
+const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
 const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
 const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformPricingManagement"));
 const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
@@ -80,6 +83,13 @@ const Documents = React.lazy(() => import("./crm/pages/Documents"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
+const SuperAdminLayout = React.lazy(() => import("./crm/components/superadmin/SuperAdminLayout"));
+const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOverview"));
+const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
+const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImpersonate"));
+const SuperAdminCompliance = React.lazy(() => import("./crm/pages/SuperAdminCompliance"));
+const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnalytics"));
+const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminNotifications"));
 
 // Loading component
 function PageLoader() {
@@ -162,9 +172,11 @@ function AppRoutes() {
       <Route path="/tenant/payments" element={<React.Suspense fallback={<PageLoader />}><TenantPayments /></React.Suspense>} />
       <Route path="/tenant/maintenance" element={<React.Suspense fallback={<PageLoader />}><TenantMaintenance /></React.Suspense>} />
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
+      <Route path="/tenant/autopay" element={<React.Suspense fallback={<PageLoader />}><TenantAutopay /></React.Suspense>} />
       <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
       <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
       <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><OwnerProperties /></React.Suspense>} />
+      <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><OwnerLedgerPage /></React.Suspense>} />
       <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><VendorDashboard /></React.Suspense>} />
       <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrders /></React.Suspense>} />
       <Route path="/vendor/profile" element={<React.Suspense fallback={<PageLoader />}><VendorProfile /></React.Suspense>} />
@@ -314,6 +326,11 @@ function AppRoutes() {
             <Reports />
           </React.Suspense>
         } />
+        <Route path="admin/payments" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <AdminPayments />
+          </React.Suspense>
+        } />
         <Route path="documents" element={
           <React.Suspense fallback={<PageLoader />}>
             <Documents />
@@ -404,7 +421,15 @@ function AppRoutes() {
             <SubscriptionManagement />
           </React.Suspense>
         } />
-        <Route path="super-admin" element={<SuperAdminApp />} />
+        <Route path="super-admin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminLayout /></React.Suspense>}>
+          <Route index element={<React.Suspense fallback={<PageLoader />}><SuperAdminOverview /></React.Suspense>} />
+          <Route path="overview" element={<React.Suspense fallback={<PageLoader />}><SuperAdminOverview /></React.Suspense>} />
+          <Route path="subscribers" element={<React.Suspense fallback={<PageLoader />}><SuperAdminSubscribers /></React.Suspense>} />
+          <Route path="impersonate" element={<React.Suspense fallback={<PageLoader />}><SuperAdminImpersonate /></React.Suspense>} />
+          <Route path="compliance" element={<React.Suspense fallback={<PageLoader />}><SuperAdminCompliance /></React.Suspense>} />
+          <Route path="analytics" element={<React.Suspense fallback={<PageLoader />}><SuperAdminAnalytics /></React.Suspense>} />
+          <Route path="notifications" element={<React.Suspense fallback={<PageLoader />}><SuperAdminNotifications /></React.Suspense>} />
+        </Route>
         <Route path="help" element={
           <React.Suspense fallback={<PageLoader />}>
             <HelpSupport />
