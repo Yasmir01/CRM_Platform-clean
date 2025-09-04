@@ -25,14 +25,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     // calculate late fee if applicable
     let total = amount;
+    let wasLate = false;
+    let lateFeeApplied = 0;
     try {
       if (propertyId) {
         const { calculateLateFee } = await import('../../src/lib/payments/fees');
         const { isLate, lateFee } = await calculateLateFee(propertyId, new Date());
-        if (isLate) total += lateFee;
+        if (isLate) {
+          wasLate = true;
+          lateFeeApplied = Number(lateFee) || 0;
+          total += lateFeeApplied;
+        }
       }
     } catch (e) {
       console.error('late fee calc error', (e as any)?.message || e);
+    }
+    if (wasLate && lateFeeApplied > 0) {
+      try {
+        const { logPaymentAudit } = await import('../../src/lib/payments/audit');
+        await logPaymentAudit({ tenantId: dbUser.id, action: 'late_fee_applied', details: `Late fee $${lateFeeApplied} applied to property ${propertyId || ''}`, actorId: dbUser.id });
+      } catch (e) {
+        console.error('late_fee_applied audit error', (e as any)?.message || e);
+      }
     }
 
     const providerImpl = getPaymentProvider(provider as any);
@@ -50,6 +64,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
     // Send tenant receipt via email (if SMTP configured)
+    // Audit: payment created
+    try {
+      const { logPaymentAudit } = await import('../../src/lib/payments/audit');
+      await logPaymentAudit({ paymentId: payment.id, tenantId: dbUser.id, action: 'payment_created', details: `Amount: $${Number(payment.amount).toFixed(2)}, Gateway: ${provider}`, actorId: dbUser.id });
+    } catch (e) {
+      console.error('payment_created audit error', (e as any)?.message || e);
+    }
+
     try {
       if (dbUser.email && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
         const subject = 'Rent Payment Receipt';

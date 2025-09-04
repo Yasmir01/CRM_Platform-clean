@@ -494,3 +494,23 @@ model PropertyPaymentSetting {
 
   property    Property @relation(fields: [propertyId], references: [id])
 }
+
+// --- Payment Compliance ---
+model PaymentAudit {
+  id        String   @id @default(cuid())
+  paymentId String?
+  tenantId  String?
+  action    String   // payment_created | refund_issued | late_fee_applied | dispute_opened | dispute_resolved
+  details   String?
+  actorId   String?
+  createdAt DateTime @default(now())
+}
+
+model PaymentDispute {
+  id         String   @id @default(cuid())
+  paymentId  String
+  status     String   // open | under_review | resolved
+  reason     String?
+  openedAt   DateTime @default(now())
+  resolvedAt DateTime?
+}
