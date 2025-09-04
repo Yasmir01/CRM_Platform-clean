@@ -48,7 +48,7 @@ function VendorDropdown({ requestId, currentVendor, onChange }: { requestId: str
 
   useEffect(() => {
     const fetchVendors = async () => {
-      const res = await fetch('/api/users/vendors', { credentials: 'include' });
+      const res = await fetch('/api/vendors/list', { credentials: 'include' });
       const data = await res.json();
       setVendors(Array.isArray(data) ? data : []);
     };
@@ -58,7 +58,7 @@ function VendorDropdown({ requestId, currentVendor, onChange }: { requestId: str
   const updateVendor = async (vendorId: string) => {
     try {
       setLoading(true);
-      await fetch(`/api/maintenance/vendor/${requestId}`, {
+      await fetch(`/api/maintenance/vendor`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
