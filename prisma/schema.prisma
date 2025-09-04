@@ -185,25 +185,31 @@ model RevenueEvent {
 
 // --- Tenant Rent Payments ---
 model RentPayment {
-  id             String   @id @default(cuid())
-  tenantId       String
-  propertyId     String?
-  amount         Float
-  status         String   // pending | success | failed | refunded | partially_refunded
-  gateway        String   // stripe | paypal | plaid | applepay
-  methodId       String?
-  externalId     String?
-  refundedAmount Float   @default(0)
-  autopay        Boolean  @default(false)
-  refundReason   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(cuid())
+  tenantId        String
+  propertyId      String?
+  leaseId         String?
+  amount          Float
+  allocatedAmount Float   @default(0)
+  status          String   // pending | success | failed | refunded | partially_refunded
+  gateway         String   // stripe | paypal | plaid | applepay
+  methodId        String?
+  externalId      String?
+  idempotencyKey  String?  @unique
+  refundedAmount  Float    @default(0)
+  autopay         Boolean  @default(false)
+  refundReason    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   tenant       User      @relation(fields: [tenantId], references: [id])
   property     Property? @relation(fields: [propertyId], references: [id])
+  lease        Lease?    @relation(fields: [leaseId], references: [id])
+  allocations  PaymentAllocation[]
 
   @@index([tenantId])
   @@index([propertyId])
+  @@index([leaseId])
 }
 
 model LateFeeRule {
@@ -397,6 +403,12 @@ model Lease {
   unit          Unit          @relation(fields: [unitId], references: [id])
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
   ledgerEntries LedgerEntry[]
+  allowSplit    Boolean       @default(true)
+  allowPartial  Boolean       @default(true)
+
+  participants  LeaseParticipant[]
+  invoices      Invoice[]
+  payments      RentPayment[]
 
   @@index([status])                     // fast lookup of terminated leases
   @@index([tenantId])
@@ -855,4 +867,80 @@ model MessageRead {
   @@unique([messageId, userId])
   @@index([userId])
   @@index([messageId])
+}
+
+// --- Payment policy per Property (global defaults can be row with propertyId = null)
+model PropertyPaymentPolicy {
+  id            String   @id @default(cuid())
+  propertyId    String?  @unique
+  allowPartial  Boolean  @default(true)
+  allowSplit    Boolean  @default(true)
+  minPartialUsd Float    @default(10)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- Lease participants (roommates / co-tenants)
+model LeaseParticipant {
+  id         String  @id @default(cuid())
+  leaseId    String
+  tenantId   String
+  shareType  String  // "EQUAL" | "PERCENTAGE" | "FIXED"
+  shareValue Float?  // null for EQUAL, percent for PERCENTAGE (0..100), fixed $ for FIXED
+
+  lease   Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+
+  @@unique([leaseId, tenantId])
+}
+
+// --- Invoices (monthly rent, utilities, etc.)
+model Invoice {
+  id          String   @id @default(cuid())
+  leaseId     String
+  propertyId  String
+  dueDate     DateTime
+  totalAmount Float
+  balanceDue  Float    @default(0)
+  status      String   // "OPEN" | "PARTIALLY_PAID" | "PAID" | "VOID"
+  memo        String?
+
+  lines    InvoiceLine[]
+  payments PaymentAllocation[]
+
+  lease    Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leaseId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model InvoiceLine {
+  id            String   @id @default(cuid())
+  invoiceId     String
+  description   String
+  amount        Float
+  billToTenantId String?
+
+  invoice  Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+// --- Allocation (where a payment’s dollars actually went)
+model PaymentAllocation {
+  id         String  @id @default(cuid())
+  paymentId  String
+  invoiceId  String
+  tenantId   String?
+  amount     Float
+
+  payment RentPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([invoiceId])
+  @@index([paymentId])
+  @@index([tenantId])
 }
