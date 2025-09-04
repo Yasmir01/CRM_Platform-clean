@@ -3,20 +3,28 @@ import { Box, Paper, Typography, Stack, Button, FormControl, InputLabel, Select,
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface PaymentSummary { month: string; collected: number; outstanding: number; }
-interface PaymentRecord { id: string; tenantName: string; propertyName: string; leaseName: string; amount: number; status: 'paid' | 'outstanding'; date: string; }
+interface PaymentRecord { id: string; tenantName: string; propertyId: string; propertyName: string; leaseId: string; leaseName: string; amount: number; status: 'paid' | 'outstanding'; date: string; }
 interface PropertyOption { id: string; name: string; }
+interface LeaseOption { id: string; name: string; propertyId: string; }
 
 export default function PaymentReportingDashboard() {
   const [summary, setSummary] = React.useState<PaymentSummary[]>([]);
   const [records, setRecords] = React.useState<PaymentRecord[]>([]);
   const [properties, setProperties] = React.useState<PropertyOption[]>([]);
+  const [leases, setLeases] = React.useState<LeaseOption[]>([]);
+  const [selectedLease, setSelectedLease] = React.useState<string>('');
+  const [tenantFilter, setTenantFilter] = React.useState<string>('');
   const [selectedProperty, setSelectedProperty] = React.useState<string>('');
   const [loading, setLoading] = React.useState(false);
 
   const load = React.useCallback(async () => {
     setLoading(true);
     try {
-      const qs = selectedProperty ? `?property=${encodeURIComponent(selectedProperty)}` : '';
+      const params = new URLSearchParams();
+      if (selectedProperty) params.set('property', selectedProperty);
+      if (selectedLease) params.set('lease', selectedLease);
+      if (tenantFilter) params.set('tenant', tenantFilter);
+      const qs = params.toString() ? `?${params.toString()}` : '';
       const [sRes, rRes] = await Promise.all([
         fetch(`/api/admin/payments/summary${qs}`, { credentials: 'include' }),
         fetch(`/api/admin/payments/records${qs}`, { credentials: 'include' }),
@@ -33,10 +41,14 @@ export default function PaymentReportingDashboard() {
   React.useEffect(() => { load(); }, [load]);
 
   React.useEffect(() => {
-    fetch('/api/admin/filters/properties', { credentials: 'include' })
+    fetch('/api/admin/properties', { credentials: 'include' })
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => setProperties(Array.isArray(d) ? d : []))
       .catch(() => setProperties([]));
+    fetch('/api/admin/leases', { credentials: 'include' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => setLeases(Array.isArray(d) ? d : []))
+      .catch(() => setLeases([]));
   }, []);
 
   const exportCSV = React.useCallback(() => {
@@ -75,15 +87,41 @@ export default function PaymentReportingDashboard() {
           <Stack direction="row" spacing={1} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 220 }}>
               <InputLabel>Filter by Property</InputLabel>
-              <Select label="Filter by Property" value={selectedProperty} onChange={(e) => setSelectedProperty(e.target.value)}>
+              <Select label="Filter by Property" value={selectedProperty} onChange={(e) => { setSelectedProperty(e.target.value); setSelectedLease(''); }}>
                 <MenuItem value="">All Properties</MenuItem>
                 {properties.map((p) => (
                   <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
+            <FormControl size="small" sx={{ minWidth: 220 }}>
+              <InputLabel>Filter by Lease</InputLabel>
+              <Select label="Filter by Lease" value={selectedLease} onChange={(e) => setSelectedLease(e.target.value)} disabled={!selectedProperty}>
+                <MenuItem value="">All Leases</MenuItem>
+                {leases.filter((l) => l.propertyId === selectedProperty).map((l) => (
+                  <MenuItem key={l.id} value={l.id}>{l.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 220 }}>
+              <InputLabel shrink>Tenant Contains</InputLabel>
+              <Box sx={{ mt: 3, position: 'relative' }}>
+                <input value={tenantFilter} onChange={(e) => setTenantFilter(e.target.value)} placeholder="Search tenant" style={{ width: '100%', padding: '6px 10px', borderRadius: 4, border: '1px solid var(--mui-palette-divider)' }} />
+              </Box>
+            </FormControl>
             <Button variant="outlined" onClick={load} disabled={loading}>Refresh</Button>
             <Button variant="outlined" onClick={exportCSV}>Export CSV</Button>
+            <Button variant="outlined" onClick={async () => {
+              const res = await fetch('/api/admin/payments/export-pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ records }) });
+              if (!res.ok) return;
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'payment_report.pdf';
+              a.click();
+              URL.revokeObjectURL(url);
+            }}>Export PDF</Button>
           </Stack>
         </Stack>
 
