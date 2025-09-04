@@ -15,7 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const userId = String((user as any).sub || (user as any).id);
     const messages = await prisma.directMessage.findMany({
       where: { receiverId: userId },
-      include: { sender: { select: { id: true, name: true, email: true } }, property: { select: { address: true } } },
+      include: { sender: { select: { id: true, name: true, email: true } }, property: { select: { address: true } }, attachments: true },
       orderBy: { createdAt: 'desc' },
       take: 200,
     });
