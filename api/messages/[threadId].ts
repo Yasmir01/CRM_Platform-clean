@@ -35,7 +35,56 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!text) return res.status(400).json({ error: 'Missing body' });
 
       const message = await prisma.message.create({ data: { threadId, senderId: userId, body: text } });
-      await prisma.messageThread.update({ where: { id: threadId }, data: { updatedAt: new Date() } });
+      const thread = await prisma.messageThread.update({ where: { id: threadId }, data: { updatedAt: new Date() } });
+
+      // Notify other participants
+      try {
+        const participants = await prisma.messageParticipant.findMany({
+          where: { threadId, userId: { not: userId } },
+          include: { user: true },
+        });
+
+        // In-app notification for each
+        for (const p of participants) {
+          try {
+            await prisma.messageNotification.create({
+              data: { messageId: message.id, userId: p.userId, type: 'inapp', status: 'unread' },
+            });
+          } catch {}
+
+          // Email notification if SMTP configured
+          try {
+            const email = (p.user as any)?.email as string | undefined;
+            if (email && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+              const { sendHtmlMail } = await import('../../src/lib/mailer');
+              await sendHtmlMail([email], `New Message in ${thread.subject}`, `<p>New message:</p><p>${text}</p>`);
+              await prisma.messageNotification.create({ data: { messageId: message.id, userId: p.userId, type: 'email', status: 'sent' } });
+            }
+          } catch (e) {
+            try {
+              await prisma.messageNotification.create({ data: { messageId: message.id, userId: p.userId, type: 'email', status: 'failed' } });
+            } catch {}
+          }
+
+          // SMS notification if Twilio configured
+          try {
+            const phone = (p.user as any)?.phone as string | undefined;
+            if (phone && process.env.TWILIO_SID && process.env.TWILIO_TOKEN && process.env.TWILIO_FROM) {
+              const { sendSMS } = await import('../../src/lib/sms');
+              const preview = text.length > 100 ? text.slice(0, 100) + '…' : text;
+              await sendSMS(phone, `New message: ${preview}`);
+              await prisma.messageNotification.create({ data: { messageId: message.id, userId: p.userId, type: 'sms', status: 'sent' } });
+            }
+          } catch (e) {
+            try {
+              await prisma.messageNotification.create({ data: { messageId: message.id, userId: p.userId, type: 'sms', status: 'failed' } });
+            } catch {}
+          }
+        }
+      } catch (e) {
+        console.error('message notify error', (e as any)?.message || e);
+      }
+
       return res.status(200).json(message);
     } catch (e: any) {
       console.error('thread post error', e?.message || e);
