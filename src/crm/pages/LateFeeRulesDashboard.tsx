@@ -18,6 +18,7 @@ export default function LateFeeRulesDashboard() {
 
   const [form, setForm] = React.useState<Partial<Rule>>({ scope: 'GLOBAL', feeType: 'FIXED', gracePeriod: 3, feeAmount: 50, isActive: true });
   const [submitting, setSubmitting] = React.useState(false);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
 
   const load = React.useCallback(() => {
     setLoading(true);
