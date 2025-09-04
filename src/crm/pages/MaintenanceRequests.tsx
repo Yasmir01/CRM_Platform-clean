@@ -69,8 +69,8 @@ import AssignVendor from '../components/AssignVendor';
                      <Button size="small" variant="contained" color="success" onClick={() => updateStatus(r.id, 'completed')}>Mark Completed</Button>
                    )}
                    {r.status !== 'closed' && (
-                     <Button size="small" variant="outlined" color="secondary" onClick={() => updateStatus(r.id, 'closed')}>Close</Button>
-                   )}
+                    <Button size="small" variant="outlined" color="secondary" onClick={async () => { await fetch(`/api/admin/maintenance/${r.id}/close`, { method: 'POST', credentials: 'include' }); load(); }}>Close</Button>
+                  )}
                  </Stack>
                </TableCell>
              </TableRow>
