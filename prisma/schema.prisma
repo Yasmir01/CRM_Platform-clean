@@ -189,6 +189,8 @@ model RentPayment {
   tenantId     String
   amount       Float
   status       String   // pending | success | failed | refunded
+  gateway      String   // stripe | paypal | plaid | applepay
+  methodId     String?
   autopay      Boolean  @default(false)
   refundReason String?
   createdAt    DateTime @default(now())
