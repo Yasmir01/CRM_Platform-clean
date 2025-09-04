@@ -214,7 +214,7 @@ model AutoPay {
 }
 
 /// ----------------------------------------------------------
-///  NEW MODELS FOR TENANT‑LEDGER / PAST BALANCES
+///  NEW MODELS FOR TENANT��LEDGER / PAST BALANCES
 /// ----------------------------------------------------------
 
 enum LeaseStatus {
@@ -237,6 +237,19 @@ model Property {
   units     Unit[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SLAConfig {
+  id         String    @id @default(cuid())
+  category   String
+  hours      Int
+  propertyId String?
+
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([category])
+  @@index([propertyId])
+  @@unique([category, propertyId])
 }
 
 model OwnerLedger {
