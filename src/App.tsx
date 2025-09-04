@@ -75,6 +75,7 @@ import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
 const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
 const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
 const EscalationRequestView = React.lazy(() => import("./crm/pages/EscalationRequestView"));
+const ComplianceExportPage = React.lazy(() => import("./crm/pages/ComplianceExport"));
 const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
 const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
 const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
@@ -374,6 +375,11 @@ function AppRoutes() {
         <Route path="escalation-logs/:requestId" element={
           <React.Suspense fallback={<PageLoader />}>
             <EscalationRequestView />
+          </React.Suspense>
+        } />
+        <Route path="escalation-export" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <ComplianceExportPage />
           </React.Suspense>
         } />
         <Route path="reports" element={

@@ -67,6 +67,14 @@ export default function SuperAdminLayout() {
           >
             <ListItemText primary="Escalation Matrix" />
           </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-export"
+            selected={location.pathname === '/crm/escalation-export'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Compliance Export" />
+          </ListItemButton>
         </List>
       </Paper>
       <Box sx={{ flex: 1 }}>
