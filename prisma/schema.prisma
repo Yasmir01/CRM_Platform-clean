@@ -397,3 +397,53 @@ model Notification {
   createdBy String
   createdAt DateTime @default(now())
 }
+
+// --- Accounting integrations ---
+model AccountingConnection {
+  id           String   @id @default(cuid())
+  orgId        String
+  provider     String   // quickbooks | xero | freshbooks
+  realmId      String?
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  enabled      Boolean  @default(true)
+
+  @@unique([orgId, provider])
+}
+
+model AccountingSyncLog {
+  id        String   @id @default(cuid())
+  orgId     String
+  provider  String
+  direction String   // push | pull
+  entity    String   // ledger_entry | account | invoice | bill | payment
+  payload   Json
+  status    String   // success | failed | pending
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+model COAMap {
+  id           String   @id @default(cuid())
+  orgId        String
+  provider     String   // quickbooks | xero | freshbooks
+  localType    String   // rent_income | expense | fee | refund | security_deposit
+  providerAcct String
+  updatedAt    DateTime @updatedAt
+
+  @@unique([orgId, provider, localType])
+}
+
+model SyncQueue {
+  id        String   @id @default(cuid())
+  orgId     String
+  provider  String
+  task      String   // push_ledger_entry | pull_accounts | reconcile
+  payload   Json
+  retries   Int      @default(0)
+  notBefore DateTime @default(now())
+  createdAt DateTime @default(now())
+}
