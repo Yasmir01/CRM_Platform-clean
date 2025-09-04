@@ -1,4 +1,4 @@
-export type ProviderName = "quickbooks" | "xero" | "freshbooks";
+export type ProviderName = "quickbooks" | "xero" | "freshbooks" | "wave";
 
 export interface OAuthTokens {
   accessToken: string;
