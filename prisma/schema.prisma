@@ -340,3 +340,13 @@ model Document {
   @@index([leaseId])
   @@index([uploadedBy])
 }
+
+// --- Platform Notifications ---
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  audience  String   // ALL, ADMINS, TENANTS, OWNERS...
+  createdBy String
+  createdAt DateTime @default(now())
+}
