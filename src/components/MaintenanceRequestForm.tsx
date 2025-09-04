@@ -51,8 +51,25 @@ export function MaintenanceRequestForm() {
     <div>
       <h3>Maintenance Request</h3>
       <form onSubmit={handleSubmit}>
-        <label>Title<input value={title} onChange={e => setTitle(e.target.value)} required /></label>
+        <label>Title<input value={title} onChange={e => setTitle(e.target.value)} /></label>
+        <label>Category
+          <select value={category} onChange={e => setCategory(e.target.value)}>
+            <option value="">Select Category</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="electrical">Electrical</option>
+            <option value="hvac">HVAC</option>
+            <option value="general">General</option>
+          </select>
+        </label>
         <label>Description<textarea value={description} onChange={e => setDescription(e.target.value)} required /></label>
+        <label>Priority
+          <select value={priority} onChange={e => setPriority(e.target.value)}>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="emergency">Emergency</option>
+          </select>
+        </label>
         <label>
           Attachment
           <input type="file" onChange={e => setFile(e.target.files?.[0] || null)} />
