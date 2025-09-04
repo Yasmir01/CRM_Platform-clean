@@ -1,5 +1,6 @@
 import { prisma } from '../../_db';
 import { ensurePermission } from '../../../src/lib/authorize';
+import { prisma } from '../../_db';
 
 export default async function handler(req: any, res: any) {
   const method = req.method || 'GET';
