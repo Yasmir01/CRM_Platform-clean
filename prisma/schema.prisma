@@ -552,3 +552,18 @@ model MessageParticipant {
   @@unique([threadId, userId])
   @@index([userId])
 }
+
+model MessageNotification {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  type      String   // email | sms | inapp
+  status    String   // sent | failed | unread | read
+  createdAt DateTime @default(now())
+
+  message   Message @relation(fields: [messageId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([messageId])
+}
