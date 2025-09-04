@@ -40,7 +40,7 @@ export function MaintenanceRequestForm() {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description, s3Key }),
+      body: JSON.stringify({ title, description, category, priority, s3Key }),
     });
     if (!res.ok) { setStatus('Failed to create request'); return; }
     setStatus('Request created');
