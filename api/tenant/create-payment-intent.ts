@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { ensurePermission } from '../../src/lib/authorize';
+import { prisma } from '../_db';
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY as string | undefined;
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: '2022-11-15' }) : (null as any);
