@@ -96,6 +96,7 @@ const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminN
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
+const MessagesSearch = React.lazy(() => import("./crm/pages/MessagesSearch"));
 
 // Loading component
 function PageLoader() {
@@ -311,6 +312,11 @@ function AppRoutes() {
         <Route path="messages/:threadId" element={
           <React.Suspense fallback={<PageLoader />}>
             <MessageThreadPage />
+          </React.Suspense>
+        } />
+        <Route path="messages/search" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <MessagesSearch />
           </React.Suspense>
         } />
         <Route path="suggestions" element={
