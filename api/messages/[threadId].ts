@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const messages = await prisma.message.findMany({
         where: { threadId },
-        include: { sender: true },
+        include: { sender: true, attachments: true },
         orderBy: { createdAt: 'asc' },
         take: 500,
       });
