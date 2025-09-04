@@ -22,7 +22,13 @@ export default function AdminPayments() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Payments Dashboard</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h5" sx={{ fontWeight: 700 }}>Payments Dashboard</Typography>
+        <Box>
+          <Button href="/api/admin/payments/export/csv" variant="contained" color="success" sx={{ mr: 1 }}>Export CSV</Button>
+          <Button href="/api/admin/payments/export/pdf" variant="contained" color="secondary">Export PDF</Button>
+        </Box>
+      </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(4, 1fr)' }, gap: 2, mb: 2, textAlign: 'center' }}>
         <Paper sx={{ p: 2, bgcolor: 'success.light' }}>
