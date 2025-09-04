@@ -49,6 +49,13 @@ export default function MessageThreadPage() {
                 </Box>
               )}
               <Typography variant="caption" color="text.secondary">{new Date(m.createdAt).toLocaleString()}</Typography>
+              <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
+                {Array.isArray(m.reads) && m.reads.length > 0 ? `Seen by: ${m.reads.map((r: any) => r.user?.name || r.user?.email || 'User').join(', ')}` : 'Not yet read'}
+              </Typography>
+              {/* Auto-mark as read on render */}
+              <span style={{ display: 'none' }}>
+                {(() => { fetch(`/api/messages/${threadId}/read`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ messageId: m.id }) }); return null; })()}
+              </span>
             </Box>
           ))}
         </Stack>
