@@ -85,6 +85,23 @@ export default async function handler(req: any, res: any) {
     const totalAlloc = await prisma.paymentAllocation.aggregate({ _sum: { amount: true }, where: { paymentId: payment.id } });
     const updatedPayment = await prisma.rentPayment.update({ where: { id: payment.id }, data: { allocatedAmount: Number(totalAlloc._sum.amount ?? 0) } });
 
+    // Handle Autopay setup if requested
+    if (autopay && autopay.enabled) {
+      const frequency = String(autopay.frequency || 'monthly');
+      const dayOfMonth = Number((lease as any)?.dueDay || 1);
+      const apAmount = Number(autopay.amount || amount);
+      try {
+        await prisma.autoPay.upsert({
+          where: { tenantId: String(tenantId) },
+          update: { amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined },
+          create: { tenantId: String(tenantId), amount: apAmount, dayOfMonth, frequency, active: true, propertyId: propertyId || undefined },
+        });
+        await prisma.user.update({ where: { id: String(tenantId) }, data: { autopayEnabled: true } });
+      } catch (e) {
+        console.error('autopay upsert in tenant/payments error', (e as any)?.message || e);
+      }
+    }
+
     return res.status(200).json(updatedPayment);
   } catch (e: any) {
     console.error('tenant/payments POST error', e?.message || e);
