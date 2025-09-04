@@ -105,6 +105,9 @@ const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImp
 const SuperAdminCompliance = React.lazy(() => import("./crm/pages/SuperAdminCompliance"));
 const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnalytics"));
 const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminNotifications"));
+const SUPaymentPoliciesGlobal = React.lazy(() => import("./crm/pages/SUPaymentPoliciesGlobal"));
+const SUPaymentPoliciesProperty = React.lazy(() => import("./crm/pages/SUPaymentPoliciesProperty"));
+const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPoliciesLease"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
