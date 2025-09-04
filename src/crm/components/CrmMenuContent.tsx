@@ -72,7 +72,7 @@ const mainListItems = [
   { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
@@ -133,6 +133,7 @@ export default function CrmMenuContent() {
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
   const [newTasksCount, setNewTasksCount] = React.useState(0);
   const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = React.useState(0);
 
   const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
 
@@ -211,11 +212,23 @@ export default function CrmMenuContent() {
     updateSuggestionCount();
     if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
+    const updateUnreadMessages = async () => {
+      try {
+        const r = await fetch('/api/messages/unread', { credentials: 'include' });
+        const d = await r.json().catch(() => ({ count: 0 }));
+        setUnreadMessagesCount(Number(d?.count || 0));
+      } catch {
+        setUnreadMessagesCount(0);
+      }
+    };
+    updateUnreadMessages();
+
     // Set up an interval to check for updates every 5 seconds
     const interval = setInterval(() => {
       updateApplicationCount();
       updateTaskCount();
       updateSuggestionCount();
+      updateUnreadMessages();
       if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
     }, 5000);
 
@@ -268,6 +281,10 @@ export default function CrmMenuContent() {
                     </Badge>
                   ) : item.badge && item.text === "Suggestions" ? (
                     <Badge badgeContent={newSuggestionsCount} color="error">
+                      {item.icon}
+                    </Badge>
+                  ) : item.badge && item.text === "Communications" ? (
+                    <Badge badgeContent={unreadMessagesCount} color="error">
                       {item.icon}
                     </Badge>
                   ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
