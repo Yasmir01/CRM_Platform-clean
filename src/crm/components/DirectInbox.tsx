@@ -80,20 +80,7 @@ export default function DirectInbox() {
             <p className="font-semibold">{m.sender?.name || m.sender?.email || 'Unknown'}</p>
             <p>{m.content}</p>
             {Array.isArray(m.attachments) && m.attachments.length > 0 && (
-              <div className="mt-2 space-y-1">
-                <p className="font-medium text-sm">Attachments:</p>
-                {m.attachments.map((a: any) => (
-                  <a
-                    key={a.id}
-                    href={a.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    📎 {a.filename}
-                  </a>
-                ))}
-              </div>
+              <AttachmentList attachments={m.attachments} />
             )}
             <span className="text-xs text-gray-500">{new Date(m.createdAt).toLocaleString()}</span>
           </div>
