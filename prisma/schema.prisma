@@ -423,28 +423,29 @@ model Tenant {
 }
 
 model Lease {
-  id            String        @id @default(uuid())
-  unitId        String
-  tenantId      String
-  orgId         String?
-  startDate     DateTime
-  endDate       DateTime?
-  status        LeaseStatus   @default(ACTIVE)
-  archived      Boolean       @default(false)
-  rentAmount    Float?
-  dueDay        Int?
-  unit          Unit          @relation(fields: [unitId], references: [id])
-  tenant        Tenant        @relation(fields: [tenantId], references: [id])
-  ledgerEntries LedgerEntry[]
-  allowSplit    Boolean       @default(true)
-  allowPartial  Boolean       @default(true)
-  minPartialUsd Float?
+  id             String           @id @default(uuid())
+  unitId         String
+  tenantId       String
+  orgId          String?
+  startDate      DateTime
+  endDate        DateTime?
+  status         LeaseStatus      @default(ACTIVE)
+  archived       Boolean          @default(false)
+  rentAmount     Float?
+  dueDay         Int?             // 1..31, day of the month rent is due
+  allowsSplit    Boolean          @default(true)
+  allowPartial   Boolean          @default(true)
+  minPartialUsd  Float?
 
-  participants  LeaseParticipant[]
-  invoices      Invoice[]
-  payments      RentPayment[]
-  documents     Document[]    @relation("LeaseDocuments")
-  autoPays      AutoPay[]
+  // Relations
+  unit           Unit             @relation(fields: [unitId], references: [id])
+  tenant         Tenant           @relation(fields: [tenantId], references: [id])
+  ledgerEntries  LedgerEntry[]
+  participants   LeaseParticipant[]
+  invoices       Invoice[]
+  payments       RentPayment[]
+  documents      Document[]       @relation("LeaseDocuments")
+  autoPays       AutoPay[]
 
   @@index([status])
   @@index([tenantId])
@@ -452,20 +453,17 @@ model Lease {
 }
 
 model LeaseParticipant {
-  id         String  @id @default(cuid())
+  id         String   @id @default(uuid())
   leaseId    String
   tenantId   String
   shareType  String   // EQUAL | PERCENTAGE
   shareValue Float?
 
-  lease   Lease  @relation(fields: [leaseId], references: [id], onDelete: Cascade)
-  tenant  Tenant @relation(fields: [tenantId], references: [id])
+  // Relations
+  lease      Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
 
-  createdAt DateTime @default(now())
-
-  @@index([leaseId])
-  @@index([tenantId])
-  @@unique([leaseId, tenantId])
+  createdAt  DateTime @default(now())
 }
 
 model LedgerEntry {
