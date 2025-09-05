@@ -1,6 +1,8 @@
 import crypto from 'crypto';
 import { prisma } from '../../../_db';
 import { logSyncEvent } from '../../../../src/services/accounting/logService';
+import { fetchQuickBooksEntity } from '../../../../src/services/accounting/quickbooksService';
+import { fetchXeroEntity } from '../../../../src/services/accounting/xeroService';
 
 export const config = { api: { bodyParser: false } } as any;
 
@@ -9,7 +11,6 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
 
   const provider = String((req.query as any).provider || '').toLowerCase();
 
-  // Read raw body
   const chunks: Buffer[] = [];
   await new Promise<void>((resolve) => {
     (req as any).on('data', (chunk: Buffer) => chunks.push(chunk));
@@ -33,6 +34,16 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         const conn = realmId ? await prisma.accountingConnection.findFirst({ where: { realmId } }) : null;
         const orgId = conn?.orgId || null;
         await logSyncEvent({ orgId, provider: 'quickbooks', source: 'webhook', data: evt, status: 'received', entity: 'qb_event' });
+        const entities: any[] = evt?.dataChangeEvent?.entities || [];
+        for (const ent of entities) {
+          if (orgId && realmId && ent?.name && ent?.id) {
+            try {
+              await fetchQuickBooksEntity(orgId, realmId, String(ent.name), String(ent.id));
+            } catch (e: any) {
+              await logSyncEvent({ orgId, provider: 'quickbooks', source: 'webhook', data: { error: e?.message || String(e), entity: ent }, status: 'failed', entity: 'qb_target_fetch', message: e?.message || 'fetch_failed' });
+            }
+          }
+        }
       }
       return res.status(200).send('ok');
     }
@@ -46,12 +57,18 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
 
       const payload = JSON.parse(raw || '{}');
       const events: any[] = payload.events || [];
-      // Determine org by first event tenantId if present
       const tenantId: string | undefined = events[0]?.tenantId || undefined;
       const conn = tenantId ? await prisma.accountingConnection.findFirst({ where: { realmId: tenantId } }) : null;
       const orgId = conn?.orgId || null;
       for (const evt of events) {
         await logSyncEvent({ orgId, provider: 'xero', source: 'webhook', data: evt, status: 'received', entity: 'xero_event' });
+        if (orgId && evt?.tenantId && evt?.resourceType && evt?.resourceId) {
+          try {
+            await fetchXeroEntity(orgId, String(evt.tenantId), String(evt.resourceType), String(evt.resourceId));
+          } catch (e: any) {
+            await logSyncEvent({ orgId, provider: 'xero', source: 'webhook', data: { error: e?.message || String(e), event: evt }, status: 'failed', entity: 'xero_target_fetch', message: e?.message || 'fetch_failed' });
+          }
+        }
       }
       return res.status(200).send('ok');
     }
