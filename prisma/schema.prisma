@@ -42,6 +42,8 @@ model User {
   ownerLedgers           OwnerLedger[]  @relation("OwnerLedgers")
   uploadedDocuments      Document[]     @relation("UserUploadedDocuments")
   vendorInvoices         MaintenanceInvoice[] @relation("VendorMaintenanceInvoices")
+  directMessagesSent     DirectMessage[]      @relation("DirectMessagesSent")
+  directMessagesReceived DirectMessage[]      @relation("DirectMessagesReceived")
 
   @@index([orgId])
 }
@@ -127,6 +129,7 @@ model SubscriptionPlan {
   paymentTypes  String[]
   backupTypes   String[]
   subscriptions Subscription[]
+  escalationMatrices EscalationMatrix[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 }
@@ -216,6 +219,8 @@ model RentPayment {
   property     Property? @relation("PropertyRentPayments", fields: [propertyId], references: [id])
   lease        Lease?    @relation(fields: [leaseId], references: [id])
   allocations  PaymentAllocation[]
+  lateFees     LateFee[]
+  refunds      Refund[]
 
   @@index([tenantId])
   @@index([propertyId])
@@ -335,6 +340,8 @@ model Property {
   slaConfigs           SLAConfig[]           @relation("PropertySLAConfigs")
   escalationMatrices   EscalationMatrix[]    @relation("PropertyEscalationMatrices")
   autoPays             AutoPay[]             @relation("PropertyAutoPays")
+  lateFeeRules         LateFeeRule[]
+  directMessages       DirectMessage[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -410,6 +417,7 @@ model Tenant {
   email     String?
   leases    Lease[]
   documents Document[] @relation("TenantDocuments")
+  participants LeaseParticipant[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -436,6 +444,7 @@ model Lease {
   invoices      Invoice[]
   payments      RentPayment[]
   documents     Document[]    @relation("LeaseDocuments")
+  autoPays      AutoPay[]
 
   @@index([status])
   @@index([tenantId])
@@ -528,6 +537,8 @@ model MaintenanceRequest {
   unit        Unit?    @relation("UnitMaintenanceRequests", fields: [unitId], references: [id])
   attachments MaintenanceAttachment[]
   assignments MaintenanceAssignment[]
+  escalationLogs EscalationLog[]
+  invoices       MaintenanceInvoice[]
 
   @@index([propertyId])
   @@index([unitId])
