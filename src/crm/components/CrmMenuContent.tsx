@@ -216,14 +216,16 @@ export default function CrmMenuContent() {
       try {
         if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
         if (!user) return;
-        const ac = new AbortController();
-        const t = setTimeout(() => ac.abort(), 2500);
-        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', signal: ac.signal });
-        clearTimeout(t);
-        if (!r.ok) { setUnreadMessagesCount(0); return; }
+        if (typeof navigator !== 'undefined' && 'onLine' in navigator && (navigator as any).onLine === false) {
+          setUnreadMessagesCount(0);
+          return;
+        }
+        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', keepalive: true }).catch(() => null as any);
+        if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
         const d = await r.json().catch(() => ({ count: 0 }));
         setUnreadMessagesCount(Number(d?.count || 0));
-      } catch {
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
         setUnreadMessagesCount(0);
       }
     };
