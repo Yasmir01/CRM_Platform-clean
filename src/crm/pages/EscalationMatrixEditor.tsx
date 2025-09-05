@@ -51,7 +51,14 @@ export default function EscalationMatrixEditor() {
       fetch('/api/admin/filters/properties', { credentials: 'include' }),
       fetch('/api/subscription-plans', { credentials: 'include' }),
     ]);
-    const [props, pls] = await Promise.all([propsRes.json(), plansRes.json()]);
+
+    const safeJson = async (res: Response | undefined | null) => {
+      if (!res || !('ok' in res) || !res.ok) return null as any;
+      try { return await res.json(); } catch { return null as any; }
+    };
+
+    const props = await safeJson(propsRes);
+    const pls = await safeJson(plansRes);
     setProperties(Array.isArray(props) ? props : []);
     setPlans(Array.isArray(pls) ? pls : []);
     // Do not call fetchScopeRows here to avoid duplicate concurrent reads; it runs in the effect below
