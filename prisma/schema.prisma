@@ -513,8 +513,8 @@ model Document {
 
   org         Organization  @relation(fields: [orgId], references: [id])
   uploader    User          @relation(fields: [uploadedBy], references: [id])
-  tenant      Tenant?       @relation(fields: [tenantId], references: [id])
-  lease       Lease?        @relation(fields: [leaseId], references: [id])
+  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  lease       Lease        @relation(fields: [leaseId], references: [id])
 
   @@index([orgId])
   @@index([tenantId])
@@ -644,261 +644,14 @@ model AccountingConnection {
   accessToken  String
   refreshToken String
   expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  enabled      Boolean  @default(true)
-  autoSync     String?  // manual | daily | weekly
-  alertOnError Boolean? @default(false)
-
-  @@unique([orgId, provider])
 }
 
 model AccountingSyncLog {
   id        String   @id @default(cuid())
   orgId     String
   provider  String
-  direction String   // push | pull
-  entity    String   // ledger_entry | account | invoice | bill | payment
-  payload   Json
-  status    String   // success | failed | pending
-  message   String?
+  action    String
   createdAt DateTime @default(now())
-}
-
-model COAMap {
-  id           String   @id @default(cuid())
-  orgId        String
-  provider     String   // quickbooks | xero | freshbooks
-  localType    String   // rent_income | expense | fee | refund | security_deposit
-  providerAcct String
-  updatedAt    DateTime @updatedAt
-
-  @@unique([orgId, provider, localType])
-}
-
-model SyncQueue {
-  id        String   @id @default(cuid())
-  orgId     String
-  provider  String
-  task      String   // push_ledger_entry | pull_accounts | reconcile
-  payload   Json
-  retries   Int      @default(0)
-  notBefore DateTime @default(now())
-  createdAt DateTime @default(now())
-}
-
-// --- Payment Methods ---
-model PaymentMethod {
-  id         String   @id @default(cuid())
-  tenantId   String
-  provider   String   // "stripe", "paypal", etc.
-  methodId   String   // provider method ID
-  type       String   // "card", "ach"
-  last4      String?
-  brand      String?
-  isDefault  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  tenant User @relation(fields: [tenantId], references: [id])
-}
-
-// --- Payment Receipt Audit Log ---
-model PaymentReceipt {
-  id        String   @id @default(cuid())
-  paymentId String
-  tenantId  String
-  type      String   // email | sms
-  status    String   // sent | failed
-  createdAt DateTime @default(now())
-}
-
-// --- Global / Property Payment Settings ---
-model GlobalPaymentSetting {
-  id          String   @id @default(cuid())
-  dueDay      Int      @default(1)    // rent due date (e.g., 1st of month)
-  gracePeriod Int      @default(3)    // days after due date
-  lateFee     Float    @default(50.0) // default fee
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model PropertyPaymentSetting {
-  id          String   @id @default(cuid())
-  propertyId  String   @unique
-  dueDay      Int?
-  gracePeriod Int?
-  lateFee     Float?
-
-  property    Property @relation(fields: [propertyId], references: [id])
-}
-
-// --- Payment Compliance ---
-model PaymentAudit {
-  id        String   @id @default(cuid())
-  paymentId String?
-  tenantId  String?
-  action    String   // payment_created | refund_issued | late_fee_applied | dispute_opened | dispute_resolved
-  details   String?
-  actorId   String?
-  createdAt DateTime @default(now())
-}
-
-model PaymentDispute {
-  id         String   @id @default(cuid())
-  paymentId  String
-  status     String   // open | under_review | resolved
-  reason     String?
-  openedAt   DateTime @default(now())
-  resolvedAt DateTime?
-}
-
-model PaymentGateway {
-  id                 String   @id @default(cuid())
-  name               String
-  enabled            Boolean  @default(false)
-  config             Json
-  propertyId         String?
-  subscriptionPlanId String?
-  global             Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  property           Property?         @relation(fields: [propertyId], references: [id])
-  subscriptionPlan   SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
-
-  @@index([propertyId])
-  @@index([subscriptionPlanId])
-  @@index([global])
-}
-
-// --- Messaging ---
-model MessageThread {
-  id           String               @id @default(cuid())
-  subject      String
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  messages     Message[]
-  participants MessageParticipant[]
-}
-
-model MessageEscalation {
-  id        String   @id @default(cuid())
-  threadId  String
-  fromRole  String
-  toRole    String
-  reason    String?
-  createdAt DateTime @default(now())
-
-  thread    MessageThread @relation(fields: [threadId], references: [id])
-
-  @@index([threadId])
-}
-
-model ArchivedThread {
-  id         String   @id @default(cuid())
-  threadId   String   @unique
-  archivedBy String
-  archivedAt DateTime @default(now())
-  reason     String?
-
-  thread     MessageThread @relation(fields: [threadId], references: [id])
-}
-
-model Message {
-  id        String   @id @default(cuid())
-  threadId  String
-  senderId  String
-  body      String
-  createdAt DateTime @default(now())
-
-  thread      MessageThread       @relation(fields: [threadId], references: [id])
-  sender      User                @relation(fields: [senderId], references: [id])
-  attachments MessageAttachment[]
-  reads       MessageRead[]
-
-  @@index([threadId])
-  @@index([senderId])
-}
-
-model MessageParticipant {
-  id        String   @id @default(cuid())
-  threadId  String
-  userId    String
-  role      String   // tenant, manager, owner, admin, superadmin
-  joinedAt  DateTime @default(now())
-
-  thread    MessageThread @relation(fields: [threadId], references: [id])
-  user      User          @relation(fields: [userId], references: [id])
-
-  @@unique([threadId, userId])
-  @@index([userId])
-}
-
-model MessageNotification {
-  id        String   @id @default(cuid())
-  messageId String
-  userId    String
-  type      String   // email | sms | inapp
-  status    String   // sent | failed | unread | read
-  createdAt DateTime @default(now())
-
-  message   Message @relation(fields: [messageId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([messageId])
-}
-
-model MessageAttachment {
-  id         String   @id @default(cuid())
-  messageId  String
-  fileUrl    String
-  fileType   String
-  fileName   String
-  uploadedAt DateTime @default(now())
-
-  message    Message  @relation(fields: [messageId], references: [id])
-
-  @@index([messageId])
-}
-
-model MessageRead {
-  id        String   @id @default(cuid())
-  messageId String
-  userId    String
-  readAt    DateTime @default(now())
-
-  message   Message @relation(fields: [messageId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
-
-  @@unique([messageId, userId])
-  @@index([userId])
-  @@index([messageId])
-}
-
-// --- Payment policy per Property (global defaults can be row with propertyId = null)
-model PropertyPaymentPolicy {
-  id            String   @id @default(cuid())
-  propertyId    String?  @unique
-  allowPartial  Boolean  @default(true)
-  allowSplit    Boolean  @default(true)
-  minPartialUsd Float    @default(10)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// --- Lease participants (roommates / co-tenants)
-model LeaseParticipant {
-  id         String  @id @default(cuid())
-  leaseId    String
-  tenantId   String
-  shareType  String  // "EQUAL" | "PERCENTAGE" | "FIXED"
-  shareValue Float?  // null for EQUAL, percent for PERCENTAGE (0..100), fixed $ for FIXED
-
-  lease   Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
-
-  @@unique([leaseId, tenantId])
 }
 
 // --- Invoices (monthly rent, utilities, etc.)
@@ -994,4 +747,16 @@ model AccountingContact {
   syncedAt   DateTime  @default(now())
 
   @@unique([externalId, source])
+}
+
+// --- Temp codes for passwordless/OTP flows ---
+model TempCode {
+  email     String   @id
+  code      String
+  purpose   String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([expiresAt])
 }
