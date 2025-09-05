@@ -28,15 +28,22 @@ export default function EscalationMatrixEditor() {
 
   const fetchScopeRows = React.useCallback(async () => {
     setLoading(true);
-    const p = new URLSearchParams();
-    p.set('scope', scope);
-    if (scope === 'property' && propertyId) p.set('propertyId', propertyId);
-    if (scope === 'plan' && planId) p.set('planId', planId);
+    try {
+      const p = new URLSearchParams();
+      p.set('scope', scope);
+      if (scope === 'property' && propertyId) p.set('propertyId', propertyId);
+      if (scope === 'plan' && planId) p.set('planId', planId);
 
-    const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
-    const data = await res.json();
-    setRows(Array.isArray(data) ? data : []);
-    setLoading(false);
+      const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
+      if (!res.ok) {
+        setRows([]);
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      setRows(Array.isArray(data) ? data : []);
+    } finally {
+      setLoading(false);
+    }
   }, [scope, propertyId, planId]);
 
   const load = React.useCallback(async () => {
