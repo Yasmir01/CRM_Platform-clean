@@ -214,7 +214,13 @@ export default function CrmMenuContent() {
 
     const updateUnreadMessages = async () => {
       try {
-        const r = await fetch('/api/messages/unread', { credentials: 'include' });
+        if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+        if (!user) return;
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), 2500);
+        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', signal: ac.signal });
+        clearTimeout(t);
+        if (!r.ok) { setUnreadMessagesCount(0); return; }
         const d = await r.json().catch(() => ({ count: 0 }));
         setUnreadMessagesCount(Number(d?.count || 0));
       } catch {
@@ -230,7 +236,7 @@ export default function CrmMenuContent() {
       updateSuggestionCount();
       updateUnreadMessages();
       if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
-    }, 5000);
+    }, 15000);
 
     // Also listen for storage events (when localStorage is updated in another tab)
     const handleStorageChange = (e: StorageEvent) => {
