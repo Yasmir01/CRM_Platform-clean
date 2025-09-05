@@ -442,6 +442,23 @@ model Lease {
   @@index([unitId])
 }
 
+model LeaseParticipant {
+  id         String  @id @default(cuid())
+  leaseId    String
+  tenantId   String
+  shareType  String   // EQUAL | PERCENTAGE
+  shareValue Float?
+
+  lease   Lease  @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  tenant  Tenant @relation(fields: [tenantId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([leaseId])
+  @@index([tenantId])
+  @@unique([leaseId, tenantId])
+}
+
 model LedgerEntry {
   id          String    @id @default(uuid())
   leaseId     String
@@ -535,8 +552,8 @@ model Document {
 
   org         Organization  @relation("OrgDocuments", fields: [orgId], references: [id])
   uploader    User          @relation("UserUploadedDocuments", fields: [uploadedBy], references: [id])
-  tenant      Tenant        @relation("TenantDocuments", fields: [tenantId], references: [id])
-  lease       Lease         @relation("LeaseDocuments", fields: [leaseId], references: [id])
+  tenant      Tenant?       @relation("TenantDocuments", fields: [tenantId], references: [id])
+  lease       Lease?        @relation("LeaseDocuments", fields: [leaseId], references: [id])
 
   @@index([orgId])
   @@index([tenantId])
