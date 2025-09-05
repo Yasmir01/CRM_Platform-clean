@@ -1,8 +1,36 @@
 import { prisma } from '../_db';
 
+import { getUserOr401 } from '../../src/utils/authz';
+
 export default async function handler(req: any, res: any) {
+  if (req.method === 'GET') {
+    try {
+      const user = getUserOr401(req, res);
+      if (!user) return;
+      const url = new URL(req.url || '/', `http://${req.headers.host}`);
+      const tenantId = String(url.searchParams.get('tenantId') || '');
+      if (!tenantId) return res.status(400).json({ error: 'tenantId_required' });
+      // Optional: ensure requester is the same tenant or has admin role
+      const roles = Array.isArray((user as any).roles) ? (user as any).roles.map((r: string) => String(r).toLowerCase()) : [];
+      const role = (user as any).role ? String((user as any).role).toLowerCase() : '';
+      const isAdmin = roles.includes('admin') || roles.includes('superadmin') || role === 'admin' || role === 'super_admin';
+      if (!isAdmin && String((user as any).sub || (user as any).id) !== tenantId) {
+        return res.status(403).json({ error: 'forbidden' });
+      }
+
+      const rows = await prisma.rentPayment.findMany({
+        where: { tenantId },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
+      return res.status(200).json(rows);
+    } catch (e: any) {
+      console.error('tenant/payments GET error', e?.message || e);
+      return res.status(500).json({ error: 'failed' });
+    }
+  }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
   try {
