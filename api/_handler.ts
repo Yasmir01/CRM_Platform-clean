@@ -25,6 +25,22 @@ export function defineHandler<T extends ZodSchema<any>>(opts: {
     const user = getUserOr401(req, res);
     if (!user) return;
 
+    if (opts.roles && opts.roles.length) {
+      const rawRoles: string[] = Array.isArray((user as any).roles)
+        ? (user as any).roles
+        : (user as any).role
+        ? [String((user as any).role)]
+        : [];
+      const norm = (s: string) => String(s || '')
+        .toUpperCase()
+        .replace(/[^A-Z]/g, '') // remove non letters
+        .replace('SUPERADMIN', 'SUPERADMIN')
+        .replace('ADMIN', 'ADMIN');
+      const have = new Set(rawRoles.map(norm));
+      const needOk = opts.roles.some((r) => have.has(norm(r)));
+      if (!needOk) return res.status(403).json({ error: 'forbidden' });
+    }
+
     let body: any = {};
     if (opts.bodySchema && method !== 'GET') {
       try {
