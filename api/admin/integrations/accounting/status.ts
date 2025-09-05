@@ -42,7 +42,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const connected = Boolean(conn?.enabled);
       const last = lastLogs.find((l) => normProvider(l.provider) === p);
       const lastSynced = last?.createdAt?.toISOString() || null;
-      return { provider: toLabel(p), connected, lastSynced };
+      const autoSync = !!(conn?.autoSync && conn.autoSync !== 'manual');
+      const alertOnError = Boolean(conn?.alertOnError);
+      return { provider: toLabel(p), connected, lastSynced, autoSync, alertOnError };
     });
 
     return res.status(200).json(items);
