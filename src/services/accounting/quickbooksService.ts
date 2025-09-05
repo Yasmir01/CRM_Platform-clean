@@ -1,6 +1,7 @@
 import { withValidToken } from "./tokenService";
 import { logSyncEvent } from "./logService";
 import { persistQuickBooksEntity } from "./mapper/quickbooksMapper";
+import { withValidToken } from "./tokenService";
 
 export async function fetchQuickBooksEntity(orgId: string, realmId: string, entityType: string, entityId: string) {
   const headers = await withValidToken("quickbooks", orgId);
