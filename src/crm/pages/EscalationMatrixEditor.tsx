@@ -29,6 +29,11 @@ export default function EscalationMatrixEditor() {
   const fetchScopeRows = React.useCallback(async () => {
     setLoading(true);
     try {
+      if (import.meta.env.DEV) {
+        setRows([]);
+        return;
+      }
+
       const p = new URLSearchParams();
       p.set('scope', scope);
       if (scope === 'property' && propertyId) p.set('propertyId', propertyId);
