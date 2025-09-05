@@ -1,14 +1,16 @@
 import { defineHandler } from '../_handler';
 import { prisma } from '../_db';
+import { z } from 'zod';
+
+const Body = z.object({ orgId: z.string() });
 
 export default defineHandler({
-  methods: ['GET'],
-  roles: ['ADMIN', 'SUPER_ADMIN', 'MANAGER'],
+  methods: ['POST'],
+  roles: ['ADMIN', 'SUPER_ADMIN', 'OWNER'],
+  bodySchema: Body,
   limitKey: 'ai:top-risk',
-  fn: async ({ req, res }) => {
-    const url = new URL(req.url || '/', `http://${req.headers.host}`);
-    const orgId = String(url.searchParams.get('orgId') || '');
-    if (!orgId) return res.status(400).json({ error: 'orgId_required' });
+  fn: async ({ res, body }) => {
+    const orgId = body.orgId;
 
     const leases = await prisma.lease.findMany({
       where: { orgId },
@@ -49,7 +51,7 @@ export default defineHandler({
     });
 
     scored.sort((a, b) => a.score - b.score);
-    const top = scored.slice(0, 10);
+    const top = scored.slice(0, 5);
 
     return res.status(200).json({ tenants: top });
   },
