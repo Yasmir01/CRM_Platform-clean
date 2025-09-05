@@ -57,7 +57,9 @@ export default defineConfig({
       "dayjs/plugin/utc",
       // CJS library interop
       "crypto-js",
-      "qrcode"
+      "qrcode",
+      // Fix CJS default export interop for libraries used by Recharts
+      "eventemitter3"
     ],
     exclude: [
       "@mui/icons-material",
