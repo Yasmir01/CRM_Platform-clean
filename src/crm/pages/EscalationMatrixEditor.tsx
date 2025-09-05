@@ -47,7 +47,7 @@ export default function EscalationMatrixEditor() {
     const [props, pls] = await Promise.all([propsRes.json(), plansRes.json()]);
     setProperties(Array.isArray(props) ? props : []);
     setPlans(Array.isArray(pls) ? pls : []);
-    fetchScopeRows();
+    // Do not call fetchScopeRows here to avoid duplicate concurrent reads; it runs in the effect below
   }, [fetchScopeRows]);
 
   React.useEffect(() => { load(); }, [load]);
