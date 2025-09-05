@@ -55,7 +55,7 @@ import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
-const mainListItems = [
+export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
@@ -87,7 +87,7 @@ const marketingListItems = [
   // Landing Pages and Promotions integrated into the main Marketing Automation hub
 ];
 
-const secondaryListItems = [
+export const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
@@ -98,13 +98,13 @@ const secondaryListItems = [
 ];
 
 // Tenant-specific secondary items (no user roles or marketplace)
-const tenantSecondaryItems = [
+export const tenantSecondaryItems = [
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
   { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
 // Tenant-specific menu items (simplified interface)
-const tenantMenuItems = [
+export const tenantMenuItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "News & Announcements", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
@@ -113,7 +113,7 @@ const tenantMenuItems = [
   { text: "Profile", icon: <PersonRoundedIcon />, path: "/crm/profile" },
 ];
 
-const serviceProviderMenuItems = [
+export const serviceProviderMenuItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
