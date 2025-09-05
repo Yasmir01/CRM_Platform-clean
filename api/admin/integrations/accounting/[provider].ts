@@ -37,7 +37,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!body.enabled) patch.enabled = true;
       patch.expiresAt = new Date(Date.now() + 365 * 24 * 3600 * 1000);
     }
-    if (typeof body.autoSync === 'string') patch.autoSync = String(body.autoSync);
+    if (typeof body.autoSync === 'string') {
+      patch.autoSync = String(body.autoSync);
+    } else if (typeof body.autoSync === 'boolean') {
+      patch.autoSync = body.autoSync ? 'daily' : 'manual';
+    }
     if (typeof body.alertOnError === 'boolean') patch.alertOnError = Boolean(body.alertOnError);
 
     await prisma.accountingConnection.upsert({
