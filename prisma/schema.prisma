@@ -951,3 +951,47 @@ model PaymentAllocation {
   @@index([paymentId])
   @@index([tenantId])
 }
+
+// --- Accounting external entity persistence ---
+model AccountingInvoice {
+  id         String   @id @default(cuid())
+  orgId      String?
+  externalId String
+  source     String   // quickbooks | xero | wave
+  tenantId   String
+  propertyId String?
+  amount     Float
+  status     String   // draft | open | paid | voided
+  dueDate    DateTime?
+  syncedAt   DateTime  @default(now())
+
+  @@unique([externalId, source])
+}
+
+model AccountingPayment {
+  id         String   @id @default(cuid())
+  orgId      String?
+  externalId String
+  source     String   // quickbooks | xero | wave
+  tenantId   String
+  propertyId String?
+  amount     Float
+  method     String
+  status     String   // pending | completed | failed
+  syncedAt   DateTime  @default(now())
+
+  @@unique([externalId, source])
+}
+
+model AccountingContact {
+  id         String   @id @default(cuid())
+  orgId      String?
+  externalId String
+  source     String   // quickbooks | xero | wave
+  name       String
+  email      String?
+  phone      String?
+  syncedAt   DateTime  @default(now())
+
+  @@unique([externalId, source])
+}
