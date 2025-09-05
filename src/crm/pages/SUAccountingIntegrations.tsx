@@ -35,6 +35,17 @@ export default function SUAccountingIntegrations() {
     load();
   }
 
+  function connect(p: ProviderName) {
+    const id = p.toLowerCase();
+    window.location.href = `/api/auth/${encodeURIComponent(id)}/start`;
+  }
+
+  async function disconnect(p: ProviderName) {
+    const id = p.toLowerCase();
+    await fetch(`/api/admin/integrations/accounting/${encodeURIComponent(id)}/disconnect`, { method: 'POST', credentials: 'include' });
+    load();
+  }
+
   async function updateConfig(p: ProviderName, payload: Partial<IntegrationConfig>) {
     await fetch(`/api/admin/integrations/accounting/${encodeURIComponent(p)}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload)
@@ -68,6 +79,11 @@ export default function SUAccountingIntegrations() {
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Switch checked={i.enabled} onChange={(_, c) => toggle(i.provider, c)} />
                   <Typography variant="body2">Enabled</Typography>
+                  {!i.enabled ? (
+                    <Button size="small" variant="outlined" onClick={() => connect(i.provider)}>Connect</Button>
+                  ) : (
+                    <Button size="small" color="error" onClick={() => disconnect(i.provider)}>Disconnect</Button>
+                  )}
                 </Stack>
               </Stack>
               <Stack spacing={1}>
@@ -86,6 +102,7 @@ export default function SUAccountingIntegrations() {
                     <Typography variant="body2">Alert on Error</Typography>
                   </Stack>
                   <Button variant="text" href={`/crm/super-admin/accounting-integrations/${(i.providerId || i.provider.toLowerCase())}/logs`}>View Logs</Button>
+                  <Button variant="text" href={`/api/admin/integrations/accounting/${(i.providerId || i.provider.toLowerCase())}/status`} target="_blank">Status JSON</Button>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Typography variant="body2" color="text.secondary">Last Sync: {i.lastSync ? new Date(i.lastSync).toLocaleString() : 'Never'}</Typography>
