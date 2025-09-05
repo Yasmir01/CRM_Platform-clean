@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { MENU } from '../../config/menu';
 
 function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -19,17 +21,9 @@ function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const links = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/units', label: 'Units' },
-  { href: '/tenants', label: 'Tenants' },
-  { href: '/owners', label: 'Owners' },
-  { href: '/vendors', label: 'Vendors' },
-  { href: '/reports', label: 'Reports' },
-];
-
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
 
   return (
     <>
@@ -46,17 +40,22 @@ export default function Sidebar() {
         } md:translate-x-0`}
       >
         <div className="p-4 font-bold text-xl border-b">CRM Menu</div>
-        <nav className="p-4 space-y-2">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="block rounded-lg px-3 py-2 hover:bg-gray-100"
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </a>
-          ))}
+        <nav className="p-4 space-y-1">
+          {MENU.map((item) => {
+            const Icon = item.icon as any;
+            const active = pathname === item.href || pathname.startsWith(item.href + '/');
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-100 ${active ? 'bg-gray-100 font-medium' : ''}`}
+                onClick={() => setOpen(false)}
+              >
+                {Icon ? <Icon fontSize="small" /> : null}
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </aside>
 
