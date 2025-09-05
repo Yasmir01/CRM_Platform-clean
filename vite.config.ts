@@ -7,6 +7,21 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
+      warning: path.resolve(__dirname, "./src/shims/warning.ts"),
+      lodash: 'lodash-es',
+      qrcode: path.resolve(__dirname, './src/shims/qrcode.ts'),
+      'dayjs/plugin/advancedFormat.js': 'dayjs/plugin/advancedFormat',
+      'dayjs/plugin/localizedFormat.js': 'dayjs/plugin/localizedFormat',
+      'dayjs/plugin/customParseFormat.js': 'dayjs/plugin/customParseFormat',
+      'dayjs/plugin/weekOfYear.js': 'dayjs/plugin/weekOfYear',
+      'dayjs/plugin/isBetween.js': 'dayjs/plugin/isBetween',
+      'dayjs/plugin/isSameOrBefore.js': 'dayjs/plugin/isSameOrBefore',
+      'dayjs/plugin/isSameOrAfter.js': 'dayjs/plugin/isSameOrAfter',
+      'dayjs/plugin/isLeapYear.js': 'dayjs/plugin/isLeapYear',
+      'dayjs/plugin/localeData.js': 'dayjs/plugin/localeData',
+      'dayjs/plugin/minMax.js': 'dayjs/plugin/minMax',
+      'dayjs/plugin/utc.js': 'dayjs/plugin/utc',
     },
   },
   optimizeDeps: {
@@ -28,15 +43,23 @@ export default defineConfig({
       "react-dropzone",
       // Dayjs core and plugins used by MUI AdapterDayjs
       "dayjs",
-      "dayjs/plugin/advancedFormat.js",
-      "dayjs/plugin/localizedFormat.js",
-      "dayjs/plugin/customParseFormat.js",
-      "dayjs/plugin/weekOfYear.js",
-      "dayjs/plugin/isBetween.js",
+      "dayjs/plugin/advancedFormat",
+      "dayjs/plugin/localizedFormat",
+      "dayjs/plugin/customParseFormat",
+      "dayjs/plugin/weekOfYear",
+      "dayjs/plugin/isBetween",
+      "dayjs/plugin/isLeapYear",
       // App usage
-      "dayjs/plugin/isSameOrBefore.js",
+      "dayjs/plugin/isSameOrBefore",
+      "dayjs/plugin/isSameOrAfter",
+      "dayjs/plugin/localeData",
+      "dayjs/plugin/minMax",
+      "dayjs/plugin/utc",
       // CJS library interop
-      "crypto-js"
+      "crypto-js",
+      "qrcode",
+      // Fix CJS default export interop for libraries used by Recharts
+      "eventemitter3"
     ],
     exclude: [
       "@mui/icons-material",

@@ -10,31 +10,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!auth) return;
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-  const { title, description, priority, propertyId, unitId, s3Key } = body as {
-    title?: string; description?: string; priority?: string; propertyId?: string; unitId?: string; s3Key?: string | null;
+  const { title, description, priority, propertyId, unitId, s3Key, category } = body as {
+    title?: string; description?: string; priority?: string; propertyId?: string; unitId?: string; s3Key?: string | null; category?: string;
   };
-  if (!title || !description) return res.status(400).json({ error: 'missing' });
+  if (!description) return res.status(400).json({ error: 'missing description' });
+  const finalTitle = title && title.trim().length ? title : `Maintenance: ${String(category || 'general')}`;
 
   const tenantId = String((auth as any).sub || (auth as any).id);
   const user = await prisma.user.findUnique({ where: { id: tenantId } });
   const orgId = user?.orgId || null;
 
+  // Resolve propertyId to compute SLA
+  const resolvedPropertyId = propertyId || (await (async () => {
+    try {
+      const lease = await prisma.lease.findFirst({ where: { tenantId, status: 'ACTIVE' as any }, include: { unit: true } });
+      return lease?.unit?.propertyId || undefined;
+    } catch { return undefined; }
+  })());
+
+  // Compute SLA deadline from SLAConfig (property override, then global)
+  let deadline: Date | null = null;
+  if (category) {
+    const propPolicy = resolvedPropertyId
+      ? await prisma.sLAConfig.findFirst({ where: { category, propertyId: String(resolvedPropertyId) } })
+      : null;
+    const globalPolicy = !propPolicy ? await prisma.sLAConfig.findFirst({ where: { category, propertyId: null } }) : null;
+    const hours = propPolicy?.hours ?? globalPolicy?.hours;
+    if (hours && Number.isFinite(hours)) deadline = new Date(Date.now() + Number(hours) * 60 * 60 * 1000);
+  }
+
   const reqRec = await prisma.maintenanceRequest.create({
     data: {
       tenantId,
       orgId: orgId || undefined,
-      propertyId: propertyId || (await (async () => {
-        // If propertyId not provided, try to infer from active lease
-        try {
-          const lease = await prisma.lease.findFirst({ where: { tenantId, status: 'ACTIVE' as any }, include: { unit: true } });
-          return lease?.unit?.propertyId || undefined;
-        } catch { return undefined; }
-      })()),
+      propertyId: resolvedPropertyId,
       unitId: unitId || undefined,
-      title,
+      title: finalTitle,
       description,
+      category: category || undefined,
       priority: priority || 'normal',
-      // attachment key can be stored via a separate Document; for now keep in description/meta
+      deadline: deadline || undefined,
     },
   });
 
@@ -45,10 +60,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await notify({
         userId: admin.id,
         email: admin.email || undefined,
-        type: 'maintenance_request',
+        type: 'maintenance_new',
         title: 'New Maintenance Request',
-        message: `${user?.email || 'Tenant'} submitted: ${title}`,
-        meta: { requestId: reqRec.id },
+        message: `${user?.email || 'Tenant'} submitted: ${finalTitle}`,
+        meta: { requestId: reqRec.id, link: `/crm/maintenance-requests?id=${reqRec.id}` },
       });
     }
   }

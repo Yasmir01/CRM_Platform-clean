@@ -66,21 +66,177 @@ export function OwnerProperties() {
 }
 
 export function VendorDashboard() {
+  const [requests, setRequests] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [uploadingId, setUploadingId] = React.useState<string | null>(null);
+
+  const load = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch('/api/vendor/requests', { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => { load(); }, []);
+
+  const markComplete = async (id: string) => {
+    await fetch(`/api/vendor/requests/${id}/complete`, { method: 'POST', credentials: 'include' });
+    await load();
+  };
+
+  const handleFile = async (id: string, file: File) => {
+    try {
+      setUploadingId(id);
+      const presignRes = await fetch('/api/storage/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ fileName: file.name, contentType: file.type })
+      });
+      if (!presignRes.ok) throw new Error('Failed to get upload URL');
+      const { uploadUrl, key } = await presignRes.json();
+      const up = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+      if (!up.ok) throw new Error('Upload failed');
+      const attachRes = await fetch(`/api/maintenance/${id}/attachments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ key, fileType: file.type, fileName: file.name })
+      });
+      if (!attachRes.ok) throw new Error('Failed to save attachment');
+      await load();
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   return (
     <RoleLayout>
-      <h1>Vendor Dashboard</h1>
-      <p>Assigned work orders and profile.</p>
+      <h1>Vendor Portal</h1>
+      {error && <p className="text-red-600">{error}</p>}
+      {loading ? (
+        <p>Loading...</p>
+      ) : requests.length === 0 ? (
+        <p>No assigned requests.</p>
+      ) : (
+        <div className="space-y-4">
+          {requests.map((r) => (
+            <div key={r.id} className="border p-4 rounded">
+              <h2 className="font-semibold">{r.property?.address || 'Property'}</h2>
+              <p className="text-sm text-gray-600">{r.category || 'General'} • {r.priority || 'normal'}</p>
+              <p className="text-xs text-gray-500">Request ID: {r.id}</p>
+              {r.description && <p className="mt-2">{r.description}</p>}
+
+              {Array.isArray(r.attachments) && r.attachments.length > 0 && (
+                <div className="mt-2">
+                  <h3 className="text-sm font-semibold">Attachments</h3>
+                  <div className="flex flex-col gap-1">
+                    {r.attachments.map((a: any) => (
+                      <a key={a.id} href={`/api/storage/download?key=${encodeURIComponent(a.fileUrl)}`} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                        {a.fileName || a.fileUrl}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-3 flex items-center gap-2">
+                <label className="cursor-pointer bg-blue-600 text-white px-3 py-1 rounded">
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleFile(r.id, f);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                  {uploadingId === r.id ? 'Uploading...' : 'Upload File'}
+                </label>
+                <button onClick={() => markComplete(r.id)} className="px-3 py-1 bg-green-600 text-white rounded">
+                  Mark as Completed
+                </button>
+              </div>
+
+              <VendorInvoiceUploader requestId={r.id} onUploaded={load} />
+            </div>
+          ))}
+        </div>
+      )}
     </RoleLayout>
   );
 }
 
-export function VendorWorkOrders() {
+function VendorInvoiceUploader({ requestId, onUploaded }: { requestId: string; onUploaded?: () => void }) {
+  const [files, setFiles] = React.useState<FileList | null>(null);
+  const [amount, setAmount] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const submit = async () => {
+    if (!files || !amount) return;
+    try {
+      setSubmitting(true);
+      setError(null);
+      const metas: Array<{ key: string; fileType: string; fileName: string }> = [];
+      for (const file of Array.from(files)) {
+        const presignRes = await fetch('/api/storage/presign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ fileName: file.name, contentType: file.type })
+        });
+        if (!presignRes.ok) throw new Error('Failed to get upload URL');
+        const { uploadUrl, key } = await presignRes.json();
+        const up = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+        if (!up.ok) throw new Error('Upload failed');
+        metas.push({ key, fileType: file.type, fileName: file.name });
+      }
+
+      const res = await fetch(`/api/vendor/requests/${requestId}/invoice`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ amount: parseFloat(amount), files: metas })
+      });
+      if (!res.ok) throw new Error('Failed to save invoice');
+      setFiles(null);
+      setAmount('');
+      if (onUploaded) onUploaded();
+    } catch (e: any) {
+      setError(e?.message || 'Upload failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <RoleLayout>
-      <h1>Work Orders</h1>
-      <p>Work orders list.</p>
-    </RoleLayout>
+    <div className="mt-3 border-t pt-3">
+      <h3 className="font-semibold text-sm mb-2">Upload Invoice</h3>
+      {error && <p className="text-red-600 text-sm mb-1">{error}</p>}
+      <div className="flex items-center gap-2">
+        <input type="file" accept="application/pdf,image/*" multiple onChange={(e) => setFiles(e.target.files)} />
+        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} className="border p-2 rounded" />
+        <button onClick={submit} disabled={submitting} className="px-3 py-1 bg-blue-600 text-white rounded">
+          {submitting ? 'Uploading…' : 'Upload Invoice'}
+        </button>
+      </div>
+    </div>
   );
+}
+
+export function VendorWorkOrders() {
+  return <VendorDashboard />;
 }
 
 export function VendorProfile() {

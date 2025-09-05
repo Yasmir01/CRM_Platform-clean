@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Typography, Paper } from '@mui/material';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from 'recharts';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { BarChart } from '@mui/x-charts/BarChart';
 
 export default function SuperAdminAnalytics() {
   const [data, setData] = React.useState<any | null>(null);
@@ -16,21 +17,23 @@ export default function SuperAdminAnalytics() {
 
   if (!data) return <Typography>Loading analytics...</Typography>;
 
+  // Prepare chart data for MUI X Charts
+  const rentMonths = (data.rentData || []).map((d: any) => d.month);
+  const rentValues = (data.rentData || []).map((d: any) => Number(d.rent || 0));
+
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>Analytics Dashboard</Typography>
 
       <Paper sx={{ p: 2, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Rent Collected (Last 6 Months)</Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data.rentData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="rent" stroke="#2563eb" strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChart
+          xAxis={[{ scaleType: 'point', data: rentMonths }]}
+          series={[{ data: rentValues, color: '#2563eb', label: 'Rent', showMark: false }]}
+          height={300}
+          grid={{ horizontal: true, vertical: false }}
+          margin={{ left: 40, right: 20, top: 20, bottom: 20 }}
+        />
       </Paper>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2, mb: 3 }}>
@@ -50,15 +53,12 @@ export default function SuperAdminAnalytics() {
 
       <Paper sx={{ p: 2, mb: 3 }}>
         <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>Delinquency</Typography>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={[{ label: 'Delinquency', value: data.delinquencyRate }]}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="label" />
-            <YAxis domain={[0, 100]} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#dc2626" />
-          </BarChart>
-        </ResponsiveContainer>
+        <BarChart
+          xAxis={[{ scaleType: 'band', data: ['Delinquency'] }]}
+          series={[{ data: [Number(data.delinquencyRate || 0)], color: '#dc2626', label: 'Rate' }]}
+          height={220}
+          margin={{ left: 40, right: 20, top: 20, bottom: 20 }}
+        />
       </Paper>
 
       <Paper sx={{ p: 2 }}>

@@ -10,6 +10,9 @@ const navItems = [
   { label: 'Compliance', to: '/crm/super-admin/compliance' },
   { label: 'Analytics', to: '/crm/super-admin/analytics' },
   { label: 'Notifications', to: '/crm/super-admin/notifications' },
+  { label: 'Payment Policies', to: '/crm/super-admin/payment-policies/global' },
+  { label: 'Accounting Integrations', to: '/crm/super-admin/accounting-integrations' },
+  { label: 'Sync Logs', to: '/crm/super-admin/accounting-sync-logs' },
 ];
 
 export default function SuperAdminLayout() {
@@ -41,6 +44,40 @@ export default function SuperAdminLayout() {
               </ListItemButton>
             );
           })}
+          <Divider sx={{ my: 1 }} />
+          <Typography variant="caption" sx={{ px: 2, color: 'text.secondary', textTransform: 'uppercase', fontWeight: 700 }}>Compliance & Escalations</Typography>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-logs"
+            selected={location.pathname === '/crm/escalation-logs'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Escalation Logs" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/sla-policies"
+            selected={location.pathname === '/crm/sla-policies'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="SLA Policies" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-matrix"
+            selected={location.pathname === '/crm/escalation-matrix'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Escalation Matrix" />
+          </ListItemButton>
+          <ListItemButton
+            component={Link}
+            to="/crm/escalation-export"
+            selected={location.pathname === '/crm/escalation-export'}
+            sx={{ borderRadius: 1 }}
+          >
+            <ListItemText primary="Compliance Export" />
+          </ListItemButton>
         </List>
       </Paper>
       <Box sx={{ flex: 1 }}>

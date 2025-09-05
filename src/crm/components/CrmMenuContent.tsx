@@ -55,7 +55,7 @@ import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
 
-const mainListItems = [
+export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
@@ -72,7 +72,7 @@ const mainListItems = [
   { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
@@ -87,7 +87,7 @@ const marketingListItems = [
   // Landing Pages and Promotions integrated into the main Marketing Automation hub
 ];
 
-const secondaryListItems = [
+export const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
@@ -98,27 +98,27 @@ const secondaryListItems = [
 ];
 
 // Tenant-specific secondary items (no user roles or marketplace)
-const tenantSecondaryItems = [
+export const tenantSecondaryItems = [
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
   { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
 // Tenant-specific menu items (simplified interface)
-const tenantMenuItems = [
+export const tenantMenuItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "News & Announcements", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "Profile", icon: <PersonRoundedIcon />, path: "/crm/profile" },
 ];
 
-const serviceProviderMenuItems = [
+export const serviceProviderMenuItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications" },
+  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
 ];
 
 export default function CrmMenuContent() {
@@ -133,6 +133,7 @@ export default function CrmMenuContent() {
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
   const [newTasksCount, setNewTasksCount] = React.useState(0);
   const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = React.useState(0);
 
   const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
 
@@ -211,13 +212,33 @@ export default function CrmMenuContent() {
     updateSuggestionCount();
     if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
+    const updateUnreadMessages = async () => {
+      try {
+        if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+        if (!user) return;
+        if (typeof navigator !== 'undefined' && 'onLine' in navigator && (navigator as any).onLine === false) {
+          setUnreadMessagesCount(0);
+          return;
+        }
+        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', keepalive: true }).catch(() => null as any);
+        if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
+        const d = await r.json().catch(() => ({ count: 0 }));
+        setUnreadMessagesCount(Number(d?.count || 0));
+      } catch (e: any) {
+        if (e?.name === 'AbortError') return;
+        setUnreadMessagesCount(0);
+      }
+    };
+    updateUnreadMessages();
+
     // Set up an interval to check for updates every 5 seconds
     const interval = setInterval(() => {
       updateApplicationCount();
       updateTaskCount();
       updateSuggestionCount();
+      updateUnreadMessages();
       if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
-    }, 5000);
+    }, 15000);
 
     // Also listen for storage events (when localStorage is updated in another tab)
     const handleStorageChange = (e: StorageEvent) => {
@@ -268,6 +289,10 @@ export default function CrmMenuContent() {
                     </Badge>
                   ) : item.badge && item.text === "Suggestions" ? (
                     <Badge badgeContent={newSuggestionsCount} color="error">
+                      {item.icon}
+                    </Badge>
+                  ) : item.badge && item.text === "Communications" ? (
+                    <Badge badgeContent={unreadMessagesCount} color="error">
                       {item.icon}
                     </Badge>
                   ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (

@@ -19,3 +19,13 @@ export async function sendMail(to: string[], subject: string, text: string, atta
     attachments,
   });
 }
+
+export async function sendHtmlMail(to: string[], subject: string, html: string, attachments?: any[]) {
+  await transporter.sendMail({
+    from: `"MyCRM Reports" <${process.env.SMTP_USER}>`,
+    to: to.join(','),
+    subject,
+    html,
+    attachments,
+  });
+}
