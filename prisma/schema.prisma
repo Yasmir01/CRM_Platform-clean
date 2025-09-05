@@ -34,6 +34,15 @@ model User {
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
 
+  // Back-relations
+  rentPayments           RentPayment[]  @relation("TenantRentPayments")
+  lateFees               LateFee[]      @relation("TenantLateFees")
+  refunds                Refund[]       @relation("TenantRefunds")
+  autopay                AutoPay?       @relation("TenantAutoPay")
+  ownerLedgers           OwnerLedger[]  @relation("OwnerLedgers")
+  uploadedDocuments      Document[]     @relation("UserUploadedDocuments")
+  vendorInvoices         MaintenanceInvoice[] @relation("VendorMaintenanceInvoices")
+
   @@index([orgId])
 }
 
@@ -42,6 +51,7 @@ model Organization {
   name      String
   plan      String        @default("basic")
   users     User[]
+  documents Document[]    @relation("OrgDocuments")
   settings  OrgSettings?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
@@ -202,8 +212,8 @@ model RentPayment {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  tenant       User      @relation(fields: [tenantId], references: [id])
-  property     Property? @relation(fields: [propertyId], references: [id])
+  tenant       User      @relation("TenantRentPayments", fields: [tenantId], references: [id])
+  property     Property? @relation("PropertyRentPayments", fields: [propertyId], references: [id])
   lease        Lease?    @relation(fields: [leaseId], references: [id])
   allocations  PaymentAllocation[]
 
@@ -241,9 +251,9 @@ model LateFee {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  tenant     User       @relation(fields: [tenantId], references: [id])
+  tenant     User       @relation("TenantLateFees", fields: [tenantId], references: [id])
   payment    RentPayment? @relation(fields: [paymentId], references: [id])
-  property   Property   @relation(fields: [propertyId], references: [id])
+  property   Property   @relation("PropertyLateFees", fields: [propertyId], references: [id])
 
   @@index([tenantId])
   @@index([propertyId])
@@ -261,7 +271,7 @@ model Refund {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  tenant     User        @relation(fields: [tenantId], references: [id])
+  tenant     User        @relation("TenantRefunds", fields: [tenantId], references: [id])
   payment    RentPayment @relation(fields: [paymentId], references: [id])
 
   @@index([tenantId])
@@ -287,8 +297,8 @@ model AutoPay {
   amountValue  Float?
   splitEmails  String[]  @default([])
 
-  tenant     User      @relation(fields: [tenantId], references: [id])
-  property   Property? @relation(fields: [propertyId], references: [id])
+  tenant     User      @relation("TenantAutoPay", fields: [tenantId], references: [id])
+  property   Property? @relation("PropertyAutoPays", fields: [propertyId], references: [id])
   lease      Lease?    @relation(fields: [leaseId], references: [id])
 
   @@index([propertyId])
@@ -317,6 +327,14 @@ model Property {
   id        String   @id @default(uuid())
   address   String
   units     Unit[]
+  rentPayments         RentPayment[]         @relation("PropertyRentPayments")
+  lateFees             LateFee[]             @relation("PropertyLateFees")
+  ownerLedgers         OwnerLedger[]         @relation("PropertyOwnerLedgers")
+  recurringTasks       RecurringTask[]       @relation("PropertyRecurringTasks")
+  maintenanceRequests  MaintenanceRequest[]  @relation("PropertyMaintenanceRequests")
+  slaConfigs           SLAConfig[]           @relation("PropertySLAConfigs")
+  escalationMatrices   EscalationMatrix[]    @relation("PropertyEscalationMatrices")
+  autoPays             AutoPay[]             @relation("PropertyAutoPays")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -327,7 +345,7 @@ model SLAConfig {
   hours      Int
   propertyId String?
 
-  property   Property? @relation(fields: [propertyId], references: [id])
+  property   Property? @relation("PropertySLAConfigs", fields: [propertyId], references: [id])
 
   @@index([category])
   @@index([propertyId])
@@ -347,7 +365,7 @@ model EscalationMatrix {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  property          Property?         @relation(fields: [propertyId], references: [id])
+  property          Property?         @relation("PropertyEscalationMatrices", fields: [propertyId], references: [id])
   subscriptionPlan  SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
 
   @@index([propertyId])
@@ -364,8 +382,8 @@ model OwnerLedger {
   note       String?
   createdAt  DateTime  @default(now())
 
-  owner      User      @relation(fields: [ownerId], references: [id])
-  property   Property? @relation(fields: [propertyId], references: [id])
+  owner      User      @relation("OwnerLedgers", fields: [ownerId], references: [id])
+  property   Property? @relation("PropertyOwnerLedgers", fields: [propertyId], references: [id])
 
   @@index([ownerId])
   @@index([propertyId])
@@ -377,6 +395,8 @@ model Unit {
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id])
   leases     Lease[]
+  recurringTasks       RecurringTask[]       @relation("UnitRecurringTasks")
+  maintenanceRequests  MaintenanceRequest[]  @relation("UnitMaintenanceRequests")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -389,6 +409,7 @@ model Tenant {
   name      String
   email     String?
   leases    Lease[]
+  documents Document[] @relation("TenantDocuments")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -401,9 +422,9 @@ model Lease {
   startDate     DateTime
   endDate       DateTime?
   status        LeaseStatus   @default(ACTIVE)
-  archived      Boolean       @default(false)   // hide from active UI if desired
+  archived      Boolean       @default(false)
   rentAmount    Float?
-  dueDay        Int?          // 1..31, day of the month rent is due
+  dueDay        Int?
   unit          Unit          @relation(fields: [unitId], references: [id])
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
   ledgerEntries LedgerEntry[]
@@ -414,8 +435,9 @@ model Lease {
   participants  LeaseParticipant[]
   invoices      Invoice[]
   payments      RentPayment[]
+  documents     Document[]    @relation("LeaseDocuments")
 
-  @@index([status])                     // fast lookup of terminated leases
+  @@index([status])
   @@index([tenantId])
   @@index([unitId])
 }
@@ -456,8 +478,8 @@ model RecurringTask {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
-  property    Property             @relation(fields: [propertyId], references: [id])
-  unit        Unit?                @relation(fields: [unitId], references: [id])
+  property    Property             @relation("PropertyRecurringTasks", fields: [propertyId], references: [id])
+  unit        Unit?                @relation("UnitRecurringTasks", fields: [unitId], references: [id])
 
   @@index([propertyId])
   @@index([unitId])
@@ -485,8 +507,8 @@ model MaintenanceRequest {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  property    Property @relation(fields: [propertyId], references: [id])
-  unit        Unit?    @relation(fields: [unitId], references: [id])
+  property    Property @relation("PropertyMaintenanceRequests", fields: [propertyId], references: [id])
+  unit        Unit?    @relation("UnitMaintenanceRequests", fields: [unitId], references: [id])
   attachments MaintenanceAttachment[]
   assignments MaintenanceAssignment[]
 
@@ -511,10 +533,10 @@ model Document {
   url         String
   createdAt   DateTime      @default(now())
 
-  org         Organization  @relation(fields: [orgId], references: [id])
-  uploader    User          @relation(fields: [uploadedBy], references: [id])
-  tenant      Tenant       @relation(fields: [tenantId], references: [id])
-  lease       Lease        @relation(fields: [leaseId], references: [id])
+  org         Organization  @relation("OrgDocuments", fields: [orgId], references: [id])
+  uploader    User          @relation("UserUploadedDocuments", fields: [uploadedBy], references: [id])
+  tenant      Tenant        @relation("TenantDocuments", fields: [tenantId], references: [id])
+  lease       Lease         @relation("LeaseDocuments", fields: [leaseId], references: [id])
 
   @@index([orgId])
   @@index([tenantId])
@@ -573,7 +595,7 @@ model MaintenanceInvoice {
   archivedAt DateTime?
 
   request    MaintenanceRequest @relation(fields: [requestId], references: [id])
-  vendor     User               @relation(fields: [vendorId], references: [id])
+  vendor     User               @relation("VendorMaintenanceInvoices", fields: [vendorId], references: [id])
   files      InvoiceFile[]
 
   @@index([requestId])
