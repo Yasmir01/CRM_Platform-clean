@@ -21,9 +21,12 @@ export default function InsightsDashboard({ orgId }: { orgId: string }) {
   const { data: riskData, isLoading: riskLoading } = useQuery({
     queryKey: ['top-risk', orgId],
     queryFn: async () => {
-      const r = await fetch(`/api/ai/top-risk?orgId=${encodeURIComponent(orgId)}`, {
+      const r = await fetch(`/api/ai/top-risk`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         cache: 'no-store',
+        body: JSON.stringify({ orgId }),
       });
       if (!r.ok) throw new Error('failed');
       return r.json();
