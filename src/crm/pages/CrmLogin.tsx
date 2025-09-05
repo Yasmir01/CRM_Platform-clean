@@ -248,6 +248,10 @@ export default function CrmLogin() {
             </Typography>
           </Divider>
 
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Link href="/vendor-login" underline="hover">Service Provider Login</Link>
+          </Box>
+
           {/* Show demo login in development or when explicitly enabled */}
           {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_LOGIN === 'true' || true) && (
             <DemoUsersSection>
