@@ -1,6 +1,7 @@
 import { withValidToken } from "./tokenService";
 import { logSyncEvent } from "./logService";
 import { persistXeroEntity } from "./mapper/xeroMapper";
+import { withValidToken } from "./tokenService";
 
 export async function fetchXeroEntity(orgId: string, tenantId: string, resourceType: string, resourceId: string) {
   const headers: Record<string, string> = await withValidToken("xero", orgId);
