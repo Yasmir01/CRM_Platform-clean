@@ -47,6 +47,12 @@ export default function EscalationMatrixEditor() {
   }, [scope, propertyId, planId]);
 
   const load = React.useCallback(async () => {
+    if (import.meta.env.DEV) {
+      setProperties([]);
+      setPlans([]);
+      return;
+    }
+
     const [propsRes, plansRes] = await Promise.all([
       fetch('/api/admin/filters/properties', { credentials: 'include' }),
       fetch('/api/subscription-plans', { credentials: 'include' }),
