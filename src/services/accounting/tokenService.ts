@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { getProvider } from "@/lib/accounting/factory";
 import { getTokens, saveTokens } from "@/lib/accounting/store";
 import type { ProviderName } from "@/lib/accounting/types";
@@ -31,4 +32,9 @@ export async function refreshAccessToken(provider: string, orgId: string): Promi
   await saveTokens(orgId, prov, refreshed);
 
   return refreshed.accessToken;
+}
+
+export async function withValidToken(provider: string, orgId: string): Promise<Record<string, string>> {
+  const token = await refreshAccessToken(provider, orgId);
+  return { Authorization: `Bearer ${token}` };
 }
