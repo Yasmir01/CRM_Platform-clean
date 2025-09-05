@@ -1,12 +1,11 @@
-import React from 'react';
-import SidebarNav from './SidebarNav';
-import type { Role } from './NavConfig';
+import ResponsiveSidebar from './ResponsiveSidebar';
 
-export default function AppLayout({ children, role }: { children: React.ReactNode; role: Role }) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="app-shell">
-      <SidebarNav role={role} />
-      <main className="main-content">{children}</main>
+    <div className="min-h-screen bg-gray-950 text-gray-100">
+      <ResponsiveSidebar />
+      {/* left padding only on desktop where the sidebar is fixed */}
+      <main className="md:pl-64">{children}</main>
     </div>
   );
 }
