@@ -1,5 +1,7 @@
 import { withValidToken } from "./accounting/tokenService";
 
+import { withValidToken } from "./accounting/tokenService";
+
 // QUICKBOOKS
 export async function syncQuickBooks(integrationId: string, companyId: string) {
   const headers = await withValidToken("quickbooks", integrationId);
