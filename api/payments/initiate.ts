@@ -1,41 +1,43 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_db';
-import { getUserOr401 } from '../../src/utils/authz';
-import { startStripeCheckout, startPayPalCheckout } from '../../src/lib/gateways';
+import { defineHandler } from '../_handler';
+import Stripe from 'stripe';
+import { z } from 'zod';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+const stripeKey = process.env.STRIPE_SECRET_KEY as string | undefined;
+const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: '2024-06-20' }) : null;
 
-  const user = getUserOr401(req, res);
-  if (!user) return;
+const Body = z.object({
+  orgId: z.string(),
+  tenantId: z.string(),
+  amountUsd: z.number().min(1),
+  invoiceId: z.string().optional(),
+});
 
-  try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const tenantId = String(body.tenantId || '');
-    const amount = Number(body.amount || 0);
-    const gatewayId = String(body.gatewayId || '');
-
-    if (!tenantId || !amount || !gatewayId) return res.status(400).json({ error: 'Missing fields' });
-
-    const gateway = await prisma.paymentGateway.findUnique({ where: { id: gatewayId } });
-    if (!gateway || !gateway.enabled) return res.status(400).json({ error: 'Gateway not available' });
-
-    let redirectUrl = '';
-    if (gateway.name.toLowerCase() === 'stripe') {
-      redirectUrl = await startStripeCheckout(amount, tenantId, (gateway as any).config || {});
-    } else if (gateway.name.toLowerCase() === 'paypal') {
-      redirectUrl = await startPayPalCheckout(amount, tenantId, (gateway as any).config || {});
-    } else {
-      // Fallback: simulate success redirect
-      redirectUrl = '/tenant/payments';
+export default defineHandler({
+  methods: ['POST'],
+  roles: ['TENANT', 'ADMIN'],
+  bodySchema: Body,
+  limitKey: 'payments:initiate',
+  fn: async ({ res, body, user }) => {
+    if (!stripe) {
+      return res.status(500).json({ error: 'stripe_not_configured' });
     }
 
-    return res.status(200).json({ redirectUrl });
-  } catch (e: any) {
-    console.error('payments initiate error', e?.message || e);
-    return res.status(500).json({ error: 'failed' });
-  }
-}
+    const key = `tenant:${body.tenantId}:amt:${body.amountUsd}:min:${Math.floor(Date.now() / 60000)}`;
+    const intent = await stripe.paymentIntents.create(
+      {
+        amount: Math.round(body.amountUsd * 100),
+        currency: 'usd',
+        customer: (user as any)?.stripeCustomerId || undefined,
+        metadata: {
+          orgId: body.orgId,
+          tenantId: body.tenantId,
+          invoiceId: body.invoiceId ?? '',
+        },
+        automatic_payment_methods: { enabled: true },
+      },
+      { idempotencyKey: key }
+    );
+
+    res.json({ ok: true, clientSecret: intent.client_secret });
+  },
+});
