@@ -1,4 +1,3 @@
-import VendorLogin from "./components/vendor/VendorLogin";
 import * as React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -197,7 +196,6 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/vendor-login" element={<VendorLogin />} />
       <Route path="/login" element={<CrmLogin />} />
       {/* Role-based portals */}
       <Route path="/tenant" element={<React.Suspense fallback={<PageLoader />}><TenantDashboard /></React.Suspense>} />
