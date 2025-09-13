@@ -590,6 +590,7 @@ function AppRoutes() {
 }
 
 import ImpersonationBanner from './components/ImpersonationBanner';
+import { BrandingProvider } from './context/BrandingContext';
 
 export default function App() {
   return (
