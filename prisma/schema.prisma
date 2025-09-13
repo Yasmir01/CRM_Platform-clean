@@ -61,6 +61,12 @@ model Organization {
   updatedAt DateTime      @updatedAt
 }
 
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
 model Account {
   id        String   @id @default(cuid())
   name      String
