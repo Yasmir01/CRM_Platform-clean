@@ -34,13 +34,22 @@ export async function POST(req: Request) {
 
     const pdfBytes = await generateInvoicePdf(source, invoice.accountId);
 
-    // Read global settings to determine CC/BCC behavior
+    // Read global settings to determine CC behavior
     const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
-    const cc = settings?.ccFinanceOnResend ? settings?.financeEmail : undefined;
+
+    // Resolve CC behavior: account override takes precedence
+    let ccEmail: string | undefined;
+    if (invoice.account?.ccFinanceOnResend === true) {
+      ccEmail = settings?.financeEmail ?? undefined;
+    } else if (invoice.account?.ccFinanceOnResend === false) {
+      ccEmail = undefined;
+    } else if (settings?.ccFinanceOnResend) {
+      ccEmail = settings.financeEmail ?? undefined;
+    }
 
     await sendEmail({
       to: invoice.account?.email ?? "billing@example.com",
-      cc: cc || undefined,
+      cc: ccEmail || undefined,
       subject: `Invoice #${invoice.number} - ${invoice.account?.name ?? ""}`,
       text: "Here is a copy of your invoice.",
       attachments: [{ filename: `invoice-${invoice.number}.pdf`, content: Buffer.from(pdfBytes) }],
