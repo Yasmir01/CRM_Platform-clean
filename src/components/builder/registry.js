@@ -1,4 +1,3 @@
-import PropertyLandingPage from "./PropertyLandingPage";
 import PropertyLandingPage from "./PropertyLandingPage.tsx";
 import PropertyLeadForm from "./PropertyLeadForm.tsx";
 
