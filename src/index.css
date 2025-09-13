@@ -1,5 +1,4 @@
-body {
-  margin: 0;
+margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -116,3 +115,60 @@ body > iframe[src*="metamask"] {
 .sidebar-link.active { background: #4f46e5; color: #fff; }
 .sidebar-footer { padding: 8px; border-top: 1px solid #e5e5e5; font-size: 12px; color: #666; }
 .main-content { flex: 1; background: #fff; min-height: 100vh; padding: 24px; }
+
+/* Tenant Portal — improved notification and section styles */
+.tenant-portal-container { padding: 32px; max-width: 1000px; margin: 0 auto; }
+.portal-header { margin-bottom: 18px; }
+.portal-title { font-size: 24px; font-weight: 700; margin: 0; }
+
+.portal-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+
+.portal-section { background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 18px; box-shadow: 0 1px 2px rgba(16,24,40,0.03); }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.section-title { font-size: 18px; font-weight: 600; margin: 0; }
+.section-actions { display: flex; align-items: center; gap: 12px; }
+
+.unread-badge { min-width: 28px; height: 28px; padding: 4px 8px; border-radius: 999px; background: #2563eb; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+.unread-badge[aria-hidden="true"] { display: none; }
+
+.action-button { padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: #2563eb; cursor: pointer; font-weight: 600; }
+.action-button:disabled { opacity: 0.5; cursor: not-allowed; }
+.mark-all-button { border: 1px solid #e6eefc; background: #f3f8ff; }
+
+.empty-state { color: #6b7280; }
+
+/* Reminders */
+.reminders-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.reminder-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; border: 1px solid #efe7d8; background: #fffbeb; }
+.reminder-main { display: flex; gap: 8px; align-items: center; }
+.reminder-type { color: #92400e; }
+.reminder-message { color: #111827; }
+.reminder-meta { color: #6b7280; font-size: 13px; }
+
+/* Notifications */
+.notifications-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.notification-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; border: 1px solid #e8eef6; }
+.notification-unread { background: #eff6ff; }
+.notification-read { background: #f9fafb; }
+.notification-content { display: flex; flex-direction: column; gap: 6px; }
+.notification-message { color: #0f172a; font-weight: 500; }
+.notification-meta { color: #6b7280; font-size: 13px; }
+.notification-actions { display: flex; align-items: center; gap: 10px; }
+.mark-button { background: transparent; border: 1px solid #c7e0ff; padding: 6px 10px; border-radius: 8px; color: #0b5ed7; }
+.read-label { color: #6b7280; font-weight: 600; }
+
+/* History */
+.history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; border: 1px solid #eef2f6; background: #ffffff; }
+.history-main { display: flex; gap: 8px; align-items: center; }
+.history-type { color: #111827; font-weight: 600; }
+.history-details { color: #374151; }
+.history-meta { color: #6b7280; font-size: 13px; }
+
+/* Loading */
+.loading-indicator { margin-top: 14px; color: #6b7280; }
+
+@media (min-width: 900px) {
+  .portal-grid { grid-template-columns: 1fr 440px; }
+  .portal-section { padding: 20px; }
+}
