@@ -170,4 +170,15 @@ model HistoryEvent {
   createdAt   DateTime @default(now())
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  // tenant relation omitted to stay compatible if Tenant model differs
+  type      String
+  message   String
+  read      Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+}
+
 // --- the rest of the schema remains unchanged ---
