@@ -346,6 +346,22 @@ model Property {
   updatedAt DateTime @updatedAt
 }
 
+model Lead {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+
+  name       String
+  email      String
+  phone      String?
+  message    String?
+
+  source     String?
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId])
+}
+
 model SLAConfig {
   id         String    @id @default(cuid())
   category   String
