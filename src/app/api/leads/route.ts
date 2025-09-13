@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       // Try to find landing page and related property/account/users
       const lp = await prisma.propertyLandingPage.findUnique({
         where: { id: data.landingPageId },
-        include: { property: true },
+        include: { property: true, subscriber: true },
       });
 
       let notifyEmails: string[] = [];
