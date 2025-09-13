@@ -77,6 +77,19 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
             console.warn('Failed to upload invoice PDF to storage', uploadErr);
           }
 
+          // Persist stripe event snapshot (for reproducible regeneration)
+          try {
+            await prisma.stripeEvent.create({
+              data: {
+                stripeId: invoice.id,
+                type: 'invoice.finalized',
+                data: invoice,
+              } as any,
+            });
+          } catch (storeErr) {
+            console.warn('Failed to store stripe event', storeErr);
+          }
+
           // Persist invoice record
           try {
             await prisma.billingInvoice.create({
