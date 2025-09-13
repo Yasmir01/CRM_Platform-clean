@@ -110,20 +110,59 @@ prisma.$use(async (params, next) => {
   const result = await next(params);
 
   try {
+    const res: any = result;
+
+    // HistoryEvent -> broadcast to tenant, owner, company/admin
     if (params.model === 'HistoryEvent' && params.action === 'create') {
-      const res: any = result;
-      if (res && res.tenantId) {
+      if (res?.tenantId) {
         await pusher.trigger(`tenant-${res.tenantId}`, 'new-history', {
           id: res.id,
           type: res.type,
           details: res.details,
           createdAt: res.createdAt,
           metadata: res.metadata || null,
+          ownerId: res.ownerId || null,
+          companyId: res.companyId || null,
         });
+      }
+
+      if (res?.ownerId) {
+        await pusher.trigger(`owner-${res.ownerId}`, 'new-history', {
+          id: res.id,
+          type: res.type,
+          details: res.details,
+          createdAt: res.createdAt,
+          metadata: res.metadata || null,
+          tenantId: res.tenantId || null,
+          companyId: res.companyId || null,
+        });
+      }
+
+      if (res?.companyId) {
+        await pusher.trigger(`company-${res.companyId}`, 'new-history', res);
+      } else {
+        await pusher.trigger('admin-global', 'new-history', res);
+      }
+    }
+
+    // Notification -> broadcast to tenant, owner, company/admin
+    if (params.model === 'Notification' && params.action === 'create') {
+      if (res?.tenantId) {
+        await pusher.trigger(`tenant-${res.tenantId}`, 'new-notification', res);
+      }
+
+      if (res?.ownerId) {
+        await pusher.trigger(`owner-${res.ownerId}`, 'new-notification', res);
+      }
+
+      if (res?.companyId) {
+        await pusher.trigger(`company-${res.companyId}`, 'new-notification', res);
+      } else {
+        await pusher.trigger('admin-global', 'new-notification', res);
       }
     }
   } catch (e) {
-    console.warn('Failed to trigger pusher for history event', e);
+    console.warn('Failed to trigger pusher for history/notification', e);
   }
 
   return result;
