@@ -49,6 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     if (format === 'pdf') {
+      // If GET PDF was requested, generate simple PDF
       const jsPDF = (await import('jspdf')).jsPDF as any;
       const doc = new jsPDF();
       doc.text('Financial Overview Report', 14, 20);
@@ -87,6 +88,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.setHeader('Content-Disposition', 'attachment; filename="financial-overview.pdf"');
       return res.status(200).send(Buffer.from(pdfBytes));
     }
+
+    return res.status(400).json({ error: 'Invalid format' });
 
     return res.status(400).json({ error: 'Invalid format' });
   } catch (err: any) {
