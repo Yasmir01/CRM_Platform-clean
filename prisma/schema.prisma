@@ -360,6 +360,8 @@ model Property {
   directMessages       DirectMessage[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([accountId])
 }
 
 model Lead {
