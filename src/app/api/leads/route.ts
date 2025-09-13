@@ -55,15 +55,32 @@ export async function POST(req: Request) {
 
       const emailText = `You have a new lead:\nName: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone || 'N/A'}\nMessage: ${lead.message || ''}`;
 
-      if (notifyEmails.length > 0) {
-        // send in background
-        sendEmail({ to: notifyEmails, subject: `New lead for ${lp?.property?.name || 'your property'}`, text: emailText }).catch((e: any) => console.error('Failed to send lead email', e));
+      // Determine subscriber-level contacts and settings
+      const subscriber: any = lp?.subscriber || null;
+      const subscriberEmail = subscriber?.email || (notifyEmails.length > 0 ? notifyEmails[0] : null);
+      const subscriberPhone = subscriber?.phone || (notifyPhones.length > 0 ? notifyPhones[0] : null);
+
+      // Check plan rules and admin overrides
+      const { canUseEmail, canUseSMS } = await import('../../../../../src/lib/planRules');
+
+      // Email: subscriber must want email, admin must allow, and plan must permit
+      if (
+        subscriberEmail &&
+        (subscriber?.notifyEmail ?? true) &&
+        (subscriber?.emailEnabledByAdmin ?? true) &&
+        canUseEmail(subscriber?.plan)
+      ) {
+        sendEmail({ to: subscriberEmail, subject: `New lead for ${lp?.property?.name || 'your property'}`, text: emailText }).catch((e: any) => console.error('Failed to send lead email', e));
       }
 
-      if (notifyPhones.length > 0) {
-        for (const p of notifyPhones) {
-          sendSMS(p, `New lead: ${lead.name} (${lead.email}) for ${lp?.property?.name || 'your property'}`).catch((e: any) => console.error('Failed to send lead SMS', e));
-        }
+      // SMS: subscriber must want SMS, admin must allow, and plan must permit
+      if (
+        subscriberPhone &&
+        (subscriber?.notifySMS ?? false) &&
+        (subscriber?.smsEnabledByAdmin ?? true) &&
+        canUseSMS(subscriber?.plan)
+      ) {
+        sendSMS(subscriberPhone, `New lead: ${lead.name} (${lead.email}) for ${lp?.property?.name || 'your property'}`).catch((e: any) => console.error('Failed to send lead SMS', e));
       }
     } catch (notifErr) {
       // do not fail lead creation if notifications fail
