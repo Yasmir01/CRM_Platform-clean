@@ -31,3 +31,17 @@ export function canUseFeature(plan: Plan | string | undefined, feature: string) 
   const p = String(plan || "").toLowerCase() as Plan;
   return (planFeatures[p] && Boolean((planFeatures as any)[p][feature])) || false;
 }
+
+export function canUseLandingPages(plan: Plan | string | undefined) {
+  return canUseFeature(plan, "landingPages");
+}
+
+export function canUseCustomDomain(plan: Plan | string | undefined) {
+  return canUseFeature(plan, "customDomain");
+}
+
+export function landingPageLimit(plan: Plan | string | undefined) {
+  const p = String(plan || "").toLowerCase();
+  if (p === "basic") return 1;
+  return Infinity;
+}
