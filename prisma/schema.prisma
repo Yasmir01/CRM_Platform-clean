@@ -80,6 +80,8 @@ model Account {
   seats     Int      @default(1)
   stripeCustomerId String?
   stripeSubId   String?
+  // Per-subscriber CC override: null = follow global setting, true/false overrides
+  ccFinanceOnResend Boolean?
   createdAt DateTime @default(now())
 }
 
