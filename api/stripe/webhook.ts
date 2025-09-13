@@ -48,6 +48,21 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         }
       }
     }
+
+    if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.created') {
+      const subscription = event.data.object as Stripe.Subscription & { metadata?: any };
+      const accountId = subscription.metadata?.accountId as string | undefined;
+      if (accountId) {
+        try {
+          const seatItem = subscription.items && (subscription.items as any).data.find((it: any) => String(it.price?.id) === String(process.env.STRIPE_PRICE_PER_SEAT));
+          const seats = seatItem ? Number(seatItem.quantity || 1) : 1;
+          await prisma.account.update({ where: { id: accountId }, data: { stripeSubId: subscription.id, seats } as any });
+          console.log('Updated account seats from subscription event', accountId, seats);
+        } catch (e) {
+          console.error('Failed to persist subscription update', e);
+        }
+      }
+    }
   } catch (e) {
     console.error('Webhook handler error', e);
   }
