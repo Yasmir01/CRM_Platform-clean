@@ -11,12 +11,24 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const propertyId = searchParams.get("propertyId");
   const type = searchParams.get("type");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+
+  const createdAtFilter = (from || to)
+    ? {
+        createdAt: {
+          ...(from ? { gte: new Date(from) } : {}),
+          ...(to ? { lte: new Date(to) } : {}),
+        },
+      }
+    : {};
 
   const feed = await prisma.historyEvent.findMany({
     where: {
       ownerId: session.user.ownerId,
       ...(propertyId ? { propertyId } : {}),
       ...(type ? { type } : {}),
+      ...createdAtFilter,
     },
     orderBy: { createdAt: "desc" },
     take: 50,
