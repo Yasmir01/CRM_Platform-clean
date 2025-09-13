@@ -36,5 +36,13 @@ export async function POST(req: Request) {
     },
   });
 
+  // create notification and email
+  try {
+    const { createNotification } = await import('../../../../lib/notify');
+    await createNotification(String(body.tenantId), 'reminder', `New reminder: ${body.message}`);
+  } catch (e) {
+    console.warn('Failed to create notification for reminder', e);
+  }
+
   return NextResponse.json(reminder);
 }
