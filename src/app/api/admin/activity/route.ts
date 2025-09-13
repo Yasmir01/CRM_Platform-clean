@@ -12,12 +12,24 @@ export async function GET(req: Request) {
   const tenantId = searchParams.get("tenantId");
   const companyId = searchParams.get("companyId");
   const type = searchParams.get("type");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+
+  const createdAtFilter = (from || to)
+    ? {
+        createdAt: {
+          ...(from ? { gte: new Date(from) } : {}),
+          ...(to ? { lte: new Date(to) } : {}),
+        },
+      }
+    : {};
 
   const activity = await prisma.historyEvent.findMany({
     where: {
       ...(tenantId ? { tenantId } : {}),
       ...(companyId ? { companyId } : {}),
       ...(type ? { type } : {}),
+      ...createdAtFilter,
     },
     orderBy: { createdAt: "desc" },
     take: 100,
