@@ -69,13 +69,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       await import('jspdf-autotable');
       const doc = new jsPDF();
 
-      // Header
-      doc.setFontSize(18);
+      // Branding: include logo & company info if available
+      const account = (dbUser as any)?.account;
+      if (account?.logoUrl) {
+        try {
+          const logoRes = await fetch(account.logoUrl);
+          if (logoRes.ok) {
+            const logoBuf = Buffer.from(await logoRes.arrayBuffer());
+            // try PNG/JPEG auto-detect by URL
+            const mime = account.logoUrl.endsWith('.png') ? 'PNG' : 'JPEG';
+            doc.addImage(logoBuf.toString('base64'), mime as any, 14, 10, 40, 20);
+          }
+        } catch (e) {
+          console.warn('Failed to load logo', e);
+        }
+      }
+
+      // Company Info
+      doc.setFontSize(12);
       doc.setTextColor('#111827');
-      doc.text('📊 Financial Overview Report', 14, 22);
-      doc.setFontSize(10);
+      doc.text(account?.name || 'Company', 60, 18);
+      if (account?.address) doc.text(String(account.address), 60, 26);
+      if (account?.phone) doc.text(`📞 ${account.phone}`, 60, 34);
+      if (account?.email) doc.text(`✉️ ${account.email}`, 60, 42);
+
+      // Report Title
+      doc.setFontSize(16);
+      doc.setTextColor('#111827');
+      doc.text('Financial Overview Report', 14, 60);
+      doc.setFontSize(11);
       doc.setTextColor('#6B7280');
-      doc.text(`Generated: ${today.toLocaleDateString()}`, 14, 30);
+      doc.text(`Generated: ${today.toLocaleDateString()}`, 14, 70);
 
       // Summary table
       (doc as any).autoTable({
