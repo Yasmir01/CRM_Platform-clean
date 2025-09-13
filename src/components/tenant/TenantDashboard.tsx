@@ -24,6 +24,22 @@ export default function TenantDashboard() {
   const lease = data.lease;
   const payments = data.payments || [];
 
+  async function handlePay(leaseId: string) {
+    try {
+      const res = await fetch('/api/payments/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId }) });
+      const json = await res.json();
+      if (res.ok && json.url) {
+        window.location.href = json.url;
+      } else {
+        console.error('Checkout error', json);
+        alert('Failed to start checkout');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Failed to start checkout');
+    }
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
       <h1 className="text-2xl font-bold mb-4">Welcome, {data.tenant?.name}</h1>
@@ -39,6 +55,9 @@ export default function TenantDashboard() {
         <p>
           <strong>Next Due Date:</strong> {lease.dueDate ? new Date(lease.dueDate).toLocaleDateString() : 'N/A'}
         </p>
+        <div className="mt-4">
+          <button onClick={() => handlePay(lease.id)} className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Pay Rent Online</button>
+        </div>
       </div>
 
       <div className="bg-white shadow rounded-lg p-6 mb-6">
