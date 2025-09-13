@@ -43,6 +43,20 @@ export default function Sidebar() {
         <div className="p-4 font-bold text-xl border-b">CRM Menu</div>
         <nav className="p-4 space-y-1">
           {MENU.map((item) => {
+            // map some common routes to RBAC actions
+            const actionMap: Record<string, string> = {
+              '/properties': 'property:read',
+              '/tenants': 'tenant:read',
+              '/rent': 'payment:read',
+              '/work-orders': 'ticket:read',
+              '/invoices': 'invoice:read',
+            };
+
+            const requiredAction = actionMap[item.href];
+            const allowed = requiredAction ? useRBAC(requiredAction) : true;
+
+            if (!allowed) return null;
+
             const Icon = item.icon as any;
             const active = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
