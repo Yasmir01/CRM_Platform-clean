@@ -30,14 +30,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const successUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.STRIPE_SUCCESS_URL || `https://${req.headers.host}/crm/settings`;
     const cancelUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.STRIPE_CANCEL_URL || `https://${req.headers.host}/crm/settings`;
 
+    // determine seat count
+    const account = await prisma.account.findUnique({ where: { id: dbUser.accountId }, include: { users: true } });
+    const seatCount = (account?.users || []).length || 1;
+
+    const perSeatPrice = process.env.STRIPE_PRICE_PER_SEAT;
+
+    const line_items: any[] = [{ price: priceId, quantity: 1 }];
+    if (perSeatPrice) {
+      line_items.push({ price: perSeatPrice, quantity: seatCount });
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items,
+      subscription_data: { metadata: { accountId: dbUser.accountId, priceId } },
       success_url: successUrl,
       cancel_url: cancelUrl,
       customer_email: dbUser.email || undefined,
-      metadata: { accountId: dbUser.accountId, priceId },
     });
 
     return res.status(200).json({ url: session.url });
