@@ -597,12 +597,14 @@ export default function App() {
     <AppTheme>
       <CssBaseline enableColorScheme />
       <LocaleProvider>
-        <AuthProvider>
-          <ImpersonationBanner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AuthProvider>
+        <BrandingProvider>
+          <AuthProvider>
+            <ImpersonationBanner />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </AuthProvider>
+        </BrandingProvider>
       </LocaleProvider>
     </AppTheme>
   );
