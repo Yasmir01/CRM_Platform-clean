@@ -26,12 +26,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Scope by accountId when not SUPER_ADMIN
     const accountFilter = role !== 'SUPER_ADMIN' && dbUser?.accountId ? { accountId: dbUser.accountId } : undefined;
 
+    const paymentsWhere: any = {};
+    if (role !== 'SUPER_ADMIN' && dbUser?.accountId) paymentsWhere.lease = { property: { accountId: dbUser.accountId } };
+
     const payments = await prisma.payment.findMany({
-      where: {
-        orderBy: undefined,
-        ...(accountFilter ? { lease: { property: { accountId: dbUser.accountId } } } : {}),
-        createdAt: { gte: new Date(0) },
-      },
+      where: paymentsWhere,
       include: { tenant: true, lease: { include: { property: true } } },
       orderBy: { createdAt: 'desc' },
     });
