@@ -323,7 +323,25 @@ export function AdminDashboard() {
 
         <div className="flex gap-4 mb-6">
           <a href="/api/admin/export?format=csv" className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">Download CSV</a>
-          <a href="/api/admin/export?format=pdf" className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700">Download PDF</a>
+          <button onClick={async ()=>{
+            try{
+              const chartImage = (await import('../../lib/canvasUtils')).chartToBase64 ? await (await import('../../lib/canvasUtils')).chartToBase64('trendChart') : null;
+              const res = await fetch('/api/admin/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chartImage }) });
+              if (!res.ok) throw new Error('Export failed');
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'financial-overview.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            }catch(e){
+              console.error(e);
+              alert('Failed to generate PDF');
+            }
+          }} className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700">Download PDF</button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
