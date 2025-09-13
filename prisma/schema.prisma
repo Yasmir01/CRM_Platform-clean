@@ -74,6 +74,7 @@ model Account {
   address   String?
   phone     String?
   email     String?
+  plan      Plan     @default(FREE)
   users     User[]
   properties Property[]
   createdAt DateTime @default(now())
