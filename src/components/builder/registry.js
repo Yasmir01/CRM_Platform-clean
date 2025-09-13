@@ -1,4 +1,5 @@
 import PropertyLandingPage from "./PropertyLandingPage";
+import PropertyLandingPage from "./PropertyLandingPage";
 import PropertyLeadForm from "./PropertyLeadForm";
 
 /**
@@ -59,6 +60,6 @@ import PropertyLeadForm from "./PropertyLeadForm";
     // @builder/io/react not installed — that's fine in this environment.
     // Avoid throwing so dev server stays up.
     // eslint-disable-next-line no-console
-    console.warn("Builder not available — skipping component registration.", err?.message || err);
+    console.warn("Builder not available �� skipping component registration.", err?.message || err);
   }
 })();
