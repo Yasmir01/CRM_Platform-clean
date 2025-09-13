@@ -28,12 +28,20 @@ export const POST = withAuthorization("property:write", async (req: Request) => 
   const subscriberId = user?.subscriberId || user?.orgId || user?.accountId;
 
   const subscriber = await prisma.subscriber.findUnique({ where: { id: subscriberId }, include: { landingPages: true } });
-  if (!subscriber || !canUseLandingPages(subscriber.plan as any)) {
-    return new Response("Landing pages not enabled for your plan", { status: 403 });
+  if (!subscriber) {
+    return new Response("Subscriber not found", { status: 403 });
+  }
+
+  // Validate landing page access: subscriber-level flag, admin override, and plan
+  const landingPagesEnabled = Boolean((subscriber as any).enableLandingPages);
+  const landingPagesAdmin = (subscriber as any).landingPagesEnabledByAdmin;
+
+  if (!landingPagesEnabled || landingPagesAdmin === false || !canUseLandingPages(subscriber.plan as any)) {
+    return new Response("Landing pages not enabled", { status: 403 });
   }
 
   const limit = landingPageLimit(subscriber.plan as any);
-  if (limit !== Infinity && subscriber.landingPages.length >= limit) {
+  if (limit !== Infinity && (subscriber as any).landingPages && (subscriber as any).landingPages.length >= limit) {
     return new Response("Landing page limit reached", { status: 403 });
   }
 
@@ -42,8 +50,13 @@ export const POST = withAuthorization("property:write", async (req: Request) => 
     return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400, headers: { "Content-Type": "application/json" } });
   }
 
-  if (data.customDomain && !canUseCustomDomain(subscriber.plan as any)) {
-    return new Response("Custom domains require Enterprise plan", { status: 403 });
+  // Validate custom domain availability and subscriber-level flags
+  if (data.customDomain) {
+    const customEnabled = Boolean((subscriber as any).enableCustomDomain);
+    const customAdmin = (subscriber as any).customDomainEnabledByAdmin;
+    if (!customEnabled || customAdmin === false || !canUseCustomDomain(subscriber.plan as any)) {
+      return new Response("Custom domains not enabled", { status: 403 });
+    }
   }
 
   // ensure slug and customDomain uniqueness
