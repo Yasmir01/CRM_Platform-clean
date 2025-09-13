@@ -449,7 +449,7 @@ model Unit {
   recurringTasks       RecurringTask[]       @relation("UnitRecurringTasks")
   maintenanceRequests  MaintenanceRequest[]  @relation("UnitMaintenanceRequests")
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@index([propertyId])
   @@unique([propertyId, number])
@@ -544,7 +544,7 @@ model RecurringTask {
   vendorId    String?
   isActive    Boolean              @default(true)
   createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
+  updatedAt   DateTime @updatedAt
 
   property    Property             @relation("PropertyRecurringTasks", fields: [propertyId], references: [id])
   unit        Unit?                @relation("UnitRecurringTasks", fields: [unitId], references: [id])
@@ -591,6 +591,7 @@ model MaintenanceRequest {
   @@index([escalated])
 }
 
+/// ----------------------------------------------------------
 /// Document Management System
 model Document {
   id          String        @id @default(cuid())
@@ -865,4 +866,20 @@ model TempCode {
   updatedAt DateTime @updatedAt
 
   @@index([expiresAt])
+}
+
+// Billing invoices generated from Stripe (white-labeled PDFs)
+model BillingInvoice {
+  id          String   @id @default(cuid())
+  accountId   String
+  account     Account  @relation(fields: [accountId], references: [id])
+  stripeId    String   @unique
+  number      String
+  amount      Int
+  periodStart DateTime
+  periodEnd   DateTime
+  pdfUrl      String
+  createdAt   DateTime @default(now())
+
+  @@index([accountId])
 }

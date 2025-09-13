@@ -50,7 +50,6 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
     }
 
     if (event.type === 'invoice.finalized') {
-      // generate invoice PDF and email
       const invoice = event.data.object as any;
       // try to get accountId from metadata, else try subscription
       let accountId = invoice.metadata?.accountId as string | undefined;
@@ -65,7 +64,37 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         try {
           const { generateInvoicePdf } = await import('../../src/lib/invoicePdf');
           const { sendEmail } = await import('../../src/lib/mailer');
+          const { s3Upload } = await import('../../src/lib/storage');
+
           const pdfBytes = await generateInvoicePdf(invoice, accountId);
+
+          // Upload to storage
+          const fileName = `invoices/${accountId}/invoice-${invoice.number || invoice.id}.pdf`;
+          let pdfUrl: string | undefined = undefined;
+          try {
+            pdfUrl = await s3Upload(fileName, pdfBytes);
+          } catch (uploadErr) {
+            console.warn('Failed to upload invoice PDF to storage', uploadErr);
+          }
+
+          // Persist invoice record
+          try {
+            await prisma.billingInvoice.create({
+              data: {
+                accountId,
+                stripeId: invoice.id,
+                number: invoice.number || invoice.id,
+                amount: invoice.amount_due ?? invoice.total ?? 0,
+                periodStart: invoice.period_start ? new Date(invoice.period_start * 1000) : new Date(),
+                periodEnd: invoice.period_end ? new Date(invoice.period_end * 1000) : new Date(),
+                pdfUrl: pdfUrl ?? '',
+              } as any,
+            });
+          } catch (dbErr) {
+            console.error('Failed to save billing invoice to DB', dbErr);
+          }
+
+          // Send email with attachment
           await sendEmail({
             to: invoice.customer_email || invoice.customer || undefined,
             subject: `Invoice #${invoice.number || invoice.id}`,
