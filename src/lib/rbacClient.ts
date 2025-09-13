@@ -20,7 +20,7 @@ const permissions: PermissionMap = {
     "ticket:read",
     "ticket:write",
   ],
-  PROPERTY_MANAGER: ["property:read", "tenant:read", "ticket:read", "ticket:write"],
+  PROPERTY_MANAGER: ["property:read", "tenant:read", "ticket:read", "ticket:write", "lead:read", "lead:write"],
   ACCOUNTING: ["invoice:read", "invoice:write", "payment:read", "payment:write"],
   MAINTENANCE: ["ticket:read", "ticket:write"],
   OWNER: ["owner:read", "property:read", "tenant:read"],
