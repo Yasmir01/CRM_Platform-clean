@@ -20,5 +20,14 @@ export async function POST(req: Request) {
 
   const body = await req.json();
   const event = await prisma.historyEvent.create({ data: { tenantId: body.tenantId, type: body.type, details: body.details, metadata: body.metadata || null } });
+
+  // create notification
+  try {
+    const { createNotification } = await import('../../../../lib/notify');
+    await createNotification(String(body.tenantId), 'history', `New history entry: ${body.type} - ${body.details}`);
+  } catch (e) {
+    console.warn('Failed to create notification for history', e);
+  }
+
   return NextResponse.json(event);
 }
