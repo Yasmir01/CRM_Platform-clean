@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!userPayload) return;
 
   const userId = String(userPayload.sub || userPayload?.id || '');
-  const dbUser = await prisma.user.findUnique({ where: { id: userId } });
+  const dbUser = await prisma.user.findUnique({ where: { id: userId }, include: { account: true } });
   if (!dbUser) return res.status(401).json({ error: 'Unauthorized' });
 
   const allowed = ['SUPER_ADMIN', 'ADMIN', 'OWNER'];
