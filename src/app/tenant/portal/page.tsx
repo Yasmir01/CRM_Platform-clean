@@ -47,6 +47,52 @@ export default function TenantPortal() {
         )}
       </section>
 
+      {/* Notifications */}
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Notifications</h2>
+        <div className="mb-4">
+          <button
+            onClick={async () => {
+              await fetch('/api/tenant/notifications/mark-all', { method: 'POST' });
+              const res = await fetch('/api/tenant/notifications');
+              const data = await res.json();
+              setNotifications(data);
+            }}
+            className="mb-4 text-sm text-gray-600 hover:underline"
+          >
+            Mark all as read
+          </button>
+        </div>
+
+        {notifications.length === 0 ? (
+          <p className="text-gray-500">No notifications yet.</p>
+        ) : (
+          <ul className="space-y-2">
+            {notifications.map((n) => (
+              <li key={n.id} className={`p-3 rounded border flex justify-between ${n.read ? 'bg-gray-50' : 'bg-blue-50'}`}>
+                <div>
+                  {n.message}
+                  <div className="text-xs text-gray-500">{new Date(n.createdAt).toLocaleString()}</div>
+                </div>
+                {!n.read && (
+                  <button
+                    onClick={async () => {
+                      await fetch(`/api/tenant/notifications/${n.id}`, { method: 'POST' });
+                      const res = await fetch('/api/tenant/notifications');
+                      const data = await res.json();
+                      setNotifications(data);
+                    }}
+                    className="ml-4 text-sm text-blue-600 hover:underline"
+                  >
+                    Mark as read
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* History */}
       <section>
         <h2 className="text-xl font-semibold mb-4">History</h2>
