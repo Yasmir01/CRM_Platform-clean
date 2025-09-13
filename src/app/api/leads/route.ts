@@ -32,9 +32,6 @@ export async function POST(req: Request) {
 
     // Fire-and-forget: notify subscriber(s) via email and SMS when possible
     try {
-      const { sendEmail } = await import('../../../../../src/lib/mailer');
-      const { sendSMS } = await import('../../../../../src/lib/sms');
-
       // Try to find landing page and related property/account/users
       const lp = await prisma.propertyLandingPage.findUnique({
         where: { id: data.landingPageId },
