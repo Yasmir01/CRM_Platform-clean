@@ -27,6 +27,50 @@ export async function POST(req: Request) {
       },
     });
 
+    // Fire-and-forget: notify subscriber(s) via email and SMS when possible
+    try {
+      const { sendEmail } = await import('../../../../../src/lib/mailer');
+      const { sendSMS } = await import('../../../../../src/lib/sms');
+
+      // Try to find landing page and related property/account/users
+      const lp = await prisma.propertyLandingPage.findUnique({
+        where: { id: data.landingPageId },
+        include: { property: true },
+      });
+
+      let notifyEmails: string[] = [];
+      let notifyPhones: string[] = [];
+
+      if (lp) {
+        const accountId = (lp as any).companyId || lp.property?.accountId || null;
+        if (accountId) {
+          const users = await prisma.user.findMany({ where: { accountId }, select: { email: true, phone: true } });
+          notifyEmails = users.map((u) => u.email).filter(Boolean);
+          notifyPhones = users.map((u) => u.phone).filter(Boolean);
+        }
+      }
+
+      // Fallback to env email
+      if (notifyEmails.length === 0 && process.env.EMAIL_FROM) notifyEmails = [process.env.EMAIL_FROM];
+
+      const emailText = `You have a new lead:\nName: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone || 'N/A'}\nMessage: ${lead.message || ''}`;
+
+      if (notifyEmails.length > 0) {
+        // send in background
+        sendEmail({ to: notifyEmails, subject: `New lead for ${lp?.property?.name || 'your property'}`, text: emailText }).catch((e: any) => console.error('Failed to send lead email', e));
+      }
+
+      if (notifyPhones.length > 0) {
+        for (const p of notifyPhones) {
+          sendSMS(p, `New lead: ${lead.name} (${lead.email}) for ${lp?.property?.name || 'your property'}`).catch((e: any) => console.error('Failed to send lead SMS', e));
+        }
+      }
+    } catch (notifErr) {
+      // do not fail lead creation if notifications fail
+      // eslint-disable-next-line no-console
+      console.warn('Lead created but notification failed or not configured', notifErr);
+    }
+
     return new Response(JSON.stringify({ success: true, lead }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     // eslint-disable-next-line no-console
