@@ -20,6 +20,12 @@ export function BrandingProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await fetch('/api/branding');
         if (!res.ok) return;
+        const contentType = res.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          const text = await res.text();
+          console.error('Branding endpoint did not return JSON:', text.slice(0, 200));
+          return;
+        }
         const data = await res.json();
         if (mounted) setBranding(data || null);
       } catch (e) {
