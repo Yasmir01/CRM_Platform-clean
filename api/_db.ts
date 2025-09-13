@@ -102,3 +102,29 @@ prisma.$use(async (params, next) => {
 
   return result;
 });
+
+// Broadcast history events via Pusher for tenant channels
+import { pusher } from "../src/lib/pusher";
+
+prisma.$use(async (params, next) => {
+  const result = await next(params);
+
+  try {
+    if (params.model === 'HistoryEvent' && params.action === 'create') {
+      const res: any = result;
+      if (res && res.tenantId) {
+        await pusher.trigger(`tenant-${res.tenantId}`, 'new-history', {
+          id: res.id,
+          type: res.type,
+          details: res.details,
+          createdAt: res.createdAt,
+          metadata: res.metadata || null,
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to trigger pusher for history event', e);
+  }
+
+  return result;
+});
