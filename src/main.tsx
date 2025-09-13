@@ -2,6 +2,7 @@ import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
+import "@/components/builder/registry";
 import App from "./App.tsx";
 import { initializeErrorHandling } from "./utils/errorHandling";
 import { AppErrorBoundary } from "@/components/core/AppErrorBoundary";
