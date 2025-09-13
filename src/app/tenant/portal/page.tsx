@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function TenantPortal() {
   const [reminders, setReminders] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   useEffect(() => {
     fetch("/api/tenant/reminders")
@@ -16,6 +17,11 @@ export default function TenantPortal() {
       .then((res) => res.json())
       .then(setHistory)
       .catch(() => setHistory([]));
+
+    fetch("/api/tenant/notifications")
+      .then((res) => res.json())
+      .then(setNotifications)
+      .catch(() => setNotifications([]));
   }, []);
 
   return (
