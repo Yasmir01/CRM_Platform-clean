@@ -48,39 +48,59 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).send(csv);
     }
 
-    if (format === 'pdf') {
-      // If GET PDF was requested, generate simple PDF
-      const jsPDF = (await import('jspdf')).jsPDF as any;
+    // Support POST branded PDF
+    if (req.method === 'POST') {
+      const raw = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const chartImage = raw.chartImage as string | undefined | null;
+
+      const { jsPDF } = await import('jspdf');
+      await import('jspdf-autotable');
       const doc = new jsPDF();
-      doc.text('Financial Overview Report', 14, 20);
 
-      // Totals
-      const totalCollected = payments.filter((p: any) => String(p.status || '').toUpperCase() === 'PAID').reduce((s: number, p: any) => s + (p.amount || 0), 0);
-      const totalOverdue = leases.filter((l: any) => l.dueDate && new Date(l.dueDate) < today && !payments.find((p: any) => p.leaseId === l.id && String(p.status || '').toUpperCase() === 'PAID')).reduce((s: number, l: any) => s + (l.rentAmount || 0), 0);
-      doc.text(`Total Collected: $${totalCollected.toFixed(2)}`, 14, 30);
-      doc.text(`Total Overdue: $${totalOverdue.toFixed(2)}`, 14, 38);
+      // Header
+      doc.setFontSize(18);
+      doc.setTextColor('#111827');
+      doc.text('📊 Financial Overview Report', 14, 22);
+      doc.setFontSize(10);
+      doc.setTextColor('#6B7280');
+      doc.text(`Generated: ${today.toLocaleDateString()}`, 14, 30);
 
-      let y = 50;
-      doc.text('Recent Payments:', 14, y);
-      y += 8;
-      payments.slice(0, 50).forEach((p: any, i: number) => {
-        const line = `${i + 1}. ${p.tenant?.name || ''} - ${p.lease?.property?.title || ''} - $${p.amount} - ${new Date(p.createdAt).toLocaleDateString()} - ${p.status}`;
-        doc.text(line, 14, y);
-        y += 8;
-        if (y > 270) { doc.addPage(); y = 20; }
+      // Summary table
+      (doc as any).autoTable({
+        startY: 36,
+        head: [['Total Collected', 'Total Overdue', 'Active Tenants']],
+        body: [[
+          `$${payments.filter((p:any)=>String(p.status||'').toUpperCase()==='PAID').reduce((s:number,p:any)=>s+(p.amount||0),0).toLocaleString()}`,
+          `$${leases.filter((l:any)=>l.dueDate && new Date(l.dueDate) < today && !payments.find((p:any)=>p.leaseId===l.id && String(p.status||'').toUpperCase()==='PAID')).reduce((s:number,l:any)=>s+(l.rentAmount||0),0).toLocaleString()}`,
+          `${leases.length}`
+        ]],
+        theme: 'grid',
       });
 
-      doc.addPage();
-      doc.text('Per-Property Breakdown:', 14, 20);
-      let y2 = 34;
-      for (const prop of properties) {
-        const propCollected = payments.filter((p: any) => p.lease && p.lease.propertyId === prop.id && String(p.status || '').toUpperCase() === 'PAID').reduce((s: number, p: any) => s + (p.amount || 0), 0);
-        const propOverdue = leases.filter((l: any) => l.propertyId === prop.id && l.dueDate && new Date(l.dueDate) < today && !payments.find((p: any) => p.leaseId === l.id && String(p.status || '').toUpperCase() === 'PAID')).reduce((s: number, l: any) => s + (l.rentAmount || 0), 0);
-        const tenantsCount = (prop.leases || []).length;
-        const line = `${prop.title || prop.address || prop.id} — Collected: $${propCollected} — Overdue: $${propOverdue} — Tenants: ${tenantsCount}`;
-        doc.text(line, 14, y2);
-        y2 += 8;
-        if (y2 > 270) { doc.addPage(); y2 = 20; }
+      // Property breakdown
+      const propertyRows = properties.map((prop:any)=>{
+        const propCollected = payments.filter((p:any)=>p.lease && p.lease.propertyId===prop.id && String(p.status||'').toUpperCase()==='PAID').reduce((s:number,p:any)=>s+(p.amount||0),0);
+        const propOverdue = leases.filter((l:any)=>l.propertyId===prop.id && l.dueDate && new Date(l.dueDate) < today && !payments.find((p:any)=>p.leaseId===l.id && String(p.status||'').toUpperCase()==='PAID')).reduce((s:number,l:any)=>s+(l.rentAmount||0),0);
+        return [prop.title || prop.address || prop.id, `$${propCollected.toLocaleString()}`, `$${propOverdue.toLocaleString()}`, (prop.leases||[]).length];
+      });
+
+      (doc as any).autoTable({
+        startY: (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 10 : 60,
+        head: [['Property','Collected','Overdue','Tenants']],
+        body: propertyRows,
+        theme: 'striped',
+      });
+
+      // Chart image
+      if (chartImage) {
+        try {
+          doc.addPage();
+          doc.setFontSize(14);
+          doc.text('Rent Collection Trend', 14, 20);
+          doc.addImage(chartImage, 'PNG', 14, 30, 180, 100);
+        } catch (e) {
+          console.warn('Failed to embed chart image', e);
+        }
       }
 
       const pdfBytes = doc.output('arraybuffer');
