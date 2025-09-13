@@ -34,13 +34,13 @@ export async function POST(req: Request) {
 
     const pdfBytes = await generateInvoicePdf(source, invoice.accountId);
 
-    const financeTeam = process.env.SUPERADMIN_FINANCE_EMAIL;
-    const financeBcc = process.env.SUPERADMIN_FINANCE_BCC;
+    // Read global settings to determine CC/BCC behavior
+    const settings = await prisma.globalSettings.findUnique({ where: { id: 'default' } });
+    const cc = settings?.ccFinanceOnResend ? settings?.financeEmail : undefined;
 
     await sendEmail({
       to: invoice.account?.email ?? "billing@example.com",
-      cc: financeTeam || undefined,
-      bcc: financeBcc || undefined,
+      cc: cc || undefined,
       subject: `Invoice #${invoice.number} - ${invoice.account?.name ?? ""}`,
       text: "Here is a copy of your invoice.",
       attachments: [{ filename: `invoice-${invoice.number}.pdf`, content: Buffer.from(pdfBytes) }],
