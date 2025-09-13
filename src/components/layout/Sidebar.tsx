@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MENU } from '../../config/menu';
+import { useRBAC } from '@/hooks/useRBAC';
 
 function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
