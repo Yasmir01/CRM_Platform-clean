@@ -59,6 +59,18 @@ model Organization {
   updatedAt DateTime      @updatedAt
 }
 
+model Account {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String?
+  address   String?
+  phone     String?
+  email     String?
+  users     User[]
+  properties Property[]
+  createdAt DateTime @default(now())
+}
+
 model OrgSettings {
   id                 String        @id @default(cuid())
   orgId              String        @unique
