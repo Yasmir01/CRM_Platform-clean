@@ -1,4 +1,13 @@
 import { prisma } from '../../../../../api/_db';
+import { withAuthorization } from '../../../../lib/authz';
+
+export const GET = withAuthorization('lead:read', async (req: Request) => {
+  const leads = await prisma.lead.findMany({
+    include: { landingPage: { include: { property: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
+  return new Response(JSON.stringify(leads), { headers: { 'Content-Type': 'application/json' } });
+});
 
 export async function POST(req: Request) {
   try {
