@@ -1,6 +1,6 @@
 import PropertyLandingPage from "./PropertyLandingPage";
-import PropertyLandingPage from "./PropertyLandingPage";
-import PropertyLeadForm from "./PropertyLeadForm";
+import PropertyLandingPage from "./PropertyLandingPage.tsx";
+import PropertyLeadForm from "./PropertyLeadForm.tsx";
 
 /**
  * Register components with Builder so editors can drag/drop and edit props.
