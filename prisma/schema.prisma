@@ -894,3 +894,11 @@ model StripeEvent {
 
   @@index([type])
 }
+
+// Global settings manageable by Super Admin
+model GlobalSettings {
+  id                String   @id @default(cuid())
+  ccFinanceOnResend Boolean  @default(true)
+  financeEmail      String?
+  updatedAt         DateTime @updatedAt
+}
