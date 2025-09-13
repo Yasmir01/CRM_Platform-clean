@@ -15,12 +15,16 @@ export const transporter = nodemailer.createTransport({
 
 export async function sendEmail({
   to,
+  cc,
+  bcc,
   subject,
   text,
   html,
   attachments,
 }: {
   to: string | string[];
+  cc?: string | string[];
+  bcc?: string | string[];
   subject: string;
   text: string;
   html?: string;
@@ -30,12 +34,14 @@ export async function sendEmail({
     await transporter.sendMail({
       from: FROM,
       to: Array.isArray(to) ? to.join(',') : to,
+      cc: cc ? (Array.isArray(cc) ? cc.join(',') : cc) : undefined,
+      bcc: bcc ? (Array.isArray(bcc) ? bcc.join(',') : bcc) : undefined,
       subject,
       text,
       html,
       attachments,
     });
-    console.log(`✅ Email sent to ${Array.isArray(to) ? to.join(',') : to}`);
+    console.log(`✅ Email sent to ${Array.isArray(to) ? to.join(',') : to}${cc ? `; cc=${Array.isArray(cc) ? cc.join(',') : cc}` : ''}${bcc ? `; bcc=${Array.isArray(bcc) ? bcc.join(',') : bcc}` : ''}`);
   } catch (err) {
     console.error('❌ Email error:', err);
     throw err;
