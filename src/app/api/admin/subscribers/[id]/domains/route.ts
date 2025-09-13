@@ -1,29 +1,47 @@
 import { prisma } from "../../../../../../api/_db";
-import { getSession, requireSuperAdmin } from "../../../../../../lib/auth";
+import { getSession } from "../../../../../../lib/auth";
 
-export const GET = async (_req: Request, { params }: any) => {
-  const session = await getSession(_req);
-  try { requireSuperAdmin(session); } catch (e) { return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 403, headers: { 'Content-Type': 'application/json' } }); }
-
-  const id = params.id;
-  const sub = await prisma.subscriber.findUnique({ where: { id } });
-  if (!sub) return new Response(JSON.stringify({}), { headers: { 'Content-Type': 'application/json' } });
-
-  // return override fields if present
-  return new Response(JSON.stringify({ landingPagesEnabledByAdmin: (sub as any).landingPagesEnabledByAdmin ?? null, customDomainEnabledByAdmin: (sub as any).customDomainEnabledByAdmin ?? null }), { headers: { 'Content-Type': 'application/json' } });
-};
-
-export const PUT = async (req: Request, { params }: any) => {
+async function requireSuperAdminSession(req: Request) {
   const session = await getSession(req);
-  try { requireSuperAdmin(session); } catch (e) { return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 403, headers: { 'Content-Type': 'application/json' } }); }
+  if (!session?.user || session.user.role !== 'SUPER_ADMIN') throw new Error('Unauthorized');
+  return session;
+}
 
-  const id = params.id;
-  const payload = await req.json();
+export async function GET(req: Request, { params }: any) {
+  try {
+    await requireSuperAdminSession(req);
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
 
-  const updated = await prisma.subscriber.update({ where: { id }, data: {
-    landingPagesEnabledByAdmin: typeof payload.landingPagesEnabledByAdmin === 'boolean' ? payload.landingPagesEnabledByAdmin : null,
-    customDomainEnabledByAdmin: typeof payload.customDomainEnabledByAdmin === 'boolean' ? payload.customDomainEnabledByAdmin : null,
-  }});
+  const subscriber = await prisma.subscriber.findUnique({
+    where: { id: params.id },
+    select: {
+      id: true,
+      name: true,
+      plan: true,
+      landingPagesEnabledByAdmin: true,
+      customDomainEnabledByAdmin: true,
+    },
+  });
 
-  return new Response(JSON.stringify({ success: true, updated }), { headers: { 'Content-Type': 'application/json' } });
-};
+  if (!subscriber) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: { 'Content-Type': 'application/json' } });
+
+  return new Response(JSON.stringify(subscriber), { headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function PUT(req: Request, { params }: any) {
+  try {
+    await requireSuperAdminSession(req);
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const body = await req.json();
+  const updated = await prisma.subscriber.update({ where: { id: params.id }, data: {
+    landingPagesEnabledByAdmin: typeof body.landingPagesEnabledByAdmin === 'boolean' ? body.landingPagesEnabledByAdmin : undefined,
+    customDomainEnabledByAdmin: typeof body.customDomainEnabledByAdmin === 'boolean' ? body.customDomainEnabledByAdmin : undefined,
+  } });
+
+  return new Response(JSON.stringify(updated), { headers: { 'Content-Type': 'application/json' } });
+}
