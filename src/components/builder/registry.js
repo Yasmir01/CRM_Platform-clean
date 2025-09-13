@@ -13,7 +13,8 @@ import PropertyLeadForm from "./PropertyLeadForm";
 
 (async function registerBuilderComponents() {
   try {
-    const { builder } = await import("@builder.io/react");
+    const modName = "@builder.io/react";
+    const { builder } = await import(/* @vite-ignore */ modName);
 
     builder.init(process.env.NEXT_PUBLIC_BUILDER_API_KEY || "");
 
@@ -60,6 +61,6 @@ import PropertyLeadForm from "./PropertyLeadForm";
     // @builder/io/react not installed — that's fine in this environment.
     // Avoid throwing so dev server stays up.
     // eslint-disable-next-line no-console
-    console.warn("Builder not available �� skipping component registration.", err?.message || err);
+    console.warn("Builder not available — skipping component registration.", err?.message || err);
   }
 })();
