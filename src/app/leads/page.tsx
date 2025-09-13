@@ -1,6 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
@@ -40,6 +53,53 @@ export default function LeadsPage() {
       console.error(e);
     }
   };
+
+  const filteredLeads = useMemo(() => {
+    const byStatus = statusFilter === "all" ? leads : leads.filter((l) => l.status === statusFilter);
+    if (!search) return byStatus;
+    const q = search.toLowerCase().trim();
+    return byStatus.filter((l) => {
+      const hay = [l.name, l.email, l.landingPage?.property?.name, l.message]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [leads, statusFilter, search]);
+
+  // Chart data
+  const leadsByProperty = useMemo(() => {
+    const acc: Record<string, any> = {};
+    for (const l of leads) {
+      const property = l.landingPage?.property?.name || "Unknown";
+      acc[property] = acc[property] || { property, count: 0 };
+      acc[property].count++;
+    }
+    return Object.values(acc);
+  }, [leads]);
+
+  const leadsByStatus = useMemo(() => {
+    const acc: Record<string, any> = {};
+    for (const l of leads) {
+      const s = l.status || "unknown";
+      acc[s] = acc[s] || { status: s, count: 0 };
+      acc[s].count++;
+    }
+    return Object.values(acc);
+  }, [leads]);
+
+  const COLORS = ["#8884d8", "#82ca9d", "#ffc658"];
+
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
+  const paginatedLeads = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredLeads.slice(start, start + pageSize);
+  }, [filteredLeads, page]);
+
+  useEffect(() => {
+    // reset to first page when filters change
+    setPage(1);
+  }, [statusFilter, search]);
 
   const exportCSV = () => {
     const rowsSource = filteredLeads;
@@ -88,46 +148,46 @@ export default function LeadsPage() {
     doc.save("leads.pdf");
   };
 
-  const filteredLeads = useMemo(() => {
-    const byStatus = statusFilter === "all" ? leads : leads.filter((l) => l.status === statusFilter);
-    if (!search) return byStatus;
-    const q = search.toLowerCase().trim();
-    return byStatus.filter((l) => {
-      const hay = [l.name, l.email, l.landingPage?.property?.name, l.message]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(q);
-    });
-  }, [leads, statusFilter, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
-  const paginatedLeads = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredLeads.slice(start, start + pageSize);
-  }, [filteredLeads, page]);
-
-  useEffect(() => {
-    // reset to first page when filters change
-    setPage(1);
-  }, [statusFilter, search]);
-
   if (loading) return <p className="p-4">Loading leads...</p>;
 
   return (
     <div className="p-6">
-      {/* Header + Export */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Lead Management</h1>
-        <div className="flex gap-2">
-          <button onClick={exportCSV} className="px-3 py-1 bg-blue-500 text-white rounded">
-            Export CSV
-          </button>
-          <button onClick={exportPDF} className="px-3 py-1 bg-green-500 text-white rounded">
-            Export PDF
-          </button>
+      <h1 className="text-2xl font-bold mb-6">Lead Management</h1>
+
+      {/* --- Charts --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Leads by Property */}
+        <div className="bg-white shadow rounded p-4">
+          <h2 className="text-lg font-semibold mb-2">Leads by Property</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={leadsByProperty}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="property" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="count" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Leads by Status */}
+        <div className="bg-white shadow rounded p-4">
+          <h2 className="text-lg font-semibold mb-2">Leads by Status</h2>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie data={leadsByStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label>
+                {leadsByStatus.map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
+
+      {/* --- Filters + Table + Pagination (same as before) --- */}
 
       {/* Filters */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
