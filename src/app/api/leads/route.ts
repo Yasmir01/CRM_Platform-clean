@@ -1,8 +1,8 @@
 import { prisma } from '../../../../../api/_db';
-import { prisma } from '../../../../../api/_db';
 import { withAuthorization } from '../../../../lib/authz';
 import { sendEmail } from '../../../../lib/mailer';
 import { sendSMS } from '../../../../lib/sms';
+import { canUseFeature } from '../../../../lib/planRules';
 
 export const GET = withAuthorization('lead:read', async (req: Request) => {
   const leads = await prisma.lead.findMany({
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     // Fire-and-forget: notify subscriber(s) via email and SMS when possible
     try {
       // Try to find landing page and related property/account/users
-      const lp = await prisma.propertyLandingPage.findUnique({
+      const lp = await prisma.landingPage.findUnique({
         where: { id: data.landingPageId },
         include: { property: true, subscriber: true },
       });
@@ -61,7 +61,8 @@ export async function POST(req: Request) {
       const subscriberPhone = subscriber?.phone || (notifyPhones.length > 0 ? notifyPhones[0] : null);
 
       // Check plan rules and admin overrides
-      const { canUseEmail, canUseSMS } = await import('../../../../../src/lib/planRules');
+      const canUseEmail = (plan: any) => canUseFeature(plan, 'email');
+      const canUseSMS = (plan: any) => canUseFeature(plan, 'sms');
 
       // Email: subscriber must want email, admin must allow, and plan must permit
       if (
