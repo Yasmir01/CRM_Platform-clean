@@ -212,6 +212,18 @@ export default function CrmMenuContent() {
     updateSuggestionCount();
     if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
+    // Safe fetch wrapper to avoid synchronous fetch failures (some environments may monkey-patch fetch)
+    const safeFetch = (...args: any[]) => {
+      try {
+        const fn = (globalThis as any).fetch || (window as any).fetch;
+        if (!fn) return Promise.resolve(null);
+        // Attempt to call fetch and ensure any rejection is handled
+        return Promise.resolve(fn.apply(null, args)).catch(() => null);
+      } catch (err) {
+        return Promise.resolve(null);
+      }
+    };
+
     const updateUnreadMessages = async () => {
       try {
         if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
@@ -220,12 +232,15 @@ export default function CrmMenuContent() {
           setUnreadMessagesCount(0);
           return;
         }
-        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', keepalive: true }).catch(() => null as any);
+        // Use absolute origin to avoid unexpected proxy/cors issues in some environments
+        const url = (typeof location !== 'undefined' ? location.origin : '') + '/api/messages/unread';
+        const r = await safeFetch(url, { credentials: 'include', cache: 'no-store' });
         if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
-        const d = await r.json().catch(() => ({ count: 0 }));
+        const d = await (r.json ? r.json().catch(() => ({ count: 0 })) : Promise.resolve({ count: 0 }));
         setUnreadMessagesCount(Number(d?.count || 0));
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
+        console.warn('updateUnreadMessages failed', e);
         setUnreadMessagesCount(0);
       }
     };
