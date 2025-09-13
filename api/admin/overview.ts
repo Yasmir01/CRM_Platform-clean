@@ -23,15 +23,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const today = new Date();
     const startOfYear = new Date(today.getFullYear(), 0, 1);
 
+    // Scope data to user's org unless SUPER_ADMIN
+    const orgFilter: any = {};
+    if (role !== 'SUPER_ADMIN') {
+      orgFilter['orgId'] = dbUser.orgId;
+    }
+
     const payments = await prisma.payment.findMany({
-      where: { createdAt: { gte: startOfYear } },
+      where: {
+        createdAt: { gte: startOfYear },
+        ...(role !== 'SUPER_ADMIN' ? { lease: { property: { orgId: dbUser.orgId } } } : {}),
+      },
       include: { lease: { include: { property: true } }, tenant: true },
     });
 
-    const leases = await prisma.lease.findMany({ where: { archived: false, status: 'ACTIVE' }, include: { tenant: true, property: true } });
+    const leases = await prisma.lease.findMany({ where: { archived: false, status: 'ACTIVE', ...(role !== 'SUPER_ADMIN' ? { property: { orgId: dbUser.orgId } } : {}) }, include: { tenant: true, property: true } });
 
     const totalCollected = payments
-      .filter((p: any) => String(p.status || '').toUpperCase() === 'PAID' || String(p.status || '').toLowerCase() === 'succeeded' || String(p.status || '').toLowerCase() === 'success')
+      .filter((p: any) => {
+        const s = String(p.status || '').toUpperCase();
+        return s === 'PAID' || s === 'SUCCEEDED' || s === 'SUCCESS';
+      })
       .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
     // overdue: leases with a dueDate in past and no PAID payment for that lease
@@ -39,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!l.dueDate) return false;
       const due = new Date(l.dueDate);
       if (due >= today) return false;
-      const paid = payments.find((p: any) => p.leaseId === l.id && (String(p.status || '').toUpperCase() === 'PAID' || String(p.status || '').toLowerCase() === 'succeeded' || String(p.status || '').toLowerCase() === 'success'));
+      const paid = payments.find((p: any) => p.leaseId === l.id && (['PAID','SUCCEEDED','SUCCESS'].includes(String(p.status || '').toUpperCase())));
       return !paid;
     });
 
@@ -53,8 +65,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const collected = payments
         .filter((p: any) => {
           const created = new Date(p.createdAt);
+          const s = String(p.status || '').toUpperCase();
           return (
-            (String(p.status || '').toUpperCase() === 'PAID' || String(p.status || '').toLowerCase() === 'succeeded' || String(p.status || '').toLowerCase() === 'success') &&
+            (s === 'PAID' || s === 'SUCCEEDED' || s === 'SUCCESS') &&
             created.getMonth() === d.getMonth() &&
             created.getFullYear() === d.getFullYear()
           );
@@ -64,13 +77,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       monthlyData.push({ month: monthLabel, collected });
     }
 
+    // Property breakdown
+    const propertyStats: { property: string; collected: number; overdue: number; tenants: number }[] = [];
+    const properties = await prisma.property.findMany({ where: { ...(role !== 'SUPER_ADMIN' ? { orgId: dbUser.orgId } : {}) }, include: { leases: true } });
+
+    for (const property of properties) {
+      const propertyPayments = payments.filter((p: any) => p.lease && p.lease.propertyId === property.id && ['PAID','SUCCEEDED','SUCCESS'].includes(String(p.status || '').toUpperCase()));
+      const propertyCollected = propertyPayments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+      const propertyOverdue = leases
+        .filter((l: any) => l.propertyId === property.id && l.dueDate && new Date(l.dueDate) < today && !payments.find((p: any) => p.leaseId === l.id && ['PAID','SUCCEEDED','SUCCESS'].includes(String(p.status || '').toUpperCase())))
+        .reduce((sum: number, l: any) => sum + (l.rentAmount || 0), 0);
+
+      propertyStats.push({ property: property.title || property.address || String(property.id), collected: propertyCollected, overdue: propertyOverdue, tenants: (property.leases || []).length });
+    }
+
     return res.status(200).json({
-      totals: {
-        collected: totalCollected,
-        overdue: totalOverdue,
-        tenants: leases.length,
-      },
+      totals: { collected: totalCollected, overdue: totalOverdue, tenants: leases.length },
       trend: monthlyData,
+      properties: propertyStats,
     });
   } catch (err: any) {
     console.error('admin overview error', err?.message || err);
