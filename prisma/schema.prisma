@@ -814,6 +814,20 @@ model AccountingContact {
 }
 
 // --- Temp codes for passwordless/OTP flows ---
+model ReportPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  frequency String   // "weekly", "monthly", "none"
+  format    String   // "csv", "excel", "pdf"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
 model TempCode {
   email     String   @id
   code      String
