@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../../../api/_db';
+import { prisma } from '../../_db';
 import { getUserOr401 } from '../../../src/utils/authz';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
