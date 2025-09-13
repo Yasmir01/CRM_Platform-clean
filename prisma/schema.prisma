@@ -345,6 +345,8 @@ enum EntryType {
 model Property {
   id        String   @id @default(uuid())
   address   String
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
   units     Unit[]
   rentPayments         RentPayment[]         @relation("PropertyRentPayments")
   lateFees             LateFee[]             @relation("PropertyLateFees")
