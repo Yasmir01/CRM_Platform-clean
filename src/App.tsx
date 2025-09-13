@@ -1,4 +1,3 @@
-import VendorLogin from "./components/vendor/VendorLogin";
 import * as React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
