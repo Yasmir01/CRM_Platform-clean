@@ -23,9 +23,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const format = (req.query && (req.query as any).format) ? String((req.query as any).format) : 'csv';
 
     const today = new Date();
-    const payments = await prisma.payment.findMany({ orderBy: { createdAt: 'desc' }, include: { tenant: true, lease: { include: { property: true } } } });
-    const leases = await prisma.lease.findMany({ where: { active: true }, include: { tenant: true, property: true } });
-    const properties = await prisma.property.findMany({ include: { leases: true } });
+    // Scope by accountId when not SUPER_ADMIN
+    const accountFilter = role !== 'SUPER_ADMIN' && dbUser?.accountId ? { accountId: dbUser.accountId } : undefined;
+
+    const payments = await prisma.payment.findMany({
+      where: {
+        orderBy: undefined,
+        ...(accountFilter ? { lease: { property: { accountId: dbUser.accountId } } } : {}),
+        createdAt: { gte: new Date(0) },
+      },
+      include: { tenant: true, lease: { include: { property: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const leases = await prisma.lease.findMany({ where: { active: true, ...(accountFilter ? { property: { accountId: dbUser.accountId } } : {}) }, include: { tenant: true, property: true } });
+
+    const properties = await prisma.property.findMany({ where: { ...(accountFilter ? { accountId: dbUser.accountId } : {}) }, include: { leases: true } });
 
     if (format === 'csv') {
       const { Parser } = await import('json2csv');
