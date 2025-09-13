@@ -168,7 +168,7 @@ export default function AdminInvoicesPage() {
                     {new Date(inv.periodStart).toLocaleDateString()} - {new Date(inv.periodEnd).toLocaleDateString()}
                   </td>
                   <td className="admin-td p-2">${(inv.amount / 100).toFixed(2)}</td>
-                  <td className="admin-td p-2">
+                  <td className="admin-td p-2 flex gap-2 items-center">
                     {inv.pdfUrl ? (
                       <a className="admin-download text-blue-600 underline" href={inv.pdfUrl} target="_blank" rel="noreferrer">
                         Download PDF
@@ -176,6 +176,31 @@ export default function AdminInvoicesPage() {
                     ) : (
                       <span className="admin-no-pdf text-gray-500">N/A</span>
                     )}
+
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch("/api/admin/invoices/resend", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ invoiceId: inv.id }),
+                          });
+                          if (res.ok) {
+                            alert("Invoice resent successfully ✅");
+                          } else {
+                            const err = await res.json().catch(() => null);
+                            console.error('Resend failed', err);
+                            alert("Failed to resend invoice ❌");
+                          }
+                        } catch (e) {
+                          console.error(e);
+                          alert("Failed to resend invoice ❌");
+                        }
+                      }}
+                      className="resend-btn text-sm bg-yellow-500 text-white px-2 py-1 rounded"
+                    >
+                      Resend
+                    </button>
                   </td>
                 </tr>
               ))}
