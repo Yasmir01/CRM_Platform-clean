@@ -883,3 +883,14 @@ model BillingInvoice {
 
   @@index([accountId])
 }
+
+// Stored Stripe webhook payloads for reproducible invoices
+model StripeEvent {
+  id        String   @id @default(cuid())
+  stripeId  String   @unique
+  type      String
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([type])
+}
