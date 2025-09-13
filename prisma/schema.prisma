@@ -144,4 +144,30 @@ model Image {
   property   Property @relation(fields: [propertyId], references: [id])
 }
 
+model Reminder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  type        String
+  message     String
+  dueDate     DateTime
+  status      String   @default("pending")
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model HistoryEvent {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+
+  type        String
+  details     String
+  metadata    Json?
+
+  createdAt   DateTime @default(now())
+}
+
 // --- the rest of the schema remains unchanged ---
