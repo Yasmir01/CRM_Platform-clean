@@ -1,6 +1,6 @@
 "use client";
 import { Builder } from "@builder.io/react";
-import { PropertyHero, PropertyGallery, PropertyLeadForm } from "./index";
+import { PropertyHero, PropertyGallery, PropertyLeadForm, PropertyLandingPage } from "./index";
 
 // ✅ Register PropertyHero
 Builder.registerComponent(PropertyHero, {
