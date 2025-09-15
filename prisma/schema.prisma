@@ -220,11 +220,9 @@ model LateFee {
 
 model AutoPay {
   id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
-  active    Boolean  @default(true)
-  method    String
-  createdAt DateTime @default(now())
+  active    Boolean  @default(false)
+  tenant    Tenant   @relation("TenantAutoPay", fields: [tenantId], references: [id])
+  tenantId  String   @unique  // One autopay per tenant
 }
 
 model Refund {
