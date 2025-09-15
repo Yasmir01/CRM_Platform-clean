@@ -33,11 +33,22 @@ export async function POST(req: Request) {
       lastName = rest.join(' ');
     }
 
+    const email = data.email ? String(data.email).trim() : '';
+    if (!firstName || !email) {
+      return NextResponse.json({ error: 'firstName and email are required' }, { status: 400 });
+    }
+
+    // Duplicate email check (case-insensitive)
+    const existing = await prisma.contact.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
+    if (existing) {
+      return NextResponse.json({ error: 'Contact with this email already exists' }, { status: 409 });
+    }
+
     const contact = await prisma.contact.create({
       data: {
         firstName: String(firstName || ''),
         lastName: String(lastName || ''),
-        email: data.email || null,
+        email: email,
         phone: data.phone || null,
         position: data.position || null,
         companyId: data.companyId || null,
