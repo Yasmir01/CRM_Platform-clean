@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json(contact);
       }
       case 'DELETE': {
-        const { id } = req.body;
+        const id = String(req.query?.id || (req.body && (req.body.id || req.body)) || '');
         if (!id) return res.status(400).json({ error: 'Missing id' });
         await prisma.contact.delete({ where: { id } });
         return res.status(204).end();
