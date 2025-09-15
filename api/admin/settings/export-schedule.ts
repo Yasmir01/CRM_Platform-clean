@@ -14,7 +14,7 @@ async function getSchedule(req: VercelRequest, res: VercelResponse) {
   if (!user) return;
   const orgId = String((user as any).orgId || 'global');
   const settings = await prisma.orgSettings.findUnique({ where: { orgId } });
-  return res.status(200).json({ schedule: settings?.exportSchedule || 'daily', allowImpersonation: Boolean(settings?.allowImpersonation) });
+  return res.status(200).json({ schedule: settings?.exportSchedule || 'daily', allowImpersonation: Boolean(settings?.allowImpersonation), allowExport: Boolean(settings?.allowExport) });
 }
 
 async function putSchedule(req: VercelRequest, res: VercelResponse) {
