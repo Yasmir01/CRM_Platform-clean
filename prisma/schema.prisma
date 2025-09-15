@@ -181,11 +181,22 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+model SubscriptionPlan {
+  id           String   @id @default(cuid())
+  name         String
+  allowExports Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
 model Subscriber {
   id                          String   @id @default(cuid())
   name                        String
+  companyName                 String?  // optional alias for display
+  logoUrl                     String?
   email                       String   @unique
-  plan                        String   @default("basic")
+  planId                      String?
+  plan                        SubscriptionPlan? @relation(fields: [planId], references: [id])
+  forceAllowExports           Boolean  @default(false)
 
   // Feature toggles
   enableReminders             Boolean  @default(false)
