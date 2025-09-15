@@ -7,6 +7,7 @@ export default function ImpersonationLogs() {
   const [search, setSearch] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
+  const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
     let mounted = true;
