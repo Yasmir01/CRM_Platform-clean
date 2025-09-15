@@ -371,43 +371,40 @@ model OrgSettings {
 model Company {
   id         String    @id @default(cuid())
   name       String
-  domain     String?   @db.VarChar(255)
+  domain     String?   @unique
   industry   String?
-  size       String?   // small, medium, enterprise
+
   contacts   Contact[]
+
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  archived   Boolean   @default(false)
-
-  @@index([domain])
 }
 
 model Contact {
-  id         String    @id @default(cuid())
-  firstName  String
-  lastName   String
-  email      String?   @unique
-  phone      String?
-  position   String?   // job title
-  companyId  String?
-  company    Company?  @relation(fields: [companyId], references: [id])
-  ownerId    String?   // assigned user (sales rep)
-  notes      Note[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  archived   Boolean   @default(false)
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  phone     String?
+  position  String?
 
-  @@index([ownerId])
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  ownerId   String?
+  owner     User?    @relation(fields: [ownerId], references: [id])
+
+  notes     Note[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Note {
-  id          String   @id @default(cuid())
-  content     String
-  contactId   String?
-  contact     Contact? @relation(fields: [contactId], references: [id])
-  createdById String
-  createdBy   User     @relation(fields: [createdById], references: [id])
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  content   String
+  contactId String
+  contact   Contact  @relation(fields: [contactId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model GlobalSettings {
