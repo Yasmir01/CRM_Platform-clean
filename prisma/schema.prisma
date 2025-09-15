@@ -384,13 +384,15 @@ model ImpersonationLog {
 // User model (kept minimal here, adjust as needed)
 // ============================================================
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  accountId String?
-  account   Account? @relation(fields: [accountId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  name                  String?         @db.VarChar(255)
+  // 🔗 Direct Messages
+  directMessagesSent     DirectMessage[] @relation("DirectMessagesSent")
+  directMessagesReceived DirectMessage[] @relation("DirectMessagesReceived")
+  uploadedDocuments      Document[]      @relation("UserUploadedDocuments")
+
+  @@index([name])
 }
 
 // Minimal Tenant model used by several payment/lease flows.
