@@ -227,11 +227,12 @@ model AutoPay {
 
 model Refund {
   id        String   @id @default(cuid())
-  paymentId String
-  payment   Payment  @relation(fields: [paymentId], references: [id])
   amount    Float
-  reason    String?
-  createdAt DateTime @default(now())
+  date      DateTime @default(now())
+  tenant    Tenant   @relation("TenantRefunds", fields: [tenantId], references: [id])
+  tenantId  String
+
+  @@index([tenantId, date])
 }
 
 // ============================================================
