@@ -210,10 +210,12 @@ model RentPayment {
 
 model LateFee {
   id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
   amount    Float
-  appliedAt DateTime @default(now())
+  date      DateTime @default(now())
+  tenant    Tenant   @relation("TenantLateFees", fields: [tenantId], references: [id])
+  tenantId  String
+
+  @@index([tenantId, date])
 }
 
 model AutoPay {
