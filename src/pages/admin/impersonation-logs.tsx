@@ -24,7 +24,26 @@ export default function ImpersonationLogs() {
       }
     }
     load();
-    return () => { mounted = false; };
+
+    // fetch org settings in parallel
+    let mountedSettings = true;
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/org-settings/current');
+        if (!res.ok) {
+          // non 2xx - ignore and keep settings null
+          return;
+        }
+        const s = await res.json();
+        if (!mountedSettings) return;
+        setSettings(s || null);
+      } catch (e) {
+        // ignore
+      }
+    }
+    loadSettings();
+
+    return () => { mounted = false; mountedSettings = false; };
   }, []);
 
   const filteredLogs = logs.filter((log) => {
@@ -131,10 +150,12 @@ export default function ImpersonationLogs() {
           <button onClick={() => { setSearch(''); setStatusFilter('all'); setFromDate(''); setToDate(''); }} className="clear-filters px-3 py-1 bg-gray-200 rounded">Clear Filters</button>
         </div>
 
-        <div className="export-actions flex items-center gap-2 ml-auto">
-          <button onClick={exportCSV} className="px-3 py-1 bg-blue-600 text-white rounded">Export CSV</button>
-          <button onClick={exportPDF} className="px-3 py-1 bg-green-600 text-white rounded">Export PDF</button>
-        </div>
+        {settings?.allowExport && (
+          <div className="export-actions flex items-center gap-2 ml-auto">
+            <button onClick={exportCSV} className="px-3 py-1 bg-blue-600 text-white rounded">Export CSV</button>
+            <button onClick={exportPDF} className="px-3 py-1 bg-green-600 text-white rounded">Export PDF</button>
+          </div>
+        )}
       </div>
 
       <table className="min-w-full border">
