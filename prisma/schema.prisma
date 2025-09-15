@@ -313,14 +313,17 @@ model ImpersonationLog {
   id            String   @id @default(cuid())
   superAdminId  String
   targetUserId  String
+  subscriberId  String?
   startedAt     DateTime @default(now())
   endedAt       DateTime?
 
   superAdmin    User     @relation(fields: [superAdminId], references: [id])
   targetUser    User     @relation(fields: [targetUserId], references: [id])
+  subscriber    Subscriber? @relation(fields: [subscriberId], references: [id])
 
   @@index([superAdminId])
   @@index([targetUserId])
+  @@index([subscriberId])
 }
 
 // --- the rest of the schema remains unchanged ---
