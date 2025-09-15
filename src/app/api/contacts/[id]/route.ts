@@ -28,6 +28,11 @@ export async function PATCH(
     const { id } = params;
     const body = await req.json();
     const updates: any = {};
+    if (body.name !== undefined) {
+      const [f, ...rest] = String(body.name).split(' ');
+      updates.firstName = f || '';
+      updates.lastName = rest.join(' ');
+    }
     if (body.firstName !== undefined) updates.firstName = body.firstName;
     if (body.lastName !== undefined) updates.lastName = body.lastName;
     if (body.email !== undefined) updates.email = body.email;
@@ -38,6 +43,20 @@ export async function PATCH(
     return NextResponse.json(updated);
   } catch (e: any) {
     console.error('PATCH /api/contacts/[id] error', e?.message || e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    await prisma.contact.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (e: any) {
+    console.error('DELETE /api/contacts/[id] error', e?.message || e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
