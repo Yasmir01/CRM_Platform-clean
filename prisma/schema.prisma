@@ -395,18 +395,19 @@ model User {
   @@index([name])
 }
 
-// Minimal Tenant model used by several payment/lease flows.
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String?  @unique
-  orgId     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  String               @id @default(cuid())
+  name                String               @db.VarChar(255)
+  // 🔗 Relations
+  rentPayments        RentPayment[]        @relation("TenantRentPayments")
+  lateFees            LateFee[]            @relation("TenantLateFees")
+  refunds             Refund[]             @relation("TenantRefunds")
+  autopay             AutoPay?             @relation("TenantAutoPay")
+  ownerLedgers        OwnerLedger[]        @relation("OwnerLedgers")
+  uploadedDocuments   Document[]           @relation("UserUploadedDocuments")
+  vendorInvoices      MaintenanceInvoice[] @relation("VendorMaintenanceInvoices")
 
-  // relations (optional)
-  leases    Lease[]
-  rentPayments RentPayment[]
+  @@index([name])
 }
 
 // Owner ledger entries used by owner-facing APIs
