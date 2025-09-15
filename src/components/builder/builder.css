@@ -48,3 +48,32 @@
 .lead-sub { margin-top: 0; margin-bottom: 12px; color: #6b7280; }
 .more-details { margin-top: 28px; }
 .more-title { margin-bottom: 8px; }
+
+/* Lead pipeline styles */
+.lp-board { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 8px 24px rgba(15,23,42,0.06); }
+.lp-board-title { font-size: 1.125rem; margin-bottom: 12px; }
+.lp-board-columns { display: flex; gap: 12px; overflow-x: auto; }
+.lp-column { min-width: 220px; background: #f9fafb; border-radius: 8px; padding: 8px; display:flex; flex-direction:column; max-height: 420px; }
+.lp-column-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; font-weight:600; }
+.lp-count { background:#111827; color:#fff; padding:2px 8px; border-radius:12px; font-size:0.85rem; }
+.lp-column-body { overflow:auto; display:flex; flex-direction:column; gap:8px; }
+.lp-card { background:#fff; border-radius:6px; padding:8px; box-shadow:0 4px 8px rgba(0,0,0,0.04); }
+.lp-card-title { font-weight:600; }
+.lp-card-sub { color:#6b7280; font-size:0.9rem; }
+.lp-card-placeholder { color:#9ca3af; font-style:italic; }
+.lp-loading { color:#6b7280; }
+
+/* Lead detail */
+.lead-card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 8px 20px rgba(0,0,0,0.04); }
+.lead-card-row { margin-bottom:8px; }
+.lead-notes { color:#374151; }
+
+/* Payments */
+.payments-table { background:#fff; border-radius:8px; padding:12px; box-shadow:0 8px 20px rgba(0,0,0,0.04); }
+.payments-header { display:flex; justify-content:space-between; align-items:center; }
+.payments-actions .btn { margin-left:8px; }
+.payments-list { width:100%; border-collapse:collapse; margin-top:8px; }
+.payments-list th, .payments-list td { text-align:left; padding:8px; border-bottom:1px solid #f3f4f6; }
+.btn { padding:6px 10px; border-radius:6px; background:#eef2ff; }
+.btn-primary { padding:8px 12px; background:#111827; color:#fff; border-radius:6px; }
+.proration-form .input { display:block; width:100%; padding:8px; margin-bottom:8px; border:1px solid #e5e7eb; border-radius:6px; }
