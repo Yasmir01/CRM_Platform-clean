@@ -353,6 +353,17 @@ model ReportPreference {
   createdAt DateTime @default(now())
 }
 
+model OrgSettings {
+  id                 String        @id @default(cuid())
+  orgId              String        @unique
+  exportSchedule     String        @default("daily")
+  allowImpersonation Boolean       @default(false)
+  allowExport        Boolean       @default(true)
+  organization       Organization  @relation(fields: [orgId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
 model GlobalSettings {
   id                 String  @id @default(cuid())
   allowImpersonation Boolean @default(false)
