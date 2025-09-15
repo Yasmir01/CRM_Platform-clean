@@ -208,7 +208,7 @@ export default function AdminLeadManagementPage() {
 
                   {/* Impersonate button: find subscriber's primaryUserId from subscribers list */}
                   {(() => {
-                    const sub = subscribers.find((s) => s.name === lead.subscriber?.name || s.id === lead.subscriber?.id);
+                    const sub = subscribers.find((s) => (s.name === lead.subscriber?.name) || (s.id === lead.subscriber?.id));
                     const primaryUserId = sub ? sub.primaryUserId : null;
                     return (
                       <button onClick={() => impersonate(primaryUserId)} className="px-3 py-1 bg-blue-600 text-white rounded">
