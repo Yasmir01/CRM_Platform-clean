@@ -363,6 +363,8 @@ model OrgSettings {
   organization       Organization  @relation(fields: [orgId], references: [id])
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+
+  @@index([notifications])
 }
 
 model GlobalSettings {
