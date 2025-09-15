@@ -65,12 +65,43 @@ export async function PATCH(
   }
 }
 
+async function isSuperAdmin(req: Request): Promise<boolean> {
+  try {
+    const role = req.headers.get('x-user-role');
+    return String(role || '').toUpperCase() === 'SA';
+  } catch {
+    return false;
+  }
+}
+
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
+    const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true, deals: true, tasks: true } as any });
+    if (!contact) return NextResponse.json({ error: 'Contact not found' }, { status: 404 });
+
+    // determine orgId from company if present
+    const orgId = contact.company?.orgId || null;
+    let allowOverride = false;
+    if (orgId) {
+      const settings = await prisma.orgSettings.findUnique({ where: { orgId } });
+      allowOverride = Boolean(settings?.allowSADeletes);
+    }
+
+    const hasActiveRelations = (contact as any).deals?.length > 0 || (contact as any).tasks?.length > 0;
+    if (hasActiveRelations) {
+      const superAdmin = await isSuperAdmin(req);
+      if (!superAdmin || !allowOverride) {
+        return NextResponse.json({ error: 'Cannot delete contact with active deals or tasks (SA override not allowed)' }, { status: 403 });
+      }
+      // SA override: delete related deals and tasks if exist
+      await prisma.deal.deleteMany({ where: { contactId: id } }).catch(() => {});
+      await prisma.task.deleteMany({ where: { contactId: id } }).catch(() => {});
+    }
+
     await prisma.contact.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (e: any) {
