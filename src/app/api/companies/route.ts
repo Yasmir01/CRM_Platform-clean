@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
     const companies = await prisma.company.findMany({
       include: { contacts: true },
-      orderBy: { updatedAt: 'desc' },
-      take: 100,
+      orderBy: { name: 'asc' },
     });
-    return NextResponse.json(companies);
+    // map contacts to name for frontend
+    const mapped = companies.map((c) => ({
+      ...c,
+      contacts: (c.contacts || []).map((ct) => ({ id: ct.id, name: `${ct.firstName || ''} ${ct.lastName || ''}`.trim() })),
+    }));
+    return NextResponse.json(mapped);
   } catch (e: any) {
     console.error('GET /api/companies error', e?.message || e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -21,8 +26,8 @@ export async function POST(req: Request) {
     const company = await prisma.company.create({
       data: {
         name: data.name,
-        domain: data.domain || null,
         industry: data.industry || null,
+        website: data.website || data.domain || null,
       },
     });
     return NextResponse.json(company, { status: 201 });
