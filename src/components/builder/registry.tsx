@@ -12,10 +12,19 @@ const registered = new Set<string>();
 function safeRegister(component: any, name: string, inputs: any[] = [], wrapWithPlan: boolean = false) {
   if (!component) return;
   try {
-    const opts: any = { name, inputs };
+    // clone inputs so we don't mutate the caller's array
+    const regInputs = Array.isArray(inputs) ? [...inputs] : [];
+
+    if (wrapWithPlan) {
+      // append force toggles for SA/SU override
+      regInputs.push({ name: 'forceShow', type: 'boolean', defaultValue: false });
+      regInputs.push({ name: 'forceHide', type: 'boolean', defaultValue: false });
+    }
+
+    const opts: any = { name, inputs: regInputs };
     if (wrapWithPlan) {
       opts.wrap = (props: any) => (
-        <PlanWrapper allowedPlans={props.allowedPlans}>
+        <PlanWrapper allowedPlans={props.allowedPlans} forceShow={props.forceShow} forceHide={props.forceHide}>
           {React.createElement(component as any, props)}
         </PlanWrapper>
       );
