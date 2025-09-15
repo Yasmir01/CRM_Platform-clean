@@ -43,6 +43,7 @@ export default function ImpersonationLogs() {
               <td className="border px-3 py-2">{log.subscriber?.companyName || log.subscriber?.name || log.subscriberId}</td>
               <td className="border px-3 py-2">{new Date(log.startedAt).toLocaleString()}</td>
               <td className="border px-3 py-2">{log.endedAt ? new Date(log.endedAt).toLocaleString() : 'Active'}</td>
+              <td className="border px-3 py-2">{log.alertSent ? <span className="text-green-600 font-semibold">Sent</span> : <span className="text-gray-500 italic">Suppressed</span>}</td>
             </tr>
           ))}
         </tbody>
