@@ -405,3 +405,46 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Minimal Tenant model used by several payment/lease flows.
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?  @unique
+  orgId     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations (optional)
+  leases    Lease[]
+  rentPayments RentPayment[]
+}
+
+// Owner ledger entries used by owner-facing APIs
+model OwnerLedger {
+  id        String   @id @default(cuid())
+  ownerId   String
+  propertyId String?
+  entryType String?
+  amount    Float    @default(0)
+  createdAt DateTime @default(now())
+}
+
+// DirectMessage thread messages
+model DirectMessage {
+  id         String   @id @default(cuid())
+  content    String
+  sentAt     DateTime @default(now())
+  senderId   String
+  receiverId String
+}
+
+// Unit model used by Lease and listings
+model Unit {
+  id        String   @id @default(cuid())
+  number    String?
+  name      String?
+  propertyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
