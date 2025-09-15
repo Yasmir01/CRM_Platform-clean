@@ -9,7 +9,20 @@ export default function ImpersonationLogs() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [settings, setSettings] = useState<any>(null);
-  const [showExportTooltip, setShowExportTooltip] = useState(false);
+
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/org-settings/current');
+      if (!res.ok) {
+        setSettings(null);
+        return;
+      }
+      const s = await res.json();
+      setSettings(s || null);
+    } catch (e) {
+      // ignore
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -27,25 +40,12 @@ export default function ImpersonationLogs() {
     }
     load();
 
-    // fetch org settings in parallel
-    let mountedSettings = true;
-    async function loadSettings() {
-      try {
-        const res = await fetch('/api/org-settings/current');
-        if (!res.ok) {
-          // non 2xx - ignore and keep settings null
-          return;
-        }
-        const s = await res.json();
-        if (!mountedSettings) return;
-        setSettings(s || null);
-      } catch (e) {
-        // ignore
-      }
-    }
-    loadSettings();
+    // fetch org settings in parallel and listen for changes
+    fetchSettings();
+    const onSettingsChanged = () => fetchSettings();
+    window.addEventListener('orgSettingsChanged', onSettingsChanged as EventListener);
 
-    return () => { mounted = false; mountedSettings = false; };
+    return () => { mounted = false; window.removeEventListener('orgSettingsChanged', onSettingsChanged as EventListener); };
   }, []);
 
   const filteredLogs = logs.filter((log) => {
