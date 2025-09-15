@@ -110,27 +110,41 @@ model Property {
   updatedAt   DateTime @updatedAt
 }
 
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  LOST
+  CONVERTED
+}
+
 model Lead {
-  id          String   @id @default(cuid())
-  propertyId  String
-  accountId   String?
+  id           String      @id @default(cuid())
+  propertyId   String?
+  accountId    String?
 
-  name        String
-  email       String
-  phone       String?
-  message     String?
+  name         String
+  email        String
+  phone        String?
+  message      String?
 
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-  utmContent  String?
-  utmTerm     String?
-  sourceUrl   String?
+  status       LeadStatus  @default(NEW)
 
-  property    Property @relation(fields: [propertyId], references: [id])
-  account     Account? @relation(fields: [accountId], references: [id])
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  utmContent   String?
+  utmTerm      String?
+  sourceUrl    String?
 
-  createdAt   DateTime @default(now())
+  property     Property?   @relation(fields: [propertyId], references: [id])
+  account      Account?    @relation(fields: [accountId], references: [id])
+
+  subscriberId String
+  subscriber   Subscriber  @relation(fields: [subscriberId], references: [id])
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 // Image model used by Property
