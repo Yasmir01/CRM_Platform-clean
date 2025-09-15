@@ -197,6 +197,7 @@ model Subscriber {
   planId                      String?
   plan                        SubscriptionPlan? @relation(fields: [planId], references: [id])
   forceAllowExports           Boolean  @default(false)
+  impersonationAlerts        Boolean?
 
   // Feature toggles
   enableReminders             Boolean  @default(false)
