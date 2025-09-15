@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getUserOr401 } from '../../src/utils/authz';
 import { ensurePermission } from '../../src/lib/authorize';
 import { prisma } from '../_db';
@@ -15,7 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const take = Math.min(1000, Number((req.query as any).take || 50));
       const skip = Math.max(0, Number((req.query as any).skip || 0));
 
-      const where: any = { archived: false };
+      const where: any = {};
       if (companyId) where.companyId = companyId;
       if (ownerId) where.ownerId = ownerId;
       if (q) {
@@ -28,7 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ];
       }
 
-      const contacts = await prisma.contact.findMany({ where, take, skip, orderBy: { updatedAt: 'desc' }, include: { company: true } });
+      const contacts = await prisma.contact.findMany({ where, take, skip, orderBy: { updatedAt: 'desc' }, include: { company: true, owner: true } });
       return res.status(200).json(contacts);
     }
 
@@ -48,7 +47,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
       if (!data.firstName || !data.lastName) return res.status(400).json({ error: 'Missing name' });
 
-      const created = await prisma.contact.create({ data });
+      const created = await prisma.contact.create({ data, include: { company: true, owner: true } });
       return res.status(201).json(created);
     }
 
