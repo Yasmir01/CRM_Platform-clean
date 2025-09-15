@@ -1,6 +1,8 @@
 "use client";
 import { Builder } from "@builder.io/react";
 import * as BuilderComponents from "./index";
+import PlanWrapper from "@/components/PlanWrapper";
+import { PLAN_OPTIONS } from "@/utils/plans";
 
 // Keep track of names we've explicitly registered to avoid duplicates
 const registered = new Set<string>();
