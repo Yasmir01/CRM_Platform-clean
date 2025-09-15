@@ -45,3 +45,8 @@ export function landingPageLimit(plan: Plan | string | undefined) {
   if (p === "basic") return 1;
   return Infinity;
 }
+
+export function canUseReminders(plan: Plan | string | undefined) {
+  const p = String(plan || "").toLowerCase();
+  return p === "pro" || p === "enterprise";
+}
