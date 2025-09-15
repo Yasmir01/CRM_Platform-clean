@@ -1,6 +1,3 @@
-// Prisma schema for CRM Subscription Plans and Monetization
-// Provider: PostgreSQL (Neon)
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,53 +7,350 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// --- RBAC Users ---
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  MANAGER
-  OWNER
-  VENDOR
-  TENANT
+// ============================================================
+// Core Enums
+// ============================================================
+enum BillingCycle {
+  MONTHLY
+  YEARLY
 }
 
-model User {
-  id                     String         @id @default(cuid())
-  email                  String         @unique
-  name                   String?
-  role                   Role           @default(TENANT)
-  permissions            String?
-  autopayEnabled         Boolean        @default(false)
-  stripeCustomerId       String?
-  defaultPaymentMethodId String?
-  orgId                  String
-  org                    Organization   @relation(fields: [orgId], references: [id])
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
+enum ProductType {
+  SUBSCRIPTION
+  ADDON
+}
 
-  // Back-relations
-  rentPayments           RentPayment[]  @relation("TenantRentPayments")
-  lateFees               LateFee[]      @relation("TenantLateFees")
-  refunds                Refund[]       @relation("TenantRefunds")
-  autopay                AutoPay?       @relation("TenantAutoPay")
-  ownerLedgers           OwnerLedger[]  @relation("OwnerLedgers")
-  uploadedDocuments      Document[]     @relation("UserUploadedDocuments")
-  vendorInvoices         MaintenanceInvoice[] @relation("VendorMaintenanceInvoices")
-  directMessagesSent     DirectMessage[]      @relation("DirectMessagesSent")
-  directMessagesReceived DirectMessage[]      @relation("DirectMessagesReceived")
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+  PAUSED
+}
 
-  @@index([orgId])
+// ============================================================
+// Accounts & Organizations
+// ============================================================
+model Account {
+  id               String   @id @default(cuid())
+  name             String
+  domain           String?
+  subdomain        String?
+  stripeCustomerId String?
+  stripeSetupIntentId String?
+  subscription     Subscription?
+  organizations    Organization[]
+  properties       Property[]
+  users            User[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Organization {
-  id        String        @id @default(cuid())
+  id          String      @id @default(cuid())
+  name        String
+  domain      String?
+  subdomain   String?
+  accountId   String
+  account     Account     @relation(fields: [accountId], references: [id])
+  properties  Property[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ============================================================
+// Subscription & Billing
+// ============================================================
+model SubscriptionPlan {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  priceId        String?   // Stripe priceId
+  amount         Float
+  currency       String    @default("usd")
+  cycle          BillingCycle
+  userLimit      Int?
+  propertyLimit  Int?
+  features       Json?
+  tools          Json?
+  services       Json?
+  escalation     EscalationMatrix[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  accountId            String
+  account              Account            @relation(fields: [accountId], references: [id])
+  planId               String
+  plan                 SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status               SubscriptionStatus
+  trialEndsAt          DateTime?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  stripeSubscriptionId String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  subscriptionId String
+  subscription  Subscription @relation(fields: [subscriptionId], references: [id])
+  amount        Float
+  currency      String   @default("usd")
+  status        String
+  method        String?
+  reference     String?
+  createdAt     DateTime @default(now())
+}
+
+model RevenueEvent {
+  id         String   @id @default(cuid())
+  type       String
+  amount     Float
+  currency   String   @default("usd")
+  timestamp  DateTime @default(now())
+  metadata   Json?
+}
+
+model BillingInvoice {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amount         Float
+  currency       String @default("usd")
+  status         String
+  dueDate        DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
+}
+
+model StripeEvent {
+  id        String   @id @default(cuid())
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Properties & Escalation / SLA
+// ============================================================
+model Property {
+  id              String        @id @default(cuid())
+  name            String
+  address         String?
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+  escalation      EscalationMatrix[]
+  leases          Lease[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model EscalationMatrix {
+  id                  String              @id @default(cuid())
+  level               Int
+  description         String?
+  notifyEmail         String?
+  propertyId          String?
+  property            Property?           @relation(fields: [propertyId], references: [id])
+  subscriptionPlanId  String?
+  subscriptionPlan    SubscriptionPlan?   @relation(fields: [subscriptionPlanId], references: [id])
+  createdAt           DateTime @default(now())
+}
+
+model SLAConfig {
+  id                  String   @id @default(cuid())
+  responseTimeHours   Int
+  resolutionTimeHours Int
+  propertyId          String?
+  property            Property? @relation(fields: [propertyId], references: [id])
+  createdAt           DateTime @default(now())
+}
+
+// ============================================================
+// Rent & Ledger
+// ============================================================
+model Lease {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  tenantId    String
+  tenant      User     @relation(fields: [tenantId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  rentAmount  Float
+  currency    String   @default("usd")
+  ledger      LedgerEntry[]
+  createdAt   DateTime @default(now())
+}
+
+model LedgerEntry {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  type      String
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+model RentPayment {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  amount    Float
+  status    String
+  paidAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model LateFee {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  amount    Float
+  appliedAt DateTime @default(now())
+}
+
+model AutoPay {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  active    Boolean  @default(true)
+  method    String
+  createdAt DateTime @default(now())
+}
+
+model Refund {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  amount    Float
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Documents & Attachments
+// ============================================================
+model Document {
+  id        String   @id @default(cuid())
+  leaseId   String?
+  lease     Lease?   @relation(fields: [leaseId], references: [id])
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceAttachment {
+  id        String   @id @default(cuid())
+  propertyId String
+  property  Property @relation(fields: [propertyId], references: [id])
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceInvoice {
+  id        String   @id @default(cuid())
+  propertyId String
+  property  Property @relation(fields: [propertyId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Accounting Integrations
+// ============================================================
+model AccountingConnection {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  provider  String
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingSyncLog {
+  id          String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  status      String
+  details     Json?
+  createdAt   DateTime @default(now())
+}
+
+model AccountingInvoice {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingPayment {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingContact {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
   name      String
-  plan      String        @default("basic")
-  users     User[]
-  documents Document[]    @relation("OrgDocuments")
-  settings  OrgSettings?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  email     String?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model UserNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Utilities & Logs
+// ============================================================
+model TempCode {
+  id        String   @id @default(cuid())
+  code      String
+  type      String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model ReportPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  preferences Json
+  createdAt DateTime @default(now())
 }
 
 model OrgSettings {
@@ -64,747 +358,38 @@ model OrgSettings {
   orgId              String        @unique
   exportSchedule     String        @default("daily")
   allowImpersonation Boolean       @default(false)
+  allowExport        Boolean       @default(true)
   organization       Organization  @relation(fields: [orgId], references: [id])
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 }
 
+model GlobalSettings {
+  id                 String  @id @default(cuid())
+  allowImpersonation Boolean @default(false)
+  createdAt          DateTime @default(now())
+}
+
 model ImpersonationLog {
-  id             String   @id @default(cuid())
-  superAdminId   String?
-  adminId        String?
-  targetUserId   String
-  startedAt      DateTime @default(now())
-  endedAt        DateTime?
-  notified       Boolean  @default(false)
-}
-
-model UserNotification {
-  id        String   @id @default(cuid())
-  userId    String
-  message   String
-  type      String?
-  title     String?
-  meta      Json?
-  createdAt DateTime @default(now())
-  read      Boolean  @default(false)
-}
-
-enum BillingCycle {
-  monthly
-  yearly
-}
-
-enum ProductType {
-  product
-  addon
-  service
-  subscription
-}
-
-enum SubscriptionStatus {
-  active
-  trialing
-  past_due
-  canceled
-  incomplete
-  incomplete_expired
-  unpaid
-  paused
-}
-
-model SubscriptionPlan {
-  id            String       @id @default(uuid())
-  name          String
-  price         Float        @default(0)
-  billingCycle  BillingCycle @default(monthly)
-  description   String?
-  userLimit     Int          @default(1)
-  propertyLimit Int          @default(10)
-  isActive      Boolean      @default(true)
-  features      String[]
-  pages         String[]
-  tools         String[]
-  services      String[]
-  paymentTypes  String[]
-  backupTypes   String[]
-  subscriptions Subscription[]
-  escalationMatrices EscalationMatrix[]
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-}
-
-model Product {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  type        ProductType @default(product)
-  price       Float       @default(0)
-  isActive    Boolean     @default(true)
-  category    String?
-  tags        String[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-model Subscriber {
-  id          String         @id @default(uuid())
-  email       String         @unique
-  companyName String?
-  subscriptions Subscription[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-}
-
-model Subscription {
-  id                   String              @id @default(uuid())
-  subscriberId         String
-  subscriber           Subscriber          @relation(fields: [subscriberId], references: [id])
-  planId               String?
-  plan                 SubscriptionPlan?   @relation(fields: [planId], references: [id])
-  status               SubscriptionStatus  @default(active)
-  startDate            DateTime            @default(now())
-  endDate              DateTime?
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
-  cancelAtPeriodEnd    Boolean             @default(false)
-  payments             Payment[]
-  revenueEvents        RevenueEvent[]
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-}
-
-model Payment {
-  id             String        @id @default(uuid())
-  subscriptionId String
-  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
-  amount         Float
-  currency       String        @default("usd")
-  status         String
-  provider       String        @default("stripe")
-  externalId     String?
-  createdAt      DateTime      @default(now())
-}
-
-model RevenueEvent {
-  id             String        @id @default(uuid())
-  subscriptionId String?
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
-  type           String
-  amount         Float
-  metadata       Json?
-  createdAt      DateTime      @default(now())
-}
-
-// --- Tenant Rent Payments ---
-model RentPayment {
-  id              String   @id @default(cuid())
-  tenantId        String
-  propertyId      String?
-  leaseId         String?
-  amount          Float
-  allocatedAmount Float   @default(0)
-  status          String   // pending | success | failed | refunded | partially_refunded
-  gateway         String   // stripe | paypal | plaid | applepay
-  methodId        String?
-  externalId      String?
-  idempotencyKey  String?  @unique
-  refundedAmount  Float    @default(0)
-  autopay         Boolean  @default(false)
-  refundReason    String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  tenant       User      @relation("TenantRentPayments", fields: [tenantId], references: [id])
-  property     Property? @relation("PropertyRentPayments", fields: [propertyId], references: [id])
-  lease        Lease?    @relation(fields: [leaseId], references: [id])
-  allocations  PaymentAllocation[]
-  lateFees     LateFee[]
-  refunds      Refund[]
-
-  @@index([tenantId])
-  @@index([propertyId])
-  @@index([leaseId])
-}
-
-model LateFeeRule {
-  id          String   @id @default(cuid())
-  scope       String   // GLOBAL | PROPERTY
-  propertyId  String?
-  gracePeriod Int
-  feeType     String   // FIXED | PERCENTAGE
-  feeAmount   Float
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  property    Property? @relation(fields: [propertyId], references: [id])
-
-  @@index([isActive])
-  @@index([propertyId])
-}
-
-model LateFee {
-  id         String   @id @default(cuid())
-  tenantId   String
-  paymentId  String?
-  propertyId String
-  amount     Float
-  status     String   // PENDING | APPLIED | WAIVED
-  appliedAt  DateTime?
-  waivedBy   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  tenant     User       @relation("TenantLateFees", fields: [tenantId], references: [id])
-  payment    RentPayment? @relation(fields: [paymentId], references: [id])
-  property   Property   @relation("PropertyLateFees", fields: [propertyId], references: [id])
-
-  @@index([tenantId])
-  @@index([propertyId])
-  @@index([paymentId])
-}
-
-model Refund {
-  id         String   @id @default(cuid())
-  paymentId  String
-  tenantId   String
-  amount     Float
-  status     String   // PENDING | COMPLETED | FAILED
-  reason     String?
-  gateway    String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  tenant     User        @relation("TenantRefunds", fields: [tenantId], references: [id])
-  payment    RentPayment @relation(fields: [paymentId], references: [id])
-
-  @@index([tenantId])
-  @@index([paymentId])
-}
-
-model AutoPay {
-  id         String   @id @default(cuid())
-  tenantId   String   @unique
-  amount     Float
-  frequency  String
-  dayOfMonth Int
-  active     Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // New fields for gateway-scoped rules
-  propertyId   String?
-  leaseId      String?
-  gatewayId    String?
-  methodId     String?
-  amountType   String?   @default("FULL_RENT") // FULL_RENT | FIXED | PERCENTAGE
-  amountValue  Float?
-  splitEmails  String[]  @default([])
-
-  tenant     User      @relation("TenantAutoPay", fields: [tenantId], references: [id])
-  property   Property? @relation("PropertyAutoPays", fields: [propertyId], references: [id])
-  lease      Lease?    @relation(fields: [leaseId], references: [id])
-
-  @@index([propertyId])
-  @@index([leaseId])
-}
-
-/// ----------------------------------------------------------
-///  NEW MODELS FOR TENANT‑LEDGER / PAST BALANCES
-/// ----------------------------------------------------------
-
-enum LeaseStatus {
-  ACTIVE
-  TERMINATED   // tenant moved out but balance may still exist
-  CLOSED       // all balances settled, can be archived
-}
-
-enum EntryType {
-  RENT
-  DEPOSIT
-  FEE
-  PAYMENT
-  ADJUSTMENT
-}
-
-model Property {
-  id        String   @id @default(uuid())
-  address   String
-  units     Unit[]
-  rentPayments         RentPayment[]         @relation("PropertyRentPayments")
-  lateFees             LateFee[]             @relation("PropertyLateFees")
-  ownerLedgers         OwnerLedger[]         @relation("PropertyOwnerLedgers")
-  recurringTasks       RecurringTask[]       @relation("PropertyRecurringTasks")
-  maintenanceRequests  MaintenanceRequest[]  @relation("PropertyMaintenanceRequests")
-  slaConfigs           SLAConfig[]           @relation("PropertySLAConfigs")
-  escalationMatrices   EscalationMatrix[]    @relation("PropertyEscalationMatrices")
-  autoPays             AutoPay[]             @relation("PropertyAutoPays")
-  lateFeeRules         LateFeeRule[]
-  directMessages       DirectMessage[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model SLAConfig {
-  id         String    @id @default(cuid())
-  category   String
-  hours      Int
-  propertyId String?
-
-  property   Property? @relation("PropertySLAConfigs", fields: [propertyId], references: [id])
-
-  @@index([category])
-  @@index([propertyId])
-  @@unique([category, propertyId])
-}
-
-model EscalationMatrix {
-  id                 String   @id @default(cuid())
-  level              Int
-  role               String
-  hoursAfterDeadline Int
-
-  // Scope
-  propertyId         String?
-  subscriptionPlanId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  property          Property?         @relation("PropertyEscalationMatrices", fields: [propertyId], references: [id])
-  subscriptionPlan  SubscriptionPlan? @relation(fields: [subscriptionPlanId], references: [id])
-
-  @@index([propertyId])
-  @@index([subscriptionPlanId])
-  @@unique([level, propertyId, subscriptionPlanId])
-}
-
-model OwnerLedger {
-  id         String    @id @default(cuid())
-  ownerId    String
-  propertyId String?
-  entryType  String    // rent_income, expense, fee, refund
-  amount     Float
-  note       String?
-  createdAt  DateTime  @default(now())
-
-  owner      User      @relation("OwnerLedgers", fields: [ownerId], references: [id])
-  property   Property? @relation("PropertyOwnerLedgers", fields: [propertyId], references: [id])
-
-  @@index([ownerId])
-  @@index([propertyId])
-}
-
-model Unit {
-  id         String   @id @default(uuid())
-  number     String
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-  leases     Lease[]
-  recurringTasks       RecurringTask[]       @relation("UnitRecurringTasks")
-  maintenanceRequests  MaintenanceRequest[]  @relation("UnitMaintenanceRequests")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([propertyId])
-  @@unique([propertyId, number])
-}
-
-model Tenant {
-  id        String   @id @default(uuid())
-  name      String
-  email     String?
-  leases    Lease[]
-  documents Document[] @relation("TenantDocuments")
-  participants LeaseParticipant[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Lease {
-  id             String           @id @default(uuid())
-  unitId         String
-  tenantId       String
-  orgId          String?
-  startDate      DateTime
-  endDate        DateTime?
-  status         LeaseStatus      @default(ACTIVE)
-  archived       Boolean          @default(false)
-  rentAmount     Float?
-  dueDay         Int?             // 1..31, day of the month rent is due
-  allowsSplit    Boolean          @default(true)
-  allowPartial   Boolean          @default(true)
-  minPartialUsd  Float?
-
-  // Relations
-  unit           Unit             @relation(fields: [unitId], references: [id])
-  tenant         Tenant           @relation(fields: [tenantId], references: [id])
-  ledgerEntries  LedgerEntry[]
-  participants   LeaseParticipant[]
-  invoices       Invoice[]
-  payments       RentPayment[]
-  documents      Document[]       @relation("LeaseDocuments")
-  autoPays       AutoPay[]
-
-  @@index([status])
-  @@index([tenantId])
-  @@index([unitId])
-}
-
-model LeaseParticipant {
-  id         String   @id @default(uuid())
-  leaseId    String
-  tenantId   String
-  shareType  String   // EQUAL | PERCENTAGE
-  shareValue Float?
-
-  // Relations
-  lease      Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
-  tenant     Tenant   @relation(fields: [tenantId], references: [id])
-
-  createdAt  DateTime @default(now())
-}
-
-model LedgerEntry {
-  id          String    @id @default(uuid())
-  leaseId     String
-  lease       Lease     @relation(fields: [leaseId], references: [id])
-  date        DateTime  @default(now())
-  description String
-  amountCents Int       // positive = charge, negative = payment
-  type        EntryType
-
-  @@index([leaseId])
-}
-
-// --- Recurring maintenance automation ---
-enum RecurrenceFrequency {
-  DAY
-  WEEK
-  MONTH
-  QUARTER
-  YEAR
-}
-
-model RecurringTask {
-  id          String               @id @default(cuid())
-  propertyId  String
-  unitId      String?
-  title       String
-  description String?
-  frequency   RecurrenceFrequency
-  interval    Int                  @default(1)
-  nextRunAt   DateTime
-  lastRunAt   DateTime?
-  vendorId    String?
-  isActive    Boolean              @default(true)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-
-  property    Property             @relation("PropertyRecurringTasks", fields: [propertyId], references: [id])
-  unit        Unit?                @relation("UnitRecurringTasks", fields: [unitId], references: [id])
-
-  @@index([propertyId])
-  @@index([unitId])
-  @@index([isActive, nextRunAt])
-}
-
-model MaintenanceRequest {
-  id          String   @id @default(cuid())
-  tenantId    String?
-  orgId       String?
-  propertyId  String
-  unitId      String?
-  title       String
-  description String?
-  category    String?
-  status      String   @default("open") // open, in_progress, completed, canceled
-  priority    String   @default("normal")  // low, normal, high, emergency
-  assignedTo  String?
-  vendorId    String?
-  createdById String?
-  deadline    DateTime?
-  escalated   Boolean  @default(false)
-  escalatedAt DateTime?
-  escalationLevel Int  @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  property    Property @relation("PropertyMaintenanceRequests", fields: [propertyId], references: [id])
-  unit        Unit?    @relation("UnitMaintenanceRequests", fields: [unitId], references: [id])
-  attachments MaintenanceAttachment[]
-  assignments MaintenanceAssignment[]
-  escalationLogs EscalationLog[]
-  invoices       MaintenanceInvoice[]
-
-  @@index([propertyId])
-  @@index([unitId])
-  @@index([status])
-  @@index([orgId])
-  @@index([tenantId])
-  @@index([deadline])
-  @@index([escalated])
-}
-
-/// Document Management System
-model Document {
-  id          String        @id @default(cuid())
-  orgId       String
-  uploadedBy  String
-  tenantId    String?
-  leaseId     String?
-  type        String
-  name        String
-  url         String
-  createdAt   DateTime      @default(now())
-
-  org         Organization  @relation("OrgDocuments", fields: [orgId], references: [id])
-  uploader    User          @relation("UserUploadedDocuments", fields: [uploadedBy], references: [id])
-  tenant      Tenant?       @relation("TenantDocuments", fields: [tenantId], references: [id])
-  lease       Lease?        @relation("LeaseDocuments", fields: [leaseId], references: [id])
-
-  @@index([orgId])
-  @@index([tenantId])
-  @@index([leaseId])
-  @@index([uploadedBy])
-}
-
-model MaintenanceAttachment {
-  id         String   @id @default(cuid())
-  requestId  String
-  fileUrl    String
-  fileName   String
-  fileType   String
-  uploadedAt DateTime @default(now())
-  archivedAt DateTime?
-
-  request    MaintenanceRequest @relation(fields: [requestId], references: [id])
-
-  @@index([requestId])
-}
-
-model MaintenanceAssignment {
-  id          String   @id @default(cuid())
-  requestId   String
-  assigneeId  String
-  role        String   // manager | vendor | staff
-  assignedAt  DateTime @default(now())
-  completedAt DateTime?
-
-  request     MaintenanceRequest @relation(fields: [requestId], references: [id])
-
-  @@index([requestId])
-  @@index([assigneeId])
-}
-
-model EscalationLog {
-  id          String   @id @default(cuid())
-  requestId   String
-  level       Int
-  role        String
-  triggeredAt DateTime @default(now())
-
-  request     MaintenanceRequest @relation(fields: [requestId], references: [id])
-
-  @@unique([requestId, level])
-  @@index([requestId])
-}
-
-model MaintenanceInvoice {
-  id         String   @id @default(cuid())
-  requestId  String
-  vendorId   String
-  amount     Float?
-  status     String   @default("pending") // pending, approved, rejected
-  uploadedAt DateTime @default(now())
-  archivedAt DateTime?
-
-  request    MaintenanceRequest @relation(fields: [requestId], references: [id])
-  vendor     User               @relation("VendorMaintenanceInvoices", fields: [vendorId], references: [id])
-  files      InvoiceFile[]
-
-  @@index([requestId])
-  @@index([vendorId])
-}
-
-model InvoiceFile {
-  id         String   @id @default(cuid())
-  invoiceId  String
-  fileUrl    String
-  fileName   String
-  fileType   String
-  uploadedAt DateTime @default(now())
-  archivedAt DateTime?
-
-  invoice    MaintenanceInvoice @relation(fields: [invoiceId], references: [id])
-
-  @@index([invoiceId])
-}
-
-model DirectMessage {
-  id          String   @id @default(cuid())
-  senderId    String
-  receiverId  String?
-  propertyId  String?
-  content     String
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  sender      User     @relation("DirectMessagesSent", fields: [senderId], references: [id])
-  receiver    User?    @relation("DirectMessagesReceived", fields: [receiverId], references: [id])
-  property    Property? @relation(fields: [propertyId], references: [id])
-  attachments DirectMessageAttachment[]
-
-  @@index([receiverId])
-  @@index([propertyId])
-}
-
-model DirectMessageAttachment {
-  id         String   @id @default(cuid())
-  messageId  String
-  url        String
-  filename   String
-  mimeType   String
-  createdAt  DateTime @default(now())
-
-  message    DirectMessage @relation(fields: [messageId], references: [id])
-
-  @@index([messageId])
-}
-
-// --- Platform Notifications ---
-model Notification {
-  id        String   @id @default(cuid())
-  title     String
-  message   String
-  audience  String   // ALL, ADMINS, TENANTS, OWNERS...
-  createdBy String
-  createdAt DateTime @default(now())
-}
-
-// --- Accounting integrations ---
-model AccountingConnection {
-  id           String   @id @default(cuid())
-  orgId        String
-  provider     String   // quickbooks | xero | freshbooks
-  realmId      String?
-  accessToken  String
-  refreshToken String
-  expiresAt    DateTime
-}
-
-model AccountingSyncLog {
-  id        String   @id @default(cuid())
-  orgId     String
-  provider  String
-  action    String
-  createdAt DateTime @default(now())
-}
-
-// --- Invoices (monthly rent, utilities, etc.)
-model Invoice {
-  id          String   @id @default(cuid())
-  leaseId     String
-  propertyId  String
-  dueDate     DateTime
-  totalAmount Float
-  balanceDue  Float    @default(0)
-  status      String   // "OPEN" | "PARTIALLY_PAID" | "PAID" | "VOID"
-  memo        String?
-
-  lines    InvoiceLine[]
-  payments PaymentAllocation[]
-
-  lease    Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([leaseId])
-  @@index([propertyId])
-  @@index([status])
-}
-
-model InvoiceLine {
   id            String   @id @default(cuid())
-  invoiceId     String
-  description   String
-  amount        Float
-  billToTenantId String?
-
-  invoice  Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  superAdminId  String
+  superAdmin    User     @relation("SuperAdminLogs", fields: [superAdminId], references: [id])
+  subscriberId  String
+  subscriber    User     @relation("SubscriberLogs", fields: [subscriberId], references: [id])
+  startedAt     DateTime @default(now())
+  endedAt       DateTime?
+  alertSent     Boolean  @default(true)
 }
 
-// --- Allocation (where a payment’s dollars actually went)
-model PaymentAllocation {
-  id         String  @id @default(cuid())
-  paymentId  String
-  invoiceId  String
-  tenantId   String?
-  amount     Float
-
-  payment RentPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  invoice Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@index([invoiceId])
-  @@index([paymentId])
-  @@index([tenantId])
-}
-
-// --- Accounting external entity persistence ---
-model AccountingInvoice {
-  id         String   @id @default(cuid())
-  orgId      String?
-  externalId String
-  source     String   // quickbooks | xero | wave
-  tenantId   String
-  propertyId String?
-  amount     Float
-  status     String   // draft | open | paid | voided
-  dueDate    DateTime?
-  syncedAt   DateTime  @default(now())
-
-  @@unique([externalId, source])
-}
-
-model AccountingPayment {
-  id         String   @id @default(cuid())
-  orgId      String?
-  externalId String
-  source     String   // quickbooks | xero | wave
-  tenantId   String
-  propertyId String?
-  amount     Float
-  method     String
-  status     String   // pending | completed | failed
-  syncedAt   DateTime  @default(now())
-
-  @@unique([externalId, source])
-}
-
-model AccountingContact {
-  id         String   @id @default(cuid())
-  orgId      String?
-  externalId String
-  source     String   // quickbooks | xero | wave
-  name       String
-  email      String?
-  phone      String?
-  syncedAt   DateTime  @default(now())
-
-  @@unique([externalId, source])
-}
-
-// --- Temp codes for passwordless/OTP flows ---
-model TempCode {
-  email     String   @id
-  code      String
-  purpose   String?
-  expiresAt DateTime
+// ============================================================
+// User model (kept minimal here, adjust as needed)
+// ============================================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([expiresAt])
 }

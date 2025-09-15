@@ -285,10 +285,141 @@ export function ManagerMaintenance() {
 }
 
 export function AdminDashboard() {
+  const [data, setData] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/admin/overview');
+        const json = await res.json();
+        if (mounted) setData(json);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  if (loading) return (
+    <RoleLayout>
+      <p className="p-6">Loading financial overview...</p>
+    </RoleLayout>
+  );
+
+  if (!data) return (
+    <RoleLayout>
+      <p className="p-6">No data available.</p>
+    </RoleLayout>
+  );
+
   return (
     <RoleLayout>
-      <h1>Admin Dashboard</h1>
-      <p>System administration.</p>
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <h1 className="text-2xl font-bold mb-6">Financial Overview</h1>
+
+        <div className="flex gap-4 mb-6">
+          <a href="/api/admin/export?format=csv" className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">Download CSV</a>
+          <button onClick={async ()=>{
+            try{
+              const chartImage = (await import('../../lib/canvasUtils')).chartToBase64 ? await (await import('../../lib/canvasUtils')).chartToBase64('trendChart') : null;
+              const res = await fetch('/api/admin/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chartImage }) });
+              if (!res.ok) throw new Error('Export failed');
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'financial-overview.pdf';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              URL.revokeObjectURL(url);
+            }catch(e){
+              console.error(e);
+              alert('Failed to generate PDF');
+            }
+          }} className="bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700">Download PDF</button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="shadow-lg bg-white p-6">
+            <h2 className="text-sm text-gray-500">Total Collected</h2>
+            <p className="text-2xl font-bold text-green-600">${data.totals.collected.toLocaleString()}</p>
+          </div>
+          <div className="shadow-lg bg-white p-6">
+            <h2 className="text-sm text-gray-500">Total Overdue</h2>
+            <p className="text-2xl font-bold text-red-600">${data.totals.overdue.toLocaleString()}</p>
+          </div>
+          <div className="shadow-lg bg-white p-6">
+            <h2 className="text-sm text-gray-500">Active Tenants</h2>
+            <p className="text-2xl font-bold text-blue-600">{data.totals.tenants}</p>
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6 mb-10">
+          <h2 className="text-lg font-semibold mb-4">Rent Collected (Last 6 Months)</h2>
+          <div style={{ width: '100%', height: 300 }}>
+            {/* lightweight chart fallback: simple table if recharts not loaded */}
+            {Array.isArray(data.trend) && (
+              <div className="flex gap-4">
+                {data.trend.map((t: any) => (
+                  <div key={t.month} className="text-center flex-1">
+                    <div className="text-sm text-gray-500">{t.month}</div>
+                    <div className="text-lg font-bold">${t.collected.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Per-Property Breakdown</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100 text-left">
+                  <th className="p-3">Property</th>
+                  <th className="p-3">Collected</th>
+                  <th className="p-3">Overdue</th>
+                  <th className="p-3">Tenants</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.isArray(data.properties) && data.properties.map((p: any, i: number) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-3 font-medium">{p.property}</td>
+                    <td className="p-3 text-green-600">${p.collected.toLocaleString()}</td>
+                    <td className="p-3 text-red-600">${p.overdue.toLocaleString()}</td>
+                    <td className="p-3">{p.tenants}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8">
+            <div style={{ width: '100%', height: 300 }}>
+              {/* Basic bar chart fallback: show simple bars */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {Array.isArray(data.properties) && data.properties.map((p: any) => (
+                  <div key={p.property} className="p-4 bg-gray-50 rounded">
+                    <div className="text-sm font-medium mb-2">{p.property}</div>
+                    <div className="h-24 bg-gray-100 relative rounded overflow-hidden">
+                      <div className="absolute bottom-0 left-0 bg-green-500" style={{ width: `${Math.min(100, p.collected > 0 ? (p.collected / (p.collected + p.overdue || 1)) * 100 : 0)}%`, height: '100%' }} />
+                    </div>
+                    <div className="mt-2 text-sm">Collected: ${p.collected.toLocaleString()}</div>
+                    <div className="text-sm text-red-600">Overdue: ${p.overdue.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </RoleLayout>
   );
 }
