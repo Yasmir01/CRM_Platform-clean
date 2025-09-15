@@ -97,7 +97,7 @@ safeRegister(BuilderComponents.PaymentHistoryTable, "PaymentHistoryTable", [
   { name: "title", type: "string", defaultValue: "Payment History" },
   { name: "showFilters", type: "boolean", defaultValue: true },
   { name: "showExport", type: "boolean", defaultValue: true },
-  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: ["Starter","Pro","Enterprise"] }], defaultValue: ["Pro","Enterprise"] },
+  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: PLAN_OPTIONS as any }], defaultValue: ["Pro","Enterprise"] as any },
 ], true);
 
 // Payment Proration Calculator
