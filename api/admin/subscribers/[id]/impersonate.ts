@@ -35,7 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       // create impersonation log
       try {
-        await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id } });
+        await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id, subscriberId: id } });
       } catch (e) {
         // ignore logging errors
       }
