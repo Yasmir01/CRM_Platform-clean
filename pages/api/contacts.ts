@@ -5,6 +5,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
+        const companyId = String(req.query?.companyId || '');
+        if (companyId) {
+          const contacts = await prisma.contact.findMany({ where: { companyId }, include: { company: true, owner: true } });
+          return res.status(200).json(contacts);
+        }
         const contacts = await prisma.contact.findMany({ include: { company: true, owner: true } });
         return res.status(200).json(contacts);
       }
