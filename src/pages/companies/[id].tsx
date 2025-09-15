@@ -114,31 +114,27 @@ export default function CompanyDetailPage() {
     }
   }
 
-  // inline edit for contacts on company detail
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-  const [editForm, setEditForm] = React.useState({ firstName: '', lastName: '', email: '', phone: '' });
+  // Edit modal state
+  const [editing, setEditing] = useState<Contact | null>(null);
 
-  function startEdit(c: Contact) {
-    setEditingId(c.id);
-    setEditForm({ firstName: c.firstName, lastName: c.lastName, email: c.email, phone: c.phone || '' });
-  }
-
-  async function saveEdit(id: string) {
+  async function saveEditing() {
+    if (!editing) return;
     try {
-      await fetch('/api/contacts', {
+      const res = await fetch('/api/contacts', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...editForm }),
+        body: JSON.stringify(editing),
       });
-      setEditingId(null);
-      fetchData();
+      if (res.ok) {
+        const updated = await res.json();
+        setContacts((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+        setEditing(null);
+      } else {
+        console.error('Failed to update contact');
+      }
     } catch (e) {
       console.error('Update contact error', e);
     }
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
   }
 
   if (loading) return <p className="p-6">Loading...</p>;
