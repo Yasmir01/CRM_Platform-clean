@@ -61,30 +61,21 @@ export default function ImpersonationLogs() {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
+  const buildExportUrl = (format: 'csv' | 'pdf') => {
+    const params = new URLSearchParams();
+    params.set('format', format);
+    if (search) params.set('search', search);
+    if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter);
+    if (fromDate) params.set('from', fromDate);
+    if (toDate) params.set('to', toDate);
+    return `/api/impersonation-logs-export?${params.toString()}`;
+  };
+
   const exportCSV = () => {
     try {
-      const headers = ['Super Admin','Subscriber','Started','Ended','Alert Status'];
-      const rows = (filteredLogs || []).map((log) => {
-        const admin = (log.superAdmin?.email || log.superAdminId || '').toString();
-        const subscriber = (log.subscriber?.companyName || log.subscriber?.name || log.subscriberId || '').toString();
-        const started = new Date(log.startedAt).toLocaleString();
-        const ended = log.endedAt ? new Date(log.endedAt).toLocaleString() : 'Active';
-        const status = log.alertSent ? 'Sent' : 'Suppressed';
-        return [admin, subscriber, started, ended, status].map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',');
-      });
-      const csv = [headers.join(','), ...rows].join('\n');
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `impersonation-logs-${new Date().toISOString()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      // ignore
-    }
+      const url = buildExportUrl('csv');
+      window.open(url, '_blank');
+    } catch (e) {}
   };
 
   const exportPDF = () => {
