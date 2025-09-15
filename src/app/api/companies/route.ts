@@ -23,9 +23,13 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const data = await req.json();
+    const name = String(data.name || '').trim();
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
     const company = await prisma.company.create({
       data: {
-        name: data.name,
+        name,
         industry: data.industry || null,
         website: data.website || data.domain || null,
       },
