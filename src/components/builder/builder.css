@@ -34,3 +34,17 @@
 
 .branding-bar { display:flex; gap:1rem; align-items:center; padding: .5rem 1rem; background: #fff; border-bottom:1px solid #f3f4f6; }
 .branding-logo { height: 40px; object-fit:contain; }
+.branding-name { font-weight: 700; }
+
+.hero-image { width: 100%; max-width: 480px; border-radius: 8px; object-fit: cover; }
+.hero-placeholder { width: 480px; height: 280px; background: #f3f4f6; border-radius: 8px; }
+
+.features-wrapper { margin-top: 16px; }
+
+.landing-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; }
+.about-title { font-size: 18px; font-weight: 700; }
+.about-body { margin-top: 12px; }
+.lead-title { margin: 0; margin-bottom: 8px; }
+.lead-sub { margin-top: 0; margin-bottom: 12px; color: #6b7280; }
+.more-details { margin-top: 28px; }
+.more-title { margin-bottom: 8px; }
