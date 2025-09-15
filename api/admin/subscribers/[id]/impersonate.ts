@@ -37,18 +37,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id, subscriberId: id } });
 
-        // send audit email if configured
+        // send audit email if system config allows
         try {
-          const { sendEmail } = await import('../../../src/lib/mailer');
-          const auditTo = process.env.AUDIT_EMAIL;
-          if (auditTo) {
-            const superAdminEmail = String((user as any).email || (user as any).sub || '');
-            await sendEmail({
-              to: auditTo,
-              subject: `Impersonation Started - subscriber ${id}`,
-              text: `Super Admin ${superAdminEmail} started impersonating subscriber ${id} (user ${subscriberAdmin.id}).`,
-              html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${id}</p><p><strong>Impersonated User:</strong> ${subscriberAdmin.id} (${subscriberAdmin.email})</p><p><strong>Started At:</strong> ${new Date().toLocaleString()}</p>`,
-            });
+          const sys = await prisma.systemConfig.findFirst();
+          const enabled = sys?.impersonationAlerts ?? true;
+          if (enabled) {
+            const { sendEmail } = await import('../../../src/lib/mailer');
+            const auditTo = process.env.AUDIT_EMAIL;
+            if (auditTo) {
+              const superAdminEmail = String((user as any).email || (user as any).sub || '');
+              await sendEmail({
+                to: auditTo,
+                subject: `Impersonation Started - subscriber ${id}`,
+                text: `Super Admin ${superAdminEmail} started impersonating subscriber ${id} (user ${subscriberAdmin.id}).`,
+                html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${id}</p><p><strong>Impersonated User:</strong> ${subscriberAdmin.id} (${subscriberAdmin.email})</p><p><strong>Started At:</strong> ${new Date().toLocaleString()}</p>`,
+              });
+            }
           }
         } catch (e) {
           // ignore email errors
