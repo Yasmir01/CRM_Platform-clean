@@ -17,18 +17,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const result = await prisma.impersonationLog.updateMany({ where: { superAdminId: String((user as any).sub || (user as any).id), subscriberId, endedAt: null }, data: { endedAt: new Date() } });
 
-      // send audit email
+      // send audit email if system config allows
       try {
-        const { sendEmail } = await import('../../src/lib/mailer');
-        const auditTo = process.env.AUDIT_EMAIL;
-        if (auditTo) {
-          const superAdminEmail = String((user as any).email || (user as any).sub || '');
-          await sendEmail({
-            to: auditTo,
-            subject: `Impersonation Ended - subscriber ${subscriberId}`,
-            text: `Super Admin ${superAdminEmail} ended impersonation of subscriber ${subscriberId}.`,
-            html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${subscriberId}</p><p><strong>Ended At:</strong> ${new Date().toLocaleString()}</p><p><strong>UpdatedRows:</strong> ${result.count}</p>`,
-          });
+        const sys = await prisma.systemConfig.findFirst();
+        const enabled = sys?.impersonationAlerts ?? true;
+        if (enabled) {
+          const { sendEmail } = await import('../../src/lib/mailer');
+          const auditTo = process.env.AUDIT_EMAIL;
+          if (auditTo) {
+            const superAdminEmail = String((user as any).email || (user as any).sub || '');
+            await sendEmail({
+              to: auditTo,
+              subject: `Impersonation Ended - subscriber ${subscriberId}`,
+              text: `Super Admin ${superAdminEmail} ended impersonation of subscriber ${subscriberId}.`,
+              html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${subscriberId}</p><p><strong>Ended At:</strong> ${new Date().toLocaleString()}</p><p><strong>UpdatedRows:</strong> ${result.count}</p>`,
+            });
+          }
         }
       } catch (e) {
         // ignore email errors
