@@ -17,10 +17,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const result = await prisma.impersonationLog.updateMany({ where: { superAdminId: String((user as any).sub || (user as any).id), subscriberId, endedAt: null }, data: { endedAt: new Date() } });
 
-      // send audit email if system config allows
+      // send audit email if per-subscriber or system config allows
       try {
+        const subscriberRec = await prisma.subscriber.findUnique({ where: { id: subscriberId }, select: { impersonationAlerts: true } });
         const sys = await prisma.systemConfig.findFirst();
-        const enabled = sys?.impersonationAlerts ?? true;
+        const enabled = typeof subscriberRec?.impersonationAlerts !== 'undefined' && subscriberRec?.impersonationAlerts !== null
+          ? subscriberRec?.impersonationAlerts
+          : sys?.impersonationAlerts ?? true;
+
         if (enabled) {
           const { sendEmail } = await import('../../src/lib/mailer');
           const auditTo = process.env.AUDIT_EMAIL;
