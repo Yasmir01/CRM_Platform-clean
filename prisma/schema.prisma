@@ -181,4 +181,55 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
+model Subscriber {
+  id                          String   @id @default(cuid())
+  name                        String
+  email                       String   @unique
+  plan                        String   @default("basic")
+
+  // Feature toggles
+  enableReminders             Boolean  @default(false)
+  // SA/SU override flags
+  remindersEnabledByAdmin     Boolean  @default(true)
+
+  // email/sms notification settings for leads etc
+  notifyEmail                 Boolean  @default(true)
+  notifySMS                   Boolean  @default(false)
+
+  // Landing/pages-related flags (if present)
+  enableLandingPages          Boolean  @default(false)
+  enableCustomDomain          Boolean  @default(false)
+  landingPagesEnabledByAdmin  Boolean  @default(true)
+  customDomainEnabledByAdmin  Boolean  @default(true)
+
+  // relations
+  reminders                   Reminder[]
+
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+}
+
+model Reminder {
+  id           String   @id @default(cuid())
+  tenantId     String?
+  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
+  subscriberId String?
+  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id])
+
+  leaseId      String?
+  propertyId   String?
+
+  type         String
+  message      String
+  sendAt       DateTime
+  repeat       String?
+  sentAt       DateTime?
+  attempts     Int      @default(0)
+  acknowledged Boolean  @default(false)
+  status       String   @default("pending")
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 // --- the rest of the schema remains unchanged ---
