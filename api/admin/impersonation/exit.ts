@@ -36,6 +36,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               text: `Super Admin ${superAdminEmail} ended impersonation of subscriber ${subscriberId}.`,
               html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${subscriberId}</p><p><strong>Ended At:</strong> ${new Date().toLocaleString()}</p><p><strong>UpdatedRows:</strong> ${result.count}</p>`,
             });
+
+            // Mark alertSent true for updated rows
+            try {
+              await prisma.impersonationLog.updateMany({ where: { superAdminId: String((user as any).sub || (user as any).id), subscriberId, endedAt: { not: null } }, data: { alertSent: true } });
+            } catch (e) {
+              // ignore
+            }
           }
         }
       } catch (e) {
