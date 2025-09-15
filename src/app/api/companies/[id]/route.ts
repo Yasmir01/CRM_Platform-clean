@@ -66,14 +66,22 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
-    const company = await prisma.company.findUnique({ where: { id }, include: { contacts: true } });
+    const company = await prisma.company.findUnique({ where: { id }, include: { contacts: true, organization: true } });
     if (!company) return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+
+    // fetch org settings if available
+    let allowOverride = false;
+    if (company.orgId) {
+      const settings = await prisma.orgSettings.findUnique({ where: { orgId: company.orgId } });
+      allowOverride = Boolean(settings?.allowSADeletes);
+    }
 
     if ((company.contacts || []).length > 0) {
       const superAdmin = await isSuperAdmin(req);
-      if (!superAdmin) {
-        return NextResponse.json({ error: 'Cannot delete company with active contacts (SA override required)' }, { status: 403 });
+      if (!superAdmin || !allowOverride) {
+        return NextResponse.json({ error: 'Cannot delete company with active contacts (SA override not allowed)' }, { status: 403 });
       }
+
       // SA override: delete contacts first
       await prisma.contact.deleteMany({ where: { companyId: id } });
     }
