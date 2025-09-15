@@ -44,6 +44,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Contact with this email already exists' }, { status: 409 });
     }
 
+    // Check company exists if provided
+    const companyId = data.companyId || null;
+    if (companyId) {
+      const company = await prisma.company.findUnique({ where: { id: String(companyId) } });
+      if (!company) {
+        return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+      }
+    }
+
     const contact = await prisma.contact.create({
       data: {
         firstName: String(firstName || ''),
@@ -51,7 +60,7 @@ export async function POST(req: Request) {
         email: email,
         phone: data.phone || null,
         position: data.position || null,
-        companyId: data.companyId || null,
+        companyId: companyId,
         ownerId: data.ownerId || null,
       },
       include: { company: true, owner: true },
