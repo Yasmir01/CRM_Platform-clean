@@ -5,11 +5,21 @@ import * as BuilderComponents from "./index";
 // Keep track of names we've explicitly registered to avoid duplicates
 const registered = new Set<string>();
 
+import PlanWrapper from './PlanWrapper';
+
 // Helper to safely register a component when it exists
-function safeRegister(component: any, name: string, inputs: any[] = []) {
+function safeRegister(component: any, name: string, inputs: any[] = [], wrapWithPlan: boolean = false) {
   if (!component) return;
   try {
-    Builder.registerComponent(component, { name, inputs });
+    const opts: any = { name, inputs };
+    if (wrapWithPlan) {
+      opts.wrap = (props: any) => (
+        <PlanWrapper allowedPlans={props.allowedPlans}>
+          {React.createElement(component as any, props)}
+        </PlanWrapper>
+      );
+    }
+    Builder.registerComponent(component, opts);
     registered.add(name);
   } catch (e) {
     // do not crash registration; log for debugging
