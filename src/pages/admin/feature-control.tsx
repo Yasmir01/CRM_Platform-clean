@@ -69,11 +69,35 @@ export default function FeatureControlPanel() {
                   <div key={feature} className="border rounded p-2">
                     <p className="font-medium capitalize">{feature}</p>
                     <p className="text-sm text-gray-500">Plan: {planAllows ? '✔ Allowed' : '✘ Blocked'}</p>
-                    <button
-                      onClick={() => toggleFeature(sub.id, feature, !forceFlag)}
-                      className={`mt-2 px-3 py-1 rounded text-white ${forceFlag ? 'bg-red-500' : 'bg-green-500'}`}>
-                      {forceFlag ? 'Disable Override' : 'Force Enable'}
-                    </button>
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => toggleFeature(sub.id, feature, !forceFlag)}
+                        className={`px-3 py-1 rounded text-white ${forceFlag ? 'bg-red-500' : 'bg-green-500'}`}>
+                        {forceFlag ? 'Disable Override' : 'Force Enable'}
+                      </button>
+                      {feature === 'exports' && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(`/api/admin/subscribers/${sub.id}/impersonate`, { method: 'POST' });
+                              const data = await res.json();
+                              if (!res.ok) return alert(data?.error || 'Failed to impersonate');
+                              const token = data.token;
+                              // store as cookie for middleware to pick up
+                              document.cookie = `impersonationToken=${token}; path=/`;
+                              window.location.href = '/dashboard';
+                            } catch (e) {
+                              // eslint-disable-next-line no-console
+                              console.error('impersonate error', e);
+                              alert('Impersonation failed');
+                            }
+                          }}
+                          className="px-3 py-1 rounded bg-blue-500 text-white"
+                        >
+                          Impersonate
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}
