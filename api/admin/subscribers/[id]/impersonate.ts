@@ -33,6 +33,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         impersonatedBy: String((user as any).sub || (user as any).id),
       };
 
+      // create impersonation log
+      try {
+        await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id } });
+      } catch (e) {
+        // ignore logging errors
+      }
+
       const token = jwt.sign(payload, SECRET, { expiresIn: '15m' });
       return res.status(200).json({ token });
     }
