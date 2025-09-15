@@ -40,13 +40,13 @@ safeRegister(BuilderComponents.PropertyHero, "PropertyLandingHero", [
 safeRegister(BuilderComponents.PropertyGallery, "PropertyLandingGallery", [
   { name: "title", type: "string", defaultValue: "Property Gallery" },
   { name: "images", type: "list", subFields: [{ name: "src", type: "file" }, { name: "alt", type: "string" }] },
-]);
+], true);
 
 safeRegister(BuilderComponents.PropertyLeadForm, "PropertyLandingContactForm", [
   { name: "title", type: "string", defaultValue: "Contact Us" },
   { name: "submitLabel", type: "string", defaultValue: "Send Message" },
   { name: "successMessage", type: "string", defaultValue: "We\u2019ll get back to you shortly." },
-]);
+], true);
 
 // Also register the original names so existing pages/components continue to work
 safeRegister(BuilderComponents.PropertyHero, "PropertyHero", [
