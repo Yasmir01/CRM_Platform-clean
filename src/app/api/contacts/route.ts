@@ -1,26 +1,38 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
-  const contacts = [
-    {
-      id: '1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      phone: '+1 555-1234',
-      company: { id: 'c1', name: 'Acme Corp' },
-      owner: { id: 'u1', email: 'admin@crm.com' },
-    },
-    {
-      id: '2',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: 'jane@beta.com',
-      phone: '+1 555-5678',
-      company: { id: 'c2', name: 'Beta Properties' },
-      owner: { id: 'u2', email: 'sales@crm.com' },
-    },
-  ];
+  try {
+    const contacts = await prisma.contact.findMany({
+      include: { company: true, owner: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    });
+    return NextResponse.json(contacts);
+  } catch (e: any) {
+    console.error('GET /api/contacts error', e?.message || e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
 
-  return NextResponse.json(contacts);
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    const contact = await prisma.contact.create({
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        position: data.position,
+        companyId: data.companyId || null,
+        ownerId: data.ownerId || null,
+      },
+      include: { company: true, owner: true },
+    });
+    return NextResponse.json(contact, { status: 201 });
+  } catch (e: any) {
+    console.error('POST /api/contacts error', e?.message || e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }
