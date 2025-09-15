@@ -52,6 +52,32 @@ export default function AdminHistoryPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Super Admin Global History</h1>
 
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 mb-6 items-end">
+        <div>
+          <label className="block text-sm font-medium mb-1">Action</label>
+          <select className="border rounded px-3 py-2" value={actionFilter} onChange={(e) => setActionFilter(e.target.value)}>
+            <option value="">All</option>
+            <option value="ImpersonationStarted">Impersonation Started</option>
+            <option value="ImpersonationStopped">Impersonation Stopped</option>
+            <option value="TenantUpdated">Tenant Updated</option>
+            <option value="PaymentRecorded">Payment Recorded</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Subscriber ID</label>
+          <input type="text" placeholder="Enter subscriber ID" className="border rounded px-3 py-2" value={subscriberFilter} onChange={(e) => setSubscriberFilter(e.target.value)} />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Search</label>
+          <input type="text" placeholder="Search email, details, or company" className="border rounded px-3 py-2" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+
+        <button onClick={fetchHistory} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply Filters</button>
+      </div>
+
       <div className="space-y-4">
         {history.length === 0 && <div className="text-gray-600">No history found.</div>}
 
