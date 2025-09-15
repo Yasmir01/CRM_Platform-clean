@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ControlledFeature } from '@/components/ControlledFeature';
+import { ControlledFeature } from '@/components/builder/ControlledFeature';
 
 export default function ImpersonationLogs() {
   const [logs, setLogs] = useState<any[]>([]);
