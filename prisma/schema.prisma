@@ -235,4 +235,24 @@ model ReminderLog {
   @@index([createdAt])
 }
 
+model WebhookSubscription {
+  id           String   @id @default(cuid())
+  name         String
+  url          String
+  event        String
+  active       Boolean  @default(true)
+  subscriberId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ExternalWebhookEvent {
+  id         String   @id @default(cuid())
+  provider   String?
+  payload    Json
+  receivedAt DateTime @default(now())
+  processed  Boolean  @default(false)
+  notes      String?
+}
+
 // --- the rest of the schema remains unchanged ---
