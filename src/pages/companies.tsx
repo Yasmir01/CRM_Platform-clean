@@ -42,6 +42,8 @@ export default function CompaniesPage() {
 
   async function deleteCompany(id: string) {
     try {
+      const confirmed = window.confirm('Delete this company? This action cannot be undone.');
+      if (!confirmed) return;
       await fetch('/api/companies', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -51,6 +53,33 @@ export default function CompaniesPage() {
     } catch (err) {
       console.error('Delete company error', err);
     }
+  }
+
+  // inline edit state
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editForm, setEditForm] = React.useState({ name: '', domain: '' });
+
+  function startEdit(c: Company) {
+    setEditingId(c.id);
+    setEditForm({ name: c.name, domain: c.domain || '' });
+  }
+
+  async function saveEdit(id: string) {
+    try {
+      await fetch('/api/companies', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...editForm }),
+      });
+      setEditingId(null);
+      fetchCompanies();
+    } catch (err) {
+      console.error('Update company error', err);
+    }
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
   }
 
   useEffect(() => {
@@ -97,16 +126,31 @@ export default function CompaniesPage() {
             {companies.map((c) => (
               <tr key={c.id}>
                 <td className="p-2 border">
-                  <Link href={`/companies/${c.id}`} className="text-blue-600 hover:underline">{c.name}</Link>
+                  {editingId === c.id ? (
+                    <input className="border p-1 rounded w-full" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                  ) : (
+                    <Link href={`/companies/${c.id}`} className="text-blue-600 hover:underline">{c.name}</Link>
+                  )}
                 </td>
-                <td className="p-2 border">{c.domain}</td>
                 <td className="p-2 border">
-                  <button
-                    onClick={() => deleteCompany(c.id)}
-                    className="px-2 py-1 bg-red-500 text-white rounded"
-                  >
-                    Delete
-                  </button>
+                  {editingId === c.id ? (
+                    <input className="border p-1 rounded w-full" value={editForm.domain} onChange={(e) => setEditForm({ ...editForm, domain: e.target.value })} />
+                  ) : (
+                    c.domain
+                  )}
+                </td>
+                <td className="p-2 border">
+                  {editingId === c.id ? (
+                    <div className="flex gap-2">
+                      <button onClick={() => saveEdit(c.id)} className="px-2 py-1 bg-green-500 text-white rounded">Save</button>
+                      <button onClick={cancelEdit} className="px-2 py-1 bg-gray-300 rounded">Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button onClick={() => startEdit(c)} className="px-2 py-1 bg-yellow-500 text-white rounded">Edit</button>
+                      <button onClick={() => deleteCompany(c.id)} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
