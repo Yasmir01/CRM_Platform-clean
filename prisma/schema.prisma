@@ -432,12 +432,10 @@ model DirectMessage {
   @@index([receiverId, sentAt])
 }
 
-// Unit model used by Lease and listings
 model Unit {
   id        String   @id @default(cuid())
-  number    String?
-  name      String?
-  propertyId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  name      String   @db.VarChar(255)
+  tenants   Tenant[]
+
+  @@unique([name])
 }
