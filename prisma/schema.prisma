@@ -50,27 +50,14 @@ model Account {
 }
 
 model Organization {
-  id              String   @id @default(cuid())
-  name            String
-  domain          String?
-  subdomain       String?
-  accountId       String
-  account         Account  @relation(fields: [accountId], references: [id])
-  properties      Property[]
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(255)
+  users     User[]
+  documents Document[]   @relation("OrgDocuments")
+  settings  OrgSettings?
+  units     Unit[]
 
-  // UI / billing
-  logoUrl         String?
-  planTier        String   @default("basic")
-
-  // Feature flags (SU controlled or plan restricted)
-  exportEnabled    Boolean  @default(true)
-  remindersEnabled Boolean  @default(true)
-  brandingEnabled  Boolean  @default(false)
-  historyEnabled   Boolean  @default(true)
-  leadsEnabled     Boolean  @default(true)
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  @@unique([name])
 }
 
 // ============================================================
