@@ -51,12 +51,33 @@ export async function PATCH(
   }
 }
 
+async function isSuperAdmin(req: Request): Promise<boolean> {
+  try {
+    const role = req.headers.get('x-user-role');
+    return String(role || '').toUpperCase() === 'SA';
+  } catch {
+    return false;
+  }
+}
+
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const { id } = params;
+    const company = await prisma.company.findUnique({ where: { id }, include: { contacts: true } });
+    if (!company) return NextResponse.json({ error: 'Company not found' }, { status: 404 });
+
+    if ((company.contacts || []).length > 0) {
+      const superAdmin = await isSuperAdmin(req);
+      if (!superAdmin) {
+        return NextResponse.json({ error: 'Cannot delete company with active contacts (SA override required)' }, { status: 403 });
+      }
+      // SA override: delete contacts first
+      await prisma.contact.deleteMany({ where: { companyId: id } });
+    }
+
     await prisma.company.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (e: any) {
