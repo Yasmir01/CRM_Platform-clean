@@ -42,7 +42,7 @@ export default function PropertyLandingPage({
         {account.logoUrl ? (
           <img src={account.logoUrl} alt={account.name} className="branding-logo" />
         ) : (
-          <div style={{ fontWeight: 700 }}>{account.name || "Property"}</div>
+          <div className="branding-name">{account.name || "Property"}</div>
         )}
       </div>
 
@@ -57,7 +57,7 @@ export default function PropertyLandingPage({
             {property.sqft && <div>{property.sqft} sqft</div>}
           </div>
 
-          <div style={{ marginTop: 16 }}>
+          <div className="features-wrapper">
             <div className="features-grid">
               {(property.features || []).slice(0, 6).map((f, i) => (
                 <div key={i} className="feature-card">
@@ -70,22 +70,18 @@ export default function PropertyLandingPage({
 
         <div className="hero-right">
           {heroImage ? (
-            <img
-              src={heroImage}
-              alt={property.title}
-              style={{ width: "100%", maxWidth: 480, borderRadius: 8, objectFit: "cover" }}
-            />
+            <img src={heroImage} alt={property.title} className="hero-image" />
           ) : (
-            <div style={{ width: 480, height: 280, background: "#f3f4f6", borderRadius: 8 }} />
+            <div className="hero-placeholder" />
           )}
         </div>
       </section>
 
       <div className="landing-body">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "1.25rem" }}>
+        <div className="landing-grid">
           <article>
-            <h2 style={{ fontSize: 18, fontWeight: 700 }}>About this property</h2>
-            <div style={{ marginTop: 12 }} dangerouslySetInnerHTML={{ __html: property.descriptionHtml || property.description || "" }} />
+            <h2 className="about-title">About this property</h2>
+            <div className="about-body" dangerouslySetInnerHTML={{ __html: property.descriptionHtml || property.description || "" }} />
             <div className="property-gallery" aria-hidden={!property.images}>
               {(property.images || []).slice(0, 6).map((img, idx) => (
                 <img key={idx} src={img.url} alt={img.alt || `${property.title} image ${idx + 1}`} />
@@ -95,8 +91,8 @@ export default function PropertyLandingPage({
 
           <aside>
             <div className="lead-panel">
-              <h3 style={{ margin: 0, marginBottom: 8 }}>Interested? Contact us</h3>
-              <p style={{ marginTop: 0, marginBottom: 12, color: "#6b7280" }}>Quick response — no spam.</p>
+              <h3 className="lead-title">Interested? Contact us</h3>
+              <p className="lead-sub">Quick response — no spam.</p>
               {showLeadForm ? (
                 <PropertyLeadForm propertyId={property.id} property={property} account={account} />
               ) : (
@@ -106,8 +102,8 @@ export default function PropertyLandingPage({
           </aside>
         </div>
 
-        <div style={{ marginTop: 28 }}>
-          <h3 style={{ marginBottom: 8 }}>More details</h3>
+        <div className="more-details">
+          <h3 className="more-title">More details</h3>
           <div>{property.longDetails || property.extra || ""}</div>
         </div>
       </div>
