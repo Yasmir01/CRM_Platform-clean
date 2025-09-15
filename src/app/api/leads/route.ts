@@ -3,6 +3,7 @@ import { withAuthorization } from '../../../../lib/authz';
 import { sendEmail } from '../../../../lib/mailer';
 import { sendSMS } from '../../../../lib/sms';
 import { canUseFeature } from '../../../../lib/planRules';
+import { withRateLimit } from '../../../../lib/withRateLimit';
 
 export const GET = withAuthorization('lead:read', async (req: Request) => {
   const leads = await prisma.lead.findMany({
