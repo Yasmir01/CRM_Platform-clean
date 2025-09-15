@@ -1,22 +1,33 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
-  const companies = [
-    {
-      id: 'c1',
-      name: 'Acme Corp',
-      domain: 'acme.com',
-      industry: 'Real Estate',
-      _count: { contacts: 3 },
-    },
-    {
-      id: 'c2',
-      name: 'Beta Properties',
-      domain: 'betaproperties.com',
-      industry: 'Property Management',
-      _count: { contacts: 5 },
-    },
-  ];
+  try {
+    const companies = await prisma.company.findMany({
+      include: { contacts: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 100,
+    });
+    return NextResponse.json(companies);
+  } catch (e: any) {
+    console.error('GET /api/companies error', e?.message || e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
 
-  return NextResponse.json(companies);
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    const company = await prisma.company.create({
+      data: {
+        name: data.name,
+        domain: data.domain || null,
+        industry: data.industry || null,
+      },
+    });
+    return NextResponse.json(company, { status: 201 });
+  } catch (e: any) {
+    console.error('POST /api/companies error', e?.message || e);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }
