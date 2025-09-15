@@ -16,29 +16,33 @@ export default function AdminHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      try {
-        setLoading(true);
-        setError(null);
-        const res = await fetch("/api/admin/history");
-        if (!res.ok) throw new Error("Failed to load history");
-        const data = await res.json();
-        const items: HistoryEntry[] = data.history || data;
-        if (!mounted) return;
-        setHistory(items);
-      } catch (e: any) {
-        if (!mounted) return;
-        setError(e?.message || "Failed to load");
-      } finally {
-        if (mounted) setLoading(false);
-      }
+  const [actionFilter, setActionFilter] = useState<string>('');
+  const [subscriberFilter, setSubscriberFilter] = useState<string>('');
+  const [search, setSearch] = useState<string>('');
+
+  async function fetchHistory() {
+    try {
+      setLoading(true);
+      setError(null);
+      const params = new URLSearchParams();
+      if (actionFilter) params.append('action', actionFilter);
+      if (subscriberFilter) params.append('subscriberId', subscriberFilter);
+      if (search) params.append('search', search);
+      const res = await fetch(`/api/admin/history?${params.toString()}`);
+      if (!res.ok) throw new Error('Failed to load history');
+      const data = await res.json();
+      const items: HistoryEntry[] = data.history || data;
+      setHistory(items);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to load');
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => {
-      mounted = false;
-    };
+  }
+
+  useEffect(() => {
+    fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) return <div className="p-6">Loading history...</div>;
