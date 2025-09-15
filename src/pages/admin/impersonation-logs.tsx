@@ -80,27 +80,9 @@ export default function ImpersonationLogs() {
 
   const exportPDF = () => {
     try {
-      const win = window.open('', '_blank');
-      if (!win) return;
-      const style = `<style>body{font-family:Arial,Helvetica,sans-serif;padding:16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}thead{background:#f3f4f6;font-weight:600}</style>`;
-      const rowsHtml = (filteredLogs || []).map((log) => {
-        const admin = (log.superAdmin?.email || log.superAdminId || '').toString();
-        const subscriber = (log.subscriber?.companyName || log.subscriber?.name || log.subscriberId || '').toString();
-        const started = new Date(log.startedAt).toLocaleString();
-        const ended = log.endedAt ? new Date(log.endedAt).toLocaleString() : 'Active';
-        const status = log.alertSent ? 'Sent' : 'Suppressed';
-        return `<tr><td>${escapeHtml(admin)}</td><td>${escapeHtml(subscriber)}</td><td>${escapeHtml(started)}</td><td>${escapeHtml(ended)}</td><td>${escapeHtml(status)}</td></tr>`;
-      }).join('');
-      const html = `<!doctype html><html><head><title>Impersonation Logs</title>${style}</head><body><h1>Impersonation Logs</h1><table><thead><tr><th>Super Admin</th><th>Subscriber</th><th>Started</th><th>Ended</th><th>Alert Status</th></tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
-      win.document.open();
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      // trigger print; user can save as PDF from print dialog
-      win.print();
-    } catch (e) {
-      // ignore
-    }
+      const url = buildExportUrl('pdf');
+      window.open(url, '_blank');
+    } catch (e) {}
   };
 
   if (loading) return <p className="p-6 text-gray-500">Loading logs...</p>;
