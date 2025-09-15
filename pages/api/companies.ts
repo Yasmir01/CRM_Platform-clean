@@ -5,6 +5,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
+        const id = String(req.query?.id || '');
+        if (id) {
+          const company = await prisma.company.findUnique({ where: { id }, include: { contacts: true } });
+          if (!company) return res.status(404).json({ error: 'Not found' });
+          return res.status(200).json(company);
+        }
         const companies = await prisma.company.findMany({ include: { contacts: true } });
         return res.status(200).json(companies);
       }
