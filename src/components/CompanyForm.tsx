@@ -5,8 +5,8 @@ import React, { useEffect, useState } from 'react';
 type CompanyFormProps = {
   open: boolean;
   onClose: () => void;
-  onSave: (data: { name: string; industry?: string; website?: string }) => void;
-  initialData?: { name?: string; industry?: string; website?: string };
+  onSave: (data: { id?: string; name: string; industry?: string; website?: string }) => void;
+  initialData?: { id?: string; name?: string; industry?: string; website?: string };
 };
 
 export default function CompanyForm({ open, onClose, onSave, initialData }: CompanyFormProps) {
@@ -30,7 +30,7 @@ export default function CompanyForm({ open, onClose, onSave, initialData }: Comp
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onSave({ name: name.trim(), industry: industry.trim() || undefined, website: website.trim() || undefined });
+    onSave({ id: initialData?.id, name: name.trim(), industry: industry.trim() || undefined, website: website.trim() || undefined });
     onClose();
   };
 
