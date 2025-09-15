@@ -262,10 +262,12 @@ model MaintenanceAttachment {
 
 model MaintenanceInvoice {
   id        String   @id @default(cuid())
-  propertyId String
-  property  Property @relation(fields: [propertyId], references: [id])
   amount    Float
-  createdAt DateTime @default(now())
+  date      DateTime @default(now())
+  tenant    Tenant   @relation("VendorMaintenanceInvoices", fields: [tenantId], references: [id])
+  tenantId  String
+
+  @@index([tenantId, date])
 }
 
 // ============================================================
