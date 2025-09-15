@@ -201,6 +201,23 @@ export default function CompanyDetailPage() {
           </div>
         </>
       )}
+
+      {/* Edit Modal */}
+      {editing && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded shadow w-96">
+            <h3 className="text-lg font-bold mb-2">Edit Contact</h3>
+            <input placeholder="First Name" value={editing.firstName} onChange={(e) => setEditing({ ...editing, firstName: e.target.value })} className="border p-1 w-full mb-2" />
+            <input placeholder="Last Name" value={editing.lastName || ''} onChange={(e) => setEditing({ ...editing, lastName: e.target.value })} className="border p-1 w-full mb-2" />
+            <input placeholder="Email" value={editing.email} onChange={(e) => setEditing({ ...editing, email: e.target.value })} className="border p-1 w-full mb-2" />
+            <input placeholder="Phone" value={editing.phone || ''} onChange={(e) => setEditing({ ...editing, phone: e.target.value })} className="border p-1 w-full mb-2" />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setEditing(null)} className="px-3 py-1 bg-gray-200 rounded">Cancel</button>
+              <button onClick={saveEditing} className="px-3 py-1 bg-blue-600 text-white rounded">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
