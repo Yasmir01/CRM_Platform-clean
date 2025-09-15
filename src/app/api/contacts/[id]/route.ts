@@ -39,6 +39,17 @@ export async function PATCH(
     if (body.phone !== undefined) updates.phone = body.phone;
     if (body.ownerId !== undefined) updates.ownerId = body.ownerId;
 
+    // Require firstName and email
+    if (!updates.firstName || !updates.email) {
+      return NextResponse.json({ error: 'firstName and email are required' }, { status: 400 });
+    }
+
+    // Prevent duplicate email excluding self
+    const duplicate = await prisma.contact.findFirst({ where: { email: { equals: updates.email, mode: 'insensitive' }, NOT: { id } } });
+    if (duplicate) {
+      return NextResponse.json({ error: 'Another contact with this email already exists' }, { status: 409 });
+    }
+
     const updated = await prisma.contact.update({ where: { id }, data: updates });
     return NextResponse.json(updated);
   } catch (e: any) {
