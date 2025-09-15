@@ -27,6 +27,12 @@ export async function POST(req: Request) {
     if (!name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
+    // Check for duplicates (case-insensitive)
+    const existing = await prisma.company.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
+    if (existing) {
+      return NextResponse.json({ error: 'Company with this name already exists' }, { status: 409 });
+    }
+
     const company = await prisma.company.create({
       data: {
         name,
