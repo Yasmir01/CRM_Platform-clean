@@ -101,6 +101,29 @@ export default function FeatureControlPanel() {
                   </div>
                 );
               })}
+
+              {/* Per-subscriber impersonation alerts control */}
+              <div className="border rounded p-2">
+                <p className="font-medium">Impersonation Alerts</p>
+                <p className="text-sm text-gray-500">{sub.impersonationAlerts === null || typeof sub.impersonationAlerts === 'undefined' ? 'Following Global' : sub.impersonationAlerts ? 'Enabled' : 'Disabled'}</p>
+                <button
+                  onClick={async () => {
+                    try {
+                      const current = sub.impersonationAlerts;
+                      // toggle: if null -> true, if true->false, if false->null (cycle)
+                      const newVal = (current === null || typeof current === 'undefined') ? true : (current === true ? false : null);
+                      await fetch(`/api/admin/subscribers/${sub.id}/alerts`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: newVal }) });
+                      window.location.reload();
+                    } catch (e) {
+                      console.error(e);
+                      alert('Failed to update alerts setting');
+                    }
+                  }}
+                  className="mt-2 px-3 py-1 rounded bg-indigo-600 text-white"
+                >
+                  Toggle Alert
+                </button>
+              </div>
             </div>
           </div>
         ))}
