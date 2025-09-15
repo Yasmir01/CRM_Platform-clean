@@ -8,6 +8,7 @@ export default function ImpersonationLogs() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [settings, setSettings] = useState<any>(null);
+  const [showExportTooltip, setShowExportTooltip] = useState(false);
 
   useEffect(() => {
     let mounted = true;
