@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getUserOr401 } from '../../src/utils/authz';
 import { ensurePermission } from '../../src/lib/authorize';
 import { prisma } from '../_db';
@@ -11,13 +10,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const q = String((req.query as any).q || '').trim();
       const industry = String((req.query as any).industry || '');
-      const size = String((req.query as any).size || '');
       const take = Math.min(1000, Number((req.query as any).take || 50));
       const skip = Math.max(0, Number((req.query as any).skip || 0));
 
-      const where: any = { archived: false };
+      const where: any = {};
       if (industry) where.industry = industry;
-      if (size) where.size = size;
       if (q) {
         const qLower = q.toLowerCase();
         where.OR = [
@@ -39,7 +36,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         name: String(body.name || '').trim(),
         domain: body.domain || null,
         industry: body.industry || null,
-        size: body.size || null,
       };
       if (!data.name) return res.status(400).json({ error: 'Missing name' });
 
