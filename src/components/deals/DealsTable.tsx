@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react'
+import DealForm from './DealForm'
 
 export default function DealsTable() {
   const [deals, setDeals] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    let mounted = true
+  const fetchDeals = () => {
+    setLoading(true)
     fetch('/api/deals')
       .then(res => res.json())
-      .then(data => {
-        if (!mounted) return
-        setDeals(data)
-        setLoading(false)
-      })
+      .then(data => { setDeals(data); setLoading(false) })
       .catch(() => setLoading(false))
+  }
 
-    return () => { mounted = false }
-  }, [])
+  useEffect(() => { fetchDeals() }, [])
 
   if (loading) return <p>Loading...</p>
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Deals</h1>
+    <div className="p-6 space-y-6">
+      <DealForm onCreated={fetchDeals} />
+
+      <h1 className="text-2xl font-bold">Deals</h1>
       <table className="min-w-full border">
         <thead>
           <tr className="bg-gray-100">
-            <th className="border px-3 py-2 text-left">Title</th>
-            <th className="border px-3 py-2 text-left">Amount</th>
-            <th className="border px-3 py-2 text-left">Stage</th>
-            <th className="border px-3 py-2 text-left">Status</th>
-            <th className="border px-3 py-2 text-left">Company</th>
-            <th className="border px-3 py-2 text-left">Contact</th>
+            <th className="border px-3 py-2">Title</th>
+            <th className="border px-3 py-2">Amount</th>
+            <th className="border px-3 py-2">Stage</th>
+            <th className="border px-3 py-2">Status</th>
+            <th className="border px-3 py-2">Company</th>
+            <th className="border px-3 py-2">Contact</th>
           </tr>
         </thead>
         <tbody>
