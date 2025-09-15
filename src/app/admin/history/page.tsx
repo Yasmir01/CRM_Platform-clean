@@ -76,6 +76,23 @@ export default function AdminHistoryPage() {
         </div>
 
         <button onClick={fetchHistory} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Apply Filters</button>
+
+        {/* Export Buttons */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => window.open(`/api/admin/history-export?export=csv&action=${encodeURIComponent(actionFilter)}&subscriberId=${encodeURIComponent(subscriberFilter)}&search=${encodeURIComponent(search)}`, '_blank')}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Export CSV
+          </button>
+
+          <button
+            onClick={() => window.open(`/api/admin/history-export?export=pdf&action=${encodeURIComponent(actionFilter)}&subscriberId=${encodeURIComponent(subscriberFilter)}&search=${encodeURIComponent(search)}`, '_blank')}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4">
