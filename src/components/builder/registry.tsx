@@ -63,6 +63,36 @@ safeRegister(BuilderComponents.PropertyLandingPage, "PropertyLandingPage", [
   { name: "showLeadForm", type: "boolean" },
 ]);
 
+// Lead Pipeline Board
+safeRegister(BuilderComponents.LeadPipelineBoard, "LeadPipelineBoard", [
+  { name: "title", type: "string", defaultValue: "Lead Management Board" },
+  { name: "stages", type: "list", defaultValue: ["New", "Contacted", "Tour Scheduled", "Application Sent", "Closed"], subFields: [{ name: "stageName", type: "string" }] },
+  { name: "showCounts", type: "boolean", defaultValue: true },
+]);
+
+// Lead Detail Card
+safeRegister(BuilderComponents.LeadDetailCard, "LeadDetailCard", [
+  { name: "nameLabel", type: "string", defaultValue: "Lead Name" },
+  { name: "emailLabel", type: "string", defaultValue: "Email" },
+  { name: "phoneLabel", type: "string", defaultValue: "Phone" },
+  { name: "statusLabel", type: "string", defaultValue: "Current Stage" },
+  { name: "notesLabel", type: "string", defaultValue: "Notes" },
+]);
+
+// Payment History Table
+safeRegister(BuilderComponents.PaymentHistoryTable, "PaymentHistoryTable", [
+  { name: "title", type: "string", defaultValue: "Payment History" },
+  { name: "showFilters", type: "boolean", defaultValue: true },
+  { name: "showExport", type: "boolean", defaultValue: true },
+]);
+
+// Payment Proration Calculator
+safeRegister(BuilderComponents.PaymentProrationCalculator, "PaymentProrationCalculator", [
+  { name: "title", type: "string", defaultValue: "Prorated Rent Calculator" },
+  { name: "submitLabel", type: "string", defaultValue: "Calculate" },
+  { name: "showHelpText", type: "boolean", defaultValue: true },
+]);
+
 // Auto-register any remaining components exported from the barrel with empty inputs
 Object.entries(BuilderComponents).forEach(([name, component]) => {
   if (!component) return;
