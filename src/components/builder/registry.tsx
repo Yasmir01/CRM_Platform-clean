@@ -78,7 +78,8 @@ safeRegister(BuilderComponents.LeadPipelineBoard, "LeadPipelineBoard", [
   { name: "title", type: "string", defaultValue: "Lead Management Board" },
   { name: "stages", type: "list", defaultValue: ["New", "Contacted", "Tour Scheduled", "Application Sent", "Closed"], subFields: [{ name: "stageName", type: "string" }] },
   { name: "showCounts", type: "boolean", defaultValue: true },
-]);
+  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: ["Starter","Pro","Enterprise"] }], defaultValue: ["Starter","Pro","Enterprise"] },
+], true);
 
 // Lead Detail Card
 safeRegister(BuilderComponents.LeadDetailCard, "LeadDetailCard", [
@@ -87,21 +88,24 @@ safeRegister(BuilderComponents.LeadDetailCard, "LeadDetailCard", [
   { name: "phoneLabel", type: "string", defaultValue: "Phone" },
   { name: "statusLabel", type: "string", defaultValue: "Current Stage" },
   { name: "notesLabel", type: "string", defaultValue: "Notes" },
-]);
+  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: ["Starter","Pro","Enterprise"] }], defaultValue: ["Starter","Pro","Enterprise"] },
+], true);
 
 // Payment History Table
 safeRegister(BuilderComponents.PaymentHistoryTable, "PaymentHistoryTable", [
   { name: "title", type: "string", defaultValue: "Payment History" },
   { name: "showFilters", type: "boolean", defaultValue: true },
   { name: "showExport", type: "boolean", defaultValue: true },
-]);
+  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: ["Starter","Pro","Enterprise"] }], defaultValue: ["Pro","Enterprise"] },
+], true);
 
 // Payment Proration Calculator
 safeRegister(BuilderComponents.PaymentProrationCalculator, "PaymentProrationCalculator", [
   { name: "title", type: "string", defaultValue: "Prorated Rent Calculator" },
   { name: "submitLabel", type: "string", defaultValue: "Calculate" },
   { name: "showHelpText", type: "boolean", defaultValue: true },
-]);
+  { name: "allowedPlans", type: "list", subFields: [{ name: "plan", type: "string", enum: ["Starter","Pro","Enterprise"] }], defaultValue: ["Starter","Pro","Enterprise"] },
+], true);
 
 // Auto-register any remaining components exported from the barrel with empty inputs
 Object.entries(BuilderComponents).forEach(([name, component]) => {
