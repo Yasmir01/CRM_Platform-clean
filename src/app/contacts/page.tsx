@@ -1,63 +1,152 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+
+interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: { id: string; name: string } | null;
+  notes?: string;
+}
 
 export default function ContactsPage() {
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [search, setSearch] = useState('');
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     fetch('/api/contacts')
-      .then((res) => res.json())
-      .then(setContacts)
-      .catch(() => setContacts([]));
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return;
+        setContacts(data || []);
+      })
+      .catch(() => setContacts([]))
+      .finally(() => setLoading(false));
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const filtered = contacts.filter((c) =>
-    `${c.firstName} ${c.lastName} ${c.email || ''}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleSave = async () => {
+    if (!selectedContact) return;
+    try {
+      const res = await fetch(`/api/contacts/${selectedContact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: undefined, // legacy API uses separate fields; keep body consistent with app route which updates allowed fields
+        }),
+      });
+      // Our app route expects firstName/lastName/email/phone; but this UI uses name => split
+      // Better split name into first/last
+      const [firstName, ...rest] = (selectedContact.name || '').split(' ');
+      const lastName = rest.join(' ');
+      const patchRes = await fetch(`/api/contacts/${selectedContact.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email: selectedContact.email, phone: selectedContact.phone }),
+      });
+      const updated = await patchRes.json();
+      setContacts((prev) => prev.map((c) => (c.id === updated.id ? { ...c, name: `${updated.firstName} ${updated.lastName}`, email: updated.email, phone: updated.phone } : c)));
+      setIsModalOpen(false);
+      setSelectedContact(null);
+    } catch (e) {
+      console.error('Failed saving contact', e);
+    }
+  };
+
+  if (loading) return <p className="p-6">Loading contacts...</p>;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Contacts</h1>
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search contacts..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-2 py-1 rounded flex-1"
-        />
-        <Link href="/contacts/new" className="px-3 py-1 bg-blue-500 text-white rounded">
-          + New Contact
-        </Link>
-      </div>
-
-      <table className="min-w-full border">
+      <table className="min-w-full border rounded">
         <thead>
-          <tr className="bg-gray-100">
-            <th className="px-3 py-2 border text-left">Name</th>
-            <th className="px-3 py-2 border text-left">Email</th>
-            <th className="px-3 py-2 border text-left">Company</th>
-            <th className="px-3 py-2 border text-left">Owner</th>
+          <tr className="bg-gray-100 text-left">
+            <th className="p-2 border">Name</th>
+            <th className="p-2 border">Email</th>
+            <th className="p-2 border">Phone</th>
+            <th className="p-2 border">Company</th>
+            <th className="p-2 border">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {filtered.map((c) => (
-            <tr key={c.id} className="hover:bg-gray-50">
-              <td className="px-3 py-2 border">
-                <Link href={`/contacts/${c.id}`} className="text-blue-600 hover:underline">
-                  {c.firstName} {c.lastName}
-                </Link>
+          {contacts.map((c) => (
+            <tr key={c.id}>
+              <td className="p-2 border">{c.name}</td>
+              <td className="p-2 border">{c.email}</td>
+              <td className="p-2 border">{c.phone || '-'}</td>
+              <td className="p-2 border">{c.company?.name || '-'}</td>
+              <td className="p-2 border">
+                <button
+                  onClick={() => {
+                    setSelectedContact(c);
+                    setIsModalOpen(true);
+                  }}
+                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Edit
+                </button>
               </td>
-              <td className="px-3 py-2 border">{c.email || '-'}</td>
-              <td className="px-3 py-2 border">{c.company?.name || '-'}</td>
-              <td className="px-3 py-2 border">{c.owner?.email || '-'}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Modal (simple) */}
+      {isModalOpen && selectedContact && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+            <h2 className="text-xl font-semibold mb-4">Edit Contact</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}
+              className="space-y-3"
+            >
+              <input
+                type="text"
+                value={selectedContact.name}
+                onChange={(e) => setSelectedContact({ ...selectedContact, name: e.target.value })}
+                placeholder="Name"
+                className="w-full border p-2 rounded"
+              />
+              <input
+                type="email"
+                value={selectedContact.email}
+                onChange={(e) => setSelectedContact({ ...selectedContact, email: e.target.value })}
+                placeholder="Email"
+                className="w-full border p-2 rounded"
+              />
+              <input
+                type="text"
+                value={selectedContact.phone || ''}
+                onChange={(e) => setSelectedContact({ ...selectedContact, phone: e.target.value })}
+                placeholder="Phone"
+                className="w-full border p-2 rounded"
+              />
+              <textarea
+                value={selectedContact.notes || ''}
+                onChange={(e) => setSelectedContact({ ...selectedContact, notes: e.target.value })}
+                placeholder="Notes"
+                className="w-full border p-2 rounded"
+              />
+              <div className="flex justify-end gap-2">
+                <button type="button" onClick={() => { setIsModalOpen(false); setSelectedContact(null); }} className="px-3 py-1 bg-gray-200 rounded">
+                  Cancel
+                </button>
+                <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
