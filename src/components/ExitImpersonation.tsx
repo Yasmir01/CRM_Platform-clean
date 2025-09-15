@@ -13,14 +13,28 @@ export default function ExitImpersonation() {
 
   const exitImpersonation = async () => {
     try {
-      const res = await fetch('/api/admin/stop-impersonation', { method: 'POST', credentials: 'include' });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        alert(data?.error || 'Failed to stop impersonation');
-        return;
+      // try to read impersonation token from cookies
+      const cookie = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('impersonationToken='));
+      let subscriberId: string | null = null;
+      if (cookie) {
+        const token = cookie.split('=')[1];
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          subscriberId = payload.subscriberId || null;
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      if (subscriberId) {
+        await fetch('/api/admin/impersonation/exit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subscriberId }),
+        });
       }
     } catch (e) {
-      console.error(e);
+      console.error('Failed to close impersonation log', e);
     }
 
     // Clear cookie client-side as well
