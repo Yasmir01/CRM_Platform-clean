@@ -14,19 +14,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const payload = jwt.verify(raw, JWT_SECRET) as any;
-    const user = { id: payload.sub, email: payload.email, role: payload.role, roles: payload.roles };
+    const user: any = { id: payload.sub, email: payload.email, role: payload.role, roles: payload.roles };
+
+    // impersonation info
+    const impersonating = payload.impersonating || null;
+    const originalUserId = payload.originalUserId || null;
 
     // try to locate a subscriber with this email
     let subscriber = null;
     try {
       if (user.email) {
-        subscriber = await prisma.subscriber.findFirst({ where: { email: user.email }, select: { id: true, plan: true } });
+        subscriber = await prisma.subscriber.findFirst({ where: { email: user.email }, select: { id: true, plan: true, name: true } });
       }
     } catch (e) {
       // ignore
     }
 
-    return res.status(200).json({ authenticated: true, user, subscriber });
+    return res.status(200).json({ authenticated: true, user, subscriber, impersonating, originalUserId });
   } catch (err) {
     return res.status(401).json({ authenticated: false });
   }
