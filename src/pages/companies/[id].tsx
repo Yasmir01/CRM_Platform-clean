@@ -149,6 +149,15 @@ export default function CompanyDetailPage() {
       <h1 className="text-2xl font-bold mb-2">{company.name}</h1>
       {company.domain && <p className="mb-4 text-gray-600">Domain: {company.domain}</p>}
 
+      <h2 className="text-xl font-semibold mt-6 mb-2">Add Contact</h2>
+      <form onSubmit={handleAddContact} className="flex gap-2 mb-6">
+        <input placeholder="First Name" value={newContact.firstName} onChange={(e) => setNewContact({ ...newContact, firstName: e.target.value })} className="border px-2 py-1 rounded" required />
+        <input placeholder="Last Name" value={newContact.lastName} onChange={(e) => setNewContact({ ...newContact, lastName: e.target.value })} className="border px-2 py-1 rounded" />
+        <input placeholder="Email" type="email" value={newContact.email} onChange={(e) => setNewContact({ ...newContact, email: e.target.value })} className="border px-2 py-1 rounded" required />
+        <input placeholder="Phone" value={newContact.phone} onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })} className="border px-2 py-1 rounded" />
+        <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Add</button>
+      </form>
+
       <h2 className="text-xl font-semibold mb-2">Contacts</h2>
 
       <div className="mb-4 flex items-center gap-2">
