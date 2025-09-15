@@ -1,6 +1,3 @@
-// Prisma schema for CRM Subscription Plans and Monetization
-// Provider: PostgreSQL (Neon)
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,322 +7,378 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// --- RBAC Users ---
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  MANAGER
-  OWNER
-  VENDOR
-  TENANT
+// ============================================================
+// Core Enums
+// ============================================================
+enum BillingCycle {
+  MONTHLY
+  YEARLY
 }
 
-model User {
-  id                     String         @id @default(cuid())
-  email                  String         @unique
-  name                   String?
-  role                   Role           @default(TENANT)
-  permissions            String?
-  autopayEnabled         Boolean        @default(false)
-  stripeCustomerId       String?
-  defaultPaymentMethodId String?
-  orgId                  String
-  org                    Organization   @relation(fields: [orgId], references: [id])
-  accountId              String
-  account                Account       @relation(fields: [accountId], references: [id])
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
+enum ProductType {
+  SUBSCRIPTION
+  ADDON
+}
 
-  // Back-relations
-  rentPayments           RentPayment[]  @relation("TenantRentPayments")
-  lateFees               LateFee[]      @relation("TenantLateFees")
-  refunds                Refund[]       @relation("TenantRefunds")
-  autopay                AutoPay?       @relation("TenantAutoPay")
-  ownerLedgers           OwnerLedger[]  @relation("OwnerLedgers")
-  uploadedDocuments      Document[]     @relation("UserUploadedDocuments")
-  vendorInvoices         MaintenanceInvoice[] @relation("VendorMaintenanceInvoices")
-  directMessagesSent     DirectMessage[]      @relation("DirectMessagesSent")
-  directMessagesReceived DirectMessage[]      @relation("DirectMessagesReceived")
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  UNPAID
+  PAUSED
+}
 
-  @@index([orgId])
+// ============================================================
+// Accounts & Organizations
+// ============================================================
+model Account {
+  id               String   @id @default(cuid())
+  name             String
+  domain           String?
+  subdomain        String?
+  stripeCustomerId String?
+  stripeSetupIntentId String?
+  subscription     Subscription?
+  organizations    Organization[]
+  properties       Property[]
+  users            User[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Organization {
-  id        String        @id @default(cuid())
-  name      String
-  plan      String        @default("basic")
-  users     User[]
-  documents Document[]    @relation("OrgDocuments")
-  settings  OrgSettings?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id          String      @id @default(cuid())
+  name        String
+  domain      String?
+  subdomain   String?
+  accountId   String
+  account     Account     @relation(fields: [accountId], references: [id])
+  properties  Property[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
-enum Plan {
-  FREE
-  PRO
-  ENTERPRISE
+// ============================================================
+// Subscription & Billing
+// ============================================================
+model SubscriptionPlan {
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  priceId        String?   // Stripe priceId
+  amount         Float
+  currency       String    @default("usd")
+  cycle          BillingCycle
+  userLimit      Int?
+  propertyLimit  Int?
+  features       Json?
+  tools          Json?
+  services       Json?
+  escalation     EscalationMatrix[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
-model Account {
-  id               String     @id @default(cuid())
-  name             String
-  email            String?
-  logoUrl          String?
-  phone            String?
-  domain           String?    @unique
-  subdomain        String?    @unique
-  leadsWebhookUrl  String?
-
-  properties       Property[]
-  leads            Lead[]
-
-  seats            Int        @default(1)
-  stripeCustomerId String?
-  stripeSubId      String?
-  // Per-subscriber CC override: null = follow global setting, true/false overrides
-  ccFinanceOnResend Boolean?
-
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+model Subscription {
+  id                   String             @id @default(cuid())
+  accountId            String
+  account              Account            @relation(fields: [accountId], references: [id])
+  planId               String
+  plan                 SubscriptionPlan   @relation(fields: [planId], references: [id])
+  status               SubscriptionStatus
+  trialEndsAt          DateTime?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  stripeSubscriptionId String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
 }
 
-model Property {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String?
-  address     String?
-  heroImage   String?
-  published   Boolean  @default(false)
-
-  accountId   String?
-  account     Account? @relation(fields: [accountId], references: [id])
-
-  units       Unit[]
-  images      Image[]
-  leads       Lead[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Payment {
+  id            String    @id @default(cuid())
+  subscriptionId String
+  subscription  Subscription @relation(fields: [subscriptionId], references: [id])
+  amount        Float
+  currency      String   @default("usd")
+  status        String
+  method        String?
+  reference     String?
+  createdAt     DateTime @default(now())
 }
 
-enum LeadStatus {
-  NEW
-  CONTACTED
-  QUALIFIED
-  LOST
-  CONVERTED
-}
-
-model Lead {
-  id           String      @id @default(cuid())
-  propertyId   String?
-  accountId    String?
-
-  name         String
-  email        String
-  phone        String?
-  message      String?
-
-  status       LeadStatus  @default(NEW)
-
-  utmSource    String?
-  utmMedium    String?
-  utmCampaign  String?
-  utmContent   String?
-  utmTerm      String?
-  sourceUrl    String?
-
-  property     Property?   @relation(fields: [propertyId], references: [id])
-  account      Account?    @relation(fields: [accountId], references: [id])
-
-  subscriberId String
-  subscriber   Subscriber  @relation(fields: [subscriberId], references: [id])
-
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-}
-
-// Image model used by Property
-model Image {
+model RevenueEvent {
   id         String   @id @default(cuid())
-  propertyId String
-  url        String
-  alt        String?
-  createdAt  DateTime @default(now())
-
-  property   Property @relation(fields: [propertyId], references: [id])
+  type       String
+  amount     Float
+  currency   String   @default("usd")
+  timestamp  DateTime @default(now())
+  metadata   Json?
 }
 
-model HistoryEvent {
-  id          String   @id @default(cuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id])
-
-  type        String
-  details     String
-  metadata    Json?
-
-  createdAt   DateTime @default(now())
+model BillingInvoice {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  amount         Float
+  currency       String @default("usd")
+  status         String
+  dueDate        DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime @default(now())
 }
 
-model Notification {
+model StripeEvent {
   id        String   @id @default(cuid())
-  tenantId  String
-  // tenant relation omitted to stay compatible if Tenant model differs
   type      String
-  message   String
-  read      Boolean  @default(false)
-
+  payload   Json
   createdAt DateTime @default(now())
 }
 
-model SubscriptionPlan {
-  id           String   @id @default(cuid())
-  name         String
-  allowExports Boolean  @default(false)
-  createdAt    DateTime @default(now())
+// ============================================================
+// Properties & Escalation / SLA
+// ============================================================
+model Property {
+  id              String        @id @default(cuid())
+  name            String
+  address         String?
+  organizationId  String
+  organization    Organization  @relation(fields: [organizationId], references: [id])
+  escalation      EscalationMatrix[]
+  leases          Lease[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
-model Subscriber {
-  id                          String   @id @default(cuid())
-  name                        String
-  companyName                 String?  // optional alias for display
-  logoUrl                     String?
-  email                       String   @unique
-  planId                      String?
-  plan                        SubscriptionPlan? @relation(fields: [planId], references: [id])
-  forceAllowExports           Boolean  @default(false)
-  impersonationAlerts        Boolean?
-
-  // Feature toggles
-  enableReminders             Boolean  @default(false)
-  // SA/SU override flags
-  remindersEnabledByAdmin     Boolean  @default(true)
-
-  // email/sms notification settings for leads etc
-  notifyEmail                 Boolean  @default(true)
-  notifySMS                   Boolean  @default(false)
-
-  // Landing/pages-related flags (if present)
-  enableLandingPages          Boolean  @default(false)
-  enableCustomDomain          Boolean  @default(false)
-  landingPagesEnabledByAdmin  Boolean  @default(true)
-  customDomainEnabledByAdmin  Boolean  @default(true)
-
-  // relations
-  reminders                   Reminder[]
-
-  createdAt                  DateTime @default(now())
-  updatedAt                  DateTime @updatedAt
+model EscalationMatrix {
+  id                  String              @id @default(cuid())
+  level               Int
+  description         String?
+  notifyEmail         String?
+  propertyId          String?
+  property            Property?           @relation(fields: [propertyId], references: [id])
+  subscriptionPlanId  String?
+  subscriptionPlan    SubscriptionPlan?   @relation(fields: [subscriptionPlanId], references: [id])
+  createdAt           DateTime @default(now())
 }
 
-model Reminder {
-  id           String   @id @default(cuid())
-  tenantId     String?
-  tenant       Tenant?  @relation(fields: [tenantId], references: [id])
-  subscriberId String?
-  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id])
-
-  leaseId      String?
-  propertyId   String?
-
-  type         String
-  message      String
-  sendAt       DateTime
-  repeat       String?
-  sentAt       DateTime?
-  attempts     Int      @default(0)
-  acknowledged Boolean  @default(false)
-  status       String   @default("pending")
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model SLAConfig {
+  id                  String   @id @default(cuid())
+  responseTimeHours   Int
+  resolutionTimeHours Int
+  propertyId          String?
+  property            Property? @relation(fields: [propertyId], references: [id])
+  createdAt           DateTime @default(now())
 }
 
-model ReminderLog {
+// ============================================================
+// Rent & Ledger
+// ============================================================
+model Lease {
   id          String   @id @default(cuid())
-  reminderId  String
-  reminder    Reminder @relation(fields: [reminderId], references: [id])
-
-  initiatedBy String?
-  channel     String
-  status      String
-  response    Json?
-  note        String?
-
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  tenantId    String
+  tenant      User     @relation(fields: [tenantId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  rentAmount  Float
+  currency    String   @default("usd")
+  ledger      LedgerEntry[]
   createdAt   DateTime @default(now())
-
-  @@index([reminderId])
-  @@index([createdAt])
 }
 
-model WebhookSubscription {
-  id           String   @id @default(cuid())
-  name         String
-  url          String
-  event        String
-  active       Boolean  @default(true)
-  subscriberId String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+model LedgerEntry {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  type      String
+  amount    Float
+  createdAt DateTime @default(now())
 }
 
-model ExternalWebhookEvent {
-  id         String   @id @default(cuid())
-  provider   String?
-  payload    Json
-  receivedAt DateTime @default(now())
-  processed  Boolean  @default(false)
-  notes      String?
+model RentPayment {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  amount    Float
+  status    String
+  paidAt    DateTime?
+  createdAt DateTime @default(now())
 }
 
-model History {
-  id           String    @id @default(cuid())
-  userId       String
-  subscriberId String?
-  action       String
-  details      String?
-  createdAt    DateTime  @default(now())
-
-  user         User      @relation(fields: [userId], references: [id])
-  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id])
-
-  @@index([userId])
-  @@index([subscriberId])
+model LateFee {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  amount    Float
+  appliedAt DateTime @default(now())
 }
 
-model ScheduledExport {
-  id         String   @id @default(cuid())
-  type       String
-  frequency  String
-  email      String
-  active     Boolean  @default(true)
-  suId       String
-  su         User     @relation(fields: [suId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model AutoPay {
+  id        String   @id @default(cuid())
+  leaseId   String
+  lease     Lease    @relation(fields: [leaseId], references: [id])
+  active    Boolean  @default(true)
+  method    String
+  createdAt DateTime @default(now())
+}
 
-  @@index([suId])
+model Refund {
+  id        String   @id @default(cuid())
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+  amount    Float
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Documents & Attachments
+// ============================================================
+model Document {
+  id        String   @id @default(cuid())
+  leaseId   String?
+  lease     Lease?   @relation(fields: [leaseId], references: [id])
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceAttachment {
+  id        String   @id @default(cuid())
+  propertyId String
+  property  Property @relation(fields: [propertyId], references: [id])
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model MaintenanceInvoice {
+  id        String   @id @default(cuid())
+  propertyId String
+  property  Property @relation(fields: [propertyId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Accounting Integrations
+// ============================================================
+model AccountingConnection {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  provider  String
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingSyncLog {
+  id          String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  status      String
+  details     Json?
+  createdAt   DateTime @default(now())
+}
+
+model AccountingInvoice {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingPayment {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  amount    Float
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model AccountingContact {
+  id        String   @id @default(cuid())
+  connectionId String
+  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
+  name      String
+  email     String?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model UserNotification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  notificationId String
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// Utilities & Logs
+// ============================================================
+model TempCode {
+  id        String   @id @default(cuid())
+  code      String
+  type      String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model ReportPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  preferences Json
+  createdAt DateTime @default(now())
+}
+
+model GlobalSettings {
+  id                 String  @id @default(cuid())
+  allowImpersonation Boolean @default(false)
+  createdAt          DateTime @default(now())
 }
 
 model ImpersonationLog {
   id            String   @id @default(cuid())
   superAdminId  String
-  targetUserId  String
-  subscriberId  String?
+  superAdmin    User     @relation("SuperAdminLogs", fields: [superAdminId], references: [id])
+  subscriberId  String
+  subscriber    User     @relation("SubscriberLogs", fields: [subscriberId], references: [id])
   startedAt     DateTime @default(now())
   endedAt       DateTime?
-  alertSent     Boolean  @default(false)
-
-  superAdmin    User     @relation(fields: [superAdminId], references: [id])
-  targetUser    User     @relation(fields: [targetUserId], references: [id])
-  subscriber    Subscriber? @relation(fields: [subscriberId], references: [id])
-
-  @@index([superAdminId])
-  @@index([targetUserId])
-  @@index([subscriberId])
+  alertSent     Boolean  @default(true)
 }
 
-// --- the rest of the schema remains unchanged ---
+// ============================================================
+// User model (kept minimal here, adjust as needed)
+// ============================================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  accountId String?
+  account   Account? @relation(fields: [accountId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
