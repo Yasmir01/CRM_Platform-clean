@@ -200,12 +200,12 @@ model LedgerEntry {
 
 model RentPayment {
   id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
   amount    Float
-  status    String
-  paidAt    DateTime?
-  createdAt DateTime @default(now())
+  date      DateTime @default(now())
+  tenant    Tenant   @relation("TenantRentPayments", fields: [tenantId], references: [id])
+  tenantId  String
+
+  @@index([tenantId, date])
 }
 
 model LateFee {
