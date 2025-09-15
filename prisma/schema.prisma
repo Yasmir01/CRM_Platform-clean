@@ -375,6 +375,8 @@ model Company {
   name       String
   domain     String?   @unique
   industry   String?
+  orgId      String?
+  organization Organization? @relation(fields: [orgId], references: [id])
 
   contacts   Contact[]
 
