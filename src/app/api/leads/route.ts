@@ -89,6 +89,16 @@ export async function POST(req: Request) {
       console.warn('Lead created but notification failed or not configured', notifErr);
     }
 
+    // emit webhooks for lead.created
+    try {
+      const { emitWebhook } = await import('@/lib/webhooks');
+      const property = await prisma.property.findUnique({ where: { id: lead.propertyId } });
+      const payload = { lead, property };
+      emitWebhook('lead.created', payload, (lead as any).subscriberId || undefined);
+    } catch (e) {
+      console.warn('emitWebhook failed for lead', e);
+    }
+
     return new Response(JSON.stringify({ success: true, lead }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
     // eslint-disable-next-line no-console
