@@ -403,6 +403,25 @@ model Contact {
   updatedAt DateTime @updatedAt
 }
 
+model Deal {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  amount      Float?
+  stage       String   // e.g. "Lead", "Negotiation", "Closed Won", "Closed Lost"
+  probability Int?     // % chance of closing
+  status      String   @default("open") // open, won, lost
+  orgId       String
+  org         Organization @relation(fields: [orgId], references: [id])
+  companyId   String?
+  company     Company?   @relation(fields: [companyId], references: [id])
+  contactId   String?
+  contact     Contact?   @relation(fields: [contactId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deleted     Boolean  @default(false) // soft delete
+}
+
 model Note {
   id        String   @id @default(cuid())
   content   String
