@@ -317,6 +317,7 @@ model ImpersonationLog {
   subscriberId  String?
   startedAt     DateTime @default(now())
   endedAt       DateTime?
+  alertSent     Boolean  @default(false)
 
   superAdmin    User     @relation(fields: [superAdminId], references: [id])
   targetUser    User     @relation(fields: [targetUserId], references: [id])
