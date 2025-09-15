@@ -30,6 +30,16 @@ Builder.registerComponent(PropertyGallery, {
   ],
 });
 
+// ✅ Register PropertyLandingPage
+Builder.registerComponent(PropertyLandingPage, {
+  name: "PropertyLandingPage",
+  inputs: [
+    { name: "property", type: "object" },
+    { name: "account", type: "object" },
+    { name: "showLeadForm", type: "boolean" },
+  ],
+});
+
 // ✅ Register PropertyLeadForm
 Builder.registerComponent(PropertyLeadForm, {
   name: "PropertyLeadForm",
