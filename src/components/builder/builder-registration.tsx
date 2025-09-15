@@ -29,7 +29,8 @@ function withPlanInputs(baseInputs: any[] = []) {
 
 (async function registerBuilderComponents() {
   try {
-    const mod = await import("@builder.io/react");
+    const pkg = "@builder.io/react" as const;
+    const mod = await import(pkg);
     const builder = (mod && (mod.builder || mod.default || mod)) as any;
     if (!builder || !builder.registerComponent) {
       // Builder isn't available in this environment
