@@ -100,12 +100,15 @@ export default function CompanyDetailPage() {
     try {
       const confirmed = window.confirm('Delete this contact? This action cannot be undone.');
       if (!confirmed) return;
-      await fetch('/api/contacts', {
+      const res = await fetch(`/api/contacts?id=${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
       });
-      fetchData();
+      if (res.status === 204) {
+        setContacts((prev) => prev.filter((c) => c.id !== id));
+      } else {
+        // fallback: refetch
+        fetchData();
+      }
     } catch (e) {
       console.error('Delete contact error', e);
     }
