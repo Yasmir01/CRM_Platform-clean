@@ -38,6 +38,7 @@ export async function PATCH(
     if (body.email !== undefined) updates.email = body.email;
     if (body.phone !== undefined) updates.phone = body.phone;
     if (body.ownerId !== undefined) updates.ownerId = body.ownerId;
+    if (body.companyId !== undefined) updates.companyId = body.companyId;
 
     // Require firstName and email
     if (!updates.firstName || !updates.email) {
@@ -48,6 +49,12 @@ export async function PATCH(
     const duplicate = await prisma.contact.findFirst({ where: { email: { equals: updates.email, mode: 'insensitive' }, NOT: { id } } });
     if (duplicate) {
       return NextResponse.json({ error: 'Another contact with this email already exists' }, { status: 409 });
+    }
+
+    // Validate company existence if provided
+    if (updates.companyId) {
+      const company = await prisma.company.findUnique({ where: { id: String(updates.companyId) } });
+      if (!company) return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
     const updated = await prisma.contact.update({ where: { id }, data: updates });
