@@ -419,13 +419,17 @@ model OwnerLedger {
   @@index([tenantId])
 }
 
-// DirectMessage thread messages
 model DirectMessage {
-  id         String   @id @default(cuid())
-  content    String
-  sentAt     DateTime @default(now())
-  senderId   String
+  id        String   @id @default(cuid())
+  content   String
+  sentAt    DateTime @default(now())
+  sender    User     @relation("DirectMessagesSent", fields: [senderId], references: [id])
+  senderId  String
+  receiver  User     @relation("DirectMessagesReceived", fields: [receiverId], references: [id])
   receiverId String
+
+  @@index([senderId, sentAt])
+  @@index([receiverId, sentAt])
 }
 
 // Unit model used by Lease and listings
