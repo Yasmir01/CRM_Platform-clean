@@ -5,6 +5,8 @@ export default function ImpersonationLogs() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'suppressed'>('all');
   const [search, setSearch] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -28,6 +30,21 @@ export default function ImpersonationLogs() {
     const matchesStatus = statusFilter === 'all' ? true : statusFilter === 'sent' ? log.alertSent : !log.alertSent;
     if (!matchesStatus) return false;
 
+    // Date range filtering (apply even when there's no search)
+    const logDate = new Date(log.startedAt);
+    let matchesDate = true;
+    if (fromDate) {
+      const from = new Date(fromDate);
+      from.setHours(0, 0, 0, 0);
+      if (logDate < from) matchesDate = false;
+    }
+    if (toDate) {
+      const to = new Date(toDate);
+      to.setHours(23, 59, 59, 999);
+      if (logDate > to) matchesDate = false;
+    }
+    if (!matchesDate) return false;
+
     if (!search) return true;
     const q = search.toLowerCase();
     const adminEmail = (log.superAdmin?.email || log.superAdminId || '').toString().toLowerCase();
@@ -44,8 +61,8 @@ export default function ImpersonationLogs() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Impersonation Logs</h1>
 
-      <div className="flex items-center gap-4 mb-4">
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="border px-2 py-1 rounded">
+      <div className="filters-row flex items-center gap-4 mb-4">
+        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="status-select border px-2 py-1 rounded">
           <option value="all">All</option>
           <option value="sent">Alert Sent</option>
           <option value="suppressed">Alert Suppressed</option>
@@ -56,10 +73,27 @@ export default function ImpersonationLogs() {
           placeholder="Search by Super Admin or Subscriber"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border px-2 py-1 rounded flex-1"
+          className="search-input border px-2 py-1 rounded flex-1"
         />
 
-        <button onClick={() => { setSearch(''); setStatusFilter('all'); }} className="px-3 py-1 bg-gray-200 rounded">Reset</button>
+        <div className="date-range flex items-center gap-2">
+          <label className="text-sm">From:</label>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="date-input border px-2 py-1 rounded"
+          />
+          <label className="text-sm">To:</label>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="date-input border px-2 py-1 rounded"
+          />
+        </div>
+
+        <button onClick={() => { setSearch(''); setStatusFilter('all'); setFromDate(''); setToDate(''); }} className="px-3 py-1 bg-gray-200 rounded">Reset</button>
       </div>
 
       <table className="min-w-full border">
