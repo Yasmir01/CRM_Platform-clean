@@ -64,6 +64,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       take: take || 1000,
     });
 
+    // Check org-level export setting
+    const orgId = (dbUser as any)?.orgId || (user as any).orgId || 'global';
+    const settings = await prisma.orgSettings.findUnique({ where: { orgId } });
+    if (settings && settings.allowExport === false) {
+      return res.status(403).json({ error: 'Exports disabled for this organization' });
+    }
+
     if (format === 'csv') {
       const rows = logs.map((l) => ({
         id: l.id,
