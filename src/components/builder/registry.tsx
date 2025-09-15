@@ -39,7 +39,8 @@ function buildRegister(builder: any, component: any, name: string, inputs: any[]
 
 (async function registerAll() {
   try {
-    const mod = await import('@builder.io/react');
+    const pkg = '@builder.io/react' as const;
+    const mod = await import(pkg);
     const builder = (mod && (mod.builder || mod.default || mod)) as any;
     if (!builder || !builder.registerComponent) {
       console.warn('@builder.io/react missing or invalid — skipping builder registration');
