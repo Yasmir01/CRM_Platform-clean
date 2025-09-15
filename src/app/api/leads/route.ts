@@ -12,12 +12,23 @@ export const GET = withAuthorization('lead:read', async (req: Request) => {
   return new Response(JSON.stringify(leads), { headers: { 'Content-Type': 'application/json' } });
 });
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   try {
     const data = await req.json();
 
     if (!data || !data.name || !data.email || !data.landingPageId) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Verify reCAPTCHA token (if enabled)
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      const token = data.recaptchaToken;
+      const ip = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '') as string;
+      const { verifyRecaptcha } = await import('@/lib/recaptcha');
+      const rc = await verifyRecaptcha(token, ip);
+      if (!rc.success || (typeof rc.score === 'number' && rc.score < 0.4)) {
+        return new Response(JSON.stringify({ error: 'Failed CAPTCHA check' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
+      }
     }
 
     const lead = await prisma.lead.create({
@@ -106,3 +117,5 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ error: 'Server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }
+
+export const POST = withRateLimit(handler, { keyPrefix: 'leads' });
