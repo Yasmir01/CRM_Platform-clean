@@ -30,13 +30,19 @@ export async function PATCH(
   try {
     const { id } = params;
     const data = await req.json();
+    const name = String(data.name || '').trim();
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+    // Prevent duplicate name (excluding current)
+    const duplicate = await prisma.company.findFirst({ where: { name: { equals: name, mode: 'insensitive' }, NOT: { id } } });
+    if (duplicate) {
+      return NextResponse.json({ error: 'Another company with this name already exists' }, { status: 409 });
+    }
+
     const updated = await prisma.company.update({
       where: { id },
-      data: {
-        name: data.name,
-        industry: data.industry || null,
-        website: data.website || data.domain || null,
-      },
+      data: { name, industry: data.industry || null, website: data.website || data.domain || null },
     });
     return NextResponse.json(updated);
   } catch (e: any) {
