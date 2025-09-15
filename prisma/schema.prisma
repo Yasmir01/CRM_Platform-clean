@@ -309,4 +309,18 @@ model ScheduledExport {
   @@index([suId])
 }
 
+model ImpersonationLog {
+  id            String   @id @default(cuid())
+  superAdminId  String
+  targetUserId  String
+  startedAt     DateTime @default(now())
+  endedAt       DateTime?
+
+  superAdmin    User     @relation(fields: [superAdminId], references: [id])
+  targetUser    User     @relation(fields: [targetUserId], references: [id])
+
+  @@index([superAdminId])
+  @@index([targetUserId])
+}
+
 // --- the rest of the schema remains unchanged ---
