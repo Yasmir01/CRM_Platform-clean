@@ -34,8 +34,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
 
       // create impersonation log
+      let logRecord: any = null;
       try {
-        await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id, subscriberId: id } });
+        logRecord = await prisma.impersonationLog.create({ data: { superAdminId: String((user as any).sub || (user as any).id), targetUserId: subscriberAdmin.id, subscriberId: id } });
 
         // send audit email if per-subscriber or system config allows
         try {
@@ -56,6 +57,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 text: `Super Admin ${superAdminEmail} started impersonating subscriber ${id} (user ${subscriberAdmin.id}).`,
                 html: `<p><strong>Super Admin:</strong> ${superAdminEmail}</p><p><strong>Subscriber:</strong> ${id}</p><p><strong>Impersonated User:</strong> ${subscriberAdmin.id} (${subscriberAdmin.email})</p><p><strong>Started At:</strong> ${new Date().toLocaleString()}</p>`,
               });
+
+              // mark alertSent true on the created log
+              try {
+                await prisma.impersonationLog.update({ where: { id: logRecord.id }, data: { alertSent: true } });
+              } catch (e) {
+                // ignore
+              }
             }
           }
         } catch (e) {
