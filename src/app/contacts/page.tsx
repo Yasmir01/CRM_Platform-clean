@@ -23,7 +23,15 @@ export default function ContactsPage() {
       .then((r) => r.json())
       .then((data) => {
         if (!mounted) return;
-        setContacts(data || []);
+        const list = (data || []).map((item: any) => ({
+          id: item.id,
+          name: `${item.firstName || ''} ${item.lastName || ''}`.trim(),
+          email: item.email,
+          phone: item.phone || '',
+          company: item.company || null,
+          notes: item.notes && item.notes.length ? item.notes[0]?.content || '' : '',
+        }));
+        setContacts(list);
       })
       .catch(() => setContacts([]))
       .finally(() => setLoading(false));
