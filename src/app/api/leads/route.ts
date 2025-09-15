@@ -17,7 +17,7 @@ async function handler(req: Request) {
   try {
     const data = await req.json();
 
-    if (!data || !data.name || !data.email || !data.landingPageId) {
+    if (!data || !data.name || !data.email) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
@@ -32,29 +32,45 @@ async function handler(req: Request) {
       }
     }
 
+    // Try to resolve landing page (if provided) so we can derive subscriber/property when missing from headers
+    let lp: any = null;
+    if (data.landingPageId) {
+      lp = await prisma.landingPage.findUnique({ where: { id: data.landingPageId }, include: { property: true, subscriber: true } });
+    }
+
+    const headerSubscriberId = (req.headers.get('x-subscriber-id') || '') as string;
+    const subscriberId = headerSubscriberId || lp?.subscriber?.id;
+    if (!subscriberId) {
+      return new Response(JSON.stringify({ error: 'Missing subscriberId' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    const propertyId = (req.headers.get('x-property-id') || lp?.property?.id || null) as string | null;
+
+    // ✅ Save lead into Prisma
     const lead = await prisma.lead.create({
       data: {
-        landingPageId: data.landingPageId,
+        propertyId: propertyId || undefined,
         name: data.name,
         email: data.email,
         phone: data.phone || null,
         message: data.message || null,
+        subscriberId,
       },
     });
 
     // Fire-and-forget: notify subscriber(s) via email and SMS when possible
     try {
-      // Try to find landing page and related property/account/users
-      const lp = await prisma.landingPage.findUnique({
-        where: { id: data.landingPageId },
-        include: { property: true, subscriber: true },
-      });
+      // Use lp if we already have it, otherwise try to derive from lead.propertyId
+      let landing = lp;
+      if (!landing && lead.propertyId) {
+        landing = await prisma.landingPage.findFirst({ where: { propertyId: lead.propertyId }, include: { property: true, subscriber: true } });
+      }
 
       let notifyEmails: string[] = [];
       let notifyPhones: string[] = [];
 
-      if (lp) {
-        const accountId = (lp as any).companyId || lp.property?.accountId || null;
+      if (landing) {
+        const accountId = (landing as any).companyId || landing.property?.accountId || null;
         if (accountId) {
           const users = await prisma.user.findMany({ where: { accountId }, select: { email: true, phone: true } });
           notifyEmails = users.map((u) => u.email).filter(Boolean);
@@ -68,7 +84,7 @@ async function handler(req: Request) {
       const emailText = `You have a new lead:\nName: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone || 'N/A'}\nMessage: ${lead.message || ''}`;
 
       // Determine subscriber-level contacts and settings
-      const subscriber: any = lp?.subscriber || null;
+      const subscriber: any = landing?.subscriber || (await prisma.subscriber.findUnique({ where: { id: subscriberId } })) || null;
       const subscriberEmail = subscriber?.email || (notifyEmails.length > 0 ? notifyEmails[0] : null);
       const subscriberPhone = subscriber?.phone || (notifyPhones.length > 0 ? notifyPhones[0] : null);
 
@@ -83,7 +99,7 @@ async function handler(req: Request) {
         (subscriber?.emailEnabledByAdmin ?? true) &&
         canUseEmail(subscriber?.plan)
       ) {
-        sendEmail({ to: subscriberEmail, subject: `New lead for ${lp?.property?.name || 'your property'}`, text: emailText }).catch((e: any) => console.error('Failed to send lead email', e));
+        sendEmail({ to: subscriberEmail, subject: `New lead for ${landing?.property?.name || 'your property'}`, text: emailText }).catch((e: any) => console.error('Failed to send lead email', e));
       }
 
       // SMS: subscriber must want SMS, admin must allow, and plan must permit
@@ -93,7 +109,7 @@ async function handler(req: Request) {
         (subscriber?.smsEnabledByAdmin ?? true) &&
         canUseSMS(subscriber?.plan)
       ) {
-        sendSMS(subscriberPhone, `New lead: ${lead.name} (${lead.email}) for ${lp?.property?.name || 'your property'}`).catch((e: any) => console.error('Failed to send lead SMS', e));
+        sendSMS(subscriberPhone, `New lead: ${lead.name} (${lead.email}) for ${landing?.property?.name || 'your property'}`).catch((e: any) => console.error('Failed to send lead SMS', e));
       }
     } catch (notifErr) {
       // do not fail lead creation if notifications fail
@@ -104,9 +120,9 @@ async function handler(req: Request) {
     // emit webhooks for lead.created
     try {
       const { emitWebhook } = await import('@/lib/webhooks');
-      const property = await prisma.property.findUnique({ where: { id: lead.propertyId } });
+      const property = lead.propertyId ? await prisma.property.findUnique({ where: { id: lead.propertyId } }) : null;
       const payload = { lead, property };
-      emitWebhook('lead.created', payload, (lead as any).subscriberId || undefined);
+      emitWebhook('lead.created', payload, lead.subscriberId || undefined);
     } catch (e) {
       console.warn('emitWebhook failed for lead', e);
     }
