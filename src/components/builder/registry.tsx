@@ -35,7 +35,7 @@ safeRegister(BuilderComponents.PropertyHero, "PropertyLandingHero", [
   { name: "ctaLabel", type: "string", defaultValue: "View Listings" },
   { name: "ctaLink", type: "url", defaultValue: "/properties" },
   { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "png", "webp"] },
-]);
+], true);
 
 safeRegister(BuilderComponents.PropertyGallery, "PropertyLandingGallery", [
   { name: "title", type: "string", defaultValue: "Property Gallery" },
