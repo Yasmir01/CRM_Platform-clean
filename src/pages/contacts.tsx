@@ -53,6 +53,8 @@ export default function ContactsPage() {
 
   async function deleteContact(id: string) {
     try {
+      const confirmed = window.confirm('Delete this contact? This action cannot be undone.');
+      if (!confirmed) return;
       await fetch('/api/contacts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -62,6 +64,33 @@ export default function ContactsPage() {
     } catch (err) {
       console.error('Delete contact error', err);
     }
+  }
+
+  // inline edit state
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editForm, setEditForm] = React.useState({ firstName: '', lastName: '', email: '', phone: '', companyId: '' });
+
+  function startEdit(c: Contact) {
+    setEditingId(c.id);
+    setEditForm({ firstName: c.firstName, lastName: c.lastName, email: c.email, phone: c.phone || '', companyId: c.company?.id || '' });
+  }
+
+  async function saveEdit(id: string) {
+    try {
+      await fetch('/api/contacts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...editForm }),
+      });
+      setEditingId(null);
+      fetchData();
+    } catch (err) {
+      console.error('Update contact error', err);
+    }
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
   }
 
   useEffect(() => {
