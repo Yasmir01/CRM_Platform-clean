@@ -1,25 +1,18 @@
-export const planFeatures: Record<string, Record<string, boolean>> = {
-  FREE: {
-    branding: false,
-    exports: false,
-    landingPages: true,
-    reminders: false,
-  },
-  PRO: {
-    branding: true,
-    exports: true,
-    landingPages: true,
-    reminders: true,
-  },
-  ENTERPRISE: {
-    branding: true,
-    exports: true,
-    landingPages: true,
-    reminders: true,
-  },
-};
+export async function fetchOrgFeatures(orgId: string) {
+  const res = await fetch(`/api/org/${encodeURIComponent(orgId)}/features`);
+  if (!res.ok) throw new Error(`Failed to fetch org features: ${res.status}`);
+  return res.json();
+}
 
-export function hasFeature(accountPlan: string | undefined, feature: keyof typeof planFeatures['FREE']) {
-  const plan = String(accountPlan || 'FREE').toUpperCase();
-  return (planFeatures as any)[plan]?.[feature] ?? false;
+export async function toggleFeature(orgId: string, feature: string, enabled: boolean) {
+  const res = await fetch(`/api/org/${encodeURIComponent(orgId)}/features`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ feature, enabled }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => null);
+    throw new Error(`Failed to update feature: ${res.status} ${body || ''}`);
+  }
+  return res.json();
 }
