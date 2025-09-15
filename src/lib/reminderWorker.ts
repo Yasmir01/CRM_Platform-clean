@@ -6,20 +6,33 @@ import { pusher } from "@/lib/pusher";
 import { isRemindersAllowedForSubscriber } from "@/lib/featureChecks";
 import { createReminderLog } from "@/lib/reminderLog";
 
+let twilioClient: any = null;
+try {
+  if (process.env.TWILIO_SID) {
+    // require dynamically to avoid hard dependency
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const Twilio = require('twilio');
+    twilioClient = new Twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
+  }
+} catch (e) {
+  // twilio not installed or failed to init; fall back to sendSMS helper
+  twilioClient = null;
+}
+
 export async function sendReminderNow(reminderId: string, initiatedBy: string = 'system') {
   const reminder = await prisma.reminder.findUnique({ where: { id: reminderId }, include: { subscriber: true, tenant: true, property: true } });
-  if (!reminder) throw new Error('Reminder not found');
+  if (!reminder) return;
 
   if (!reminder.subscriberId || !reminder.subscriber) {
     await createReminderLog({ reminderId, initiatedBy, channel: 'system', status: 'failed', note: 'No subscriber associated' });
-    await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'failed', attempts: { increment: 1 } } });
+    await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'FAILED', attempts: { increment: 1 } } });
     return;
   }
 
   const allowed = await isRemindersAllowedForSubscriber(reminder.subscriberId);
   if (!allowed) {
     await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'system', status: 'skipped', note: 'Reminders disabled by plan/admin/subscriber' });
-    await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'cancelled' } });
+    await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'CANCELLED' } });
     return;
   }
 
@@ -49,8 +62,13 @@ export async function sendReminderNow(reminderId: string, initiatedBy: string = 
     if (reminder.subscriber?.notifySMS && reminder.subscriber?.phone) {
       await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'queued', note: `Sending SMS to ${reminder.subscriber.phone}` });
       try {
-        const smsRes = await sendSMS(reminder.subscriber.phone, `${subject}: ${text}`);
-        await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'sent', response: { result: smsRes } });
+        if (twilioClient) {
+          const sms = await twilioClient.messages.create({ to: reminder.subscriber.phone, from: process.env.TWILIO_PHONE_NUMBER, body: `${subject}: ${text}`, statusCallback: `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/twilio-sms` });
+          await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'sent', response: { sid: sms.sid } });
+        } else {
+          const smsRes = await sendSMS(reminder.subscriber.phone, `${subject}: ${text}`);
+          await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'sent', response: { result: smsRes } });
+        }
       } catch (err: any) {
         await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'failed', response: { error: err?.message || String(err) } });
       }
@@ -76,6 +94,6 @@ export async function sendReminderNow(reminderId: string, initiatedBy: string = 
     await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'in-app', status: 'failed', response: { error: String(e) } });
   }
 
-  await prisma.reminder.update({ where: { id: reminder.id }, data: { sentAt: new Date(), status: 'sent', attempts: { increment: 1 } } });
+  await prisma.reminder.update({ where: { id: reminder.id }, data: { sentAt: new Date(), status: 'SENT', attempts: { increment: 1 } } });
   await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'system', status: 'completed', note: 'Reminder processing completed' });
 }
