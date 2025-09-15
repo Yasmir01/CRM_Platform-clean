@@ -96,7 +96,9 @@ export default function CompaniesPage() {
           <tbody>
             {companies.map((c) => (
               <tr key={c.id}>
-                <td className="p-2 border">{c.name}</td>
+                <td className="p-2 border">
+                  <Link href={`/companies/${c.id}`} className="text-blue-600 hover:underline">{c.name}</Link>
+                </td>
                 <td className="p-2 border">{c.domain}</td>
                 <td className="p-2 border">
                   <button
