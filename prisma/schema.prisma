@@ -284,4 +284,18 @@ model History {
   @@index([subscriberId])
 }
 
+model ScheduledExport {
+  id         String   @id @default(cuid())
+  type       String
+  frequency  String
+  email      String
+  active     Boolean  @default(true)
+  suId       String
+  su         User     @relation(fields: [suId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([suId])
+}
+
 // --- the rest of the schema remains unchanged ---
