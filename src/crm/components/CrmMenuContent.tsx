@@ -220,10 +220,24 @@ export default function CrmMenuContent() {
           setUnreadMessagesCount(0);
           return;
         }
-        const r = await fetch('/api/messages/unread', { credentials: 'include', cache: 'no-store', keepalive: true }).catch(() => null as any);
+        let r: Response | null = null;
+        try {
+          const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
+          r = await fetch(url, { credentials: 'include', cache: 'no-store' });
+        } catch (err) {
+          // network error
+          setUnreadMessagesCount(0);
+          return;
+        }
+
         if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
-        const d = await r.json().catch(() => ({ count: 0 }));
-        setUnreadMessagesCount(Number(d?.count || 0));
+
+        try {
+          const d = await r.json();
+          setUnreadMessagesCount(Number(d?.count || 0));
+        } catch (e) {
+          setUnreadMessagesCount(0);
+        }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
         setUnreadMessagesCount(0);
