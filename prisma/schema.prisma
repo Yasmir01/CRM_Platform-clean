@@ -1,612 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-// ============================================================
-// Core Enums
-// ============================================================
-enum BillingCycle {
-  MONTHLY
-  YEARLY
-}
-
-enum ProductType {
-  SUBSCRIPTION
-  ADDON
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  TRIALING
-  UNPAID
-  PAUSED
-}
-
-// ============================================================
-// Accounts & Organizations
-// ============================================================
-model Account {
-  id             String        @id @default(cuid())
-  organizations  Organization[]
-  properties     Property[]     @relation("AccountProperties")
-  users          User[]
-  connections    AccountingConnection[]
-}
-
-model Property {
-  id          String   @id @default(cuid())
-  accountId   String
-  account     Account  @relation("AccountProperties", fields: [accountId], references: [id])
-  slaConfigs  SLAConfig[]
-  attachments MaintenanceAttachment[]
-  invoices    MaintenanceInvoice[]
-}
-
-model Subscription {
-  id        String   @id @default(cuid())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id])
-  planId    String   @unique
-  plan      SubscriptionPlan @relation(fields: [planId], references: [id])
-  payments  Payment[]
-  invoices  BillingInvoice[]
-}
-
-model SubscriptionPlan {
-  id             String         @id @default(cuid())
-  name           String
-  subscriptions  Subscription[]
-}
-
-model Payment {
-  id             String   @id @default(cuid())
-  subscriptionId String
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
-  amount         Float
-  refunds        Refund[]
-}
-
-model BillingInvoice {
-  id             String   @id @default(cuid())
-  subscriptionId String
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
-  amount         Float
-}
-
-model SLAConfig {
-  id         String   @id @default(cuid())
-  propertyId String?
-  property   Property? @relation(fields: [propertyId], references: [id])
-}
-
-model Lease {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    User     @relation("TenantLeases", fields: [tenantId], references: [id])
-  payments  RentPayment[]
-  lateFees  LateFee[]
-  autoPays  AutoPay[]
-  documents Document[]
-}
-
-model RentPayment {
-  id      String @id @default(cuid())
-  leaseId String
-  lease   Lease  @relation(fields: [leaseId], references: [id])
-}
-
-model LateFee {
-  id      String @id @default(cuid())
-  leaseId String
-  lease   Lease  @relation(fields: [leaseId], references: [id])
-}
-
-model AutoPay {
-  id      String  @id @default(cuid())
-  leaseId String
-  lease   Lease   @relation(fields: [leaseId], references: [id])
-  active  Boolean @default(true)
-}
-
-model Refund {
-  id        String @id @default(cuid())
-  paymentId String
-  payment   Payment @relation(fields: [paymentId], references: [id])
-}
-
-model Document {
-  id      String  @id @default(cuid())
-  leaseId String?
-  lease   Lease?  @relation(fields: [leaseId], references: [id])
-}
-
-model MaintenanceAttachment {
-  id         String   @id @default(cuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-}
-
-model MaintenanceInvoice {
-  id         String   @id @default(cuid())
-  propertyId String
-  property   Property @relation(fields: [propertyId], references: [id])
-}
-
-model AccountingConnection {
-  id        String @id @default(cuid())
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id])
-  syncLogs  AccountingSyncLog[]
-  invoices  AccountingInvoice[]
-  payments  AccountingPayment[]
-  contacts  AccountingContact[]
-}
-
-model AccountingSyncLog {
-  id           String              @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-}
-
-model AccountingInvoice {
-  id           String              @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-}
-
-model AccountingPayment {
-  id           String              @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-}
-
-model AccountingContact {
-  id           String              @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-}
-
-model UserNotification {
-  id             String        @id @default(cuid())
-  userId         String
-  user           User          @relation(fields: [userId], references: [id])
-  notificationId String
-  notification   Notification  @relation(fields: [notificationId], references: [id])
-}
-
-model TempCode {
-  id        String  @id @default(cuid())
-  userId    String?
-  user      User?   @relation(fields: [userId], references: [id])
-  expiresAt DateTime
-}
-
-model ReportPreference {
-  id          String @id @default(cuid())
-  userId      String
-  user        User   @relation(fields: [userId], references: [id])
-  preferences Json
-}
-
-model OrgSettings {
-  id           String        @id @default(cuid())
-  orgId        String        @unique
-  organization Organization  @relation(fields: [orgId], references: [id])
-}
-
-model Company {
-  id           String        @id @default(cuid())
-  orgId        String?
-  organization Organization? @relation(fields: [orgId], references: [id])
-  deals        Deal[]
-}
-
-model Contact {
-  id      String @id @default(cuid())
-  ownerId String?
-  owner   User?  @relation(fields: [ownerId], references: [id])
-  deals   Deal[]
-}
-
-model Deal {
-  id        String        @id @default(cuid())
-  orgId     String
-  org       Organization  @relation(fields: [orgId], references: [id])
-  companyId String?
-  company   Company?      @relation(fields: [companyId], references: [id])
-  contactId String?
-  contact   Contact?      @relation(fields: [contactId], references: [id])
-}
-
-model ImpersonationLog {
-  id            String   @id @default(cuid())
-  superAdminId  String
-  superAdmin    User     @relation("SuperAdminLogs", fields: [superAdminId], references: [id])
-  subscriberId  String
-  subscriber    User     @relation("SubscriberLogs", fields: [subscriberId], references: [id])
-}
+// =====================
+// Core User Management
+// =====================
 
 model User {
-  id                String              @id @default(cuid())
-  leases            Lease[]             @relation("TenantLeases")
-  ownedContacts     Contact[]           @relation("ContactOwner")
-  notifications     UserNotification[]
-  impersonationsAsSA ImpersonationLog[] @relation("SuperAdminLogs")
-  impersonationsAsSub ImpersonationLog[] @relation("SubscriberLogs")
-  reportPreferences ReportPreference[]
-  tempCodes         TempCode[]
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  password      String
+  role          Role          @default(USER)
+  orgId         String?
+  organization  Organization? @relation(fields: [orgId], references: [id])
+  accounts      Account[]
+  impersonationLogs ImprLog[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
-model Organization {
-  id        String       @id @default(cuid())
-  accounts  Account[]
-  settings  OrgSettings?
-  companies Company[]
-  deals     Deal[]
-}
-
-model Organization {
-  id          String      @id @default(cuid())
-  name        String
-  domain      String?
-  subdomain   String?
-  accountId   String
-  account     Account     @relation(fields: [accountId], references: [id])
-  properties  Property[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-// ============================================================
-// Subscription & Billing
-// ============================================================
-model SubscriptionPlan {
-  id             String   @id @default(cuid())
-  name           String
-  description    String?
-  priceId        String?   // Stripe priceId
-  amount         Float
-  currency       String    @default("usd")
-  cycle          BillingCycle
-  userLimit      Int?
-  propertyLimit  Int?
-  features       Json?
-  tools          Json?
-  services       Json?
-  escalation     EscalationMatrix[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-model Subscription {
-  id                   String             @id @default(cuid())
-  accountId            String
-  account              Account            @relation(fields: [accountId], references: [id])
-  planId               String
-  plan                 SubscriptionPlan   @relation(fields: [planId], references: [id])
-  status               SubscriptionStatus
-  trialEndsAt          DateTime?
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  stripeSubscriptionId String?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-}
-
-model Payment {
-  id            String    @id @default(cuid())
-  subscriptionId String
-  subscription  Subscription @relation(fields: [subscriptionId], references: [id])
-  amount        Float
-  currency      String   @default("usd")
-  status        String
-  method        String?
-  reference     String?
-  createdAt     DateTime @default(now())
-}
-
-model RevenueEvent {
-  id         String   @id @default(cuid())
-  type       String
-  amount     Float
-  currency   String   @default("usd")
-  timestamp  DateTime @default(now())
-  metadata   Json?
-}
-
-model BillingInvoice {
-  id             String   @id @default(cuid())
-  subscriptionId String
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
-  amount         Float
-  currency       String @default("usd")
-  status         String
-  dueDate        DateTime?
-  paidAt         DateTime?
-  createdAt      DateTime @default(now())
-}
-
-model StripeEvent {
+model Account {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
   type      String
-  payload   Json
-  createdAt DateTime @default(now())
-}
-
-// ============================================================
-// Properties & Escalation / SLA
-// ============================================================
-model Property {
-  id              String        @id @default(cuid())
-  name            String
-  address         String?
-  organizationId  String
-  organization    Organization  @relation(fields: [organizationId], references: [id])
-  escalation      EscalationMatrix[]
-  leases          Lease[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-}
-
-model EscalationMatrix {
-  id                  String              @id @default(cuid())
-  level               Int
-  description         String?
-  notifyEmail         String?
-  propertyId          String?
-  property            Property?           @relation(fields: [propertyId], references: [id])
-  subscriptionPlanId  String?
-  subscriptionPlan    SubscriptionPlan?   @relation(fields: [subscriptionPlanId], references: [id])
-  createdAt           DateTime @default(now())
-}
-
-model SLAConfig {
-  id                  String   @id @default(cuid())
-  responseTimeHours   Int
-  resolutionTimeHours Int
-  propertyId          String?
-  property            Property? @relation(fields: [propertyId], references: [id])
-  createdAt           DateTime @default(now())
-}
-
-// ============================================================
-// Rent & Ledger
-// ============================================================
-model Lease {
-  id          String   @id @default(cuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  tenantId    String
-  tenant      User     @relation(fields: [tenantId], references: [id])
-  startDate   DateTime
-  endDate     DateTime
-  rentAmount  Float
-  currency    String   @default("usd")
-  ledger      LedgerEntry[]
-  createdAt   DateTime @default(now())
-}
-
-model LedgerEntry {
-  id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
-  type      String
-  amount    Float
-  createdAt DateTime @default(now())
-}
-
-model RentPayment {
-  id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
-  amount    Float
-  status    String
-  paidAt    DateTime?
-  createdAt DateTime @default(now())
-}
-
-model LateFee {
-  id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
-  amount    Float
-  appliedAt DateTime @default(now())
-}
-
-model AutoPay {
-  id        String   @id @default(cuid())
-  leaseId   String
-  lease     Lease    @relation(fields: [leaseId], references: [id])
-  active    Boolean  @default(true)
-  method    String
-  createdAt DateTime @default(now())
-}
-
-model Refund {
-  id        String   @id @default(cuid())
-  paymentId String
-  payment   Payment  @relation(fields: [paymentId], references: [id])
-  amount    Float
-  reason    String?
-  createdAt DateTime @default(now())
-}
-
-// ============================================================
-// Documents & Attachments
-// ============================================================
-model Document {
-  id        String   @id @default(cuid())
-  leaseId   String?
-  lease     Lease?   @relation(fields: [leaseId], references: [id])
-  url       String
-  type      String
-  createdAt DateTime @default(now())
-}
-
-model MaintenanceAttachment {
-  id        String   @id @default(cuid())
-  propertyId String
-  property  Property @relation(fields: [propertyId], references: [id])
-  url       String
-  type      String
-  createdAt DateTime @default(now())
-}
-
-model MaintenanceInvoice {
-  id        String   @id @default(cuid())
-  propertyId String
-  property  Property @relation(fields: [propertyId], references: [id])
-  amount    Float
-  createdAt DateTime @default(now())
-}
-
-// ============================================================
-// Accounting Integrations
-// ============================================================
-model AccountingConnection {
-  id        String   @id @default(cuid())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id])
   provider  String
-  status    String
-  createdAt DateTime @default(now())
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 }
 
-model AccountingSyncLog {
-  id          String   @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-  status      String
-  details     Json?
-  createdAt   DateTime @default(now())
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
 }
 
-model AccountingInvoice {
-  id        String   @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-  amount    Float
-  status    String
-  createdAt DateTime @default(now())
-}
+// =====================
+// Organizations
+// =====================
 
-model AccountingPayment {
-  id        String   @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-  amount    Float
-  status    String
-  createdAt DateTime @default(now())
-}
-
-model AccountingContact {
-  id        String   @id @default(cuid())
-  connectionId String
-  connection   AccountingConnection @relation(fields: [connectionId], references: [id])
-  name      String
-  email     String?
-  createdAt DateTime @default(now())
-}
-
-// ============================================================
-// Notifications
-// ============================================================
-model Notification {
-  id        String   @id @default(cuid())
-  type      String
-  message   String
-  createdAt DateTime @default(now())
-}
-
-model UserNotification {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  notificationId String
-  notification   Notification @relation(fields: [notificationId], references: [id])
-  readAt    DateTime?
-  createdAt DateTime @default(now())
-}
-
-// ============================================================
-// Utilities & Logs
-// ============================================================
-model TempCode {
-  id        String   @id @default(cuid())
-  code      String
-  type      String
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
-
-model ReportPreference {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  preferences Json
-  createdAt DateTime @default(now())
+model Organization {
+  id             String          @id @default(cuid())
+  name           String
+  logoUrl        String?
+  tier           Tier            @default(FREE)
+  users          User[]
+  orgSettings    OrgSettings?
+  subscriptions  Subscription[]
+  properties     Property[]
+  contacts       Contact[]
+  companies      Company[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model OrgSettings {
   id                 String        @id @default(cuid())
   orgId              String        @unique
+  organization       Organization  @relation(fields: [orgId], references: [id])
   exportSchedule     String        @default("daily")
   allowImpersonation Boolean       @default(false)
   allowExport        Boolean       @default(true)
   notifications      Boolean       @default(true)
-  allowSADeletes     Boolean       @default(true)
-  organization       Organization  @relation(fields: [orgId], references: [id])
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
-
-  @@index([notifications])
 }
 
-
-// Contacts & Companies
-model Company {
-  id         String    @id @default(cuid())
-  name       String
-  domain     String?   @unique
-  industry   String?
-  orgId      String?
-  organization Organization? @relation(fields: [orgId], references: [id])
-
-  contacts   Contact[]
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+enum Tier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
 }
+
+model GlobalSettings {
+  id            String   @id @default(cuid())
+  maintenance   Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// =====================
+// CRM Core
+// =====================
 
 model Contact {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  phone     String?
-  position  String?
-
-  companyId String?
-  company   Company? @relation(fields: [companyId], references: [id])
-
-  ownerId   String?
-  owner     User?    @relation(fields: [ownerId], references: [id])
-
-  notes     Note[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String        @id @default(cuid())
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name        String
+  email       String?
+  phone       String?
+  companyId   String?
+  company     Company?      @relation(fields: [companyId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
+
+model Company {
+  id          String        @id @default(cuid())
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name        String
+  industry    String?
+  contacts    Contact[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Property {
+  id          String        @id @default(cuid())
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name        String
+  address     String
+  tenants     Tenant[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  name        String
+  email       String?
+  phone       String?
+  reminders   Reminder[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Reminder {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  message   String
+  dueDate   DateTime
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// =====================
+// Billing / Plans
+// =====================
+
+model Subscription {
+  id             String        @id @default(cuid())
+  orgId          String
+  organization   Organization  @relation(fields: [orgId], references: [id])
+  plan           Tier
+  active         Boolean       @default(true)
+  startDate      DateTime      @default(now())
+  endDate        DateTime?
+  prorated       Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// =====================
+// Logs / History
+// =====================
+
+model ImprLog {
+  id             String   @id @default(cuid())
+  superAdminId   String
+  superAdmin     User     @relation(fields: [superAdminId], references: [id])
+  subscriberId   String
+  subscriber     Organization @relation(fields: [subscriberId], references: [id])
+  startedAt      DateTime @default(now())
+  endedAt        DateTime?
+  alertSent      Boolean  @default(false)
+}
+
+model History {
+  id          String   @id @default(cuid())
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  action      String
+  actorId     String?
+  actor       User?    @relation(fields: [actorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+// =====================
+// Deals (CRM)
+// =====================
 
 model Deal {
   id          String   @id @default(cuid())
@@ -627,40 +218,14 @@ model Deal {
   deleted     Boolean  @default(false) // soft delete
 }
 
-model Note {
+// Keep additional models (Invoices, Payments, etc.) if needed later
+
+// =====================
+// Misc
+// =====================
+
+model GlobalLog {
   id        String   @id @default(cuid())
-  content   String
-  contactId String
-  contact   Contact  @relation(fields: [contactId], references: [id])
+  message   String
   createdAt DateTime @default(now())
-}
-
-model GlobalSettings {
-  id                 String  @id @default(cuid())
-  allowImpersonation Boolean @default(false)
-  createdAt          DateTime @default(now())
-}
-
-model ImpersonationLog {
-  id            String   @id @default(cuid())
-  superAdminId  String
-  superAdmin    User     @relation("SuperAdminLogs", fields: [superAdminId], references: [id])
-  subscriberId  String
-  subscriber    User     @relation("SubscriberLogs", fields: [subscriberId], references: [id])
-  startedAt     DateTime @default(now())
-  endedAt       DateTime?
-  alertSent     Boolean  @default(true)
-}
-
-// ============================================================
-// User model (kept minimal here, adjust as needed)
-// ============================================================
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  accountId String?
-  account   Account? @relation(fields: [accountId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
