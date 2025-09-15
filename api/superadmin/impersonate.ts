@@ -31,6 +31,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     data: { superAdminId, targetUserId },
   });
 
+  // Log history entry for impersonation start (attempt to resolve subscriber by target email)
+  try {
+    const targetSubscriber = await prisma.subscriber.findFirst({ where: { email: target.email }, select: { id: true } });
+    await prisma.history.create({
+      data: {
+        userId: superAdminId,
+        subscriberId: targetSubscriber ? targetSubscriber.id : undefined,
+        action: 'ImpersonationStarted',
+        details: JSON.stringify({ by: superAdminEmail, targetUserId }),
+      },
+    });
+  } catch (e) {
+    // ignore history logging errors
+  }
+
   // Notify target user
   try {
     const { notifyImpersonation } = await import('../../src/lib/impersonationNotify');
