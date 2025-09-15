@@ -180,42 +180,14 @@ export default function CompanyDetailPage() {
             <tbody>
               {paged.map((c) => (
                 <tr key={c.id}>
+                  <td className="p-2 border">{c.firstName} {c.lastName}</td>
+                  <td className="p-2 border">{c.email}</td>
+                  <td className="p-2 border">{c.phone || '-'}</td>
                   <td className="p-2 border">
-                    {editingId === c.id ? (
-                      <>
-                        <input className="border p-1 rounded w-full mb-1" value={editForm.firstName} onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} />
-                        <input className="border p-1 rounded w-full" value={editForm.lastName} onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} />
-                      </>
-                    ) : (
-                      <>{c.firstName} {c.lastName}</>
-                    )}
-                  </td>
-                  <td className="p-2 border">
-                    {editingId === c.id ? (
-                      <input className="border p-1 rounded w-full" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
-                    ) : (
-                      c.email
-                    )}
-                  </td>
-                  <td className="p-2 border">
-                    {editingId === c.id ? (
-                      <input className="border p-1 rounded w-full" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
-                    ) : (
-                      c.phone || '-'
-                    )}
-                  </td>
-                  <td className="p-2 border">
-                    {editingId === c.id ? (
-                      <div className="flex gap-2">
-                        <button onClick={() => saveEdit(c.id)} className="px-2 py-1 bg-green-500 text-white rounded">Save</button>
-                        <button onClick={cancelEdit} className="px-2 py-1 bg-gray-300 rounded">Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <button onClick={() => startEdit(c)} className="px-2 py-1 bg-yellow-500 text-white rounded">Edit</button>
-                        <button onClick={() => deleteContact(c.id)} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
-                      </div>
-                    )}
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditing(c)} className="px-2 py-1 bg-blue-600 text-white rounded">Edit</button>
+                      <button onClick={() => deleteContact(c.id)} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}
