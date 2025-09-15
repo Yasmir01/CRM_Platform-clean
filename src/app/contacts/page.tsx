@@ -35,24 +35,17 @@ export default function ContactsPage() {
   const handleSave = async () => {
     if (!selectedContact) return;
     try {
-      const res = await fetch(`/api/contacts/${selectedContact.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: undefined, // legacy API uses separate fields; keep body consistent with app route which updates allowed fields
-        }),
-      });
-      // Our app route expects firstName/lastName/email/phone; but this UI uses name => split
-      // Better split name into first/last
+      // split name into first/last
       const [firstName, ...rest] = (selectedContact.name || '').split(' ');
       const lastName = rest.join(' ');
-      const patchRes = await fetch(`/api/contacts/${selectedContact.id}`, {
+      const res = await fetch(`/api/contacts/${selectedContact.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firstName, lastName, email: selectedContact.email, phone: selectedContact.phone }),
       });
-      const updated = await patchRes.json();
-      setContacts((prev) => prev.map((c) => (c.id === updated.id ? { ...c, name: `${updated.firstName} ${updated.lastName}`, email: updated.email, phone: updated.phone } : c)));
+      if (!res.ok) throw new Error('Failed to save');
+      const updated = await res.json();
+      setContacts((prev) => prev.map((c) => (c.id === updated.id ? { ...c, name: `${updated.firstName || firstName} ${updated.lastName || lastName}`, email: updated.email, phone: updated.phone } : c)));
       setIsModalOpen(false);
       setSelectedContact(null);
     } catch (e) {
