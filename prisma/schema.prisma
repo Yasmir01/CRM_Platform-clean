@@ -240,11 +240,15 @@ model Refund {
 // ============================================================
 model Document {
   id        String   @id @default(cuid())
-  leaseId   String?
-  lease     Lease?   @relation(fields: [leaseId], references: [id])
+  name      String   @db.VarChar(255)
   url       String
-  type      String
-  createdAt DateTime @default(now())
+  uploadedBy User?   @relation("UserUploadedDocuments", fields: [uploadedById], references: [id])
+  uploadedById String?
+  org        Organization? @relation("OrgDocuments", fields: [orgId], references: [id])
+  orgId      String?
+
+  @@index([orgId])
+  @@index([uploadedById])
 }
 
 model MaintenanceAttachment {
