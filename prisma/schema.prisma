@@ -360,12 +360,14 @@ model OrgSettings {
   allowImpersonation Boolean       @default(false)
   allowExport        Boolean       @default(true)
   notifications      Boolean       @default(true)
+  allowSADeletes     Boolean       @default(true)
   organization       Organization  @relation(fields: [orgId], references: [id])
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 
   @@index([notifications])
 }
+
 
 // Contacts & Companies
 model Company {
