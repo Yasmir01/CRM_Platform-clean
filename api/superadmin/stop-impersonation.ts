@@ -28,6 +28,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       data: { endedAt: new Date() },
     });
 
+    // Log history entry for impersonation stop
+    try {
+      // attempt to resolve subscriber by impersonated user's id
+      let subscriberId: string | undefined = undefined;
+      try {
+        const targetUser = await prisma.user.findUnique({ where: { id: payload.impersonating }, select: { email: true } });
+        if (targetUser?.email) {
+          const s = await prisma.subscriber.findFirst({ where: { email: targetUser.email }, select: { id: true } });
+          if (s) subscriberId = s.id;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      await prisma.history.create({
+        data: {
+          userId: payload.originalUserId,
+          subscriberId: subscriberId || undefined,
+          action: 'ImpersonationStopped',
+          details: JSON.stringify({ by: payload.originalEmail, targetUserId: payload.impersonating }),
+        },
+      });
+    } catch (e) {
+      // ignore history logging errors
+    }
+
     try {
       const { notifyImpersonationEnd } = await import('../../src/lib/impersonationNotify');
       await notifyImpersonationEnd(payload.impersonating, payload.originalEmail);
