@@ -56,6 +56,31 @@ export default function CompanyDetailPage() {
     fetchData();
   }, [id]);
 
+  // NEW CONTACT FORM STATE & HANDLER
+  const [newContact, setNewContact] = useState({ firstName: '', lastName: '', email: '', phone: '' });
+
+  async function handleAddContact(e: React.FormEvent) {
+    e.preventDefault();
+    if (!id) return;
+    try {
+      const res = await fetch('/api/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId: id, ...newContact }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setContacts((prev) => [created, ...prev]);
+        setNewContact({ firstName: '', lastName: '', email: '', phone: '' });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error('Failed to create contact', err);
+      }
+    } catch (e) {
+      console.error('Add contact error', e);
+    }
+  }
+
   // search & pagination state
   const [q, setQ] = React.useState('');
   const [page, setPage] = React.useState(1);
