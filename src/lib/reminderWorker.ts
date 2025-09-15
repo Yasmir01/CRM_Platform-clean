@@ -95,5 +95,14 @@ export async function sendReminderNow(reminderId: string, initiatedBy: string = 
   }
 
   await prisma.reminder.update({ where: { id: reminder.id }, data: { sentAt: new Date(), status: 'SENT', attempts: { increment: 1 } } });
+
+  // emit webhooks for reminder events
+  try {
+    const { emitWebhook } = await import('@/lib/webhooks');
+    emitWebhook('reminder.processed', { reminderId: reminder.id, status: 'sent' }, reminder.subscriberId || undefined);
+  } catch (e) {
+    console.warn('emitWebhook failed for reminder', e);
+  }
+
   await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'system', status: 'completed', note: 'Reminder processing completed' });
 }
