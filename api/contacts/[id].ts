@@ -1,4 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ensurePermission } from '../../src/lib/authorize';
 import { getUserOr401 } from '../../src/utils/authz';
 import { prisma } from '../_db';
@@ -11,7 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET') {
       const user = getUserOr401(req, res);
       if (!user) return;
-      const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true, notes: { orderBy: { createdAt: 'desc' } } } });
+      const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true, notes: { orderBy: { createdAt: 'desc' } }, owner: true } });
       if (!contact) return res.status(404).json({ error: 'Not found' });
       return res.status(200).json(contact);
     }
@@ -36,9 +35,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'DELETE') {
       const user = ensurePermission(req, res, 'contacts:manage');
       if (!user) return;
-      // soft delete
-      const archived = await prisma.contact.update({ where: { id }, data: { archived: true } });
-      return res.status(200).json({ ok: true, archived });
+      // hard delete
+      await prisma.contact.delete({ where: { id } });
+      return res.status(200).json({ ok: true });
     }
 
     res.setHeader('Allow', 'GET, PATCH, DELETE');
