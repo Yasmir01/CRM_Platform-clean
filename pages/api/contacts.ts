@@ -14,9 +14,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(200).json(contacts);
       }
       case 'POST': {
-        const { firstName, lastName, email, phone, companyId, ownerId } = req.body;
-        const contact = await prisma.contact.create({ data: { firstName, lastName, email, phone, companyId, ownerId } });
-        return res.status(201).json(contact);
+        const { companyId, firstName, lastName, email, phone, ownerId } = req.body || {};
+        if (!companyId || !firstName || !email) {
+          return res.status(400).json({ error: 'companyId, firstName and email are required' });
+        }
+        try {
+          const contact = await prisma.contact.create({
+            data: {
+              firstName: String(firstName),
+              lastName: lastName ? String(lastName) : '',
+              email: String(email),
+              phone: phone || null,
+              company: { connect: { id: String(companyId) } },
+              ownerId: ownerId || undefined,
+            },
+          });
+          return res.status(201).json(contact);
+        } catch (err: any) {
+          console.error('create contact error', err?.message || err);
+          return res.status(500).json({ error: err?.message || 'Failed to create contact' });
+        }
       }
       case 'PATCH': {
         const { id, ...updates } = req.body;
