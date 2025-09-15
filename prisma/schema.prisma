@@ -367,6 +367,8 @@ model OrgSettings {
   @@index([notifications])
 }
 
+// Contacts & Companies
+
 model GlobalSettings {
   id                 String  @id @default(cuid())
   allowImpersonation Boolean @default(false)
