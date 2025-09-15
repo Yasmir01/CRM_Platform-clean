@@ -55,6 +55,63 @@ export default function CompanyDetailPage() {
     fetchData();
   }, [id]);
 
+  // search & pagination state
+  const [q, setQ] = React.useState('');
+  const [page, setPage] = React.useState(1);
+  const pageSize = 10;
+
+  const filtered = React.useMemo(() => {
+    const lower = q.trim().toLowerCase();
+    if (!lower) return contacts;
+    return contacts.filter((c) => (`${c.firstName} ${c.lastName} ${c.email || ''}`).toLowerCase().includes(lower));
+  }, [contacts, q]);
+
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  async function deleteContact(id: string) {
+    try {
+      const confirmed = window.confirm('Delete this contact? This action cannot be undone.');
+      if (!confirmed) return;
+      await fetch('/api/contacts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      fetchData();
+    } catch (e) {
+      console.error('Delete contact error', e);
+    }
+  }
+
+  // inline edit for contacts on company detail
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editForm, setEditForm] = React.useState({ firstName: '', lastName: '', email: '', phone: '' });
+
+  function startEdit(c: Contact) {
+    setEditingId(c.id);
+    setEditForm({ firstName: c.firstName, lastName: c.lastName, email: c.email, phone: c.phone || '' });
+  }
+
+  async function saveEdit(id: string) {
+    try {
+      await fetch('/api/contacts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...editForm }),
+      });
+      setEditingId(null);
+      fetchData();
+    } catch (e) {
+      console.error('Update contact error', e);
+    }
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+  }
+
   if (loading) return <p className="p-6">Loading...</p>;
 
   if (!company) return <p className="p-6">Company not found</p>;
@@ -67,27 +124,76 @@ export default function CompanyDetailPage() {
       {company.domain && <p className="mb-4 text-gray-600">Domain: {company.domain}</p>}
 
       <h2 className="text-xl font-semibold mb-2">Contacts</h2>
-      {contacts.length === 0 ? (
+
+      <div className="mb-4 flex items-center gap-2">
+        <input value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} placeholder="Search contacts..." className="border p-2 rounded flex-1" />
+        <div className="text-sm text-gray-600">{total} results</div>
+      </div>
+
+      {paged.length === 0 ? (
         <p>No contacts linked to this company.</p>
       ) : (
-        <table className="min-w-full border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">Phone</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contacts.map((c) => (
-              <tr key={c.id}>
-                <td className="p-2 border">{c.firstName} {c.lastName}</td>
-                <td className="p-2 border">{c.email}</td>
-                <td className="p-2 border">{c.phone || '-'}</td>
+        <>
+          <table className="min-w-full border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-2 border">Name</th>
+                <th className="p-2 border">Email</th>
+                <th className="p-2 border">Phone</th>
+                <th className="p-2 border">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paged.map((c) => (
+                <tr key={c.id}>
+                  <td className="p-2 border">
+                    {editingId === c.id ? (
+                      <>
+                        <input className="border p-1 rounded w-full mb-1" value={editForm.firstName} onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} />
+                        <input className="border p-1 rounded w-full" value={editForm.lastName} onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} />
+                      </>
+                    ) : (
+                      <>{c.firstName} {c.lastName}</>
+                    )}
+                  </td>
+                  <td className="p-2 border">
+                    {editingId === c.id ? (
+                      <input className="border p-1 rounded w-full" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                    ) : (
+                      c.email
+                    )}
+                  </td>
+                  <td className="p-2 border">
+                    {editingId === c.id ? (
+                      <input className="border p-1 rounded w-full" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                    ) : (
+                      c.phone || '-'
+                    )}
+                  </td>
+                  <td className="p-2 border">
+                    {editingId === c.id ? (
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEdit(c.id)} className="px-2 py-1 bg-green-500 text-white rounded">Save</button>
+                        <button onClick={cancelEdit} className="px-2 py-1 bg-gray-300 rounded">Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <button onClick={() => startEdit(c)} className="px-2 py-1 bg-yellow-500 text-white rounded">Edit</button>
+                        <button onClick={() => deleteContact(c.id)} className="px-2 py-1 bg-red-500 text-white rounded">Delete</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="mt-4 flex items-center gap-2">
+            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-3 py-1 bg-gray-200 rounded">Prev</button>
+            <div className="text-sm">Page {page} of {pages}</div>
+            <button onClick={() => setPage(Math.min(pages, page + 1))} disabled={page === pages} className="px-3 py-1 bg-gray-200 rounded">Next</button>
+          </div>
+        </>
       )}
     </div>
   );
