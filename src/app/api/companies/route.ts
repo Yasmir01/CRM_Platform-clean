@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const companies = await prisma.company.findMany({
       include: { contacts: true },
-      orderBy: { name: 'asc' },
+      orderBy: { createdAt: 'desc' },
     });
     // map contacts to name for frontend
     const mapped = companies.map((c) => ({
