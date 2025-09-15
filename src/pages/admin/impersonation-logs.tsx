@@ -152,34 +152,16 @@ export default function ImpersonationLogs() {
           <button onClick={() => { setSearch(''); setStatusFilter('all'); setFromDate(''); setToDate(''); }} className="clear-filters px-3 py-1 bg-gray-200 rounded">Clear Filters</button>
         </div>
 
-        {settings?.allowExport ? (
-          <div className="export-actions flex items-center gap-2 ml-auto">
+        <ControlledFeature
+          enabled={Boolean(settings?.allowExport)}
+          disabledLabel="Export options are disabled for this organization. Contact your SuperAdmin if you need access."
+          className="ml-auto"
+        >
+          <div className="export-actions flex items-center gap-2">
             <button onClick={exportCSV} className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Export CSV</button>
             <button onClick={exportPDF} className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Export PDF</button>
           </div>
-        ) : (
-          <div className="export-disabled ml-auto">
-            <div
-              className="relative inline-block"
-              onMouseEnter={() => setShowExportTooltip(true)}
-              onMouseLeave={() => setShowExportTooltip(false)}
-            >
-              <button
-                className="px-3 py-1 bg-gray-300 text-gray-600 rounded cursor-not-allowed"
-                disabled
-                aria-disabled="true"
-              >
-                Export Disabled
-              </button>
-
-              {showExportTooltip && (
-                <div role="tooltip" className="absolute top-full right-0 mt-2 w-72 p-2 text-sm text-white bg-black rounded shadow">
-                  Export options are disabled for this organization. Contact your SuperAdmin if you need access.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        </ControlledFeature>
       </div>
 
       <table className="min-w-full border">
