@@ -4,18 +4,21 @@ import { sendSMS } from "@/lib/sms";
 import { createNotification } from "@/lib/notify";
 import { pusher } from "@/lib/pusher";
 import { isRemindersAllowedForSubscriber } from "@/lib/featureChecks";
+import { createReminderLog } from "@/lib/reminderLog";
 
-export async function sendReminderNow(reminderId: string) {
+export async function sendReminderNow(reminderId: string, initiatedBy: string = 'system') {
   const reminder = await prisma.reminder.findUnique({ where: { id: reminderId }, include: { subscriber: true, tenant: true, property: true } });
   if (!reminder) throw new Error('Reminder not found');
 
   if (!reminder.subscriberId || !reminder.subscriber) {
+    await createReminderLog({ reminderId, initiatedBy, channel: 'system', status: 'failed', note: 'No subscriber associated' });
     await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'failed', attempts: { increment: 1 } } });
     return;
   }
 
   const allowed = await isRemindersAllowedForSubscriber(reminder.subscriberId);
   if (!allowed) {
+    await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'system', status: 'skipped', note: 'Reminders disabled by plan/admin/subscriber' });
     await prisma.reminder.update({ where: { id: reminder.id }, data: { status: 'cancelled' } });
     return;
   }
@@ -27,7 +30,15 @@ export async function sendReminderNow(reminderId: string) {
   try {
     const toEmail = reminder.tenant?.email || reminder.subscriber?.email;
     if (reminder.subscriber?.notifyEmail && toEmail) {
-      await sendEmail({ to: toEmail, subject, text, html: `<p>${text}</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tenant/dashboard">Open Portal</a></p>` });
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'email', status: 'queued', note: `Sending email to ${toEmail}` });
+      try {
+        const result = await sendEmail({ to: toEmail, subject, text, html: `<p>${text}</p><p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tenant/dashboard">Open Portal</a></p>` });
+        await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'email', status: 'sent', response: { providerResult: result?.messageId || result } });
+      } catch (err: any) {
+        await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'email', status: 'failed', response: { error: err?.message || String(err) } });
+      }
+    } else {
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'email', status: 'skipped', note: 'Email not enabled or no recipient' });
     }
   } catch (e) {
     console.warn('email failed', e);
@@ -36,7 +47,15 @@ export async function sendReminderNow(reminderId: string) {
   // SMS
   try {
     if (reminder.subscriber?.notifySMS && reminder.subscriber?.phone) {
-      await sendSMS(reminder.subscriber.phone, `${subject}: ${text}`);
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'queued', note: `Sending SMS to ${reminder.subscriber.phone}` });
+      try {
+        const smsRes = await sendSMS(reminder.subscriber.phone, `${subject}: ${text}`);
+        await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'sent', response: { result: smsRes } });
+      } catch (err: any) {
+        await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'failed', response: { error: err?.message || String(err) } });
+      }
+    } else {
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'sms', status: 'skipped', note: 'SMS not enabled or no recipient' });
     }
   } catch (e) {
     console.warn('sms failed', e);
@@ -45,12 +64,18 @@ export async function sendReminderNow(reminderId: string) {
   // In-app notification
   try {
     if (reminder.tenantId) {
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'in-app', status: 'queued', note: `Creating in-app notification for tenant ${reminder.tenantId}` });
       await createNotification(reminder.tenantId, 'reminder', text);
       try { await pusher.trigger(`tenant-${reminder.tenantId}`, 'new-notification', { id: reminder.id, message: text, createdAt: new Date() }); } catch (e) {}
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'in-app', status: 'sent', note: `Pushed to tenant ${reminder.tenantId}` });
+    } else {
+      await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'in-app', status: 'skipped', note: 'No tenantId' });
     }
   } catch (e) {
     console.warn('notify failed', e);
+    await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'in-app', status: 'failed', response: { error: String(e) } });
   }
 
   await prisma.reminder.update({ where: { id: reminder.id }, data: { sentAt: new Date(), status: 'sent', attempts: { increment: 1 } } });
+  await createReminderLog({ reminderId: reminder.id, initiatedBy, channel: 'system', status: 'completed', note: 'Reminder processing completed' });
 }
