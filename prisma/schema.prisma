@@ -269,4 +269,19 @@ model ExternalWebhookEvent {
   notes      String?
 }
 
+model History {
+  id           String    @id @default(cuid())
+  userId       String
+  subscriberId String?
+  action       String
+  details      String?
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userId], references: [id])
+  subscriber   Subscriber? @relation(fields: [subscriberId], references: [id])
+
+  @@index([userId])
+  @@index([subscriberId])
+}
+
 // --- the rest of the schema remains unchanged ---
