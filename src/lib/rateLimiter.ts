@@ -1,30 +1,63 @@
-// src/lib/rateLimiter.ts
-import { kv } from '@vercel/kv';
+let limiter: any = null;
 
-// Fallback in-memory map if kv isn't configured
-const localBuckets = new Map<string, { ts: number; count: number }>();
+try {
+  // try to use rate-limiter-flexible with Redis if available
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { RateLimiterRedis, RateLimiterMemory } = require('rate-limiter-flexible');
+  // import redis client if configured
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const redisClient = require('./redis').redisClient;
 
-export async function rateLimit(key: string, limit = 5, windowSec = 60) {
-  try {
-    if (kv) {
-      const now = Math.floor(Date.now() / 1000);
-      const bucket = `rate:${key}:${Math.floor(now / windowSec)}`;
-      const current = (await kv.incr(bucket)) || 0;
-      if (current === 1) await kv.expire(bucket, windowSec);
-      if (current > limit) throw new Error('rate_limited');
-      return current;
-    }
-  } catch (e) {
-    // fall through to local
-    console.warn('kv rateLimit failed, falling back to local in-memory limiter', e?.message || e);
+  const points = parseInt(process.env.RATE_LIMIT_POINTS || '10', 10);
+  const duration = parseInt(process.env.RATE_LIMIT_DURATION || '60', 10);
+  const blockDuration = parseInt(process.env.RATE_LIMIT_LOCK_TIME || '60', 10);
+
+  if (redisClient) {
+    limiter = new RateLimiterRedis({
+      storeClient: redisClient,
+      points,
+      duration,
+      keyPrefix: 'rlf',
+      inmemoryBlockOnConsumed: points * 2,
+      inmemoryBlockDuration: blockDuration,
+    });
+  } else {
+    limiter = new RateLimiterMemory({
+      points,
+      duration,
+      keyPrefix: 'rlf-mem',
+    });
   }
+} catch (e) {
+  // rate-limiter-flexible not installed — fallback to a simple in-memory limiter
+  // eslint-disable-next-line no-console
+  console.warn('rate-limiter-flexible not available, using simple in-memory fallback', e);
 
-  // Local fallback
-  const now = Date.now();
-  const bucketKey = `${key}:${Math.floor(now / (windowSec * 1000))}`;
-  const entry = localBuckets.get(bucketKey) || { ts: now, count: 0 };
-  entry.count += 1;
-  localBuckets.set(bucketKey, entry);
-  if (entry.count > limit) throw new Error('rate_limited');
-  return entry.count;
+  const map = new Map<string, { points: number; resetAt: number }>();
+  const points = parseInt(process.env.RATE_LIMIT_POINTS || '10', 10);
+  const duration = parseInt(process.env.RATE_LIMIT_DURATION || '60', 10);
+
+  limiter = {
+    consume: async (key: string, cost = 1) => {
+      const now = Date.now();
+      const entry = map.get(key);
+      if (!entry || entry.resetAt <= now) {
+        map.set(key, { points: points - cost, resetAt: now + duration * 1000 });
+        return { remainingPoints: points - cost };
+      }
+      if (entry.points - cost < 0) {
+        const msBefore = entry.resetAt - now;
+        const err: any = new Error('RateLimiterExceeded');
+        err.msBeforeNext = msBefore;
+        throw err;
+      }
+      entry.points -= cost;
+      map.set(key, entry);
+      return { remainingPoints: entry.points };
+    },
+    // convenience
+    get: async (key: string) => map.get(key),
+  };
 }
+
+export default limiter;
