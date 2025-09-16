@@ -18,12 +18,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         skip: (pageNumber - 1) * pageSize,
         take: pageSize,
         orderBy: { [field]: order },
+        include: { contacts: { take: 3, orderBy: { firstName: 'asc' } }, _count: { select: { contacts: true } } },
       });
 
       const total = await prisma.company.count();
       const hasMore = pageNumber * pageSize < total;
 
-      res.status(200).json({ data: companies, hasMore, total, page: pageNumber, totalPages: Math.max(Math.ceil(total / pageSize), 1) });
+      // Map response to include contactCount and a small preview of contacts
+      const data = companies.map((c) => ({
+        id: c.id,
+        name: c.name,
+        industry: c.industry || null,
+        website: c.website || null,
+        createdAt: c.createdAt,
+        contactCount: (c as any)._count?.contacts || 0,
+        contactsPreview: (c as any).contacts?.map((ct: any) => ({ id: ct.id, name: `${ct.firstName || ''} ${ct.lastName || ''}`.trim(), email: ct.email })) || [],
+      }));
+
+      res.status(200).json({ data, hasMore, total, page: pageNumber, totalPages: Math.max(Math.ceil(total / pageSize), 1) });
     } catch (err) {
       console.error("Error fetching companies:", err);
       res.status(500).json({ error: "Failed to fetch companies" });
