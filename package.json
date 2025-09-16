@@ -13,8 +13,9 @@
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:push": "prisma db push --schema prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.mjs",
-    "prisma:seed-demo": "node prisma/seed-demo.mjs"
-  },
+    "prisma:seed-demo": "node prisma/seed-demo.mjs",
+    "prisma:migrate": "prisma migrate dev --name sync-relations"
+    },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.879.0",
     "@aws-sdk/s3-request-presigner": "^3.879.0",
