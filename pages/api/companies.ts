@@ -1,69 +1,49 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from '@/lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    if (req.method === 'GET') {
-      const page = Math.max(parseInt(String(req.query.page || '1'), 10), 1);
-      const limit = Math.max(parseInt(String(req.query.limit || '10'), 10), 1);
-      const skip = (page - 1) * limit;
+  if (req.method === "GET") {
+    try {
+      const { page = "1", limit = "10", sortField = "createdAt", sortOrder = "asc" } = req.query as Record<string, string>;
 
-      const sortField = String(req.query.sortField || 'createdAt');
-      const sortOrder = String(req.query.sortOrder || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+      const pageNumber = parseInt(page, 10) || 1;
+      const pageSize = parseInt(limit, 10) || 10;
 
-      const scalarFields = new Set(['name', 'industry', 'website', 'createdAt']);
-      let orderBy: any = { createdAt: sortOrder };
-      if (scalarFields.has(sortField)) {
-        orderBy = { [sortField]: sortOrder };
-      } else {
-        orderBy = { createdAt: sortOrder };
-      }
+      // validate sortField - allowlist to prevent unsafe dynamic fields
+      const allowed = new Set(["name", "industry", "website", "createdAt"]);
+      const field = allowed.has(sortField) ? sortField : "createdAt";
+      const order = sortOrder === "asc" ? "asc" : "desc";
 
-      const [companies, total] = await Promise.all([
-        prisma.company.findMany({ skip, take: limit, orderBy, include: { contacts: true } }),
-        prisma.company.count(),
-      ]);
+      const companies = await prisma.company.findMany({
+        skip: (pageNumber - 1) * pageSize,
+        take: pageSize,
+        orderBy: { [field]: order },
+      });
 
-      const data = companies.map((c) => ({
-        id: c.id,
-        name: c.name,
-        industry: c.industry || '',
-        website: c.website || null,
-        createdAt: c.createdAt,
-      }));
+      const total = await prisma.company.count();
+      const hasMore = pageNumber * pageSize < total;
 
-      const totalPages = Math.max(Math.ceil(total / limit), 1);
-      const hasMore = page < totalPages;
-
-      return res.status(200).json({ data, total, page, totalPages, hasMore });
+      res.status(200).json({ data: companies, hasMore, total, page: pageNumber, totalPages: Math.max(Math.ceil(total / pageSize), 1) });
+    } catch (err) {
+      console.error("Error fetching companies:", err);
+      res.status(500).json({ error: "Failed to fetch companies" });
     }
-
-    if (req.method === 'POST') {
+  } else if (req.method === "POST") {
+    try {
       const { name, industry, website, phone, address } = req.body || {};
       if (!name) return res.status(400).json({ error: 'name is required' });
-      const company = await prisma.company.create({ data: { name: String(name), industry: industry || null, website: website || null, phone: phone || null, address: address || null } });
-      return res.status(201).json(company);
-    }
 
-    if (req.method === 'PUT') {
-      const { id, ...updateData } = req.body || {};
-      if (!id) return res.status(400).json({ error: 'Missing id' });
-      const updated = await prisma.company.update({ where: { id }, data: updateData });
-      return res.status(200).json(updated);
-    }
+      const newCompany = await prisma.company.create({
+        data: { name: String(name), industry: industry || null, website: website || null, phone: phone || null, address: address || null },
+      });
 
-    if (req.method === 'DELETE') {
-      const id = String(req.body?.id || req.query?.id || '');
-      if (!id) return res.status(400).json({ error: 'Missing id' });
-      await prisma.company.delete({ where: { id } });
-      return res.status(200).json({ message: 'Deleted successfully' });
+      res.status(201).json(newCompany);
+    } catch (err) {
+      console.error("Error creating company:", err);
+      res.status(500).json({ error: "Failed to create company" });
     }
-
-    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
-  } catch (err: any) {
-    console.error('pages/api/companies error', err?.message || err);
-    return res.status(500).json({ error: 'Server error', details: err?.message });
+  } else {
+    res.setHeader("Allow", ["GET", "POST"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
