@@ -25,31 +25,39 @@ export default function ContactsPage() {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    fetch("/api/contacts")
-      .then((r) => r.json())
-      .then((data) => {
-        if (!mounted) return;
-        const list = (data || []).map((item: any) => ({
-          id: item.id,
-          firstName: item.firstName || item.first || undefined,
-          lastName: item.lastName || undefined,
-          name: item.name || `${item.firstName || item.first || ""} ${item.lastName || ""}`.trim(),
-          email: item.email || null,
-          phone: item.phone || null,
-          company: item.company || null,
-          notes: item.notes || null,
-        }));
-        setContacts(list);
-      })
-      .catch(() => setContacts([]))
-      .finally(() => setLoading(false));
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const LIMIT = 10;
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const fetchContacts = async (pageToFetch = page) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/contacts?page=${pageToFetch}&limit=${LIMIT}`);
+      if (!res.ok) throw new Error('Failed fetching contacts');
+      const data = await res.json();
+      const list = (data.contacts || []).map((item: any) => ({
+        id: item.id,
+        firstName: item.firstName || item.first || undefined,
+        lastName: item.lastName || undefined,
+        name: item.name || `${item.firstName || item.first || ""} ${item.lastName || ""}`.trim(),
+        email: item.email || null,
+        phone: item.phone || null,
+        company: item.company || null,
+        notes: item.notes || null,
+      }));
+      setContacts(list);
+      setTotalPages(data.totalPages || 1);
+      setPage(data.page || 1);
+    } catch (e) {
+      console.error('fetchContacts error', e);
+      setContacts([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchContacts(page); }, [page]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,16 +75,7 @@ export default function ContactsPage() {
       return;
     }
 
-    const saved = await res.json();
-
-    if (editingId) {
-      setContacts((prev) => prev.map((c) => (c.id === saved.id ? { ...c, firstName: saved.firstName, lastName: saved.lastName, name: `${saved.firstName || ""} ${saved.lastName || ""}`.trim(), email: saved.email, phone: saved.phone } : c)));
-    } else {
-      setContacts((prev) => [
-        { id: saved.id, firstName: saved.firstName, lastName: saved.lastName, name: `${saved.firstName || ""} ${saved.lastName || ""}`.trim(), email: saved.email, phone: saved.phone, company: saved.company || null },
-        ...prev,
-      ]);
-    }
+    await fetchContacts(1); // refresh first page after create/update
 
     setForm({ firstName: "", lastName: "", email: "", phone: "" });
     setEditingId(null);
@@ -95,7 +94,12 @@ export default function ContactsPage() {
       console.error("Failed to delete", await res.text());
       return;
     }
-    setContacts((prev) => prev.filter((c) => c.id !== id));
+    // if last item on page removed, go to previous page when appropriate
+    if (contacts.length === 1 && page > 1) {
+      setPage(page - 1);
+    } else {
+      await fetchContacts(page);
+    }
   };
 
   const filtered = contacts.filter((c) => {
