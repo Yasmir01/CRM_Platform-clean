@@ -8,15 +8,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       case 'GET': {
         const id = String(req.query?.id || '');
         const companyId = String(req.query?.companyId || '');
+
         if (id) {
           const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true } });
           if (!contact) return res.status(404).json({ error: 'Not found' });
           return res.status(200).json(contact);
         }
 
+        // pagination support
+        const page = Math.max(parseInt(String(req.query?.page || '1'), 10) || 1, 1);
+        const limit = Math.max(parseInt(String(req.query?.limit || '10'), 10) || 10, 1);
+        const skip = (page - 1) * limit;
+
         const where = companyId ? { companyId } : undefined;
-        const contacts = await prisma.contact.findMany({ where, include: { company: true } });
-        return res.status(200).json(contacts);
+
+        const [contacts, total] = await Promise.all([
+          prisma.contact.findMany({ where, include: { company: true }, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+          prisma.contact.count({ where }),
+        ]);
+
+        return res.status(200).json({ contacts, total, page, totalPages: Math.max(Math.ceil(total / limit), 1) });
       }
 
       case 'POST': {
