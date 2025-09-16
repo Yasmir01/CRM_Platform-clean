@@ -1,8 +1,17 @@
 {
+  "name": "crm-system",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "if [ -n \"$DATABASE_URL\" ]; then prisma db push --schema prisma/schema.prisma; else echo \"Skipping Prisma db push: DATABASE_URL not set\"; fi && prisma generate --schema prisma/schema.prisma && vite build",
     "preview": "vite preview",
+    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
+    "prisma:push": "prisma db push --schema prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.mjs",
     "prisma:seed-demo": "node prisma/seed-demo.mjs",
     "prisma:migrate": "prisma migrate dev --name sync-relations"
