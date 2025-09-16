@@ -6,54 +6,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'GET': {
+        const id = String(req.query?.id || '');
         const companyId = String(req.query?.companyId || '');
-        if (companyId) {
-          const contacts = await prisma.contact.findMany({ where: { companyId }, include: { company: true, owner: true } });
-          return res.status(200).json(contacts);
+        if (id) {
+          const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true } });
+          if (!contact) return res.status(404).json({ error: 'Not found' });
+          return res.status(200).json(contact);
         }
-        const contacts = await prisma.contact.findMany({ include: { company: true, owner: true } });
+
+        const where = companyId ? { companyId } : undefined;
+        const contacts = await prisma.contact.findMany({ where, include: { company: true } });
         return res.status(200).json(contacts);
       }
+
       case 'POST': {
-        const { companyId, firstName, lastName, email, phone, ownerId } = req.body || {};
-        if (!companyId || !firstName || !email) {
-          return res.status(400).json({ error: 'companyId, firstName and email are required' });
+        const { firstName, lastName, email, phone, companyId, position } = req.body || {};
+        if (!firstName || !email) return res.status(400).json({ error: 'firstName and email are required' });
+
+        const data: any = {
+          firstName: String(firstName),
+          lastName: lastName ? String(lastName) : '',
+          email: String(email),
+          phone: phone || null,
+          position: position || null,
+        };
+
+        if (companyId) {
+          data.company = { connect: { id: String(companyId) } };
         }
-        try {
-          const contact = await prisma.contact.create({
-            data: {
-              firstName: String(firstName),
-              lastName: lastName ? String(lastName) : '',
-              email: String(email),
-              phone: phone || null,
-              company: { connect: { id: String(companyId) } },
-              ownerId: ownerId || undefined,
-            },
-          });
-          return res.status(201).json(contact);
-        } catch (err: any) {
-          console.error('create contact error', err?.message || err);
-          return res.status(500).json({ error: err?.message || 'Failed to create contact' });
-        }
+
+        const contact = await prisma.contact.create({ data });
+        return res.status(201).json(contact);
       }
-      case 'PATCH': {
-        const { id, ...updates } = req.body;
+
+      case 'PUT': {
+        const { id, ...updateData } = req.body || {};
         if (!id) return res.status(400).json({ error: 'Missing id' });
-        const contact = await prisma.contact.update({ where: { id }, data: updates });
-        return res.status(200).json(contact);
+
+        const data: any = { ...updateData };
+        // allow updating relation via companyId
+        if (updateData.companyId === null) {
+          data.companyId = null;
+        } else if (updateData.companyId) {
+          data.company = { connect: { id: String(updateData.companyId) } };
+          delete data.companyId;
+        }
+
+        const updated = await prisma.contact.update({ where: { id }, data });
+        return res.status(200).json(updated);
       }
+
       case 'DELETE': {
-        const id = String(req.query?.id || (req.body && (req.body.id || req.body)) || '');
+        const id = String(req.body?.id || req.query?.id || '');
         if (!id) return res.status(400).json({ error: 'Missing id' });
         await prisma.contact.delete({ where: { id } });
-        return res.status(204).end();
+        return res.status(200).json({ message: 'Deleted successfully' });
       }
+
       default:
-        res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
+        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
     }
   } catch (err: any) {
     console.error('pages/api/contacts error', err?.message || err);
-    return res.status(500).json({ error: err?.message || 'Server error' });
+    return res.status(500).json({ error: 'Server error', details: err?.message });
   }
 }
