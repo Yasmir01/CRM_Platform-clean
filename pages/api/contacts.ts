@@ -8,12 +8,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const limit = Math.max(parseInt((req.query.limit as string) || "10", 10), 1);
       const skip = (page - 1) * limit;
 
+      const sortBy = String(req.query.sortBy || "createdAt");
+      const order = String(req.query.order || "desc").toLowerCase() === "asc" ? "asc" : "desc";
+
+      // Map allowed sort fields to prisma orderBy
+      const scalarFields = new Set(["firstName", "lastName", "email", "createdAt", "companyId"]);
+
+      let orderBy: any = { createdAt: order };
+
+      if (sortBy === "name") {
+        orderBy = [{ firstName: order }, { lastName: order }];
+      } else if (sortBy === "company" || sortBy === "companyId") {
+        orderBy = { company: { name: order } };
+      } else if (scalarFields.has(sortBy)) {
+        orderBy = { [sortBy]: order };
+      } else {
+        // fallback
+        orderBy = { createdAt: order };
+      }
+
       const [contacts, total] = await Promise.all([
         prisma.contact.findMany({
           skip,
           take: limit,
           include: { company: true },
-          orderBy: { createdAt: "desc" },
+          orderBy,
         }),
         prisma.contact.count(),
       ]);
