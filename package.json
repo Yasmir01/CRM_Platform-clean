@@ -1,17 +1,8 @@
 {
-  "name": "crm-system",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "engines": {
-    "node": "22.x"
-  },
   "scripts": {
     "dev": "vite",
-    "build": "if [ -n \"$DATABASE_URL\" ]; then prisma db push --schema prisma/schema.prisma; else echo \"Skipping Prisma db push: DATABASE_URL not set\"; fi && prisma generate --schema prisma/schema.prisma && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "prisma:generate": "prisma generate --schema prisma/schema.prisma",
-    "prisma:push": "prisma db push --schema prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.mjs",
     "prisma:seed-demo": "node prisma/seed-demo.mjs",
     "prisma:migrate": "prisma migrate dev --name sync-relations"
@@ -30,6 +21,7 @@
     "@mui/x-charts": "8.3.1",
     "@mui/x-data-grid": "8.9.1",
     "@mui/x-date-pickers": "8.10.2",
+    "@paypal/paypal-server-sdk": "1.0.3",
     "@prisma/client": "6.15.0",
     "@stripe/react-stripe-js": "4.0.0",
     "@stripe/stripe-js": "7.9.0",
@@ -65,8 +57,7 @@
     "use-sync-external-store": "1.5.0",
     "uuid": "11.1.0",
     "xlsx": "0.18.5",
-    "zod": "3.25.76",
-    "@paypal/paypal-server-sdk": "1.0.3"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/react": "19.1.4",
@@ -78,5 +69,8 @@
     "vite": "6.3.5",
     "ts-node": "10.9.1",
     "@types/node": "20.5.1"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
