@@ -9,9 +9,12 @@ export default function ContactsPage() {
   const [loading, setLoading] = useState(false);
   const LIMIT = 10;
 
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [order, setOrder] = useState<'asc'|'desc'>('desc');
+
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/contacts?page=${page}&limit=${LIMIT}`)
+    fetch(`/api/contacts?page=${page}&limit=${LIMIT}&sortBy=${encodeURIComponent(sortBy)}&order=${order}`)
       .then((res) => res.json())
       .then((data) => {
         setContacts(data.contacts || []);
@@ -19,7 +22,7 @@ export default function ContactsPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, [page]);
+  }, [page, sortBy, order]);
 
   return (
     <div className="p-6">
