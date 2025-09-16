@@ -1,85 +1,65 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from '@/lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  try {
-    switch (req.method) {
-      case 'GET': {
-        const id = String(req.query?.id || '');
-        const companyId = String(req.query?.companyId || '');
+  if (req.method === "GET") {
+    try {
+      const page = Math.max(parseInt((req.query.page as string) || "1", 10), 1);
+      const limit = Math.max(parseInt((req.query.limit as string) || "10", 10), 1);
+      const skip = (page - 1) * limit;
 
-        if (id) {
-          const contact = await prisma.contact.findUnique({ where: { id }, include: { company: true } });
-          if (!contact) return res.status(404).json({ error: 'Not found' });
-          return res.status(200).json(contact);
-        }
+      const [contacts, total] = await Promise.all([
+        prisma.contact.findMany({
+          skip,
+          take: limit,
+          include: { company: true },
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.contact.count(),
+      ]);
 
-        // pagination support
-        const page = Math.max(parseInt(String(req.query?.page || '1'), 10) || 1, 1);
-        const limit = Math.max(parseInt(String(req.query?.limit || '10'), 10) || 10, 1);
-        const skip = (page - 1) * limit;
-
-        const where = companyId ? { companyId } : undefined;
-
-        const [contacts, total] = await Promise.all([
-          prisma.contact.findMany({ where, include: { company: true }, skip, take: limit, orderBy: { createdAt: 'desc' } }),
-          prisma.contact.count({ where }),
-        ]);
-
-        return res.status(200).json({ contacts, total, page, totalPages: Math.max(Math.ceil(total / limit), 1) });
-      }
-
-      case 'POST': {
-        const { firstName, lastName, email, phone, companyId, position } = req.body || {};
-        if (!firstName || !email) return res.status(400).json({ error: 'firstName and email are required' });
-
-        const data: any = {
-          firstName: String(firstName),
-          lastName: lastName ? String(lastName) : '',
-          email: String(email),
-          phone: phone || null,
-          position: position || null,
-        };
-
-        if (companyId) {
-          data.company = { connect: { id: String(companyId) } };
-        }
-
-        const contact = await prisma.contact.create({ data });
-        return res.status(201).json(contact);
-      }
-
-      case 'PUT': {
-        const { id, ...updateData } = req.body || {};
-        if (!id) return res.status(400).json({ error: 'Missing id' });
-
-        const data: any = { ...updateData };
-        // allow updating relation via companyId
-        if (updateData.companyId === null) {
-          data.companyId = null;
-        } else if (updateData.companyId) {
-          data.company = { connect: { id: String(updateData.companyId) } };
-          delete data.companyId;
-        }
-
-        const updated = await prisma.contact.update({ where: { id }, data });
-        return res.status(200).json(updated);
-      }
-
-      case 'DELETE': {
-        const id = String(req.body?.id || req.query?.id || '');
-        if (!id) return res.status(400).json({ error: 'Missing id' });
-        await prisma.contact.delete({ where: { id } });
-        return res.status(200).json({ message: 'Deleted successfully' });
-      }
-
-      default:
-        res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-        return res.status(405).end(`Method ${req.method} Not Allowed`);
+      return res.status(200).json({
+        contacts,
+        total,
+        page,
+        totalPages: Math.max(Math.ceil(total / limit), 1),
+      });
+    } catch (err) {
+      console.error('GET /api/contacts error', err);
+      return res.status(500).json({ error: "Failed to fetch contacts" });
     }
-  } catch (err: any) {
-    console.error('pages/api/contacts error', err?.message || err);
-    return res.status(500).json({ error: 'Server error', details: err?.message });
+  } else if (req.method === "POST") {
+    try {
+      const { name, firstName, lastName, email, companyId, phone } = req.body || {};
+
+      let fName = firstName;
+      let lName = lastName;
+
+      if (!fName && name) {
+        const parts = String(name).trim().split(/\s+/);
+        fName = parts.shift() || '';
+        lName = parts.join(' ') || '';
+      }
+
+      if (!fName || !email) return res.status(400).json({ error: 'firstName (or name) and email are required' });
+
+      const data: any = {
+        firstName: String(fName),
+        lastName: lName ? String(lName) : '',
+        email: String(email),
+        phone: phone || null,
+      };
+
+      if (companyId) data.company = { connect: { id: String(companyId) } };
+
+      const newContact = await prisma.contact.create({ data });
+      return res.status(201).json(newContact);
+    } catch (err) {
+      console.error('POST /api/contacts error', err);
+      return res.status(500).json({ error: "Failed to create contact" });
+    }
+  } else {
+    res.setHeader("Allow", ["GET", "POST"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
