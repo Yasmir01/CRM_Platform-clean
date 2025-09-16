@@ -34,9 +34,26 @@ export default function ContactsPage() {
         <table className="w-full border rounded shadow-sm">
           <thead>
             <tr className="bg-gray-100 text-left">
-              <th className="p-2">Name</th>
-              <th className="p-2">Email</th>
-              <th className="p-2">Company</th>
+              <th className="px-4 py-2 cursor-pointer" onClick={() => {
+                if (sortBy === 'name') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('name'); setOrder('asc'); }
+              }}>
+                Name {sortBy === 'name' && (order === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="px-4 py-2 cursor-pointer" onClick={() => {
+                if (sortBy === 'email') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('email'); setOrder('asc'); }
+              }}>
+                Email {sortBy === 'email' && (order === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="px-4 py-2 cursor-pointer" onClick={() => {
+                if (sortBy === 'companyId' || sortBy === 'company') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('company'); setOrder('asc'); }
+              }}>
+                Company { (sortBy === 'company' || sortBy === 'companyId') && (order === 'asc' ? '↑' : '↓')}
+              </th>
+              <th className="px-4 py-2 cursor-pointer" onClick={() => {
+                if (sortBy === 'createdAt') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('createdAt'); setOrder('asc'); }
+              }}>
+                Created {sortBy === 'createdAt' && (order === 'asc' ? '↑' : '↓')}
+              </th>
             </tr>
           </thead>
           <tbody>
