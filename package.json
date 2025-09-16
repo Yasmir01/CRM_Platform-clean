@@ -13,8 +13,9 @@
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:push": "prisma db push --schema prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.mjs",
-    "prisma:seed-demo": "node prisma/seed-demo.mjs"
-  },
+    "prisma:seed-demo": "node prisma/seed-demo.mjs",
+    "prisma:migrate": "prisma migrate dev --name sync-relations"
+    },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.879.0",
     "@aws-sdk/s3-request-presigner": "^3.879.0",
@@ -74,6 +75,11 @@
     "prisma": "^6.15.0",
     "terser": "^5.43.1",
     "typescript": "^5.2.2",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.5.1"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
