@@ -150,6 +150,27 @@ export default function ContactsPage() {
         </tbody>
       </table>
 
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+        >
+          Previous
+        </button>
+
+        <span>Page {page} of {totalPages}</span>
+
+        <button
+          className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+          disabled={page === totalPages}
+          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+        >
+          Next
+        </button>
+      </div>
+
       <form onSubmit={handleSubmit} className="mt-6 space-y-3">
         <h2 className="text-xl font-semibold">{editingId ? "Edit Contact" : "Add Contact"}</h2>
         <div className="grid grid-cols-2 gap-3">
