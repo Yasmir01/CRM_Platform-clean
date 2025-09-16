@@ -74,6 +74,11 @@
     "prisma": "^6.15.0",
     "terser": "^5.43.1",
     "typescript": "^5.2.2",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "ts-node": "^10.9.1",
+    "@types/node": "^20.5.1"
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
