@@ -1,153 +1,164 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+"use client";
+
+import React, { useEffect, useState } from "react";
 
 interface Contact {
   id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  company?: { id: string; name: string } | null;
-  notes?: string;
+  firstName?: string;
+  lastName?: string;
+  first?: string; // legacy support
+  name?: string;
+  email?: string | null;
+  phone?: string | null;
+  company?: { id?: string; name?: string } | null;
+  notes?: string | null;
 }
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // Form
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    fetch('/api/contacts')
+    fetch("/api/contacts")
       .then((r) => r.json())
       .then((data) => {
         if (!mounted) return;
         const list = (data || []).map((item: any) => ({
           id: item.id,
-          name: `${item.firstName || ''} ${item.lastName || ''}`.trim(),
-          email: item.email,
-          phone: item.phone || '',
+          firstName: item.firstName || item.first || undefined,
+          lastName: item.lastName || undefined,
+          name: item.name || `${item.firstName || item.first || ""} ${item.lastName || ""}`.trim(),
+          email: item.email || null,
+          phone: item.phone || null,
           company: item.company || null,
-          notes: item.notes && item.notes.length ? item.notes[0]?.content || '' : '',
+          notes: item.notes || null,
         }));
         setContacts(list);
       })
       .catch(() => setContacts([]))
       .finally(() => setLoading(false));
+
     return () => {
       mounted = false;
     };
   }, []);
 
-  const handleSave = async () => {
-    if (!selectedContact) return;
-    try {
-      // split name into first/last
-      const [firstName, ...rest] = (selectedContact.name || '').split(' ');
-      const lastName = rest.join(' ');
-      const res = await fetch(`/api/contacts/${selectedContact.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email: selectedContact.email, phone: selectedContact.phone }),
-      });
-      if (!res.ok) throw new Error('Failed to save');
-      const updated = await res.json();
-      setContacts((prev) => prev.map((c) => (c.id === updated.id ? { ...c, name: `${updated.firstName || firstName} ${updated.lastName || lastName}`, email: updated.email, phone: updated.phone } : c)));
-      setIsModalOpen(false);
-      setSelectedContact(null);
-    } catch (e) {
-      console.error('Failed saving contact', e);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const method = editingId ? "PUT" : "POST";
+    const body = editingId ? { id: editingId, ...form } : form;
+
+    const res = await fetch("/api/contacts", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to save contact", await res.text());
+      return;
     }
+
+    const saved = await res.json();
+
+    if (editingId) {
+      setContacts((prev) => prev.map((c) => (c.id === saved.id ? { ...c, firstName: saved.firstName, lastName: saved.lastName, name: `${saved.firstName || ""} ${saved.lastName || ""}`.trim(), email: saved.email, phone: saved.phone } : c)));
+    } else {
+      setContacts((prev) => [
+        { id: saved.id, firstName: saved.firstName, lastName: saved.lastName, name: `${saved.firstName || ""} ${saved.lastName || ""}`.trim(), email: saved.email, phone: saved.phone, company: saved.company || null },
+        ...prev,
+      ]);
+    }
+
+    setForm({ firstName: "", lastName: "", email: "", phone: "" });
+    setEditingId(null);
   };
 
-  if (loading) return <p className="p-6">Loading contacts...</p>;
+  const handleEdit = (c: Contact) => {
+    setEditingId(c.id);
+    setForm({ firstName: c.firstName || "", lastName: c.lastName || "", email: c.email || "", phone: c.phone || "" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this contact?")) return;
+    const res = await fetch("/api/contacts", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) {
+      console.error("Failed to delete", await res.text());
+      return;
+    }
+    setContacts((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const filtered = contacts.filter((c) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return `${c.name || ""} ${c.email || ""}`.toLowerCase().includes(q);
+  });
+
+  if (loading) return <p className="p-4">Loading...</p>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Contacts</h1>
-      <table className="min-w-full border rounded">
+
+      <div className="mb-4 flex gap-2">
+        <input
+          type="text"
+          placeholder="Search contacts..."
+          className="border rounded px-3 py-2 flex-1"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      <table className="w-full border-collapse border">
         <thead>
           <tr className="bg-gray-100 text-left">
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Phone</th>
-            <th className="p-2 border">Company</th>
-            <th className="p-2 border">Actions</th>
+            <th className="border p-2">Name</th>
+            <th className="border p-2">Email</th>
+            <th className="border p-2">Phone</th>
+            <th className="border p-2">Company</th>
+            <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {contacts.map((c) => (
+          {filtered.map((c) => (
             <tr key={c.id}>
-              <td className="p-2 border">{c.name}</td>
-              <td className="p-2 border">{c.email}</td>
-              <td className="p-2 border">{c.phone || '-'}</td>
-              <td className="p-2 border">{c.company?.name || '-'}</td>
-              <td className="p-2 border">
-                <button
-                  onClick={() => {
-                    setSelectedContact(c);
-                    setIsModalOpen(true);
-                  }}
-                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Edit
-                </button>
+              <td className="border p-2">{c.name}</td>
+              <td className="border p-2">{c.email}</td>
+              <td className="border p-2">{c.phone || "-"}</td>
+              <td className="border p-2">{c.company?.name || "-"}</td>
+              <td className="border p-2 space-x-2">
+                <button onClick={() => handleEdit(c)} className="bg-blue-500 text-white px-3 py-1 rounded">Edit</button>
+                <button onClick={() => handleDelete(c.id)} className="bg-red-500 text-white px-3 py-1 rounded">Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Modal (simple) */}
-      {isModalOpen && selectedContact && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-lg w-96">
-            <h2 className="text-xl font-semibold mb-4">Edit Contact</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSave();
-              }}
-              className="space-y-3"
-            >
-              <input
-                type="text"
-                value={selectedContact.name}
-                onChange={(e) => setSelectedContact({ ...selectedContact, name: e.target.value })}
-                placeholder="Name"
-                className="w-full border p-2 rounded"
-              />
-              <input
-                type="email"
-                value={selectedContact.email}
-                onChange={(e) => setSelectedContact({ ...selectedContact, email: e.target.value })}
-                placeholder="Email"
-                className="w-full border p-2 rounded"
-              />
-              <input
-                type="text"
-                value={selectedContact.phone || ''}
-                onChange={(e) => setSelectedContact({ ...selectedContact, phone: e.target.value })}
-                placeholder="Phone"
-                className="w-full border p-2 rounded"
-              />
-              <textarea
-                value={selectedContact.notes || ''}
-                onChange={(e) => setSelectedContact({ ...selectedContact, notes: e.target.value })}
-                placeholder="Notes"
-                className="w-full border p-2 rounded"
-              />
-              <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => { setIsModalOpen(false); setSelectedContact(null); }} className="px-3 py-1 bg-gray-200 rounded">
-                  Cancel
-                </button>
-                <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
-              </div>
-            </form>
-          </div>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+        <h2 className="text-xl font-semibold">{editingId ? "Edit Contact" : "Add Contact"}</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <input type="text" placeholder="First Name" className="border rounded px-3 py-2 w-full" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} required />
+          <input type="text" placeholder="Last Name" className="border rounded px-3 py-2 w-full" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} required />
         </div>
-      )}
+        <input type="email" placeholder="Email" className="border rounded px-3 py-2 w-full" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+        <input type="text" placeholder="Phone" className="border rounded px-3 py-2 w-full" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+        <div className="flex gap-2">
+          <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">{editingId ? "Update Contact" : "Add Contact"}</button>
+          {editingId && <button type="button" onClick={() => { setEditingId(null); setForm({ firstName: "", lastName: "", email: "", phone: "" }); }} className="bg-gray-200 px-4 py-2 rounded">Cancel</button>}
+        </div>
+      </form>
     </div>
   );
 }
