@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from '@/auth/useSession';
 
 type Company = {
   id: string;
@@ -11,6 +12,7 @@ type Company = {
 };
 
 export default function CompaniesPage() {
+  const sess = useSession();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -21,6 +23,10 @@ export default function CompaniesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
   const [formData, setFormData] = useState({ name: "", industry: "", website: "" });
+
+  const isLoadingSession = (sess as any).loading;
+  const user = (sess as any).user;
+  const isSuper = Boolean(user && ((user.roles && user.roles.includes('SUPER_ADMIN')) || user.role === 'SUPER_ADMIN'));
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -86,6 +92,8 @@ export default function CompaniesPage() {
 
   const totalPages = Math.ceil(total / pageSize) || 1;
 
+  if (isLoadingSession) return <p>Loading...</p>;
+
   return (
     <div className="companies-page p-6">
       <h1 className="companies-title text-2xl font-bold mb-4">Companies</h1>
@@ -115,16 +123,18 @@ export default function CompaniesPage() {
             <option value={25}>25 per page</option>
             <option value={50}>50 per page</option>
           </select>
-          <button
-            onClick={() => {
-              setEditing(null);
-              setFormData({ name: "", industry: "", website: "" });
-              setShowForm(true);
-            }}
-            className="companies-add-button bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            + Add Company
-          </button>
+          {isSuper && (
+            <button
+              onClick={() => {
+                setEditing(null);
+                setFormData({ name: "", industry: "", website: "" });
+                setShowForm(true);
+              }}
+              className="companies-add-button bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              + Add Company
+            </button>
+          )}
         </div>
       </div>
 
@@ -137,17 +147,17 @@ export default function CompaniesPage() {
               <th className="px-4 py-2 border text-left">Industry</th>
               <th className="px-4 py-2 border text-left">Website</th>
               <th className="px-4 py-2 border text-left">Created</th>
-              <th className="px-4 py-2 border text-left">Actions</th>
+              {isSuper && <th className="px-4 py-2 border text-left">Actions</th>}
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="text-center py-4">Loading...</td>
+                <td colSpan={isSuper ? 5 : 4} className="text-center py-4">Loading...</td>
               </tr>
             ) : companies.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-4">No companies found</td>
+                <td colSpan={isSuper ? 5 : 4} className="text-center py-4">No companies found</td>
               </tr>
             ) : (
               companies.map((company) => (
@@ -164,19 +174,21 @@ export default function CompaniesPage() {
                     )}
                   </td>
                   <td className="px-4 py-2 border">{new Date(company.createdAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-2 border flex gap-2">
-                    <button
-                      onClick={() => {
-                        setEditing(company);
-                        setFormData({ name: company.name, industry: company.industry ?? "", website: company.website ?? "" });
-                        setShowForm(true);
-                      }}
-                      className="companies-edit-button bg-yellow-500 text-white px-3 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(company.id)} className="companies-delete-button bg-red-600 text-white px-3 py-1 rounded">Delete</button>
-                  </td>
+                  {isSuper && (
+                    <td className="px-4 py-2 border flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditing(company);
+                          setFormData({ name: company.name, industry: company.industry ?? "", website: company.website ?? "" });
+                          setShowForm(true);
+                        }}
+                        className="companies-edit-button bg-yellow-500 text-white px-3 py-1 rounded"
+                      >
+                        Edit
+                      </button>
+                      <button onClick={() => handleDelete(company.id)} className="companies-delete-button bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
