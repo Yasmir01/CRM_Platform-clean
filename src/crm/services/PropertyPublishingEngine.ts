@@ -13,6 +13,7 @@ import {
   PlatformConfiguration,
   RealEstatePlatformService as ServiceInterface
 } from '../types/RealEstatePlatformTypes';
+import { displayContactName } from '@/crm/utils/contactDisplay';
 import { Property } from '../contexts/CrmDataContext';
 
 // Platform-specific adapter interfaces
