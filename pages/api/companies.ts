@@ -22,6 +22,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 OR: [
                   { name: { contains: search as string, mode: "insensitive" } },
                   { industry: { contains: search as string, mode: "insensitive" } },
+                  { email: { contains: search as string, mode: "insensitive" } },
+                  { phone: { contains: search as string, mode: "insensitive" } },
+                  { address: { contains: search as string, mode: "insensitive" } },
                 ],
               }
             : {};
@@ -35,14 +38,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "POST": {
-          const { name, industry, website } = req.body;
+          const { name, industry, website, email, phone, address } = req.body;
 
           if (!name) {
             return res.status(400).json({ error: "Company name is required" });
           }
 
           const company = await prisma.company.create({
-            data: { name, industry, website },
+            data: { name, industry, website, email, phone, address },
           });
 
           return res.status(201).json(company);
