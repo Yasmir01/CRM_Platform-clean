@@ -21,6 +21,7 @@ model User {
   organization  Organization? @relation(fields: [orgId], references: [id])
   accounts      Account[]
   impersonationLogs ImprLog[]
+  histories     History[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
@@ -62,6 +63,9 @@ model Organization {
   properties     Property[]
   contacts       Contact[]
   companies      Company[]
+  imprLogs       ImprLog[]
+  histories      History[]
+  deals          Deal[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 }
@@ -106,6 +110,7 @@ model Contact {
   phone       String?
   companyId   String?
   company     Company?      @relation(fields: [companyId], references: [id])
+  deals       Deal[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
@@ -120,6 +125,7 @@ model Company {
   phone       String?
   address     String?
   contacts    Contact[]
+  deals       Deal[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 }
