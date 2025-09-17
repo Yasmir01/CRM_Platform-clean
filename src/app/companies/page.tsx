@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 type Company = {
   id: string;
   name: string;
-  email?: string;
-  phone?: string;
+  industry?: string;
+  website?: string;
   createdAt: string;
 };
 
@@ -20,7 +20,7 @@ export default function CompaniesPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [formData, setFormData] = useState({ name: "", industry: "", website: "" });
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -64,7 +64,7 @@ export default function CompaniesPage() {
       }
       setShowForm(false);
       setEditing(null);
-      setFormData({ name: "", email: "", phone: "" });
+      setFormData({ name: "", industry: "", website: "" });
       fetchCompanies();
     } catch (err) {
       console.error("Failed to save company", err);
@@ -84,14 +84,14 @@ export default function CompaniesPage() {
     }
   };
 
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = Math.ceil(total / pageSize) || 1;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Companies</h1>
+    <div className="companies-page p-6">
+      <h1 className="companies-title text-2xl font-bold mb-4">Companies</h1>
 
       {/* Actions */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="companies-actions flex items-center justify-between mb-4">
         <input
           type="text"
           placeholder="Search companies..."
@@ -100,16 +100,16 @@ export default function CompaniesPage() {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="border rounded p-2 w-1/2"
+          className="companies-search-input border rounded p-2 w-1/2"
         />
-        <div className="flex items-center gap-2">
+        <div className="companies-controls flex items-center gap-2">
           <select
             value={pageSize}
             onChange={(e) => {
               setPage(1);
               setPageSize(Number(e.target.value));
             }}
-            className="border rounded p-2"
+            className="companies-page-size-select border rounded p-2"
           >
             <option value={10}>10 per page</option>
             <option value={25}>25 per page</option>
@@ -118,10 +118,10 @@ export default function CompaniesPage() {
           <button
             onClick={() => {
               setEditing(null);
-              setFormData({ name: "", email: "", phone: "" });
+              setFormData({ name: "", industry: "", website: "" });
               setShowForm(true);
             }}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="companies-add-button bg-blue-600 text-white px-4 py-2 rounded"
           >
             + Add Company
           </button>
@@ -129,15 +129,15 @@ export default function CompaniesPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border">
+      <div className="companies-table-wrap overflow-x-auto">
+        <table className="companies-table min-w-full border">
           <thead>
             <tr className="bg-gray-100">
-              <th className="px-4 py-2 border">Name</th>
-              <th className="px-4 py-2 border">Email</th>
-              <th className="px-4 py-2 border">Phone</th>
-              <th className="px-4 py-2 border">Created</th>
-              <th className="px-4 py-2 border">Actions</th>
+              <th className="px-4 py-2 border text-left">Name</th>
+              <th className="px-4 py-2 border text-left">Industry</th>
+              <th className="px-4 py-2 border text-left">Website</th>
+              <th className="px-4 py-2 border text-left">Created</th>
+              <th className="px-4 py-2 border text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -151,23 +151,31 @@ export default function CompaniesPage() {
               </tr>
             ) : (
               companies.map((company) => (
-                <tr key={company.id}>
+                <tr key={company.id} className="companies-row">
                   <td className="px-4 py-2 border">{company.name}</td>
-                  <td className="px-4 py-2 border">{company.email || "-"}</td>
-                  <td className="px-4 py-2 border">{company.phone || "-"}</td>
+                  <td className="px-4 py-2 border">{company.industry || "-"}</td>
+                  <td className="px-4 py-2 border">
+                    {company.website ? (
+                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        {company.website}
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td className="px-4 py-2 border">{new Date(company.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-2 border flex gap-2">
                     <button
                       onClick={() => {
                         setEditing(company);
-                        setFormData({ name: company.name, email: company.email ?? "", phone: company.phone ?? "" });
+                        setFormData({ name: company.name, industry: company.industry ?? "", website: company.website ?? "" });
                         setShowForm(true);
                       }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded"
+                      className="companies-edit-button bg-yellow-500 text-white px-3 py-1 rounded"
                     >
                       Edit
                     </button>
-                    <button onClick={() => handleDelete(company.id)} className="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+                    <button onClick={() => handleDelete(company.id)} className="companies-delete-button bg-red-600 text-white px-3 py-1 rounded">Delete</button>
                   </td>
                 </tr>
               ))
@@ -177,19 +185,19 @@ export default function CompaniesPage() {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-4">
+      <div className="companies-pagination flex justify-between items-center mt-4">
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="companies-prev-button px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
           Prev
         </button>
-        <span>Page {page} of {totalPages || 1}</span>
+        <span className="companies-page-info">Page {page} of {totalPages}</span>
         <button
           onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
           disabled={page === totalPages || totalPages === 0}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          className="companies-next-button px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
           Next
         </button>
@@ -197,15 +205,33 @@ export default function CompaniesPage() {
 
       {/* Modal Form */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-lg w-96">
+        <div className="companies-modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="companies-modal-panel bg-white p-6 rounded shadow-lg w-96">
             <h2 className="text-xl font-bold mb-4">{editing ? "Edit Company" : "Add Company"}</h2>
-            <input type="text" placeholder="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="border rounded p-2 mb-2 w-full" />
-            <input type="email" placeholder="Email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="border rounded p-2 mb-2 w-full" />
-            <input type="text" placeholder="Phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="border rounded p-2 mb-4 w-full" />
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="companies-input border rounded p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Industry"
+              value={formData.industry}
+              onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+              className="companies-input border rounded p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Website"
+              value={formData.website}
+              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              className="companies-input border rounded p-2 mb-4 w-full"
+            />
             <div className="flex justify-end gap-2">
-              <button onClick={() => { setShowForm(false); setEditing(null); }} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
-              <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+              <button onClick={() => { setShowForm(false); setEditing(null); }} className="companies-cancel-button px-4 py-2 bg-gray-300 rounded">Cancel</button>
+              <button onClick={handleSubmit} className="companies-save-button px-4 py-2 bg-blue-600 text-white rounded">Save</button>
             </div>
           </div>
         </div>
