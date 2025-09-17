@@ -26,6 +26,7 @@ import {
   Alert,
   LinearProgress,
 } from "@mui/material";
+import { displayContactName } from '@/crm/utils/contactDisplay';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import VisibilityIcon from '@mui/icons-material/Visibility';
