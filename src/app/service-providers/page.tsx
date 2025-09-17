@@ -54,6 +54,16 @@ export default function ServiceProvidersPage() {
   const validateEmail = (v?: string) => { if (!v) return true; return /^\S+@\S+\.\S+$/.test(v); };
   const validatePhone = (v?: string) => { if (!v) return true; return /^[0-9+()\-\s]+$/.test(v); };
 
+  // notifications hook (dynamic require to avoid import-time side effects)
+  const toasts = ((): any => {
+    try {
+      // eslint-disable-next-line global-require
+      return require('../../crm/components/GlobalNotificationProvider').useNotifications();
+    } catch (e) {
+      return null;
+    }
+  })();
+
   const handleSave = async () => {
     setFormError(null);
     if (!formData.name || !String(formData.name).trim()) { setFormError('Name is required'); return; }
@@ -73,7 +83,7 @@ export default function ServiceProvidersPage() {
       setEditing(null);
       setFormData({ name: "", email: "", phone: "", service: "", notes: "" });
       fetchProviders();
-      try { window.alert('Saved'); } catch(e){}
+      try { if (toasts) toasts.showSuccess('Saved', 'Service provider saved'); else window.alert('Saved'); } catch(e){}
     } catch (err: any) {
       console.error('Save failed', err);
       setFormError(err?.message || 'Save failed');
