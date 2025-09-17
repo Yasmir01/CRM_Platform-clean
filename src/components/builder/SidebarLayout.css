@@ -1,0 +1,53 @@
+:root{
+  --sb-sidebar-width: 256px;
+  --sb-sidebar-bg: #111827;
+  --sb-sidebar-text: #ffffff;
+  --sb-main-bg: #f9fafb;
+  --sb-topbar-bg: #ffffff;
+  --sb-border: #e5e7eb;
+}
+
+.sb-layout{
+  display:flex;
+  min-height:100vh;
+  width:100%;
+}
+
+.sb-sidebar{
+  width:var(--sb-sidebar-width);
+  background:var(--sb-sidebar-bg);
+  color:var(--sb-sidebar-text);
+  padding:16px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.sb-sidebar-header{ display:flex; align-items:center; gap:12px; }
+.sb-logo{ width:28px; height:28px; background:var(--sb-sidebar-text); border-radius:6px; }
+.sb-title{ margin:0; font-size:18px; font-weight:700; }
+
+.sb-nav-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.sb-nav-link{ color:#d1d5db; text-decoration:none; display:block; padding:8px 12px; border-radius:6px; }
+.sb-nav-link:hover{ background: rgba(255,255,255,0.04); }
+
+.sb-main-column{ flex:1 1 auto; display:flex; flex-direction:column; background:var(--sb-main-bg); }
+
+.sb-topbar{ display:flex; align-items:center; justify-content:space-between; background:var(--sb-topbar-bg); border-bottom:1px solid var(--sb-border); padding:12px 20px; box-shadow:0 1px 0 rgba(0,0,0,0.03); }
+.sb-welcome{ margin:0; font-size:16px; font-weight:600; }
+
+.sb-topbar-right{ display:flex; align-items:center; gap:12px; }
+.sb-profile{ display:flex; align-items:center; gap:8px; cursor:pointer; }
+.sb-avatar{ width:32px; height:32px; background:#d1d5db; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#111827; font-weight:600; }
+.sb-username{ font-weight:500; }
+
+.sb-logout{ background:#ef4444; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+.sb-logout:hover{ background:#dc2626; }
+
+.sb-main{ flex:1 1 auto; padding:20px; overflow:auto; }
+
+@media (max-width:767px){
+  .sb-sidebar{ width:100%; display:flex; flex-direction:row; align-items:center; padding:8px; }
+  .sb-nav-list{ flex-direction:row; gap:6px; overflow:auto; }
+}
