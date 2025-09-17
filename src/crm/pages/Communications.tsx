@@ -769,7 +769,7 @@ export default function Communications() {
   };
 
   const filteredCommunications = communications.filter(comm =>
-    comm.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    displayContactName(comm.contact).toLowerCase().includes(searchTerm.toLowerCase()) ||
     comm.contact.number.includes(searchTerm) ||
     (comm.message && comm.message.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -940,7 +940,7 @@ export default function Communications() {
                   const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
                   const email = (user.email || '').toLowerCase();
                   return (
-                    comm.contact.name.toLowerCase() === fullName ||
+                    displayContactName(comm.contact).toLowerCase() === fullName ||
                     (comm.contact.email || '').toLowerCase() === email
                   );
                 })
@@ -967,7 +967,7 @@ export default function Communications() {
                 const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
                 const email = (user.email || '').toLowerCase();
                 return (
-                  comm.contact.name.toLowerCase() === fullName ||
+                  displayContactName(comm.contact).toLowerCase() === fullName ||
                   (comm.contact.email || '').toLowerCase() === email
                 );
               }).length === 0 && (
@@ -1383,7 +1383,7 @@ export default function Communications() {
                               id: comm.id,
                               firstName: comm.contact.name.split(' ')[0],
                               lastName: comm.contact.name.split(' ')[1] || '',
-                              email: comm.contact.email || `${comm.contact.name.toLowerCase().replace(' ', '.')}@email.com`,
+                              email: comm.contact.email || `${displayContactName(comm.contact).toLowerCase().replace(' ', '.')}@email.com`,
                               phone: comm.contact.number,
                             });
                             setOpenCommunicationDialog(true);
