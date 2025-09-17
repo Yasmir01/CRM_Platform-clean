@@ -22,6 +22,7 @@ const Properties = React.lazy(() => import("./crm/pages/Properties"));
 const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
 const PropertyManagers = React.lazy(() => import("./crm/pages/PropertyManagers"));
 const ContactManagement = React.lazy(() => import("./crm/pages/ContactManagement"));
+const Companies = React.lazy(() => import("./crm/pages/Companies"));
 const SalesAutomation = React.lazy(() => import("./crm/pages/SalesAutomation"));
 const Templates = React.lazy(() => import("./crm/pages/Templates"));
 const Settings = React.lazy(() => import("./crm/pages/Settings"));
