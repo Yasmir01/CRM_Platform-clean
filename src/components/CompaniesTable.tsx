@@ -2,6 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { fetchCompanies, updateCompany, deleteCompany } from "../services/companies";
 import "./companies.css";
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+
+const Alert = React.forwardRef(function Alert(props: any, ref: any) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 type Company = {
   id: string;
