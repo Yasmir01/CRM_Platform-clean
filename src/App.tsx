@@ -253,6 +253,11 @@ function AppRoutes() {
             <ContactManagement />
           </React.Suspense>
         } />
+        <Route path="companies" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Companies />
+          </React.Suspense>
+        } />
         <Route path="sales" element={
           <React.Suspense fallback={<PageLoader />}>
             <SalesAutomation />
@@ -578,6 +583,7 @@ function AppRoutes() {
       } />
       {/* Redirect common paths to CRM equivalents */}
       <Route path="/profile" element={<Navigate to="/crm/profile" replace />} />
+      <Route path="/companies" element={<Navigate to="/crm/companies" replace />} />
       <Route path="/settings" element={<Navigate to="/crm/settings" replace />} />
       <Route path="/properties" element={<Navigate to="/crm/properties" replace />} />
       <Route path="/tenants" element={<Navigate to="/crm/tenants" replace />} />
