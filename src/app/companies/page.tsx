@@ -6,8 +6,11 @@ import { useSession } from '@/auth/useSession';
 type Company = {
   id: string;
   name: string;
+  email?: string;
+  phone?: string;
   industry?: string;
   website?: string;
+  address?: string;
   createdAt: string;
 };
 
@@ -22,7 +25,7 @@ export default function CompaniesPage() {
 
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Company | null>(null);
-  const [formData, setFormData] = useState({ name: "", industry: "", website: "" });
+  const [formData, setFormData] = useState({ name: "", industry: "", website: "", email: "", phone: "", address: "" });
 
   const isLoadingSession = (sess as any).loading;
   const user = (sess as any).user;
