@@ -91,6 +91,9 @@ async function main() {
       orgId: org.id,
       name: "Acme Supplies",
       industry: "Maintenance",
+      website: "https://acmesupplies.example",
+      phone: "555-0001",
+      address: "456 Industrial Way, Springfield",
     },
   });
 
