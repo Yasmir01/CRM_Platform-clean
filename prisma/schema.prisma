@@ -42,8 +42,11 @@ model Contact {
 model Company {
   id        String   @id @default(cuid())
   name      String
+  email     String?
+  phone     String?
   industry  String?
   website   String?
+  address   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
