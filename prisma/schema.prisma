@@ -115,6 +115,9 @@ model Company {
   organization Organization @relation(fields: [orgId], references: [id])
   name        String
   industry    String?
+  website     String?
+  phone       String?
+  address     String?
   contacts    Contact[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
