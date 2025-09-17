@@ -109,8 +109,11 @@ export default function CompaniesPage() {
       setEditing(null);
       setFormData({ name: "", industry: "", website: "", email: "", phone: "", address: "" });
       fetchCompanies();
-      // Simple success feedback
-      try { window.alert('Company saved'); } catch (e) {}
+      // Success feedback via notifications if available
+      try {
+        if (toasts) toasts.showSuccess('Saved', 'Company saved');
+        else { try { window.alert('Company saved'); } catch (e) {} }
+      } catch (e) { /* ignore */ }
     } catch (err: any) {
       console.error("Failed to save company", err);
       setFormError(err?.message || 'Failed to save company');
