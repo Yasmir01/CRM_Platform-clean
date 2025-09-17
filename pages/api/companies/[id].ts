@@ -24,7 +24,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "PUT": {
-          const { name, industry, website, email, phone, address } = req.body;
+          let { name, industry, website, email, phone, address } = req.body || {};
+
+          if (name && typeof name === 'string') name = name.trim();
+          if (industry && typeof industry === 'string') industry = industry.trim();
+          if (email && typeof email === 'string') email = email.trim();
+          if (phone && typeof phone === 'string') phone = phone.trim();
+          if (address && typeof address === 'string') address = address.trim();
+          if (website && typeof website === 'string') website = website.trim();
+
+          if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+            return res.status(400).json({ error: 'Invalid email address' });
+          }
+
+          if (phone && !/^[0-9+()\-\s]+$/.test(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number' });
+          }
+
+          if (website) {
+            try {
+              const url = new URL(website.startsWith('http') ? website : `https://${website}`);
+              website = url.toString();
+            } catch (e) {
+              return res.status(400).json({ error: 'Invalid website URL' });
+            }
+          }
+
           const updated = await prisma.company.update({
             where: { id: id as string },
             data: { name, industry, website, email, phone, address },
