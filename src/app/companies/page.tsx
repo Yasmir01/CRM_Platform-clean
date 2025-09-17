@@ -119,8 +119,49 @@ export default function CompaniesPage() {
     }
   };
 
+  // Notifications (toasts)
+  const toasts = ((): any => {
+    try {
+      // import hook dynamically to avoid import-time issues
+      // eslint-disable-next-line global-require
+      return require('../../crm/components/GlobalNotificationProvider').useNotifications();
+    } catch (e) {
+      return null;
+    }
+  })();
+
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this company?")) return;
+    if (!toasts) {
+      if (!confirm("Are you sure you want to delete this company?")) return;
+    } else {
+      // show a warning with confirm action
+      toasts.showWarning(
+        'Confirm delete',
+        'Are you sure you want to delete this company? This action cannot be undone.',
+        [
+          {
+            id: 'confirm-delete',
+            label: 'Delete',
+            action: async () => {
+              try {
+                const res = await fetch(`/api/companies/${id}`, { method: 'DELETE' });
+                if (!res.ok && res.status !== 204) throw new Error('Failed to delete');
+                toasts.showSuccess('Deleted', 'Company deleted');
+                if (companies.length === 1 && page > 1) setPage((p) => p - 1);
+                else fetchCompanies();
+              } catch (err) {
+                console.error('Failed to delete company', err);
+                toasts.showError('Delete failed', String(err?.message || err));
+              }
+            },
+            variant: 'contained',
+          },
+          { id: 'cancel', label: 'Cancel', action: () => {}, variant: 'text' },
+        ]
+      );
+      return;
+    }
+
     try {
       const res = await fetch(`/api/companies/${id}`, { method: "DELETE" });
       if (!res.ok && res.status !== 204) throw new Error("Failed to delete");
