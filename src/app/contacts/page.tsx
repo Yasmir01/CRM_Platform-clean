@@ -29,6 +29,23 @@ export default function ContactsPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Contacts</h1>
 
+      <div className="mb-4 flex items-center justify-between">
+        {/* Page Size Selector */}
+        <div className="flex items-center space-x-2">
+          <label htmlFor="pageSize" className="text-sm text-gray-700">Rows per page:</label>
+          <select
+            id="pageSize"
+            value={pageSize}
+            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            className="border rounded-md px-2 py-1 text-sm"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+      </div>
+
       {loading ? (
         <p>Loading contacts...</p>
       ) : (
