@@ -38,10 +38,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "POST": {
-          const { name, industry, website, email, phone, address } = req.body;
+          let { name, industry, website, email, phone, address } = req.body || {};
 
-          if (!name) {
+          if (!name || typeof name !== 'string' || !name.trim()) {
             return res.status(400).json({ error: "Company name is required" });
+          }
+
+          name = name.trim();
+          industry = typeof industry === 'string' ? industry.trim() : undefined;
+          email = typeof email === 'string' ? email.trim() : undefined;
+          phone = typeof phone === 'string' ? phone.trim() : undefined;
+          address = typeof address === 'string' ? address.trim() : undefined;
+          website = typeof website === 'string' ? website.trim() : undefined;
+
+          // Basic email validation
+          if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+            return res.status(400).json({ error: 'Invalid email address' });
+          }
+
+          // Basic phone validation (digits, spaces, +, -, parentheses)
+          if (phone && !/^[0-9+()\-\s]+$/.test(phone)) {
+            return res.status(400).json({ error: 'Invalid phone number' });
+          }
+
+          // Normalize website if present
+          if (website) {
+            try {
+              const url = new URL(website.startsWith('http') ? website : `https://${website}`);
+              website = url.toString();
+            } catch (e) {
+              return res.status(400).json({ error: 'Invalid website URL' });
+            }
           }
 
           const company = await prisma.company.create({
