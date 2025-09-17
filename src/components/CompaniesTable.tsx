@@ -1,6 +1,7 @@
 // src/components/CompaniesTable.tsx
 import React, { useEffect, useState } from "react";
-import { fetchCompanies } from "../services/companies";
+import { fetchCompanies, updateCompany, deleteCompany } from "../services/companies";
+import "./companies.css";
 
 type Company = {
   id: string;
@@ -20,13 +21,16 @@ export default function CompaniesTable() {
   const [loading, setLoading] = useState(false);
   const [sort, setSort] = useState("createdAt:desc");
   const [search, setSearch] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingValues, setEditingValues] = useState<{ name?: string; industry?: string }>({});
 
   async function load() {
     try {
       setLoading(true);
       const result = await fetchCompanies({ page, pageSize, sort, search });
-      setData(result.data);
-      setTotal(result.total);
+      const items = result.items ?? result.data ?? result;
+      setData(items);
+      setTotal(result.total ?? result.total ?? 0);
     } catch (err) {
       console.error(err);
       alert("Failed to load companies");
@@ -40,68 +44,133 @@ export default function CompaniesTable() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, sort]);
 
-  const pageCount = Math.ceil(total / pageSize);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+
+  const startEdit = (c: Company) => {
+    setEditingId(c.id);
+    setEditingValues({ name: c.name, industry: c.industry ?? "" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingValues({});
+  };
+
+  const saveEdit = async () => {
+    if (!editingId) return;
+    try {
+      await updateCompany(editingId, editingValues);
+      await load();
+      cancelEdit();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update company");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this company?")) return;
+    try {
+      await deleteCompany(id);
+      // If last item on page deleted, move page back if needed
+      const remaining = data.length - 1;
+      if (remaining === 0 && page > 1) setPage((p) => p - 1);
+      else await load();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete company");
+    }
+  };
 
   return (
-    <div style={{ padding: 12 }}>
-      <h2>Companies</h2>
+    <div className="companies-container">
+      <h2 className="companies-title">Companies</h2>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12, alignItems: "center" }}>
+      <div className="companies-toolbar">
         <input
+          className="companies-search"
           placeholder="Search company..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { setPage(1); load(); } }}
         />
-        <button onClick={() => { setPage(1); load(); }}>Search</button>
+        <button className="companies-btn" onClick={() => { setPage(1); load(); }}>Search</button>
 
-        <label style={{ marginLeft: "auto" }}>
-          Page size:
-          <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-          </select>
-        </label>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+          <label className="companies-page-size">
+            Page size:
+            <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </label>
+        </div>
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table className="companies-table">
         <thead>
           <tr>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
-              <button onClick={() => setSort(sort === "name:asc" ? "name:desc" : "name:asc")}>Name</button>
+            <th className="companies-th">
+              <button className="companies-link" onClick={() => setSort(sort === "name:asc" ? "name:desc" : "name:asc")}>Name</button>
             </th>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>
-              <button onClick={() => setSort(sort === "industry:asc" ? "industry:desc" : "industry:asc")}>Industry</button>
+            <th className="companies-th">
+              <button className="companies-link" onClick={() => setSort(sort === "industry:asc" ? "industry:desc" : "industry:asc")}>Industry</button>
             </th>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>Organization</th>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>Contacts</th>
-            <th style={{ textAlign: "left", borderBottom: "1px solid #ccc" }}>Created</th>
+            <th className="companies-th">Organization</th>
+            <th className="companies-th">Contacts</th>
+            <th className="companies-th">Created</th>
+            <th className="companies-th">Actions</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
-            <tr><td colSpan={5}>Loading...</td></tr>
+            <tr><td colSpan={6}>Loading...</td></tr>
           ) : data.length === 0 ? (
-            <tr><td colSpan={5}>No companies</td></tr>
+            <tr><td colSpan={6}>No companies</td></tr>
           ) : data.map((c) => (
-            <tr key={c.id}>
-              <td style={{ padding: "8px 4px" }}>{c.name}</td>
-              <td>{c.industry ?? "-"}</td>
-              <td>{c.organization?.name ?? "-"}</td>
-              <td>{(c.contacts || []).map((t) => t.name ?? t.email ?? "—").join(", ")}</td>
-              <td>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}</td>
+            <tr key={c.id} className={editingId === c.id ? "row-editing" : ""}>
+              <td className="companies-td">
+                {editingId === c.id ? (
+                  <input value={editingValues.name ?? ""} onChange={(e) => setEditingValues((v) => ({ ...v, name: e.target.value }))} />
+                ) : (
+                  c.name
+                )}
+              </td>
+              <td className="companies-td">
+                {editingId === c.id ? (
+                  <input value={editingValues.industry ?? ""} onChange={(e) => setEditingValues((v) => ({ ...v, industry: e.target.value }))} />
+                ) : (
+                  c.industry ?? "-"
+                )}
+              </td>
+              <td className="companies-td">{c.organization?.name ?? "-"}</td>
+              <td className="companies-td">{(c.contacts || []).map((t) => t.name ?? t.email ?? "—").join(", ")}</td>
+              <td className="companies-td">{c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}</td>
+              <td className="companies-td">
+                {editingId === c.id ? (
+                  <>
+                    <button className="action-btn save" onClick={saveEdit}>Save</button>
+                    <button className="action-btn cancel" onClick={cancelEdit}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="action-btn edit" onClick={() => startEdit(c)}>Edit</button>
+                    <button className="action-btn delete" onClick={() => handleDelete(c.id)}>Delete</button>
+                  </>
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-        <button onClick={() => setPage(1)} disabled={page === 1}>First</button>
-        <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
+      <div className="companies-pagination">
+        <button className="companies-btn" onClick={() => setPage(1)} disabled={page === 1}>First</button>
+        <button className="companies-btn" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
         <span>Page {page} / {pageCount || 1}</span>
-        <button onClick={() => setPage((p) => Math.min(pageCount || 1, p + 1))} disabled={page >= pageCount}>Next</button>
-        <button onClick={() => setPage(pageCount || 1)} disabled={page >= pageCount}>Last</button>
+        <button className="companies-btn" onClick={() => setPage((p) => Math.min(pageCount || 1, p + 1))} disabled={page >= pageCount}>Next</button>
+        <button className="companies-btn" onClick={() => setPage(pageCount || 1)} disabled={page >= pageCount}>Last</button>
 
         <div style={{ marginLeft: "auto" }}>
           <small>{total} companies</small>
