@@ -885,7 +885,7 @@ export default function PowerDialer() {
                       }}
                     >
                       <TableCell>
-                        <Typography variant="subtitle2">{contact.name}</Typography>
+                        <Typography variant="subtitle2">{displayContactName(contact)}</Typography>
                         {contact.property && (
                           <Typography variant="body2" color="text.secondary">
                             {contact.property}
