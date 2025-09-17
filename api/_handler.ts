@@ -52,7 +52,12 @@ export function defineHandler<T extends ZodSchema<any>>(opts: {
     }
 
     try {
-      await opts.fn({ req, res, user, body });
+      // Run handler with session available in async local storage so prisma middleware
+      // can access the current user's session.
+      const { runWithSession } = await import('../src/lib/sessionContext');
+      await runWithSession(user || null, async () => {
+        await opts.fn({ req, res, user, body });
+      });
     } catch (e: any) {
       console.error('api_error', { route: req.url, err: e?.message || e });
       return res.status(500).json({ error: 'internal_error' });
