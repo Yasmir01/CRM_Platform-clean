@@ -1,62 +1,60 @@
+// pages/api/companies.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '@/lib/prisma';
+import { PrismaClient } from "@prisma/client";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-    try {
-      const { page = "1", limit = "10", sortField = "createdAt", sortOrder = "asc" } = req.query as Record<string, string>;
+const prisma = new PrismaClient();
 
-      const pageNumber = parseInt(page, 10) || 1;
-      const pageSize = parseInt(limit, 10) || 10;
+type CompanyResponse = {
+  data: any[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
 
-      // validate sortField - allowlist to prevent unsafe dynamic fields
-      const allowed = new Set(["name", "industry", "website", "createdAt"]);
-      const field = allowed.has(sortField) ? sortField : "createdAt";
-      const order = sortOrder === "asc" ? "asc" : "desc";
+export default async function handler(req: NextApiRequest, res: NextApiResponse<CompanyResponse | { error: string }>) {
+  try {
+    const q = req.query;
 
-      const companies = await prisma.company.findMany({
-        skip: (pageNumber - 1) * pageSize,
-        take: pageSize,
-        orderBy: { [field]: order },
-        include: { contacts: { take: 3, orderBy: { firstName: 'asc' } }, _count: { select: { contacts: true } } },
-      });
+    // pagination params
+    const page = Math.max(1, Number(q.page ?? 1));
+    const pageSize = Math.min(100, Math.max(1, Number(q.pageSize ?? 10)));
 
-      const total = await prisma.company.count();
-      const hasMore = pageNumber * pageSize < total;
+    // sorting: example "name:asc" or "createdAt:desc"
+    const sortParam = typeof q.sort === "string" ? q.sort : "createdAt:desc";
+    const [sortField, sortDir] = sortParam.split(":");
+    const orderBy: any = {};
+    orderBy[sortField || "createdAt"] = sortDir === "asc" ? "asc" : "desc";
 
-      // Map response to include contactCount and a small preview of contacts
-      const data = companies.map((c) => ({
-        id: c.id,
-        name: c.name,
-        industry: c.industry || null,
-        website: c.website || null,
-        createdAt: c.createdAt,
-        contactCount: (c as any)._count?.contacts || 0,
-        contactsPreview: (c as any).contacts?.map((ct: any) => ({ id: ct.id, name: `${ct.firstName || ''} ${ct.lastName || ''}`.trim(), email: ct.email })) || [],
-      }));
+    // optional search/filter
+    const search = typeof q.search === "string" && q.search.trim().length > 0 ? q.search.trim() : null;
 
-      res.status(200).json({ data, hasMore, total, page: pageNumber, totalPages: Math.max(Math.ceil(total / pageSize), 1) });
-    } catch (err) {
-      console.error("Error fetching companies:", err);
-      res.status(500).json({ error: "Failed to fetch companies" });
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { industry: { contains: search, mode: "insensitive" } },
+      ];
     }
-  } else if (req.method === "POST") {
-    try {
-      const { name, industry, website, phone, address } = req.body || {};
-      if (!name) return res.status(400).json({ error: 'name is required' });
 
-      const newCompany = await prisma.company.create({
-        data: { name: String(name), industry: industry || null, website: website || null, phone: phone || null, address: address || null },
-      });
+    const total = await prisma.company.count({ where });
 
-      res.status(201).json(newCompany);
-    } catch (err) {
-      console.error("Error creating company:", err);
-      res.status(500).json({ error: "Failed to create company" });
-    }
-  } else {
-    res.setHeader("Allow", ["GET", "POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    const data = await prisma.company.findMany({
+      where,
+      orderBy,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        contacts: { select: { id: true, name: true, email: true } }, // optional include
+        organization: { select: { id: true, name: true } },
+      },
+    });
+
+    res.status(200).json({ data, total, page, pageSize });
+  } catch (err: any) {
+    console.error("API /api/companies error:", err);
+    res.status(500).json({ error: err.message ?? "Internal error" });
+  } finally {
+    // don't always disconnect in serverless—ok for dev. Comment if you keep long-lived prisma instance.
+    // await prisma.$disconnect();
   }
 }
