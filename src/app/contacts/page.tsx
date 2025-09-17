@@ -60,7 +60,7 @@ export default function ContactsPage() {
           <tbody>
             {contacts.map((contact) => (
               <tr key={contact.id} className="border-t">
-                <td className="p-2">{contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim()}</td>
+                <td className="p-2">{displayContactName(contact)}</td>
                 <td className="p-2">{contact.email}</td>
                 <td className="p-2">{contact.company?.name || "—"}</td>
               </tr>
