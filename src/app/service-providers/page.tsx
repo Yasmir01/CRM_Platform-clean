@@ -93,7 +93,31 @@ export default function ServiceProvidersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this service provider?')) return;
+    if (!toasts) {
+      if (!confirm('Delete this service provider?')) return;
+    } else {
+      toasts.showWarning('Confirm delete', 'Delete this service provider?', [
+        {
+          id: 'confirm-sp-delete',
+          label: 'Delete',
+          action: async () => {
+            try {
+              const res = await fetch(`/api/service-providers/${id}`, { method: 'DELETE' });
+              if (!res.ok && res.status !== 204) throw new Error('Failed to delete');
+              toasts.showSuccess('Deleted', 'Service provider deleted');
+              fetchProviders();
+            } catch (err) {
+              console.error('Delete failed', err);
+              toasts.showError('Delete failed', String(err?.message || err));
+            }
+          },
+          variant: 'contained',
+        },
+        { id: 'cancel', label: 'Cancel', action: () => {}, variant: 'text' }
+      ]);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/service-providers/${id}`, { method: 'DELETE' });
       if (!res.ok && res.status !== 204) throw new Error('Failed to delete');
