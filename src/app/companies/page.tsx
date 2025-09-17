@@ -1,31 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 
 interface Company {
   id: string;
   name: string;
+  email?: string | null;
+  phone?: string | null;
   industry?: string | null;
-  website?: string | null;
   createdAt?: string;
-  updatedAt?: string;
 }
 
 export default function CompaniesPage() {
@@ -34,8 +17,6 @@ export default function CompaniesPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [total, setTotal] = useState(0);
 
   async function load() {
@@ -44,19 +25,20 @@ export default function CompaniesPage() {
       const params = new URLSearchParams();
       params.set("page", String(page));
       params.set("pageSize", String(pageSize));
-      params.set("sort", `${sortField}:${sortOrder}`);
       if (search.trim()) params.set("search", search.trim());
 
       const res = await fetch(`/api/companies?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to load companies");
       const json = await res.json();
-      // API may return { items, total } or { data, total }
+      // support both { items, total } and { data, total }
       const items = json.items ?? json.data ?? json;
-      const totalCount = json.total ?? json.count ?? (Array.isArray(items) ? items.length : 0);
-      setCompanies(items);
+      const totalCount = json.total ?? 0;
+      setCompanies(items || []);
       setTotal(totalCount);
     } catch (err) {
       console.error(err);
+      setCompanies([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -65,84 +47,83 @@ export default function CompaniesPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, sortField, sortOrder]);
+  }, [page, pageSize]);
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
-        <h1 style={{ margin: 0 }}>Companies</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Companies</h1>
 
-        <div style={{ display: "flex", gap: 8, marginLeft: "auto", alignItems: "center" }}>
-          <Input
-            value={search}
-            onChange={(e: any) => setSearch(e.target.value)}
-            placeholder="Search companies..."
-            onKeyDown={(e) => { if (e.key === "Enter") { setPage(1); load(); } }}
-            style={{ width: 260 }}
-          />
-          <Button onClick={() => { setPage(1); load(); }}>Search</Button>
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search companies..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border p-2 rounded mb-4 w-full"
+        onKeyDown={(e) => { if (e.key === 'Enter') { setPage(1); load(); } }}
+      />
 
-          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            Page size:
-            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
-              <SelectTrigger style={{ minWidth: 80 }}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10</SelectItem>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-              </SelectContent>
-            </Select>
-          </label>
-        </div>
+      {/* Page Size Selector */}
+      <div className="mb-4">
+        <label className="mr-2">Rows per page:</label>
+        <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setPage(1);
+          }}
+          className="border p-1 rounded"
+        >
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+        </select>
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>
-              <Button variant="ghost" onClick={() => { setSortField("name"); setSortOrder((o) => o === "asc" ? "desc" : "asc"); }}>
-                Name
-              </Button>
-            </TableHead>
-            <TableHead>
-              <Button variant="ghost" onClick={() => { setSortField("industry"); setSortOrder((o) => o === "asc" ? "desc" : "asc"); }}>
-                Industry
-              </Button>
-            </TableHead>
-            <TableHead>Website</TableHead>
-            <TableHead>Created</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
-            <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow>
-          ) : companies.length === 0 ? (
-            <TableRow><TableCell colSpan={4}>No companies</TableCell></TableRow>
-          ) : companies.map((c) => (
-            <TableRow key={c.id}>
-              <TableCell>{c.name}</TableCell>
-              <TableCell>{c.industry ?? "-"}</TableCell>
-              <TableCell>{c.website ?? "-"}</TableCell>
-              <TableCell>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {/* Table */}
+      {loading ? (
+        <p>Loading companies...</p>
+      ) : (
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-2 border">Name</th>
+              <th className="p-2 border">Email</th>
+              <th className="p-2 border">Phone</th>
+              <th className="p-2 border">Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {companies.map((company) => (
+              <tr key={company.id} className="hover:bg-gray-50">
+                <td className="p-2 border">{company.name}</td>
+                <td className="p-2 border">{company.email || "-"}</td>
+                <td className="p-2 border">{company.phone || "-"}</td>
+                <td className="p-2 border">{company.createdAt ? new Date(company.createdAt).toLocaleDateString() : "-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
-      <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
-        <Button onClick={() => setPage(1)} disabled={page === 1}>First</Button>
-        <Button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
-        <div>Page {page} / {pageCount}</div>
-        <Button onClick={() => setPage((p) => Math.min(pageCount, p + 1))} disabled={page >= pageCount}>Next</Button>
-        <Button onClick={() => setPage(pageCount)} disabled={page >= pageCount}>Last</Button>
-
-        <div style={{ marginLeft: "auto" }}>
-          <small>{total} companies</small>
-        </div>
+      {/* Pagination */}
+      <div className="flex justify-between mt-4">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage(Math.max(1, page - 1))}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>Page {page}</span>
+        <button
+          onClick={() => setPage(Math.min(page + 1, pageCount))}
+          className="px-3 py-1 border rounded"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
