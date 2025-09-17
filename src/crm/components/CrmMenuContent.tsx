@@ -216,19 +216,32 @@ export default function CrmMenuContent() {
     const updateUnreadMessages = async () => {
       try {
         if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
-        if (!user) return;
+        if (!user) { setUnreadMessagesCount(0); return; }
         if (typeof navigator !== 'undefined' && 'onLine' in navigator && (navigator as any).onLine === false) {
           setUnreadMessagesCount(0);
           return;
         }
+
+        // Use a relative URL to avoid origin mismatches (preview/proxy environments)
+        const url = '/api/messages/unread';
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
         let r: Response | null = null;
         try {
-          const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
-          r = await fetch(url, { credentials: 'include', cache: 'no-store' });
-        } catch (err) {
-          // network error
+          r = await fetch(url, { credentials: 'include', cache: 'no-store', signal: controller.signal });
+        } catch (err: any) {
+          // If fetch was aborted due to timeout, treat as no unread messages
+          if (err?.name === 'AbortError') {
+            setUnreadMessagesCount(0);
+            return;
+          }
+          // Network or CORS error - do not throw, just set to 0
           setUnreadMessagesCount(0);
           return;
+        } finally {
+          clearTimeout(timeout);
         }
 
         if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
