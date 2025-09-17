@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { displayContactName } from '@/crm/utils/contactDisplay';
+import { useSession } from '@/auth/useSession';
 
 export default function ContactsPage() {
+  const sess = useSession();
   const [contacts, setContacts] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -12,6 +14,10 @@ export default function ContactsPage() {
 
   const [sortBy, setSortBy] = useState('createdAt');
   const [order, setOrder] = useState<'asc'|'desc'>('desc');
+
+  const isLoadingSession = (sess as any).loading;
+  const user = (sess as any).user;
+  const isSuper = Boolean(user && ((user.roles && user.roles.includes('SUPER_ADMIN')) || user.role === 'SUPER_ADMIN'));
 
   useEffect(() => {
     setLoading(true);
@@ -25,9 +31,17 @@ export default function ContactsPage() {
       .catch(() => setLoading(false));
   }, [page, sortBy, order, pageSize]);
 
+  if (isLoadingSession) return <p>Loading...</p>;
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Contacts</h1>
+
+      {isSuper && (
+        <button className="px-4 py-2 mb-4 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700" onClick={() => alert('TODO: Add Contact Form')}>
+          + Add Contact
+        </button>
+      )}
 
       <div className="mb-4 flex items-center justify-between">
         {/* Page Size Selector */}
@@ -62,11 +76,15 @@ export default function ContactsPage() {
               }}>
                 Email {sortBy === 'email' && (order === 'asc' ? '↑' : '↓')}
               </th>
-              <th className="px-4 py-2 cursor-pointer" onClick={() => {
-                if (sortBy === 'companyId' || sortBy === 'company') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('company'); setOrder('asc'); }
-              }}>
-                Company { (sortBy === 'company' || sortBy === 'companyId') && (order === 'asc' ? '↑' : '↓')}
-              </th>
+
+              {isSuper && (
+                <th className="px-4 py-2 cursor-pointer" onClick={() => {
+                  if (sortBy === 'companyId' || sortBy === 'company') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('company'); setOrder('asc'); }
+                }}>
+                  Company { (sortBy === 'company' || sortBy === 'companyId') && (order === 'asc' ? '↑' : '↓')}
+                </th>
+              )}
+
               <th className="px-4 py-2 cursor-pointer" onClick={() => {
                 if (sortBy === 'createdAt') setOrder(order === 'asc' ? 'desc' : 'asc'); else { setSortBy('createdAt'); setOrder('asc'); }
               }}>
@@ -79,7 +97,8 @@ export default function ContactsPage() {
               <tr key={contact.id} className="border-t">
                 <td className="p-2">{displayContactName(contact)}</td>
                 <td className="p-2">{contact.email}</td>
-                <td className="p-2">{contact.company?.name || "—"}</td>
+                {isSuper && <td className="p-2">{contact.company?.name || "—"}</td>}
+                <td className="p-2">{new Date(contact.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>
