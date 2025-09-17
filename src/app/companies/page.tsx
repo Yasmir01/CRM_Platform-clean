@@ -54,7 +54,35 @@ export default function CompaniesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageSize, search]);
 
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  const validateEmail = (value?: string) => {
+    if (!value) return true;
+    return /^\S+@\S+\.\S+$/.test(value);
+  };
+  const validatePhone = (value?: string) => {
+    if (!value) return true;
+    return /^[0-9+()\-\s]+$/.test(value);
+  };
+
   const handleSubmit = async () => {
+    setFormError(null);
+
+    if (!formData.name || !formData.name.trim()) {
+      setFormError('Name is required');
+      return;
+    }
+    if (!validateEmail(formData.email)) {
+      setFormError('Please enter a valid email address');
+      return;
+    }
+    if (!validatePhone(formData.phone)) {
+      setFormError('Please enter a valid phone number');
+      return;
+    }
+
+    setSubmitting(true);
     try {
       if (editing) {
         const res = await fetch(`/api/companies/${editing.id}`, {
@@ -62,21 +90,32 @@ export default function CompaniesPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
-        if (!res.ok) throw new Error("Failed to update");
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          throw new Error(err?.error || 'Failed to update');
+        }
       } else {
         const res = await fetch("/api/companies", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
-        if (!res.ok) throw new Error("Failed to create");
+        if (!res.ok) {
+          const err = await res.json().catch(() => null);
+          throw new Error(err?.error || 'Failed to create');
+        }
       }
       setShowForm(false);
       setEditing(null);
-      setFormData({ name: "", industry: "", website: "" });
+      setFormData({ name: "", industry: "", website: "", email: "", phone: "", address: "" });
       fetchCompanies();
-    } catch (err) {
+      // Simple success feedback
+      try { window.alert('Company saved'); } catch (e) {}
+    } catch (err: any) {
       console.error("Failed to save company", err);
+      setFormError(err?.message || 'Failed to save company');
+    } finally {
+      setSubmitting(false);
     }
   };
 
