@@ -1,3 +1,4 @@
+import { safeParse } from '../../utils/safeJson';
 // LocalStorage service for CRM data persistence
 export class LocalStorageService {
   private static readonly PREFIX = 'crm_';
