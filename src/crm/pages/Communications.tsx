@@ -949,7 +949,7 @@ export default function Communications() {
                   <Paper key={comm.id} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
                     <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
-                        <Typography variant="subtitle2">{comm.type} {comm.direction === 'Inbound' ? 'from' : 'to'} {comm.contact.name}</Typography>
+                        <Typography variant="subtitle2">{comm.type} {comm.direction === 'Inbound' ? 'from' : 'to'} {displayContactName(comm.contact)}</Typography>
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Typography variant="caption" color="text.secondary">
                             {new Date(comm.timestamp).toLocaleString()}
