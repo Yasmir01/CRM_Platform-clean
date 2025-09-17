@@ -15,7 +15,7 @@ type Company = {
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", industry: "", website: "" });
+  const [form, setForm] = useState({ name: "", industry: "", website: "", phone: "", address: "" });
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -46,7 +46,7 @@ export default function CompaniesPage() {
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Failed to create");
-      setForm({ name: "", industry: "", website: "" });
+      setForm({ name: "", industry: "", website: "", phone: "", address: "" });
       await fetchCompanies();
     } catch (err) {
       console.error(err);
@@ -80,6 +80,18 @@ export default function CompaniesPage() {
               value={form.website}
               onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
             />
+            <TextField
+              fullWidth
+              label="Phone"
+              value={form.phone}
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            />
+            <TextField
+              fullWidth
+              label="Address"
+              value={form.address}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+            />
             <CardActions>
               <Button type="submit" variant="contained" color="primary">Add Company</Button>
             </CardActions>
@@ -96,12 +108,32 @@ export default function CompaniesPage() {
             <ul className="divide-y">
               {companies.map((c) => (
                 <li key={c.id} className="py-3">
-                  <p className="font-semibold">{c.name}</p>
-                  <p className="text-sm text-gray-600">{c.industry || '-'}</p>
-                  {c.website && (
-                    <a href={c.website} target="_blank" rel="noreferrer" className="text-blue-600 text-sm">{c.website}</a>
-                  )}
-                  <p className="text-sm text-gray-500">Contacts: {c.contactCount ?? 0}</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{c.name}</p>
+                      <p className="text-sm text-gray-600">{c.industry || '-'}</p>
+                    </div>
+                    <div className="text-sm text-gray-500">{c.contactCount ?? 0} contacts</div>
+                  </div>
+
+                  <div className="mt-2 space-y-1">
+                    {c.website && (
+                      <a href={c.website} target="_blank" rel="noreferrer" className="text-blue-600 text-sm">{c.website}</a>
+                    )}
+                    {c.phone && <div className="text-sm">Phone: {c.phone}</div>}
+                    {c.address && <div className="text-sm">Address: {c.address}</div>}
+
+                    {c.contactsPreview && c.contactsPreview.length > 0 && (
+                      <div className="mt-1 text-sm">
+                        <strong>Contacts:</strong>
+                        <ul className="list-disc list-inside">
+                          {c.contactsPreview.map((ct: any) => (
+                            <li key={ct.id}>{ct.name} — {ct.email}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
