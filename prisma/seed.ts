@@ -101,7 +101,8 @@ async function main() {
     data: {
       orgId: org.id,
       companyId: company.id,
-      name: "Jane Smith",
+      firstName: "Jane",
+      lastName: "Smith",
       email: "jane.smith@acme.com",
       phone: "555-9876",
     },
