@@ -24,6 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where.OR = [
           { name: { contains: search, mode: "insensitive" } },
           { email: { contains: search, mode: "insensitive" } },
+          { phone: { contains: search, mode: "insensitive" } },
         ];
       }
 
