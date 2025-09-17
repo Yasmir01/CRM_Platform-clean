@@ -88,3 +88,14 @@ model Deal {
   userId String?
   user   User?            @relation(fields: [userId], references: [id])
 }
+
+model ServiceProvider {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  service   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
