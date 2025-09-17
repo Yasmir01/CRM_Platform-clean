@@ -1,126 +1,128 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-interface Company {
+type Company = {
   id: string;
   name: string;
-  email?: string | null;
-  phone?: string | null;
-  industry?: string | null;
-  createdAt?: string;
-}
+  email?: string;
+  phone?: string;
+  createdAt: string;
+};
 
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
 
-  async function load() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set("page", String(page));
-      params.set("pageSize", String(pageSize));
-      if (search.trim()) params.set("search", search.trim());
-
-      const res = await fetch(`/api/companies?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to load companies");
-      const json = await res.json();
-      // support both { items, total } and { data, total }
-      const items = json.items ?? json.data ?? json;
-      const totalCount = json.total ?? 0;
-      setCompanies(items || []);
-      setTotal(totalCount);
-    } catch (err) {
-      console.error(err);
-      setCompanies([]);
-      setTotal(0);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize]);
+    const fetchCompanies = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          pageSize: String(pageSize),
+        });
+        if (search) params.set("search", search);
 
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+        const res = await fetch(`/api/companies?${params.toString()}`);
+        if (!res.ok) throw new Error("Failed to fetch companies");
+        const json = await res.json();
+        setCompanies(json.data ?? json.items ?? []);
+        setTotal(json.total ?? 0);
+      } catch (err) {
+        console.error("Failed to fetch companies", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, [page, pageSize, search]);
+
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Companies</h1>
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search companies..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="border p-2 rounded mb-4 w-full"
-        onKeyDown={(e) => { if (e.key === 'Enter') { setPage(1); load(); } }}
-      />
-
-      {/* Page Size Selector */}
-      <div className="mb-4">
-        <label className="mr-2">Rows per page:</label>
+      {/* Search + Page Size */}
+      <div className="flex items-center justify-between mb-4">
+        <input
+          type="text"
+          placeholder="Search companies..."
+          value={search}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
+          className="border rounded p-2 w-1/2"
+        />
         <select
           value={pageSize}
           onChange={(e) => {
-            setPageSize(Number(e.target.value));
             setPage(1);
+            setPageSize(Number(e.target.value));
           }}
-          className="border p-1 rounded"
+          className="border rounded p-2"
         >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
+          <option value={10}>10 per page</option>
+          <option value={25}>25 per page</option>
+          <option value={50}>50 per page</option>
         </select>
       </div>
 
       {/* Table */}
-      {loading ? (
-        <p>Loading companies...</p>
-      ) : (
-        <table className="w-full border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">Phone</th>
-              <th className="p-2 border">Created At</th>
-            </tr>
-          </thead>
-          <tbody>
-            {companies.map((company) => (
-              <tr key={company.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{company.name}</td>
-                <td className="p-2 border">{company.email || "-"}</td>
-                <td className="p-2 border">{company.phone || "-"}</td>
-                <td className="p-2 border">{company.createdAt ? new Date(company.createdAt).toLocaleDateString() : "-"}</td>
+      <div className="overflow-x-auto">
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <table className="min-w-full border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 border">Name</th>
+                <th className="px-4 py-2 border">Email</th>
+                <th className="px-4 py-2 border">Phone</th>
+                <th className="px-4 py-2 border">Created</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {companies.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="text-center py-4">No companies found</td>
+                </tr>
+              ) : (
+                companies.map((company) => (
+                  <tr key={company.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 border">{company.name}</td>
+                    <td className="px-4 py-2 border">{company.email || "-"}</td>
+                    <td className="px-4 py-2 border">{company.phone || "-"}</td>
+                    <td className="px-4 py-2 border">{new Date(company.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       {/* Pagination */}
-      <div className="flex justify-between mt-4">
+      <div className="flex justify-between items-center mt-4">
         <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
-          onClick={() => setPage(Math.max(1, page - 1))}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
-          Previous
+          Prev
         </button>
-        <span>Page {page}</span>
+        <span>Page {page} of {totalPages || 1}</span>
         <button
-          onClick={() => setPage(Math.min(page + 1, pageCount))}
-          className="px-3 py-1 border rounded"
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+          disabled={page === totalPages || totalPages === 0}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
         >
           Next
         </button>
