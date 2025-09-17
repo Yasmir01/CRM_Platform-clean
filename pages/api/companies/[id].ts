@@ -24,10 +24,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "PUT": {
-          const { name, industry, website } = req.body;
+          const { name, industry, website, email, phone, address } = req.body;
           const updated = await prisma.company.update({
             where: { id: id as string },
-            data: { name, industry, website },
+            data: { name, industry, website, email, phone, address },
           });
           return res.status(200).json(updated);
         }
