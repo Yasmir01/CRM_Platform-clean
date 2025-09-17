@@ -18,7 +18,8 @@ export class LocalStorageService {
       if (item === null) {
         return defaultValue;
       }
-      return JSON.parse(item);
+      import { safeParse } from "../../utils/safeJson";
+      return safeParse(item, defaultValue);
     } catch (error) {
       console.error('Error reading from localStorage:', error);
       return defaultValue;
