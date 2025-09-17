@@ -1381,9 +1381,9 @@ export default function Communications() {
                           onClick={() => {
                             setSelectedContact({
                               id: comm.id,
-                              firstName: comm.contact.name.split(' ')[0],
-                              lastName: comm.contact.name.split(' ')[1] || '',
-                              email: comm.contact.email || `${displayContactName(comm.contact).toLowerCase().replace(' ', '.')}@email.com`,
+                              firstName: (displayContactName(comm.contact).split(' ')[0]) || '',
+                              lastName: (displayContactName(comm.contact).split(' ')[1]) || '',
+                              email: comm.contact.email || `${displayContactName(comm.contact).toLowerCase().replace(/\s+/g, '.')}@email.com`,
                               phone: comm.contact.number,
                             });
                             setOpenCommunicationDialog(true);
