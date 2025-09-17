@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { displayContactName } from '@/crm/utils/contactDisplay';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<any[]>([]);
