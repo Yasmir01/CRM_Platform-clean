@@ -1336,7 +1336,7 @@ export default function Communications() {
                     </TableCell>
                     <TableCell>
                       <Stack>
-                        <Typography variant="body2">{comm.contact.name}</Typography>
+                        <Typography variant="body2">{displayContactName(comm.contact)}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {formatPhoneDisplay(comm.contact.number)}
                         </Typography>
