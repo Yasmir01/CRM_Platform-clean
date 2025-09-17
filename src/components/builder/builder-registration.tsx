@@ -153,13 +153,22 @@ function withPlanInputs(baseInputs: any[] = []) {
       });
     }
 
+    // Register ServiceProvidersBuilder explicitly
+    if (BuilderComponents.ServiceProvidersBuilder) {
+      builder.registerComponent(BuilderComponents.ServiceProvidersBuilder as any, {
+        name: 'ServiceProviders',
+        inputs: withPlanInputs([]),
+        wrap: (props: any) => wrapWithPlan(BuilderComponents.ServiceProvidersBuilder, props),
+      });
+    }
+
     // Auto-register any other components exported from the barrel with plan inputs by default
     Object.entries(BuilderComponents).forEach(([name, comp]) => {
       if (!comp) return;
       // already registered above
       const registeredNames = [
         'PropertyLandingPage','PropertyLandingHero','PropertyLandingGallery','PropertyLandingContactForm',
-        'LeadPipelineBoard','LeadDetailCard','PaymentHistoryTable','PaymentProrationCalculator'
+        'LeadPipelineBoard','LeadDetailCard','PaymentHistoryTable','PaymentProrationCalculator','ServiceProvidersBuilder'
       ];
       if (registeredNames.includes(name)) return;
 
