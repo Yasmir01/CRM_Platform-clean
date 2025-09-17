@@ -169,6 +169,8 @@ export default function CompaniesPage() {
               companies.map((company) => (
                 <tr key={company.id} className="companies-row">
                   <td className="px-4 py-2 border">{company.name}</td>
+                  <td className="px-4 py-2 border">{company.email || "-"}</td>
+                  <td className="px-4 py-2 border">{company.phone || "-"}</td>
                   <td className="px-4 py-2 border">{company.industry || "-"}</td>
                   <td className="px-4 py-2 border">
                     {company.website ? (
@@ -179,13 +181,14 @@ export default function CompaniesPage() {
                       "-"
                     )}
                   </td>
+                  <td className="px-4 py-2 border">{company.address || "-"}</td>
                   <td className="px-4 py-2 border">{new Date(company.createdAt).toLocaleDateString()}</td>
                   {isSuper && (
                     <td className="px-4 py-2 border flex gap-2">
                       <button
                         onClick={() => {
                           setEditing(company);
-                          setFormData({ name: company.name, industry: company.industry ?? "", website: company.website ?? "" });
+                          setFormData({ name: company.name, industry: company.industry ?? "", website: company.website ?? "", email: company.email ?? "", phone: company.phone ?? "", address: company.address ?? "" });
                           setShowForm(true);
                         }}
                         className="companies-edit-button bg-yellow-500 text-white px-3 py-1 rounded"
