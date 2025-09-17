@@ -1,145 +1,149 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, TextField, Card, CardHeader, CardContent, CardActions, CircularProgress } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
-type Company = {
+interface Company {
   id: string;
   name: string;
   industry?: string | null;
   website?: string | null;
   createdAt?: string;
-  contactCount?: number;
-};
+  updatedAt?: string;
+}
 
 export default function CompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: "", industry: "", website: "", phone: "", address: "" });
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [total, setTotal] = useState(0);
 
-  const fetchCompanies = async () => {
+  async function load() {
     setLoading(true);
     try {
-      const res = await fetch("/api/companies");
-      if (!res.ok) throw new Error("Failed to load");
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
+      params.set("sort", `${sortField}:${sortOrder}`);
+      if (search.trim()) params.set("search", search.trim());
+
+      const res = await fetch(`/api/companies?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to load companies");
       const json = await res.json();
-      // API returns { data, hasMore, ... }
-      setCompanies(json.data || []);
+      // API may return { items, total } or { data, total }
+      const items = json.items ?? json.data ?? json;
+      const totalCount = json.total ?? json.count ?? (Array.isArray(items) ? items.length : 0);
+      setCompanies(items);
+      setTotal(totalCount);
     } catch (err) {
-      console.error("Error fetching companies:", err);
-      setCompanies([]);
+      console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   useEffect(() => {
-    fetchCompanies();
-  }, []);
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, sortField, sortOrder]);
 
-  const addCompany = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("/api/companies", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error("Failed to create");
-      setForm({ name: "", industry: "", website: "", phone: "", address: "" });
-      await fetchCompanies();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Companies</h1>
+    <div style={{ padding: 16 }}>
+      <div style={{ display: "flex", gap: 12, marginBottom: 12, alignItems: "center" }}>
+        <h1 style={{ margin: 0 }}>Companies</h1>
 
-      <Card className="max-w-md">
-        <CardHeader title="Add Company" />
-        <CardContent>
-          <form onSubmit={addCompany} className="space-y-3">
-            <TextField
-              fullWidth
-              required
-              label="Company name"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Industry"
-              value={form.industry}
-              onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Website"
-              value={form.website}
-              onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Phone"
-              value={form.phone}
-              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-            />
-            <TextField
-              fullWidth
-              label="Address"
-              value={form.address}
-              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-            />
-            <CardActions>
-              <Button type="submit" variant="contained" color="primary">Add Company</Button>
-            </CardActions>
-          </form>
-        </CardContent>
-      </Card>
+        <div style={{ display: "flex", gap: 8, marginLeft: "auto", alignItems: "center" }}>
+          <Input
+            value={search}
+            onChange={(e: any) => setSearch(e.target.value)}
+            placeholder="Search companies..."
+            onKeyDown={(e) => { if (e.key === "Enter") { setPage(1); load(); } }}
+            style={{ width: 260 }}
+          />
+          <Button onClick={() => { setPage(1); load(); }}>Search</Button>
 
-      <Card>
-        <CardHeader title="Company List" />
-        <CardContent>
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            Page size:
+            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+              <SelectTrigger style={{ minWidth: 80 }}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </label>
+        </div>
+      </div>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <Button variant="ghost" onClick={() => { setSortField("name"); setSortOrder((o) => o === "asc" ? "desc" : "asc"); }}>
+                Name
+              </Button>
+            </TableHead>
+            <TableHead>
+              <Button variant="ghost" onClick={() => { setSortField("industry"); setSortOrder((o) => o === "asc" ? "desc" : "asc"); }}>
+                Industry
+              </Button>
+            </TableHead>
+            <TableHead>Website</TableHead>
+            <TableHead>Created</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {loading ? (
-            <div className="flex items-center gap-2"><CircularProgress size={20} /> <span>Loading...</span></div>
-          ) : (
-            <ul className="divide-y">
-              {companies.map((c) => (
-                <li key={c.id} className="py-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold">{c.name}</p>
-                      <p className="text-sm text-gray-600">{c.industry || '-'}</p>
-                    </div>
-                    <div className="text-sm text-gray-500">{c.contactCount ?? 0} contacts</div>
-                  </div>
+            <TableRow><TableCell colSpan={4}>Loading...</TableCell></TableRow>
+          ) : companies.length === 0 ? (
+            <TableRow><TableCell colSpan={4}>No companies</TableCell></TableRow>
+          ) : companies.map((c) => (
+            <TableRow key={c.id}>
+              <TableCell>{c.name}</TableCell>
+              <TableCell>{c.industry ?? "-"}</TableCell>
+              <TableCell>{c.website ?? "-"}</TableCell>
+              <TableCell>{c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
-                  <div className="mt-2 space-y-1">
-                    {c.website && (
-                      <a href={c.website} target="_blank" rel="noreferrer" className="text-blue-600 text-sm">{c.website}</a>
-                    )}
-                    {c.phone && <div className="text-sm">Phone: {c.phone}</div>}
-                    {c.address && <div className="text-sm">Address: {c.address}</div>}
+      <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
+        <Button onClick={() => setPage(1)} disabled={page === 1}>First</Button>
+        <Button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>Prev</Button>
+        <div>Page {page} / {pageCount}</div>
+        <Button onClick={() => setPage((p) => Math.min(pageCount, p + 1))} disabled={page >= pageCount}>Next</Button>
+        <Button onClick={() => setPage(pageCount)} disabled={page >= pageCount}>Last</Button>
 
-                    {c.contactsPreview && c.contactsPreview.length > 0 && (
-                      <div className="mt-1 text-sm">
-                        <strong>Contacts:</strong>
-                        <ul className="list-disc list-inside">
-                          {c.contactsPreview.map((ct: any) => (
-                            <li key={ct.id}>{ct.name} — {ct.email}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+        <div style={{ marginLeft: "auto" }}>
+          <small>{total} companies</small>
+        </div>
+      </div>
     </div>
   );
 }
