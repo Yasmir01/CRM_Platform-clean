@@ -248,6 +248,27 @@ export default function CompaniesPage() {
               placeholder="Website"
               value={formData.website}
               onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+              className="companies-input border rounded p-2 mb-2 w-full"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="companies-input border rounded p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="companies-input border rounded p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              placeholder="Address"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               className="companies-input border rounded p-2 mb-4 w-full"
             />
             <div className="flex justify-end gap-2">
