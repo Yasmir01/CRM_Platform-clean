@@ -17,3 +17,30 @@ export async function fetchCompanies(q: CompaniesQuery = {}) {
   if (!res.ok) throw new Error("Failed to fetch companies");
   return res.json();
 }
+
+export async function updateCompany(id: string, updates: Record<string, any>) {
+  const res = await fetch(`/api/companies`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, ...updates }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Failed to update company");
+  }
+  return res.json();
+}
+
+export async function deleteCompany(id: string) {
+  const res = await fetch(`/api/companies`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id }),
+  });
+  if (res.status === 204) return null;
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Failed to delete company");
+  }
+  return res.json();
+}
