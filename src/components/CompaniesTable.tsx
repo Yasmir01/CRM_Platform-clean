@@ -30,6 +30,13 @@ export default function CompaniesTable() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState<{ name?: string; industry?: string }>({});
 
+  const [snack, setSnack] = useState<{ open: boolean; message: string; severity?: 'success' | 'error' | 'info' }>(
+    { open: false, message: '', severity: 'info' }
+  );
+
+  const showSnack = (message: string, severity: 'success' | 'error' | 'info' = 'info') => setSnack({ open: true, message, severity });
+  const closeSnack = () => setSnack({ open: false, message: '', severity: 'info' });
+
   async function load() {
     try {
       setLoading(true);
@@ -39,7 +46,7 @@ export default function CompaniesTable() {
       setTotal(result.total ?? result.total ?? 0);
     } catch (err) {
       console.error(err);
-      alert("Failed to load companies");
+      showSnack("Failed to load companies", 'error');
     } finally {
       setLoading(false);
     }
@@ -68,23 +75,29 @@ export default function CompaniesTable() {
       await updateCompany(editingId, editingValues);
       await load();
       cancelEdit();
+      showSnack("Company updated", 'success');
     } catch (err) {
       console.error(err);
-      alert("Failed to update company");
+      showSnack("Failed to update company", 'error');
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this company?")) return;
+    // Optimistic remove
+    const prev = data;
+    setData((d) => d.filter((c) => c.id !== id));
     try {
       await deleteCompany(id);
+      showSnack("Company deleted", 'success');
       // If last item on page deleted, move page back if needed
-      const remaining = data.length - 1;
+      const remaining = prev.length - 1;
       if (remaining === 0 && page > 1) setPage((p) => p - 1);
       else await load();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete company");
+      setData(prev); // revert
+      showSnack("Failed to delete company", 'error');
     }
   };
 
@@ -182,6 +195,12 @@ export default function CompaniesTable() {
           <small>{total} companies</small>
         </div>
       </div>
+
+      <Snackbar open={snack.open} autoHideDuration={4000} onClose={closeSnack}>
+        <Alert onClose={closeSnack} severity={snack.severity || 'info'} sx={{ width: '100%' }}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
