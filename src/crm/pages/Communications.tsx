@@ -37,6 +37,7 @@ import {
   FormControlLabel,
   LinearProgress,
 } from "@mui/material";
+import { displayContactName } from '@/crm/utils/contactDisplay';
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import PhoneCallbackRoundedIcon from "@mui/icons-material/PhoneCallbackRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
