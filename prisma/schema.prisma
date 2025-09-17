@@ -100,8 +100,9 @@ model Contact {
   id          String        @id @default(cuid())
   orgId       String
   organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  email       String?
+  firstName   String
+  lastName    String
+  email       String       @unique
   phone       String?
   companyId   String?
   company     Company?      @relation(fields: [companyId], references: [id])
