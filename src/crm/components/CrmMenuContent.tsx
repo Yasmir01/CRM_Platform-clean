@@ -59,6 +59,7 @@ export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
+  { text: "Companies", icon: <BusinessCenterRoundedIcon />, path: "/crm/companies" },
   { text: "Sales Automation", icon: <SellRoundedIcon />, path: "/crm/sales" },
   { text: "Marketing Automation", icon: <AutorenewRoundedIcon />, path: "/crm/marketing" },
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
