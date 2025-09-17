@@ -141,6 +141,18 @@ function withPlanInputs(baseInputs: any[] = []) {
       });
     }
 
+    // Register SidebarLayout as a layout so it can be applied globally in Builder.io
+    if (BuilderComponents.SidebarLayout) {
+      builder.registerComponent(BuilderComponents.SidebarLayout as any, {
+        name: "SidebarLayout",
+        inputs: [
+          { name: "role", type: "string", enum: ["SUPER_ADMIN", "ADMIN", "USER"], defaultValue: "USER" },
+        ],
+        // allow children to be nested inside this layout
+        noWrap: false,
+      });
+    }
+
     // Auto-register any other components exported from the barrel with plan inputs by default
     Object.entries(BuilderComponents).forEach(([name, comp]) => {
       if (!comp) return;
