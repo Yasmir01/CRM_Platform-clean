@@ -37,6 +37,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+import { displayContactName } from '@/crm/utils/contactDisplay';
 import SMSConnectionDialog from "../components/SMSConnectionDialog";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import PhoneCallbackRoundedIcon from "@mui/icons-material/PhoneCallbackRounded";
