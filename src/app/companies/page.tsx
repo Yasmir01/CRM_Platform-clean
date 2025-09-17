@@ -147,8 +147,11 @@ export default function CompaniesPage() {
           <thead>
             <tr className="bg-gray-100">
               <th className="px-4 py-2 border text-left">Name</th>
+              <th className="px-4 py-2 border text-left">Email</th>
+              <th className="px-4 py-2 border text-left">Phone</th>
               <th className="px-4 py-2 border text-left">Industry</th>
               <th className="px-4 py-2 border text-left">Website</th>
+              <th className="px-4 py-2 border text-left">Address</th>
               <th className="px-4 py-2 border text-left">Created</th>
               {isSuper && <th className="px-4 py-2 border text-left">Actions</th>}
             </tr>
