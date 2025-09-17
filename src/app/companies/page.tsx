@@ -310,9 +310,12 @@ export default function CompaniesPage() {
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               className="companies-input border rounded p-2 mb-4 w-full"
             />
+            {formError && <div className="text-sm text-red-600 mb-2">{formError}</div>}
             <div className="flex justify-end gap-2">
               <button onClick={() => { setShowForm(false); setEditing(null); }} className="companies-cancel-button px-4 py-2 bg-gray-300 rounded">Cancel</button>
-              <button onClick={handleSubmit} className="companies-save-button px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+              <button onClick={handleSubmit} disabled={submitting} className={`companies-save-button px-4 py-2 text-white rounded ${submitting ? 'bg-gray-400' : 'bg-blue-600'}`}>
+                {submitting ? 'Saving...' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
