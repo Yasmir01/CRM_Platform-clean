@@ -7,6 +7,15 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 import { sendEmail } from "../src/lib/mailer";
+import { applyRoleBasedMiddleware } from '../src/lib/prismaMiddleware';
+
+// Apply role-based middleware to scope subscribers' queries
+try {
+  applyRoleBasedMiddleware(prisma as any);
+} catch (e) {
+  // eslint-disable-next-line no-console
+  console.warn('Failed to apply role-based middleware in api/_db', e);
+}
 
 // Middleware: automatic tenant history logging
 prisma.$use(async (params, next) => {
