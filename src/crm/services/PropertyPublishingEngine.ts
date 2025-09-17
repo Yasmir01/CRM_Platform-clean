@@ -331,7 +331,7 @@ class ApartmentsComAdapter extends BasePlatformAdapter {
         isPrimary: photo.isPrimary
       })),
       contact: {
-        name: data.contact.name,
+        name: displayContactName(data.contact),
         phone: data.contact.phone,
         email: data.contact.email,
         preferredContact: data.contact.preferredContact
@@ -456,7 +456,7 @@ class CraigslistAdapter extends BasePlatformAdapter {
       },
       images: data.media.photos.slice(0, 12).map(photo => photo.url),
       contact_info: {
-        name: data.contact.name,
+        name: displayContactName(data.contact),
         phone: data.contact.phone,
         email: data.contact.email
       }
