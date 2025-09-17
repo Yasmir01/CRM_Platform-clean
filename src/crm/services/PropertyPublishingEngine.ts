@@ -187,7 +187,7 @@ class ZillowAdapter extends BasePlatformAdapter {
         leaseDuration: data.availability.leaseDuration
       },
       contact: {
-        agentName: data.contact.name,
+        agentName: displayContactName(data.contact),
         phone: data.contact.phone,
         email: data.contact.email
       }
