@@ -7,235 +7,80 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =====================
-// Core User Management
-// =====================
-
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String?
-  password      String
-  role          Role          @default(USER)
-  orgId         String?
-  organization  Organization? @relation(fields: [orgId], references: [id])
-  accounts      Account[]
-  impersonationLogs ImprLog[]
-  histories     History[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-}
-
-model Account {
   id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  type      String
-  provider  String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  contacts  Contact[]
+  companies Company[]
+  deals     Deal[]
 }
-
-enum Role {
-  USER
-  ADMIN
-  SUPERADMIN
-}
-
-// =====================
-// Organizations
-// =====================
-
-model Organization {
-  id             String          @id @default(cuid())
-  name           String
-  logoUrl        String?
-  tier           Tier            @default(FREE)
-  users          User[]
-  orgSettings    OrgSettings?
-  subscriptions  Subscription[]
-  properties     Property[]
-  contacts       Contact[]
-  companies      Company[]
-  imprLogs       ImprLog[]
-  histories      History[]
-  deals          Deal[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-}
-
-model OrgSettings {
-  id                 String        @id @default(cuid())
-  orgId              String        @unique
-  organization       Organization  @relation(fields: [orgId], references: [id])
-  exportSchedule     String        @default("daily")
-  allowImpersonation Boolean       @default(false)
-  allowExport        Boolean       @default(true)
-  notifications      Boolean       @default(true)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-}
-
-enum Tier {
-  FREE
-  BASIC
-  PREMIUM
-  ENTERPRISE
-}
-
-model GlobalSettings {
-  id            String   @id @default(cuid())
-  maintenance   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
-// =====================
-// CRM Core
-// =====================
 
 model Contact {
-  id          String        @id @default(cuid())
-  orgId       String
-  organization Organization @relation(fields: [orgId], references: [id])
-  firstName   String
-  lastName    String
-  email       String       @unique
-  phone       String?
-  companyId   String?
-  company     Company?      @relation(fields: [companyId], references: [id])
-  deals       Deal[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId String?
+  user   User?       @relation(fields: [userId], references: [id])
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  deals Deal[]
 }
 
 model Company {
-  id          String        @id @default(cuid())
-  orgId       String
-  organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  industry    String?
-  website     String?
-  phone       String?
-  address     String?
-  contacts    Contact[]
-  deals       Deal[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
-model Property {
-  id          String        @id @default(cuid())
-  orgId       String
-  organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  address     String
-  tenants     Tenant[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-}
-
-model Tenant {
-  id          String   @id @default(cuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  name        String
-  email       String?
-  phone       String?
-  reminders   Reminder[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Reminder {
   id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  message   String
-  dueDate   DateTime
-  sent      Boolean  @default(false)
+  name      String
+  website   String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId   String?
+  user     User?      @relation(fields: [userId], references: [id])
+  contacts Contact[]
+  deals    Deal[]
 }
 
-// =====================
-// Billing / Plans
-// =====================
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-model Subscription {
-  id             String        @id @default(cuid())
-  orgId          String
-  organization   Organization  @relation(fields: [orgId], references: [id])
-  plan           Tier
-  active         Boolean       @default(true)
-  startDate      DateTime      @default(now())
-  endDate        DateTime?
-  prorated       Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  // Relations
+  deals Deal[]
 }
-
-// =====================
-// Logs / History
-// =====================
-
-model ImprLog {
-  id             String   @id @default(cuid())
-  superAdminId   String
-  superAdmin     User     @relation(fields: [superAdminId], references: [id])
-  subscriberId   String
-  subscriber     Organization @relation(fields: [subscriberId], references: [id])
-  startedAt      DateTime @default(now())
-  endedAt        DateTime?
-  alertSent      Boolean  @default(false)
-}
-
-model History {
-  id          String   @id @default(cuid())
-  orgId       String
-  organization Organization @relation(fields: [orgId], references: [id])
-  action      String
-  actorId     String?
-  actor       User?    @relation(fields: [actorId], references: [id])
-  createdAt   DateTime @default(now())
-}
-
-// =====================
-// Deals (CRM)
-// =====================
 
 model Deal {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  amount      Float?
-  stage       String   // e.g. "Lead", "Negotiation", "Closed Won", "Closed Lost"
-  probability Int?     // % chance of closing
-  status      String   @default("open") // open, won, lost
-  orgId       String
-  org         Organization @relation(fields: [orgId], references: [id])
-  companyId   String?
-  company     Company?   @relation(fields: [companyId], references: [id])
-  contactId   String?
-  contact     Contact?   @relation(fields: [contactId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deleted     Boolean  @default(false) // soft delete
-}
+  id         String        @id @default(cuid())
+  title      String
+  amount     Float
+  stage      String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 
-// Keep additional models (Invoices, Payments, etc.) if needed later
+  // Relations
+  orgId     String
+  org       Organization  @relation(fields: [orgId], references: [id])
 
-// =====================
-// Misc
-// =====================
+  companyId String?
+  company   Company?      @relation(fields: [companyId], references: [id])
 
-model GlobalLog {
-  id        String   @id @default(cuid())
-  message   String
-  createdAt DateTime @default(now())
+  contactId String?
+  contact   Contact?      @relation(fields: [contactId], references: [id])
+
+  userId String?
+  user   User?            @relation(fields: [userId], references: [id])
 }
