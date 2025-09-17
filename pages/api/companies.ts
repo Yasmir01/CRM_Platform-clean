@@ -4,57 +4,60 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-type CompanyResponse = {
-  data: any[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse<CompanyResponse | { error: string }>) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const q = req.query;
+    if (req.method === "GET") {
+      // pagination
+      const page = Math.max(1, Number(req.query.page ?? 1));
+      const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize ?? 10)));
 
-    // pagination params
-    const page = Math.max(1, Number(q.page ?? 1));
-    const pageSize = Math.min(100, Math.max(1, Number(q.pageSize ?? 10)));
+      // sorting
+      const sortParam = typeof req.query.sort === "string" ? req.query.sort : "createdAt:desc";
+      const [sortField, sortDir] = sortParam.split(":");
+      const orderBy: any = {};
+      orderBy[sortField || "createdAt"] = sortDir === "asc" ? "asc" : "desc";
 
-    // sorting: example "name:asc" or "createdAt:desc"
-    const sortParam = typeof q.sort === "string" ? q.sort : "createdAt:desc";
-    const [sortField, sortDir] = sortParam.split(":");
-    const orderBy: any = {};
-    orderBy[sortField || "createdAt"] = sortDir === "asc" ? "asc" : "desc";
+      // search
+      const search = typeof req.query.search === "string" ? req.query.search.trim() : null;
+      const where: any = {};
+      if (search) {
+        where.OR = [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ];
+      }
 
-    // optional search/filter
-    const search = typeof q.search === "string" && q.search.trim().length > 0 ? q.search.trim() : null;
+      const [items, total] = await Promise.all([
+        prisma.company.findMany({
+          where,
+          orderBy,
+          skip: (page - 1) * pageSize,
+          take: pageSize,
+        }),
+        prisma.company.count({ where }),
+      ]);
 
-    const where: any = {};
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { industry: { contains: search, mode: "insensitive" } },
-      ];
+      return res.status(200).json({ items, total, page, pageSize });
     }
 
-    const total = await prisma.company.count({ where });
+    if (req.method === "POST") {
+      const { name, email, phone } = req.body;
+      if (!name) {
+        return res.status(400).json({ error: "Company name is required" });
+      }
+      const company = await prisma.company.create({
+        data: { name, email, phone },
+      });
+      return res.status(201).json(company);
+    }
 
-    const data = await prisma.company.findMany({
-      where,
-      orderBy,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        contacts: { select: { id: true, name: true, email: true } }, // optional include
-        organization: { select: { id: true, name: true } },
-      },
-    });
-
-    res.status(200).json({ data, total, page, pageSize });
+    res.setHeader("Allow", ["GET", "POST"]);
+    return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err: any) {
     console.error("API /api/companies error:", err);
-    res.status(500).json({ error: err.message ?? "Internal error" });
+    return res.status(500).json({ error: err.message ?? "Internal error" });
   } finally {
-    // don't always disconnect in serverless—ok for dev. Comment if you keep long-lived prisma instance.
+    // keep prisma connected for serverless warm reuse in production
     // await prisma.$disconnect();
   }
 }
