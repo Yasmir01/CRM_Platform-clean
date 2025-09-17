@@ -325,7 +325,7 @@ export function AdminDashboard() {
           <a href="/api/admin/export?format=csv" className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700">Download CSV</a>
           <button onClick={async ()=>{
             try{
-              const chartImage = (await import('../../lib/canvasUtils')).chartToBase64 ? await (await import('../../lib/canvasUtils')).chartToBase64('trendChart') : null;
+              const chartImage = (await import('../lib/canvasUtils')).chartToBase64 ? await (await import('../lib/canvasUtils')).chartToBase64('trendChart') : null;
               const res = await fetch('/api/admin/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chartImage }) });
               if (!res.ok) throw new Error('Export failed');
               const blob = await res.blob();
