@@ -51,13 +51,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(201).json(company);
     }
 
-    res.setHeader("Allow", ["GET", "POST"]);
+    if (req.method === "PATCH") {
+      const { id, ...updates } = req.body;
+      if (!id) {
+        return res.status(400).json({ error: "Company ID is required" });
+      }
+      const company = await prisma.company.update({
+        where: { id },
+        data: updates,
+      });
+      return res.status(200).json(company);
+    }
+
+    if (req.method === "DELETE") {
+      const { id } = req.body;
+      if (!id) {
+        return res.status(400).json({ error: "Company ID is required" });
+      }
+      await prisma.company.delete({ where: { id } });
+      return res.status(204).end();
+    }
+
+    res.setHeader("Allow", ["GET", "POST", "PATCH", "DELETE"]);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   } catch (err: any) {
     console.error("API /api/companies error:", err);
     return res.status(500).json({ error: err.message ?? "Internal error" });
   } finally {
-    // keep prisma connected for serverless warm reuse in production
-    // await prisma.$disconnect();
+    // disconnect prisma to avoid open handles in serverless build environments
+    await prisma.$disconnect();
   }
 }
