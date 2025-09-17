@@ -809,7 +809,7 @@ export default function PowerDialer() {
             {callSession.isActive && selectedContact && (
               <Box sx={{ mt: 3, p: 2, bgcolor: "primary.light", borderRadius: 1, border: 2, borderColor: "primary.main" }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>🔊 Currently Calling:</Typography>
-                <Typography variant="h6">{selectedContact.name}</Typography>
+                <Typography variant="h6">{displayContactName(selectedContact)}</Typography>
                 <Typography variant="body2" color="text.secondary">{selectedContact.phone}</Typography>
                 <Typography variant="body2" color="text.secondary">{selectedContact.type}</Typography>
                 <Typography variant="body2" color="text.secondary">
