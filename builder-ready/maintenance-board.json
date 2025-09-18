@@ -1,0 +1,107 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "MaintenanceBoard",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "Maintenance Requests" } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "display: flex; gap: 16px; overflow-x: auto; padding: 12px 0;"
+      },
+      "children": [
+        {
+          "tagName": "div",
+          "properties": {
+            "style": "flex: 1; min-width: 250px; background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;"
+          },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "📝 New" } } },
+            {
+              "tagName": "div",
+              "children": [
+                {
+                  "tagName": "div",
+                  "properties": {
+                    "style": "background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px;"
+                  },
+                  "children": [
+                    { "component": { "name": "Text", "options": { "text": "Leaking faucet - Unit 101" } } },
+                    { "component": { "name": "Text", "options": { "text": "Tenant: John Doe" } } },
+                    { "component": { "name": "Text", "options": { "text": "Vendor: Pending Assignment" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": {
+            "style": "flex: 1; min-width: 250px; background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;"
+          },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🔧 In Progress" } } },
+            {
+              "tagName": "div",
+              "children": [
+                {
+                  "tagName": "div",
+                  "properties": {
+                    "style": "background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px;"
+                  },
+                  "children": [
+                    { "component": { "name": "Text", "options": { "text": "AC repair - Unit 203" } } },
+                    { "component": { "name": "Text", "options": { "text": "Tenant: Jane Smith" } } },
+                    { "component": { "name": "Text", "options": { "text": "Vendor: CoolAir LLC" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": {
+            "style": "flex: 1; min-width: 250px; background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;"
+          },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "✅ Completed" } } },
+            {
+              "tagName": "div",
+              "children": [
+                {
+                  "tagName": "div",
+                  "properties": {
+                    "style": "background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 8px;"
+                  },
+                  "children": [
+                    { "component": { "name": "Text", "options": { "text": "Pest control - Unit 305" } } },
+                    { "component": { "name": "Text", "options": { "text": "Tenant: Smith Family" } } },
+                    { "component": { "name": "Text", "options": { "text": "Vendor: SafePest Services" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "div",
+      "children": [
+        {
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "⚙️ Assign vendors and update status as requests move across stages."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
