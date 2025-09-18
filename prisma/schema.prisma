@@ -108,9 +108,16 @@ model ServiceProvider {
 model Ticket {
   id          String   @id @default(cuid())
   title       String
-  description String
-  priority    String   @default("medium") // low, medium, high
-  status      String   @default("open")   // open, in_progress, closed
+  description String?
+  priority    String   @default("Low") // Low | Medium | High
+  status      String   @default("Open") // Open | In Progress | Closed
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Optional relations
+  company   Company?   @relation(fields: [companyId], references: [id])
+  companyId String?
+
+  contact   Contact?   @relation(fields: [contactId], references: [id])
+  contactId String?
 }
