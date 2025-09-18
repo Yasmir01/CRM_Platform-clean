@@ -516,10 +516,10 @@ export default function CrmMenuContent() {
               { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
             ];
             let base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
-            if (user?.role === 'Service Provider') {
+            if (isVendorUser) {
               base = serviceProviderSecondaryItems;
             }
-            const computed = isSuperAdmin() && user?.role !== 'Service Provider'
+            const computed = isSuperAdmin() && !isVendorUser
               ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }]
               : base;
             return computed;
