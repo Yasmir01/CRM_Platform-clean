@@ -38,7 +38,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.warn('Failed to upsert subscription record during override', e);
     }
 
-    await prisma.superAdminAction.create({ data: { userId: String((user as any).sub || (user as any).id), action: 'override_subscription', details: JSON.stringify({ targetUserId: userId, plan }) } }).catch(() => null);
+    // Record action in logs if superAdminAction model exists (best-effort)
+    try {
+      if ((prisma as any).superAdminAction) {
+        await (prisma as any).superAdminAction.create({ data: { userId: String((user as any).sub || (user as any).id), action: 'override_subscription', details: JSON.stringify({ targetUserId: userId, plan }) } }).catch(() => null);
+      }
+    } catch (_) {}
 
     return res.status(200).json({ ok: true });
   } catch (e: any) {
