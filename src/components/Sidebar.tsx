@@ -31,7 +31,7 @@ export default function Sidebar({ user }: { user: User }) {
           {(role === "SU" || role === "SA") && (
             <li className="builder-nav-item"><Link href="/companies" className="builder-nav-link">Companies</Link></li>
           )}
-          <li className="builder-nav-item"><Link href="/service-providers" className="builder-nav-link">Service Providers</Link></li>
+          <li className="builder-nav-item"><Link href="/service-providers" className="builder-nav-link"><HandymanRoundedIcon fontSize="small" className="inline-block mr-2" />Service Providers</Link></li>
 
           {role === "SU" && (
             <>
