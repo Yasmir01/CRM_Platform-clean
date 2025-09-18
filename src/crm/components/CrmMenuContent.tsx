@@ -350,37 +350,78 @@ export default function CrmMenuContent() {
         <List dense>
           {menuItems.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => handleNavigation(item.path)}
-              >
-                <ListItemIcon>
-                  {item.badge && item.text === "Applications" ? (
-                    <Badge badgeContent={newApplicationsCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Tasks" ? (
-                    <Badge badgeContent={newTasksCount} color="warning">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Suggestions" ? (
-                    <Badge badgeContent={newSuggestionsCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Communications" ? (
-                    <Badge badgeContent={unreadMessagesCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
-                    <Badge badgeContent={assignedPropsCount} color="warning">
-                      {item.icon}
-                    </Badge>
-                  ) : (
-                    item.icon
-                  )}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
+              {
+                (() => {
+                  // Determine current company plan (fallback to 'basic')
+                  const getCurrentPlan = () => {
+                    try {
+                      if (user && (user as any).subscriptionPlan) return (user as any).subscriptionPlan;
+                      const p = typeof window !== 'undefined' ? window.localStorage.getItem('company_plan') : null;
+                      return p || 'basic';
+                    } catch (e) {
+                      return 'basic';
+                    }
+                  };
+
+                  const planOrder: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
+                  const currentPlan = getCurrentPlan();
+
+                  const isAllowed = (requiredPlan?: string) => {
+                    if (!requiredPlan) return true;
+                    if (isSuperAdmin()) return true;
+                    const cur = planOrder[(currentPlan || '').toLowerCase()] || 1;
+                    const req = planOrder[(requiredPlan || '').toLowerCase()] || 1;
+                    return cur >= req;
+                  };
+
+                  const handleLockedClick = (requiredPlan?: string) => {
+                    const msg = `This feature requires the ${requiredPlan?.toUpperCase() || 'PRO'} plan. Upgrade to access.`;
+                    if (typeof window !== 'undefined') {
+                      // Navigate to subscription management
+                      window.alert(msg);
+                      window.location.href = '/crm/subscriptions';
+                    }
+                  };
+
+                  const allowed = isAllowed((item as any).requiredPlan);
+
+                  return (
+                    <ListItemButton
+                      selected={location.pathname === item.path}
+                      onClick={() => { if (allowed) handleNavigation(item.path); else handleLockedClick((item as any).requiredPlan); }}
+                      sx={allowed ? {} : { opacity: 0.6, cursor: 'pointer' }}
+                    >
+                      <ListItemIcon>
+                        {item.badge && item.text === "Applications" ? (
+                          <Badge badgeContent={newApplicationsCount} color="error">
+                            {item.icon}
+                          </Badge>
+                        ) : item.badge && item.text === "Tasks" ? (
+                          <Badge badgeContent={newTasksCount} color="warning">
+                            {item.icon}
+                          </Badge>
+                        ) : item.badge && item.text === "Suggestions" ? (
+                          <Badge badgeContent={newSuggestionsCount} color="error">
+                            {item.icon}
+                          </Badge>
+                        ) : item.badge && item.text === "Communications" ? (
+                          <Badge badgeContent={unreadMessagesCount} color="error">
+                            {item.icon}
+                          </Badge>
+                        ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
+                          <Badge badgeContent={assignedPropsCount} color="warning">
+                            {item.icon}
+                          </Badge>
+                        ) : (
+                          item.icon
+                        )}
+                      </ListItemIcon>
+                      <ListItemText primary={item.text} />
+                      {!allowed && <ListItemText primary={`(Upgrade to ${((item as any).requiredPlan || 'pro').toUpperCase()})`} sx={{ textAlign: 'right', color: 'text.secondary' }} />}
+                    </ListItemButton>
+                  );
+                })()
+              }
 
               {item.children && (
                 <List disablePadding sx={{ pl: 4 }}>
