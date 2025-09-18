@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             ? {
                 OR: [
                   { name: { contains: search, mode: "insensitive" } },
-                  { service: { contains: search, mode: "insensitive" } },
+                  { category: { contains: search, mode: "insensitive" } },
                 ],
               }
             : {};
