@@ -117,9 +117,12 @@ model Ticket {
   updatedAt   DateTime @updatedAt
 
   // Optional relations
-  company   Company?   @relation(fields: [companyId], references: [id])
-  companyId String?
+  company            Company?         @relation(fields: [companyId], references: [id])
+  companyId          String?
 
-  contact   Contact?   @relation(fields: [contactId], references: [id])
-  contactId String?
+  contact            Contact?         @relation(fields: [contactId], references: [id])
+  contactId          String?
+
+  serviceProvider    ServiceProvider? @relation(fields: [serviceProviderId], references: [id])
+  serviceProviderId  String?
 }
