@@ -1,155 +1,147 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface ServiceProvider {
   id: string;
   name: string;
   serviceType?: string;
-  phone?: string;
-  email?: string;
-  notes?: string;
+  phone?: string | null;
+  email?: string | null;
+  createdAt: string;
 }
 
 export default function ServiceProvidersPage() {
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<Partial<ServiceProvider>>({});
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Load providers
   useEffect(() => {
-    let mounted = true;
-    (async () => {
+    const controller = new AbortController();
+    const fetchProviders = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/service-providers");
+        const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+        if (search && search.trim()) params.set('search', search.trim());
+        const res = await fetch(`/api/service-providers?${params.toString()}`, { signal: controller.signal });
         const data = await res.json();
-        const list = Array.isArray(data) ? data : data.providers ?? data;
-        if (mounted) setProviders(list || []);
+        // support both shapes
+        const list = Array.isArray(data) ? data : (data.providers ?? data.providers ?? []);
+        setProviders(list || []);
+        setTotal(data.total ?? (Array.isArray(data) ? data.length : list.length));
       } catch (err) {
-        console.error(err);
-        if (mounted) setProviders([]);
+        if ((err as any)?.name === 'AbortError') return;
+        console.error('Failed to fetch providers', err);
+        setProviders([]);
+        setTotal(0);
       } finally {
-        if (mounted) setLoading(false);
+        setLoading(false);
       }
-    })();
-    return () => { mounted = false; };
-  }, []);
+    };
 
-  // Handle form submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.name) return;
+    fetchProviders();
+    return () => controller.abort();
+  }, [search, page, pageSize]);
 
-    try {
-      const res = await fetch("/api/service-providers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) throw new Error('Create failed');
-      const created = await res.json();
-      setProviders((prev) => [...prev, created]);
-      setForm({});
-    } catch (err) {
-      console.error("Error creating provider:", err);
-      alert('Failed to create provider');
-    }
-  };
-
-  // Delete (use RESTful route)
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
-    try {
-      const res = await fetch(`/api/service-providers/${id}`, { method: "DELETE" });
-      if (!res.ok && res.status !== 204) throw new Error('Delete failed');
-      setProviders((prev) => prev.filter((p) => p.id !== id));
-    } catch (err) {
-      console.error("Error deleting provider:", err);
-      alert('Failed to delete provider');
-    }
-  };
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Service Providers</h1>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Service Providers</h1>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded">
+          <AddIcon fontSize="small" />
+          Add Provider
+        </button>
+      </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-gray-50 p-4 rounded-lg shadow">
+      <div className="flex items-center justify-between mb-4">
         <input
           type="text"
-          placeholder="Name"
-          value={form.name || ""}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          className="w-full p-2 border rounded"
-          required
+          placeholder="Search providers..."
+          value={search}
+          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+          className="border rounded px-3 py-2 w-1/3"
         />
-        <input
-          type="text"
-          placeholder="Service Type"
-          value={form.serviceType || ""}
-          onChange={(e) => setForm({ ...form, serviceType: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="text"
-          placeholder="Phone"
-          value={form.phone || ""}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email || ""}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <textarea
-          placeholder="Notes"
-          value={form.notes || ""}
-          onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          className="w-full p-2 border rounded"
-        />
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Add Provider</button>
-      </form>
 
-      {/* Table */}
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <table className="w-full border-collapse border border-gray-300">
+        <select
+          value={pageSize}
+          onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
+          className="border rounded px-2 py-1"
+        >
+          <option value={10}>10 / page</option>
+          <option value={25}>25 / page</option>
+          <option value={50}>50 / page</option>
+        </select>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-200">
           <thead>
             <tr className="bg-gray-100">
-              <th className="border p-2 text-left">Name</th>
-              <th className="border p-2 text-left">Service Type</th>
-              <th className="border p-2 text-left">Phone</th>
-              <th className="border p-2 text-left">Email</th>
-              <th className="border p-2 text-left">Notes</th>
-              <th className="border p-2 text-left">Actions</th>
+              <th className="p-2 border text-left">Name</th>
+              <th className="p-2 border text-left">Service Type</th>
+              <th className="p-2 border text-left">Phone</th>
+              <th className="p-2 border text-left">Email</th>
+              <th className="p-2 border text-left">Created At</th>
+              <th className="p-2 border text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {providers.map((p) => (
-              <tr key={p.id} className="hover:bg-gray-50">
-                <td className="border p-2">{p.name}</td>
-                <td className="border p-2">{p.serviceType || (p as any).category || "-"}</td>
-                <td className="border p-2">{p.phone || "-"}</td>
-                <td className="border p-2">{p.email || "-"}</td>
-                <td className="border p-2">{p.notes || "-"}</td>
-                <td className="border p-2 text-center">
-                  <button onClick={() => handleDelete(p.id)} className="px-2 py-1 bg-red-600 text-white rounded">Delete</button>
-                </td>
-              </tr>
-            ))}
-
-            {providers.length === 0 && (
+            {loading ? (
               <tr>
-                <td colSpan={6} className="text-center p-4 text-gray-500">No providers yet</td>
+                <td colSpan={6} className="text-center p-4">Loading...</td>
               </tr>
+            ) : providers.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="text-center p-4 text-gray-500">No providers found</td>
+              </tr>
+            ) : (
+              providers.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50">
+                  <td className="p-2 border">{p.name}</td>
+                  <td className="p-2 border">{p.serviceType || '-'}</td>
+                  <td className="p-2 border">{p.phone || '-'}</td>
+                  <td className="p-2 border">{p.email || '-'}</td>
+                  <td className="p-2 border">{new Date(p.createdAt).toLocaleDateString()}</td>
+                  <td className="p-2 border">
+                    <div className="flex gap-2">
+                      <button className="px-2 py-1 border rounded text-gray-700"><EditIcon fontSize="small" /></button>
+                      <button className="px-2 py-1 bg-red-600 text-white rounded"><DeleteIcon fontSize="small" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
-      )}
+      </div>
+
+      <div className="flex justify-between items-center mt-4">
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+
+        <span>Page {page} of {totalPages}</span>
+
+        <button
+          disabled={page === totalPages || totalPages === 0}
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+          className="px-3 py-1 border rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
