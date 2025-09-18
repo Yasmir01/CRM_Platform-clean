@@ -145,3 +145,14 @@ model Subscription {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }
+
+/// Tenant invites for onboarding flow
+model TenantInvite {
+  id         String   @id @default(cuid())
+  tenantId   String?  // optional link to tenant record
+  email      String
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
