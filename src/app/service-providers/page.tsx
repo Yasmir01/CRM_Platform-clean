@@ -24,7 +24,7 @@ export default function ServiceProvidersPage() {
 
   // Form state
   const [editing, setEditing] = useState<ServiceProvider | null>(null);
-  const [form, setForm] = useState({ name: "", service: "", phone: "", email: "", website: "" });
+  const [form, setForm] = useState({ name: "", category: "", phone: "", email: "", website: "" });
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
