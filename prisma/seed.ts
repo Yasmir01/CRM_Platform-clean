@@ -3,106 +3,86 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear old data (respect relation order)
+  // Clear existing data if needed (order matters)
   await prisma.ticket.deleteMany();
   await prisma.contact.deleteMany();
   await prisma.serviceProvider.deleteMany();
   await prisma.company.deleteMany();
 
-  // --- Companies ---
-  const acme = await prisma.company.create({
-    data: {
-      name: "Acme Corp",
-      industry: "Software",
-      website: "https://acme.example.com",
-    },
-  });
-
-  const globex = await prisma.company.create({
-    data: {
-      name: "Globex Inc",
-      industry: "Consulting",
-      website: "https://globex.example.com",
-    },
-  });
-
-  // --- Contacts ---
-  const john = await prisma.contact.create({
-    data: {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@acme.com",
-      phone: "+1 555-1234",
-      companyId: acme.id,
-    },
-  });
-
-  const jane = await prisma.contact.create({
-    data: {
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@globex.com",
-      phone: "+1 555-5678",
-      companyId: globex.id,
-    },
-  });
-
-  // --- Tickets ---
-  await prisma.ticket.createMany({
-    data: [
-      {
-        title: "Website not loading",
-        description: "Client reports CRM login page is down.",
-        priority: "High",
-        status: "Open",
-      },
-      {
-        title: "Invoice PDF issue",
-        description: "Generated invoices missing company logo.",
-        priority: "Medium",
-        status: "In Progress",
-      },
-      {
-        title: "Feature request: Dark mode",
-        description: "Subscriber requested dark theme for dashboard.",
-        priority: "Low",
-        status: "Open",
-      },
-    ],
-  });
-
-  // --- Service Providers ---
+  // Service Providers
   await prisma.serviceProvider.createMany({
     data: [
       {
-        name: "ACME Plumbing",
+        name: "QuickFix Plumbing",
         serviceType: "Plumbing",
         phone: "555-123-4567",
-        email: "support@acmeplumbing.com",
+        email: "support@quickfix.com",
       },
       {
-        name: "Bright Electric",
+        name: "BrightSpark Electricians",
         serviceType: "Electrical",
         phone: "555-987-6543",
-        email: "info@brightelectric.com",
+        email: "contact@brightspark.com",
       },
       {
-        name: "Top Roofers",
-        serviceType: "Roofing",
-        phone: "555-321-9999",
-        email: "hello@toproofers.com",
+        name: "CleanSweep Janitorial",
+        serviceType: "Cleaning",
+        phone: "555-222-3333",
+        email: "hello@cleansweep.com",
       },
     ],
+    skipDuplicates: true,
   });
 
-  console.log("✅ Seed data created: Companies, Contacts, Tickets, Service Providers");
+  // Companies
+  const company1 = await prisma.company.create({
+    data: {
+      name: "Acme Real Estate",
+      industry: "Real Estate",
+      email: "info@acme-re.com",
+      phone: "555-111-2222",
+    },
+  });
+
+  const company2 = await prisma.company.create({
+    data: {
+      name: "TechWorks Inc.",
+      industry: "Technology",
+      email: "support@techworks.com",
+      phone: "555-333-4444",
+    },
+  });
+
+  // Contacts (linked to companies)
+  await prisma.contact.createMany({
+    data: [
+      {
+        firstName: "Alice",
+        lastName: "Johnson",
+        email: "alice@acme-re.com",
+        phone: "555-111-9999",
+        companyId: company1.id,
+      },
+      {
+        firstName: "Bob",
+        lastName: "Martinez",
+        email: "bob@techworks.com",
+        phone: "555-333-7777",
+        companyId: company2.id,
+      },
+    ],
+    skipDuplicates: true,
+  });
+
+  console.log("✅ Seed complete!");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
     await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
   });
