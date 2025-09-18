@@ -1,5 +1,5 @@
-import * as React from "react";
-import * as React from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
@@ -132,14 +132,14 @@ export default function CrmMenuContent() {
   const { filterWorkOrders } = useServiceProviderScope();
 
   // Get actual new applications count from localStorage
-  const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
-  const [newTasksCount, setNewTasksCount] = React.useState(0);
-  const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
-  const [unreadMessagesCount, setUnreadMessagesCount] = React.useState(0);
+  const [newApplicationsCount, setNewApplicationsCount] = useState(0);
+  const [newTasksCount, setNewTasksCount] = useState(0);
+  const [newSuggestionsCount, setNewSuggestionsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
-  const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
+  const [assignedPropsCount, setAssignedPropsCount] = useState(0);
 
-  const recomputeAssignedPropsCount = React.useCallback(() => {
+  const recomputeAssignedPropsCount = useCallback(() => {
     try {
       const workOrders = LocalStorageService.getWorkOrders();
       const filtered = filterWorkOrders(workOrders || []);
@@ -151,7 +151,7 @@ export default function CrmMenuContent() {
     }
   }, [filterWorkOrders]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateApplicationCount = () => {
       const applications = LocalStorageService.getApplications();
       const newAppsCount = applications.filter((app: any) => app.status === 'New').length;
