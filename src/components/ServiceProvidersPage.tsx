@@ -1,6 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
+interface Company {
+  id: string;
+  name: string;
+}
+
 interface ServiceProvider {
   id: string;
   name: string;
@@ -12,13 +17,15 @@ interface ServiceProvider {
 
 export default function ServiceProvidersPage() {
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<ServiceProvider | null>(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", companyId: "" });
 
-  // Fetch providers
+  // Fetch providers + companies
   useEffect(() => {
     fetchProviders();
+    fetchCompanies();
   }, []);
 
   async function fetchProviders() {
@@ -29,10 +36,22 @@ export default function ServiceProvidersPage() {
       const list = Array.isArray(data) ? data : (data.data ?? data.providers ?? data);
       setProviders(list);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching providers:", err);
       setProviders([]);
     }
     setLoading(false);
+  }
+
+  async function fetchCompanies() {
+    try {
+      const res = await fetch("/api/companies");
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data.data ?? data.companies ?? data);
+      setCompanies(list || []);
+    } catch (err) {
+      console.error("Error fetching companies:", err);
+      setCompanies([]);
+    }
   }
 
   // Handle form submit (create or edit)
@@ -103,13 +122,20 @@ export default function ServiceProvidersPage() {
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             className="border p-2 rounded w-full"
           />
-          <input
-            type="text"
-            placeholder="Company ID"
+
+          {/* Dropdown for Company */}
+          <select
             value={form.companyId}
             onChange={(e) => setForm({ ...form, companyId: e.target.value })}
             className="border p-2 rounded w-full"
-          />
+          >
+            <option value="">-- Select Company --</option>
+            {companies.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
         </div>
         <button
           type="submit"
