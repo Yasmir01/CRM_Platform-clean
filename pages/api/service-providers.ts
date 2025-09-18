@@ -62,7 +62,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (email !== undefined) data.email = email;
           if (notes !== undefined) data.notes = notes;
           if (address !== undefined) data.address = address;
-          if (companyId !== undefined) data.companyId = companyId;
+          if (companyId !== undefined) {
+            if (companyId === null || typeof companyId !== 'string') return res.status(400).json({ error: 'companyId must be a string' });
+            const company = await prisma.company.findUnique({ where: { id: companyId } });
+            if (!company) return res.status(400).json({ error: 'companyId does not reference an existing company' });
+            data.companyId = companyId;
+          }
 
           const updated = await prisma.serviceProvider.update({ where: { id: String(id) }, data, include: { company: true } });
           return res.status(200).json(updated);
