@@ -104,3 +104,19 @@ model ServiceProvider {
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
 }
+
+model Ticket {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  status      String   @default("open") // open, in_progress, closed
+  priority    String   @default("medium") // low, medium, high
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  company   Company?   @relation(fields: [companyId], references: [id])
+  companyId String?
+  contact   Contact?   @relation(fields: [contactId], references: [id])
+  contactId String?
+}
