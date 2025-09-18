@@ -1,11 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-interface Company {
-  id: string;
-  name: string;
-}
-
 interface ServiceProvider {
   id: string;
   name: string;
@@ -17,15 +12,15 @@ interface ServiceProvider {
 
 export default function ServiceProvidersPage() {
   const [providers, setProviders] = useState<ServiceProvider[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<ServiceProvider | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", companyId: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "" });
 
-  // Fetch providers + companies
+  // 🔹 Replace this with actual companyId from session/auth
+  const companyId = "current-user-company-id";
+
   useEffect(() => {
     fetchProviders();
-    fetchCompanies();
   }, []);
 
   async function fetchProviders() {
@@ -42,24 +37,13 @@ export default function ServiceProvidersPage() {
     setLoading(false);
   }
 
-  async function fetchCompanies() {
-    try {
-      const res = await fetch("/api/companies");
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : (data.data ?? data.companies ?? data);
-      setCompanies(list || []);
-    } catch (err) {
-      console.error("Error fetching companies:", err);
-      setCompanies([]);
-    }
-  }
-
-  // Handle form submit (create or edit)
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     const method = editing ? "PUT" : "POST";
-    const body = editing ? { ...form, id: editing.id } : form;
+    const body = editing
+      ? { ...form, id: editing.id, companyId }
+      : { ...form, companyId };
 
     await fetch("/api/service-providers", {
       method,
@@ -67,12 +51,11 @@ export default function ServiceProvidersPage() {
       body: JSON.stringify(body),
     });
 
-    setForm({ name: "", email: "", phone: "", companyId: "" });
+    setForm({ name: "", email: "", phone: "" });
     setEditing(null);
     fetchProviders();
   }
 
-  // Handle delete
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this provider?")) return;
 
@@ -122,20 +105,6 @@ export default function ServiceProvidersPage() {
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             className="border p-2 rounded w-full"
           />
-
-          {/* Dropdown for Company */}
-          <select
-            value={form.companyId}
-            onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-            className="border p-2 rounded w-full"
-          >
-            <option value="">-- Select Company --</option>
-            {companies.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
         </div>
         <button
           type="submit"
@@ -148,7 +117,7 @@ export default function ServiceProvidersPage() {
             type="button"
             onClick={() => {
               setEditing(null);
-              setForm({ name: "", email: "", phone: "", companyId: "" });
+              setForm({ name: "", email: "", phone: "" });
             }}
             className="mt-4 ml-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
           >
@@ -183,7 +152,6 @@ export default function ServiceProvidersPage() {
                       name: p.name,
                       email: p.email || "",
                       phone: p.phone || "",
-                      companyId: p.companyId || "",
                     });
                   }}
                   className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600"
