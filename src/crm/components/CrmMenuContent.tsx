@@ -296,11 +296,29 @@ export default function CrmMenuContent() {
     navigate(path);
   };
 
+  // Compute menu items with role-based visibility
+  const computeMainMenu = () => {
+    let base = isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems);
+
+    // Determine if the current user should see Companies
+    const roleName = (user?.role || '').toString();
+    const isSUorSA = isSuperAdmin() || /^(SU|SA|SUPER_ADMIN|ADMIN)$/i.test(roleName);
+
+    if (!isSUorSA) {
+      // Subscribers should not see Companies; filter it out
+      base = base.filter(item => item.path !== '/crm/companies');
+    }
+
+    return base;
+  };
+
+  const menuItems = computeMainMenu();
+
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <Box>
         <List dense>
-          {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
+          {menuItems.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 selected={location.pathname === item.path}
