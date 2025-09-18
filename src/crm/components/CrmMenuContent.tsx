@@ -416,7 +416,12 @@ export default function CrmMenuContent() {
                     }
                   };
 
-                  const allowed = isAllowed((item as any).requiredPlan);
+                  // Also enforce role-level visibility for top-level items
+                  const roleRestrictedPaths = ['/crm/properties', '/crm/leases', '/crm/tenants', '/crm/accounting', '/crm/reports', '/crm/companies'];
+                  let allowed = isAllowed((item as any).requiredPlan);
+                  if ((isTenantUser || isVendorUser) && item.path && roleRestrictedPaths.includes(item.path)) {
+                    allowed = false;
+                  }
 
                   return (
                     <ListItemButton
