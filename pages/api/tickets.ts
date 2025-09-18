@@ -61,7 +61,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    res.setHeader('Allow', ['GET', 'POST']);
+    if (req.method === "PUT") {
+      try {
+        const { id, title, description, priority, status } = req.body || {};
+        if (!id) return res.status(400).json({ error: 'id is required' });
+
+        const data: any = {};
+        if (title !== undefined) data.title = String(title);
+        if (description !== undefined) data.description = String(description);
+        if (priority !== undefined) data.priority = priority;
+        if (status !== undefined) data.status = status;
+
+        const updated = await prisma.ticket.update({ where: { id: String(id) }, data });
+        return res.status(200).json(updated);
+      } catch (err) {
+        console.error('PUT /api/tickets error', err);
+        return res.status(500).json({ error: 'Failed to update ticket' });
+      }
+    }
+
+    if (req.method === "DELETE") {
+      try {
+        const { id } = req.body || {};
+        if (!id) return res.status(400).json({ error: 'id is required' });
+
+        await prisma.ticket.delete({ where: { id: String(id) } });
+        return res.status(200).json({ success: true });
+      } catch (err) {
+        console.error('DELETE /api/tickets error', err);
+        return res.status(500).json({ error: 'Failed to delete ticket' });
+      }
+    }
+
+    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   });
 }
