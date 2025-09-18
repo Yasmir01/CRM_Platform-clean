@@ -9,31 +9,6 @@ async function main() {
   await prisma.serviceProvider.deleteMany();
   await prisma.company.deleteMany();
 
-  // Service Providers
-  await prisma.serviceProvider.createMany({
-    data: [
-      {
-        name: "QuickFix Plumbing",
-        serviceType: "Plumbing",
-        phone: "555-123-4567",
-        email: "support@quickfix.com",
-      },
-      {
-        name: "BrightSpark Electricians",
-        serviceType: "Electrical",
-        phone: "555-987-6543",
-        email: "contact@brightspark.com",
-      },
-      {
-        name: "CleanSweep Janitorial",
-        serviceType: "Cleaning",
-        phone: "555-222-3333",
-        email: "hello@cleansweep.com",
-      },
-    ],
-    skipDuplicates: true,
-  });
-
   // Companies
   const company1 = await prisma.company.create({
     data: {
@@ -41,6 +16,7 @@ async function main() {
       industry: "Real Estate",
       email: "info@acme-re.com",
       phone: "555-111-2222",
+      address: "100 Main St",
     },
   });
 
@@ -50,7 +26,42 @@ async function main() {
       industry: "Technology",
       email: "support@techworks.com",
       phone: "555-333-4444",
+      address: "200 Tech Ave",
     },
+  });
+
+  // Service Providers (linked to companies)
+  await prisma.serviceProvider.createMany({
+    data: [
+      {
+        name: "QuickFix Plumbing",
+        serviceType: "Plumbing",
+        phone: "555-123-4567",
+        email: "support@quickfix.com",
+        address: "12 Flow Rd",
+        notes: "Preferred for plumbing emergencies",
+        companyId: company1.id,
+      },
+      {
+        name: "BrightSpark Electricians",
+        serviceType: "Electrical",
+        phone: "555-987-6543",
+        email: "contact@brightspark.com",
+        address: "34 Volt St",
+        notes: "Handles electrical inspections",
+        companyId: company2.id,
+      },
+      {
+        name: "CleanSweep Janitorial",
+        serviceType: "Cleaning",
+        phone: "555-222-3333",
+        email: "hello@cleansweep.com",
+        address: "56 Clean Blvd",
+        notes: "Daily janitorial services",
+        companyId: company1.id,
+      },
+    ],
+    skipDuplicates: true,
   });
 
   // Contacts (linked to companies)

@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             : {};
 
           const [providers, total] = await Promise.all([
-            prisma.serviceProvider.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+            prisma.serviceProvider.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { company: true } }),
             prisma.serviceProvider.count({ where }),
           ]);
 
@@ -28,15 +28,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case 'POST': {
-          const { name, serviceType, phone, email, notes } = req.body || {};
+          const { name, serviceType, phone, email, notes, address, companyId } = req.body || {};
           if (!name || typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' });
 
-          const provider = await prisma.serviceProvider.create({ data: { name: String(name).trim(), serviceType: serviceType || null, phone: phone || null, email: email || null, notes: notes || null } });
+          const provider = await prisma.serviceProvider.create({
+            data: {
+              name: String(name).trim(),
+              serviceType: serviceType || null,
+              phone: phone || null,
+              email: email || null,
+              notes: notes || null,
+              address: address || null,
+              companyId: companyId || null,
+            },
+            include: { company: true },
+          });
           return res.status(201).json(provider);
         }
 
         case 'PUT': {
-          const { id, name, serviceType, phone, email, notes } = req.body || {};
+          const { id, name, serviceType, phone, email, notes, address, companyId } = req.body || {};
           if (!id || typeof id !== 'string') return res.status(400).json({ error: 'id is required' });
 
           const data: any = {};
@@ -45,8 +56,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           if (phone !== undefined) data.phone = phone;
           if (email !== undefined) data.email = email;
           if (notes !== undefined) data.notes = notes;
+          if (address !== undefined) data.address = address;
+          if (companyId !== undefined) data.companyId = companyId;
 
-          const updated = await prisma.serviceProvider.update({ where: { id: String(id) }, data });
+          const updated = await prisma.serviceProvider.update({ where: { id: String(id) }, data, include: { company: true } });
           return res.status(200).json(updated);
         }
 
