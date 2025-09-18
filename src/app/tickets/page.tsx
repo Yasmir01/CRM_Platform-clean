@@ -24,6 +24,13 @@ export default function TicketsPage() {
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
 
+  // Create ticket form state
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [creating, setCreating] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
     return () => clearTimeout(t);
@@ -56,11 +63,113 @@ export default function TicketsPage() {
 
   const isLoadingSession = (sess as any).loading;
 
+  // Dynamic toasts (optional)
+  const toasts = ((): any => {
+    try {
+      // eslint-disable-next-line global-require
+      return require('../../crm/components/GlobalNotificationProvider').useNotifications();
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    if (!title || !description) {
+      setFormError('Title and description are required');
+      return;
+    }
+    setCreating(true);
+    try {
+      const res = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, priority }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || 'Failed to create ticket');
+      }
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      // feedback
+      if (toasts) toasts.showSuccess('Created', 'Ticket created successfully');
+      else { try { window.alert('Ticket created successfully'); } catch (e) {} }
+      // refresh list
+      setPage(1);
+      fetchTickets();
+    } catch (err: any) {
+      console.error('Create ticket failed', err);
+      setFormError(err?.message || 'Failed to create ticket');
+      if (toasts) toasts.showError('Create failed', String(err?.message || err));
+      else { try { window.alert('Error creating ticket'); } catch (e) {} }
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (isLoadingSession) return <p>Loading...</p>;
 
   return (
     <div className="tickets-page p-6">
       <h1 className="tickets-title text-2xl font-bold mb-4">Support Tickets</h1>
+
+      {/* Create form */}
+      <div className="create-ticket-wrap mb-6 max-w-3xl w-full">
+        <form onSubmit={handleCreate} className="create-ticket-form space-y-4 bg-white p-6 rounded-lg shadow">
+          <h2 className="text-lg font-semibold">Create New Ticket</h2>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="create-ticket-title w-full border rounded px-3 py-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="create-ticket-description w-full border rounded px-3 py-2"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Priority</label>
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="create-ticket-priority w-full border rounded px-3 py-2"
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+
+          {formError && <div className="text-sm text-red-600">{formError}</div>}
+
+          <div>
+            <button
+              type="submit"
+              disabled={creating}
+              className="create-ticket-submit bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            >
+              {creating ? 'Creating...' : 'Create Ticket'}
+            </button>
+          </div>
+        </form>
+      </div>
 
       <div className="tickets-actions flex items-center justify-between mb-4">
         <input
