@@ -60,30 +60,57 @@ export const mainListItems = [
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
   { text: "Companies", icon: <BusinessCenterRoundedIcon />, path: "/crm/companies" },
-  // Removed Sales & Marketing Automation to focus on property management
-  { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
-  { text: "Units", icon: <StorefrontRoundedIcon />, path: "/crm/units" },
-  { text: "Leases", icon: <ViewKanbanRoundedIcon />, path: "/crm/leases" },
-  { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
-  { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
-  { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
-  { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
-  { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
-  { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
+
+  // Properties group with nested entries
+  {
+    text: "Properties",
+    icon: <HomeWorkRoundedIcon />,
+    path: "/crm/properties",
+    children: [
+      { text: "Units", icon: <StorefrontRoundedIcon />, path: "/crm/units" },
+      { text: "Leases", icon: <ViewKanbanRoundedIcon />, path: "/crm/leases" },
+      { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
+    ],
+  },
+
+  // Leasing group
+  {
+    text: "Leasing",
+    icon: <DescriptionIcon />,
+    path: "/crm/leasing",
+    children: [
+      { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
+      { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
+      { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
+    ],
+  },
+
   { text: "Maintenance", icon: <BuildRoundedIcon />, path: "/crm/maintenance" },
   { text: "Accounting", icon: <AccountBalanceRoundedIcon />, path: "/crm/accounting" },
   { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
-  { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
-  { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
-  { text: "Tickets", icon: <SupportAgentRoundedIcon />, path: "/tickets" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
-  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
-  { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
-  { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
-  { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
-  { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
   { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
+
+  // Admin & Tools group
+  {
+    text: "Admin & Tools",
+    icon: <AdminPanelSettingsRoundedIcon />,
+    path: "/crm/admin",
+    children: [
+      { text: "Tickets", icon: <SupportAgentRoundedIcon />, path: "/tickets" },
+      { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
+      { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
+      { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
+      { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
+      { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
+      { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
+      { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
+      { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
+      { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
+      { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
+      { text: "Super Admin", icon: <GavelRoundedIcon />, path: "/crm/super-admin" },
+    ],
+  },
+
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
 
