@@ -156,3 +156,15 @@ model TenantInvite {
   used       Boolean  @default(false)
   createdAt  DateTime @default(now())
 }
+
+model VendorInvite {
+  id         String   @id @default(cuid())
+  vendorId   String?  // optional link to service provider record
+  email      String
+  name       String?
+  category   String?
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
