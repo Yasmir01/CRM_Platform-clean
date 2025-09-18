@@ -11,14 +11,30 @@ export default function Sidebar() {
   const [role, setRole] = useState<UserRole>("Subscriber");
 
   useEffect(() => {
-    try {
-      const storedRole = localStorage.getItem("userRole") as UserRole | null;
-      if (storedRole === "SU" || storedRole === "SA" || storedRole === "Subscriber") {
-        setRole(storedRole);
+    let mounted = true;
+    const fetchRole = async () => {
+      try {
+        const res = await fetch('/api/auth/session');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        const r = data?.role;
+        if (mounted && (r === 'SU' || r === 'SA' || r === 'Subscriber')) setRole(r);
+        return;
+      } catch (_err) {
+        // Fallback to localStorage if API not available
+        try {
+          const storedRole = localStorage.getItem('userRole') as UserRole | null;
+          if (storedRole === 'SU' || storedRole === 'SA' || storedRole === 'Subscriber') {
+            if (mounted) setRole(storedRole);
+          }
+        } catch (e) {
+          // ignore
+        }
       }
-    } catch (e) {
-      // Ignore localStorage errors in environments where it's unavailable
-    }
+    };
+
+    fetchRole();
+    return () => { mounted = false; };
   }, []);
 
   const navItems: { href: string; label: string; roles: UserRole[] }[] = [
