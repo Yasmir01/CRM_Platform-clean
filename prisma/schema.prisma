@@ -91,18 +91,13 @@ model Deal {
 }
 
 model ServiceProvider {
-  id         String   @id @default(cuid())
-  name       String
-  serviceType String?
-  phone      String?
-  email      String?
-  notes      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Optional relation to Company
-  companyId  String?
-  company    Company? @relation(fields: [companyId], references: [id])
+  id          String   @id @default(cuid())
+  name        String
+  serviceType String
+  phone       String?
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Ticket {
