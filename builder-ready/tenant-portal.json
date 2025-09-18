@@ -1,0 +1,92 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "TenantPortal",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "🏠 Tenant Portal" } }
+    },
+    {
+      "tagName": "div",
+      "properties": { "style": "margin: 16px 0;" },
+      "children": [
+        {
+          "component": { "name": "Text", "options": { "text": "Welcome, John Doe (Tenant)" } }
+        },
+        {
+          "component": { "name": "Text", "options": { "text": "Unit: 101 | Lease Status: Active" } }
+        }
+      ]
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;"
+      },
+      "children": [
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "💰 Current Balance" } } },
+            { "component": { "name": "Text", "options": { "text": "$1,200 Due" } } },
+            { "component": { "name": "Text", "options": { "text": "Pay Now" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "📝 Maintenance Requests" } } },
+            { "component": { "name": "Text", "options": { "text": "Submit a new request" } } },
+            { "component": { "name": "Text", "options": { "text": "View existing requests" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f9fafb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "📑 Lease Documents" } } },
+            { "component": { "name": "Text", "options": { "text": "Download Lease Agreement" } } },
+            { "component": { "name": "Text", "options": { "text": "View Renewal Options" } } }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "⚠️ Past Tenants – Pay Outstanding Balances" } }
+    },
+    {
+      "tagName": "div",
+      "properties": { "style": "background: #fff; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin: 12px 0;" },
+      "children": [
+        {
+          "component": {
+            "name": "Text",
+            "options": { "text": "Jane Smith (Former Tenant, Unit 203)" }
+          }
+        },
+        {
+          "component": {
+            "name": "Text",
+            "options": { "text": "Outstanding Balance: $1,450" }
+          }
+        },
+        {
+          "component": {
+            "name": "Text",
+            "options": { "text": "💳 Pay Balance Now" }
+          }
+        },
+        {
+          "component": {
+            "name": "Text",
+            "options": { "text": "Note: You no longer have access to maintenance or leasing tools, but you may settle your account." }
+          }
+        }
+      ]
+    }
+  ]
+}
