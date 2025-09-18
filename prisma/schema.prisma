@@ -132,3 +132,16 @@ model Ticket {
   serviceProvider    ServiceProvider? @relation(fields: [serviceProviderId], references: [id])
   serviceProviderId  String?
 }
+
+/// Subscriptions: separate table for landlord/property manager subscription records
+model Subscription {
+  id                    String   @id @default(cuid())
+  user                  User     @relation(fields: [userId], references: [id])
+  userId                String
+  plan                  String   @default("free")    // free, basic, pro, enterprise
+  status                String   @default("inactive")// active, canceled, past_due, inactive
+  stripeSubscriptionId  String?  @unique
+  currentPeriodEnd      DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
