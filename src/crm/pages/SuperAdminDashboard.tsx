@@ -186,11 +186,69 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
   React.useEffect(() => {
     try { if (!isSuperAdmin()) { console.warn('Access denied: Super Admin only'); } } catch {}
   }, [isSuperAdmin]);
+
   const [subscribers, setSubscribers] = React.useState<SubscriberAccount[]>(mockSubscribers);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("All");
   const [planFilter, setPlanFilter] = React.useState<string>("All");
   const [currentTab, setCurrentTab] = React.useState(0);
+
+  // Real metrics state
+  const [metrics, setMetrics] = React.useState<any>(null);
+  const [analytics, setAnalytics] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const [subsRes, dashRes, analyticsRes] = await Promise.all([
+          fetch('/api/admin/subscribers', { credentials: 'include' }),
+          fetch('/api/superadmin/dashboard', { credentials: 'include' }),
+          fetch('/api/superadmin/analytics', { credentials: 'include' }),
+        ]);
+
+        if (!mounted) return;
+
+        if (subsRes.ok) {
+          const subs = await subsRes.json();
+          // Map to SubscriberAccount shape (best-effort)
+          const mapped = (Array.isArray(subs) ? subs : []).map((s: any) => ({
+            id: s.id,
+            companyName: s.name || s.companyName || s.name || s.id,
+            contactEmail: (s.users && s.users[0] && s.users[0].email) || s.contactEmail || '',
+            contactName: (s.users && s.users[0] && s.users[0].name) || '',
+            phone: s.phone || '',
+            plan: (s.plan && (s.plan.name || s.plan.title)) || 'Basic',
+            status: s.active ? 'Active' : 'Inactive',
+            subscriptionDate: s.createdAt || new Date().toISOString(),
+            lastPayment: '',
+            nextPayment: '',
+            monthlyFee: (s.plan && Number(s.plan.price || 0)) || 0,
+            userCount: (s.users || []).length || 0,
+            propertyCount: s.propertyCount || 0,
+            lastLogin: s.lastLogin || '',
+            features: s.features || [],
+            paymentStatus: 'Current',
+          }));
+          setSubscribers(mapped);
+        }
+
+        if (dashRes.ok) {
+          const d = await dashRes.json();
+          setMetrics(d);
+        }
+
+        if (analyticsRes.ok) {
+          const a = await analyticsRes.json();
+          setAnalytics(a);
+        }
+      } catch (e) {
+        console.warn('Failed to load super admin data', e);
+      }
+    }
+    load();
+    return () => { mounted = false; };
+  }, []);
   const [selectedSubscriber, setSelectedSubscriber] = React.useState<SubscriberAccount | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = React.useState(false);
   const [actionDialogOpen, setActionDialogOpen] = React.useState(false);
