@@ -1,4 +1,5 @@
---sidebar-width: 16rem; /* 256px */
+:root {
+  --sidebar-width: 16rem; /* 256px */
   --sidebar-bg: #111827;
   --sidebar-text: #ffffff;
   --main-bg: #f9fafb;
