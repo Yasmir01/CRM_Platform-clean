@@ -79,21 +79,18 @@ async function main() {
         serviceType: "Plumbing",
         phone: "555-123-4567",
         email: "support@acmeplumbing.com",
-        notes: "24/7 emergency service",
       },
       {
         name: "Bright Electric",
         serviceType: "Electrical",
         phone: "555-987-6543",
         email: "info@brightelectric.com",
-        notes: "Certified electricians",
       },
       {
         name: "Top Roofers",
         serviceType: "Roofing",
         phone: "555-321-9999",
         email: "hello@toproofers.com",
-        notes: "Specialists in flat roofs",
       },
     ],
   });
