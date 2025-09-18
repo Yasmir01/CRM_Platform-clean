@@ -1,9 +1,9 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import React, { Suspense } from "react";
 import { useUser } from "@/hooks/useUser";
 
-const Sidebar = dynamic(() => import("./Sidebar"), { ssr: false });
+const Sidebar = React.lazy(() => import("./Sidebar"));
 
 export default function SidebarWrapper({ email }: { email?: string }) {
   const { user, loading } = useUser(email);
@@ -11,5 +11,9 @@ export default function SidebarWrapper({ email }: { email?: string }) {
   if (loading) return <div>Loading...</div>;
   if (!user) return <div>No session found</div>;
 
-  return <Sidebar user={user} />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Sidebar user={user} />
+    </Suspense>
+  );
 }
