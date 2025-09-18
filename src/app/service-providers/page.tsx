@@ -163,7 +163,7 @@ export default function ServiceProvidersPage() {
               providers.map((p) => (
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="border px-3 py-2">{p.name}</td>
-                  <td className="border px-3 py-2">{p.service || '-'}</td>
+                  <td className="border px-3 py-2">{(p as any).category || p.service || '-'}</td>
                   <td className="border px-3 py-2">{p.phone || '-'}</td>
                   <td className="border px-3 py-2">{p.email || '-'}</td>
                   <td className="border px-3 py-2">{p.website ? (<a href={p.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{p.website}</a>) : '-'}</td>
