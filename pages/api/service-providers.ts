@@ -30,6 +30,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         case 'POST': {
           const { name, serviceType, phone, email, notes, address, companyId } = req.body || {};
           if (!name || typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' });
+          if (!companyId || typeof companyId !== 'string') return res.status(400).json({ error: 'companyId is required' });
+
+          // ensure company exists
+          const company = await prisma.company.findUnique({ where: { id: companyId } });
+          if (!company) return res.status(400).json({ error: 'companyId does not reference an existing company' });
 
           const provider = await prisma.serviceProvider.create({
             data: {
@@ -39,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               email: email || null,
               notes: notes || null,
               address: address || null,
-              companyId: companyId || null,
+              companyId: companyId,
             },
             include: { company: true },
           });
