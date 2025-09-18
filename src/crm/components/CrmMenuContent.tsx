@@ -60,18 +60,20 @@ export const mainListItems = [
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
   { text: "Companies", icon: <BusinessCenterRoundedIcon />, path: "/crm/companies" },
-  { text: "Sales Automation", icon: <SellRoundedIcon />, path: "/crm/sales" },
-  { text: "Marketing Automation", icon: <AutorenewRoundedIcon />, path: "/crm/marketing" },
+  // Removed Sales & Marketing Automation to focus on property management
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
+  { text: "Units", icon: <StorefrontRoundedIcon />, path: "/crm/units" },
+  { text: "Leases", icon: <ViewKanbanRoundedIcon />, path: "/crm/leases" },
   { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
   { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
   { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
   { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
   { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
   { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
+  { text: "Maintenance", icon: <BuildRoundedIcon />, path: "/crm/maintenance" },
+  { text: "Accounting", icon: <AccountBalanceRoundedIcon />, path: "/crm/accounting" },
   { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
   { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
-  { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
   { text: "Tickets", icon: <SupportAgentRoundedIcon />, path: "/tickets" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
@@ -82,6 +84,7 @@ export const mainListItems = [
   { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
   { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
   { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
+  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
 
 const marketingListItems = [
