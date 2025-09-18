@@ -381,6 +381,19 @@ export default function CrmMenuContent() {
                 </ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItemButton>
+
+              {item.children && (
+                <List component="div" disablePadding sx={{ pl: 4 }}>
+                  {item.children.map((child, idx) => (
+                    <ListItem key={idx} disablePadding sx={{ display: "block" }}>
+                      <ListItemButton selected={location.pathname === child.path} onClick={() => handleNavigation(child.path)}>
+                        <ListItemIcon>{child.icon}</ListItemIcon>
+                        <ListItemText primary={child.text} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </ListItem>
           ))}
         </List>
