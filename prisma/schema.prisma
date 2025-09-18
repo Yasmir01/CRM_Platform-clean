@@ -100,8 +100,8 @@ model ServiceProvider {
   address   String?
   notes     String?
 
-  companyId String?
-  company   Company? @relation(fields: [companyId], references: [id])
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
