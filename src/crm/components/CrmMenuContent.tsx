@@ -337,20 +337,11 @@ export default function CrmMenuContent() {
 
   // Compute menu items with role-based visibility
   const computeMainMenu = () => {
-    const roleRaw = (user?.role || '').toString();
-    const role = roleRaw.toLowerCase();
-
-    const isTenant = /tenant/i.test(role);
-    const isVendor = /vendor|service provider/i.test(role);
-    const isLandlord = /landlord/i.test(role);
-    const isPropertyManager = /property[_ ]?manager/i.test(role) || /manager/i.test(role);
-    const isAdmin = isSuperAdmin() || /^(su|sa|super_admin|admin)$/i.test(roleRaw);
-
     // Base menu depends primarily on role/mode
     let base = mainListItems;
-    if (isTenant || isTenantMode) {
+    if (isTenantUser || isTenantMode) {
       base = tenantMenuItems;
-    } else if (isVendor) {
+    } else if (isVendorUser) {
       base = serviceProviderMenuItems;
     } else {
       base = mainListItems;
@@ -359,16 +350,16 @@ export default function CrmMenuContent() {
     // Filter out items that shouldn't be visible to certain roles
     base = base.filter((item) => {
       // Tenant and Vendor should not see management/companies by default
-      if ((isTenant || isVendor) && item.path && ['/crm/companies', '/crm/companies'].includes(item.path)) return false;
+      if ((isTenantUser || isVendorUser) && item.path && ['/crm/companies'].includes(item.path)) return false;
 
       // Properties / Leasing / Accounting should be hidden from tenants and vendors
-      if ((isTenant || isVendor) && item.path && ['/crm/properties', '/crm/leasing', '/crm/accounting', '/crm/reports', '/crm/rent-collection'].includes(item.path)) return false;
+      if ((isTenantUser || isVendorUser) && item.path && ['/crm/properties', '/crm/leasing', '/crm/accounting', '/crm/reports', '/crm/rent-collection'].includes(item.path)) return false;
 
       return true;
     });
 
-    // Non-admins shouldn't see Super Admin item later; handle companies visibility
-    if (!isAdmin) {
+    // Non-admins shouldn't see Companies
+    if (!isAdminUser) {
       base = base.filter(item => item.path !== '/crm/companies');
     }
 
