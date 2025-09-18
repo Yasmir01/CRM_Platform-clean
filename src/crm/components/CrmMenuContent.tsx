@@ -160,6 +160,15 @@ export default function CrmMenuContent() {
   const { user } = useAuth();
   const { filterWorkOrders } = useServiceProviderScope();
 
+  // Role flags (normalize common role names)
+  const roleRaw = (user?.role || '').toString();
+  const roleLower = roleRaw.toLowerCase();
+  const isTenantUser = /tenant/i.test(roleLower);
+  const isVendorUser = /vendor|service provider/i.test(roleLower);
+  const isLandlordUser = /landlord/i.test(roleLower);
+  const isPropertyManagerUser = /property[_ ]?manager/i.test(roleLower) || /manager/i.test(roleLower);
+  const isAdminUser = isSuperAdmin() || /^(su|sa|super_admin|admin)$/i.test(roleRaw);
+
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = useState(0);
   const [newTasksCount, setNewTasksCount] = useState(0);
