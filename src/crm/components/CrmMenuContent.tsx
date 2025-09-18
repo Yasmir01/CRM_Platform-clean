@@ -328,14 +328,38 @@ export default function CrmMenuContent() {
 
   // Compute menu items with role-based visibility
   const computeMainMenu = () => {
-    let base = isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems);
+    const roleRaw = (user?.role || '').toString();
+    const role = roleRaw.toLowerCase();
 
-    // Determine if the current user should see Companies
-    const roleName = (user?.role || '').toString();
-    const isSUorSA = isSuperAdmin() || /^(SU|SA|SUPER_ADMIN|ADMIN)$/i.test(roleName);
+    const isTenant = /tenant/i.test(role);
+    const isVendor = /vendor|service provider/i.test(role);
+    const isLandlord = /landlord/i.test(role);
+    const isPropertyManager = /property[_ ]?manager/i.test(role) || /manager/i.test(role);
+    const isAdmin = isSuperAdmin() || /^(su|sa|super_admin|admin)$/i.test(roleRaw);
 
-    if (!isSUorSA) {
-      // Subscribers should not see Companies; filter it out
+    // Base menu depends primarily on role/mode
+    let base = mainListItems;
+    if (isTenant || isTenantMode) {
+      base = tenantMenuItems;
+    } else if (isVendor) {
+      base = serviceProviderMenuItems;
+    } else {
+      base = mainListItems;
+    }
+
+    // Filter out items that shouldn't be visible to certain roles
+    base = base.filter((item) => {
+      // Tenant and Vendor should not see management/companies by default
+      if ((isTenant || isVendor) && item.path && ['/crm/companies', '/crm/companies'].includes(item.path)) return false;
+
+      // Properties / Leasing / Accounting should be hidden from tenants and vendors
+      if ((isTenant || isVendor) && item.path && ['/crm/properties', '/crm/leasing', '/crm/accounting', '/crm/reports', '/crm/rent-collection'].includes(item.path)) return false;
+
+      return true;
+    });
+
+    // Non-admins shouldn't see Super Admin item later; handle companies visibility
+    if (!isAdmin) {
       base = base.filter(item => item.path !== '/crm/companies');
     }
 
