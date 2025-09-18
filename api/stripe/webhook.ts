@@ -65,7 +65,12 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
       // Persist on User record if customer_email present
       try {
         const email = session.customer_email || undefined;
+        let user: any = null;
         if (email) {
+          user = await prisma.user.findUnique({ where: { email } }).catch(() => null);
+        }
+
+        if (user) {
           const updateData: any = {
             subscriptionPlan: plan === 'FREE' ? 'free' : plan.toLowerCase(),
             subscriptionStatus: 'active',
@@ -73,8 +78,33 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
           if (subscriptionId) updateData.subscriptionId = subscriptionId;
           if (currentPeriodEnd) updateData.currentPeriodEnd = currentPeriodEnd;
 
-          await prisma.user.updateMany({ where: { email }, data: updateData });
+          await prisma.user.update({ where: { id: user.id }, data: updateData });
           console.log('Updated user subscription from webhook', email, updateData);
+
+          // Upsert subscription record linked to this user
+          try {
+            if (subscriptionId) {
+              await prisma.subscription.upsert({
+                where: { stripeSubscriptionId: subscriptionId },
+                create: {
+                  userId: user.id,
+                  plan: updateData.subscriptionPlan,
+                  status: updateData.subscriptionStatus,
+                  stripeSubscriptionId: subscriptionId,
+                  currentPeriodEnd: currentPeriodEnd,
+                },
+                update: {
+                  userId: user.id,
+                  plan: updateData.subscriptionPlan,
+                  status: updateData.subscriptionStatus,
+                  currentPeriodEnd: currentPeriodEnd,
+                },
+              });
+              console.log('Upserted subscription record for user', user.id, subscriptionId);
+            }
+          } catch (e) {
+            console.error('Failed to upsert subscription record', e);
+          }
         }
       } catch (e) {
         console.error('Failed to update user from checkout.session.completed', e);
