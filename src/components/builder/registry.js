@@ -1,5 +1,6 @@
 import PropertyLandingPage from "./PropertyLandingPage.tsx";
 import PropertyLeadForm from "./PropertyLeadForm.tsx";
+import SidebarWrapper from "../SidebarWrapper";
 
 /**
  * Register components with Builder so editors can drag/drop and edit props.
