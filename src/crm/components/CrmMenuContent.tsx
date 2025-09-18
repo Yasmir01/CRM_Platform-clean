@@ -383,7 +383,7 @@ export default function CrmMenuContent() {
               </ListItemButton>
 
               {item.children && (
-                <List component="div" disablePadding sx={{ pl: 4 }}>
+                <List disablePadding sx={{ pl: 4 }}>
                   {item.children.map((child, idx) => (
                     <ListItem key={idx} disablePadding sx={{ display: "block" }}>
                       <ListItemButton selected={location.pathname === child.path} onClick={() => handleNavigation(child.path)}>
