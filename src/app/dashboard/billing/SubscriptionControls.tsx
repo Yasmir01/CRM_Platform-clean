@@ -9,17 +9,15 @@ export default function SubscriptionControls(_: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const pricePro = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO || "";
-  const priceEnterprise = process.env.NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE || "";
-
-  async function handleCheckout(priceId: string) {
+  // We now pass plan keys (basic/pro/enterprise) to the backend which maps to real Price IDs
+  async function handleCheckout(plan: string) {
     try {
       setError(null);
       setLoading(true);
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ plan }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Failed to create checkout session');
@@ -43,33 +41,31 @@ export default function SubscriptionControls(_: Props) {
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.planName}>Pro</h3>
-            <div className={styles.planPrice}>$29 / month</div>
+            <div className={styles.planPrice}>$149 / month</div>
           </div>
           <p className={styles.planDescription}>Everything small teams need.</p>
           <button
             className={styles.upgradeButton}
-            disabled={loading || !pricePro}
-            onClick={() => handleCheckout(pricePro)}
+            disabled={loading}
+            onClick={() => handleCheckout('pro')}
           >
             {loading ? 'Redirecting…' : 'Upgrade to Pro'}
           </button>
-          {!pricePro && <div className={styles.hint}>Price not configured</div>}
         </div>
 
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <h3 className={styles.planName}>Enterprise</h3>
-            <div className={styles.planPrice}>Custom pricing</div>
+            <div className={styles.planPrice}>$200 / month</div>
           </div>
           <p className={styles.planDescription}>Advanced features and support.</p>
           <button
             className={styles.upgradeButton}
-            disabled={loading || !priceEnterprise}
-            onClick={() => handleCheckout(priceEnterprise)}
+            disabled={loading}
+            onClick={() => handleCheckout('enterprise')}
           >
             {loading ? 'Redirecting…' : 'Upgrade to Enterprise'}
           </button>
-          {!priceEnterprise && <div className={styles.hint}>Price not configured</div>}
         </div>
       </div>
 
