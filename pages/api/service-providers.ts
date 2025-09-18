@@ -10,13 +10,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   return runWithRequestSession(req as any, async () => {
     try {
       switch (req.method) {
-        case "GET": {
-          const providers = await prisma.serviceProvider.findMany({ orderBy: { createdAt: "desc" } });
-          return res.status(200).json(providers);
+            case "GET": {
+          const { page = "1", pageSize = "10", search = "" } = req.query as Record<string, string>;
+          const skip = (parseInt(page, 10) - 1) * parseInt(pageSize, 10);
+          const take = parseInt(pageSize, 10);
+
+          const where = search
+            ? {
+                OR: [
+                  { name: { contains: search, mode: "insensitive" } },
+                  { service: { contains: search, mode: "insensitive" } },
+                ],
+              }
+            : {};
+
+          const [providers, total] = await Promise.all([
+            prisma.serviceProvider.findMany({ where, skip, take, orderBy: { createdAt: "desc" }, include: { company: true } }),
+            prisma.serviceProvider.count({ where }),
+          ]);
+
+          return res.status(200).json({ providers, total });
         }
 
         case "POST": {
-          let { name, email, phone, service, notes } = req.body || {};
+          let { name, email, phone, service, notes, companyId } = req.body || {};
 
           if (!name || typeof name !== "string" || !name.trim()) {
             return res.status(400).json({ error: "Service provider name is required" });
@@ -27,6 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           phone = typeof phone === "string" ? phone.trim() : undefined;
           service = typeof service === "string" ? service.trim() : undefined;
           notes = typeof notes === "string" ? notes.trim() : undefined;
+          companyId = typeof companyId === "string" ? companyId : undefined;
 
           if (email && !/^\S+@\S+\.\S+$/.test(email)) {
             return res.status(400).json({ error: "Invalid email address" });
@@ -36,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
 
           const provider = await prisma.serviceProvider.create({
-            data: { name, email, phone, service, notes },
+            data: { name, email, phone, service, notes, companyId },
           });
 
           return res.status(201).json(provider);
