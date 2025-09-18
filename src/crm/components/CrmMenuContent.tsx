@@ -479,10 +479,16 @@ export default function CrmMenuContent() {
                         const currentPlan = getCurrentPlan();
                         const cur = planOrder[(currentPlan || '').toLowerCase()] || 1;
                         const req = planOrder[(requiredPlan || '').toLowerCase()] || 1;
-                        const allowedChild = isSuperAdmin() || cur >= req;
+                        let allowedChild = isSuperAdmin() || cur >= req;
+
+                        // Role-based restrictions for child paths
+                        const childRestrictedPaths = ['/crm/units', '/crm/leases', '/crm/tenants', '/crm/applications'];
+                        if ((isTenantUser || isVendorUser) && child.path && childRestrictedPaths.includes(child.path)) {
+                          allowedChild = false;
+                        }
 
                         return (
-                          <ListItemButton selected={location.pathname === child.path} onClick={() => { if (allowedChild) handleNavigation(child.path); else { window.alert(`This feature requires the ${(requiredPlan||'PRO').toUpperCase()} plan. Upgrade to access.`); window.location.href = '/crm/subscriptions'; } }} sx={allowedChild ? {} : { opacity: 0.6, cursor: 'pointer' }}>
+                          <ListItemButton selected={location.pathname === child.path} onClick={() => { if (allowedChild) handleNavigation(child.path); else { window.alert(`This feature requires the ${(requiredPlan||'PRO').toUpperCase()} plan or appropriate role. Upgrade or contact admin to access.`); window.location.href = '/crm/subscriptions'; } }} sx={allowedChild ? {} : { opacity: 0.6, cursor: 'pointer' }}>
                             <ListItemIcon>{child.icon}</ListItemIcon>
                             <ListItemText primary={child.text} />
                           </ListItemButton>
