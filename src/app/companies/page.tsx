@@ -31,11 +31,19 @@ export default function CompaniesPage() {
   const user = (sess as any).user;
   const isSuper = Boolean(user && ((user.roles && user.roles.includes('SUPER_ADMIN')) || user.role === 'SUPER_ADMIN'));
 
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const fetchCompanies = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-      if (search) params.set("search", search);
+      if (debouncedSearch) params.set("search", debouncedSearch);
 
       const res = await fetch(`/api/companies?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch companies");
@@ -50,9 +58,10 @@ export default function CompaniesPage() {
   };
 
   useEffect(() => {
+    // reset page when pageSize changes handled elsewhere; here we fetch on debouncedSearch/page/pageSize
     fetchCompanies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, search]);
+  }, [page, pageSize, debouncedSearch]);
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
