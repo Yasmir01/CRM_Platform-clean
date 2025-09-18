@@ -229,6 +229,43 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         console.error('Failed to update users from subscription event', e);
       }
     }
+
+    // Handle payment intent succeeded (tenant payments)
+    if (event.type === 'payment_intent.succeeded') {
+      const intent = event.data.object as Stripe.PaymentIntent & { metadata?: any };
+      try {
+        const metadata = intent.metadata || {};
+        const amount = intent.amount_received ?? intent.amount || 0;
+        // Prefer explicit tenantId in metadata
+        const tenantId = metadata.tenantId || metadata.tenant_id || undefined;
+        if (tenantId) {
+          try {
+            await prisma.tenant.update({ where: { id: String(tenantId) }, data: { balance: { decrement: Number(amount) / 100 } } as any });
+            console.log('Decremented tenant balance for tenantId', tenantId, amount);
+            return;
+          } catch (e) {
+            console.warn('Failed to update tenant by id from payment intent', e);
+          }
+        }
+
+        // Fallback: try email from charges
+        const charges = (intent.charges && (intent.charges as any).data) || [];
+        const billingEmail = charges[0]?.billing_details?.email || intent.receipt_email || intent.customer_email;
+        if (billingEmail) {
+          try {
+            const t = await prisma.tenant.findFirst({ where: { email: billingEmail } });
+            if (t) {
+              await prisma.tenant.update({ where: { id: t.id }, data: { balance: { decrement: Number(amount) / 100 } } as any });
+              console.log('Decremented tenant balance for email', billingEmail, amount);
+            }
+          } catch (e) {
+            console.warn('Failed to update tenant by email from payment intent', e);
+          }
+        }
+      } catch (e) {
+        console.error('Failed handling payment_intent.succeeded', e);
+      }
+    }
   } catch (e) {
     console.error('Webhook handler error', e);
   }
