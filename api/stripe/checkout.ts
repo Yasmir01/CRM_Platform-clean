@@ -19,8 +19,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const priceId = String(body.priceId || '');
-    if (!priceId) return res.status(400).json({ error: 'Missing priceId' });
+    const plan = String((body.plan || '').toLowerCase() || '');
+    const suppliedPriceId = String(body.priceId || '');
+
+    // Price mapping provided by user
+    const priceMap: Record<string, string> = {
+      basic: 'price_1S8nebJmsBh8kkKukov2pqNI',
+      pro: 'price_1S8nfLJmsBh8kkKuaFkqiD5c',
+      enterprise: 'price_1S8ngqJmsBh8kkKuHphcNyHd',
+    };
+
+    // Prefer explicit priceId, fall back to plan mapping
+    const priceId = suppliedPriceId || (plan ? priceMap[plan] : '');
+    if (!priceId) return res.status(400).json({ error: 'Missing priceId or plan' });
 
     const secret = process.env.STRIPE_SECRET_KEY;
     if (!secret) return res.status(500).json({ error: 'Stripe not configured' });
@@ -45,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items,
-      subscription_data: { metadata: { accountId: dbUser.accountId, priceId } },
+      subscription_data: { metadata: { accountId: dbUser.accountId, priceId, plan: plan || null } },
       success_url: successUrl,
       cancel_url: cancelUrl,
       customer_email: dbUser.email || undefined,
