@@ -20,6 +20,7 @@ export default function TicketsPage() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Low');
   const [status, setStatus] = useState('Open');
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTickets();
@@ -30,7 +31,6 @@ export default function TicketsPage() {
     try {
       const res = await fetch('/api/tickets');
       const data = await res.json();
-      // support both shapes: array or { tickets: [...] }
       const items = Array.isArray(data) ? data : (data?.tickets ?? data);
       setTickets(items || []);
     } catch (e) {
@@ -48,13 +48,26 @@ export default function TicketsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, description, priority, status }),
       });
-      setTitle('');
-      setDescription('');
-      setPriority('Low');
-      setStatus('Open');
+      resetForm();
       fetchTickets();
     } catch (err) {
       console.error('Create ticket error', err);
+    }
+  }
+
+  async function updateTicket(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!editId) return;
+    try {
+      await fetch('/api/tickets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editId, title, description, priority, status }),
+      });
+      resetForm();
+      fetchTickets();
+    } catch (err) {
+      console.error('Update ticket error', err);
     }
   }
 
@@ -67,17 +80,34 @@ export default function TicketsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id }),
       });
+      if (editId === id) resetForm();
       fetchTickets();
     } catch (err) {
       console.error('Delete ticket error', err);
     }
   }
 
+  function startEdit(ticket: Ticket) {
+    setEditId(ticket.id);
+    setTitle(ticket.title);
+    setDescription(ticket.description || '');
+    setPriority(ticket.priority || 'Low');
+    setStatus(ticket.status || 'Open');
+  }
+
+  function resetForm() {
+    setEditId(null);
+    setTitle('');
+    setDescription('');
+    setPriority('Low');
+    setStatus('Open');
+  }
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Tickets</h1>
 
-      <form onSubmit={createTicket} className="grid grid-cols-1 gap-2 mb-6 max-w-2xl">
+      <form onSubmit={editId ? updateTicket : createTicket} className="grid grid-cols-1 gap-2 mb-6 max-w-2xl">
         <input
           type="text"
           placeholder="Title"
@@ -107,9 +137,16 @@ export default function TicketsPage() {
             <option>Closed</option>
           </select>
 
-          <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
-            Add Ticket
-          </button>
+          <div>
+            <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+              {editId ? 'Update Ticket' : 'Add Ticket'}
+            </button>
+            {editId && (
+              <button type="button" onClick={resetForm} className="ml-2 px-4 py-2 bg-gray-300 rounded">
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       </form>
 
@@ -140,9 +177,14 @@ export default function TicketsPage() {
                 <td className="p-2 border">{t.contact?.name || '-'}</td>
                 <td className="p-2 border">{new Date(t.createdAt).toLocaleDateString()}</td>
                 <td className="p-2 border">
-                  <button onClick={() => deleteTicket(t.id)} className="px-2 py-1 bg-red-600 text-white rounded">
-                    Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => startEdit(t)} className="px-2 py-1 bg-yellow-500 text-white rounded">
+                      Edit
+                    </button>
+                    <button onClick={() => deleteTicket(t.id)} className="px-2 py-1 bg-red-600 text-white rounded">
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
