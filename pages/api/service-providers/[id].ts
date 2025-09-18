@@ -20,13 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "PUT": {
-          let { name, email, phone, service, notes } = req.body || {};
+          let { name, email, phone, category, service, website, notes } = req.body || {};
 
           if (name && typeof name === "string") name = name.trim();
           if (email && typeof email === "string") email = email.trim();
           if (phone && typeof phone === "string") phone = phone.trim();
-          if (service && typeof service === "string") service = service.trim();
-          if (notes && typeof notes === "string") notes = notes.trim();
+          category = typeof category === 'string' ? category.trim() : (typeof service === 'string' ? service.trim() : undefined);
+          website = typeof website === 'string' ? website.trim() : (typeof notes === 'string' ? notes.trim() : undefined);
 
           if (email && !/^\S+@\S+\.\S+$/.test(email)) {
             return res.status(400).json({ error: "Invalid email address" });
@@ -35,7 +35,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(400).json({ error: "Invalid phone number" });
           }
 
-          const updated = await prisma.serviceProvider.update({ where: { id }, data: { name, email, phone, service, notes } });
+          const data: any = {};
+          if (name !== undefined) data.name = name;
+          if (email !== undefined) data.email = email;
+          if (phone !== undefined) data.phone = phone;
+          if (category !== undefined) data.category = category;
+          if (website !== undefined) data.website = website;
+
+          const updated = await prisma.serviceProvider.update({ where: { id }, data });
           return res.status(200).json(updated);
         }
 
