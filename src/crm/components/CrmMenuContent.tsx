@@ -427,10 +427,30 @@ export default function CrmMenuContent() {
                 <List disablePadding sx={{ pl: 4 }}>
                   {item.children.map((child, idx) => (
                     <ListItem key={idx} disablePadding sx={{ display: "block" }}>
-                      <ListItemButton selected={location.pathname === child.path} onClick={() => handleNavigation(child.path)}>
-                        <ListItemIcon>{child.icon}</ListItemIcon>
-                        <ListItemText primary={child.text} />
-                      </ListItemButton>
+                      {
+                      (() => {
+                        const requiredPlan = (child as any).requiredPlan;
+                        const planOrder: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
+                        const getCurrentPlan = () => {
+                          try {
+                            if (user && (user as any).subscriptionPlan) return (user as any).subscriptionPlan;
+                            const p = typeof window !== 'undefined' ? window.localStorage.getItem('company_plan') : null;
+                            return p || 'basic';
+                          } catch (e) { return 'basic'; }
+                        };
+                        const currentPlan = getCurrentPlan();
+                        const cur = planOrder[(currentPlan || '').toLowerCase()] || 1;
+                        const req = planOrder[(requiredPlan || '').toLowerCase()] || 1;
+                        const allowedChild = isSuperAdmin() || cur >= req;
+
+                        return (
+                          <ListItemButton selected={location.pathname === child.path} onClick={() => { if (allowedChild) handleNavigation(child.path); else { window.alert(`This feature requires the ${(requiredPlan||'PRO').toUpperCase()} plan. Upgrade to access.`); window.location.href = '/crm/subscriptions'; } }} sx={allowedChild ? {} : { opacity: 0.6, cursor: 'pointer' }}>
+                            <ListItemIcon>{child.icon}</ListItemIcon>
+                            <ListItemText primary={child.text} />
+                          </ListItemButton>
+                        );
+                      })()
+                    }
                     </ListItem>
                   ))}
                 </List>
