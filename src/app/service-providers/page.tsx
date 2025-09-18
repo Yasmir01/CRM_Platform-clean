@@ -117,7 +117,7 @@ export default function ServiceProvidersPage() {
         <h2 className="font-semibold mb-2">{editing ? 'Edit Provider' : 'Add Provider'}</h2>
         <div className="grid grid-cols-2 gap-4">
           <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="border rounded px-2 py-1" />
-          <input placeholder="Category" value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className="border rounded px-2 py-1" />
+          <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="border rounded px-2 py-1" />
           <input placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="border rounded px-2 py-1" />
           <input placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="border rounded px-2 py-1" />
           <input placeholder="Website" value={form.website || ''} onChange={(e) => setForm({ ...form, website: e.target.value })} className="border rounded px-2 py-1 col-span-2" />
