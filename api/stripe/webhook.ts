@@ -35,9 +35,23 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
       const accountId = session.metadata?.accountId as string | undefined;
       const priceId = session.metadata?.priceId as string | undefined;
 
-      let plan: 'FREE' | 'PRO' | 'ENTERPRISE' = 'FREE';
+      let plan: 'free' | 'PRO' | 'ENTERPRISE' | 'PRO' = 'FREE';
+      // Determine plan from metadata priceId or mapping to env prices
       if (priceId && process.env.STRIPE_PRICE_PRO && priceId === process.env.STRIPE_PRICE_PRO) plan = 'PRO';
       if (priceId && process.env.STRIPE_PRICE_ENTERPRISE && priceId === process.env.STRIPE_PRICE_ENTERPRISE) plan = 'ENTERPRISE';
+
+      // Try to fetch subscription details if available to get current_period_end and subscription id
+      let subscriptionObj: Stripe.Subscription | null = null;
+      try {
+        if (session.subscription) {
+          subscriptionObj = await stripe.subscriptions.retrieve(String(session.subscription));
+        }
+      } catch (e) {
+        console.warn('Failed to retrieve subscription for checkout.session.completed', e);
+      }
+
+      const subscriptionId = subscriptionObj?.id || (session.subscription ? String(session.subscription) : undefined) || undefined;
+      const currentPeriodEnd = subscriptionObj?.current_period_end ? new Date(subscriptionObj.current_period_end * 1000) : undefined;
 
       if (accountId) {
         try {
@@ -46,6 +60,24 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         } catch (e) {
           console.error('Failed to update account plan', e);
         }
+      }
+
+      // Persist on User record if customer_email present
+      try {
+        const email = session.customer_email || undefined;
+        if (email) {
+          const updateData: any = {
+            subscriptionPlan: plan === 'FREE' ? 'free' : plan.toLowerCase(),
+            subscriptionStatus: 'active',
+          };
+          if (subscriptionId) updateData.subscriptionId = subscriptionId;
+          if (currentPeriodEnd) updateData.currentPeriodEnd = currentPeriodEnd;
+
+          await prisma.user.updateMany({ where: { email }, data: updateData });
+          console.log('Updated user subscription from webhook', email, updateData);
+        }
+      } catch (e) {
+        console.error('Failed to update user from checkout.session.completed', e);
       }
     }
 
