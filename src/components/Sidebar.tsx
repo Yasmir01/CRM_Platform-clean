@@ -27,10 +27,10 @@ export default function Sidebar({ user }: { user: User }) {
       <nav className="builder-nav" aria-label="Primary navigation">
         <ul className="builder-nav-list">
           <li className="builder-nav-item"><Link href="/dashboard" className="builder-nav-link">Dashboard</Link></li>
-          <li className="builder-nav-item"><Link href="/contacts" className="builder-nav-link">Contacts</Link></li>
           {(role === "SU" || role === "SA") && (
             <li className="builder-nav-item"><Link href="/companies" className="builder-nav-link">Companies</Link></li>
           )}
+          <li className="builder-nav-item"><Link href="/contacts" className="builder-nav-link">Contacts</Link></li>
           <li className="builder-nav-item"><Link href="/service-providers" className="builder-nav-link"><HandymanRoundedIcon fontSize="small" className="inline-block mr-2" />Service Providers</Link></li>
 
           {role === "SU" && (
