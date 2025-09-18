@@ -61,7 +61,7 @@ export default function ServiceProvidersPage() {
 
   const startEdit = (p: ServiceProvider) => {
     setEditing(p);
-    setForm({ name: p.name || "", service: p.service || "", phone: p.phone || "", email: p.email || "", website: p.website || "" });
+    setForm({ name: p.name || "", category: (p as any).category || p.service || "", phone: p.phone || "", email: p.email || "", website: p.website || "" });
   };
 
   const resetForm = () => {
