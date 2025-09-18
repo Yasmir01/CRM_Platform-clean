@@ -27,6 +27,33 @@ export default defineHandler({
     }
 
     const upd = await prisma.maintenanceInvoice.update({ where: { id: inv.id }, data: { status: 'approved' } });
+
+    // Create ledger entry for accounting (expense)
+    try {
+      await prisma.ledgerEntry.create({
+        data: {
+          leaseId: inv.requestId || null,
+          propertyId: inv.propertyId || null,
+          amountCents: Math.round((inv.amount || 0) * 100),
+          type: 'expense',
+          description: `Maintenance invoice approved: ${inv.id}`,
+          createdBy: String((user as any).sub || (user as any).id || ''),
+        } as any,
+      });
+    } catch (e) {
+      console.warn('Failed to create ledger entry for maintenance invoice', e);
+    }
+
+    // Notify vendor (if any) and tenant about approval
+    try {
+      const vendor = inv.vendorId ? await prisma.user.findUnique({ where: { id: inv.vendorId } }) : null;
+      if (vendor && vendor.email) {
+        await prisma.notification.create({ data: { title: 'Invoice Approved', message: `Invoice ${inv.id} has been approved for payment.`, audience: 'VENDOR', createdBy: String((user as any).sub || (user as any).id || ''), } });
+      }
+    } catch (e) {
+      console.warn('Failed to notify vendor about invoice approval', e);
+    }
+
     return res.json({ ok: true, invoice: upd });
   },
 });
