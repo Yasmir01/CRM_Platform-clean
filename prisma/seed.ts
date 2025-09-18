@@ -3,9 +3,10 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear old data (order matters due to relations)
+  // Clear old data (respect relation order)
   await prisma.ticket.deleteMany();
   await prisma.contact.deleteMany();
+  await prisma.serviceProvider.deleteMany();
   await prisma.company.deleteMany();
 
   // --- Companies ---
@@ -70,7 +71,34 @@ async function main() {
     ],
   });
 
-  console.log("✅ Seed data created: Companies, Contacts, Tickets");
+  // --- Service Providers ---
+  await prisma.serviceProvider.createMany({
+    data: [
+      {
+        name: "TechFix IT Solutions",
+        service: "IT Support",
+        phone: "+1 555-1111",
+        email: "support@techfix.com",
+        website: "https://techfix.example.com",
+      },
+      {
+        name: "QuickPlumb Services",
+        service: "Plumbing",
+        phone: "+1 555-2222",
+        email: "info@quickplumb.com",
+        website: "https://quickplumb.example.com",
+      },
+      {
+        name: "BrightSpark Electricians",
+        service: "Electrical",
+        phone: "+1 555-3333",
+        email: "contact@brightspark.com",
+        website: "https://brightspark.example.com",
+      },
+    ],
+  });
+
+  console.log("✅ Seed data created: Companies, Contacts, Tickets, Service Providers");
 }
 
 main()
