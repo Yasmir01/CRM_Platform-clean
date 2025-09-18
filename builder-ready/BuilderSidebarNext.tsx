@@ -11,32 +11,24 @@ export default function Sidebar() {
   const pathname = usePathname() || "/";
   const [role, setRole] = useState<UserRole>("Subscriber");
 
+  const { user, loading } = useUser();
+
   useEffect(() => {
-    let mounted = true;
-    const fetchRole = async () => {
-      try {
-        const res = await fetch('/api/auth/session');
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        const r = data?.role;
-        if (mounted && (r === 'SU' || r === 'SA' || r === 'Subscriber')) setRole(r);
-        return;
-      } catch (_err) {
-        // Fallback to localStorage if API not available
+    if (!loading) {
+      if (user && (user.role === "SU" || user.role === "SA" || user.role === "Subscriber")) {
+        setRole(user.role as UserRole);
+      } else {
         try {
-          const storedRole = localStorage.getItem('userRole') as UserRole | null;
-          if (storedRole === 'SU' || storedRole === 'SA' || storedRole === 'Subscriber') {
-            if (mounted) setRole(storedRole);
+          const storedRole = localStorage.getItem("userRole") as UserRole | null;
+          if (storedRole === "SU" || storedRole === "SA" || storedRole === "Subscriber") {
+            setRole(storedRole);
           }
         } catch (e) {
           // ignore
         }
       }
-    };
-
-    fetchRole();
-    return () => { mounted = false; };
-  }, []);
+    }
+  }, [user, loading]);
 
   const navItems: { href: string; label: string; roles: UserRole[] }[] = [
     { href: "/contacts", label: "Contacts", roles: ["SU", "SA", "Subscriber"] },
