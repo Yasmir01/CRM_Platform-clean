@@ -29,7 +29,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             skip,
             take: limit,
             where,
-            include: { company: true, contact: true },
             orderBy: { createdAt: 'desc' },
           }),
           prisma.ticket.count({ where }),
