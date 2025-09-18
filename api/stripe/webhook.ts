@@ -152,9 +152,11 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
       }
     }
 
-    if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.created') {
+    if (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.created' || event.type === 'customer.subscription.deleted') {
       const subscription = event.data.object as Stripe.Subscription & { metadata?: any };
       const accountId = subscription.metadata?.accountId as string | undefined;
+
+      // Update account seats and stripe subscription id if account mapping exists
       if (accountId) {
         try {
           const seatItem = subscription.items && (subscription.items as any).data.find((it: any) => String(it.price?.id) === String(process.env.STRIPE_PRICE_PER_SEAT));
@@ -164,6 +166,37 @@ export default async function handler(req: VercelRequest & { rawBody?: Buffer },
         } catch (e) {
           console.error('Failed to persist subscription update', e);
         }
+      }
+
+      // Update user records linked to this subscription id
+      try {
+        const planFromItems = (() => {
+          try {
+            const firstItem = (subscription.items as any)?.data?.[0];
+            const priceId = firstItem?.price?.id;
+            if (!priceId) return undefined;
+            if (priceId === process.env.STRIPE_PRICE_PRO) return 'pro';
+            if (priceId === process.env.STRIPE_PRICE_ENTERPRISE) return 'enterprise';
+            if (priceId === process.env.STRIPE_PRICE_BASIC) return 'basic';
+            return undefined;
+          } catch (e) {
+            return undefined;
+          }
+        })();
+
+        const updateData: any = {
+          subscriptionStatus: subscription.status as any,
+        };
+        if (subscription.current_period_end) updateData.currentPeriodEnd = new Date(subscription.current_period_end * 1000);
+        if (subscription.id) updateData.subscriptionId = subscription.id;
+        if (planFromItems) updateData.subscriptionPlan = planFromItems;
+
+        if (subscription.id) {
+          await prisma.user.updateMany({ where: { subscriptionId: subscription.id }, data: updateData });
+          console.log('Updated users for subscription', subscription.id, updateData);
+        }
+      } catch (e) {
+        console.error('Failed to update users from subscription event', e);
       }
     }
   } catch (e) {
