@@ -1,121 +1,50 @@
-import { PrismaClient, Role, Tier } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting seed...");
-
-  // Create a SuperAdmin
-  const superAdmin = await prisma.user.upsert({
-    where: { email: "superadmin@example.com" },
+  // Create SU user
+  const superUser = await prisma.user.upsert({
+    where: { email: "admin@example.com" },
     update: {},
     create: {
-      email: "superadmin@example.com",
+      email: "admin@example.com",
       name: "Super Admin",
-      password: "hashedpassword123", // replace with hashed password in production
-      role: Role.SUPERADMIN,
+      role: "SU",
     },
   });
 
-  // Create Organization
-  const org = await prisma.organization.upsert({
-    where: { name: "Demo Organization" },
+  // Create SA user
+  const sysAdmin = await prisma.user.upsert({
+    where: { email: "sysadmin@example.com" },
     update: {},
     create: {
-      name: "Demo Organization",
-      logoUrl: "https://placehold.co/200x200",
-      tier: Tier.BASIC,
+      email: "sysadmin@example.com",
+      name: "System Admin",
+      role: "SA",
     },
   });
 
-  // Attach SuperAdmin as user in this org
-  await prisma.user.update({
-    where: { id: superAdmin.id },
-    data: { orgId: org.id },
-  });
-
-  // Org settings
-  await prisma.orgSettings.upsert({
-    where: { orgId: org.id },
+  // Create Subscriber user
+  const subscriber = await prisma.user.upsert({
+    where: { email: "subscriber@example.com" },
     update: {},
     create: {
-      orgId: org.id,
-      allowImpersonation: true,
-      allowExport: true,
-      notifications: true,
-      exportSchedule: "daily",
+      email: "subscriber@example.com",
+      name: "Subscriber User",
+      role: "Subscriber",
     },
   });
 
-  // Subscription
-  await prisma.subscription.create({
-    data: {
-      orgId: org.id,
-      plan: Tier.BASIC,
-      active: true,
-      prorated: true,
-    },
-  });
-
-  // Property
-  const property = await prisma.property.create({
-    data: {
-      orgId: org.id,
-      name: "Sunset Apartments",
-      address: "123 Main St, Springfield",
-    },
-  });
-
-  // Tenant
-  const tenant = await prisma.tenant.create({
-    data: {
-      propertyId: property.id,
-      name: "John Doe",
-      email: "tenant@example.com",
-      phone: "555-1234",
-    },
-  });
-
-  // Reminder
-  await prisma.reminder.create({
-    data: {
-      tenantId: tenant.id,
-      message: "Rent is due",
-      dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
-    },
-  });
-
-  // Company + Contact
-  const company = await prisma.company.create({
-    data: {
-      orgId: org.id,
-      name: "Acme Supplies",
-      industry: "Maintenance",
-      website: "https://acmesupplies.example",
-      phone: "555-0001",
-      address: "456 Industrial Way, Springfield",
-    },
-  });
-
-  await prisma.contact.create({
-    data: {
-      orgId: org.id,
-      companyId: company.id,
-      firstName: "Jane",
-      lastName: "Smith",
-      email: "jane.smith@acme.com",
-      phone: "555-9876",
-    },
-  });
-
-  console.log("✅ Seed completed.");
+  console.log({ superUser, sysAdmin, subscriber });
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Seed failed", e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => {
     await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
   });
