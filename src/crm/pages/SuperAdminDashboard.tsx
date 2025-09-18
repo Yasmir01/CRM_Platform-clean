@@ -336,14 +336,12 @@ export default function SuperAdminDashboard({ adminData, onLogout }: SuperAdminD
     }
   };
 
-  // Statistics
-  const totalSubscribers = subscribers.length;
-  const activeSubscribers = subscribers.filter(s => s.status === 'Active').length;
-  const trialSubscribers = subscribers.filter(s => s.status === 'Trial').length;
-  const overdueSubscribers = subscribers.filter(s => s.status === 'Overdue').length;
-  const totalRevenue = subscribers
-    .filter(s => s.status === 'Active' || s.status === 'Trial')
-    .reduce((sum, s) => sum + s.monthlyFee, 0);
+  // Statistics (use real metrics when available)
+  const totalSubscribers = metrics?.subscribers ?? subscribers.length;
+  const activeSubscribers = Math.max(0, subscribers.filter(s => s.status === 'Active').length);
+  const trialSubscribers = Math.max(0, subscribers.filter(s => s.status === 'Trial').length);
+  const overdueSubscribers = metrics?.failedRate ?? subscribers.filter(s => s.status === 'Overdue').length;
+  const totalRevenue = metrics?.rentVolume ?? subscribers.filter(s => s.status === 'Active' || s.status === 'Trial').reduce((sum, s) => sum + s.monthlyFee, 0);
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
