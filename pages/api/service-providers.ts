@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         case "POST": {
-          let { name, email, phone, service, notes, companyId } = req.body || {};
+          let { name, email, phone, category, service, website, notes, companyId } = req.body || {};
 
           if (!name || typeof name !== "string" || !name.trim()) {
             return res.status(400).json({ error: "Service provider name is required" });
@@ -42,8 +42,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           name = name.trim();
           email = typeof email === "string" ? email.trim() : undefined;
           phone = typeof phone === "string" ? phone.trim() : undefined;
-          service = typeof service === "string" ? service.trim() : undefined;
-          notes = typeof notes === "string" ? notes.trim() : undefined;
+          category = typeof category === "string" ? category.trim() : (typeof service === 'string' ? service.trim() : undefined);
+          website = typeof website === "string" ? website.trim() : (typeof notes === 'string' ? notes.trim() : undefined);
           companyId = typeof companyId === "string" ? companyId : undefined;
 
           if (email && !/^\S+@\S+\.\S+$/.test(email)) {
@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           }
 
           const provider = await prisma.serviceProvider.create({
-            data: { name, email, phone, service, notes, companyId },
+            data: { name, email, phone, category: category || '', website: website || null, companyId },
           });
 
           return res.status(201).json(provider);
