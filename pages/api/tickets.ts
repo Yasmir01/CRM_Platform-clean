@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "POST") {
       try {
-        const { title, description, priority, companyId, contactId, status } = req.body || {};
+        const { title, description, priority, status } = req.body || {};
         if (!title || !description) return res.status(400).json({ error: 'title and description are required' });
 
         const data: any = {
@@ -52,9 +52,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           priority: priority || 'medium',
           status: status || 'open',
         };
-
-        if (companyId) data.company = { connect: { id: String(companyId) } };
-        if (contactId) data.contact = { connect: { id: String(contactId) } };
 
         const ticket = await prisma.ticket.create({ data });
         return res.status(201).json(ticket);
