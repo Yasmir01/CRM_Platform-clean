@@ -446,7 +446,7 @@ export default function CrmMenuContent() {
                           <Badge badgeContent={unreadMessagesCount} color="error">
                             {item.icon}
                           </Badge>
-                        ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
+                        ) : (isVendorUser && item.text === 'Properties') ? (
                           <Badge badgeContent={assignedPropsCount} color="warning">
                             {item.icon}
                           </Badge>
