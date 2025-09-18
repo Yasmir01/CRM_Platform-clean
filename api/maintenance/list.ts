@@ -20,7 +20,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // no org restriction
   } else if (isOrgAdmin) {
     where.orgId = user.orgId;
+  } else if (user.role && /service provider|vendor/i.test(String(user.role))) {
+    // Vendor: scope to vendor assignments
+    where.vendorId = user.id;
   } else {
+    // Default: tenant view
     where.tenantId = user.id;
   }
 
