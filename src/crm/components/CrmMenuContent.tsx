@@ -86,9 +86,9 @@ export const mainListItems = [
   },
 
   { text: "Maintenance", icon: <BuildRoundedIcon />, path: "/crm/maintenance" },
-  { text: "Accounting", icon: <AccountBalanceRoundedIcon />, path: "/crm/accounting" },
+  { text: "Accounting", icon: <AccountBalanceRoundedIcon />, path: "/crm/accounting", requiredPlan: 'pro' },
   { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
-  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
+  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports", requiredPlan: 'pro' },
 
   // Admin & Tools group
   {
