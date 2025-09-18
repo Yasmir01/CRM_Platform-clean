@@ -76,21 +76,21 @@ async function main() {
     data: [
       {
         name: "TechFix IT Solutions",
-        service: "IT Support",
+        category: "IT Support",
         phone: "+1 555-1111",
         email: "support@techfix.com",
         website: "https://techfix.example.com",
       },
       {
         name: "QuickPlumb Services",
-        service: "Plumbing",
+        category: "Plumbing",
         phone: "+1 555-2222",
         email: "info@quickplumb.com",
         website: "https://quickplumb.example.com",
       },
       {
         name: "BrightSpark Electricians",
-        service: "Electrical",
+        category: "Electrical",
         phone: "+1 555-3333",
         email: "contact@brightspark.com",
         website: "https://brightspark.example.com",
