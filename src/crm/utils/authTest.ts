@@ -67,8 +67,9 @@ export async function testAuthenticationSystem(): Promise<void> {
   }
 }
 
-// Auto-run test in development mode
-if (process.env.NODE_ENV === 'development') {
+// Auto-run test in development mode only when explicitly enabled and in a browser
+const enableAuthTest = process.env.ENABLE_AUTH_TEST === 'true';
+if (process.env.NODE_ENV === 'development' && enableAuthTest && typeof window !== 'undefined') {
   // Run test after a short delay to ensure modules are loaded
   setTimeout(() => {
     testAuthenticationSystem();
