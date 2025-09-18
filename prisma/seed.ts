@@ -3,48 +3,41 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create SU user
-  const superUser = await prisma.user.upsert({
-    where: { email: "admin@example.com" },
-    update: {},
-    create: {
-      email: "admin@example.com",
-      name: "Super Admin",
-      role: "SU",
-    },
+  // Clear old data
+  await prisma.ticket.deleteMany();
+
+  // Insert sample tickets
+  await prisma.ticket.createMany({
+    data: [
+      {
+        title: "Website not loading",
+        description: "Client reports that the CRM login page is not loading.",
+        priority: "High",
+        status: "Open",
+      },
+      {
+        title: "Invoice PDF issue",
+        description: "Generated invoices are missing company logo.",
+        priority: "Medium",
+        status: "In Progress",
+      },
+      {
+        title: "Feature request: Dark mode",
+        description: "Subscriber requested a dark theme option for dashboard.",
+        priority: "Low",
+        status: "Open",
+      },
+    ],
   });
 
-  // Create SA user
-  const sysAdmin = await prisma.user.upsert({
-    where: { email: "sysadmin@example.com" },
-    update: {},
-    create: {
-      email: "sysadmin@example.com",
-      name: "System Admin",
-      role: "SA",
-    },
-  });
-
-  // Create Subscriber user
-  const subscriber = await prisma.user.upsert({
-    where: { email: "subscriber@example.com" },
-    update: {},
-    create: {
-      email: "subscriber@example.com",
-      name: "Subscriber User",
-      role: "Subscriber",
-    },
-  });
-
-  console.log({ superUser, sysAdmin, subscriber });
+  console.log("✅ Tickets seeded successfully");
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
