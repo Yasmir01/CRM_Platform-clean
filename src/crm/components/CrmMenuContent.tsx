@@ -73,6 +73,7 @@ export const mainListItems = [
   { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
   { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
   { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
+  { text: "Tickets", icon: <SupportAgentRoundedIcon />, path: "/tickets" },
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
   { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
   { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
