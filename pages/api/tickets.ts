@@ -8,14 +8,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!user) return;
 
   return runWithRequestSession(req as any, async () => {
-    if (req.method === "GET") {
-      try {
-        const page = Math.max(parseInt((req.query.page as string) || "1", 10), 1);
-        const limit = Math.max(parseInt((req.query.pageSize as string) || "10", 10), 1);
-        const skip = (page - 1) * limit;
+    try {
+      if (req.method === "GET") {
+        // Support optional pagination/search or return all when not provided
+        const page = req.query.page ? Math.max(parseInt((req.query.page as string) || "1", 10), 1) : null;
+        const limit = req.query.pageSize ? Math.max(parseInt((req.query.pageSize as string) || "10", 10), 1) : null;
+        const skip = page && limit ? (page - 1) * limit : undefined;
 
         const search = String(req.query.search || "").trim();
-
         const where: any = {};
         if (search) {
           where.OR = [
@@ -24,76 +24,72 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ];
         }
 
+        const findOptions: any = {
+          where,
+          include: { company: true, contact: true },
+          orderBy: { createdAt: 'desc' },
+        };
+
+        if (skip !== undefined && limit) {
+          findOptions.skip = skip;
+          findOptions.take = limit;
+        }
+
         const [tickets, total] = await Promise.all([
-          prisma.ticket.findMany({
-            skip,
-            take: limit,
-            where,
-            orderBy: { createdAt: 'desc' },
-          }),
+          prisma.ticket.findMany(findOptions),
           prisma.ticket.count({ where }),
         ]);
 
-        return res.status(200).json({ tickets, total, page, totalPages: Math.max(Math.ceil(total / limit), 1) });
-      } catch (err) {
-        console.error('GET /api/tickets error', err);
-        return res.status(500).json({ error: 'Failed to fetch tickets' });
+        return res.status(200).json({ tickets, total, page: page ?? 1, totalPages: Math.max(Math.ceil((total || 0) / (limit || total || 1)), 1) });
       }
-    }
 
-    if (req.method === "POST") {
-      try {
-        const { title, description, priority, status } = req.body || {};
-        if (!title || !description) return res.status(400).json({ error: 'title and description are required' });
+      if (req.method === "POST") {
+        const { title, description, priority, status, companyId, contactId } = req.body || {};
+        if (!title) return res.status(400).json({ error: 'Title is required' });
 
         const data: any = {
           title: String(title),
-          description: String(description),
-          priority: priority || 'medium',
-          status: status || 'open',
+          description: description === undefined ? null : String(description),
+          priority: priority || undefined,
+          status: status || undefined,
         };
 
-        const ticket = await prisma.ticket.create({ data });
-        return res.status(201).json(ticket);
-      } catch (err) {
-        console.error('POST /api/tickets error', err);
-        return res.status(500).json({ error: 'Failed to create ticket' });
-      }
-    }
+        if (companyId !== undefined) data.companyId = companyId || null;
+        if (contactId !== undefined) data.contactId = contactId || null;
 
-    if (req.method === "PUT") {
-      try {
-        const { id, title, description, priority, status } = req.body || {};
-        if (!id) return res.status(400).json({ error: 'id is required' });
+        const newTicket = await prisma.ticket.create({ data });
+        return res.status(201).json(newTicket);
+      }
+
+      if (req.method === "PUT") {
+        const { id, ...updates } = req.body || {};
+        if (!id) return res.status(400).json({ error: 'ID is required' });
 
         const data: any = {};
-        if (title !== undefined) data.title = String(title);
-        if (description !== undefined) data.description = String(description);
-        if (priority !== undefined) data.priority = priority;
-        if (status !== undefined) data.status = status;
+        if (updates.title !== undefined) data.title = String(updates.title);
+        if (updates.description !== undefined) data.description = updates.description === null ? null : String(updates.description);
+        if (updates.priority !== undefined) data.priority = updates.priority;
+        if (updates.status !== undefined) data.status = updates.status;
+        if (updates.companyId !== undefined) data.companyId = updates.companyId || null;
+        if (updates.contactId !== undefined) data.contactId = updates.contactId || null;
 
-        const updated = await prisma.ticket.update({ where: { id: String(id) }, data });
-        return res.status(200).json(updated);
-      } catch (err) {
-        console.error('PUT /api/tickets error', err);
-        return res.status(500).json({ error: 'Failed to update ticket' });
+        const updatedTicket = await prisma.ticket.update({ where: { id: String(id) }, data });
+        return res.status(200).json(updatedTicket);
       }
-    }
 
-    if (req.method === "DELETE") {
-      try {
+      if (req.method === "DELETE") {
         const { id } = req.body || {};
-        if (!id) return res.status(400).json({ error: 'id is required' });
+        if (!id) return res.status(400).json({ error: 'ID is required' });
 
         await prisma.ticket.delete({ where: { id: String(id) } });
-        return res.status(200).json({ success: true });
-      } catch (err) {
-        console.error('DELETE /api/tickets error', err);
-        return res.status(500).json({ error: 'Failed to delete ticket' });
+        return res.status(204).end();
       }
-    }
 
-    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-    return res.status(405).end(`Method ${req.method} Not Allowed`);
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      return res.status(405).end(`Method ${req.method} Not Allowed`);
+    } catch (err: any) {
+      console.error('Tickets API error', err);
+      return res.status(500).json({ error: err?.message || 'Server error' });
+    }
   });
 }
