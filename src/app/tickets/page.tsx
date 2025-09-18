@@ -1,232 +1,189 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useSession } from '@/auth/useSession';
+import { useState, useEffect } from "react";
 
 type Ticket = {
   id: string;
   title: string;
-  description: string;
-  status: string;
-  priority: string;
+  description?: string;
+  priority?: string;
+  status?: string;
   createdAt: string;
-  company?: { id: string; name?: string } | null;
-  contact?: { id: string; name?: string } | null;
 };
 
 export default function TicketsPage() {
-  const sess = useSession();
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ title: "", description: "", priority: "Low" });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Create ticket form state
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
-  const [creating, setCreating] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
+  // Fetch tickets
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
-    return () => clearTimeout(t);
-  }, [search]);
+    let mounted = true;
+    fetch("/api/tickets")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!mounted) return;
+        // Support both shapes: array or { tickets: [...] }
+        const items = Array.isArray(data) ? data : (data?.tickets ?? data);
+        setTickets(items || []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const fetchTickets = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-      if (debouncedSearch) params.set('search', debouncedSearch);
-
-      const res = await fetch(`/api/tickets?${params.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch tickets');
-      const json = await res.json();
-      setTickets(json.tickets || []);
-      setTotal(json.total || 0);
-    } catch (err) {
-      console.error('Failed to fetch tickets', err);
-    } finally {
-      setLoading(false);
-    }
+  // Handle input
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
   };
 
-  useEffect(() => {
-    fetchTickets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, debouncedSearch]);
-
-  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
-
-  const isLoadingSession = (sess as any).loading;
-
-  // Dynamic toasts (optional)
-  const toasts = ((): any => {
-    try {
-      // eslint-disable-next-line global-require
-      return require('../../crm/components/GlobalNotificationProvider').useNotifications();
-    } catch (e) {
-      return null;
-    }
-  })();
-
-  const handleCreate = async (e: React.FormEvent) => {
+  // Save new or update ticket
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
-    if (!title || !description) {
-      setFormError('Title and description are required');
-      return;
-    }
-    setCreating(true);
+    const method = editingId ? "PUT" : "POST";
+    const body = editingId ? { ...form, id: editingId } : form;
+
     try {
-      const res = await fetch('/api/tickets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, priority }),
+      const res = await fetch("/api/tickets", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.error || 'Failed to create ticket');
+
+      if (!res.ok) return;
+      const updated = await res.json();
+      if (editingId) {
+        setTickets((tks) => tks.map((t) => (t.id === editingId ? updated : t)));
+      } else {
+        setTickets((tks) => [updated, ...tks]);
       }
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setPriority('medium');
-      // feedback
-      if (toasts) toasts.showSuccess('Created', 'Ticket created successfully');
-      else { try { window.alert('Ticket created successfully'); } catch (e) {} }
-      // refresh list
-      setPage(1);
-      fetchTickets();
-    } catch (err: any) {
-      console.error('Create ticket failed', err);
-      setFormError(err?.message || 'Failed to create ticket');
-      if (toasts) toasts.showError('Create failed', String(err?.message || err));
-      else { try { window.alert('Error creating ticket'); } catch (e) {} }
-    } finally {
-      setCreating(false);
+      setForm({ title: "", description: "", priority: "Low" });
+      setEditingId(null);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  if (isLoadingSession) return <p>Loading...</p>;
+  // Delete ticket
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this ticket?")) return;
+    try {
+      const res = await fetch("/api/tickets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        setTickets((tks) => tks.filter((t) => t.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Start editing
+  const handleEdit = (ticket: Ticket) => {
+    setEditingId(ticket.id);
+    setForm({
+      title: ticket.title,
+      description: ticket.description || "",
+      priority: ticket.priority || "Low",
+    });
+  };
 
   return (
-    <div className="tickets-page p-6">
-      <h1 className="tickets-title text-2xl font-bold mb-4">Support Tickets</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Tickets</h1>
 
-      {/* Create form */}
-      <div className="create-ticket-wrap mb-6 max-w-3xl w-full">
-        <form onSubmit={handleCreate} className="create-ticket-form space-y-4 bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Create New Ticket</h2>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="create-ticket-title w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className="create-ticket-description w-full border rounded px-3 py-2"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Priority</label>
-            <select
-              value={priority}
-              onChange={(e) => setPriority(e.target.value)}
-              className="create-ticket-priority w-full border rounded px-3 py-2"
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-
-          {formError && <div className="text-sm text-red-600">{formError}</div>}
-
-          <div>
-            <button
-              type="submit"
-              disabled={creating}
-              className="create-ticket-submit bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            >
-              {creating ? 'Creating...' : 'Create Ticket'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="tickets-actions flex items-center justify-between mb-4">
+      {/* Ticket Form */}
+      <form onSubmit={handleSubmit} className="mb-6 space-y-4">
         <input
           type="text"
-          placeholder="Search tickets..."
-          value={search}
-          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
-          className="tickets-search-input border rounded p-2 w-1/2"
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+          required
         />
-
-        <div className="tickets-controls flex items-center gap-2">
-          <select
-            value={pageSize}
-            onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}
-            className="tickets-page-size-select border rounded p-2"
-          >
-            <option value={10}>10 per page</option>
-            <option value={25}>25 per page</option>
-            <option value={50}>50 per page</option>
-          </select>
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={form.description}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <select
+          name="priority"
+          value={form.priority}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        >
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+        <div>
+          <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+            {editingId ? "Update Ticket" : "Add Ticket"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(null);
+                setForm({ title: "", description: "", priority: "Low" });
+              }}
+              className="ml-2 bg-gray-400 text-white px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+          )}
         </div>
-      </div>
+      </form>
 
-      {/* Ticket List (simple list view) */}
-      <div className="tickets-list-wrap">
-        <h2 className="text-lg font-semibold mb-2">My Tickets</h2>
-        {loading ? (
-          <p>Loading...</p>
-        ) : tickets.length === 0 ? (
-          <p>No tickets yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {tickets.map((ticket) => (
-              <li key={ticket.id} className="p-4 border rounded-lg shadow-sm bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-bold">{ticket.title}</h3>
-                  <span
-                    className={`px-2 py-1 text-sm rounded ${
-                      ticket.priority === 'high'
-                        ? 'bg-red-100 text-red-700'
-                        : ticket.priority === 'medium'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-green-100 text-green-700'
-                    }`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-2">{ticket.description}</p>
-                <p className="text-xs text-gray-400 mt-2">
-                  Status: {ticket.status} • Created {new Date(ticket.createdAt).toLocaleString()}
-                </p>
-              </li>
+      {/* Tickets Table */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : tickets.length === 0 ? (
+        <p>No tickets found.</p>
+      ) : (
+        <table className="w-full border">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="p-2 border">Title</th>
+              <th className="p-2 border">Priority</th>
+              <th className="p-2 border">Status</th>
+              <th className="p-2 border">Created</th>
+              <th className="p-2 border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tickets.map((t) => (
+              <tr key={t.id}>
+                <td className="p-2 border">{t.title}</td>
+                <td className="p-2 border">{t.priority}</td>
+                <td className="p-2 border">{t.status || "Open"}</td>
+                <td className="p-2 border">{new Date(t.createdAt).toLocaleDateString()}</td>
+                <td className="p-2 border space-x-2">
+                  <button onClick={() => handleEdit(t)} className="text-blue-600">
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(t.id)} className="text-red-600">
+                    Delete
+                  </button>
+                </td>
+              </tr>
             ))}
-          </ul>
-        )}
-      </div>
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
