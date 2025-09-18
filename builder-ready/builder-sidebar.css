@@ -1,5 +1,4 @@
-:root{
-  --sidebar-width: 16rem; /* 256px */
+--sidebar-width: 16rem; /* 256px */
   --sidebar-bg: #111827;
   --sidebar-text: #ffffff;
   --main-bg: #f9fafb;
@@ -69,6 +68,12 @@
 
 .builder-nav-link:hover{
   background-color:rgba(255,255,255,0.06);
+}
+
+/* Active/selected link state */
+.builder-nav-link-active{
+  background-color:rgba(255,255,255,0.10);
+  font-weight:600;
 }
 
 .builder-toggle{
