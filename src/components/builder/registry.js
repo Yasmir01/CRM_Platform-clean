@@ -57,6 +57,19 @@ import SidebarWrapper from "../SidebarWrapper";
         { name: "recaptchaSiteKey", type: "string" },
       ],
     });
+
+    // Register SidebarWrapper for Builder editor
+    builder.registerComponent(SidebarWrapper, {
+      name: "SidebarWrapper",
+      inputs: [
+        {
+          name: "email",
+          type: "string",
+          defaultValue: "demo@yourcrm.com",
+          helperText: "Pass the user email for sidebar rendering",
+        },
+      ],
+    });
   } catch (err) {
     // @builder/io/react not installed — that's fine in this environment.
     // Avoid throwing so dev server stays up.
