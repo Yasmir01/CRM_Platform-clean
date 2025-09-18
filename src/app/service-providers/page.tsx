@@ -27,13 +27,28 @@ export default function ServiceProvidersPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
   const fetchProviders = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/service-providers');
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+
+      const res = await fetch(`/api/service-providers?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to load');
-      const data = await res.json();
-      setProviders(data || []);
+      const json = await res.json();
+      setProviders(json.providers ?? json.data ?? []);
+      setTotal(json.total ?? 0);
     } catch (err) {
       console.error('Failed to load providers', err);
     } finally {
@@ -41,7 +56,7 @@ export default function ServiceProvidersPage() {
     }
   };
 
-  useEffect(() => { fetchProviders(); }, []);
+  useEffect(() => { fetchProviders(); }, [page, pageSize, debouncedSearch]);
 
   const openModal = (p?: ServiceProvider) => {
     if (p) setFormData({ ...p });
