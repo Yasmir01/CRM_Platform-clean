@@ -1,48 +1,43 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_db';
 import { getUserOr401 } from '../../src/utils/authz';
-
-const ALLOWED_TYPES = new Set(['lease','insurance','id','invoice','other']);
+import { prisma } from '../_db';
+import { safeParse } from '../../src/utils/safeJson';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const auth = getUserOr401(req, res);
-  if (!auth) return;
-  const userId = String((auth as any).sub || (auth as any).id);
+  const user = getUserOr401(req, res);
+  if (!user) return;
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return res.status(401).json({ error: 'unauthorized' });
-
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const name = String(body.name || '').trim();
-    const type = String(body.type || 'other').trim();
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+    const body = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body || {});
     const key = String(body.key || '').trim();
-    const tenantId = body.tenantId ? String(body.tenantId) : null;
-    const leaseId = body.leaseId ? String(body.leaseId) : null;
+    const name = String(body.name || '') || (key && key.split('/').pop()) || 'file';
+    const type = String(body.type || 'general');
+    const propertyId = body.propertyId ? String(body.propertyId) : undefined;
+    const tenantId = body.tenantId ? String(body.tenantId) : undefined;
 
-    if (!name || !key) return res.status(400).json({ error: 'name and key are required' });
-    if (!ALLOWED_TYPES.has(type)) return res.status(400).json({ error: 'invalid type' });
+    if (!key) return res.status(400).json({ error: 'Missing key' });
 
-    const doc = await prisma.document.create({
-      data: {
-        orgId: user.orgId,
-        uploadedBy: user.id,
-        tenantId: tenantId || undefined,
-        leaseId: leaseId || undefined,
-        type,
-        name,
-        url: key, // store S3 key; signed URL is provided by list endpoint
-      },
-    });
+    // Determine fileUrl: if key looks like URL, use it; else prefix with ASSET_BASE_URL
+    let fileUrl = key;
+    if (!fileUrl.startsWith('http')) {
+      const base = process.env.ASSET_BASE_URL || 'https://storage.example.com/uploads';
+      fileUrl = base.replace(/\/$/, '') + '/' + encodeURIComponent(key);
+    }
+
+    const doc = await prisma.document.create({ data: {
+      propertyId: propertyId || undefined,
+      tenantId: tenantId || undefined,
+      type,
+      title: name,
+      fileUrl,
+      uploadedBy: String((user as any).sub || (user as any).id),
+      visibility: 'private'
+    } });
 
     return res.status(200).json(doc);
   } catch (e: any) {
-    console.error('document create error', e?.message || e);
+    console.error('documents/create error', e?.message || e);
     return res.status(500).json({ error: 'failed' });
   }
 }
