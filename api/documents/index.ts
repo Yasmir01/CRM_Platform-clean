@@ -1,61 +1,49 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../_db';
 import { getUserOr401 } from '../../src/utils/authz';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { prisma } from '../_db';
+import { safeParse } from '../../src/utils/safeJson';
 
-const s3 = new S3Client({ region: process.env.AWS_REGION });
-
+// GET -> list documents (filter by property/tenant/vendor/type)
+// POST -> create document record (expects fileUrl already uploaded or presigned upload completed)
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const auth = getUserOr401(req, res);
-  if (!auth) return;
-  const userId = String((auth as any).sub || (auth as any).id);
-
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return res.status(401).json({ error: 'unauthorized' });
-
-  const isSuperAdmin = user.role === 'SUPER_ADMIN';
-  const isOrgAdmin = ['ADMIN', 'OWNER', 'MANAGER'].includes(user.role as any);
+  const user = getUserOr401(req, res);
+  if (!user) return;
 
   try {
-    let where: any = {};
-    if (isSuperAdmin) {
-      // no additional filter
-    } else if (isOrgAdmin) {
-      where.orgId = user.orgId;
-    } else {
-      // Tenant/Vendor: only own uploads for now
-      where = { uploadedBy: user.id };
+    if (req.method === 'GET') {
+      const q = (req.query || {}) as any;
+      const where: any = {};
+      if (q.propertyId) where.propertyId = String(q.propertyId);
+      if (q.tenantId) where.tenantId = String(q.tenantId);
+      if (q.vendorId) where.vendorId = String(q.vendorId);
+      if (q.type) where.type = String(q.type);
+
+      const docs = await prisma.document.findMany({ where, orderBy: { createdAt: 'desc' } });
+      return res.status(200).json(docs);
     }
 
-    const docs = await prisma.document.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: 100,
-    });
+    if (req.method === 'POST') {
+      const body = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body || {});
+      const data: any = {
+        propertyId: body.propertyId || undefined,
+        tenantId: body.tenantId || undefined,
+        vendorId: body.vendorId || undefined,
+        type: String(body.type || 'general'),
+        title: body.title ? String(body.title) : undefined,
+        fileUrl: String(body.fileUrl || ''),
+        uploadedBy: String((user as any).sub || (user as any).id),
+        visibility: String(body.visibility || 'private'),
+        metadata: body.metadata || undefined,
+      };
+      if (!data.fileUrl) return res.status(400).json({ error: 'fileUrl required' });
+      const doc = await prisma.document.create({ data });
+      return res.status(200).json(doc);
+    }
 
-    const bucket = process.env.S3_BUCKET as string;
-    const result = await Promise.all(
-      docs.map(async (d) => {
-        let url = d.url;
-        if (bucket && d.url && !/^https?:\/\//i.test(d.url)) {
-          try {
-            const cmd = new GetObjectCommand({ Bucket: bucket, Key: d.url });
-            url = await getSignedUrl(s3, cmd, { expiresIn: 300 }); // 5 minutes
-          } catch {}
-        }
-        return { ...d, url };
-      })
-    );
-
-    return res.status(200).json(result);
+    res.setHeader('Allow', 'GET, POST');
+    return res.status(405).json({ error: 'Method Not Allowed' });
   } catch (e: any) {
-    console.error('documents list error', e?.message || e);
+    console.error('documents/index error', e?.message || e);
     return res.status(500).json({ error: 'failed' });
   }
 }
