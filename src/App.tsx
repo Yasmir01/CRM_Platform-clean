@@ -76,6 +76,7 @@ const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
+const TaxCompliance = React.lazy(() => import("./crm/pages/TaxCompliance"));
 import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
 const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
 const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
@@ -382,6 +383,11 @@ function AppRoutes() {
         <Route path="analytics" element={
           <React.Suspense fallback={<PageLoader />}>
             <AnalyticsInsights />
+          </React.Suspense>
+        } />
+        <Route path="tax-compliance" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <TaxCompliance />
           </React.Suspense>
         } />
         <Route path="sla-policies" element={
