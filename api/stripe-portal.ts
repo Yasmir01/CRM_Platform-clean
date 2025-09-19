@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
+import { safeParse } from '../src/utils/safeJson';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
