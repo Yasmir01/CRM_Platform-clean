@@ -18,7 +18,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!dbUser.accountId) return res.status(400).json({ error: 'User has no account' });
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const { safeParse } = await import('../src/utils/safeJson');
+    const body = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body || {});
     const plan = String((body.plan || '').toLowerCase() || '');
     const suppliedPriceId = String(body.priceId || '');
 
