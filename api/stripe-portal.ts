@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const returnUrl = process.env.STRIPE_SUCCESS_URL;
     if (!secret || !returnUrl) return res.status(400).json({ error: 'Stripe not configured' });
 
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const body = typeof req.body === 'string' ? safeParse(req.body, {}) : req.body;
     const { customerId } = body || {};
     if (!customerId) return res.status(400).json({ error: 'Missing customerId' });
 
