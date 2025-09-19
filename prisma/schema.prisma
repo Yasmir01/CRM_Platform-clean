@@ -168,3 +168,105 @@ model VendorInvite {
   used       Boolean  @default(false)
   createdAt  DateTime @default(now())
 }
+
+/// Lease management
+model Lease {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id])
+  unit        String
+  tenantId    String?
+  tenant      User?    @relation("LeaseTenant", fields: [tenantId], references: [id])
+  rentAmount  Decimal  @db.Decimal(10, 2)
+  deposit     Decimal? @db.Decimal(10, 2)
+  startDate   DateTime
+  endDate     DateTime
+  status      String   @default("active")
+  documentUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Calendar events & tasks
+model CalendarEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  title      String
+  description String?
+  category   String?
+  dueDate    DateTime
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+/// Direct messaging
+model DirectMessage {
+  id        String   @id @default(cuid())
+  senderId  String
+  sender    User     @relation("DirectMessageSender", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User     @relation("DirectMessageReceiver", fields: [receiverId], references: [id])
+  propertyId String?
+  property  Property? @relation(fields: [propertyId], references: [id])
+  content   String
+  channel   String   @default("in_app")
+  status    String   @default("sent")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  attachments DirectMessageAttachment[]
+}
+
+model DirectMessageAttachment {
+  id        String   @id @default(cuid())
+  messageId String
+  message   DirectMessage @relation(fields: [messageId], references: [id])
+  url       String
+  filename  String?
+  mimeType  String?
+  createdAt DateTime @default(now())
+}
+
+/// Reminders & logs used by automation
+model Reminder {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  tenant     User?    @relation(fields: [tenantId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  type       String
+  dueAt      DateTime
+  status     String   @default("PENDING")
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ReminderLog {
+  id         String   @id @default(cuid())
+  reminderId String
+  reminder   Reminder @relation(fields: [reminderId], references: [id])
+  channel    String
+  status     String
+  note       String?
+  response   Json?
+  createdAt  DateTime @default(now())
+}
+
+/// Transactions (basic)
+model Transaction {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  tenant     User?    @relation(fields: [tenantId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  type       String
+  amount     Decimal  @db.Decimal(12,2)
+  status     String
+  description String?
+  createdAt  DateTime @default(now())
+}
