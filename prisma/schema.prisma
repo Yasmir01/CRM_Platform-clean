@@ -324,3 +324,22 @@ model AIInsight {
   confidence  Decimal? @db.Decimal(5,2)
   generatedAt DateTime @default(now())
 }
+
+/// Documents repository
+model Document {
+  id          String   @id @default(cuid())
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  tenantId    String?
+  tenant      User?     @relation("DocumentTenant", fields: [tenantId], references: [id])
+  vendorId    String?
+  vendor      ServiceProvider? @relation(fields: [vendorId], references: [id])
+  type        String
+  title       String?
+  fileUrl     String
+  uploadedBy  String?
+  visibility  String   @default("private")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
