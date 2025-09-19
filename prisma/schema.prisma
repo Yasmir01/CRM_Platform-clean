@@ -270,3 +270,22 @@ model Transaction {
   description String?
   createdAt  DateTime @default(now())
 }
+
+/// Rental applications / prospects
+model Application {
+  id             String   @id @default(cuid())
+  propertyId     String
+  property       Property @relation(fields: [propertyId], references: [id])
+  unit           String?
+  applicantName  String
+  email          String
+  phone          String?
+  employment     String?
+  income         Decimal? @db.Decimal(12,2)
+  rentalHistory  String?
+  references     String?
+  status         String   @default("pending")
+  documentUrl    String?
+  screeningResult String?
+  createdAt      DateTime @default(now())
+}
