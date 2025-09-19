@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { z, ZodSchema } from 'zod';
 import { getUserOr401 } from '../src/utils/authz';
 import { rateLimit } from './_rate';
+import { safeParse } from '../src/utils/safeJson';
 
 export function defineHandler<T extends ZodSchema<any>>(opts: {
   methods: Array<'GET' | 'POST' | 'PATCH' | 'DELETE'>;
@@ -44,7 +45,7 @@ export function defineHandler<T extends ZodSchema<any>>(opts: {
     let body: any = {};
     if (opts.bodySchema && method !== 'GET') {
       try {
-        const raw = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body ?? {});
+        const raw = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body ?? {});
         body = opts.bodySchema.parse(raw);
       } catch (e: any) {
         return res.status(400).json({ error: 'invalid_body', details: e?.errors || String(e?.message || 'invalid') });
