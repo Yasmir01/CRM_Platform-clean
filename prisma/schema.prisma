@@ -13,6 +13,7 @@ model User {
   name               String?
   password           String
   role               String   @default("Subscriber") // "SU" | "SA" | "Subscriber"
+  permissions        String?  // comma-separated per-user overrides e.g. "payments:read,maintenance:create"
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -26,6 +27,27 @@ model User {
   contacts  Contact[]
   companies Company[]
   deals     Deal[]
+  userRoles UserRole[]
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  // permissions stored as JSON mapping module -> { view, edit, delete }
+  permissions Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userRoles   UserRole[]
+}
+
+model UserRole {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  roleId     String
+  role       Role     @relation(fields: [roleId], references: [id])
+  propertyId String?
+  createdAt  DateTime @default(now())
 }
 
 model Contact {
