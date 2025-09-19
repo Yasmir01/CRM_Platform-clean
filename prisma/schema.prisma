@@ -289,3 +289,16 @@ model Application {
   screeningResult String?
   createdAt      DateTime @default(now())
 }
+
+/// Cached AI insights
+model AIInsight {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  category    String
+  insight     String
+  confidence  Decimal? @db.Decimal(5,2)
+  generatedAt DateTime @default(now())
+}
