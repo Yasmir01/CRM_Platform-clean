@@ -103,7 +103,7 @@ model Deal {
   amount     Float
   stage      String
   createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  updatedAt  DateTime @updatedAt
 
   // Relations
   orgId     String
@@ -225,35 +225,6 @@ model CalendarEvent {
   updatedAt  DateTime @updatedAt
 }
 
-/// Direct messaging
-model DirectMessage {
-  id        String   @id @default(cuid())
-  senderId  String
-  sender    User     @relation("DirectMessageSender", fields: [senderId], references: [id])
-  receiverId String
-  receiver  User     @relation("DirectMessageReceiver", fields: [receiverId], references: [id])
-  propertyId String?
-  property  Property? @relation(fields: [propertyId], references: [id])
-  content   String
-  channel   String   @default("in_app")
-  status    String   @default("sent")
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  attachments DirectMessageAttachment[]
-}
-
-model DirectMessageAttachment {
-  id        String   @id @default(cuid())
-  messageId String
-  message   DirectMessage @relation(fields: [messageId], references: [id])
-  url       String
-  filename  String?
-  mimeType  String?
-  createdAt DateTime @default(now())
-}
-
-/// Reminders & logs used by automation
 model Reminder {
   id         String   @id @default(cuid())
   tenantId   String?
@@ -279,7 +250,6 @@ model ReminderLog {
   createdAt  DateTime @default(now())
 }
 
-/// Transactions (basic)
 model Transaction {
   id         String   @id @default(cuid())
   tenantId   String?
@@ -293,7 +263,6 @@ model Transaction {
   createdAt  DateTime @default(now())
 }
 
-/// Rental applications / prospects
 model Application {
   id             String   @id @default(cuid())
   propertyId     String
@@ -312,7 +281,6 @@ model Application {
   createdAt      DateTime @default(now())
 }
 
-/// Cached AI insights
 model AIInsight {
   id          String   @id @default(cuid())
   userId      String?
@@ -325,7 +293,6 @@ model AIInsight {
   generatedAt DateTime @default(now())
 }
 
-/// Documents repository
 model Document {
   id          String   @id @default(cuid())
   propertyId  String?
@@ -356,7 +323,6 @@ model TaxReport {
   createdAt  DateTime @default(now())
 }
 
-/// Owners and distributions
 model Owner {
   id        String   @id @default(cuid())
   userId    String
@@ -380,11 +346,26 @@ model OwnerProperty {
 
 model OwnerDistribution {
   id         String   @id @default(cuid())
-  ownerId    String
+  ownerId    String   
   owner      Owner    @relation(fields: [ownerId], references: [id])
   propertyId String
   property   Property @relation(fields: [propertyId], references: [id])
   amount     Decimal  @db.Decimal(12,2)
   date       DateTime @default(now())
   method     String   @default("ach")
+}
+
+/// --- Branding model (white-labeling & branding settings) ---
+model Branding {
+  id             String   @id @default(cuid())
+  landlordId     String
+  landlord       User     @relation(fields: [landlordId], references: [id])
+  logoUrl        String?
+  primaryColor   String?  // HEX like "#3498db"
+  secondaryColor String?
+  companyName    String?
+  customDomain   String?
+  emailSender    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
