@@ -355,3 +355,36 @@ model TaxReport {
   fileUrl    String?
   createdAt  DateTime @default(now())
 }
+
+/// Owners and distributions
+model Owner {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  email     String
+  createdAt DateTime @default(now())
+  properties OwnerProperty[]
+  distributions OwnerDistribution[]
+}
+
+model OwnerProperty {
+  id                  String   @id @default(cuid())
+  ownerId             String
+  owner               Owner    @relation(fields: [ownerId], references: [id])
+  propertyId          String
+  property            Property @relation(fields: [propertyId], references: [id])
+  ownershipPercentage Decimal  @db.Decimal(5,2)
+  createdAt           DateTime @default(now())
+}
+
+model OwnerDistribution {
+  id         String   @id @default(cuid())
+  ownerId    String
+  owner      Owner    @relation(fields: [ownerId], references: [id])
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  amount     Decimal  @db.Decimal(12,2)
+  date       DateTime @default(now())
+  method     String   @default("ach")
+}
