@@ -3,7 +3,8 @@ import { setPublished } from './_store';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
-  const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+  const { safeParse } = await import('../src/utils/safeJson');
+  const body = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body || {});
   const { unitId, isActive } = body as { unitId?: string; isActive?: boolean };
   if (!unitId || typeof isActive !== 'boolean') return res.status(400).json({ error: 'invalid' });
   setPublished(unitId, isActive);
