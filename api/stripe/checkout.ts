@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { prisma } from './_db';
 import { getUserOr401 } from '../src/utils/authz';
+import { safeParse } from '../src/utils/safeJson';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -18,7 +19,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!dbUser.accountId) return res.status(400).json({ error: 'User has no account' });
 
   try {
-    const { safeParse } = await import('../src/utils/safeJson');
     const body = typeof req.body === 'string' ? safeParse(req.body, {}) : (req.body || {});
     const plan = String((body.plan || '').toLowerCase() || '');
     const suppliedPriceId = String(body.priceId || '');
