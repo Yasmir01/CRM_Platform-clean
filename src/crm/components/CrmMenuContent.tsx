@@ -261,15 +261,23 @@ export default function CrmMenuContent() {
           return;
         }
 
-        // Use a relative URL to avoid origin mismatches (preview/proxy environments)
-        const url = '/api/messages/unread';
+        // Build absolute API URL if an API base is provided (helps when app is served from a different origin)
+        const apiBase = (typeof window !== 'undefined' && (window as any).__API_BASE__) ? (window as any).__API_BASE__ : '';
+        const url = `${apiBase}/api/messages/unread`;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
 
+        // Prepare headers: try Authorization header if available in localStorage (Builder/Expo flows)
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+        try {
+          const token = typeof window !== 'undefined' ? window.localStorage.getItem('authToken') : null;
+          if (token) headers['Authorization'] = `Bearer ${token}`;
+        } catch (_) {}
+
         let r: Response | null = null;
         try {
-          r = await fetch(url, { credentials: 'include', cache: 'no-store', signal: controller.signal });
+          r = await fetch(url, { headers, cache: 'no-store', signal: controller.signal, mode: 'cors' });
         } catch (err: any) {
           // If fetch was aborted due to timeout, treat as no unread messages
           if (err?.name === 'AbortError') {
@@ -277,6 +285,7 @@ export default function CrmMenuContent() {
             return;
           }
           // Network or CORS error - do not throw, just set to 0
+          console.warn('unread messages fetch failed:', err?.message || err);
           setUnreadMessagesCount(0);
           return;
         } finally {
