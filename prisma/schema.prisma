@@ -370,6 +370,28 @@ model Branding {
   updatedAt      DateTime @updatedAt
 }
 
+/// --- Property & Lease models ---
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  units     Int
+  leases    Lease[]
+  createdAt DateTime @default(now())
+}
+
+model Lease {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  tenant     User     @relation(fields: [tenantId], references: [id])
+  tenantId   String
+  startDate  DateTime
+  endDate    DateTime
+  rentAmount Float
+  createdAt  DateTime @default(now())
+}
+
 /// --- Maintenance requests ---
 model MaintenanceRequest {
   id          String   @id @default(cuid())
