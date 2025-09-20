@@ -52,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
     );
 
-    return res.status(201).json({ ok: true, user });
+    return res.status(201).json({ ok: true, user, token });
   } catch (err: any) {
     console.error('signup error', err?.message || err);
     return res.status(500).json({ error: 'Server error' });
