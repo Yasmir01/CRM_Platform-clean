@@ -3,46 +3,32 @@ import { prisma } from './_db';
 import { getUserOr401 } from '../src/utils/authz';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
   try {
-    const userPayload = getUserOr401(req, res);
-    if (!userPayload) return; // already responded with 401
+    const user = getUserOr401(req, res);
+    if (!user) return; // getUserOr401 already responded with 401
 
-    const userId = String(userPayload.sub || userPayload?.id || '');
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-    const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-    if (!dbUser) return res.status(401).json({ error: 'Unauthorized' });
-
-    const isSuper = String(dbUser.role || '').toUpperCase() === 'SUPER_ADMIN';
-
-    const propertyId = (req.query && (req.query as any).propertyId) ? String((req.query as any).propertyId) : undefined;
-
-    let properties: any[] = [];
-
-    // Try to filter by orgId if the Property model supports it. If not, fall back to returning all properties.
-    if (isSuper) {
-      properties = await prisma.property.findMany({ select: { id: true, address: true }, orderBy: { address: 'asc' } });
-    } else {
-      try {
-        properties = await prisma.property.findMany({ where: { orgId: dbUser.orgId }, select: { id: true, address: true }, orderBy: { address: 'asc' } });
-      } catch (e: any) {
-        // likely Property model doesn't have orgId field — fall back to returning all properties
-        console.warn('Could not filter properties by orgId; returning all properties. Error:', e?.message || e);
-        properties = await prisma.property.findMany({ select: { id: true, address: true }, orderBy: { address: 'asc' } });
-      }
+    if (req.method === 'GET') {
+      const take = Math.min(1000, Number((req.query as any).take || 100));
+      const properties = await prisma.property.findMany({ include: { leases: true }, take, orderBy: { createdAt: 'desc' } });
+      return res.status(200).json(properties);
     }
 
-    // Map to { id, title } to match expected client shape
-    const result = properties.map((p: any) => ({ id: p.id, title: p.title || p.name || p.address || String(p.id) }));
+    if (req.method === 'POST') {
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+      const name = String(body.name || '').trim();
+      const address = body.address ? String(body.address) : null;
+      const units = Number(body.units || 0);
 
-    return res.status(200).json({ properties: result });
-  } catch (err: any) {
-    console.error('properties list error', err?.message || err);
+      if (!name) return res.status(400).json({ error: 'Missing name' });
+
+      const created = await prisma.property.create({ data: { name, address, units } });
+      return res.status(201).json(created);
+    }
+
+    res.setHeader('Allow', 'GET, POST');
+    return res.status(405).end('Method Not Allowed');
+  } catch (e: any) {
+    console.error('properties handler error', e?.message || e);
     return res.status(500).json({ error: 'Server error' });
   }
 }
