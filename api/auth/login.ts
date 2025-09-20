@@ -41,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     );
 
     const safeUser = { id: user.id, email: user.email, name: user.name, role: user.role, subscriptionPlan: (user as any).subscriptionPlan };
-    return res.status(200).json({ ok: true, user: safeUser });
+    return res.status(200).json({ ok: true, user: safeUser, token });
   } catch (err: any) {
     console.error('login error', err?.message || err);
     return res.status(500).json({ error: 'Server error' });
