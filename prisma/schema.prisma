@@ -308,7 +308,7 @@ model Document {
   visibility  String   @default("private")
   metadata    Json?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt  DateTime @updatedAt
 }
 
 model TaxReport {
@@ -368,4 +368,15 @@ model Branding {
   emailSender    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+/// --- Maintenance requests ---
+model MaintenanceRequest {
+  id          String   @id @default(cuid())
+  tenantId    String
+  propertyId  String?
+  subject     String
+  description String
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
 }
