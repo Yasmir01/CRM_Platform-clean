@@ -48,6 +48,15 @@ export const api = {
     return request<{ url: string }>('/api/payments/checkout', { method: 'POST', body: JSON.stringify(body) });
   },
 
+  // Maintenance
+  listMaintenance() { return request<any[]>('/api/maintenance'); },
+  createMaintenance(body: { propertyId?: string; subject: string; description: string }) {
+    return request('/api/maintenance', { method: 'POST', body: JSON.stringify(body) });
+  },
+  updateMaintenance(id: string, status: string) {
+    return request(`/api/maintenance/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+  },
+
   // Accounting
   providers() { return request('/api/accounting/providers'); },
 };
