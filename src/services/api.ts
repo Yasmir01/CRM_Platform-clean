@@ -1,5 +1,5 @@
 // src/services/api.ts
-const API_BASE = process.env.EXPO_PUBLIC_API_BASE || ""; // when empty, will use same origin
+const API_BASE = "https://cfabb82f525b43f2adec98b8c36620a6-6923ef90-5399-4cd8-83fc-ca3ea2.fly.dev"; // deployed backend used by mobile and Builder.io
 
 let authToken: string | null = null;
 export function setToken(token: string | null) { authToken = token; }
