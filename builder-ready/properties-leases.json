@@ -15,6 +15,22 @@
       "headers": {
         "Authorization": "Bearer {{ state.authToken }}"
       }
+    },
+    {
+      "name": "contactsData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/contacts",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
+    },
+    {
+      "name": "myLeaseData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/leases",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
     }
   ],
   "forms": [
