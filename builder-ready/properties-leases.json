@@ -31,6 +31,14 @@
       "headers": {
         "Authorization": "Bearer {{ state.authToken }}"
       }
+    },
+    {
+      "name": "maintenanceData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/maintenance",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
     }
   ],
   "forms": [
@@ -114,6 +122,81 @@
       "onError": {
         "type": "run",
         "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Login failed';"
+      }
+    },
+    {
+      "name": "maintenanceForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/maintenance",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "subject": "{{ state.subject }}",
+          "description": "{{ state.description }}",
+          "propertyId": "{{ state.propertyId }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "(async function(){ try{ const res = await fetch('https://crm-platform-sams-projects.vercel.app/api/maintenance', { headers: { 'Authorization': 'Bearer ' + (state.authToken || '') } }); if(res.ok){ state.maintenanceData = await res.json(); } state.formMessage = 'Maintenance request submitted'; }catch(e){ state.formError = 'Failed to refresh maintenance list'; } })();"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Failed to submit maintenance request';"
+      }
+    },
+    {
+      "name": "presignForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/storage/presign",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "filename": "{{ state.fileName }}",
+          "contentType": "{{ state.fileType }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "state.fileUpload = state.lastAction.response || {}; state.fileKey = state.fileUpload.key || state.fileKey;"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Presign failed';"
+      }
+    },
+    {
+      "name": "maintenanceUploadForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/maintenance/upload",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "subject": "{{ state.subject }}",
+          "description": "{{ state.description }}",
+          "propertyId": "{{ state.propertyId }}",
+          "fileKey": "{{ state.fileKey }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "(async function(){ try{ const res = await fetch('https://crm-platform-sams-projects.vercel.app/api/maintenance', { headers: { 'Authorization': 'Bearer ' + (state.authToken || '') } }); if(res.ok){ state.maintenanceData = await res.json(); } state.formMessage = 'Maintenance request with file submitted'; }catch(e){ state.formError = 'Failed to refresh maintenance list'; } })();"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Maintenance upload failed';"
       }
     }
   ]
