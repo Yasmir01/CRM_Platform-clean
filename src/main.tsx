@@ -12,7 +12,7 @@ cleanLocalStorage();
 import App from './App';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import AppErrorBoundary from '@/components/core/AppErrorBoundary';
+import { AppErrorBoundary } from '@/components/core/AppErrorBoundary';
 
 // Deferred builder registration is important but should be safe as a static import in production
 import '@/components/builder/registry';
