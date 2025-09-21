@@ -1,0 +1,350 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "id": "root-container",
+  "component": {
+    "name": "Container",
+    "options": {
+      "style": {
+        "padding": "30px",
+        "backgroundColor": "#f5f5f5"
+      }
+    }
+  },
+  "children": [
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "properties-leases-container",
+      "component": {
+        "name": "Container",
+        "options": {
+          "style": {
+            "padding": "20px",
+            "border": "1px solid #ddd",
+            "borderRadius": "8px",
+            "backgroundColor": "#ffffff",
+            "marginBottom": "30px"
+          }
+        }
+      },
+      "children": [
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "properties-title",
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "All Properties & Leases",
+              "style": {
+                "fontSize": "20px",
+                "fontWeight": "bold",
+                "marginBottom": "15px"
+              }
+            }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "properties-repeater",
+          "component": {
+            "name": "Repeater",
+            "options": {
+              "collection": "state.propertiesData",
+              "itemName": "property"
+            }
+          },
+          "children": [
+            {
+              "@type": "@builder.io/sdk:Element",
+              "id": "property-box",
+              "component": {
+                "name": "Container",
+                "options": {
+                  "style": {
+                    "padding": "15px",
+                    "marginBottom": "15px",
+                    "border": "1px solid #ccc",
+                    "borderRadius": "6px",
+                    "backgroundColor": "#fff"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  "id": "property-name",
+                  "component": {
+                    "name": "Text",
+                    "options": {
+                      "text": "{{ property.name }}",
+                      "style": {
+                        "fontSize": "16px",
+                        "fontWeight": "bold"
+                      }
+                    }
+                  }
+                },
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  "id": "property-address",
+                  "component": {
+                    "name": "Text",
+                    "options": {
+                      "text": "{{ property.address }}"
+                    }
+                  }
+                },
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  "id": "property-units",
+                  "component": {
+                    "name": "Text",
+                    "options": {
+                      "text": "Units: {{ property.units }}"
+                    }
+                  }
+                },
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  "id": "leases-title",
+                  "component": {
+                    "name": "Text",
+                    "options": {
+                      "text": "Leases:",
+                      "style": {
+                        "marginTop": "10px",
+                        "fontWeight": "bold"
+                      }
+                    }
+                  }
+                },
+                {
+                  "@type": "@builder.io/sdk:Element",
+                  "id": "leases-repeater",
+                  "component": {
+                    "name": "Repeater",
+                    "options": {
+                      "collection": "property.leases",
+                      "itemName": "lease"
+                    }
+                  },
+                  "children": [
+                    {
+                      "@type": "@builder.io/sdk:Element",
+                      "id": "lease-item",
+                      "component": {
+                        "name": "Text",
+                        "options": {
+                          "text": "Tenant: {{ lease.tenantId }} | Dates: {{ lease.startDate }} → {{ lease.endDate }} | Rent: ${{ lease.rentAmount }}"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "create-property-form",
+      "component": {
+        "name": "Form",
+        "options": {
+          "action": "createPropertyForm",
+          "style": {
+            "padding": "20px",
+            "border": "1px solid #ccc",
+            "borderRadius": "8px",
+            "marginBottom": "30px",
+            "backgroundColor": "#ffffff"
+          }
+        }
+      },
+      "children": [
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "form-title",
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "Create Property",
+              "style": { "fontSize": "18px", "fontWeight": "bold" }
+            }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-name",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "name", "placeholder": "Property Name" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-address",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "address", "placeholder": "Property Address" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-units",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "units", "placeholder": "Number of Units", "type": "number" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "submit-property",
+          "component": {
+            "name": "Form:SubmitButton",
+            "options": { "text": "Add Property" }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "create-lease-form",
+      "component": {
+        "name": "Form",
+        "options": {
+          "action": "createLeaseForm",
+          "style": {
+            "padding": "20px",
+            "border": "1px solid #ccc",
+            "borderRadius": "8px",
+            "marginBottom": "30px",
+            "backgroundColor": "#ffffff"
+          }
+        }
+      },
+      "children": [
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "lease-title",
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "Create Lease",
+              "style": { "fontSize": "18px", "fontWeight": "bold" }
+            }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-property-id",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "propertyId", "placeholder": "Property ID" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-tenant-id",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "tenantId", "placeholder": "Tenant ID" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-start-date",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "startDate", "placeholder": "Start Date (YYYY-MM-DD)" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-end-date",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "endDate", "placeholder": "End Date (YYYY-MM-DD)" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "input-rent",
+          "component": {
+            "name": "Form:Input",
+            "options": { "name": "rentAmount", "placeholder": "Rent Amount", "type": "number" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "submit-lease",
+          "component": {
+            "name": "Form:SubmitButton",
+            "options": { "text": "Add Lease" }
+          }
+        }
+      ]
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-container",
+      "component": {
+        "name": "Container",
+        "options": {
+          "style": {
+            "padding": "20px",
+            "border": "1px solid #ddd",
+            "borderRadius": "8px",
+            "backgroundColor": "#ffffff"
+          }
+        }
+      },
+      "children": [
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "my-lease-title",
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "My Lease",
+              "style": { "fontSize": "20px", "fontWeight": "bold", "marginBottom": "10px" }
+            }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "my-lease-property",
+          "component": {
+            "name": "Text",
+            "options": { "text": "Property: {{ state.myLeaseData[0].property.name }}" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "my-lease-address",
+          "component": {
+            "name": "Text",
+            "options": { "text": "Address: {{ state.myLeaseData[0].property.address }}" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "my-lease-dates",
+          "component": {
+            "name": "Text",
+            "options": { "text": "Lease Dates: {{ state.myLeaseData[0].startDate }} → {{ state.myLeaseData[0].endDate }}" }
+          }
+        },
+        {
+          "@type": "@builder.io/sdk:Element",
+          "id": "my-lease-rent",
+          "component": {
+            "name": "Text",
+            "options": { "text": "Rent: ${{ state.myLeaseData[0].rentAmount }}" }
+          }
+        }
+      ]
+    }
+  ]
+}
