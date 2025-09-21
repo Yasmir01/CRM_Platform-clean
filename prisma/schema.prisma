@@ -191,23 +191,6 @@ model VendorInvite {
   createdAt  DateTime @default(now())
 }
 
-/// Lease management
-model Lease {
-  id          String   @id @default(cuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  unit        String
-  tenantId    String?
-  tenant      User?    @relation("LeaseTenant", fields: [tenantId], references: [id])
-  rentAmount  Decimal  @db.Decimal(10, 2)
-  deposit     Decimal? @db.Decimal(10, 2)
-  startDate   DateTime
-  endDate     DateTime
-  status      String   @default("active")
-  documentUrl String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
 
 /// Calendar events & tasks
 model CalendarEvent {
