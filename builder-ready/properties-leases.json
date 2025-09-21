@@ -1,0 +1,58 @@
+{
+  "dataSources": [
+    {
+      "name": "propertiesData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/properties",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
+    },
+    {
+      "name": "leasesData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/leases",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
+    }
+  ],
+  "forms": [
+    {
+      "name": "createPropertyForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/properties",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "name": "{{ state.name }}",
+          "address": "{{ state.address }}",
+          "units": "{{ state.units }}"
+        }
+      }
+    },
+    {
+      "name": "createLeaseForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/leases",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "propertyId": "{{ state.propertyId }}",
+          "tenantId": "{{ state.tenantId }}",
+          "startDate": "{{ state.startDate }}",
+          "endDate": "{{ state.endDate }}",
+          "rentAmount": "{{ state.rentAmount }}"
+        }
+      }
+    }
+  ]
+}
