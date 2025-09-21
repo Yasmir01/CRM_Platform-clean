@@ -4,50 +4,37 @@ import './index.css';
 import { initializeErrorHandling } from './utils/errorHandling';
 import { cleanLocalStorage } from './utils/cleanLocalStorage';
 
-// Initialize comprehensive error handling for MetaMask and other browser extension conflicts
+// Initialize early runtime protections (index.html already has ultra-early prevention scripts)
 initializeErrorHandling();
-// Sanitize localStorage on app start to avoid accidental non-JSON values (e.g. pasted module text)
 cleanLocalStorage();
 
-(async () => {
-  try {
-    // Defer heavy imports until after localStorage sanitization to prevent JSON.parse of accidental code snippets
-    const AppMod = await import('./App.tsx');
-    const AppComponent = (AppMod && (AppMod.default || AppMod.App)) || AppMod;
+// Static imports to ensure the app bundle is produced and not dynamically fetched at runtime
+import App from './App';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
+import AppErrorBoundary from '@/components/core/AppErrorBoundary';
 
-    const { QueryClientProvider } = await import('@tanstack/react-query');
-    const qcMod = await import('@/lib/queryClient');
-    const queryClient = qcMod && (qcMod.queryClient || qcMod.default || qcMod);
+// Deferred builder registration is important but should be safe as a static import in production
+import '@/components/builder/registry';
+import '@/components/builder/builder-registration';
 
-    const AppErrMod = await import('@/components/core/AppErrorBoundary');
-    const AppErrorBoundary = (AppErrMod && (AppErrMod.AppErrorBoundary || AppErrMod.default)) || ((props: any) => props.children);
+const rootElement = document.getElementById('root')!;
+const root = createRoot(rootElement);
 
-    // Defer builder registration imports after sanitation as before
-    try {
-      await import('@/components/builder/registry');
-      await import('@/components/builder/builder-registration');
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('Deferred builder registration failed', e);
-    }
-
-    const root = createRoot(document.getElementById('root')!);
-    root.render(
-      <React.StrictMode>
-        <AppErrorBoundary>
-          <QueryClientProvider client={queryClient}>
-            <React.Suspense fallback={<div className="p-6">Loading…</div>}>
-              {AppComponent ? <AppComponent /> : <div className="p-6">App not available</div>}
-            </React.Suspense>
-          </QueryClientProvider>
-        </AppErrorBoundary>
-      </React.StrictMode>
-    );
-  } catch (err) {
-    // If dynamic bootstrap fails, fallback to simple render to avoid blank screen
-    // eslint-disable-next-line no-console
-    console.error('Bootstrap failed', err);
-    const root = createRoot(document.getElementById('root')!);
-    root.render(<div style={{ padding: 24 }}>Initialization error. Check console for details.</div>);
-  }
-})();
+try {
+  root.render(
+    <React.StrictMode>
+      <AppErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <React.Suspense fallback={<div className="p-6">Loading…</div>}>
+            <App />
+          </React.Suspense>
+        </QueryClientProvider>
+      </AppErrorBoundary>
+    </React.StrictMode>
+  );
+} catch (err) {
+  // eslint-disable-next-line no-console
+  console.error('Bootstrap failed', err);
+  root.render(<div style={{ padding: 24 }}>Initialization error. Check console for details.</div>);
+}
