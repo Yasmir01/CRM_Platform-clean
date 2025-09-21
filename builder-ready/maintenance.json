@@ -1,0 +1,39 @@
+{
+  "dataSources": [
+    {
+      "name": "maintenanceData",
+      "type": "rest",
+      "url": "https://crm-platform-sams-projects.vercel.app/api/maintenance",
+      "headers": {
+        "Authorization": "Bearer {{ state.authToken }}"
+      }
+    }
+  ],
+  "forms": [
+    {
+      "name": "maintenanceForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/maintenance",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{ state.authToken }}"
+        },
+        "body": {
+          "subject": "{{ state.subject }}",
+          "description": "{{ state.description }}",
+          "propertyId": "{{ state.propertyId }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "(async function(){ try{ const res = await fetch('https://crm-platform-sams-projects.vercel.app/api/maintenance', { headers: { 'Authorization': 'Bearer ' + (state.authToken || '') } }); if(res.ok){ state.maintenanceData = await res.json(); } state.formMessage = 'Maintenance request submitted'; }catch(e){ state.formError = 'Failed to refresh maintenance list'; } })();"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Failed to submit maintenance request';"
+      }
+    }
+  ]
+}
