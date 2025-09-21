@@ -53,6 +53,52 @@
           "rentAmount": "{{ state.rentAmount }}"
         }
       }
+    },
+    {
+      "name": "registerForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/auth/register",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "{{ state.email }}",
+          "password": "{{ state.password }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "state.authToken = state.lastAction.response && state.lastAction.response.token; if (state.authToken) { window.location.href = '/crm'; }"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Registration failed';"
+      }
+    },
+    {
+      "name": "loginForm",
+      "action": {
+        "type": "rest",
+        "url": "https://crm-platform-sams-projects.vercel.app/api/auth/login",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "{{ state.email }}",
+          "password": "{{ state.password }}"
+        }
+      },
+      "onSuccess": {
+        "type": "run",
+        "code": "state.authToken = state.lastAction.response && state.lastAction.response.token; state.user = state.lastAction.response && state.lastAction.response.user; if (state.authToken) { window.location.href = '/crm'; }"
+      },
+      "onError": {
+        "type": "run",
+        "code": "state.formError = (state.lastAction && (state.lastAction.error || (state.lastAction.response && state.lastAction.response.error))) || 'Login failed';"
+      }
     }
   ]
 }
