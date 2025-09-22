@@ -271,23 +271,18 @@ export default function CrmMenuContent() {
           return;
         }
 
-        // Build absolute API URL if an API base is provided (helps when app is served from a different origin)
-        const apiBase = (typeof window !== 'undefined' && (window as any).__API_BASE__) ? (window as any).__API_BASE__ : '';
-        const url = `${apiBase}/api/messages/unread`;
+        // Use same-origin API path and include credentials to match other message endpoints
+        const url = `/api/messages/unread`;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
 
-        // Prepare headers: try Authorization header if available in localStorage (Builder/Expo flows)
+        // Use minimal headers and include cookies for server-side session auth
         const headers: Record<string, string> = { 'Accept': 'application/json' };
-        try {
-          const token = typeof window !== 'undefined' ? window.localStorage.getItem('authToken') : null;
-          if (token) headers['Authorization'] = `Bearer ${token}`;
-        } catch (_) {}
 
         let r: Response | null = null;
         try {
-          r = await fetch(url, { headers, cache: 'no-store', signal: controller.signal, mode: 'cors' });
+          r = await fetch(url, { headers, cache: 'no-store', signal: controller.signal, credentials: 'include' });
         } catch (err: any) {
           // If fetch was aborted due to timeout, treat as no unread messages
           if (err?.name === 'AbortError') {
