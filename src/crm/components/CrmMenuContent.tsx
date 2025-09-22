@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
