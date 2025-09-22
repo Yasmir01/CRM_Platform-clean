@@ -385,3 +385,14 @@ model MaintenanceRequest {
   status      String   @default("open")
   createdAt   DateTime @default(now())
 }
+
+/// Password reset tokens for forgot-password flow
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
