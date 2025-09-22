@@ -57,6 +57,9 @@ export const api = {
     return request(`/api/maintenance/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
   },
 
+  // Current user
+  me() { return request<{ email: string; role: string }>('/api/auth/me'); },
+
   // Accounting
   providers() { return request('/api/accounting/providers'); },
 };
