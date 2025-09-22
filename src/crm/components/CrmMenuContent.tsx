@@ -442,26 +442,26 @@ export default function CrmMenuContent() {
                       <ListItemIcon>
                         {item.badge && item.text === "Applications" ? (
                           <Badge badgeContent={newApplicationsCount} color="error">
-                            {item.icon}
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                           </Badge>
                         ) : item.badge && item.text === "Tasks" ? (
                           <Badge badgeContent={newTasksCount} color="warning">
-                            {item.icon}
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                           </Badge>
                         ) : item.badge && item.text === "Suggestions" ? (
                           <Badge badgeContent={newSuggestionsCount} color="error">
-                            {item.icon}
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                           </Badge>
                         ) : item.badge && item.text === "Communications" ? (
                           <Badge badgeContent={unreadMessagesCount} color="error">
-                            {item.icon}
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                           </Badge>
                         ) : (isVendorUser && item.text === 'Properties') ? (
                           <Badge badgeContent={assignedPropsCount} color="warning">
-                            {item.icon}
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                           </Badge>
                         ) : (
-                          item.icon
+                          <IconErrorBoundary>{item.icon}</IconErrorBoundary>
                         )}
                       </ListItemIcon>
                       <ListItemText primary={item.text} />
