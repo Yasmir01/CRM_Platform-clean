@@ -152,6 +152,16 @@ export const serviceProviderMenuItems = [
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
 ];
 
+class IconErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err: any) { console.warn('Icon render error', err); }
+  render() {
+    if (this.state.hasError) return <span aria-hidden="true" style={{ display: 'inline-block', width: 20 }} />;
+    return this.props.children as any;
+  }
+}
+
 export default function CrmMenuContent() {
   const navigate = useNavigate();
   const location = useLocation();
