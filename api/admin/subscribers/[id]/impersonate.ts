@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { prisma } from '../../../api/_db';
+import { prisma } from '../../../pages/api/_db';
 import { ensurePermission } from '../../../src/lib/authorize';
 import jwt from 'jsonwebtoken';
 
