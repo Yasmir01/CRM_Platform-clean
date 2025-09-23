@@ -1,4 +1,4 @@
-import { prisma } from '../api/_db';
+import { prisma } from '../pages/api/_db';
 import Stripe from 'stripe';
 
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY as string | undefined;
