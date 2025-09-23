@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 import { getUserOr401 } from '../../src/utils/authz';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, { apiVersion: '2024-06-20' } as any);
