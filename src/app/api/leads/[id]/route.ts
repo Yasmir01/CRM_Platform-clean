@@ -1,4 +1,4 @@
-import { prisma } from '../../../../../api/_db';
+import { prisma } from '../../../../../pages/api/_db';
 import { withAuthorization } from '../../../../lib/authz';
 
 // GET a single lead
