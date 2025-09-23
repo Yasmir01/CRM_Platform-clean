@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 
 const stripeKey = process.env.STRIPE_SECRET_KEY as string | undefined;
 const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: '2024-06-20' }) : null as any;
