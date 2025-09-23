@@ -1,5 +1,5 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 
 export async function generateInvoicePdf(invoice: any, accountId: string) {
   const account = accountId ? await prisma.account.findUnique({ where: { id: accountId } }) : null;
