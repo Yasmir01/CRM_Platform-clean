@@ -1,3 +1,1 @@
-import signup from './signup';
-
-export default signup;
+export * from "../../pages/api/auth/register";
