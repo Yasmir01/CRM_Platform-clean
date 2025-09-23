@@ -1,4 +1,4 @@
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 import { notify } from './notify';
 
 function startOfDay(date: Date) {
