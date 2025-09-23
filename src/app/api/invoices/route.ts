@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../../../api/_db";
+import { prisma } from "../../../../pages/api/_db";
 
 export async function GET(req: Request) {
   try {
