@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 
 export async function runLateFeeEngine() {
   const today = dayjs();
