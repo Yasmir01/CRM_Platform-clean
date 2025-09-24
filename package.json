@@ -23,7 +23,11 @@
     "attr-accept": "latest",
     "react-dropzone": "latest",
     "crypto-js": "latest",
-    "eventemitter3": "latest"
+    "eventemitter3": "latest",
+    "@mui/icons-material": "latest",
+    "@mui/x-charts": "latest",
+    "dompurify": "latest",
+    "uuid": "latest"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
