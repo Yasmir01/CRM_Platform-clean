@@ -41,6 +41,10 @@ export default defineConfig({
       // Ensure mispackaged ESM/CJS deps are pre-bundled to valid ESM
       "attr-accept",
       "react-dropzone",
+      // MUI packages that sometimes ship mixed ESM/CJS
+      "@mui/material",
+      "@mui/system",
+      "@mui/material/styles",
       // Dayjs core and plugins used by MUI AdapterDayjs
       "dayjs",
       "dayjs/plugin/advancedFormat",
