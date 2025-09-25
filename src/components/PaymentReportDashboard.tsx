@@ -153,6 +153,29 @@ export default function PaymentReportDashboard() {
           {exporting ? "Exporting..." : "Export CSV"}
         </button>
       </div>
+
+      {/* Email export UI */}
+      <div className="mt-6 flex items-center gap-2">
+        <input
+          type="email"
+          placeholder="Recipient email"
+          value={recipient}
+          onChange={(e) => setRecipient(e.target.value)}
+          className="border rounded-lg p-2 w-64 mr-2"
+        />
+        <button
+          onClick={() => handleEmailExport("pdf")}
+          className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 mr-2"
+        >
+          Email PDF
+        </button>
+        <button
+          onClick={() => handleEmailExport("csv")}
+          className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+        >
+          Email CSV
+        </button>
+      </div>
     </div>
   );
 }
