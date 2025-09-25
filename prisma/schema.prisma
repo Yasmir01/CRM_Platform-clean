@@ -313,6 +313,8 @@ model Owner {
   name      String
   email     String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leases    Lease[]
   properties OwnerProperty[]
   distributions OwnerDistribution[]
 }
