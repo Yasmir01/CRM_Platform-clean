@@ -51,6 +51,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       where.date = dateFilter;
     }
 
+    // Resolve recipient; support special keyword 'owner' to auto-fetch owner email for a lease
+    let actualRecipient = recipient;
+    if (recipient === 'owner') {
+      if (filter === 'lease' && id) {
+        const leaseRecord = await prisma.lease.findUnique({ where: { id: String(id) }, include: { owner: true } });
+        if (!leaseRecord || !leaseRecord.owner || !leaseRecord.owner.email) {
+          return res.status(400).json({ error: 'Owner email not found for this lease' });
+        }
+        actualRecipient = leaseRecord.owner.email;
+      } else {
+        return res.status(400).json({ error: 'Owner auto-email requires lease filter + id' });
+      }
+    }
+
     const payments = await prisma.payment.findMany({
       where,
       include: { lease: true, tenant: true },
