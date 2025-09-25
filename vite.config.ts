@@ -47,8 +47,6 @@ export default defineConfig({
       "@mui/material/styles",
       // specific deep modules that sometimes are imported directly
       "@mui/system/colorManipulator",
-      "@mui/system/colorChannel",
-      "@mui/system/identifier",
       // Dayjs core and plugins used by MUI AdapterDayjs
       "dayjs",
       "dayjs/plugin/advancedFormat",
