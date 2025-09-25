@@ -6,39 +6,10 @@ export default function PaymentReportDashboard() {
   const [filter, setFilter] = useState<string>("all");
   const [exporting, setExporting] = useState(false);
 
-  async function handleExport(type: ExportFormat) {
-    try {
-      setExporting(true);
-      const res = await fetch(`/api/export/payments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ format: type, filter }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Server responded with ${res.status}`);
-      }
-
-      const blob = await res.blob();
-      const disposition = res.headers.get("content-disposition") || "";
-      const match = disposition.match(/filename=\"?([^\";]+)\"?/i);
-      const filename = match ? match[1] : `payments-report.${type === "csv" ? "csv" : "pdf"}`;
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      console.error("Export error:", err);
-      window.alert(`Export failed: ${err?.message || String(err)}`);
-    } finally {
-      setExporting(false);
-    }
+  function handleExport(type: ExportFormat) {
+    // Open the dedicated export endpoint in a new tab which triggers download
+    const url = `/api/export/${type}?filter=${encodeURIComponent(filter)}`;
+    window.open(url, "_blank");
   }
 
   return (
