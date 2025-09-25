@@ -5,6 +5,7 @@ type ExportFormat = "pdf" | "csv";
 export default function PaymentReportDashboard() {
   const [filter, setFilter] = useState<string>("all");
   const [exporting, setExporting] = useState(false);
+  const [exportId, setExportId] = useState<string>("");
 
   function handleExport(type: ExportFormat) {
     // Open the dedicated export endpoint in a new tab which triggers download
