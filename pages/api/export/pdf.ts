@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const filter = String((req.query as any).filter || 'all');
     const id = (req.query as any).id as string | undefined;
+    const startDate = (req.query as any).startDate as string | undefined;
+    const endDate = (req.query as any).endDate as string | undefined;
 
     // Basic query — adjust filter handling as needed
     const take = Math.min(10000, Number((req.query as any).take || 1000));
@@ -23,6 +25,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else if (filter === 'tenant') {
       if (!id) return res.status(400).json({ error: 'Missing tenant id for tenant filter' });
       where.tenantId = String(id);
+    }
+
+    if (startDate || endDate) {
+      const dateFilter: any = {};
+      if (startDate) {
+        const sd = new Date(String(startDate));
+        if (isNaN(sd.getTime())) return res.status(400).json({ error: 'Invalid startDate' });
+        dateFilter.gte = sd;
+      }
+      if (endDate) {
+        const ed = new Date(String(endDate));
+        if (isNaN(ed.getTime())) return res.status(400).json({ error: 'Invalid endDate' });
+        dateFilter.lte = ed;
+      }
+      where.date = dateFilter;
     }
 
     const payments = await prisma.payment.findMany({
