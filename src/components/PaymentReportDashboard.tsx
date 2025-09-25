@@ -46,6 +46,31 @@ export default function PaymentReportDashboard() {
     window.open(url, "_blank");
   }
 
+  async function handleEmailExport(type: ExportFormat) {
+    if (!recipient) return window.alert('Please enter a recipient email');
+
+    try {
+      const res = await fetch('/api/export/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filter,
+          id: selectedId || undefined,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          type,
+          recipient,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Failed to send email');
+      window.alert(data.message || 'Email sent');
+    } catch (err: any) {
+      console.error('Email export error:', err);
+      window.alert(`Email export failed: ${err?.message || String(err)}`);
+    }
+  }
+
   return (
     <div className="payment-report-card p-6 bg-white rounded-2xl shadow">
       <h2 className="payment-report-title text-xl font-bold mb-4">Payment Reporting Dashboard</h2>
