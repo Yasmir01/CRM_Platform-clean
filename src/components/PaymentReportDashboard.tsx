@@ -1,19 +1,42 @@
 import React, { useState } from "react";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type ExportFormat = "pdf" | "csv";
 
 export default function PaymentReportDashboard() {
   const [filter, setFilter] = useState<string>("all");
   const [exporting, setExporting] = useState(false);
-  const [exportId, setExportId] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<string>("");
+  const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
+  const [leases, setLeases] = useState<{ id: string }[]>([]);
+
+  useEffect(() => {
+    setSelectedId("");
+    if (filter === "tenant") {
+      fetch('/api/tenants')
+        .then((r) => r.json())
+        .then((data) => setTenants(Array.isArray(data) ? data : []))
+        .catch((err) => {
+          console.error('Failed to load tenants', err);
+          setTenants([]);
+        });
+    } else if (filter === "lease") {
+      fetch('/api/leases')
+        .then((r) => r.json())
+        .then((data) => setLeases(Array.isArray(data) ? data : []))
+        .catch((err) => {
+          console.error('Failed to load leases', err);
+          setLeases([]);
+        });
+    }
+  }, [filter]);
 
   function handleExport(type: ExportFormat) {
     // Build URL and include id when filtering by tenant or lease
     let url = `/api/export/${type}?filter=${encodeURIComponent(filter)}`;
-    if ((filter === 'tenant' || filter === 'lease') && exportId) {
-      url += `&id=${encodeURIComponent(exportId)}`;
+    if ((filter === 'tenant' || filter === 'lease') && selectedId) {
+      url += `&id=${encodeURIComponent(selectedId)}`;
     }
     window.open(url, "_blank");
   }
