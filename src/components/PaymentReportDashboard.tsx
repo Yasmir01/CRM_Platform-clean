@@ -57,14 +57,34 @@ export default function PaymentReportDashboard() {
           <option value="tenant">Per Tenant</option>
         </select>
 
-        {(filter === 'tenant' || filter === 'lease') && (
-          <input
-            aria-label="Filter ID"
-            placeholder={filter === 'tenant' ? 'Enter tenant id' : 'Enter lease id'}
-            value={exportId}
-            onChange={(e) => setExportId(e.target.value)}
-            className="filter-id-input border rounded-lg p-2 ml-2"
-          />
+        {filter === 'tenant' && (
+          <select
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="filter-select border rounded-lg p-2 ml-2"
+          >
+            <option value="">Select Tenant</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {filter === 'lease' && (
+          <select
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="filter-select border rounded-lg p-2 ml-2"
+          >
+            <option value="">Select Lease</option>
+            {leases.map((l) => (
+              <option key={l.id} value={l.id}>
+                Lease #{l.id}
+              </option>
+            ))}
+          </select>
         )}
       </div>
 
