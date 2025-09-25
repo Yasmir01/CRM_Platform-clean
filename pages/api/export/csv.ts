@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
 import { Parser } from 'json2csv';
 
@@ -10,14 +11,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const filter = String((req.query as any).filter || 'all');
+    const id = (req.query as any).id as string | undefined;
 
     const take = Math.min(10000, Number((req.query as any).take || 1000));
     const where: any = {};
 
-    if (filter === 'lease' && req.query.leaseId) {
-      where.leaseId = String(req.query.leaseId);
-    } else if (filter === 'tenant' && req.query.tenantId) {
-      where.tenantId = String(req.query.tenantId);
+    if (filter === 'lease') {
+      if (!id) return res.status(400).json({ error: 'Missing lease id for lease filter' });
+      where.leaseId = String(id);
+    } else if (filter === 'tenant') {
+      if (!id) return res.status(400).json({ error: 'Missing tenant id for tenant filter' });
+      where.tenantId = String(id);
     }
 
     const payments = await prisma.payment.findMany({
@@ -27,16 +31,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       take,
     });
 
-    const rows = payments.map((p) => ({
-      tenantName: (p as any).tenant?.name || '',
-      leaseId: (p as any).lease?.id || '',
-      amount: typeof (p as any).amount === 'number' ? (p as any).amount.toFixed(2) : String((p as any).amount || ''),
+    const mapped = payments.map((p) => ({
+      'tenant.name': (p as any).tenant?.name || 'N/A',
+      'lease.id': (p as any).lease?.id || 'N/A',
+      amount: typeof (p as any).amount === 'number' ? (p as any).amount : p.amount,
       date: p.date ? new Date(p.date).toISOString() : '',
     }));
 
-    const fields = ['tenantName', 'leaseId', 'amount', 'date'];
+    const fields = ['tenant.name', 'lease.id', 'amount', 'date'];
     const parser = new Parser({ fields });
-    const csv = parser.parse(rows as any);
+    const csv = parser.parse(mapped as any);
 
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=payments_report.csv');
