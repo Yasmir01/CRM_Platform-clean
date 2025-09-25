@@ -152,7 +152,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const csv = parser.parse(mapped as any);
     const csvBuffer = Buffer.from(csv, 'utf-8');
 
-    await sendEmail(recipient, 'payments_report.csv', csvBuffer, 'text/csv');
+    await sendEmail(actualRecipient || recipient, 'payments_report.csv', csvBuffer, 'text/csv');
     return res.status(200).json({ message: 'Email sent successfully' });
   } catch (err: any) {
     console.error('Failed to send export email:', err?.message || err);
