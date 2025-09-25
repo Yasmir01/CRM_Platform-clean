@@ -31,6 +31,16 @@ export default function PaymentReportDashboard() {
           <option value="lease">Per Lease</option>
           <option value="tenant">Per Tenant</option>
         </select>
+
+        {(filter === 'tenant' || filter === 'lease') && (
+          <input
+            aria-label="Filter ID"
+            placeholder={filter === 'tenant' ? 'Enter tenant id' : 'Enter lease id'}
+            value={exportId}
+            onChange={(e) => setExportId(e.target.value)}
+            className="filter-id-input border rounded-lg p-2 ml-2"
+          />
+        )}
       </div>
 
       <div className="payment-report-actions flex gap-4">
