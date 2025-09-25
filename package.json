@@ -4,17 +4,22 @@
   "version": "0.0.1",
   "type": "module",
   "engines": {
-    "node": "22.x"
+    "node": "22.x",
+    "npm": "10.x"
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "prisma db push --schema prisma/schema.prisma && vite build",
     "preview": "vite preview",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:push": "prisma db push --schema prisma/schema.prisma",
-    "prisma:seed": "node prisma/seed.mjs",
-    "prisma:seed-demo": "node prisma/seed-demo.mjs",
-    "prisma:migrate": "prisma migrate dev --name init"
+    "prisma:seed:dev": "tsx prisma/seed.dev.ts",
+    "prisma:seed:prod": "tsx prisma/seed.prod.ts",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "reset-db": "prisma migrate reset --force --skip-generate --skip-seed && prisma db push && prisma generate && npm run seed:auto",
+    "seed:auto": "node -e \"process.env.NODE_ENV === 'production' ? require('child_process').execSync('npm run prisma:seed:prod', {stdio: 'inherit'}) : require('child_process').execSync('npm run prisma:seed:dev', {stdio: 'inherit'})\"",
+    "sync": "powershell ./sync-push.ps1",
+    "prisma:test": "tsx prisma/test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.879.0",
@@ -89,10 +94,8 @@
     "tailwindcss-animate": "1.0.7",
     "terser": "5.43.1",
     "ts-node": "10.9.1",
+    "tsx": "4.20.5",
     "typescript": "5.7.2",
     "vite": "6.3.5"
-  },
-  "prisma": {
-    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
