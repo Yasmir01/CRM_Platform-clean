@@ -40,6 +40,8 @@ export default function PaymentReportDashboard() {
     if ((filter === 'tenant' || filter === 'lease') && selectedId) {
       url += `&id=${encodeURIComponent(selectedId)}`;
     }
+    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
     window.open(url, "_blank");
   }
 
