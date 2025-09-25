@@ -88,6 +88,24 @@ export default function PaymentReportDashboard() {
             ))}
           </select>
         )}
+
+        {/* Date range inputs */}
+        <div className="date-range flex items-center gap-2 ml-2">
+          <label className="font-medium">Start:</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="border rounded-lg p-2"
+          />
+          <label className="font-medium">End:</label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="border rounded-lg p-2"
+          />
+        </div>
       </div>
 
       <div className="payment-report-actions flex gap-4">
