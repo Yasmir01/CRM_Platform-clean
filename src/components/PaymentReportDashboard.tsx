@@ -8,8 +8,11 @@ export default function PaymentReportDashboard() {
   const [exportId, setExportId] = useState<string>("");
 
   function handleExport(type: ExportFormat) {
-    // Open the dedicated export endpoint in a new tab which triggers download
-    const url = `/api/export/${type}?filter=${encodeURIComponent(filter)}`;
+    // Build URL and include id when filtering by tenant or lease
+    let url = `/api/export/${type}?filter=${encodeURIComponent(filter)}`;
+    if ((filter === 'tenant' || filter === 'lease') && exportId) {
+      url += `&id=${encodeURIComponent(exportId)}`;
+    }
     window.open(url, "_blank");
   }
 
