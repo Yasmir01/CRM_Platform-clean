@@ -12,7 +12,7 @@ export default defineConfig({
       lodash: 'lodash-es',
       qrcode: path.resolve(__dirname, './src/shims/qrcode.ts'),
       'dayjs/plugin/advancedFormat.js': 'dayjs/plugin/advancedFormat',
-      '@mui/styled-engine': '@emotion/react',
+      '@mui/styled-engine': '@emotion/styled',
       'dayjs/plugin/localizedFormat.js': 'dayjs/plugin/localizedFormat',
       'dayjs/plugin/customParseFormat.js': 'dayjs/plugin/customParseFormat',
       'dayjs/plugin/weekOfYear.js': 'dayjs/plugin/weekOfYear',
