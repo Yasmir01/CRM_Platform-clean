@@ -176,6 +176,63 @@ export default function PaymentReportDashboard() {
           Email CSV
         </button>
       </div>
+
+      {/* Send to Owner quick actions */}
+      <div className="mt-4 flex items-center gap-2">
+        <button
+          onClick={() => {
+            fetch('/api/export/email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                filter,
+                id: selectedId,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+                type: 'pdf',
+                recipient: 'owner',
+              }),
+            })
+              .then((r) => r.json())
+              .then((data) => window.alert(data.message || data.error || 'Email sent'))
+              .catch((err) => {
+                console.error('Send to owner error', err);
+                window.alert('Failed to send to owner');
+              });
+          }}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 mr-2"
+          disabled={filter !== 'lease' || !selectedId}
+        >
+          Send PDF to Owner
+        </button>
+
+        <button
+          onClick={() => {
+            fetch('/api/export/email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                filter,
+                id: selectedId,
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+                type: 'csv',
+                recipient: 'owner',
+              }),
+            })
+              .then((r) => r.json())
+              .then((data) => window.alert(data.message || data.error || 'Email sent'))
+              .catch((err) => {
+                console.error('Send to owner error', err);
+                window.alert('Failed to send to owner');
+              });
+          }}
+          className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
+          disabled={filter !== 'lease' || !selectedId}
+        >
+          Send CSV to Owner
+        </button>
+      </div>
     </div>
   );
 }
