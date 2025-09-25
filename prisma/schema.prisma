@@ -1,3 +1,7 @@
+// --------------------
+// Generator & Datasource
+// --------------------
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,30 +11,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =====================
+// --------------------
+// Enums
+// --------------------
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum Tier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+// --------------------
 // Core User Management
-// =====================
+// --------------------
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  name          String?
-  password      String
-  role          Role          @default(USER)
-  orgId         String?
-  organization  Organization? @relation(fields: [orgId], references: [id])
-  accounts      Account[]
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String?
+  password          String
+  role              Role          @default(USER)
+  orgId             String?
+  organization      Organization? @relation(fields: [orgId], references: [id])
+  accounts          Account[]
   impersonationLogs ImprLog[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  History           History[]
 }
 
 model Account {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  type      String
-  provider  String
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id])
+  type              String
+  provider          String
   providerAccountId String
   refresh_token     String?
   access_token      String?
@@ -41,106 +63,98 @@ model Account {
   session_state     String?
 }
 
-enum Role {
-  USER
-  ADMIN
-  SUPERADMIN
-}
-
-// =====================
+// --------------------
 // Organizations
-// =====================
+// --------------------
 
 model Organization {
-  id             String          @id @default(cuid())
-  name           String
-  logoUrl        String?
-  tier           Tier            @default(FREE)
-  users          User[]
-  orgSettings    OrgSettings?
-  subscriptions  Subscription[]
-  properties     Property[]
-  contacts       Contact[]
-  companies      Company[]
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  logoUrl       String?
+  tier          Tier           @default(FREE)
+  users         User[]
+  orgSettings   OrgSettings?
+  subscriptions Subscription[]
+  properties    Property[]
+  contacts      Contact[]
+  companies     Company[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  ImprLog       ImprLog[]
+  History       History[]
+  Deal          Deal[]
 }
 
 model OrgSettings {
-  id                 String        @id @default(cuid())
-  orgId              String        @unique
-  organization       Organization  @relation(fields: [orgId], references: [id])
-  exportSchedule     String        @default("daily")
-  allowImpersonation Boolean       @default(false)
-  allowExport        Boolean       @default(true)
-  notifications      Boolean       @default(true)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-}
-
-enum Tier {
-  FREE
-  BASIC
-  PREMIUM
-  ENTERPRISE
+  id                 String       @id @default(cuid())
+  orgId              String       @unique
+  organization       Organization @relation(fields: [orgId], references: [id])
+  exportSchedule     String       @default("daily")
+  allowImpersonation Boolean      @default(false)
+  allowExport        Boolean      @default(true)
+  notifications      Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 }
 
 model GlobalSettings {
-  id            String   @id @default(cuid())
-  maintenance   Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  maintenance Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-// =====================
+// --------------------
 // CRM Core
-// =====================
+// --------------------
 
 model Contact {
-  id          String        @id @default(cuid())
-  orgId       String
+  id           String       @id @default(cuid())
+  orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  email       String?
-  phone       String?
-  companyId   String?
-  company     Company?      @relation(fields: [companyId], references: [id])
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  name         String
+  email        String?
+  phone        String?
+  companyId    String?
+  company      Company?     @relation(fields: [companyId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  Deal         Deal[]
 }
 
 model Company {
-  id          String        @id @default(cuid())
-  orgId       String
+  id           String       @id @default(cuid())
+  orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  industry    String?
-  contacts    Contact[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  name         String
+  industry     String?
+  contacts     Contact[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  Deal         Deal[]
 }
 
 model Property {
-  id          String        @id @default(cuid())
-  orgId       String
+  id           String       @id @default(cuid())
+  orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
-  name        String
-  address     String
-  tenants     Tenant[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  name         String
+  address      String
+  tenants      Tenant[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
 model Tenant {
-  id          String   @id @default(cuid())
-  propertyId  String
-  property    Property @relation(fields: [propertyId], references: [id])
-  name        String
-  email       String?
-  phone       String?
-  reminders   Reminder[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String     @id @default(cuid())
+  propertyId String
+  property   Property   @relation(fields: [propertyId], references: [id])
+  name       String
+  email      String?
+  phone      String?
+  reminders  Reminder[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model Reminder {
@@ -153,76 +167,74 @@ model Reminder {
   createdAt DateTime @default(now())
 }
 
-// =====================
+// --------------------
 // Billing / Plans
-// =====================
+// --------------------
 
 model Subscription {
-  id             String        @id @default(cuid())
-  orgId          String
-  organization   Organization  @relation(fields: [orgId], references: [id])
-  plan           Tier
-  active         Boolean       @default(true)
-  startDate      DateTime      @default(now())
-  endDate        DateTime?
-  prorated       Boolean       @default(false)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  plan         Tier
+  active       Boolean      @default(true)
+  startDate    DateTime     @default(now())
+  endDate      DateTime?
+  prorated     Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
-// =====================
+// --------------------
 // Logs / History
-// =====================
+// --------------------
 
 model ImprLog {
-  id             String   @id @default(cuid())
-  superAdminId   String
-  superAdmin     User     @relation(fields: [superAdminId], references: [id])
-  subscriberId   String
-  subscriber     Organization @relation(fields: [subscriberId], references: [id])
-  startedAt      DateTime @default(now())
-  endedAt        DateTime?
-  alertSent      Boolean  @default(false)
+  id           String       @id @default(cuid())
+  superAdminId String
+  superAdmin   User         @relation(fields: [superAdminId], references: [id])
+  subscriberId String
+  subscriber   Organization @relation(fields: [subscriberId], references: [id])
+  startedAt    DateTime     @default(now())
+  endedAt      DateTime?
+  alertSent    Boolean      @default(false)
 }
 
 model History {
-  id          String   @id @default(cuid())
-  orgId       String
+  id           String       @id @default(cuid())
+  orgId        String
   organization Organization @relation(fields: [orgId], references: [id])
-  action      String
-  actorId     String?
-  actor       User?    @relation(fields: [actorId], references: [id])
-  createdAt   DateTime @default(now())
+  action       String
+  actorId      String?
+  actor        User?        @relation(fields: [actorId], references: [id])
+  createdAt    DateTime     @default(now())
 }
 
-// =====================
-// Deals (CRM)
-// =====================
+// --------------------
+// Deals
+// --------------------
 
 model Deal {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   title       String
   description String?
   amount      Float?
-  stage       String   // e.g. "Lead", "Negotiation", "Closed Won", "Closed Lost"
-  probability Int?     // % chance of closing
-  status      String   @default("open") // open, won, lost
+  stage       String // e.g. "Lead", "Negotiation", "Closed Won", "Closed Lost"
+  probability Int? // % chance of closing
+  status      String       @default("open") // open, won, lost
   orgId       String
   org         Organization @relation(fields: [orgId], references: [id])
   companyId   String?
-  company     Company?   @relation(fields: [companyId], references: [id])
+  company     Company?     @relation(fields: [companyId], references: [id])
   contactId   String?
-  contact     Contact?   @relation(fields: [contactId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deleted     Boolean  @default(false) // soft delete
+  contact     Contact?     @relation(fields: [contactId], references: [id])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deleted     Boolean      @default(false) // soft delete
 }
 
-// Keep additional models (Invoices, Payments, etc.) if needed later
-
-// =====================
+// --------------------
 // Misc
-// =====================
+// --------------------
 
 model GlobalLog {
   id        String   @id @default(cuid())
