@@ -115,7 +115,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       doc.on('end', async () => {
         try {
           const pdfBuffer = Buffer.concat(chunks);
-          await sendEmail(recipient, filename, pdfBuffer, 'application/pdf');
+          await sendEmail(actualRecipient || recipient, filename, pdfBuffer, 'application/pdf');
           return res.status(200).json({ message: 'Email sent successfully' });
         } catch (err: any) {
           console.error('Failed to send email with PDF:', err);
