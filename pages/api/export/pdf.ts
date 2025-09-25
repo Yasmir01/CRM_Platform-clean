@@ -10,15 +10,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const filter = String((req.query as any).filter || 'all');
+    const id = (req.query as any).id as string | undefined;
 
     // Basic query — adjust filter handling as needed
     const take = Math.min(10000, Number((req.query as any).take || 1000));
     const where: any = {};
 
-    if (filter === 'lease' && req.query.leaseId) {
-      where.leaseId = String(req.query.leaseId);
-    } else if (filter === 'tenant' && req.query.tenantId) {
-      where.tenantId = String(req.query.tenantId);
+    if (filter === 'lease') {
+      if (!id) return res.status(400).json({ error: 'Missing lease id for lease filter' });
+      where.leaseId = String(id);
+    } else if (filter === 'tenant') {
+      if (!id) return res.status(400).json({ error: 'Missing tenant id for tenant filter' });
+      where.tenantId = String(id);
     }
 
     const payments = await prisma.payment.findMany({
