@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
 import PDFDocument from 'pdfkit';
 
@@ -45,13 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     doc.fontSize(18).text('Payments Report', { align: 'center' }).moveDown();
 
     // Table header
-    doc.fontSize(12).text('Date', { continued: true }).text('  |  Tenant', { continued: true }).text('  |  Lease', { continued: true }).text('  |  Amount');
+    doc.fontSize(12).text('Date  |  Tenant  |  Lease  |  Amount');
     doc.moveDown(0.5);
 
     payments.forEach((p) => {
       const date = p.date ? new Date(p.date).toISOString() : '';
-      const tenant = (p as any).tenant?.name || '';
-      const lease = (p as any).lease?.id || '';
+      const tenant = (p as any).tenant?.name || 'N/A';
+      const lease = (p as any).lease?.id || 'N/A';
       const amount = typeof (p as any).amount === 'number' ? `$${(p as any).amount.toFixed(2)}` : String((p as any).amount || '');
 
       doc.fontSize(11).text(`${date}  |  ${tenant}  |  ${lease}  |  ${amount}`);
