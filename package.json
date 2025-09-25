@@ -27,7 +27,8 @@
     "@mui/icons-material": "^5.11.16",
     "@mui/x-charts": "latest",
     "dompurify": "latest",
-    "uuid": "latest"
+    "uuid": "latest",
+    "axios": "latest"
   },
   "devDependencies": {
     "eslint": "^8.56.0",
