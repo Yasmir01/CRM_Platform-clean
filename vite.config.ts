@@ -13,7 +13,7 @@ export default defineConfig({
       qrcode: path.resolve(__dirname, './src/shims/qrcode.ts'),
       'dayjs/plugin/advancedFormat.js': 'dayjs/plugin/advancedFormat',
       'dayjs/plugin/localizedFormat.js': 'dayjs/plugin/localizedFormat',
-      '@mui/styled-engine': require('path').resolve(__dirname, 'node_modules', '@emotion', 'styled'),
+      '@mui/styled-engine': path.resolve(__dirname, 'node_modules', '@emotion', 'styled'),
       'dayjs/plugin/customParseFormat.js': 'dayjs/plugin/customParseFormat',
       'dayjs/plugin/weekOfYear.js': 'dayjs/plugin/weekOfYear',
       'dayjs/plugin/isBetween.js': 'dayjs/plugin/isBetween',
