@@ -171,6 +171,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const csvBuffer = Buffer.from(csv, 'utf-8');
 
     await sendEmail(actualRecipient || recipient, 'payments_report.csv', csvBuffer, 'text/csv');
+
+    try {
+      await prisma.reportEmailLog.create({
+        data: {
+          adminId: null,
+          recipient: String(actualRecipient || recipient),
+          reportType: String(type),
+          filter: String(filter || 'all'),
+          filterId: id ? String(id) : null,
+          startDate: startDate ? new Date(startDate) : null,
+          endDate: endDate ? new Date(endDate) : null,
+        },
+      });
+    } catch (logErr) {
+      console.warn('Failed to write report email log:', logErr);
+    }
+
     return res.status(200).json({ message: 'Email sent successfully' });
   } catch (err: any) {
     console.error('Failed to send export email:', err?.message || err);
