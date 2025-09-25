@@ -10,6 +10,8 @@ export default function PaymentReportDashboard() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
   const [leases, setLeases] = useState<{ id: string }[]>([]);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     setSelectedId("");
