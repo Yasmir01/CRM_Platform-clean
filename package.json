@@ -24,8 +24,8 @@
     "react-dropzone": "latest",
     "crypto-js": "latest",
     "eventemitter3": "latest",
-    "@mui/icons-material": "latest",
-    "@mui/x-charts": "latest",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/x-charts": "^5.0.0",
     "dompurify": "latest",
     "uuid": "latest"
   },
