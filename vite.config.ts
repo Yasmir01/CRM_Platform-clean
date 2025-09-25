@@ -46,6 +46,9 @@ export default defineConfig({
       "@mui/material",
       "@mui/system",
       "@mui/material/styles",
+      // Emotion packages used by MUI
+      "@emotion/react",
+      "@emotion/styled",
       // specific deep modules that sometimes are imported directly
       "@mui/system/colorManipulator",
       // Dayjs core and plugins used by MUI AdapterDayjs
