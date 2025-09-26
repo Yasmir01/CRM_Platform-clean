@@ -1,3 +1,7 @@
+// --------------------
+// Generator & Datasource
+// --------------------
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,205 +11,150 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                 String   @id @default(cuid())
-  email              String   @unique
-  name               String?
-  password           String
-  role               String   @default("Subscriber") // "SU" | "SA" | "Subscriber"
-  permissions        String?  // comma-separated per-user overrides e.g. "payments:read,maintenance:create"
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+// --------------------
+// Enums
+// --------------------
 
-  // Subscription fields
-  subscriptionPlan   String   @default("free") // basic, pro, enterprise, free
-  subscriptionStatus String   @default("inactive") // active, canceled, past_due, inactive
-  subscriptionId     String?  // Stripe subscription ID
-  currentPeriodEnd   DateTime?
-
-  // Relations
-  contacts  Contact[]
-  companies Company[]
-  deals     Deal[]
-  userRoles UserRole[]
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
 }
 
-model Role {
+enum Tier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+// --------------------
+// Core User Management
+// --------------------
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String?
+  password          String
+  role              Role          @default(USER)
+  orgId             String?
+  organization      Organization? @relation(fields: [orgId], references: [id])
+  accounts          Account[]
+  impersonationLogs ImprLog[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  History           History[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id])
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+}
+
+// --------------------
+// Organizations
+// --------------------
+
+model Organization {
+  id            String         @id @default(cuid())
+  name          String
+  logoUrl       String?
+  tier          Tier           @default(FREE)
+  users         User[]
+  orgSettings   OrgSettings?
+  subscriptions Subscription[]
+  properties    Property[]
+  contacts      Contact[]
+  companies     Company[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  ImprLog       ImprLog[]
+  History       History[]
+  Deal          Deal[]
+}
+
+model OrgSettings {
+  id                 String       @id @default(cuid())
+  orgId              String       @unique
+  organization       Organization @relation(fields: [orgId], references: [id])
+  exportSchedule     String       @default("daily")
+  allowImpersonation Boolean      @default(false)
+  allowExport        Boolean      @default(true)
+  notifications      Boolean      @default(true)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model GlobalSettings {
   id          String   @id @default(cuid())
-  name        String   @unique
-  // permissions stored as JSON mapping module -> { view, edit, delete }
-  permissions Json?
+  maintenance Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  userRoles   UserRole[]
 }
 
-model UserRole {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  roleId     String
-  role       Role     @relation(fields: [roleId], references: [id])
-  propertyId String?
-  createdAt  DateTime @default(now())
-}
+// --------------------
+// CRM Core
+// --------------------
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId String?
-  user   User?       @relation(fields: [userId], references: [id])
-
-  companyId String?
-  company   Company? @relation(fields: [companyId], references: [id])
-
-  deals Deal[]
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name         String
+  email        String?
+  phone        String?
+  companyId    String?
+  company      Company?     @relation(fields: [companyId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  Deal         Deal[]
 }
 
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  industry  String?
-  website   String?
-  address   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId   String?
-  user     User?      @relation(fields: [userId], references: [id])
-  contacts Contact[]
-  deals    Deal[]
-  serviceProviders ServiceProvider[]
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name         String
+  industry     String?
+  contacts     Contact[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  Deal         Deal[]
 }
 
-model Organization {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  deals Deal[]
+model Property {
+  id           String       @id @default(cuid())
+  orgId        String
+  organization Organization @relation(fields: [orgId], references: [id])
+  name         String
+  address      String
+  tenants      Tenant[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
 
-model Deal {
-  id         String        @id @default(cuid())
-  title      String
-  amount     Float
-  stage      String
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  orgId     String
-  org       Organization  @relation(fields: [orgId], references: [id])
-
-  companyId String?
-  company   Company?      @relation(fields: [companyId], references: [id])
-
-  contactId String?
-  contact   Contact?      @relation(fields: [contactId], references: [id])
-
-  userId String?
-  user   User?            @relation(fields: [userId], references: [id])
-}
-
-model ServiceProvider {
-  id        String   @id @default(cuid())
-  name      String
-  serviceType String?
-  email     String?
-  phone     String?
-  address   String?
-  notes     String?
-
-  companyId String
-  company   Company  @relation(fields: [companyId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Ticket {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  priority    String   @default("Low") // Low | Medium | High
-  status      String   @default("Open") // Open | In Progress | Closed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Optional relations
-  company            Company?         @relation(fields: [companyId], references: [id])
-  companyId          String?
-
-  contact            Contact?         @relation(fields: [contactId], references: [id])
-  contactId          String?
-
-  serviceProvider    ServiceProvider? @relation(fields: [serviceProviderId], references: [id])
-  serviceProviderId  String?
-}
-
-/// Subscriptions: separate table for landlord/property manager subscription records
-model Subscription {
-  id                    String   @id @default(cuid())
-  user                  User     @relation(fields: [userId], references: [id])
-  userId                String
-  plan                  String   @default("free")    // free, basic, pro, enterprise
-  status                String   @default("inactive")// active, canceled, past_due, inactive
-  stripeSubscriptionId  String?  @unique
-  currentPeriodEnd      DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-}
-
-/// Tenant invites for onboarding flow
-model TenantInvite {
-  id         String   @id @default(cuid())
-  tenantId   String?  // optional link to tenant record
-  email      String
-  token      String   @unique
-  expiresAt  DateTime
-  used       Boolean  @default(false)
-  createdAt  DateTime @default(now())
-}
-
-model VendorInvite {
-  id         String   @id @default(cuid())
-  vendorId   String?  // optional link to service provider record
-  email      String
-  name       String?
-  category   String?
-  token      String   @unique
-  expiresAt  DateTime
-  used       Boolean  @default(false)
-  createdAt  DateTime @default(now())
-}
-
-
-/// Calendar events & tasks
-model CalendarEvent {
-  id         String   @id @default(cuid())
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
-  propertyId String?
-  property   Property? @relation(fields: [propertyId], references: [id])
-  title      String
-  description String?
-  category   String?
-  dueDate    DateTime
-  status     String   @default("open")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Tenant {
+  id         String     @id @default(cuid())
+  propertyId String
+  property   Property   @relation(fields: [propertyId], references: [id])
+  name       String
+  email      String?
+  phone      String?
+  reminders  Reminder[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 }
 
 model Reminder {
@@ -291,7 +240,7 @@ model Document {
   visibility  String   @default("private")
   metadata    Json?
   createdAt   DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 }
 
 model TaxReport {

@@ -1,99 +1,121 @@
-import { PrismaClient } from "@prisma/client";
+// prisma/seed.ts
+import { PrismaClient, Role, Tier } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  // Clear existing data if needed (order matters)
-  await prisma.ticket.deleteMany();
+export async function main() {
+  console.log('🌱 Seeding database...');
+
+  // --- Clean DB (optional reset) ---
+  await prisma.deal.deleteMany();
+  await prisma.subscription.deleteMany();
+  await prisma.tenant.deleteMany();
+  await prisma.property.deleteMany();
   await prisma.contact.deleteMany();
-  await prisma.serviceProvider.deleteMany();
   await prisma.company.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.organization.deleteMany();
 
-  // Companies
-  const company1 = await prisma.company.create({
+  // --- Organizations ---
+  const org = await prisma.organization.create({
     data: {
-      name: "Acme Real Estate",
-      industry: "Real Estate",
-      email: "info@acme-re.com",
-      phone: "555-111-2222",
-      address: "100 Main St",
+      name: faker.company.name(),
+      logoUrl: faker.image.url(),
+      tier: Tier.BASIC,
     },
   });
 
-  const company2 = await prisma.company.create({
+  // --- Users ---
+  const adminUser = await prisma.user.create({
     data: {
-      name: "TechWorks Inc.",
-      industry: "Technology",
-      email: "support@techworks.com",
-      phone: "555-333-4444",
-      address: "200 Tech Ave",
+      email: 'admin@example.com',
+      name: 'Super Admin',
+      password: await bcrypt.hash('SuperAdmin123!', 10), // secure hash
+      role: Role.SUPERADMIN,
+      orgId: org.id,
     },
   });
 
-  // Service Providers (linked to companies)
-  await prisma.serviceProvider.createMany({
-    data: [
-      {
-        name: "QuickFix Plumbing",
-        serviceType: "Plumbing",
-        phone: "555-123-4567",
-        email: "support@quickfix.com",
-        address: "12 Flow Rd",
-        notes: "Preferred for plumbing emergencies",
-        companyId: company1.id,
-      },
-      {
-        name: "BrightSpark Electricians",
-        serviceType: "Electrical",
-        phone: "555-987-6543",
-        email: "contact@brightspark.com",
-        address: "34 Volt St",
-        notes: "Handles electrical inspections",
-        companyId: company2.id,
-      },
-      {
-        name: "CleanSweep Janitorial",
-        serviceType: "Cleaning",
-        phone: "555-222-3333",
-        email: "hello@cleansweep.com",
-        address: "56 Clean Blvd",
-        notes: "Daily janitorial services",
-        companyId: company1.id,
-      },
-    ],
-    skipDuplicates: true,
+  const normalUser = await prisma.user.create({
+    data: {
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: await bcrypt.hash('User123!', 10),
+      role: Role.USER,
+      orgId: org.id,
+    },
   });
 
-  // Contacts (linked to companies)
-  await prisma.contact.createMany({
-    data: [
-      {
-        firstName: "Alice",
-        lastName: "Johnson",
-        email: "alice@acme-re.com",
-        phone: "555-111-9999",
-        companyId: company1.id,
-      },
-      {
-        firstName: "Bob",
-        lastName: "Martinez",
-        email: "bob@techworks.com",
-        phone: "555-333-7777",
-        companyId: company2.id,
-      },
-    ],
-    skipDuplicates: true,
+  // --- Company & Contact ---
+  const company = await prisma.company.create({
+    data: {
+      name: faker.company.name(),
+      industry: faker.company.buzzPhrase(),
+      orgId: org.id,
+    },
   });
 
-  console.log("✅ Seed complete!");
+  const contact = await prisma.contact.create({
+    data: {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: faker.phone.number(),
+      companyId: company.id,
+      orgId: org.id,
+    },
+  });
+
+  // --- Property & Tenant ---
+  const property = await prisma.property.create({
+    data: {
+      name: faker.company.name() + ' Plaza',
+      address: faker.location.streetAddress(),
+      orgId: org.id,
+    },
+  });
+
+  const tenant = await prisma.tenant.create({
+    data: {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: faker.phone.number(),
+      propertyId: property.id,
+    },
+  });
+
+  // --- Deal ---
+  await prisma.deal.create({
+    data: {
+      title: 'Painting Contract',
+      description: faker.lorem.sentence(),
+      amount: 5000,
+      stage: 'Lead',
+      probability: 60,
+      orgId: org.id,
+      companyId: company.id,
+      contactId: contact.id,
+    },
+  });
+
+  // --- Subscription ---
+  await prisma.subscription.create({
+    data: {
+      orgId: org.id,
+      plan: Tier.BASIC,
+      active: true,
+    },
+  });
+
+  console.log('✅ Database seeded successfully');
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
+  .catch((e) => {
+    console.error('❌ Seeding error:', e);
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
