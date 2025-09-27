@@ -330,8 +330,8 @@ export default function CrmMenuContent() {
       </Box>
       {/* Secondary items - Adjust based on mode */}
       <Box>
-        <Divider sx={{ my: 1 }} />
-        <List dense>
+        <Divider className="crm-menu-divider" />
+        <List dense className="crm-menu-list">
           {(() => {
             const serviceProviderSecondaryItems = [
               { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
