@@ -12,6 +12,7 @@ import {
   Button,
   Divider,
 } from "@mui/material";
+import "./crm-side-menu.css";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import { useAuth } from "../contexts/AuthContext";
 
