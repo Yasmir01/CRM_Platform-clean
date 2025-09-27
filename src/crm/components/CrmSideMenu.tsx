@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import CrmUserSelector from "./CrmUserSelector";
 import CrmMenuContent from "./CrmMenuContent";
 import CrmOptionsMenu from "./CrmOptionsMenu";
+import "./crm-side-menu.css";
 import { useAuth } from "../contexts/AuthContext";
 
 const drawerWidth = 240;
