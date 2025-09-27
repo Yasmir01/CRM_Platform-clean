@@ -288,12 +288,13 @@ export default function CrmMenuContent() {
       <Box>
         <List dense className="crm-menu-list">
           {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <ListItem key={index} disablePadding className="crm-list-item">
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
+                className={"crm-list-btn " + (location.pathname === item.path ? 'selected' : '')}
               >
-                <ListItemIcon>
+                <ListItemIcon className="crm-list-icon">
                   {item.badge && item.text === "Applications" ? (
                     <Badge badgeContent={newApplicationsCount} color="error">
                       {item.icon}
