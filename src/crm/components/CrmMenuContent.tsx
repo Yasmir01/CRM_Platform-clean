@@ -284,9 +284,9 @@ export default function CrmMenuContent() {
   };
 
   return (
-    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
+    <Stack className="crm-menu-stack">
       <Box>
-        <List dense>
+        <List dense className="crm-menu-list">
           {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
