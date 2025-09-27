@@ -31,3 +31,14 @@
 .crm-bottom-user .user-name { font-weight: 500; line-height: 16px; }
 .crm-bottom-user .user-email { color: #6b7280; font-size: 12px; }
 .crm-bottom-user-info { margin-right: auto; }
+
+.crm-select-value .crm-select-name { font-weight: 500; }
+.crm-select-value .crm-select-role { font-size: 12px; color: #6b7280; }
+
+.crm-menu-item-row { display: flex; align-items: center; gap: 12px; width: 100%; }
+.crm-menu-item-info { flex-grow: 1; }
+.crm-menu-item-name { font-weight: 500; }
+.crm-menu-item-email { font-size: 12px; color: #6b7280; }
+
+.crm-logout-row { color: var(--crm-logout-color, #dc2626); }
+.crm-logout-text { font-weight: 600; margin-left: 8px; }
