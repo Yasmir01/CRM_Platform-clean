@@ -62,7 +62,7 @@ export default function CrmSideMenu() {
           >
             {getUserInitials(user.firstName, user.lastName)}
           </Avatar>
-          <div style={{ marginRight: 'auto' }}>
+          <div className="crm-bottom-user-info">
             <div className="user-name">
               {user.firstName} {user.lastName}
             </div>
