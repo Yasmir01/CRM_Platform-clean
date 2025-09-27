@@ -1,15 +1,12 @@
 import * as React from "react";
 import {
-  Box,
   MenuItem,
   FormControl,
   Select,
   SelectChangeEvent,
   Avatar,
   Typography,
-  Stack,
   Chip,
-  Button,
   Divider,
 } from "@mui/material";
 import "./crm-side-menu.css";
