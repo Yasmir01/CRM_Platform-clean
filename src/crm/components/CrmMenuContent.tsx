@@ -319,7 +319,7 @@ export default function CrmMenuContent() {
                     item.icon
                   )}
                 </ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemText className="crm-list-text" primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}
