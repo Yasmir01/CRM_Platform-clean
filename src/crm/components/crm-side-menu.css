@@ -30,3 +30,4 @@
 .crm-bottom-user .MuiAvatar-root { width: 36px; height: 36px; background: var(--crm-avatar-bg, #2563eb); }
 .crm-bottom-user .user-name { font-weight: 500; line-height: 16px; }
 .crm-bottom-user .user-email { color: #6b7280; font-size: 12px; }
+.crm-bottom-user-info { margin-right: auto; }
