@@ -53,37 +53,25 @@ export default function CrmSideMenu() {
         <CrmMenuContent />
       </Box>
       {user && (
-        <Stack
-          direction="row"
-          sx={{
-            p: 2,
-            gap: 1,
-            alignItems: "center",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
+        <div className="crm-bottom-user">
           <Avatar
             sizes="small"
             alt={`${user.firstName} ${user.lastName}`}
             src={user.avatar || "/static/images/avatar/7.jpg"}
-            sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
+            className="crm-avatar"
           >
             {getUserInitials(user.firstName, user.lastName)}
           </Avatar>
-          <Box sx={{ mr: "auto" }}>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 500, lineHeight: "16px" }}
-            >
+          <div style={{ marginRight: 'auto' }}>
+            <div className="user-name">
               {user.firstName} {user.lastName}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            </div>
+            <div className="user-email">
               {user.email}
-            </Typography>
-          </Box>
+            </div>
+          </div>
           <CrmOptionsMenu />
-        </Stack>
+        </div>
       )}
     </Drawer>
   );
