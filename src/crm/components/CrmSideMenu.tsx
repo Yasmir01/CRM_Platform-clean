@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import CrmUserSelector from "./CrmUserSelector";
 import CrmMenuContent from "./CrmMenuContent";
 import CrmOptionsMenu from "./CrmOptionsMenu";
+import "./crm-side-menu.css";
 import { useAuth } from "../contexts/AuthContext";
 
 const drawerWidth = 240;
@@ -35,22 +36,11 @@ export default function CrmSideMenu() {
   return (
     <Drawer
       variant="permanent"
-      sx={{
-        display: { xs: "none", md: "block" },
-        [`& .${drawerClasses.paper}`]: {
-          backgroundColor: "background.paper",
-        },
-      }}
+      className="crm-drawer"
     >
-      <Box
-        sx={{
-          display: "flex",
-          mt: "calc(var(--template-frame-height, 0px) + 4px)",
-          p: 1.5,
-        }}
-      >
+      <div className="crm-user-area">
         <CrmUserSelector />
-      </Box>
+      </div>
       <Divider />
       <Box
         sx={{
@@ -63,37 +53,25 @@ export default function CrmSideMenu() {
         <CrmMenuContent />
       </Box>
       {user && (
-        <Stack
-          direction="row"
-          sx={{
-            p: 2,
-            gap: 1,
-            alignItems: "center",
-            borderTop: "1px solid",
-            borderColor: "divider",
-          }}
-        >
+        <div className="crm-bottom-user">
           <Avatar
             sizes="small"
             alt={`${user.firstName} ${user.lastName}`}
             src={user.avatar || "/static/images/avatar/7.jpg"}
-            sx={{ width: 36, height: 36, bgcolor: "primary.main" }}
+            className="crm-avatar"
           >
             {getUserInitials(user.firstName, user.lastName)}
           </Avatar>
-          <Box sx={{ mr: "auto" }}>
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 500, lineHeight: "16px" }}
-            >
+          <div className="crm-bottom-user-info">
+            <div className="user-name">
               {user.firstName} {user.lastName}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            </div>
+            <div className="user-email">
               {user.email}
-            </Typography>
-          </Box>
+            </div>
+          </div>
           <CrmOptionsMenu />
-        </Stack>
+        </div>
       )}
     </Drawer>
   );

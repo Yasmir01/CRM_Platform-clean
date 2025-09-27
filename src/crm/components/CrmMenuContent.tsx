@@ -54,6 +54,7 @@ import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
+import "./crm-side-menu.css";
 
 export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
@@ -283,16 +284,17 @@ export default function CrmMenuContent() {
   };
 
   return (
-    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
+    <Stack className="crm-menu-stack">
       <Box>
-        <List dense>
+        <List dense className="crm-menu-list">
           {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <ListItem key={index} disablePadding className="crm-list-item">
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
+                className={"crm-list-btn " + (location.pathname === item.path ? 'selected' : '')}
               >
-                <ListItemIcon>
+                <ListItemIcon className="crm-list-icon">
                   {item.badge && item.text === "Applications" ? (
                     <Badge badgeContent={newApplicationsCount} color="error">
                       {item.icon}
@@ -317,7 +319,7 @@ export default function CrmMenuContent() {
                     item.icon
                   )}
                 </ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemText className="crm-list-text" primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -328,8 +330,8 @@ export default function CrmMenuContent() {
       </Box>
       {/* Secondary items - Adjust based on mode */}
       <Box>
-        <Divider sx={{ my: 1 }} />
-        <List dense>
+        <Divider className="crm-menu-divider" />
+        <List dense className="crm-menu-list">
           {(() => {
             const serviceProviderSecondaryItems = [
               { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
@@ -344,13 +346,14 @@ export default function CrmMenuContent() {
               : base;
             return computed;
           })().map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <ListItem key={index} disablePadding className="crm-list-item">
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
+                className={"crm-list-btn " + (location.pathname === item.path ? 'selected' : '')}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemIcon className="crm-list-icon">{item.icon}</ListItemIcon>
+                <ListItemText className="crm-list-text" primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}
