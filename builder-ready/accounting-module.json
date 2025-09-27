@@ -1,0 +1,112 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "AccountingModule",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "Accounting" } }
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "📑 Rent Roll" } }
+    },
+    {
+      "tagName": "table",
+      "properties": {
+        "style": "width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 24px;"
+      },
+      "children": [
+        {
+          "tagName": "thead",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Tenant" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Unit" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Monthly Rent" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Paid This Month" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Balance" } } }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "tbody",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "John Doe" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 101" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,200" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Yes" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$0" } } }
+              ]
+            },
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Jane Smith" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 203" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,450" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "No" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,450" } } }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "⚠️ Delinquency Report" } }
+    },
+    {
+      "tagName": "table",
+      "properties": {
+        "style": "width: 100%; border-collapse: collapse; font-size: 14px;"
+      },
+      "children": [
+        {
+          "tagName": "thead",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Tenant" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Unit" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Amount Due" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Days Late" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Contact" } } }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "tbody",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Jane Smith" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 203" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,450" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "7" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "jane@example.com" } } }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "div",
+      "properties": { "style": "margin-top: 16px;" },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "📤 Export: CSV | PDF" } } }
+      ]
+    }
+  ]
+}

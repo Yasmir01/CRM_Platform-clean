@@ -1,0 +1,76 @@
+.subscriptionControls {
+  padding: 16px;
+  border: 1px solid var(--gray-200, #e5e7eb);
+  border-radius: 8px;
+  background: var(--surface, #ffffff);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1 1 240px;
+  border: 1px solid var(--gray-100, #f3f4f6);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.planName {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.planPrice {
+  font-size: 0.9rem;
+  color: var(--muted, #6b7280);
+}
+
+.planDescription {
+  margin: 0;
+  color: var(--muted, #6b7280);
+}
+
+.upgradeButton {
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: var(--primary, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.upgradeButton[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hint {
+  color: var(--muted, #6b7280);
+  font-size: 0.85rem;
+}
+
+.error {
+  margin-top: 12px;
+  color: var(--danger, #b91c1c);
+}

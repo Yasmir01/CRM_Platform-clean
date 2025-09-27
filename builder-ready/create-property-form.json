@@ -1,0 +1,72 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "id": "create-property-form",
+  "component": {
+    "name": "Form",
+    "options": {
+      "action": "createPropertyForm",
+      "style": {
+        "padding": "20px",
+        "border": "1px solid #ccc",
+        "borderRadius": "8px",
+        "marginTop": "20px",
+        "backgroundColor": "#ffffff"
+      }
+    }
+  },
+  "children": [
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "form-title",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "Create Property",
+          "style": { "fontSize": "18px", "fontWeight": "bold" }
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "input-name",
+      "component": {
+        "name": "Form:Input",
+        "options": {
+          "name": "name",
+          "placeholder": "Property Name"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "input-address",
+      "component": {
+        "name": "Form:Input",
+        "options": {
+          "name": "address",
+          "placeholder": "Property Address"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "input-units",
+      "component": {
+        "name": "Form:Input",
+        "options": {
+          "name": "units",
+          "placeholder": "Number of Units",
+          "type": "number"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "submit-property",
+      "component": {
+        "name": "Form:SubmitButton",
+        "options": { "text": "Add Property" }
+      }
+    }
+  ]
+}

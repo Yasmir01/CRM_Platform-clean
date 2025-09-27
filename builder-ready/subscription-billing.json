@@ -1,0 +1,107 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "SubscriptionBilling",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "💳 Subscription & Billing" } }
+    },
+    {
+      "tagName": "p",
+      "component": { "name": "Text", "options": { "text": "Manage your subscription plan, billing information, and invoices." } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 24px 0;"
+      },
+      "children": [
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 16px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🏠 Basic Plan" } } },
+            { "component": { "name": "Text", "options": { "text": "Up to 20 Units" } } },
+            { "component": { "name": "Text", "options": { "text": "$49 / month" } } },
+            { "component": { "name": "Text", "options": { "text": "Choose Plan" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 16px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🏢 Pro Plan" } } },
+            { "component": { "name": "Text", "options": { "text": "Up to 200 Units" } } },
+            { "component": { "name": "Text", "options": { "text": "$149 / month" } } },
+            { "component": { "name": "Text", "options": { "text": "Choose Plan" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 16px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🏦 Enterprise Plan" } } },
+            { "component": { "name": "Text", "options": { "text": "Unlimited Units + Custom Features" } } },
+            { "component": { "name": "Text", "options": { "text": "Contact Sales" } } },
+            { "component": { "name": "Text", "options": { "text": "Request Demo" } } }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "🔐 Current Subscription" } }
+    },
+    {
+      "tagName": "div",
+      "properties": { "style": "margin-bottom: 16px;" },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "Plan: Pro Plan" } } },
+        { "component": { "name": "Text", "options": { "text": "Next Billing Date: 10/15/2025" } } },
+        { "component": { "name": "Text", "options": { "text": "Payment Method: **** **** **** 4242" } } },
+        { "component": { "name": "Text", "options": { "text": "Upgrade | Downgrade | Cancel" } } }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "📑 Invoices" } }
+    },
+    {
+      "tagName": "table",
+      "properties": { "style": "width: 100%; border-collapse: collapse; font-size: 14px;" },
+      "children": [
+        {
+          "tagName": "thead",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Date" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Invoice #" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Amount" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Status" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Download" } } }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "tbody",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "09/15/2025" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "INV-1001" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$149" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Paid" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Download PDF" } } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { prisma } from '../../api/_db';
+import { prisma } from '../../pages/api/_db';
 import { sendMail } from './mailer';
 
 export async function notifyImpersonation(targetUserId: string, impersonatorEmail: string) {

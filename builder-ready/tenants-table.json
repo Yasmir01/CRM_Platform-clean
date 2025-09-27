@@ -1,0 +1,72 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "TenantsTable",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "Tenants" } }
+    },
+    {
+      "tagName": "div",
+      "children": [
+        {
+          "tagName": "input",
+          "properties": {
+            "placeholder": "Search tenants by name or unit...",
+            "type": "text",
+            "style": "width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px;"
+          }
+        }
+      ]
+    },
+    {
+      "tagName": "table",
+      "properties": {
+        "style": "width: 100%; border-collapse: collapse; font-size: 14px;"
+      },
+      "children": [
+        {
+          "tagName": "thead",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Tenant Name" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Unit" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Lease Status" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Balance" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Contact" } } }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "tbody",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "John Doe" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 101" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Active Lease" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,200" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "john@example.com" } } }
+              ]
+            },
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Jane Smith" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 203" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Month-to-Month" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$0" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "jane@example.com" } } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

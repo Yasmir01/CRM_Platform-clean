@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import useUser from '@/hooks/useUser';
+import { useUser } from '@/hooks/useUser';
 
 export default function PlanWrapper({ allowedPlans, forceShow, forceHide, children }: { allowedPlans?: any; forceShow?: boolean; forceHide?: boolean; children: React.ReactNode }) {
   const { loading, user, subscriber } = useUser();

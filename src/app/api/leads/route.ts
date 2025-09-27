@@ -1,4 +1,4 @@
-import { prisma } from '../../../../../api/_db';
+import { prisma } from '../../../../../pages/api/_db';
 import { withAuthorization } from '../../../../lib/authz';
 import { sendEmail } from '../../../../lib/mailer';
 import { sendSMS } from '../../../../lib/sms';

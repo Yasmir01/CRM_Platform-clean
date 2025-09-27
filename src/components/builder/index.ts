@@ -10,3 +10,5 @@ export { default as LeadDetailCard } from "./LeadDetailCard";
 // Payment components
 export { default as PaymentHistoryTable } from "./PaymentHistoryTable";
 export { default as PaymentProrationCalculator } from "./PaymentProrationCalculator";
+export { default as SidebarLayout } from "./SidebarLayout";
+export { default as ServiceProvidersBuilder } from "./ServiceProvidersBuilder";

@@ -1,4 +1,4 @@
-import { prisma } from '../../../../../../api/_db';
+import { prisma } from '../../../../../../pages/api/_db';
 import { getSession } from '../../../../../lib/auth';
 
 async function requireSuperAdminSession(req: Request) {

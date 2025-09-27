@@ -1,5 +1,6 @@
 import PropertyLandingPage from "./PropertyLandingPage.tsx";
 import PropertyLeadForm from "./PropertyLeadForm.tsx";
+import SidebarWrapper from "../SidebarWrapper";
 
 /**
  * Register components with Builder so editors can drag/drop and edit props.
@@ -54,6 +55,19 @@ import PropertyLeadForm from "./PropertyLeadForm.tsx";
       inputs: [
         { name: "propertyId", type: "string" },
         { name: "recaptchaSiteKey", type: "string" },
+      ],
+    });
+
+    // Register SidebarWrapper for Builder editor
+    builder.registerComponent(SidebarWrapper, {
+      name: "SidebarWrapper",
+      inputs: [
+        {
+          name: "email",
+          type: "string",
+          defaultValue: "demo@yourcrm.com",
+          helperText: "Pass the user email for sidebar rendering",
+        },
       ],
     });
   } catch (err) {

@@ -22,6 +22,7 @@ const Properties = React.lazy(() => import("./crm/pages/Properties"));
 const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
 const PropertyManagers = React.lazy(() => import("./crm/pages/PropertyManagers"));
 const ContactManagement = React.lazy(() => import("./crm/pages/ContactManagement"));
+const Companies = React.lazy(() => import("./crm/pages/Companies"));
 const SalesAutomation = React.lazy(() => import("./crm/pages/SalesAutomation"));
 const Templates = React.lazy(() => import("./crm/pages/Templates"));
 const Settings = React.lazy(() => import("./crm/pages/Settings"));
@@ -75,6 +76,7 @@ const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
+const TaxCompliance = React.lazy(() => import("./crm/pages/TaxCompliance"));
 import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
 const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
 const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
@@ -97,6 +99,7 @@ const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSett
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
+const OwnerPortal = React.lazy(() => import("./crm/pages/OwnerPortal"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
@@ -252,6 +255,11 @@ function AppRoutes() {
             <ContactManagement />
           </React.Suspense>
         } />
+        <Route path="companies" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Companies />
+          </React.Suspense>
+        } />
         <Route path="sales" element={
           <React.Suspense fallback={<PageLoader />}>
             <SalesAutomation />
@@ -378,6 +386,11 @@ function AppRoutes() {
             <AnalyticsInsights />
           </React.Suspense>
         } />
+        <Route path="tax-compliance" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <TaxCompliance />
+          </React.Suspense>
+        } />
         <Route path="sla-policies" element={
           <React.Suspense fallback={<PageLoader />}>
             {/* Eager import to keep simple */}
@@ -447,6 +460,11 @@ function AppRoutes() {
         <Route path="documents" element={
           <React.Suspense fallback={<PageLoader />}>
             <Documents />
+          </React.Suspense>
+        } />
+        <Route path="owner-portal" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <OwnerPortal />
           </React.Suspense>
         } />
         <Route path="email-marketing" element={
@@ -577,6 +595,7 @@ function AppRoutes() {
       } />
       {/* Redirect common paths to CRM equivalents */}
       <Route path="/profile" element={<Navigate to="/crm/profile" replace />} />
+      <Route path="/companies" element={<Navigate to="/crm/companies" replace />} />
       <Route path="/settings" element={<Navigate to="/crm/settings" replace />} />
       <Route path="/properties" element={<Navigate to="/crm/properties" replace />} />
       <Route path="/tenants" element={<Navigate to="/crm/tenants" replace />} />

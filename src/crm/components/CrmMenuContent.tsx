@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
@@ -59,27 +59,59 @@ export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
-  { text: "Sales Automation", icon: <SellRoundedIcon />, path: "/crm/sales" },
-  { text: "Marketing Automation", icon: <AutorenewRoundedIcon />, path: "/crm/marketing" },
-  { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
-  { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
-  { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
-  { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
-  { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
-  { text: "Property Managers", icon: <PeopleRoundedIcon />, path: "/crm/managers" },
-  { text: "Service Providers", icon: <HandymanRoundedIcon />, path: "/crm/service-providers" },
+  { text: "Companies", icon: <BusinessCenterRoundedIcon />, path: "/crm/companies" },
+
+  // Properties group with nested entries
+  {
+    text: "Properties",
+    icon: <HomeWorkRoundedIcon />,
+    path: "/crm/properties",
+    children: [
+      { text: "Units", icon: <StorefrontRoundedIcon />, path: "/crm/units" },
+      { text: "Leases", icon: <ViewKanbanRoundedIcon />, path: "/crm/leases" },
+      { text: "Tenants", icon: <PersonRoundedIcon />, path: "/crm/tenants" },
+    ],
+  },
+
+  // Leasing group
+  {
+    text: "Leasing",
+    icon: <DescriptionIcon />,
+    path: "/crm/leasing",
+    children: [
+      { text: "Prospects", icon: <ContactsRoundedIcon />, path: "/crm/prospects" },
+      { text: "Applications", icon: <DescriptionIcon />, path: "/crm/applications", badge: true },
+      { text: "Leasing Funnel", icon: <ViewKanbanRoundedIcon />, path: "/crm/leasing-funnel" },
+    ],
+  },
+
+  { text: "Maintenance", icon: <BuildRoundedIcon />, path: "/crm/maintenance" },
+  { text: "Accounting", icon: <AccountBalanceRoundedIcon />, path: "/crm/accounting", requiredPlan: 'pro' },
   { text: "Rent Collection", icon: <PaymentRoundedIcon />, path: "/crm/rent-collection" },
-  { text: "Late Fees & Rules", icon: <GavelRoundedIcon />, path: "/crm/late-fees" },
-  { text: "Work Orders", icon: <BuildRoundedIcon />, path: "/crm/work-orders" },
-  { text: "Customer Service", icon: <SupportAgentRoundedIcon />, path: "/crm/customer-service" },
-  { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
-  { text: "Suggestions", icon: <LightbulbRoundedIcon />, path: "/crm/suggestions", badge: true },
-  { text: "News Board", icon: <AnnouncementRoundedIcon />, path: "/crm/news" },
-  { text: "Power Tools", icon: <ConstructionRoundedIcon />, path: "/crm/power-tools" },
-  { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools" },
-  { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
-  { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
-  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
+  { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports", requiredPlan: 'pro' },
+
+  // Admin & Tools group
+  {
+    text: "Admin & Tools",
+    icon: <AdminPanelSettingsRoundedIcon />,
+    path: "/crm/admin",
+    children: [
+      { text: "Tickets", icon: <SupportAgentRoundedIcon />, path: "/tickets" },
+      { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
+      { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
+      { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics", requiredPlan: 'pro' },
+      { text: "AI Tools", icon: <SmartToyRoundedIcon />, path: "/crm/ai-tools", requiredPlan: 'enterprise' },
+      { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations", requiredPlan: 'pro' },
+      { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management", requiredPlan: 'pro' },
+      { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup", requiredPlan: 'pro' },
+      { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
+      { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace", requiredPlan: 'enterprise' },
+      { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
+      { text: "Super Admin", icon: <GavelRoundedIcon />, path: "/crm/super-admin" },
+    ],
+  },
+
+  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
 ];
 
 const marketingListItems = [
@@ -93,7 +125,6 @@ export const secondaryListItems = [
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
-  { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
   { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
@@ -121,6 +152,16 @@ export const serviceProviderMenuItems = [
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
 ];
 
+class IconErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(err: any) { console.warn('Icon render error', err); }
+  render() {
+    if (this.state.hasError) return <span aria-hidden="true" style={{ display: 'inline-block', width: 20 }} />;
+    return this.props.children as any;
+  }
+}
+
 export default function CrmMenuContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -129,15 +170,24 @@ export default function CrmMenuContent() {
   const { user } = useAuth();
   const { filterWorkOrders } = useServiceProviderScope();
 
+  // Role flags (normalize common role names)
+  const roleRaw = (user?.role || '').toString();
+  const roleLower = roleRaw.toLowerCase();
+  const isTenantUser = /tenant/i.test(roleLower);
+  const isVendorUser = /vendor|service provider/i.test(roleLower);
+  const isLandlordUser = /landlord/i.test(roleLower);
+  const isPropertyManagerUser = /property[_ ]?manager/i.test(roleLower) || /manager/i.test(roleLower);
+  const isAdminUser = isSuperAdmin() || /^(su|sa|super_admin|admin)$/i.test(roleRaw);
+
   // Get actual new applications count from localStorage
-  const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
-  const [newTasksCount, setNewTasksCount] = React.useState(0);
-  const [newSuggestionsCount, setNewSuggestionsCount] = React.useState(0);
-  const [unreadMessagesCount, setUnreadMessagesCount] = React.useState(0);
+  const [newApplicationsCount, setNewApplicationsCount] = useState(0);
+  const [newTasksCount, setNewTasksCount] = useState(0);
+  const [newSuggestionsCount, setNewSuggestionsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
-  const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
+  const [assignedPropsCount, setAssignedPropsCount] = useState(0);
 
-  const recomputeAssignedPropsCount = React.useCallback(() => {
+  const recomputeAssignedPropsCount = useCallback(() => {
     try {
       const workOrders = LocalStorageService.getWorkOrders();
       const filtered = filterWorkOrders(workOrders || []);
@@ -149,7 +199,7 @@ export default function CrmMenuContent() {
     }
   }, [filterWorkOrders]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateApplicationCount = () => {
       const applications = LocalStorageService.getApplications();
       const newAppsCount = applications.filter((app: any) => app.status === 'New').length;
@@ -215,19 +265,36 @@ export default function CrmMenuContent() {
     const updateUnreadMessages = async () => {
       try {
         if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
-        if (!user) return;
+        if (!user) { setUnreadMessagesCount(0); return; }
         if (typeof navigator !== 'undefined' && 'onLine' in navigator && (navigator as any).onLine === false) {
           setUnreadMessagesCount(0);
           return;
         }
+
+        // Use same-origin API path and include credentials to match other message endpoints
+        const url = `/api/messages/unread`;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
+        // Use minimal headers and include cookies for server-side session auth
+        const headers: Record<string, string> = { 'Accept': 'application/json' };
+
         let r: Response | null = null;
         try {
-          const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
-          r = await fetch(url, { credentials: 'include', cache: 'no-store' });
-        } catch (err) {
-          // network error
+          r = await fetch(url, { headers, cache: 'no-store', signal: controller.signal, credentials: 'include' });
+        } catch (err: any) {
+          // If fetch was aborted due to timeout, treat as no unread messages
+          if (err?.name === 'AbortError') {
+            setUnreadMessagesCount(0);
+            return;
+          }
+          // Network or CORS error - do not throw, just set to 0
+          console.warn('unread messages fetch failed:', err?.message || err);
           setUnreadMessagesCount(0);
           return;
+        } finally {
+          clearTimeout(timeout);
         }
 
         if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
@@ -282,43 +349,161 @@ export default function CrmMenuContent() {
     navigate(path);
   };
 
+  // Compute menu items with role-based visibility
+  const computeMainMenu = () => {
+    // Base menu depends primarily on role/mode
+    let base = mainListItems;
+    if (isTenantUser || isTenantMode) {
+      base = tenantMenuItems;
+    } else if (isVendorUser) {
+      base = serviceProviderMenuItems;
+    } else {
+      base = mainListItems;
+    }
+
+    // Filter out items that shouldn't be visible to certain roles
+    base = base.filter((item) => {
+      // Tenant and Vendor should not see management/companies by default
+      if ((isTenantUser || isVendorUser) && item.path && ['/crm/companies'].includes(item.path)) return false;
+
+      // Properties / Leasing / Accounting should be hidden from tenants and vendors
+      if ((isTenantUser || isVendorUser) && item.path && ['/crm/properties', '/crm/leasing', '/crm/accounting', '/crm/reports', '/crm/rent-collection'].includes(item.path)) return false;
+
+      return true;
+    });
+
+    // Non-admins shouldn't see Companies
+    if (!isAdminUser) {
+      base = base.filter(item => item.path !== '/crm/companies');
+    }
+
+    return base;
+  };
+
+  const menuItems = computeMainMenu();
+
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <Box>
         <List dense>
-          {(isTenantMode ? tenantMenuItems : (user?.role === 'Service Provider' ? serviceProviderMenuItems : mainListItems)).map((item, index) => (
+          {menuItems.map((item, index) => (
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => handleNavigation(item.path)}
-              >
-                <ListItemIcon>
-                  {item.badge && item.text === "Applications" ? (
-                    <Badge badgeContent={newApplicationsCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Tasks" ? (
-                    <Badge badgeContent={newTasksCount} color="warning">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Suggestions" ? (
-                    <Badge badgeContent={newSuggestionsCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : item.badge && item.text === "Communications" ? (
-                    <Badge badgeContent={unreadMessagesCount} color="error">
-                      {item.icon}
-                    </Badge>
-                  ) : (user?.role === 'Service Provider' && item.text === 'Properties') ? (
-                    <Badge badgeContent={assignedPropsCount} color="warning">
-                      {item.icon}
-                    </Badge>
-                  ) : (
-                    item.icon
-                  )}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
+              {
+                (() => {
+                  // Determine current company plan (fallback to 'basic')
+                  const getCurrentPlan = () => {
+                    try {
+                      if (user && (user as any).subscriptionPlan) return (user as any).subscriptionPlan;
+                      const p = typeof window !== 'undefined' ? window.localStorage.getItem('company_plan') : null;
+                      return p || 'basic';
+                    } catch (e) {
+                      return 'basic';
+                    }
+                  };
+
+                  const planOrder: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
+                  const currentPlan = getCurrentPlan();
+
+                  const isAllowed = (requiredPlan?: string) => {
+                    if (!requiredPlan) return true;
+                    if (isSuperAdmin()) return true;
+                    const cur = planOrder[(currentPlan || '').toLowerCase()] || 1;
+                    const req = planOrder[(requiredPlan || '').toLowerCase()] || 1;
+                    return cur >= req;
+                  };
+
+                  const handleLockedClick = (requiredPlan?: string) => {
+                    const msg = `This feature requires the ${requiredPlan?.toUpperCase() || 'PRO'} plan. Upgrade to access.`;
+                    if (typeof window !== 'undefined') {
+                      // Navigate to subscription management
+                      window.alert(msg);
+                      window.location.href = '/crm/subscriptions';
+                    }
+                  };
+
+                  // Also enforce role-level visibility for top-level items
+                  const roleRestrictedPaths = ['/crm/properties', '/crm/leases', '/crm/tenants', '/crm/accounting', '/crm/reports', '/crm/companies'];
+                  let allowed = isAllowed((item as any).requiredPlan);
+                  if ((isTenantUser || isVendorUser) && item.path && roleRestrictedPaths.includes(item.path)) {
+                    allowed = false;
+                  }
+
+                  return (
+                    <ListItemButton
+                      selected={location.pathname === item.path}
+                      onClick={() => { if (allowed) handleNavigation(item.path); else handleLockedClick((item as any).requiredPlan); }}
+                      sx={allowed ? {} : { opacity: 0.6, cursor: 'pointer' }}
+                    >
+                      <ListItemIcon>
+                        {item.badge && item.text === "Applications" ? (
+                          <Badge badgeContent={newApplicationsCount} color="error">
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                          </Badge>
+                        ) : item.badge && item.text === "Tasks" ? (
+                          <Badge badgeContent={newTasksCount} color="warning">
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                          </Badge>
+                        ) : item.badge && item.text === "Suggestions" ? (
+                          <Badge badgeContent={newSuggestionsCount} color="error">
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                          </Badge>
+                        ) : item.badge && item.text === "Communications" ? (
+                          <Badge badgeContent={unreadMessagesCount} color="error">
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                          </Badge>
+                        ) : (isVendorUser && item.text === 'Properties') ? (
+                          <Badge badgeContent={assignedPropsCount} color="warning">
+                            <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                          </Badge>
+                        ) : (
+                          <IconErrorBoundary>{item.icon}</IconErrorBoundary>
+                        )}
+                      </ListItemIcon>
+                      <ListItemText primary={item.text} />
+                      {!allowed && <ListItemText primary={`(Upgrade to ${((item as any).requiredPlan || 'pro').toUpperCase()})`} sx={{ textAlign: 'right', color: 'text.secondary' }} />}
+                    </ListItemButton>
+                  );
+                })()
+              }
+
+              {item.children && (
+                <List disablePadding sx={{ pl: 4 }}>
+                  {item.children.map((child, idx) => (
+                    <ListItem key={idx} disablePadding sx={{ display: "block" }}>
+                      {
+                      (() => {
+                        const requiredPlan = (child as any).requiredPlan;
+                        const planOrder: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
+                        const getCurrentPlan = () => {
+                          try {
+                            if (user && (user as any).subscriptionPlan) return (user as any).subscriptionPlan;
+                            const p = typeof window !== 'undefined' ? window.localStorage.getItem('company_plan') : null;
+                            return p || 'basic';
+                          } catch (e) { return 'basic'; }
+                        };
+                        const currentPlan = getCurrentPlan();
+                        const cur = planOrder[(currentPlan || '').toLowerCase()] || 1;
+                        const req = planOrder[(requiredPlan || '').toLowerCase()] || 1;
+                        let allowedChild = isSuperAdmin() || cur >= req;
+
+                        // Role-based restrictions for child paths
+                        const childRestrictedPaths = ['/crm/units', '/crm/leases', '/crm/tenants', '/crm/applications'];
+                        if ((isTenantUser || isVendorUser) && child.path && childRestrictedPaths.includes(child.path)) {
+                          allowedChild = false;
+                        }
+
+                        return (
+                          <ListItemButton selected={location.pathname === child.path} onClick={() => { if (allowedChild) handleNavigation(child.path); else { window.alert(`This feature requires the ${(requiredPlan||'PRO').toUpperCase()} plan or appropriate role. Upgrade or contact admin to access.`); window.location.href = '/crm/subscriptions'; } }} sx={allowedChild ? {} : { opacity: 0.6, cursor: 'pointer' }}>
+                            <ListItemIcon>{child.icon}</ListItemIcon>
+                            <ListItemText primary={child.text} />
+                          </ListItemButton>
+                        );
+                      })()
+                    }
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </ListItem>
           ))}
         </List>
@@ -336,10 +521,10 @@ export default function CrmMenuContent() {
               { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
             ];
             let base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
-            if (user?.role === 'Service Provider') {
+            if (isVendorUser) {
               base = serviceProviderSecondaryItems;
             }
-            const computed = isSuperAdmin() && user?.role !== 'Service Provider'
+            const computed = isSuperAdmin() && !isVendorUser
               ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }]
               : base;
             return computed;

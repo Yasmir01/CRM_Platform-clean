@@ -1,4 +1,4 @@
-import { prisma } from '../api/_db';
+import { prisma } from '../pages/api/_db';
 import { sendEmail } from './mailer';
 
 export async function createNotification(tenantId: string, type: string, message: string) {

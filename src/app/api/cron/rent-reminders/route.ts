@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../../api/_db';
+import { prisma } from '../../../../pages/api/_db';
 import { sendEmail } from '../../../lib/mailer';
 
 export async function GET() {
