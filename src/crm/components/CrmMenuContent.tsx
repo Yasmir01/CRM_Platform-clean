@@ -346,13 +346,14 @@ export default function CrmMenuContent() {
               : base;
             return computed;
           })().map((item, index) => (
-            <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <ListItem key={index} disablePadding className="crm-list-item">
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
+                className={"crm-list-btn " + (location.pathname === item.path ? 'selected' : '')}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemIcon className="crm-list-icon">{item.icon}</ListItemIcon>
+                <ListItemText className="crm-list-text" primary={item.text} />
               </ListItemButton>
             </ListItem>
           ))}
