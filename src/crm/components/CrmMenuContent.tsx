@@ -54,6 +54,7 @@ import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
+import "./crm-side-menu.css";
 
 export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
