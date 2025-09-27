@@ -1,5 +1,5 @@
 .crm-drawer { width: 240px; box-sizing: border-box; }
-.crm-drawer .MuiDrawer-paper { width: 240px; box-sizing: border-box; background: var(--crm-sidebar-bg, #ffffff); border-right: 1px solid rgba(0,0,0,0.04); }
+.crm-drawer .MuiDrawer-paper { width: 240px; box-sizing: border-box; background: inherit; border-right: 1px solid var(--mui-divider, rgba(0,0,0,0.06)); }
 
 /* Responsive: hide on small screens (match previous xs/md behavior) */
 .crm-drawer { display: none; }
@@ -16,12 +16,12 @@
 .crm-menu-stack { flex-grow: 1; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
 .crm-menu-list { padding: 4px; }
 .crm-list-item { display: block; }
-.crm-list-btn { display: flex; align-items: center; gap: 12px; height: 44px; border-radius: 8px; padding: 6px 8px; text-transform: none; color: #0f172a; }
-.crm-list-btn:hover { background: #f3f4f6; }
-.crm-list-btn.selected { background: #eef2ff; font-weight: 600; border-left: 4px solid #2563eb; padding-left: 10px; }
+.crm-list-btn { display: flex; align-items: center; gap: 12px; height: 44px; border-radius: 8px; padding: 6px 8px; text-transform: none; color: var(--crm-text-color, #0f172a); }
+.crm-list-btn:hover { background: var(--crm-hover-bg, #f3f4f6); }
+.crm-list-btn.selected { background: var(--crm-selected-bg, #eef2ff); font-weight: 600; border-left: 4px solid var(--crm-accent, #2563eb); padding-left: 10px; }
 .crm-list-icon { min-width: 36px; display: flex; align-items: center; justify-content: center; }
-.crm-list-icon svg { font-size: 20px; color: #6b7280; }
-.crm-list-btn.selected .crm-list-icon svg { color: #2563eb; }
+.crm-list-icon svg { font-size: 20px; color: var(--crm-icon-color, #6b7280); }
+.crm-list-btn.selected .crm-list-icon svg { color: var(--crm-accent, #2563eb); }
 .crm-list-text .MuiListItemText-primary { font-size: 13px; }
 
 .crm-menu-divider { margin: 8px 0; }
@@ -29,7 +29,7 @@
 .crm-bottom-user { padding: 16px; display: flex; gap: 8px; align-items: center; border-top: 1px solid rgba(0,0,0,0.06); }
 .crm-bottom-user .MuiAvatar-root { width: 36px; height: 36px; background: var(--crm-avatar-bg, #2563eb); }
 .crm-bottom-user .user-name { font-weight: 500; line-height: 16px; }
-.crm-bottom-user .user-email { color: #6b7280; font-size: 12px; }
+.crm-bottom-user .user-email { color: var(--crm-muted, #6b7280); font-size: 12px; }
 .crm-bottom-user-info { margin-right: auto; }
 
 .crm-select-value .crm-select-name { font-weight: 500; }
