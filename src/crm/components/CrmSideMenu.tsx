@@ -36,22 +36,11 @@ export default function CrmSideMenu() {
   return (
     <Drawer
       variant="permanent"
-      sx={{
-        display: { xs: "none", md: "block" },
-        [`& .${drawerClasses.paper}`]: {
-          backgroundColor: "background.paper",
-        },
-      }}
+      className="crm-drawer"
     >
-      <Box
-        sx={{
-          display: "flex",
-          mt: "calc(var(--template-frame-height, 0px) + 4px)",
-          p: 1.5,
-        }}
-      >
+      <div className="crm-user-area">
         <CrmUserSelector />
-      </Box>
+      </div>
       <Divider />
       <Box
         sx={{
