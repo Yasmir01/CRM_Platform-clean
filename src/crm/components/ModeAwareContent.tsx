@@ -32,7 +32,7 @@ import PowerTools from '../pages/PowerTools';
 import AITools from '../pages/AITools';
 import NewsBoard from '../pages/NewsBoard';
 import RentCollection from '../pages/RentCollection';
-import SuperAdminApp from '../SuperAdminApp';
+import SuperAdminApp from '../superadmin/SuperAdminApp';
 import ContactManagement from '../pages/ContactManagement';
 import SalesAutomation from '../pages/SalesAutomation';
 import MarketingAutomation from '../pages/MarketingAutomation';
