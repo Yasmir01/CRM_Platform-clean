@@ -1880,41 +1880,45 @@ export default function IntegrationManagement() {
                     />
                     <Box flex={1} />
                     <Tooltip title={testingIntegrations.has(integration.id) ? "Testing connection..." : "Test Connection"}>
-                      <IconButton
-                        size="small"
-                        disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id)}
-                        onClick={() => handleTestIntegration(integration.id)}
-                        sx={{
-                          ...(testingIntegrations.has(integration.id) && {
-                            animation: 'pulse 1s infinite',
-                            '@keyframes pulse': {
-                              '0%': { opacity: 1 },
-                              '50%': { opacity: 0.5 },
-                              '100%': { opacity: 1 }
-                            }
-                          })
-                        }}
-                      >
-                        {testingIntegrations.has(integration.id) ? <RefreshRoundedIcon /> : <BugReportRoundedIcon />}
-                      </IconButton>
+                      <span style={{ display: 'inline-block' }}>
+                        <IconButton
+                          size="small"
+                          disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id)}
+                          onClick={() => handleTestIntegration(integration.id)}
+                          sx={{
+                            ...(testingIntegrations.has(integration.id) && {
+                              animation: 'pulse 1s infinite',
+                              '@keyframes pulse': {
+                                '0%': { opacity: 1 },
+                                '50%': { opacity: 0.5 },
+                                '100%': { opacity: 1 }
+                              }
+                            })
+                          }}
+                        >
+                          {testingIntegrations.has(integration.id) ? <RefreshRoundedIcon /> : <BugReportRoundedIcon />}
+                        </IconButton>
+                      </span>
                     </Tooltip>
                     <Tooltip title={syncingIntegrations.has(integration.id) ? "Syncing data..." : "Sync Now"}>
-                      <IconButton
-                        size="small"
-                        disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id) || integration.status !== "Connected"}
-                        onClick={() => handleSyncIntegration(integration.id)}
-                        sx={{
-                          ...(syncingIntegrations.has(integration.id) && {
-                            animation: 'spin 2s linear infinite',
-                            '@keyframes spin': {
-                              '0%': { transform: 'rotate(0deg)' },
-                              '100%': { transform: 'rotate(360deg)' }
-                            }
-                          })
-                        }}
-                      >
-                        <SyncRoundedIcon />
-                      </IconButton>
+                      <span style={{ display: 'inline-block' }}>
+                        <IconButton
+                          size="small"
+                          disabled={testingIntegrations.has(integration.id) || syncingIntegrations.has(integration.id) || integration.status !== "Connected"}
+                          onClick={() => handleSyncIntegration(integration.id)}
+                          sx={{
+                            ...(syncingIntegrations.has(integration.id) && {
+                              animation: 'spin 2s linear infinite',
+                              '@keyframes spin': {
+                                '0%': { transform: 'rotate(0deg)' },
+                                '100%': { transform: 'rotate(360deg)' }
+                              }
+                            })
+                          }}
+                        >
+                          <SyncRoundedIcon />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                     <Tooltip title="Configure">
                       <IconButton

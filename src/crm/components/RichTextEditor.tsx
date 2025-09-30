@@ -456,13 +456,15 @@ export default function RichTextEditor({
           <>
             <Divider orientation="vertical" flexItem />
             <Tooltip title={isHtmlMode ? "Visual Mode" : "HTML Mode"}>
-              <IconButton
-                onClick={handleHtmlModeToggle}
-                color={isHtmlMode ? "primary" : "default"}
-                disabled={disabled}
-              >
-                <CodeRoundedIcon />
-              </IconButton>
+              <span style={{ display: 'inline-block' }}>
+                <IconButton
+                  onClick={handleHtmlModeToggle}
+                  color={isHtmlMode ? "primary" : "default"}
+                  disabled={disabled}
+                >
+                  <CodeRoundedIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           </>
         )}
