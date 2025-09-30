@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "path": "CRM_Platform-clean"
+    },
+    {
+      "path": "CRM-Mobile"
+    }
+  ],
+  "settings": {
+    // Optional: keep terminals separated by project
+    "terminal.integrated.cwd": "${workspaceFolder}",
+
+    // Optional: format & lint consistency
+    "editor.formatOnSave": true,
+    "files.exclude": {
+      "**/.git": true,
+      "**/node_modules": true,
+      "**/dist": true
+    }
+  }
+}

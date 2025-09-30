@@ -1,51 +1,24 @@
-import { prisma } from '../../api/_db';
-import { sendMail } from './mailer';
+import { prisma } from '../api/_db';
+import { sendEmail } from './mailer';
 
-export type NotifyInput = {
-  userId?: string | null;
-  email?: string | null;
-  type?: string;
-  title?: string;
-  message: string;
-  meta?: Record<string, any> | null;
-};
-
-export async function notify(input: NotifyInput) {
-  const { userId, email, type, title, message, meta } = input;
-
-  let resolvedUserId = userId || null;
-  let resolvedEmail = email || null;
-
+export async function createNotification(tenantId: string, type: string, message: string) {
+  // Create in-app notification
   try {
-    if (!resolvedUserId && resolvedEmail) {
-      const u = await prisma.user.findFirst({ where: { email: resolvedEmail } });
-      if (u) resolvedUserId = u.id;
+    const notification = await prisma.notification.create({ data: { tenantId, type, message } });
+
+    // fetch tenant email
+    try {
+      const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
+      if (tenant?.email) {
+        await sendEmail({ to: tenant.email, subject: 'New Notification', text: message });
+      }
+    } catch (e) {
+      console.warn('Failed to send notification email', e);
     }
 
-    if (!resolvedEmail && resolvedUserId) {
-      const u = await prisma.user.findUnique({ where: { id: resolvedUserId } });
-      if (u?.email) resolvedEmail = u.email;
-    }
-
-    if (resolvedUserId) {
-      await prisma.userNotification.create({
-        data: {
-          userId: resolvedUserId,
-          message,
-          type,
-          title,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          meta: (meta as any) || undefined,
-        },
-      });
-    }
-
-    if (resolvedEmail && process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-      const subject = title || (type ? `${type.replace(/_/g, ' ')} notification` : 'Notification');
-      await sendMail([resolvedEmail], subject, message);
-    }
-  } catch (e) {
-    // Do not throw to avoid failing cron jobs; log instead
-    console.error('notify error', (e as any)?.message || e);
+    return notification;
+  } catch (err) {
+    console.warn('Failed to create notification', err);
+    throw err;
   }
 }

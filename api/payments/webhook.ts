@@ -1,42 +1,67 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import Stripe from 'stripe';
 import { prisma } from '../_db';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method Not Allowed' });
+export const config = { api: { bodyParser: false } } as any;
+
+export default async function handler(req: VercelRequest & { rawBody?: Buffer }, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
+  const secret = process.env.STRIPE_SECRET_KEY;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret || !webhookSecret) return res.status(400).json({ error: 'Stripe not configured' });
+
+  const chunks: Buffer[] = [];
+  await new Promise<void>((resolve) => {
+    (req as any).on('data', (chunk: Buffer) => chunks.push(chunk));
+    (req as any).on('end', () => resolve());
+  });
+  const buf = Buffer.concat(chunks);
+
+  const stripe = new Stripe(secret, { apiVersion: '2024-06-20' });
+  let event: Stripe.Event;
+  try {
+    const sig = (req.headers['stripe-signature'] || '') as string;
+    event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
+  } catch (err: any) {
+    console.error('Webhook signature verification failed', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   try {
-    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        try {
+          const leaseId = session.metadata?.leaseId as string | undefined;
+          const tenantId = session.metadata?.tenantId as string | undefined;
+          const amount = (session.amount_total || 0) / 100;
 
-    if (body?.type === 'charge.dispute.created') {
-      const paymentId = body?.data?.object?.payment_intent || body?.data?.object?.id || 'unknown';
-      const reason = body?.data?.object?.reason || 'unspecified';
-      await prisma.paymentDispute.create({ data: { paymentId, status: 'open', reason } });
-      try {
-        await prisma.notification.create({ data: { title: 'Payment Dispute Opened', message: `Dispute for payment ${paymentId}`, audience: 'SUPER_ADMIN', createdBy: 'system' } });
-      } catch {}
-      try {
-        await prisma.paymentAudit.create({ data: { paymentId, action: 'dispute_opened', details: reason, actorId: 'system' } });
-      } catch {}
+          // Idempotency check
+          const existing = await prisma.rentPayment.findFirst({ where: { externalId: session.id } });
+          if (!existing) {
+            await prisma.rentPayment.create({
+              data: {
+                tenantId: tenantId || '',
+                leaseId: leaseId || undefined,
+                propertyId: leaseId ? undefined : undefined,
+                amount: amount,
+                status: 'success',
+                gateway: 'stripe',
+                externalId: session.id,
+              },
+            });
+          }
+        } catch (e) {
+          console.error('Failed to persist rent payment from checkout.session.completed', e);
+        }
+        break;
+      }
+      default:
+        break;
     }
-
-    if (body?.type === 'charge.dispute.closed') {
-      const paymentId = body?.data?.object?.payment_intent || body?.data?.object?.id || 'unknown';
-      const status = body?.data?.object?.status || 'resolved';
-      await prisma.paymentDispute.updateMany({ where: { paymentId, status: { in: ['open', 'under_review'] } }, data: { status: 'resolved', resolvedAt: new Date() } });
-      try {
-        await prisma.notification.create({ data: { title: 'Payment Dispute Resolved', message: `Dispute resolved for payment ${paymentId} (${status})`, audience: 'SUPER_ADMIN', createdBy: 'system' } });
-      } catch {}
-      try {
-        await prisma.paymentAudit.create({ data: { paymentId, action: 'dispute_resolved', details: status, actorId: 'system' } });
-      } catch {}
-    }
-
-    return res.status(200).json({ received: true });
-  } catch (e: any) {
-    console.error('payments webhook error', e?.message || e);
-    return res.status(200).json({ received: true });
+  } catch (e) {
+    console.error('Webhook handling error', e);
   }
+
+  return res.status(200).json({ received: true });
 }

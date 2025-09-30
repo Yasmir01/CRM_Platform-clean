@@ -1,184 +1,105 @@
 import * as React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
-import CrmDashboard from "./crm/CrmDashboard";
 import { LocaleProvider } from "./crm/contexts/LocaleContext";
-import SuperAdminApp from "./crm/SuperAdminApp";
-import CrmLogin from "./crm/pages/CrmLogin";
-import { AuthProvider, useAuth } from "./crm/contexts/AuthContext";
-// Test the new authentication system
-import './crm/utils/authTest';
+import { AuthProvider } from "./crm/contexts/AuthContext";
 
-// Lazy load CRM components for better performance
-import CrmMainDashboard from "./crm/components/CrmMainDashboard";
-// const CrmMainDashboard = React.lazy(() => import("./crm/components/CrmMainDashboard"));
-const Calendar = React.lazy(() => import("./crm/pages/Calendar"));
-const Properties = React.lazy(() => import("./crm/pages/Properties"));
-const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
-const PropertyManagers = React.lazy(() => import("./crm/pages/PropertyManagers"));
-const ContactManagement = React.lazy(() => import("./crm/pages/ContactManagement"));
-const SalesAutomation = React.lazy(() => import("./crm/pages/SalesAutomation"));
-const Templates = React.lazy(() => import("./crm/pages/Templates"));
-const Settings = React.lazy(() => import("./crm/pages/Settings"));
-const Reports = React.lazy(() => import("./crm/pages/Reports"));
-const WorkOrders = React.lazy(() => import("./crm/pages/WorkOrders"));
-const MaintenanceRequests = React.lazy(() => import("./crm/pages/MaintenanceRequests"));
-const Applications = React.lazy(() => import("./crm/pages/Applications"));
-const RentalApplicationForm = React.lazy(() => import("./crm/pages/RentalApplicationForm"));
-const Prospects = React.lazy(() => import("./crm/pages/Prospects"));
-const ServiceProviders = React.lazy(() => import("./crm/pages/ServiceProviders"));
-const Communications = React.lazy(() => import("./crm/pages/Communications"));
-const EmailMarketing = React.lazy(() => import("./crm/pages/EmailMarketing"));
-const EmailManagement = React.lazy(() => import("./crm/components/EmailManagement"));
-const SmsMarketing = React.lazy(() => import("./crm/pages/SmsMarketing"));
-const PropertyLandingPages = React.lazy(() => import("./crm/pages/PropertyLandingPages"));
-const Promotions = React.lazy(() => import("./crm/pages/Promotions"));
-const Marketplace = React.lazy(() => import("./crm/pages/Marketplace"));
-const UserRoles = React.lazy(() => import("./crm/pages/UserRoles"));
-const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
-const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
-const Profile = React.lazy(() => import("./crm/pages/Profile"));
-import NewsBoard from "./crm/pages/NewsBoard";
-const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
-const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
-const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantDashboard })));
-const TenantPayments = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantPayments })));
-const TenantMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantMaintenance })));
-const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantLease })));
-const TenantAutopay = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantAutopay })));
-const TenantCheckoutPage = React.lazy(() => import("./portals/TenantCheckoutPage"));
-const AutoPaySetupPage = React.lazy(() => import("./portals/AutoPaySetupPage"));
-const TenantRefundHistoryPage = React.lazy(() => import("./portals/TenantRefundHistoryPage"));
-const PaymentMethodsPage = React.lazy(() => import("./portals/PaymentMethodsPage"));
-const NewPaymentPage = React.lazy(() => import("./portals/NewPaymentPage"));
-const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
-const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
-const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
-const OwnerLedgerPage = React.lazy(() => import("./portals/OwnerLedgerPage"));
-const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
-const VendorWorkOrders = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrders })));
-const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
-const VendorLogin = React.lazy(() => import("./components/vendor/VendorLogin"));
-const ManagerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerDashboard })));
-const ManagerTenants = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerTenants })));
-const ManagerOwners = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerOwners })));
-const ManagerMaintenance = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerMaintenance })));
-const AdminDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminDashboard })));
-const AdminUsers = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminUsers })));
-const AdminLogs = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminLogs })));
-const AITools = React.lazy(() => import("./crm/pages/AITools"));
-const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
-const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
-const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
-import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
-const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
-const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
-const EscalationRequestView = React.lazy(() => import("./crm/pages/EscalationRequestView"));
-const ComplianceExportPage = React.lazy(() => import("./crm/pages/ComplianceExport"));
-const MarketingAutomation = React.lazy(() => import("./crm/pages/MarketingAutomation"));
-const IntegrationManagement = React.lazy(() => import("./crm/pages/IntegrationManagement"));
-const GatewayManagement = React.lazy(() => import("./crm/pages/GatewayManagement"));
-const AdminPayments = React.lazy(() => import("./crm/pages/AdminPayments"));
-const AutoPayOversight = React.lazy(() => import("./crm/pages/AutoPayOversight"));
-const RefundDashboard = React.lazy(() => import("./crm/pages/RefundDashboard"));
-const PaymentReportingDashboard = React.lazy(() => import("./crm/pages/PaymentReportingDashboard"));
-const LateFeeRulesDashboard = React.lazy(() => import("./crm/pages/LateFeeRulesDashboard"));
-const AccountingSettings = React.lazy(() => import("./crm/pages/AccountingSettings"));
-const RealEstatePlatformIntegrations = React.lazy(() => import("./crm/pages/RealEstatePlatformIntegrations"));
-const PlatformPricingManagement = React.lazy(() => import("./crm/pages/PlatformPricingManagement"));
-const PlatformAuthenticationManagement = React.lazy(() => import("./crm/pages/PlatformAuthenticationManagement"));
-const BackupManagement = React.lazy(() => import("./crm/components/BackupManagement"));
-const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSettings"));
-const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
-const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
-const Documents = React.lazy(() => import("./crm/pages/Documents"));
-const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
-const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
-const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
-const SuperAdminLayout = React.lazy(() => import("./crm/components/superadmin/SuperAdminLayout"));
-const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOverview"));
-const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
-const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImpersonate"));
-const SuperAdminCompliance = React.lazy(() => import("./crm/pages/SuperAdminCompliance"));
-const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnalytics"));
-const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminNotifications"));
-const SUPaymentPoliciesGlobal = React.lazy(() => import("./crm/pages/SUPaymentPoliciesGlobal"));
-const SUPaymentPoliciesProperty = React.lazy(() => import("./crm/pages/SUPaymentPoliciesProperty"));
-const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPoliciesLease"));
-const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
-const SUPolicyMatrixStandalone = React.lazy(() => import("./crm/pages/SUPolicyMatrixStandalone"));
-const SUAccountingIntegrations = React.lazy(() => import("./crm/pages/SUAccountingIntegrations"));
-const SUAccountingIntegrationLogs = React.lazy(() => import("./crm/pages/SUAccountingIntegrationLogs"));
-const SUAccountingSyncLogs = React.lazy(() => import("./crm/pages/SUAccountingSyncLogs"));
-const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
-const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
-const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
-const MessagesSearch = React.lazy(() => import("./crm/pages/MessagesSearch"));
-const MaintenanceKanban = React.lazy(() => import("./crm/pages/MaintenanceKanban"));
+// At the top with other imports
+import Unauthorized from "./pages/Unauthorized";
 
-// Loading component
-function PageLoader() {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "50vh",
-        flexDirection: "column",
-        gap: 2
-      }}
-    >
-      <CircularProgress />
-      <Typography variant="body2" color="text.secondary">
-        Loading...
-      </Typography>
-    </Box>
-  );
-}
+// Inside <Routes> in App.tsx
+<Route path="/unauthorized" element={<Unauthorized />} />
 
+// Core pages
+import CrmLogin from "./pages/CrmLogin";
+import VendorLogin from "./crm/vendor/VendorLogin";
+
+// Barrel imports
+import {
+  TenantDashboard,
+  OwnerDashboard,
+  VendorDashboard,
+  ManagerDashboard,
+  AdminDashboard,
+  SuperAdminDashboardPage,
+} from "./crm/dashboards";
+
+import {
+  TenantSettings,
+  OwnerSettings,
+  VendorSettings,
+  ManagerSettings,
+  AdminSettings,
+  SuperAdminSettings,
+} from "./crm/settings";
+
+// Tenant sub-pages
+import TenantPayments from "./crm/tenant/TenantPayments";
+import TenantMaintenance from "./crm/tenant/TenantMaintenance";
+import TenantLease from "./crm/tenant/TenantLease";
+import TenantAutopay from "./crm/tenant/TenantAutopay";
+import TenantRefundHistoryPage from "./crm/tenant/TenantRefundHistoryPage";
+import TenantCheckoutPage from "./crm/tenant/TenantCheckoutPage";
+import PaymentMethodsPage from "./crm/tenant/PaymentMethodsPage";
+import NewPaymentPage from "./crm/tenant/NewPaymentPage";
+import AutoPaySetupPage from "./crm/tenant/AutoPaySetupPage";
+import TenantPortal from "./crm/tenant/TenantPortal";
+
+// Owner sub-pages
+import OwnerStatements from "./crm/owner/OwnerStatements";
+import OwnerProperties from "./crm/owner/OwnerProperties";
+import OwnerLedgerPage from "./crm/owner/OwnerLedgerPage";
+
+// Vendor sub-pages
+import VendorWorkOrders from "./crm/vendor/VendorWorkOrders";
+import VendorProfile from "./crm/vendor/VendorProfile";
+
+// Manager sub-pages
+import ManagerTenants from "./crm/manager/ManagerTenants";
+import ManagerOwners from "./crm/manager/ManagerOwners";
+import ManagerMaintenance from "./crm/manager/ManagerMaintenance";
+
+// Admin sub-pages
+import AdminUsers from "./crm/admin/AdminUsers";
+import AdminLogs from "./crm/admin/AdminLogs";
+import AdminPayments from "./crm/admin/AdminPayments";
+
+// SuperAdmin sub-pages
+import SuperAdminOverview from "./crm/superadmin/SuperAdminOverview";
+import SuperAdminSubscribers from "./crm/superadmin/SuperAdminSubscribers";
+import SuperAdminImpersonate from "./crm/superadmin/SuperAdminImpersonate";
+import SuperAdminCompliance from "./crm/superadmin/SuperAdminCompliance";
+import SuperAdminAnalytics from "./crm/superadmin/SuperAdminAnalytics";
+import SuperAdminNotifications from "./crm/superadmin/SuperAdminNotifications";
+import SUAccountingIntegrations from "./crm/superadmin/SUAccountingIntegrations";
+import SUAccountingIntegrationLogs from "./crm/superadmin/SUAccountingIntegrationLogs";
+import SUAccountingSyncLogs from "./crm/superadmin/SUAccountingSyncLogs";
+
+// CRM core
+import CrmDashboard from "./crm/core/CrmDashboard";
+import Calendar from "./crm/core/Calendar";
+import ContactManagement from "./crm/core/ContactManagement";
+import SalesAutomation from "./crm/core/SalesAutomation";
+import MarketingAutomation from "./crm/core/MarketingAutomation";
+import Tasks from "./crm/core/Tasks";
+import AnalyticsInsights from "./crm/core/AnalyticsInsights";
+import Properties from "./crm/core/Properties";
+import Tenants from "./crm/core/Tenants";
+
+// ProtectedRoute
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Fallback Not Found
 function NotFound() {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        p: 3
-      }}
-    >
-      <Typography variant="h3" component="h1" gutterBottom color="error">
-        404: Page Not Found
-      </Typography>
-      <Typography variant="body1" sx={{ mb: 3, textAlign: "center" }}>
-        The page you're looking for doesn't exist or has been moved.
-      </Typography>
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Try these CRM pages instead:
-      </Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-        <Button variant="outlined" href="/crm">Dashboard</Button>
-        <Button variant="outlined" href="/crm/properties">Properties</Button>
-        <Button variant="outlined" href="/crm/tenants">Tenants</Button>
-        <Button variant="outlined" href="/crm/contacts">Contacts</Button>
-        <Button variant="outlined" href="/crm/sales">Sales</Button>
-        <Button variant="outlined" href="/crm/suggestions">Suggestions</Button>
-        <Button variant="outlined" href="/crm/email-management">Email Management</Button>
-        <Button variant="outlined" href="/crm/settings">Settings</Button>
-        <Button variant="outlined" href="/crm/tasks">Tasks</Button>
-        <Button variant="outlined" href="/crm/reports">Reports</Button>
-      </Box>
-    </Box>
+    <div style={{ padding: "2rem", background: "#300", color: "#fff" }}>
+      <h1>404 - Page Not Found</h1>
+      <p>The page you are looking for does not exist.</p>
+    </div>
   );
 }
 
+<<<<<<< HEAD
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -590,15 +511,150 @@ function AppRoutes() {
 
 import ImpersonationBanner from './components/ImpersonationBanner';
 
+=======
+>>>>>>> main
 export default function App() {
   return (
     <AppTheme>
-      <CssBaseline enableColorScheme />
       <LocaleProvider>
         <AuthProvider>
-          <ImpersonationBanner />
           <BrowserRouter>
-            <AppRoutes />
+            <Routes>
+              {/* Public login */}
+              <Route path="/login" element={<CrmLogin />} />
+              <Route path="/vendor-login" element={<VendorLogin />} />
+
+              {/* Tenant portal */}
+              <Route
+                path="/tenant/*"
+                element={
+                  <ProtectedRoute allowedRoles={["tenant"]}>
+                    <TenantDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="dashboard" element={<TenantDashboard />} />
+                <Route path="payments" element={<TenantPayments />} />
+                <Route path="payment-methods" element={<PaymentMethodsPage />} />
+                <Route path="payments/new" element={<NewPaymentPage />} />
+                <Route path="checkout" element={<TenantCheckoutPage />} />
+                <Route path="maintenance" element={<TenantMaintenance />} />
+                <Route path="lease" element={<TenantLease />} />
+                <Route path="autopay" element={<TenantAutopay />} />
+                <Route path="autopay/setup" element={<AutoPaySetupPage />} />
+                <Route path="refunds" element={<TenantRefundHistoryPage />} />
+                <Route path="portal" element={<TenantPortal />} />
+                <Route path="settings" element={<TenantSettings />} />
+              </Route>
+
+              {/* Owner portal */}
+              <Route
+                path="/owner/*"
+                element={
+                  <ProtectedRoute allowedRoles={["owner"]}>
+                    <OwnerDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="statements" element={<OwnerStatements />} />
+                <Route path="properties" element={<OwnerProperties />} />
+                <Route path="ledger" element={<OwnerLedgerPage />} />
+                <Route path="settings" element={<OwnerSettings />} />
+              </Route>
+
+              {/* Vendor portal */}
+              <Route
+                path="/vendor/*"
+                element={
+                  <ProtectedRoute allowedRoles={["vendor"]}>
+                    <VendorDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="work-orders" element={<VendorWorkOrders />} />
+                <Route path="profile" element={<VendorProfile />} />
+                <Route path="settings" element={<VendorSettings />} />
+              </Route>
+
+              {/* Manager portal */}
+              <Route
+                path="/manager/*"
+                element={
+                  <ProtectedRoute allowedRoles={["manager"]}>
+                    <ManagerDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="tenants" element={<ManagerTenants />} />
+                <Route path="owners" element={<ManagerOwners />} />
+                <Route path="maintenance" element={<ManagerMaintenance />} />
+                <Route path="settings" element={<ManagerSettings />} />
+              </Route>
+
+              {/* Admin portal */}
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="logs" element={<AdminLogs />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+
+              {/* Super Admin portal */}
+              <Route
+                path="/superadmin/*"
+                element={
+                  <ProtectedRoute allowedRoles={["superadmin"]}>
+                    <SuperAdminDashboardPage />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="accounting-integrations" element={<SUAccountingIntegrations />} />
+                <Route
+                  path="accounting-integrations/:provider/logs"
+                  element={<SUAccountingIntegrationLogs />}
+                />
+                <Route path="accounting-sync-logs" element={<SUAccountingSyncLogs />} />
+                <Route path="overview" element={<SuperAdminOverview />} />
+                <Route path="subscribers" element={<SuperAdminSubscribers />} />
+                <Route path="impersonate" element={<SuperAdminImpersonate />} />
+                <Route path="compliance" element={<SuperAdminCompliance />} />
+                <Route path="analytics" element={<SuperAdminAnalytics />} />
+                <Route path="notifications" element={<SuperAdminNotifications />} />
+                <Route path="settings" element={<SuperAdminSettings />} />
+              </Route>
+
+              {/* CRM core */}
+              <Route
+                path="/crm/*"
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "manager", "superadmin"]}>
+                    <CrmDashboard />
+                  </ProtectedRoute>
+                }
+              >
+                <Route path="calendar" element={<Calendar />} />
+                <Route path="contacts" element={<ContactManagement />} />
+                <Route path="sales" element={<SalesAutomation />} />
+                <Route path="marketing" element={<MarketingAutomation />} />
+                <Route path="properties" element={<Properties />} />
+                <Route path="tenants" element={<Tenants />} />
+                <Route path="tasks" element={<Tasks />} />
+                <Route path="analytics" element={<AnalyticsInsights />} />
+              </Route>
+
+              {/* Default redirect */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
+
+              {/* Catch-all fallback */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </BrowserRouter>
         </AuthProvider>
       </LocaleProvider>
