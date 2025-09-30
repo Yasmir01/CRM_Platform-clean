@@ -221,23 +221,33 @@ export default function CrmMenuContent() {
           setUnreadMessagesCount(0);
           return;
         }
-        let r: Response | null = null;
-        try {
-          const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
-          r = await fetch(url, { credentials: 'include', cache: 'no-store' });
-        } catch (err) {
-          // network error
-          setUnreadMessagesCount(0);
-          return;
-        }
 
-        if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
+        const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
 
         try {
-          const d = await r.json();
-          setUnreadMessagesCount(Number(d?.count || 0));
-        } catch (e) {
+          const r: any = await safeFetch(url, {
+            credentials: 'include',
+            cache: 'no-store',
+            signal: controller.signal,
+            headers: { Accept: 'application/json' },
+          });
+
+          if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
+
+          try {
+            const d = await r.json();
+            setUnreadMessagesCount(Number(d?.count || 0));
+          } catch (e) {
+            setUnreadMessagesCount(0);
+          }
+        } catch (e: any) {
+          if (e?.name === 'AbortError') return;
+          console.warn('updateUnreadMessages failed', e);
           setUnreadMessagesCount(0);
+        } finally {
+          clearTimeout(timeout);
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
