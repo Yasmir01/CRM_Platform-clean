@@ -40,14 +40,33 @@ export default function EscalationMatrixEditor() {
   }, [scope, propertyId, planId]);
 
   const load = React.useCallback(async () => {
-    const [propsRes, plansRes] = await Promise.all([
-      fetch('/api/admin/filters/properties', { credentials: 'include' }),
-      fetch('/api/subscription-plans', { credentials: 'include' }),
-    ]);
-    const [props, pls] = await Promise.all([propsRes.json(), plansRes.json()]);
-    setProperties(Array.isArray(props) ? props : []);
-    setPlans(Array.isArray(pls) ? pls : []);
-    fetchScopeRows();
+    try {
+      const [propsRes, plansRes] = await Promise.all([
+        fetch('/api/admin/filters/properties', { credentials: 'include' }),
+        fetch('/api/subscription-plans', { credentials: 'include' }),
+      ]);
+
+      let props: any = [];
+      let pls: any = [];
+
+      if (propsRes.ok) {
+        try { props = await propsRes.json(); } catch (e) { console.warn('Failed to parse properties response', e); props = []; }
+      }
+
+      if (plansRes.ok) {
+        try { pls = await plansRes.json(); } catch (e) { console.warn('Failed to parse plans response', e); pls = []; }
+      }
+
+      setProperties(Array.isArray(props) ? props : []);
+      setPlans(Array.isArray(pls) ? pls : []);
+
+      // fetch current scope rows after loading filters
+      try { await fetchScopeRows(); } catch (e) { console.warn('fetchScopeRows failed', e); }
+    } catch (e) {
+      console.error('Failed to load escalation matrix data', e);
+      setProperties([]);
+      setPlans([]);
+    }
   }, [fetchScopeRows]);
 
   React.useEffect(() => { load(); }, [load]);
@@ -131,7 +150,7 @@ export default function EscalationMatrixEditor() {
           <div className="flex flex-col">
             <label className="text-xs text-gray-600">Subscription Plan</label>
             <select className="border p-2 rounded min-w-[220px]" value={planId} onChange={(e) => setPlanId(e.target.value)}>
-              <option value="">Select plan…</option>
+              <option value="">Select plan��</option>
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
