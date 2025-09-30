@@ -2,6 +2,7 @@ import * as React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
+import { safeFetch } from "../../utils/safeFetch";
 import { LocalStorageService } from "../services/LocalStorageService";
 import { suggestionService } from "../services/SuggestionService";
 import List from "@mui/material/List";
