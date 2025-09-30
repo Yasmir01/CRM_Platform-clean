@@ -212,64 +212,6 @@ export default function CrmMenuContent() {
     updateSuggestionCount();
     if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
-    // Safe fetch with XMLHttpRequest fallback to avoid environments where fetch is monkey-patched
-    const safeFetch = (input: string, init: any = {}) => {
-      // Try native fetch first
-      try {
-        const fn = (globalThis as any).fetch;
-        if (fn && typeof fn === 'function') {
-          try {
-            return Promise.resolve(fn.call(globalThis, input, init)).catch(() => xhrFallback(input, init));
-          } catch (e) {
-            return xhrFallback(input, init);
-          }
-        }
-      } catch (e) {
-        // ignore and fallback
-      }
-
-      return xhrFallback(input, init);
-    };
-
-    const xhrFallback = (input: string, init: any = {}) => {
-      return new Promise<any>((resolve) => {
-        try {
-          const xhr = new XMLHttpRequest();
-          xhr.open(init.method || 'GET', input, true);
-          if (init.credentials === 'include') xhr.withCredentials = true;
-          if (init.headers && typeof init.headers === 'object') {
-            try {
-              Object.keys(init.headers).forEach((k) => xhr.setRequestHeader(k, init.headers[k]));
-            } catch (_) {}
-          }
-          xhr.onreadystatechange = () => {
-            if (xhr.readyState === 4) {
-              const ok = xhr.status >= 200 && xhr.status < 300;
-              const responseText = xhr.responseText;
-              const resLike: any = {
-                ok,
-                status: xhr.status,
-                text: () => Promise.resolve(responseText),
-                json: () => {
-                  try {
-                    return Promise.resolve(responseText ? JSON.parse(responseText) : {});
-                  } catch (e) {
-                    return Promise.resolve({});
-                  }
-                },
-              };
-              resolve(resLike);
-            }
-          };
-          xhr.onerror = () => resolve(null);
-          xhr.ontimeout = () => resolve(null);
-          if (init.timeout) xhr.timeout = init.timeout;
-          xhr.send(init.body || null);
-        } catch (e) {
-          resolve(null);
-        }
-      });
-    };
 
     const updateUnreadMessages = async () => {
       try {
@@ -279,15 +221,48 @@ export default function CrmMenuContent() {
           setUnreadMessagesCount(0);
           return;
         }
-        // Use absolute origin to avoid unexpected proxy/cors issues in some environments
+        // Use same-origin API path and include credentials
         const url = (typeof location !== 'undefined' ? location.origin : '') + '/api/messages/unread';
-        const r = await safeFetch(url, { credentials: 'include', cache: 'no-store' });
-        if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
-        const d = await (r.json ? r.json().catch(() => ({ count: 0 })) : Promise.resolve({ count: 0 }));
-        setUnreadMessagesCount(Number(d?.count || 0));
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+
+        // Minimal headers for JSON
+        const headers: Record<string, string> = { Accept: 'application/json' };
+
+        let r: Response | null = null;
+        try {
+          r = await fetch(url, {
+            headers,
+            cache: 'no-store',
+            signal: controller.signal,
+            credentials: 'include',
+          });
+        } catch (err: any) {
+          if (err?.name === 'AbortError') {
+            setUnreadMessagesCount(0);
+            return;
+          }
+          console.warn('unread messages fetch failed:', err?.message || err);
+          setUnreadMessagesCount(0);
+          return;
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        if (!r || !r.ok) {
+          setUnreadMessagesCount(0);
+          return;
+        }
+
+        try {
+          const d = await r.json();
+          setUnreadMessagesCount(Number(d?.count || 0));
+        } catch {
+          setUnreadMessagesCount(0);
+        }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
-        console.warn('updateUnreadMessages failed', e);
         setUnreadMessagesCount(0);
       }
     };
