@@ -33,10 +33,26 @@ export default function EscalationMatrixEditor() {
     if (scope === 'property' && propertyId) p.set('propertyId', propertyId);
     if (scope === 'plan' && planId) p.set('planId', planId);
 
-    const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
-    const data = await res.json();
-    setRows(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
+      if (!res.ok) {
+        console.warn('escalation-matrices request failed', res.status);
+        setRows([]);
+        return;
+      }
+      try {
+        const data = await res.json();
+        setRows(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.warn('Failed to parse escalation-matrices response', e);
+        setRows([]);
+      }
+    } catch (e) {
+      console.error('fetchScopeRows error', e);
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
   }, [scope, propertyId, planId]);
 
   const load = React.useCallback(async () => {
@@ -150,7 +166,7 @@ export default function EscalationMatrixEditor() {
           <div className="flex flex-col">
             <label className="text-xs text-gray-600">Subscription Plan</label>
             <select className="border p-2 rounded min-w-[220px]" value={planId} onChange={(e) => setPlanId(e.target.value)}>
-              <option value="">Select plan��</option>
+              <option value="">Select plan…</option>
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
