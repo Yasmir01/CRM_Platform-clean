@@ -212,16 +212,63 @@ export default function CrmMenuContent() {
     updateSuggestionCount();
     if (user?.role === 'Service Provider') recomputeAssignedPropsCount();
 
-    // Safe fetch wrapper to avoid synchronous fetch failures (some environments may monkey-patch fetch)
-    const safeFetch = (...args: any[]) => {
+    // Safe fetch with XMLHttpRequest fallback to avoid environments where fetch is monkey-patched
+    const safeFetch = (input: string, init: any = {}) => {
+      // Try native fetch first
       try {
-        const fn = (globalThis as any).fetch || (window as any).fetch;
-        if (!fn) return Promise.resolve(null);
-        // Attempt to call fetch and ensure any rejection is handled
-        return Promise.resolve(fn.apply(null, args)).catch(() => null);
-      } catch (err) {
-        return Promise.resolve(null);
+        const fn = (globalThis as any).fetch;
+        if (fn && typeof fn === 'function') {
+          try {
+            return Promise.resolve(fn.call(globalThis, input, init)).catch(() => xhrFallback(input, init));
+          } catch (e) {
+            return xhrFallback(input, init);
+          }
+        }
+      } catch (e) {
+        // ignore and fallback
       }
+
+      return xhrFallback(input, init);
+    };
+
+    const xhrFallback = (input: string, init: any = {}) => {
+      return new Promise<any>((resolve) => {
+        try {
+          const xhr = new XMLHttpRequest();
+          xhr.open(init.method || 'GET', input, true);
+          if (init.credentials === 'include') xhr.withCredentials = true;
+          if (init.headers && typeof init.headers === 'object') {
+            try {
+              Object.keys(init.headers).forEach((k) => xhr.setRequestHeader(k, init.headers[k]));
+            } catch (_) {}
+          }
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4) {
+              const ok = xhr.status >= 200 && xhr.status < 300;
+              const responseText = xhr.responseText;
+              const resLike: any = {
+                ok,
+                status: xhr.status,
+                text: () => Promise.resolve(responseText),
+                json: () => {
+                  try {
+                    return Promise.resolve(responseText ? JSON.parse(responseText) : {});
+                  } catch (e) {
+                    return Promise.resolve({});
+                  }
+                },
+              };
+              resolve(resLike);
+            }
+          };
+          xhr.onerror = () => resolve(null);
+          xhr.ontimeout = () => resolve(null);
+          if (init.timeout) xhr.timeout = init.timeout;
+          xhr.send(init.body || null);
+        } catch (e) {
+          resolve(null);
+        }
+      });
     };
 
     const updateUnreadMessages = async () => {
