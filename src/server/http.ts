@@ -8,6 +8,7 @@ import adminComplianceRouter from "./routes/adminCompliance";
 import impersonationRouter from "./routes/impersonation";
 import ownerStatementsRouter from "./routes/ownerStatements";
 import distributionsRouter from "./routes/distributions";
+import notificationsRouter from "./routes/notifications";
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL || "*" }));
@@ -26,6 +27,7 @@ app.use("/api/admin/compliance", adminComplianceRouter);
 app.use("/api/impersonation", impersonationRouter);
 app.use("/api/owner-statements", ownerStatementsRouter);
 app.use("/api/distributions", distributionsRouter);
+app.use("/api/notifications", notificationsRouter);
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 app.listen(PORT, () => {
