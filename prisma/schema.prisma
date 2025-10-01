@@ -49,6 +49,8 @@ model User {
   ownerStatements    OwnerStatement[]
   ownerDistributions OwnerDistribution[]
   notifications      Notification[]
+  messagesAuthored   Message[]
+  threadMemberships  ThreadMember[]
 }
 
 model Account {
