@@ -21,7 +21,8 @@ router.post("/:id/messages", upload.single("file"), async (req, res) => {
       authorId,
       body,
       file,
-    });
+      origin: (req as any).isOfflineSync ? "offline-sync" : "server",
+    } as any);
 
     res.json(result);
   } catch (err) {
