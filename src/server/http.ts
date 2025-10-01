@@ -11,6 +11,7 @@ import distributionsRouter from "./routes/distributions";
 import notificationsRouter from "./routes/notifications";
 import messagesRouter from "./routes/messages";
 import syncRouter from "./routes/sync";
+import calendarRouter from "./routes/calendar";
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL || "*" }));
@@ -32,6 +33,7 @@ app.use("/api/distributions", distributionsRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/sync", syncRouter);
+app.use("/api/calendar", calendarRouter);
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 app.listen(PORT, () => {
