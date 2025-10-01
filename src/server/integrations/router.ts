@@ -4,6 +4,7 @@ import { encrypt, decrypt } from "../utils/crypto";
 import { qbAuthUrl, qbExchange, qbRefresh } from "./providers/quickbooks";
 import { xeroAuthUrl, xeroExchange, xeroRefresh } from "./providers/xero";
 import { waveAuthUrl, waveExchange, waveRefresh } from "./providers/wave";
+import { syncQuickBooks } from "../jobs/syncAccounting";
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -49,10 +50,12 @@ router.get("/:provider/callback", async (req, res) => {
     else return res.status(400).send("Unsupported provider");
 
     const acc = await ensureIntegration(organizationId, provider.toUpperCase() as IntegrationProvider);
+    const realmId = provider === "quickbooks" ? (req.query.realmId as string | undefined) : undefined;
     await prisma.integrationAccount.update({
       where: { id: acc.id },
       data: {
         enabled: true,
+        displayName: realmId ? `realm:${realmId}` : acc.displayName,
         accessTokenEnc: encrypt(tokens.access_token),
         refreshTokenEnc: tokens.refresh_token ? encrypt(tokens.refresh_token) : acc.refreshTokenEnc,
         expiresAt: tokens.expires_in ? new Date(Date.now() + tokens.expires_in * 1000) : null,
@@ -101,25 +104,32 @@ router.post("/:provider/refresh", async (req, res) => {
   }
 });
 
-// Manual sync stub (logs a SyncLog row)
+// Manual sync endpoint
 router.post("/:provider/sync", async (req, res) => {
   try {
     const provider = (req.params.provider || "").toLowerCase();
     const organizationId = getOrgId(req);
-    const acc = await prisma.integrationAccount.findFirstOrThrow({
+    await prisma.integrationAccount.findFirstOrThrow({
       where: { organizationId, provider: provider.toUpperCase() as IntegrationProvider },
     });
+
+    if (provider === "quickbooks") {
+      const result = await syncQuickBooks(organizationId);
+      return res.json({ ok: true, provider, ...result });
+    }
+
+    // Default stub for other providers
     await prisma.syncLog.create({
       data: {
         organizationId,
-        integrationId: acc.id,
-        scope: "payments",
+        integrationId: (await ensureIntegration(organizationId, provider.toUpperCase() as IntegrationProvider)).id,
+        scope: provider,
         status: "success",
-        itemCount: 5,
+        itemCount: 0,
         message: `Manual sync stub for ${provider}`,
       },
     });
-    res.json({ ok: true, items: 5 });
+    res.json({ ok: true, provider, items: 0 });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error("Sync error:", e);
