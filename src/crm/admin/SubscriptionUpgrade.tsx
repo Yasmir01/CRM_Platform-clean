@@ -21,7 +21,7 @@ type SubscriptionPlan = {
   name: string;
   price: number;
   billingCycle: string;
-  features: FeatureToggle[];
+  features: Array<FeatureToggle | string>;
 };
 
 export default function SubscriptionUpgrade() {
@@ -33,7 +33,7 @@ export default function SubscriptionUpgrade() {
       try {
         const res = await fetch("/api/subscriptions/plans");
         const data = await res.json();
-        setPlans(data);
+        if (Array.isArray(data)) setPlans(data);
       } catch (err) {
         console.error("Failed to fetch plans:", err);
       } finally {
@@ -43,12 +43,13 @@ export default function SubscriptionUpgrade() {
     fetchPlans();
   }, []);
 
-  const handleUpgrade = async (planId: string) => {
+  const handleUpgrade = async (planId: string, mode: "TIER" | "PLAN") => {
     try {
+      const payload = mode === "TIER" ? { tier: planId } : { planId };
       const res = await fetch("/api/subscriptions/upgrade", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error("Upgrade failed");
@@ -84,9 +85,9 @@ export default function SubscriptionUpgrade() {
               <Divider sx={{ my: 1 }} />
 
               <Stack spacing={1}>
-                {plan.features.map((f) => (
-                  <Typography key={f.id} variant="body2">
-                    • {f.featureKey}
+                {(plan.features || []).map((f, i) => (
+                  <Typography key={typeof f === 'string' ? `${plan.id}-${i}` : (f as FeatureToggle).id} variant="body2">
+                    • {typeof f === 'string' ? f : (f as FeatureToggle).featureKey}
                   </Typography>
                 ))}
               </Stack>
@@ -95,7 +96,11 @@ export default function SubscriptionUpgrade() {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={() => handleUpgrade(plan.id)}
+                  onClick={() => {
+                    const tierIds = ["FREE","BASIC","PREMIUM","ENTERPRISE"];
+                    const mode = tierIds.includes(String(plan.id).toUpperCase()) ? "TIER" : "PLAN";
+                    handleUpgrade(plan.id, mode);
+                  }}
                 >
                   Select {plan.name}
                 </Button>
