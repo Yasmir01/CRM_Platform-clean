@@ -300,6 +300,12 @@ enum Currency {
   GBP
 }
 
+enum AutopayFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
 // ---------- Core PM: Units & Leases ----------
 model Unit {
   id             String   @id @default(cuid())
@@ -379,6 +385,22 @@ model RentSchedule {
   receipts Receipt[]
 
   @@index([leaseId, dueOn])
+}
+
+model AutopayRule {
+  id        String            @id @default(cuid())
+  tenantId  String
+  leaseId   String
+  methodId  String?
+  amount    Decimal           @db.Decimal(10, 2)
+  frequency AutopayFrequency
+  nextRun   DateTime
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  lease  Lease  @relation(fields: [leaseId], references: [id])
 }
 
 // ---------- Payments ----------
