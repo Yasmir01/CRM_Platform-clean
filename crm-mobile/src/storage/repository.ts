@@ -42,6 +42,15 @@ export async function getPendingSync(): Promise<any[]> {
   return result.rows._array;
 }
 
+export async function getFailedSync(): Promise<any[]> {
+  const result: any = await runSql("SELECT * FROM pending_sync WHERE status='failed' ORDER BY id ASC");
+  return result.rows._array;
+}
+
+export async function markSyncStatus(id: number, status: string, error?: string) {
+  await runSql("UPDATE pending_sync SET status=?, error=? WHERE id=?", [status, error || null, id]);
+}
+
 export async function clearPendingSync(id: number) {
   await runSql("DELETE FROM pending_sync WHERE id = ?", [id]);
 }
