@@ -7,6 +7,7 @@ import leaseDocsRouter from "./routes/leaseDocs";
 import adminComplianceRouter from "./routes/adminCompliance";
 import impersonationRouter from "./routes/impersonation";
 import ownerStatementsRouter from "./routes/ownerStatements";
+import distributionsRouter from "./routes/distributions";
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL || "*" }));
