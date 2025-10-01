@@ -25,6 +25,7 @@ app.use("/api/leases", leaseDocsRouter);
 app.use("/api/admin/compliance", adminComplianceRouter);
 app.use("/api/impersonation", impersonationRouter);
 app.use("/api/owner-statements", ownerStatementsRouter);
+app.use("/api/distributions", distributionsRouter);
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 app.listen(PORT, () => {
