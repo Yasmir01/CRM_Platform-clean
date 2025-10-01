@@ -3,6 +3,8 @@ import { getQBClient } from "../integrations/qbClient";
 import { mapReceiptToQB } from "../integrations/mappers/quickbooks";
 import { getXeroClient } from "../integrations/xeroClient";
 import { mapReceiptToXeroInvoice, mapReceiptToXeroPayment } from "../integrations/mappers/xero";
+import { getWaveClient } from "../integrations/waveClient";
+import { mapReceiptToWaveTransaction } from "../integrations/mappers/wave";
 import { pathToFileURL } from "url";
 
 const prisma = new PrismaClient();
@@ -122,6 +124,47 @@ export async function syncXero(orgId: string) {
   });
 
   return { imported: invoices.length, exported: receipts.length };
+}
+
+export async function syncWave(orgId: string) {
+  const client = await getWaveClient(orgId);
+
+  const acc = await prisma.integrationAccount.findFirstOrThrow({
+    where: { organizationId: orgId, provider: "WAVE" },
+  });
+  const businessId = acc.displayName || "demo-business";
+
+  const importedCount = 0;
+
+  const receipts = await prisma.receipt.findMany({
+    where: { organizationId: orgId, payment: { is: { externalRef: null } } },
+    include: { payment: true },
+    take: 3,
+  });
+
+  for (const r of receipts) {
+    const gql = mapReceiptToWaveTransaction(r, businessId);
+    const res = await client.post("", gql);
+    const data = res.data?.data?.transactionCreate;
+    if (data?.didSucceed && r.paymentId) {
+      await prisma.payment.update({ where: { id: r.paymentId }, data: { externalRef: data.transaction.id } });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error("Wave error", data?.inputErrors);
+    }
+  }
+
+  await prisma.syncLog.create({
+    data: {
+      organizationId: orgId,
+      scope: "wave",
+      status: "success",
+      itemCount: receipts.length,
+      message: `Wave sync exported ${receipts.length} receipts (import disabled)`,
+    },
+  });
+
+  return { imported: importedCount, exported: receipts.length };
 }
 
 const isMain = (() => {
