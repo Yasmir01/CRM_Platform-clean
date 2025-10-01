@@ -1,6 +1,7 @@
 import { PrismaClient, PaymentStatus, Currency } from "@prisma/client";
 import { charge } from "../payments/processor";
 import { recordComplianceLog } from "../services/logs";
+import { sendToUsers } from "../services/push";
 import { pathToFileURL } from "url";
 
 const prisma = new PrismaClient();
@@ -140,6 +141,12 @@ export async function runAutopayOnce(opts: AutopayOptions = {}) {
         entity: `Payment:${payment.id}`,
       });
 
+      await sendToUsers([tenantUserId], {
+        title: "Autopay successful",
+        body: `We received your rent payment of $${amountDollars.toFixed(2)}.`,
+        data: { paymentId: payment.id },
+      });
+
       // Log the run (uses SyncLog as generic job log)
       await prisma.syncLog.create({
         data: {
@@ -163,6 +170,12 @@ export async function runAutopayOnce(opts: AutopayOptions = {}) {
         actor: "autopay",
         action: "PaymentFailed",
         entity: `Payment:${payment.id} - ${res.error}`,
+      });
+
+      await sendToUsers([tenantUserId], {
+        title: "Autopay failed",
+        body: "We couldn't process your rent payment. Please update your payment method.",
+        data: { scheduleId: sched.id },
       });
 
       await prisma.syncLog.create({
