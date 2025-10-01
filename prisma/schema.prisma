@@ -32,18 +32,20 @@ enum Tier {
 // --------------------
 
 model User {
-  id                String        @id @default(cuid())
-  email             String        @unique
+  id                String             @id @default(cuid())
+  email             String             @unique
   name              String?
   password          String
-  role              Role          @default(USER)
+  role              Role               @default(USER)
   orgId             String?
-  organization      Organization? @relation(fields: [orgId], references: [id])
+  organization      Organization?      @relation(fields: [orgId], references: [id])
   accounts          Account[]
   impersonationLogs ImprLog[]
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   History           History[]
+  LeaseParticipant  LeaseParticipant[]
+  PaymentMethod     PaymentMethod[]
 }
 
 model Account {
@@ -67,21 +69,30 @@ model Account {
 // --------------------
 
 model Organization {
-  id            String         @id @default(cuid())
-  name          String
-  logoUrl       String?
-  tier          Tier           @default(FREE)
-  users         User[]
-  orgSettings   OrgSettings?
-  subscriptions Subscription[]
-  properties    Property[]
-  contacts      Contact[]
-  companies     Company[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  ImprLog       ImprLog[]
-  History       History[]
-  Deal          Deal[]
+  id                 String               @id @default(cuid())
+  name               String
+  logoUrl            String?
+  tier               Tier                 @default(FREE)
+  users              User[]
+  orgSettings        OrgSettings?
+  subscriptions      Subscription[]
+  properties         Property[]
+  contacts           Contact[]
+  companies          Company[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ImprLog            ImprLog[]
+  History            History[]
+  Deal               Deal[]
+  Unit               Unit[]
+  Lease              Lease[]
+  PaymentMethod      PaymentMethod[]
+  Payment            Payment[]
+  Refund             Refund[]
+  Receipt            Receipt[]
+  WorkOrder          WorkOrder[]
+  IntegrationAccount IntegrationAccount[]
+  SyncLog            SyncLog[]
 }
 
 model OrgSettings {
@@ -142,6 +153,9 @@ model Property {
   tenants      Tenant[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  Unit         Unit[]
+  Lease        Lease[]
+  WorkOrder    WorkOrder[]
 }
 
 model Tenant {
@@ -295,48 +309,49 @@ model Unit {
   bedrooms       Int?
   bathrooms      Float?
   sqft           Int?
-  rentDefault    Decimal? @db.Decimal(10,2)
+  rentDefault    Decimal? @db.Decimal(10, 2)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  property       Property  @relation(fields: [propertyId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  leases        Lease[]
+  property     Property     @relation(fields: [propertyId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  leases       Lease[]
+  WorkOrder    WorkOrder[]
 
   @@index([organizationId])
   @@index([propertyId])
 }
 
 model Lease {
-  id             String       @id @default(cuid())
+  id             String      @id @default(cuid())
   organizationId String
   propertyId     String
   unitId         String
-  status         LeaseStatus  @default(DRAFT)
+  status         LeaseStatus @default(DRAFT)
   startDate      DateTime
   endDate        DateTime?
-  rentAmount     Decimal      @db.Decimal(10,2)
-  depositAmount  Decimal?     @db.Decimal(10,2)
-  autopayEnabled Boolean      @default(false)
-  currency       Currency     @default(USD)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  rentAmount     Decimal     @db.Decimal(10, 2)
+  depositAmount  Decimal?    @db.Decimal(10, 2)
+  autopayEnabled Boolean     @default(false)
+  currency       Currency    @default(USD)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  property       Property     @relation(fields: [propertyId], references: [id])
-  unit           Unit         @relation(fields: [unitId], references: [id])
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  participants   LeaseParticipant[]
-  payments       Payment[]
-  refunds        Refund[]
-  receipts       Receipt[]
-  schedules      RentSchedule[]
+  property     Property           @relation(fields: [propertyId], references: [id])
+  unit         Unit               @relation(fields: [unitId], references: [id])
+  organization Organization       @relation(fields: [organizationId], references: [id])
+  participants LeaseParticipant[]
+  payments     Payment[]
+  refunds      Refund[]
+  receipts     Receipt[]
+  schedules    RentSchedule[]
 
   @@index([organizationId])
   @@index([propertyId, unitId])
 }
 
 model LeaseParticipant {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   leaseId   String
   userId    String
   roleLabel String
@@ -344,24 +359,24 @@ model LeaseParticipant {
   phone     String?
   createdAt DateTime @default(now())
 
-  lease     Lease   @relation(fields: [leaseId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
+  lease Lease @relation(fields: [leaseId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
 
   @@index([leaseId])
   @@index([userId])
 }
 
 model RentSchedule {
-  id         String   @id @default(cuid())
-  leaseId    String
-  dueOn      DateTime
-  amount     Decimal  @db.Decimal(10,2)
-  isPaid     Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  leaseId   String
+  dueOn     DateTime
+  amount    Decimal  @db.Decimal(10, 2)
+  isPaid    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  lease      Lease    @relation(fields: [leaseId], references: [id])
-  payments   Payment[]
-  receipts   Receipt[]
+  lease    Lease     @relation(fields: [leaseId], references: [id])
+  payments Payment[]
+  receipts Receipt[]
 
   @@index([leaseId, dueOn])
 }
@@ -379,9 +394,9 @@ model PaymentMethod {
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
-  payments       Payment[]
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  payments     Payment[]
 
   @@index([organizationId])
   @@index([userId])
@@ -394,20 +409,20 @@ model Payment {
   scheduleId     String?
   methodId       String?
   status         PaymentStatus @default(INITIATED)
-  amount         Decimal       @db.Decimal(10,2)
-  feeAmount      Decimal?      @db.Decimal(10,2)
+  amount         Decimal       @db.Decimal(10, 2)
+  feeAmount      Decimal?      @db.Decimal(10, 2)
   externalRef    String?
   initiatedAt    DateTime      @default(now())
   completedAt    DateTime?
   createdById    String?
   notes          String?
 
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  lease          Lease         @relation(fields: [leaseId], references: [id])
-  schedule       RentSchedule? @relation(fields: [scheduleId], references: [id])
-  method         PaymentMethod? @relation(fields: [methodId], references: [id])
-  refunds        Refund[]
-  receipts       Receipt[]
+  organization Organization   @relation(fields: [organizationId], references: [id])
+  lease        Lease          @relation(fields: [leaseId], references: [id])
+  schedule     RentSchedule?  @relation(fields: [scheduleId], references: [id])
+  method       PaymentMethod? @relation(fields: [methodId], references: [id])
+  refunds      Refund[]
+  receipts     Receipt[]
 
   @@index([organizationId])
   @@index([leaseId])
@@ -415,40 +430,40 @@ model Payment {
 }
 
 model Refund {
-  id             String        @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
   leaseId        String
   paymentId      String
-  amount         Decimal       @db.Decimal(10,2)
+  amount         Decimal  @db.Decimal(10, 2)
   reason         String?
   externalRef    String?
-  createdAt      DateTime      @default(now())
+  createdAt      DateTime @default(now())
   createdById    String?
 
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  lease          Lease         @relation(fields: [leaseId], references: [id])
-  payment        Payment       @relation(fields: [paymentId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lease        Lease        @relation(fields: [leaseId], references: [id])
+  payment      Payment      @relation(fields: [paymentId], references: [id])
 
   @@index([organizationId])
   @@index([leaseId, paymentId])
 }
 
 model Receipt {
-  id             String        @id @default(cuid())
+  id             String   @id @default(cuid())
   organizationId String
   leaseId        String
   scheduleId     String?
   paymentId      String?
-  number         String        @unique
-  issuedAt       DateTime      @default(now())
-  amount         Decimal       @db.Decimal(10,2)
+  number         String   @unique
+  issuedAt       DateTime @default(now())
+  amount         Decimal  @db.Decimal(10, 2)
   pdfUrl         String?
   createdById    String?
 
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  lease          Lease         @relation(fields: [leaseId], references: [id])
-  schedule       RentSchedule? @relation(fields: [scheduleId], references: [id])
-  payment        Payment?      @relation(fields: [paymentId], references: [id])
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  lease        Lease         @relation(fields: [leaseId], references: [id])
+  schedule     RentSchedule? @relation(fields: [scheduleId], references: [id])
+  payment      Payment?      @relation(fields: [paymentId], references: [id])
 
   @@index([organizationId])
   @@index([leaseId])
@@ -457,25 +472,25 @@ model Receipt {
 
 // ---------- Maintenance ----------
 model WorkOrder {
-  id             String          @id @default(cuid())
-  organizationId String
-  propertyId     String
-  unitId         String?
-  title          String
-  description    String?
-  status         WorkOrderStatus @default(NEW)
-  priority       Int?
-  reportedById   String?
+  id               String          @id @default(cuid())
+  organizationId   String
+  propertyId       String
+  unitId           String?
+  title            String
+  description      String?
+  status           WorkOrderStatus @default(NEW)
+  priority         Int?
+  reportedById     String?
   assignedVendorId String?
-  estimatedCost  Decimal?        @db.Decimal(10,2)
-  actualCost     Decimal?        @db.Decimal(10,2)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  estimatedCost    Decimal?        @db.Decimal(10, 2)
+  actualCost       Decimal?        @db.Decimal(10, 2)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
-  organization   Organization    @relation(fields: [organizationId], references: [id])
-  property       Property        @relation(fields: [propertyId], references: [id])
-  unit           Unit?           @relation(fields: [unitId], references: [id])
-  events         WorkOrderEvent[]
+  organization Organization     @relation(fields: [organizationId], references: [id])
+  property     Property         @relation(fields: [propertyId], references: [id])
+  unit         Unit?            @relation(fields: [unitId], references: [id])
+  events       WorkOrderEvent[]
 
   @@index([organizationId])
   @@index([propertyId])
@@ -483,50 +498,50 @@ model WorkOrder {
 }
 
 model WorkOrderEvent {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   workOrderId String
   actorId     String?
   message     String
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id])
 
   @@index([workOrderId])
 }
 
 // ---------- Accounting Integrations ----------
 model IntegrationAccount {
-  id             String              @id @default(cuid())
-  organizationId String
-  provider       IntegrationProvider
-  enabled        Boolean             @default(false)
-  displayName    String?
-  accessTokenEnc String?
+  id              String              @id @default(cuid())
+  organizationId  String
+  provider        IntegrationProvider
+  enabled         Boolean             @default(false)
+  displayName     String?
+  accessTokenEnc  String?
   refreshTokenEnc String?
-  expiresAt      DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  expiresAt       DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  syncLogs       SyncLog[]
+  organization Organization @relation(fields: [organizationId], references: [id])
+  syncLogs     SyncLog[]
 
   @@index([organizationId, provider])
 }
 
 model SyncLog {
-  id              String             @id @default(cuid())
-  organizationId  String
-  integrationId   String
-  runAt           DateTime           @default(now())
-  scope           String
-  status          String
-  message         String?
-  itemCount       Int?
-  durationMs      Int?
-  payloadUrl      String?
+  id             String   @id @default(cuid())
+  organizationId String
+  integrationId  String
+  runAt          DateTime @default(now())
+  scope          String
+  status         String
+  message        String?
+  itemCount      Int?
+  durationMs     Int?
+  payloadUrl     String?
 
-  organization    Organization       @relation(fields: [organizationId], references: [id])
-  integration     IntegrationAccount @relation(fields: [integrationId], references: [id])
+  organization Organization       @relation(fields: [organizationId], references: [id])
+  integration  IntegrationAccount @relation(fields: [integrationId], references: [id])
 
   @@index([organizationId])
   @@index([integrationId, runAt])
