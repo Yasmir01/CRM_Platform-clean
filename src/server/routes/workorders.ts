@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { PrismaClient } from "@prisma/client";
 import { addWorkOrderMessage } from "../services/workorders";
+import { sendToUsers } from "../services/push";
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -55,6 +56,20 @@ router.post("/:id/status", async (req, res) => {
       where: { id },
       data: { status },
     });
+
+    const wo = await prisma.workOrder.findUnique({
+      where: { id },
+      select: { reportedById: true, assignedVendorId: true, title: true },
+    });
+    const recips = [wo?.reportedById, wo?.assignedVendorId].filter(Boolean) as string[];
+    if (recips.length) {
+      await sendToUsers(recips, {
+        title: "Work order updated",
+        body: `${wo?.title || "Work order"} → ${status}`,
+        data: { workOrderId: id, status },
+      });
+    }
+
     res.json(updated);
   } catch (err) {
     // eslint-disable-next-line no-console
