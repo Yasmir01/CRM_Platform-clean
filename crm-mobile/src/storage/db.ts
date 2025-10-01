@@ -22,7 +22,7 @@ export function initDb() {
       "CREATE TABLE IF NOT EXISTS work_orders (id TEXT PRIMARY KEY, data TEXT)"
     );
     tx.executeSql(
-      "CREATE TABLE IF NOT EXISTS pending_sync (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, payload TEXT)"
+      "CREATE TABLE IF NOT EXISTS pending_sync (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, payload TEXT, status TEXT DEFAULT 'pending', error TEXT)"
     );
   });
 }
