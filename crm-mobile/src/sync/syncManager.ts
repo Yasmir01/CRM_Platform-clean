@@ -1,5 +1,5 @@
 import NetInfo from "@react-native-community/netinfo";
-import { getPendingSync, clearPendingSync } from "../storage/repository";
+import { getPendingSync, clearPendingSync, markSyncStatus } from "../storage/repository";
 
 const API_URL = (process.env.EXPO_PUBLIC_API_URL as string) || "http://localhost:4000";
 
