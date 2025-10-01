@@ -537,6 +537,21 @@ model ESignEnvelope {
   @@index([leaseId, status])
 }
 
+model OwnerStatement {
+  id           String   @id @default(cuid())
+  ownerId      String
+  propertyId   String?
+  periodStart  DateTime
+  periodEnd    DateTime
+  totalIncome  Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpense Decimal  @default(0) @db.Decimal(10, 2)
+  netIncome    Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+
+  owner    User     @relation(fields: [ownerId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+}
+
 // ---------- Maintenance ----------
 model WorkOrder {
   id               String          @id @default(cuid())
