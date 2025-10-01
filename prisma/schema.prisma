@@ -306,6 +306,15 @@ enum AutopayFrequency {
   MONTHLY
 }
 
+enum ESignStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  DECLINED
+  VOIDED
+}
+
 // ---------- Core PM: Units & Leases ----------
 model Unit {
   id             String   @id @default(cuid())
@@ -490,6 +499,42 @@ model Receipt {
   @@index([organizationId])
   @@index([leaseId])
   @@index([paymentId])
+}
+
+model LeaseDocument {
+  id           String   @id @default(cuid())
+  leaseId      String
+  uploadedById String?
+  filename     String
+  mimeType     String?
+  sizeBytes    Int?
+  storageKey   String
+  isPrivate    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+
+  @@index([leaseId, createdAt])
+}
+
+model ESignEnvelope {
+  id            String      @id @default(cuid())
+  leaseId       String
+  documentId    String
+  provider      String
+  providerEnvId String?
+  status        ESignStatus @default(DRAFT)
+  subject       String?
+  message       String?
+  signersJson   String?
+  createdById   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lease    Lease         @relation(fields: [leaseId], references: [id])
+  document LeaseDocument @relation(fields: [documentId], references: [id])
+
+  @@index([leaseId, status])
 }
 
 // ---------- Maintenance ----------
