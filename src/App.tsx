@@ -69,7 +69,7 @@ const OwnerReports = React.lazy(() => import("./crm/owner/OwnerReports"));
 const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
 const VendorWorkOrders = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrders })));
 const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
-const VendorWorkOrderDetails = React.lazy(() => import("./crm/vendor/VendorWorkOrderDetails"));
+const VendorWorkOrderDetails = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrderDetails })));
 const VendorLogin = React.lazy(() => import("./components/vendor/VendorLogin"));
 const ManagerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerDashboard })));
 const ManagerTenants = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerTenants })));
