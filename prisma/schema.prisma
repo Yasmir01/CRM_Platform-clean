@@ -647,3 +647,16 @@ model PushToken {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model ComplianceLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  entity    String
+  details   String?
+  origin    String   @default("server")
+  createdAt DateTime @default(now())
+
+  @@index([actor, createdAt])
+  @@index([entity])
+}
