@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
+import { useTranslation } from "react-i18next";
+
 export default function TenantDashboard() {
+  const { t } = useTranslation();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +45,7 @@ export default function TenantDashboard() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
-      <h1 className="text-2xl font-bold mb-4">Welcome, {data.tenant?.name}</h1>
+      <h1 className="text-2xl font-bold mb-4">{t("welcome")}, {data.tenant?.name}</h1>
 
       <div className="bg-white shadow rounded-lg p-6 mb-6">
         <h2 className="text-lg font-semibold mb-2">Rent Overview</h2>

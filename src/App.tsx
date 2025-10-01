@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
+import "./i18n";
+import { LanguageProvider } from "./crm/contexts/LanguageContext";
 import CrmDashboard from "./crm/CrmDashboard";
 import { LocaleProvider } from "./crm/contexts/LocaleContext";
 import SuperAdminApp from "./crm/SuperAdminApp";
@@ -608,7 +610,8 @@ import { BrandingProvider } from './context/BrandingContext';
 
 export default function App() {
   return (
-    <AppTheme>
+    <LanguageProvider>
+      <AppTheme>
       <CssBaseline enableColorScheme />
       <LocaleProvider>
         <BrandingProvider>
@@ -620,6 +623,7 @@ export default function App() {
           </AuthProvider>
         </BrandingProvider>
       </LocaleProvider>
-    </AppTheme>
+      </AppTheme>
+    </LanguageProvider>
   );
 }
