@@ -5,22 +5,22 @@ export async function recordComplianceLog({
   actor,
   action,
   entity,
+  details,
+  origin = "server",
 }: {
   actor: string;
   action: string;
   entity: string;
+  details?: string;
+  origin?: "server" | "offline-sync";
 }) {
-  const message = `${actor} ${action} (${entity})`;
-  return prisma.globalLog.create({
-    data: {
-      message,
-      createdAt: new Date(),
-    },
+  return prisma.complianceLog.create({
+    data: { actor, action, entity, details, origin },
   });
 }
 
 export async function getComplianceLogs(limit = 50) {
-  return prisma.globalLog.findMany({
+  return prisma.complianceLog.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
   });
