@@ -40,7 +40,7 @@ export async function markDistributionPaid(distributionId: string, actorId: stri
     actor: actorId,
     action: "MarkPaid",
     entity: `Distribution:${distributionId}`,
-    details: `Marked as PAID`;
+    details: `Marked as PAID`,
   });
 
   return dist;
