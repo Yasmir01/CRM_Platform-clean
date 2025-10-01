@@ -246,6 +246,7 @@ function AppRoutes() {
       <Route path="/superadmin/integrations" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AccountingIntegrations /></DashboardLayout></React.Suspense>} />
       <Route path="/superadmin/integrations/logs" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><SyncLogs /></DashboardLayout></React.Suspense>} />
       <Route path="/superadmin/insights" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AIInsights /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/payments" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><PaymentsReport /></DashboardLayout></React.Suspense>} />
       <Route path="/superadmin/compliance" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><ComplianceLogs /></DashboardLayout></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
