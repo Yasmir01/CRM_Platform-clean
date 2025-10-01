@@ -469,6 +469,16 @@ function AppRoutes() {
             <AccountingSettings />
           </React.Suspense>
         } />
+        <Route path="admin/subscription" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SubscriptionDetails />
+          </React.Suspense>
+        } />
+        <Route path="admin/subscription/upgrade" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SubscriptionUpgrade />
+          </React.Suspense>
+        } />
         <Route path="admin/subscription-upgrade" element={
           <React.Suspense fallback={<PageLoader />}>
             <SubscriptionUpgrade />
