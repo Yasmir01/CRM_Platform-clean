@@ -8,6 +8,8 @@ type Integration = {
   displayName: string;
 };
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
 export default function AccountingIntegrations() {
   const [integrations, setIntegrations] = useState<Integration[]>([]);
 
@@ -20,8 +22,13 @@ export default function AccountingIntegrations() {
     setIntegrations(mock);
   }, []);
 
-  const handleConnect = (provider: string) => {
-    console.log(`Connect ${provider} via OAuth`);
+  const connect = (provider: string) => {
+    window.location.href = `${API_URL}/api/integrations/${provider.toLowerCase()}/connect?orgId=demo-org`;
+  };
+
+  const manualSync = async (provider: string) => {
+    await fetch(`${API_URL}/api/integrations/${provider.toLowerCase()}/sync?orgId=demo-org`, { method: "POST" });
+    alert("Triggered manual sync. Check Sync Logs.");
   };
 
   return (
@@ -41,9 +48,14 @@ export default function AccountingIntegrations() {
                 <Chip label="Not Connected" color="default" size="small" />
               )}
             </Stack>
-            <Button variant="contained" onClick={() => handleConnect(i.provider)}>
-              {i.enabled ? "Reconnect" : "Connect"}
-            </Button>
+            <Box>
+              <Button variant="contained" onClick={() => connect(i.provider)}>
+                {i.enabled ? "Reconnect" : "Connect"}
+              </Button>
+              <Button variant="outlined" sx={{ ml: 1 }} onClick={() => manualSync(i.provider)}>
+                Sync Now
+              </Button>
+            </Box>
           </Paper>
         ))}
       </Stack>

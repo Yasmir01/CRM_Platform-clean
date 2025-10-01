@@ -20,7 +20,9 @@
     "prisma:test": "tsx prisma/test.ts",
     "jobs:autopay:once": "tsx src/server/jobs/autopay.ts",
     "jobs:autopay:dev": "tsx src/server/jobs/autopay.loop.ts",
-    "jobs:receipt:test": "tsx src/server/services/receipts.ts"
+    "jobs:receipt:test": "tsx src/server/services/receipts.ts",
+    "jobs:sync:once": "tsx src/server/jobs/syncAccounting.ts",
+    "api:dev": "tsx src/server/http.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.879.0",
