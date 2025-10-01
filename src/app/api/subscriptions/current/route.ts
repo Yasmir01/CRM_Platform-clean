@@ -48,30 +48,37 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user?.orgId) {
-      // Return null so the client shows "No active subscription" gracefully
       return NextResponse.json(null);
     }
 
-    const sub = await prisma.subscription.findFirst({
-      where: { orgId: user.orgId, active: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    const [sub, org] = await Promise.all([
+      prisma.subscription.findFirst({ where: { orgId: user.orgId, active: true }, orderBy: { createdAt: 'desc' } }),
+      prisma.organization.findUnique({ where: { id: user.orgId }, select: { tier: true } }),
+    ]);
 
-    if (!sub) {
-      return NextResponse.json(null);
+    if (sub) {
+      const plan = getPlanForTier(String(sub.plan));
+      const end = sub.endDate ?? new Date(new Date().setMonth(new Date().getMonth() + 1));
+      return NextResponse.json({
+        mode: 'PLAN',
+        id: sub.id,
+        plan,
+        status: sub.active ? 'active' : 'inactive',
+        currentPeriodEnd: end.toISOString(),
+      });
     }
 
-    const plan = getPlanForTier(String(sub.plan));
-    const end = sub.endDate ?? new Date(new Date().setMonth(new Date().getMonth() + 1));
+    if (org) {
+      const plan = getPlanForTier(String(org.tier));
+      return NextResponse.json({
+        mode: 'TIER',
+        plan: { name: plan.name, price: plan.price, billingCycle: plan.billingCycle },
+        status: 'active',
+        currentPeriodEnd: null,
+      });
+    }
 
-    const response = {
-      id: sub.id,
-      plan,
-      status: sub.active ? 'active' : 'inactive',
-      currentPeriodEnd: end.toISOString(),
-    };
-
-    return NextResponse.json(response);
+    return NextResponse.json(null);
   } catch (err) {
     console.error('Subscription fetch error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
