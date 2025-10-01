@@ -27,6 +27,15 @@ enum Tier {
   ENTERPRISE
 }
 
+enum EventType {
+  INSPECTION
+  MAINTENANCE
+  MOVE_IN
+  MOVE_OUT
+  RENT_DUE
+  OTHER
+}
+
 // --------------------
 // Core User Management
 // --------------------
@@ -745,6 +754,44 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
+}
+
+model CalendarEvent {
+  id             String      @id @default(cuid())
+  organizationId String
+  title          String
+  description    String?
+  type           EventType   @default(OTHER)
+  propertyId     String?
+  workOrderId    String?
+  startsAt       DateTime
+  endsAt         DateTime
+  allDay         Boolean     @default(false)
+  createdById    String
+  location       String?
+  status         String      @default("confirmed")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  attendees      EventAttendee[]
+
+  @@index([organizationId, startsAt])
+  @@index([propertyId])
+  @@index([workOrderId])
+}
+
+model EventAttendee {
+  id        String         @id @default(cuid())
+  eventId   String
+  userId    String
+  role      String?
+  rsvp      String?
+  notified  Boolean        @default(false)
+  createdAt DateTime       @default(now())
+
+  event     CalendarEvent  @relation(fields: [eventId], references: [id])
+
+  @@unique([eventId, userId])
 }
 
 model ComplianceLog {
