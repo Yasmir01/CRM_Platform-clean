@@ -4,7 +4,7 @@ import { encrypt, decrypt } from "../utils/crypto";
 import { qbAuthUrl, qbExchange, qbRefresh } from "./providers/quickbooks";
 import { xeroAuthUrl, xeroExchange, xeroRefresh } from "./providers/xero";
 import { waveAuthUrl, waveExchange, waveRefresh } from "./providers/wave";
-import { syncQuickBooks } from "../jobs/syncAccounting";
+import { syncQuickBooks, syncXero } from "../jobs/syncAccounting";
 
 const prisma = new PrismaClient();
 export const router = express.Router();
@@ -115,6 +115,10 @@ router.post("/:provider/sync", async (req, res) => {
 
     if (provider === "quickbooks") {
       const result = await syncQuickBooks(organizationId);
+      return res.json({ ok: true, provider, ...result });
+    }
+    if (provider === "xero") {
+      const result = await syncXero(organizationId);
       return res.json({ ok: true, provider, ...result });
     }
 
