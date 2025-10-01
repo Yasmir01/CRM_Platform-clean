@@ -46,6 +46,7 @@ const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
 import NewsBoard from "./crm/pages/NewsBoard";
+import DashboardLayout from "./components/DashboardLayout";
 const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantDashboard })));
