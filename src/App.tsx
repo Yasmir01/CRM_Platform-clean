@@ -108,6 +108,7 @@ const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
 const AIInsights = React.lazy(() => import("./crm/superadmin/AIInsights"));
+const PaymentsReport = React.lazy(() => import("./crm/superadmin/PaymentsReport"));
 const SuperAdminLayout = React.lazy(() => import("./crm/components/superadmin/SuperAdminLayout"));
 const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOverview"));
 const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
