@@ -27,8 +27,9 @@ export default function AccountingIntegrations() {
   };
 
   const manualSync = async (provider: string) => {
-    await fetch(`${API_URL}/api/integrations/${provider.toLowerCase()}/sync?orgId=demo-org`, { method: "POST" });
-    alert("Triggered manual sync. Check Sync Logs.");
+    const res = await fetch(`${API_URL}/api/integrations/${provider.toLowerCase()}/sync?orgId=demo-org`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    alert(`Triggered manual sync: ${JSON.stringify(data)}`);
   };
 
   return (
