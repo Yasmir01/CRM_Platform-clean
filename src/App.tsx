@@ -117,7 +117,9 @@ const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPol
 const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
 const SUPolicyMatrixStandalone = React.lazy(() => import("./crm/pages/SUPolicyMatrixStandalone"));
 const SUAccountingIntegrations = React.lazy(() => import("./crm/pages/SUAccountingIntegrations"));
+const AccountingIntegrations = React.lazy(() => import("./crm/superadmin/AccountingIntegrations"));
 const SUAccountingIntegrationLogs = React.lazy(() => import("./crm/pages/SUAccountingIntegrationLogs"));
+const SyncLogs = React.lazy(() => import("./crm/superadmin/SyncLogs"));
 const SUAccountingSyncLogs = React.lazy(() => import("./crm/pages/SUAccountingSyncLogs"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
@@ -233,6 +235,8 @@ function AppRoutes() {
       <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><AdminUsers /></React.Suspense>} />
       <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><AdminLogs /></React.Suspense>} />
       <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></React.Suspense>} />
+      <Route path="/superadmin/integrations" element={<React.Suspense fallback={<PageLoader />}><AccountingIntegrations /></React.Suspense>} />
+      <Route path="/superadmin/integrations/logs" element={<React.Suspense fallback={<PageLoader />}><SyncLogs /></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
           <TenantPortal />
