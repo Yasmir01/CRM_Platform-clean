@@ -220,18 +220,20 @@ function AppRoutes() {
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
       <Route path="/tenant/autopay" element={<React.Suspense fallback={<PageLoader />}><TenantAutopay /></React.Suspense>} />
       <Route path="/tenant/autopay/setup" element={<React.Suspense fallback={<PageLoader />}><AutoPaySetupPage /></React.Suspense>} />
-      <Route path="/tenant/refunds" element={<React.Suspense fallback={<PageLoader />}><TenantRefundHistoryPage /></React.Suspense>} />
+      <Route path="/tenant/dashboard" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantDashboard /></DashboardLayout></React.Suspense>} />
+      <Route path="/tenant/refunds" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantRefundHistoryPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/tenant/receipts" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantReceiptsPage /></DashboardLayout></React.Suspense>} />
       <Route path="/tenant/receipts" element={<React.Suspense fallback={<PageLoader />}><TenantReceiptsPage /></React.Suspense>} />
       <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
       <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
       <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><OwnerProperties /></React.Suspense>} />
-      <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><OwnerLedgerPage /></React.Suspense>} />
-      <Route path="/owner/settings" element={<React.Suspense fallback={<PageLoader />}><OwnerSettings /></React.Suspense>} />
-      <Route path="/owner/reports" element={<React.Suspense fallback={<PageLoader />}><OwnerReports /></React.Suspense>} />
+      <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerLedgerPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/owner/settings" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerSettings /></DashboardLayout></React.Suspense>} />
+      <Route path="/owner/reports" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerReports /></DashboardLayout></React.Suspense>} />
       <Route path="/vendor-login" element={<React.Suspense fallback={<PageLoader />}><VendorLogin /></React.Suspense>} />
       <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><VendorDashboard /></React.Suspense>} />
-      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrders /></React.Suspense>} />
-      <Route path="/vendor/work-orders/:id" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrderDetails /></React.Suspense>} />
+      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><VendorWorkOrders /></DashboardLayout></React.Suspense>} />
+      <Route path="/vendor/work-orders/:id" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><VendorWorkOrderDetails /></DashboardLayout></React.Suspense>} />
       <Route path="/vendor/profile" element={<React.Suspense fallback={<PageLoader />}><VendorProfile /></React.Suspense>} />
       <Route path="/manager" element={<React.Suspense fallback={<PageLoader />}><ManagerDashboard /></React.Suspense>} />
       <Route path="/manager/tenants" element={<React.Suspense fallback={<PageLoader />}><ManagerTenants /></React.Suspense>} />
@@ -240,11 +242,11 @@ function AppRoutes() {
       <Route path="/admin" element={<React.Suspense fallback={<PageLoader />}><AdminDashboard /></React.Suspense>} />
       <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><AdminUsers /></React.Suspense>} />
       <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><AdminLogs /></React.Suspense>} />
-      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></React.Suspense>} />
-      <Route path="/superadmin/integrations" element={<React.Suspense fallback={<PageLoader />}><AccountingIntegrations /></React.Suspense>} />
-      <Route path="/superadmin/integrations/logs" element={<React.Suspense fallback={<PageLoader />}><SyncLogs /></React.Suspense>} />
-      <Route path="/superadmin/insights" element={<React.Suspense fallback={<PageLoader />}><AIInsights /></React.Suspense>} />
-      <Route path="/superadmin/compliance" element={<React.Suspense fallback={<PageLoader />}><ComplianceLogs /></React.Suspense>} />
+      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><SuperAdminDashboardPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/integrations" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AccountingIntegrations /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/integrations/logs" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><SyncLogs /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/insights" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AIInsights /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/compliance" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><ComplianceLogs /></DashboardLayout></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
           <TenantPortal />
