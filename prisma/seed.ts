@@ -108,6 +108,43 @@ export async function main() {
     },
   });
 
+  // --- PLAN mode seed (optional demo) ---
+  await prisma.subscriptionPlan.createMany({
+    data: [
+      { name: 'Starter', price: 29, billingCycle: 'monthly' },
+      { name: 'Pro', price: 99, billingCycle: 'monthly' },
+      { name: 'Enterprise', price: 299, billingCycle: 'monthly' },
+    ],
+    skipDuplicates: true,
+  });
+
+  const starterPlan = await prisma.subscriptionPlan.findFirst({ where: { name: 'Starter' } });
+  const proPlan = await prisma.subscriptionPlan.findFirst({ where: { name: 'Pro' } });
+  const enterprisePlan = await prisma.subscriptionPlan.findFirst({ where: { name: 'Enterprise' } });
+
+  if (starterPlan && proPlan && enterprisePlan) {
+    await prisma.featureToggle.createMany({
+      data: [
+        { planId: starterPlan.id, featureKey: 'Basic Reporting' },
+        { planId: proPlan.id, featureKey: 'Advanced Analytics' },
+        { planId: enterprisePlan.id, featureKey: 'Custom Integrations' },
+      ],
+      skipDuplicates: true,
+    });
+  }
+
+  // Attach org to Pro plan and switch to PLAN mode (demo)
+  if (proPlan) {
+    await prisma.organizationSubscription.create({
+      data: {
+        orgId: org.id,
+        planId: proPlan.id,
+        currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      },
+    });
+    await prisma.organization.update({ where: { id: org.id }, data: { subscriptionMode: 'PLAN' } });
+  }
+
   console.log('✅ Database seeded successfully');
 }
 
