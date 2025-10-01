@@ -52,6 +52,7 @@ import LightbulbRoundedIcon from "@mui/icons-material/LightbulbRounded";
 import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
+import UpgradeRoundedIcon from "@mui/icons-material/UpgradeRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
@@ -93,6 +94,7 @@ export const secondaryListItems = [
   { text: "Integrations", icon: <IntegrationInstructionsRoundedIcon />, path: "/crm/integrations" },
   { text: "Email Management", icon: <EmailRoundedIcon />, path: "/crm/email-management" },
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
+  { text: "Subscription Upgrade", icon: <UpgradeRoundedIcon />, path: "/crm/admin/subscription-upgrade" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },

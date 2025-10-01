@@ -78,6 +78,7 @@ const ManagerMaintenance = React.lazy(() => import("./portals/Portals").then(m =
 const AdminDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminDashboard })));
 const AdminUsers = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminUsers })));
 const AdminLogs = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminLogs })));
+const SubscriptionUpgrade = React.lazy(() => import("./crm/admin/SubscriptionUpgrade"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
@@ -465,6 +466,11 @@ function AppRoutes() {
         <Route path="admin/accounting" element={
           <React.Suspense fallback={<PageLoader />}>
             <AccountingSettings />
+          </React.Suspense>
+        } />
+        <Route path="admin/subscription-upgrade" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <SubscriptionUpgrade />
           </React.Suspense>
         } />
         <Route path="documents" element={
