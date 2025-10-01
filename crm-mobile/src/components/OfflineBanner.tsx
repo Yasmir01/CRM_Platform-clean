@@ -14,7 +14,7 @@ export default function OfflineBanner() {
 
   if (!offline) return null;
   return (
-    <View style={{ backgroundColor: "red", padding: 4 }}>
+    <View style={{ backgroundColor: theme.accent, padding: 4 }}>
       <Text style={{ color: "white", textAlign: "center" }}>Offline – changes will sync later</Text>
     </View>
   );
