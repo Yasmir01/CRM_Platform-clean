@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Expo } from "expo-server-sdk";
+import { createNotification } from "./notifications";
 
 const prisma = new PrismaClient();
 const expo = new Expo();
@@ -28,6 +29,11 @@ export async function sendToUsers(
     sound: payload.sound ?? "default",
     data: payload.data ?? {},
   }));
+
+  // Persist in-app notifications to keep push + in-app feed in sync
+  await Promise.allSettled(
+    userIds.map((uid) => createNotification(uid, "SYSTEM", payload.title, payload.body))
+  );
   const chunks = expo.chunkPushNotifications(messages);
   for (const chunk of chunks) {
     await expo.sendPushNotificationsAsync(chunk);
