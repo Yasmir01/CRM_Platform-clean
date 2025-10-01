@@ -79,6 +79,7 @@ const AdminDashboard = React.lazy(() => import("./portals/Portals").then(m => ({
 const AdminUsers = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminUsers })));
 const AdminLogs = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.AdminLogs })));
 const SubscriptionUpgrade = React.lazy(() => import("./crm/admin/SubscriptionUpgrade"));
+const SubscriptionDetails = React.lazy(() => import("./crm/admin/SubscriptionDetails"));
 const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
