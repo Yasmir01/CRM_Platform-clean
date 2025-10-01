@@ -593,3 +593,12 @@ model SyncLog {
   @@index([organizationId])
   @@index([integrationId, runAt])
 }
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
