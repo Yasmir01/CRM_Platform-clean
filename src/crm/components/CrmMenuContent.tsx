@@ -224,16 +224,21 @@ export default function CrmMenuContent() {
         }
 
         const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
+
+        // Use a timeout wrapper instead of AbortController to avoid runtime AbortError variations across environments
+        const fetchWithTimeout = async (u: string, options: RequestInit = {}, ms = 8000) => {
+          return await Promise.race([
+            safeFetch(u, options),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+          ]);
+        };
 
         try {
-          const r: any = await safeFetch(url, {
+          const r: any = await fetchWithTimeout(url, {
             credentials: 'include',
             cache: 'no-store',
-            signal: controller.signal,
             headers: { Accept: 'application/json' },
-          });
+          }, 8000);
 
           if (!r || !r.ok) { setUnreadMessagesCount(0); return; }
 
@@ -244,11 +249,11 @@ export default function CrmMenuContent() {
             setUnreadMessagesCount(0);
           }
         } catch (e: any) {
+          // Ignore expected timeouts but surface other errors
+          if (e?.message === 'timeout') return;
           if (e?.name === 'AbortError') return;
           console.warn('updateUnreadMessages failed', e);
           setUnreadMessagesCount(0);
-        } finally {
-          clearTimeout(timeout);
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
@@ -256,6 +261,7 @@ export default function CrmMenuContent() {
       }
     };
     updateUnreadMessages();
+
 
     // Set up an interval to check for updates every 5 seconds
     const interval = setInterval(() => {
