@@ -5,6 +5,7 @@ import { useTheme } from "../../src/crm/contexts/ThemeContext";
 
 export default function OfflineBanner() {
   const [offline, setOffline] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     const unsub = NetInfo.addEventListener((s) => setOffline(!s.isConnected));
