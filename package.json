@@ -19,7 +19,8 @@
     "sync": "powershell ./sync-push.ps1",
     "prisma:test": "tsx prisma/test.ts",
     "jobs:autopay:once": "tsx src/server/jobs/autopay.ts",
-    "jobs:autopay:dev": "tsx src/server/jobs/autopay.loop.ts"
+    "jobs:autopay:dev": "tsx src/server/jobs/autopay.loop.ts",
+    "jobs:receipt:test": "tsx src/server/services/receipts.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.879.0",
