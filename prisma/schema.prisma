@@ -674,6 +674,42 @@ model SyncLog {
   @@index([integrationId, runAt])
 }
 
+// ---------- Messaging ----------
+model MessageThread {
+  id        String    @id @default(cuid())
+  subject   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  messages  Message[]
+  members   ThreadMember[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  author    User          @relation(fields: [authorId], references: [id])
+
+  @@index([threadId, createdAt])
+}
+
+model ThreadMember {
+  id        String   @id @default(cuid())
+  threadId  String
+  userId    String
+  joinedAt  DateTime @default(now())
+
+  thread    MessageThread @relation(fields: [threadId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@index([threadId, userId])
+}
+
 model PushToken {
   id        String   @id @default(cuid())
   userId    String
