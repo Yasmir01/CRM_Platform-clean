@@ -50,6 +50,30 @@ export default function SubscriptionDetails() {
     );
   }
 
+  if (subscription.mode === 'TIER') {
+    return (
+      <Box p={2}>
+        <Typography variant="h6">Legacy Plan (Tier)</Typography>
+        <Stack spacing={1} mt={1}>
+          <Typography>
+            <strong>Plan:</strong> {subscription.plan.name}
+          </Typography>
+          <Typography>
+            <strong>Price:</strong> ${subscription.plan.price}/mo
+          </Typography>
+          <Typography>
+            <strong>Status:</strong> {subscription.status}
+          </Typography>
+        </Stack>
+        <Box mt={2}>
+          <Button variant="outlined" color="primary" onClick={() => navigate("/crm/admin/subscription-upgrade")}>
+            Change Plan
+          </Button>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box p={2}>
       <Typography variant="h6">Active Plan</Typography>
@@ -63,10 +87,11 @@ export default function SubscriptionDetails() {
         <Typography>
           <strong>Status:</strong> {subscription.status}
         </Typography>
-        <Typography>
-          <strong>Renews on:</strong>{" "}
-          {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-        </Typography>
+        {subscription.currentPeriodEnd && (
+          <Typography>
+            <strong>Renews on:</strong> {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+          </Typography>
+        )}
       </Stack>
 
       <Box mt={2}>
