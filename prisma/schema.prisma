@@ -683,6 +683,20 @@ model PushToken {
   updatedAt DateTime @updatedAt
 }
 
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
 model ComplianceLog {
   id        String   @id @default(cuid())
   actor     String
