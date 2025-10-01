@@ -59,7 +59,9 @@ export default defineConfig({
       "crypto-js",
       "qrcode",
       // Fix CJS default export interop for libraries used by Recharts
-      "eventemitter3"
+      "eventemitter3",
+      // Fix CJS/ESM interop for void-elements which may be imported as default by some dependencies
+      "void-elements"
     ],
     exclude: [
       "@mui/icons-material",

@@ -30,7 +30,7 @@ function withPlanInputs(baseInputs: any[] = []) {
 (async function registerBuilderComponents() {
   try {
     const pkg = "@builder.io/react" as const;
-    const mod = await import(pkg);
+    const mod = await import(/* @vite-ignore */ pkg);
     const builder = (mod && (mod.builder || mod.default || mod)) as any;
     if (!builder || !builder.registerComponent) {
       // Builder isn't available in this environment

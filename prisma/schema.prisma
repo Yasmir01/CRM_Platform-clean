@@ -1,4 +1,3 @@
-// --------------------
 // Generator & Datasource
 // --------------------
 
@@ -28,23 +27,39 @@ enum Tier {
   ENTERPRISE
 }
 
+enum EventType {
+  INSPECTION
+  MAINTENANCE
+  MOVE_IN
+  MOVE_OUT
+  RENT_DUE
+  OTHER
+}
+
 // --------------------
 // Core User Management
 // --------------------
 
 model User {
-  id                String        @id @default(cuid())
-  email             String        @unique
-  name              String?
-  password          String
-  role              Role          @default(USER)
-  orgId             String?
-  organization      Organization? @relation(fields: [orgId], references: [id])
-  accounts          Account[]
-  impersonationLogs ImprLog[]
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  History           History[]
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  name               String?
+  password           String
+  role               Role                @default(USER)
+  orgId              String?
+  organization       Organization?       @relation(fields: [orgId], references: [id])
+  accounts           Account[]
+  impersonationLogs  ImprLog[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  History            History[]
+  LeaseParticipant   LeaseParticipant[]
+  PaymentMethod      PaymentMethod[]
+  ownerStatements    OwnerStatement[]
+  ownerDistributions OwnerDistribution[]
+  notifications      Notification[]
+  messagesAuthored   Message[]
+  threadMemberships  ThreadMember[]
 }
 
 model Account {
@@ -68,21 +83,30 @@ model Account {
 // --------------------
 
 model Organization {
-  id            String         @id @default(cuid())
-  name          String
-  logoUrl       String?
-  tier          Tier           @default(FREE)
-  users         User[]
-  orgSettings   OrgSettings?
-  subscriptions Subscription[]
-  properties    Property[]
-  contacts      Contact[]
-  companies     Company[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  ImprLog       ImprLog[]
-  History       History[]
-  Deal          Deal[]
+  id                 String               @id @default(cuid())
+  name               String
+  logoUrl            String?
+  tier               Tier                 @default(FREE)
+  users              User[]
+  orgSettings        OrgSettings?
+  subscriptions      Subscription[]
+  properties         Property[]
+  contacts           Contact[]
+  companies          Company[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ImprLog            ImprLog[]
+  History            History[]
+  Deal               Deal[]
+  Unit               Unit[]
+  Lease              Lease[]
+  PaymentMethod      PaymentMethod[]
+  Payment            Payment[]
+  Refund             Refund[]
+  Receipt            Receipt[]
+  WorkOrder          WorkOrder[]
+  IntegrationAccount IntegrationAccount[]
+  SyncLog            SyncLog[]
 }
 
 model OrgSettings {
@@ -135,26 +159,31 @@ model Company {
 }
 
 model Property {
-  id           String       @id @default(cuid())
-  orgId        String
-  organization Organization @relation(fields: [orgId], references: [id])
-  name         String
-  address      String
-  tenants      Tenant[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id              String           @id @default(cuid())
+  orgId           String
+  organization    Organization     @relation(fields: [orgId], references: [id])
+  name            String
+  address         String
+  tenants         Tenant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  Unit            Unit[]
+  Lease           Lease[]
+  WorkOrder       WorkOrder[]
+  ownerStatements OwnerStatement[]
 }
 
 model Tenant {
-  id         String     @id @default(cuid())
-  propertyId String
-  property   Property   @relation(fields: [propertyId], references: [id])
-  name       String
-  email      String?
-  phone      String?
-  reminders  Reminder[]
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id           String        @id @default(cuid())
+  propertyId   String
+  property     Property      @relation(fields: [propertyId], references: [id])
+  name         String
+  email        String?
+  phone        String?
+  reminders    Reminder[]
+  autopayRules AutopayRule[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 model Reminder {
@@ -240,4 +269,540 @@ model GlobalLog {
   id        String   @id @default(cuid())
   message   String
   createdAt DateTime @default(now())
+}
+
+// ---------- Enums ----------
+
+enum LeaseStatus {
+  DRAFT
+  ACTIVE
+  PENDING_TERMINATION
+  TERMINATED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethodType {
+  CARD
+  ACH
+  MANUAL
+}
+
+enum WorkOrderStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum IntegrationProvider {
+  QUICKBOOKS
+  XERO
+  WAVE
+}
+
+enum Currency {
+  USD
+  CAD
+  EUR
+  GBP
+}
+
+enum AutopayFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum ESignStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  DECLINED
+  VOIDED
+}
+
+enum DistributionStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// ---------- Core PM: Units & Leases ----------
+model Unit {
+  id             String   @id @default(cuid())
+  organizationId String
+  propertyId     String
+  label          String
+  bedrooms       Int?
+  bathrooms      Float?
+  sqft           Int?
+  rentDefault    Decimal? @db.Decimal(10, 2)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  property     Property     @relation(fields: [propertyId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  leases       Lease[]
+  WorkOrder    WorkOrder[]
+
+  @@index([organizationId])
+  @@index([propertyId])
+}
+
+model Lease {
+  id             String      @id @default(cuid())
+  organizationId String
+  propertyId     String
+  unitId         String
+  status         LeaseStatus @default(DRAFT)
+  startDate      DateTime
+  endDate        DateTime?
+  rentAmount     Decimal     @db.Decimal(10, 2)
+  depositAmount  Decimal?    @db.Decimal(10, 2)
+  autopayEnabled Boolean     @default(false)
+  currency       Currency    @default(USD)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  property     Property           @relation(fields: [propertyId], references: [id])
+  unit         Unit               @relation(fields: [unitId], references: [id])
+  organization Organization       @relation(fields: [organizationId], references: [id])
+  participants LeaseParticipant[]
+  payments     Payment[]
+  refunds      Refund[]
+  receipts     Receipt[]
+  schedules    RentSchedule[]
+  documents    LeaseDocument[]
+  envelopes    ESignEnvelope[]
+  autopayRules AutopayRule[]
+
+  @@index([organizationId])
+  @@index([propertyId, unitId])
+}
+
+model LeaseParticipant {
+  id        String   @id @default(cuid())
+  leaseId   String
+  userId    String
+  roleLabel String
+  email     String?
+  phone     String?
+  createdAt DateTime @default(now())
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@index([leaseId])
+  @@index([userId])
+}
+
+model RentSchedule {
+  id        String   @id @default(cuid())
+  leaseId   String
+  dueOn     DateTime
+  amount    Decimal  @db.Decimal(10, 2)
+  isPaid    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  lease    Lease     @relation(fields: [leaseId], references: [id])
+  payments Payment[]
+  receipts Receipt[]
+
+  @@index([leaseId, dueOn])
+}
+
+model AutopayRule {
+  id        String           @id @default(cuid())
+  tenantId  String
+  leaseId   String
+  methodId  String?
+  amount    Decimal          @db.Decimal(10, 2)
+  frequency AutopayFrequency
+  nextRun   DateTime
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  lease  Lease  @relation(fields: [leaseId], references: [id])
+}
+
+// ---------- Payments ----------
+model PaymentMethod {
+  id             String            @id @default(cuid())
+  organizationId String
+  userId         String
+  type           PaymentMethodType
+  brand          String?
+  last4          String?
+  externalRef    String?
+  isDefault      Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+  payments     Payment[]
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  organizationId String
+  leaseId        String
+  scheduleId     String?
+  methodId       String?
+  status         PaymentStatus @default(INITIATED)
+  amount         Decimal       @db.Decimal(10, 2)
+  feeAmount      Decimal?      @db.Decimal(10, 2)
+  externalRef    String?
+  initiatedAt    DateTime      @default(now())
+  completedAt    DateTime?
+  createdById    String?
+  notes          String?
+
+  organization Organization   @relation(fields: [organizationId], references: [id])
+  lease        Lease          @relation(fields: [leaseId], references: [id])
+  schedule     RentSchedule?  @relation(fields: [scheduleId], references: [id])
+  method       PaymentMethod? @relation(fields: [methodId], references: [id])
+  refunds      Refund[]
+  receipts     Receipt[]
+
+  @@index([organizationId])
+  @@index([leaseId])
+  @@index([status])
+}
+
+model Refund {
+  id             String   @id @default(cuid())
+  organizationId String
+  leaseId        String
+  paymentId      String
+  amount         Decimal  @db.Decimal(10, 2)
+  reason         String?
+  externalRef    String?
+  createdAt      DateTime @default(now())
+  createdById    String?
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lease        Lease        @relation(fields: [leaseId], references: [id])
+  payment      Payment      @relation(fields: [paymentId], references: [id])
+
+  @@index([organizationId])
+  @@index([leaseId, paymentId])
+}
+
+model Receipt {
+  id             String   @id @default(cuid())
+  organizationId String
+  leaseId        String
+  scheduleId     String?
+  paymentId      String?
+  number         String   @unique
+  issuedAt       DateTime @default(now())
+  amount         Decimal  @db.Decimal(10, 2)
+  pdfUrl         String?
+  createdById    String?
+
+  organization Organization  @relation(fields: [organizationId], references: [id])
+  lease        Lease         @relation(fields: [leaseId], references: [id])
+  schedule     RentSchedule? @relation(fields: [scheduleId], references: [id])
+  payment      Payment?      @relation(fields: [paymentId], references: [id])
+
+  @@index([organizationId])
+  @@index([leaseId])
+  @@index([paymentId])
+}
+
+model LeaseDocument {
+  id           String   @id @default(cuid())
+  leaseId      String
+  uploadedById String?
+  filename     String
+  mimeType     String?
+  sizeBytes    Int?
+  storageKey   String
+  isPrivate    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  lease     Lease           @relation(fields: [leaseId], references: [id])
+  envelopes ESignEnvelope[]
+
+  @@index([leaseId, createdAt])
+}
+
+model ESignEnvelope {
+  id            String      @id @default(cuid())
+  leaseId       String
+  documentId    String
+  provider      String
+  providerEnvId String?
+  status        ESignStatus @default(DRAFT)
+  subject       String?
+  message       String?
+  signersJson   String?
+  createdById   String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  lease    Lease         @relation(fields: [leaseId], references: [id])
+  document LeaseDocument @relation(fields: [documentId], references: [id])
+
+  @@index([leaseId, status])
+}
+
+model OwnerStatement {
+  id           String   @id @default(cuid())
+  ownerId      String
+  propertyId   String?
+  periodStart  DateTime
+  periodEnd    DateTime
+  totalIncome  Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpense Decimal  @default(0) @db.Decimal(10, 2)
+  netIncome    Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+
+  owner         User                @relation(fields: [ownerId], references: [id])
+  property      Property?           @relation(fields: [propertyId], references: [id])
+  distributions OwnerDistribution[]
+}
+
+model OwnerDistribution {
+  id          String             @id @default(cuid())
+  ownerId     String
+  statementId String?
+  amount      Decimal            @db.Decimal(10, 2)
+  method      String
+  status      DistributionStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime           @default(now())
+
+  owner     User            @relation(fields: [ownerId], references: [id])
+  statement OwnerStatement? @relation(fields: [statementId], references: [id])
+}
+
+// ---------- Maintenance ----------
+model WorkOrder {
+  id               String          @id @default(cuid())
+  organizationId   String
+  propertyId       String
+  unitId           String?
+  title            String
+  description      String?
+  status           WorkOrderStatus @default(NEW)
+  priority         Int?
+  reportedById     String?
+  assignedVendorId String?
+  estimatedCost    Decimal?        @db.Decimal(10, 2)
+  actualCost       Decimal?        @db.Decimal(10, 2)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id])
+  property     Property              @relation(fields: [propertyId], references: [id])
+  unit         Unit?                 @relation(fields: [unitId], references: [id])
+  events       WorkOrderEvent[]
+  messages     WorkOrderMessage[]
+  attachments  WorkOrderAttachment[]
+
+  @@index([organizationId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model WorkOrderEvent {
+  id          String   @id @default(cuid())
+  workOrderId String
+  actorId     String?
+  message     String
+  createdAt   DateTime @default(now())
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+}
+
+model WorkOrderMessage {
+  id          String   @id @default(cuid())
+  workOrderId String
+  authorId    String?
+  body        String
+  createdAt   DateTime @default(now())
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+}
+
+model WorkOrderAttachment {
+  id          String   @id @default(cuid())
+  workOrderId String
+  uploadedBy  String?
+  url         String
+  filename    String
+  createdAt   DateTime @default(now())
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id])
+
+  @@index([workOrderId])
+}
+
+// ---------- Accounting Integrations ----------
+model IntegrationAccount {
+  id              String              @id @default(cuid())
+  organizationId  String
+  provider        IntegrationProvider
+  enabled         Boolean             @default(false)
+  displayName     String?
+  accessTokenEnc  String?
+  refreshTokenEnc String?
+  expiresAt       DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  syncLogs     SyncLog[]
+
+  @@index([organizationId, provider])
+}
+
+model SyncLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  integrationId  String
+  runAt          DateTime @default(now())
+  scope          String
+  status         String
+  message        String?
+  itemCount      Int?
+  durationMs     Int?
+  payloadUrl     String?
+
+  organization Organization       @relation(fields: [organizationId], references: [id])
+  integration  IntegrationAccount @relation(fields: [integrationId], references: [id])
+
+  @@index([organizationId])
+  @@index([integrationId, runAt])
+}
+
+// ---------- Messaging ----------
+model MessageThread {
+  id        String   @id @default(cuid())
+  subject   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+  members  ThreadMember[]
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  threadId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id])
+  author User          @relation(fields: [authorId], references: [id])
+
+  @@index([threadId, createdAt])
+}
+
+model ThreadMember {
+  id       String   @id @default(cuid())
+  threadId String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  thread MessageThread @relation(fields: [threadId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
+
+  @@index([threadId, userId])
+}
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model CalendarEvent {
+  id             String    @id @default(cuid())
+  organizationId String
+  title          String
+  description    String?
+  type           EventType @default(OTHER)
+  propertyId     String?
+  workOrderId    String?
+  startsAt       DateTime
+  endsAt         DateTime
+  allDay         Boolean   @default(false)
+  createdById    String
+  location       String?
+  status         String    @default("confirmed")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  attendees EventAttendee[]
+
+  @@index([organizationId, startsAt])
+  @@index([propertyId])
+  @@index([workOrderId])
+}
+
+model EventAttendee {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  role      String?
+  rsvp      String?
+  notified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  event CalendarEvent @relation(fields: [eventId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model ComplianceLog {
+  id        String   @id @default(cuid())
+  actor     String
+  action    String
+  entity    String
+  details   String?
+  origin    String   @default("server")
+  createdAt DateTime @default(now())
+
+  @@index([actor, createdAt])
+  @@index([entity])
 }

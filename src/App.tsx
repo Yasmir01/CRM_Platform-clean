@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppTheme from "./shared-theme/AppTheme";
+import "./i18n";
+import { LanguageProvider } from "./crm/contexts/LanguageContext";
 import CrmDashboard from "./crm/CrmDashboard";
 import { LocaleProvider } from "./crm/contexts/LocaleContext";
 import SuperAdminApp from "./crm/SuperAdminApp";
@@ -44,6 +46,7 @@ const HelpSupport = React.lazy(() => import("./crm/pages/HelpSupport"));
 const Tasks = React.lazy(() => import("./crm/pages/Tasks"));
 const Profile = React.lazy(() => import("./crm/pages/Profile"));
 import NewsBoard from "./crm/pages/NewsBoard";
+import DashboardLayout from "./components/DashboardLayout";
 const TenantPortal = React.lazy(() => import("./components/TenantPortal").then(m => ({ default: m.TenantPortal })));
 const PowerTools = React.lazy(() => import("./crm/pages/PowerTools"));
 const TenantDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantDashboard })));
@@ -53,16 +56,20 @@ const TenantLease = React.lazy(() => import("./portals/Portals").then(m => ({ de
 const TenantAutopay = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.TenantAutopay })));
 const TenantCheckoutPage = React.lazy(() => import("./portals/TenantCheckoutPage"));
 const AutoPaySetupPage = React.lazy(() => import("./portals/AutoPaySetupPage"));
-const TenantRefundHistoryPage = React.lazy(() => import("./portals/TenantRefundHistoryPage"));
+const TenantRefundHistoryPage = React.lazy(() => import("./crm/tenant/TenantRefundHistoryPage"));
+const TenantReceiptsPage = React.lazy(() => import("./crm/tenant/TenantReceiptsPage"));
 const PaymentMethodsPage = React.lazy(() => import("./portals/PaymentMethodsPage"));
 const NewPaymentPage = React.lazy(() => import("./portals/NewPaymentPage"));
 const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerDashboard })));
 const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
 const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
 const OwnerLedgerPage = React.lazy(() => import("./portals/OwnerLedgerPage"));
+const OwnerSettings = React.lazy(() => import("./crm/owner/OwnerSettings"));
+const OwnerReports = React.lazy(() => import("./crm/owner/OwnerReports"));
 const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
-const VendorWorkOrders = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorWorkOrders })));
+const VendorWorkOrders = React.lazy(() => import("./crm/vendor/VendorWorkOrders"));
 const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
+const VendorWorkOrderDetails = React.lazy(() => import("./crm/vendor/VendorWorkOrderDetails"));
 const VendorLogin = React.lazy(() => import("./components/vendor/VendorLogin"));
 const ManagerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerDashboard })));
 const ManagerTenants = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.ManagerTenants })));
@@ -100,11 +107,14 @@ const Documents = React.lazy(() => import("./crm/pages/Documents"));
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
+const AIInsights = React.lazy(() => import("./crm/superadmin/AIInsights"));
+const PaymentsReport = React.lazy(() => import("./crm/superadmin/PaymentsReport"));
 const SuperAdminLayout = React.lazy(() => import("./crm/components/superadmin/SuperAdminLayout"));
 const SuperAdminOverview = React.lazy(() => import("./crm/pages/SuperAdminOverview"));
 const SuperAdminSubscribers = React.lazy(() => import("./crm/pages/SuperAdminSubscribers"));
 const SuperAdminImpersonate = React.lazy(() => import("./crm/pages/SuperAdminImpersonate"));
 const SuperAdminCompliance = React.lazy(() => import("./crm/pages/SuperAdminCompliance"));
+const ComplianceLogs = React.lazy(() => import("./crm/superadmin/ComplianceLogs"));
 const SuperAdminAnalytics = React.lazy(() => import("./crm/pages/SuperAdminAnalytics"));
 const SuperAdminNotifications = React.lazy(() => import("./crm/pages/SuperAdminNotifications"));
 const SUPaymentPoliciesGlobal = React.lazy(() => import("./crm/pages/SUPaymentPoliciesGlobal"));
@@ -113,7 +123,9 @@ const SUPaymentPoliciesLease = React.lazy(() => import("./crm/pages/SUPaymentPol
 const SUPaymentPoliciesMatrix = React.lazy(() => import("./crm/pages/SUPaymentPoliciesMatrix"));
 const SUPolicyMatrixStandalone = React.lazy(() => import("./crm/pages/SUPolicyMatrixStandalone"));
 const SUAccountingIntegrations = React.lazy(() => import("./crm/pages/SUAccountingIntegrations"));
+const AccountingIntegrations = React.lazy(() => import("./crm/superadmin/AccountingIntegrations"));
 const SUAccountingIntegrationLogs = React.lazy(() => import("./crm/pages/SUAccountingIntegrationLogs"));
+const SyncLogs = React.lazy(() => import("./crm/superadmin/SyncLogs"));
 const SUAccountingSyncLogs = React.lazy(() => import("./crm/pages/SUAccountingSyncLogs"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
@@ -208,14 +220,20 @@ function AppRoutes() {
       <Route path="/tenant/lease" element={<React.Suspense fallback={<PageLoader />}><TenantLease /></React.Suspense>} />
       <Route path="/tenant/autopay" element={<React.Suspense fallback={<PageLoader />}><TenantAutopay /></React.Suspense>} />
       <Route path="/tenant/autopay/setup" element={<React.Suspense fallback={<PageLoader />}><AutoPaySetupPage /></React.Suspense>} />
-      <Route path="/tenant/refunds" element={<React.Suspense fallback={<PageLoader />}><TenantRefundHistoryPage /></React.Suspense>} />
+      <Route path="/tenant/dashboard" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantDashboard /></DashboardLayout></React.Suspense>} />
+      <Route path="/tenant/refunds" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantRefundHistoryPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/tenant/receipts" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><TenantReceiptsPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/tenant/receipts" element={<React.Suspense fallback={<PageLoader />}><TenantReceiptsPage /></React.Suspense>} />
       <Route path="/owner" element={<React.Suspense fallback={<PageLoader />}><OwnerDashboard /></React.Suspense>} />
       <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
       <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><OwnerProperties /></React.Suspense>} />
-      <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><OwnerLedgerPage /></React.Suspense>} />
+      <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerLedgerPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/owner/settings" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerSettings /></DashboardLayout></React.Suspense>} />
+      <Route path="/owner/reports" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><OwnerReports /></DashboardLayout></React.Suspense>} />
       <Route path="/vendor-login" element={<React.Suspense fallback={<PageLoader />}><VendorLogin /></React.Suspense>} />
       <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><VendorDashboard /></React.Suspense>} />
-      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrders /></React.Suspense>} />
+      <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><VendorWorkOrders /></DashboardLayout></React.Suspense>} />
+      <Route path="/vendor/work-orders/:id" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><VendorWorkOrderDetails /></DashboardLayout></React.Suspense>} />
       <Route path="/vendor/profile" element={<React.Suspense fallback={<PageLoader />}><VendorProfile /></React.Suspense>} />
       <Route path="/manager" element={<React.Suspense fallback={<PageLoader />}><ManagerDashboard /></React.Suspense>} />
       <Route path="/manager/tenants" element={<React.Suspense fallback={<PageLoader />}><ManagerTenants /></React.Suspense>} />
@@ -224,7 +242,12 @@ function AppRoutes() {
       <Route path="/admin" element={<React.Suspense fallback={<PageLoader />}><AdminDashboard /></React.Suspense>} />
       <Route path="/admin/users" element={<React.Suspense fallback={<PageLoader />}><AdminUsers /></React.Suspense>} />
       <Route path="/admin/logs" element={<React.Suspense fallback={<PageLoader />}><AdminLogs /></React.Suspense>} />
-      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><SuperAdminDashboardPage /></React.Suspense>} />
+      <Route path="/superadmin" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><SuperAdminDashboardPage /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/integrations" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AccountingIntegrations /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/integrations/logs" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><SyncLogs /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/insights" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><AIInsights /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/payments" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><PaymentsReport /></DashboardLayout></React.Suspense>} />
+      <Route path="/superadmin/compliance" element={<React.Suspense fallback={<PageLoader />}><DashboardLayout><ComplianceLogs /></DashboardLayout></React.Suspense>} />
       <Route path="/tenant-portal" element={
         <React.Suspense fallback={<PageLoader />}>
           <TenantPortal />
@@ -594,7 +617,8 @@ import { BrandingProvider } from './context/BrandingContext';
 
 export default function App() {
   return (
-    <AppTheme>
+    <LanguageProvider>
+      <AppTheme>
       <CssBaseline enableColorScheme />
       <LocaleProvider>
         <BrandingProvider>
@@ -606,6 +630,7 @@ export default function App() {
           </AuthProvider>
         </BrandingProvider>
       </LocaleProvider>
-    </AppTheme>
+      </AppTheme>
+    </LanguageProvider>
   );
 }
