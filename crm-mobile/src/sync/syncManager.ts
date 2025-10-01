@@ -14,10 +14,10 @@ async function sendToServer(item: { id: number; type: string; payload: string })
     if (res.ok) {
       await clearPendingSync(item.id);
     } else {
-      console.warn("Sync failed", res.status);
+      await markSyncStatus(item.id, "failed", `HTTP ${res.status}`);
     }
-  } catch (err) {
-    console.error("Sync error", err);
+  } catch (err: any) {
+    await markSyncStatus(item.id, "failed", err?.message || String(err));
   }
 }
 
@@ -27,6 +27,8 @@ export async function processPendingSync() {
 
   const items = await getPendingSync();
   for (const i of items) {
-    await sendToServer(i);
+    if (i.status === "pending") {
+      await sendToServer(i);
+    }
   }
 }
