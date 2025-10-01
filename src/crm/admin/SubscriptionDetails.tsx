@@ -3,14 +3,15 @@ import { Box, Typography, CircularProgress, Button, Stack } from "@mui/material"
 import { useNavigate } from "react-router-dom";
 
 type CurrentSubscription = {
-  id: string;
+  mode?: 'TIER' | 'PLAN';
+  id?: string;
   plan: {
     name: string;
     price: number;
     billingCycle: string;
   };
   status: string;
-  currentPeriodEnd: string;
+  currentPeriodEnd: string | null;
 };
 
 export default function SubscriptionDetails() {
