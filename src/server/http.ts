@@ -19,6 +19,7 @@ app.use("/api/integrations", integrations);
 app.use("/api/workorders", workOrdersRouter);
 app.use("/api/push", pushRouter);
 app.use("/api/leases", leaseDocsRouter);
+app.use("/api/admin/compliance", adminComplianceRouter);
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 app.listen(PORT, () => {
