@@ -5,6 +5,7 @@ import workOrdersRouter from "./routes/workorders";
 import pushRouter from "./routes/push";
 import leaseDocsRouter from "./routes/leaseDocs";
 import adminComplianceRouter from "./routes/adminCompliance";
+import impersonationRouter from "./routes/impersonation";
 
 const app = express();
 app.use(cors({ origin: process.env.APP_URL || "*" }));
