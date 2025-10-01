@@ -41,17 +41,17 @@ enum EventType {
 // --------------------
 
 model User {
-  id                 String             @id @default(cuid())
-  email              String             @unique
+  id                 String              @id @default(cuid())
+  email              String              @unique
   name               String?
   password           String
-  role               Role               @default(USER)
+  role               Role                @default(USER)
   orgId              String?
-  organization       Organization?      @relation(fields: [orgId], references: [id])
+  organization       Organization?       @relation(fields: [orgId], references: [id])
   accounts           Account[]
   impersonationLogs  ImprLog[]
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   History            History[]
   LeaseParticipant   LeaseParticipant[]
   PaymentMethod      PaymentMethod[]
@@ -159,18 +159,18 @@ model Company {
 }
 
 model Property {
-  id               String       @id @default(cuid())
-  orgId            String
-  organization     Organization @relation(fields: [orgId], references: [id])
-  name             String
-  address          String
-  tenants          Tenant[]
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  Unit             Unit[]
-  Lease            Lease[]
-  WorkOrder        WorkOrder[]
-  ownerStatements  OwnerStatement[]
+  id              String           @id @default(cuid())
+  orgId           String
+  organization    Organization     @relation(fields: [orgId], references: [id])
+  name            String
+  address         String
+  tenants         Tenant[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  Unit            Unit[]
+  Lease           Lease[]
+  WorkOrder       WorkOrder[]
+  ownerStatements OwnerStatement[]
 }
 
 model Tenant {
@@ -360,31 +360,31 @@ model Unit {
 }
 
 model Lease {
-  id             String          @id @default(cuid())
+  id             String      @id @default(cuid())
   organizationId String
   propertyId     String
   unitId         String
-  status         LeaseStatus     @default(DRAFT)
+  status         LeaseStatus @default(DRAFT)
   startDate      DateTime
   endDate        DateTime?
-  rentAmount     Decimal         @db.Decimal(10, 2)
-  depositAmount  Decimal?        @db.Decimal(10, 2)
-  autopayEnabled Boolean         @default(false)
-  currency       Currency        @default(USD)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  rentAmount     Decimal     @db.Decimal(10, 2)
+  depositAmount  Decimal?    @db.Decimal(10, 2)
+  autopayEnabled Boolean     @default(false)
+  currency       Currency    @default(USD)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  property       Property           @relation(fields: [propertyId], references: [id])
-  unit           Unit               @relation(fields: [unitId], references: [id])
-  organization   Organization       @relation(fields: [organizationId], references: [id])
-  participants   LeaseParticipant[]
-  payments       Payment[]
-  refunds        Refund[]
-  receipts       Receipt[]
-  schedules      RentSchedule[]
-  documents      LeaseDocument[]
-  envelopes      ESignEnvelope[]
-  autopayRules   AutopayRule[]
+  property     Property           @relation(fields: [propertyId], references: [id])
+  unit         Unit               @relation(fields: [unitId], references: [id])
+  organization Organization       @relation(fields: [organizationId], references: [id])
+  participants LeaseParticipant[]
+  payments     Payment[]
+  refunds      Refund[]
+  receipts     Receipt[]
+  schedules    RentSchedule[]
+  documents    LeaseDocument[]
+  envelopes    ESignEnvelope[]
+  autopayRules AutopayRule[]
 
   @@index([organizationId])
   @@index([propertyId, unitId])
@@ -422,16 +422,16 @@ model RentSchedule {
 }
 
 model AutopayRule {
-  id        String            @id @default(cuid())
+  id        String           @id @default(cuid())
   tenantId  String
   leaseId   String
   methodId  String?
-  amount    Decimal           @db.Decimal(10, 2)
+  amount    Decimal          @db.Decimal(10, 2)
   frequency AutopayFrequency
   nextRun   DateTime
-  isActive  Boolean           @default(true)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   lease  Lease  @relation(fields: [leaseId], references: [id])
@@ -527,18 +527,18 @@ model Receipt {
 }
 
 model LeaseDocument {
-  id           String          @id @default(cuid())
+  id           String   @id @default(cuid())
   leaseId      String
   uploadedById String?
   filename     String
   mimeType     String?
   sizeBytes    Int?
   storageKey   String
-  isPrivate    Boolean         @default(true)
-  createdAt    DateTime        @default(now())
+  isPrivate    Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
-  lease        Lease           @relation(fields: [leaseId], references: [id])
-  envelopes    ESignEnvelope[]
+  lease     Lease           @relation(fields: [leaseId], references: [id])
+  envelopes ESignEnvelope[]
 
   @@index([leaseId, createdAt])
 }
@@ -564,58 +564,58 @@ model ESignEnvelope {
 }
 
 model OwnerStatement {
-  id             String            @id @default(cuid())
-  ownerId        String
-  propertyId     String?
-  periodStart    DateTime
-  periodEnd      DateTime
-  totalIncome    Decimal           @default(0) @db.Decimal(10, 2)
-  totalExpense   Decimal           @default(0) @db.Decimal(10, 2)
-  netIncome      Decimal           @default(0) @db.Decimal(10, 2)
-  createdAt      DateTime          @default(now())
+  id           String   @id @default(cuid())
+  ownerId      String
+  propertyId   String?
+  periodStart  DateTime
+  periodEnd    DateTime
+  totalIncome  Decimal  @default(0) @db.Decimal(10, 2)
+  totalExpense Decimal  @default(0) @db.Decimal(10, 2)
+  netIncome    Decimal  @default(0) @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
 
-  owner          User              @relation(fields: [ownerId], references: [id])
-  property       Property?         @relation(fields: [propertyId], references: [id])
-  distributions  OwnerDistribution[]
+  owner         User                @relation(fields: [ownerId], references: [id])
+  property      Property?           @relation(fields: [propertyId], references: [id])
+  distributions OwnerDistribution[]
 }
 
 model OwnerDistribution {
-  id           String              @id @default(cuid())
-  ownerId      String
-  statementId  String?
-  amount       Decimal             @db.Decimal(10, 2)
-  method       String
-  status       DistributionStatus  @default(PENDING)
-  paidAt       DateTime?
-  createdAt    DateTime            @default(now())
+  id          String             @id @default(cuid())
+  ownerId     String
+  statementId String?
+  amount      Decimal            @db.Decimal(10, 2)
+  method      String
+  status      DistributionStatus @default(PENDING)
+  paidAt      DateTime?
+  createdAt   DateTime           @default(now())
 
-  owner        User                @relation(fields: [ownerId], references: [id])
-  statement    OwnerStatement?     @relation(fields: [statementId], references: [id])
+  owner     User            @relation(fields: [ownerId], references: [id])
+  statement OwnerStatement? @relation(fields: [statementId], references: [id])
 }
 
 // ---------- Maintenance ----------
 model WorkOrder {
-  id               String              @id @default(cuid())
+  id               String          @id @default(cuid())
   organizationId   String
   propertyId       String
   unitId           String?
   title            String
   description      String?
-  status           WorkOrderStatus     @default(NEW)
+  status           WorkOrderStatus @default(NEW)
   priority         Int?
   reportedById     String?
   assignedVendorId String?
-  estimatedCost    Decimal?            @db.Decimal(10, 2)
-  actualCost       Decimal?            @db.Decimal(10, 2)
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  estimatedCost    Decimal?        @db.Decimal(10, 2)
+  actualCost       Decimal?        @db.Decimal(10, 2)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
-  organization     Organization         @relation(fields: [organizationId], references: [id])
-  property         Property             @relation(fields: [propertyId], references: [id])
-  unit             Unit?                @relation(fields: [unitId], references: [id])
-  events           WorkOrderEvent[]
-  messages         WorkOrderMessage[]
-  attachments      WorkOrderAttachment[]
+  organization Organization          @relation(fields: [organizationId], references: [id])
+  property     Property              @relation(fields: [propertyId], references: [id])
+  unit         Unit?                 @relation(fields: [unitId], references: [id])
+  events       WorkOrderEvent[]
+  messages     WorkOrderMessage[]
+  attachments  WorkOrderAttachment[]
 
   @@index([organizationId])
   @@index([propertyId])
@@ -699,13 +699,13 @@ model SyncLog {
 
 // ---------- Messaging ----------
 model MessageThread {
-  id        String    @id @default(cuid())
+  id        String   @id @default(cuid())
   subject   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  messages  Message[]
-  members   ThreadMember[]
+  messages Message[]
+  members  ThreadMember[]
 }
 
 model Message {
@@ -715,20 +715,20 @@ model Message {
   body      String
   createdAt DateTime @default(now())
 
-  thread    MessageThread @relation(fields: [threadId], references: [id])
-  author    User          @relation(fields: [authorId], references: [id])
+  thread MessageThread @relation(fields: [threadId], references: [id])
+  author User          @relation(fields: [authorId], references: [id])
 
   @@index([threadId, createdAt])
 }
 
 model ThreadMember {
-  id        String   @id @default(cuid())
-  threadId  String
-  userId    String
-  joinedAt  DateTime @default(now())
+  id       String   @id @default(cuid())
+  threadId String
+  userId   String
+  joinedAt DateTime @default(now())
 
-  thread    MessageThread @relation(fields: [threadId], references: [id])
-  user      User          @relation(fields: [userId], references: [id])
+  thread MessageThread @relation(fields: [threadId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
 
   @@index([threadId, userId])
 }
@@ -751,29 +751,29 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
 }
 
 model CalendarEvent {
-  id             String      @id @default(cuid())
+  id             String    @id @default(cuid())
   organizationId String
   title          String
   description    String?
-  type           EventType   @default(OTHER)
+  type           EventType @default(OTHER)
   propertyId     String?
   workOrderId    String?
   startsAt       DateTime
   endsAt         DateTime
-  allDay         Boolean     @default(false)
+  allDay         Boolean   @default(false)
   createdById    String
   location       String?
-  status         String      @default("confirmed")
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  status         String    @default("confirmed")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  attendees      EventAttendee[]
+  attendees EventAttendee[]
 
   @@index([organizationId, startsAt])
   @@index([propertyId])
@@ -781,15 +781,15 @@ model CalendarEvent {
 }
 
 model EventAttendee {
-  id        String         @id @default(cuid())
+  id        String   @id @default(cuid())
   eventId   String
   userId    String
   role      String?
   rsvp      String?
-  notified  Boolean        @default(false)
-  createdAt DateTime       @default(now())
+  notified  Boolean  @default(false)
+  createdAt DateTime @default(now())
 
-  event     CalendarEvent  @relation(fields: [eventId], references: [id])
+  event CalendarEvent @relation(fields: [eventId], references: [id])
 
   @@unique([eventId, userId])
 }
