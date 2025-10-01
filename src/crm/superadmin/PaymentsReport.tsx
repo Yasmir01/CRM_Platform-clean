@@ -14,6 +14,8 @@ import {
   TextField,
 } from "@mui/material";
 import { format } from "date-fns";
+import { exportToCsv } from "../../utils/exportCsv";
+import { exportPaymentsPdf } from "../../utils/exportPdf";
 
 type PaymentRow = {
   id: string;
@@ -68,10 +70,10 @@ export default function PaymentsReport() {
           onChange={(e) => setFilter(e.target.value)}
           size="small"
         />
-        <Button variant="outlined" onClick={() => console.log("Export CSV")}>
+        <Button variant="outlined" onClick={() => exportToCsv("payments-report.csv", filtered)}>
           Export CSV
         </Button>
-        <Button variant="outlined" onClick={() => console.log("Export PDF")}>
+        <Button variant="outlined" onClick={() => exportPaymentsPdf(filtered)}>
           Export PDF
         </Button>
       </Stack>
