@@ -22,6 +22,7 @@ export interface User {
   preferredLanguage?: string;
   timezone?: string;
   countryCode?: string;
+  impersonating?: 'tenant' | 'vendor' | 'owner' | 'admin' | 'superadmin';
 }
 
 export interface AuthContextType {
@@ -38,6 +39,8 @@ export interface AuthContextType {
   sendPasswordEmail: (email: string, tempPassword: string) => void;
   isAuthenticated: boolean;
   hasPermission: (permission: string) => boolean;
+  switchRole: (role: 'tenant' | 'vendor' | 'owner' | 'admin' | 'superadmin') => void;
+  endImpersonation: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -494,6 +497,14 @@ PropCRM Team`,
     }
   };
 
+  const switchRole = (role: 'tenant' | 'vendor' | 'owner' | 'admin' | 'superadmin') => {
+    setUser((u) => (u ? { ...u, impersonating: role } : u));
+  };
+
+  const endImpersonation = () => {
+    setUser((u) => (u ? { ...u, impersonating: undefined } : u));
+  };
+
   const value: AuthContextType = {
     user,
     users,
@@ -508,6 +519,8 @@ PropCRM Team`,
     sendPasswordEmail,
     isAuthenticated,
     hasPermission,
+    switchRole,
+    endImpersonation,
   };
 
   return (
