@@ -48,22 +48,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user?.orgId) return res.status(200).json(null);
 
-    const sub = await prisma.subscription.findFirst({
-      where: { orgId: user.orgId, active: true },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Try subscription-first (treat as PLAN mode if any exists), else fallback to org.tier (TIER mode)
+    const [sub, org] = await Promise.all([
+      prisma.subscription.findFirst({ where: { orgId: user.orgId, active: true }, orderBy: { createdAt: 'desc' } }),
+      prisma.organization.findUnique({ where: { id: user.orgId }, select: { tier: true } }),
+    ]);
 
-    if (!sub) return res.status(200).json(null);
+    if (sub) {
+      const plan = getPlanForTier(String(sub.plan));
+      const end = sub.endDate ?? new Date(new Date().setMonth(new Date().getMonth() + 1));
+      return res.status(200).json({
+        mode: 'PLAN',
+        id: sub.id,
+        plan,
+        status: sub.active ? 'active' : 'inactive',
+        currentPeriodEnd: end.toISOString(),
+      });
+    }
 
-    const plan = getPlanForTier(String(sub.plan));
-    const end = sub.endDate ?? new Date(new Date().setMonth(new Date().getMonth() + 1));
+    if (org) {
+      const plan = getPlanForTier(String(org.tier));
+      return res.status(200).json({
+        mode: 'TIER',
+        plan: { name: plan.name, price: plan.price, billingCycle: plan.billingCycle },
+        status: 'active',
+        currentPeriodEnd: null,
+      });
+    }
 
-    return res.status(200).json({
-      id: sub.id,
-      plan,
-      status: sub.active ? 'active' : 'inactive',
-      currentPeriodEnd: end.toISOString(),
-    });
+    return res.status(200).json(null);
   } catch (error) {
     console.error('Error fetching current subscription:', error);
     return res.status(500).json({ error: 'Failed to fetch subscription' });
