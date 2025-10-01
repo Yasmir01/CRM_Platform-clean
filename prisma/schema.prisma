@@ -242,12 +242,49 @@ model GlobalLog {
 }
 
 // ---------- Enums ----------
-enum LeaseStatus { DRAFT ACTIVE PENDING_TERMINATION TERMINATED }
-enum PaymentStatus { INITIATED SUCCEEDED FAILED REFUNDED CANCELLED }
-enum PaymentMethodType { CARD ACH MANUAL }
-enum WorkOrderStatus { NEW ASSIGNED IN_PROGRESS ON_HOLD COMPLETED CANCELLED }
-enum IntegrationProvider { QUICKBOOKS XERO WAVE }
-enum Currency { USD CAD EUR GBP }
+
+enum LeaseStatus {
+  DRAFT
+  ACTIVE
+  PENDING_TERMINATION
+  TERMINATED
+}
+
+enum PaymentStatus {
+  INITIATED
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PaymentMethodType {
+  CARD
+  ACH
+  MANUAL
+}
+
+enum WorkOrderStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum IntegrationProvider {
+  QUICKBOOKS
+  XERO
+  WAVE
+}
+
+enum Currency {
+  USD
+  CAD
+  EUR
+  GBP
+}
 
 // ---------- Core PM: Units & Leases ----------
 model Unit {
