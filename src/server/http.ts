@@ -8,6 +8,10 @@ import leaseDocsRouter from "./routes/leaseDocs";
 const app = express();
 app.use(cors({ origin: process.env.APP_URL || "*" }));
 app.use(express.json());
+app.use((req, _res, next) => {
+  (req as any).isOfflineSync = req.headers["x-origin"] === "offline-sync";
+  next();
+});
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/integrations", integrations);
