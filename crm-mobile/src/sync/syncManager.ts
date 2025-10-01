@@ -8,7 +8,7 @@ async function sendToServer(item: { id: number; type: string; payload: string })
     const payload = JSON.parse(item.payload);
     const res = await fetch(`${API_URL}/api/sync/${item.type}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Origin": "offline-sync" },
       body: JSON.stringify(payload),
     });
     if (res.ok) {
