@@ -12,7 +12,6 @@ import {
   Button,
 } from "@mui/material";
 import { format } from "date-fns";
-import { generateReceiptPdf } from "../../utils/exportPdf";
 
 type ReceiptRow = {
   id: string;
@@ -20,6 +19,7 @@ type ReceiptRow = {
   status: string;
   method: string;
   date: string;
+  pdfUrl?: string;
 };
 
 export default function TenantReceiptsPage() {
@@ -68,18 +68,10 @@ export default function TenantReceiptsPage() {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() =>
-                      generateReceiptPdf({
-                        id: row.id,
-                        tenant: "You",
-                        property: "Maple Apartments",
-                        unit: "2B",
-                        amount: row.amount,
-                        status: row.status,
-                        method: row.method,
-                        issuedAt: row.date,
-                      })
-                    }
+                    component="a"
+                    href={row.pdfUrl}
+                    target="_blank"
+                    disabled={!row.pdfUrl}
                   >
                     PDF
                   </Button>
