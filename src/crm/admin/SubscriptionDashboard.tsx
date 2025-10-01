@@ -10,6 +10,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { CheckCircle, Cancel } from "@mui/icons-material";
+import SubscriptionDetails from "./SubscriptionDetails";
+import SubscriptionHistory from "./SubscriptionHistory";
 
 type FeatureToggle = {
   id: string;
@@ -69,26 +71,11 @@ export default function SubscriptionDashboard() {
 
   return (
     <Box p={3}>
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Current Plan: {subscription.plan.name}
-          </Typography>
-          <Typography variant="body1">
-            Status:{" "}
-            <Chip
-              label={subscription.status}
-              color={subscription.status === "active" ? "success" : "default"}
-            />
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Next Billing Date:{" "}
-            {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-          </Typography>
-        </CardContent>
-      </Card>
+      <Box mb={3}>
+        <SubscriptionDetails />
+      </Box>
 
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
             Included Features
@@ -110,6 +97,8 @@ export default function SubscriptionDashboard() {
           </Stack>
         </CardContent>
       </Card>
+
+      <SubscriptionHistory />
     </Box>
   );
 }
