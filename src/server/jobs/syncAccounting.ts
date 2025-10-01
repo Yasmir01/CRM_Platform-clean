@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { getQBClient } from "../integrations/qbClient";
 import { mapReceiptToQB } from "../integrations/mappers/quickbooks";
+import { getXeroClient } from "../integrations/xeroClient";
+import { mapReceiptToXeroInvoice, mapReceiptToXeroPayment } from "../integrations/mappers/xero";
 import { pathToFileURL } from "url";
 
 const prisma = new PrismaClient();
@@ -62,6 +64,64 @@ export async function syncQuickBooks(orgId: string) {
   });
 
   return { imported: qbPayments.length, exported: receipts.length };
+}
+
+export async function syncXero(orgId: string) {
+  const client = await getXeroClient(orgId);
+
+  // 1) Pull Invoices from Xero
+  const res = await client.get("/Invoices");
+  const invoices = res.data?.Invoices || [];
+
+  for (const inv of invoices.slice(0, 5)) {
+    const extId = inv.InvoiceID;
+    const existing = await prisma.receipt.findFirst({
+      where: { organizationId: orgId, number: `XERO-${extId}` },
+    });
+    if (!existing) {
+      await prisma.receipt.create({
+        data: {
+          leaseId: "unknown",
+          organizationId: orgId,
+          amount: inv.Total,
+          issuedAt: new Date(inv.Date),
+          number: `XERO-${extId}`,
+        },
+      });
+    }
+  }
+
+  // 2) Push CRM Receipts to Xero (create invoice + payment) for receipts whose linked payment has no externalRef
+  const receipts = await prisma.receipt.findMany({
+    where: {
+      organizationId: orgId,
+      payment: { is: { externalRef: null } },
+      NOT: { number: { startsWith: "XERO-" } },
+    },
+    include: { payment: true },
+    take: 3,
+  });
+
+  for (const r of receipts) {
+    const invoiceRes = await client.post("/Invoices", { Invoices: [mapReceiptToXeroInvoice(r)] });
+    const newInvoice = invoiceRes.data?.Invoices?.[0];
+    if (newInvoice?.InvoiceID && r.paymentId) {
+      await client.post("/Payments", { Payments: [mapReceiptToXeroPayment(newInvoice.InvoiceID, r)] });
+      await prisma.payment.update({ where: { id: r.paymentId }, data: { externalRef: newInvoice.InvoiceID } });
+    }
+  }
+
+  await prisma.syncLog.create({
+    data: {
+      organizationId: orgId,
+      scope: "xero",
+      status: "success",
+      itemCount: invoices.length,
+      message: `Xero sync imported ${invoices.length}, exported ${receipts.length}`,
+    },
+  });
+
+  return { imported: invoices.length, exported: receipts.length };
 }
 
 const isMain = (() => {
