@@ -315,6 +315,12 @@ enum ESignStatus {
   VOIDED
 }
 
+enum DistributionStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
 // ---------- Core PM: Units & Leases ----------
 model Unit {
   id             String   @id @default(cuid())
@@ -550,6 +556,20 @@ model OwnerStatement {
 
   owner    User     @relation(fields: [ownerId], references: [id])
   property Property? @relation(fields: [propertyId], references: [id])
+}
+
+model OwnerDistribution {
+  id           String              @id @default(cuid())
+  ownerId      String
+  statementId  String?
+  amount       Decimal             @db.Decimal(10, 2)
+  method       String
+  status       DistributionStatus  @default(PENDING)
+  paidAt       DateTime?
+  createdAt    DateTime            @default(now())
+
+  owner     User            @relation(fields: [ownerId], references: [id])
+  statement OwnerStatement? @relation(fields: [statementId], references: [id])
 }
 
 // ---------- Maintenance ----------
