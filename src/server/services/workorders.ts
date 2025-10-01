@@ -26,11 +26,13 @@ export async function addWorkOrderMessage({
   authorId,
   body,
   file,
+  origin,
 }: {
   workOrderId: string;
   authorId?: string;
   body?: string;
   file?: { buffer: Buffer; originalName: string };
+  origin?: "server" | "offline-sync";
 }) {
   let attachmentUrl: string | null = null;
 
@@ -73,6 +75,7 @@ export async function addWorkOrderMessage({
     actor: authorId || "system",
     action: "WOMessage",
     entity: `WO:${workOrderId}`,
+    origin: origin || "server",
   });
 
   return { msg, attachmentUrl };
