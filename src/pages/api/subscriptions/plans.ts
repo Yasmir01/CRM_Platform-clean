@@ -105,7 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user?.orgId) return res.status(404).json({ error: "Organization not found" });
 
-    const org = await prisma.organization.findUnique({ where: { id: user.orgId }, select: { tier: true } });
+    const org = await prisma.organization.findUnique({ where: { id: user.orgId }, select: { tier: true, subscriptionMode: true } });
     const orgMode = (org as any)?.subscriptionMode;
 
     if (orgMode === "PLAN") {
