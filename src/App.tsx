@@ -61,6 +61,8 @@ const OwnerDashboard = React.lazy(() => import("./portals/Portals").then(m => ({
 const OwnerStatements = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerStatements })));
 const OwnerProperties = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.OwnerProperties })));
 const OwnerLedgerPage = React.lazy(() => import("./portals/OwnerLedgerPage"));
+const OwnerSettings = React.lazy(() => import("./crm/owner/OwnerSettings"));
+const OwnerReports = React.lazy(() => import("./crm/owner/OwnerReports"));
 const VendorDashboard = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorDashboard })));
 const VendorWorkOrders = React.lazy(() => import("./crm/vendor/VendorWorkOrders"));
 const VendorProfile = React.lazy(() => import("./portals/Portals").then(m => ({ default: m.VendorProfile })));
@@ -216,6 +218,8 @@ function AppRoutes() {
       <Route path="/owner/statements" element={<React.Suspense fallback={<PageLoader />}><OwnerStatements /></React.Suspense>} />
       <Route path="/owner/properties" element={<React.Suspense fallback={<PageLoader />}><OwnerProperties /></React.Suspense>} />
       <Route path="/owner/ledger" element={<React.Suspense fallback={<PageLoader />}><OwnerLedgerPage /></React.Suspense>} />
+      <Route path="/owner/settings" element={<React.Suspense fallback={<PageLoader />}><OwnerSettings /></React.Suspense>} />
+      <Route path="/owner/reports" element={<React.Suspense fallback={<PageLoader />}><OwnerReports /></React.Suspense>} />
       <Route path="/vendor-login" element={<React.Suspense fallback={<PageLoader />}><VendorLogin /></React.Suspense>} />
       <Route path="/vendor" element={<React.Suspense fallback={<PageLoader />}><VendorDashboard /></React.Suspense>} />
       <Route path="/vendor/work-orders" element={<React.Suspense fallback={<PageLoader />}><VendorWorkOrders /></React.Suspense>} />
