@@ -23,7 +23,8 @@
     "jobs:receipt:test": "tsx src/server/services/receipts.ts",
     "jobs:sync:once": "tsx src/server/jobs/syncAccounting.ts",
     "api:dev": "tsx src/server/http.ts",
-    "jobs:autopay:daily": "tsx src/server/jobs/autopayRunner.ts"
+    "jobs:autopay:daily": "tsx src/server/jobs/autopayRunner.ts",
+    "jobs:reminders:daily": "tsx src/server/jobs/rentReminders.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.879.0",
