@@ -12,11 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { planId, orgId: bodyOrgId } = req.body || {};
-    if (!planId && !bodyOrgId) return res.status(400).json({ error: "Missing planId or orgId" });
-
-    const tier = PLAN_TO_TIER[String(planId || '').toLowerCase()];
-    if (!tier) return res.status(400).json({ error: "Invalid planId" });
+    const { planId, tier: bodyTier, orgId: bodyOrgId } = req.body || {};
+    if (!planId && !bodyTier && !bodyOrgId) return res.status(400).json({ error: "Missing planId/tier or orgId" });
 
     let orgId = bodyOrgId as string | undefined;
     if (!orgId) {
@@ -28,13 +25,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orgId = user.orgId;
     }
 
-    await prisma.subscription.updateMany({ where: { orgId, active: true }, data: { active: false, endDate: new Date() } });
+    // Determine desired tier based on provided inputs
+    let desiredTier: 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | undefined;
+    if (bodyTier) {
+      desiredTier = String(bodyTier).toUpperCase() as any;
+      if (!['FREE','BASIC','PREMIUM','ENTERPRISE'].includes(desiredTier)) {
+        return res.status(400).json({ error: 'Invalid tier' });
+      }
+    } else if (planId) {
+      desiredTier = PLAN_TO_TIER[String(planId).toLowerCase()] as any;
+      if (!desiredTier) return res.status(400).json({ error: 'Invalid planId' });
+    }
 
+    // Update Organization.tier to reflect the current selection (TIER compatibility)
+    if (desiredTier) {
+      await prisma.organization.update({ where: { id: orgId }, data: { tier: desiredTier as any } });
+    }
+
+    // Deactivate existing and create new active Subscription row
+    await prisma.subscription.updateMany({ where: { orgId, active: true }, data: { active: false, endDate: new Date() } });
     const created = await prisma.subscription.create({
-      data: { orgId, plan: tier as any, active: true, startDate: new Date() },
+      data: { orgId, plan: (desiredTier || 'BASIC') as any, active: true, startDate: new Date() },
     });
 
-    return res.status(200).json({ success: true, id: created.id });
+    // Return mode hint for client UX — if caller sent tier -> TIER, else PLAN
+    const mode = bodyTier ? 'TIER' : 'PLAN';
+    return res.status(200).json({ success: true, mode, id: created.id });
   } catch (error) {
     console.error("Error upgrading subscription:", error);
     return res.status(500).json({ error: "Failed to upgrade subscription" });
