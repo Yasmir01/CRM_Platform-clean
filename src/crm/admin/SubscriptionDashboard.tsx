@@ -7,9 +7,13 @@ import {
   Button,
   Stack,
   CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
 } from "@mui/material";
 
- type Plan = {
+type Plan = {
   id: string;
   name: string;
   price: number;
@@ -18,10 +22,11 @@ import {
   features?: any;
 };
 
- export default function SubscriptionDashboard() {
+export default function SubscriptionDashboard() {
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<any>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [orgId, setOrgId] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +35,6 @@ import {
     if (!f) return "";
     if (Array.isArray(f)) {
       if (f.length === 0) return "";
-      // Handle array of strings OR array of objects with featureKey
       if (typeof f[0] === "string") return (f as string[]).join(", ");
       return (f as { featureKey?: string; id?: string; enabled?: boolean }[])
         .map((x) => x?.featureKey || "")
@@ -44,18 +48,29 @@ import {
     setLoading(true);
     setError(null);
     try {
-      const currentUrl = explicitOrgId
-        ? `/api/subscriptions/current?orgId=${explicitOrgId}`
-        : `/api/subscriptions/current`;
-      const [subRes, plansRes] = await Promise.all([
+      const orgParam = explicitOrgId || orgId || '';
+      const currentUrl = orgParam ? `/api/subscriptions/current?orgId=${orgParam}` : `/api/subscriptions/current`;
+      const historyUrl = orgParam ? `/api/history/list?orgId=${orgParam}` : null;
+
+      const requests: Promise<Response>[] = [
         fetch(currentUrl),
         fetch("/api/subscriptions/plans"),
+        historyUrl ? fetch(historyUrl) : Promise.resolve(new Response(JSON.stringify([]))),
+      ];
+
+      const [subRes, plansRes, histRes] = await Promise.all(requests);
+      const [subJson, plansJson, histJson] = await Promise.all([
+        subRes.json(),
+        plansRes.json(),
+        histRes.json(),
       ]);
-      const subJson = await subRes.json();
-      const plansJson = await plansRes.json();
+
       if (subRes.ok) setSubscription(subJson);
       else setError(subJson?.error || "Failed to load subscription");
+
       if (Array.isArray(plansJson)) setPlans(plansJson);
+      if (Array.isArray(histJson)) setHistory(histJson);
+
       if (!explicitOrgId && subJson?.orgId) setOrgId(subJson.orgId);
     } catch (e: any) {
       setError(e?.message || "Failed to load");
@@ -143,7 +158,7 @@ import {
       <Typography variant="h6" gutterBottom>
         Available Plans
       </Typography>
-      <Stack spacing={2}>
+      <Stack spacing={2} mb={4}>
         {plans.map((plan) => (
           <Card key={plan.id}>
             <CardContent>
@@ -161,6 +176,31 @@ import {
           </Card>
         ))}
       </Stack>
+
+      <Typography variant="h6" gutterBottom>
+        Subscription History
+      </Typography>
+      <Card>
+        <CardContent>
+          {history.length === 0 ? (
+            <Typography color="text.secondary">No subscription events yet.</Typography>
+          ) : (
+            <List>
+              {history.map((log) => (
+                <React.Fragment key={log.id}>
+                  <ListItem>
+                    <ListItemText
+                      primary={log.action}
+                      secondary={new Date(log.createdAt).toLocaleString()}
+                    />
+                  </ListItem>
+                  <Divider component="li" />
+                </React.Fragment>
+              ))}
+            </List>
+          )}
+        </CardContent>
+      </Card>
 
       {error ? (
         <Typography color="error" sx={{ mt: 2 }}>{error}</Typography>
