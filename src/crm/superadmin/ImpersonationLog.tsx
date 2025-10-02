@@ -70,6 +70,30 @@ export default function ImpersonationLog() {
     URL.revokeObjectURL(url);
   };
 
+  const exportExcel = () => {
+    const wsData = logs.map((log) => ({
+      Organization: log.orgName || "",
+      "Super Admin": log.superAdmin || "",
+      Email: log.superAdminEmail || "",
+      Started: new Date(log.startedAt).toLocaleString(),
+      Ended: log.endedAt ? new Date(log.endedAt).toLocaleString() : "",
+      Status: log.endedAt ? "Closed" : "Active",
+    }));
+    const ws = XLSX.utils.json_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Impersonation Logs");
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "impersonation_logs.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Box p={3}>
       <Typography variant="h5" gutterBottom>
