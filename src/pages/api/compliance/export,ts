@@ -1,0 +1,71 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { prisma } from "@/lib/prisma";
+import * as XLSX from "xlsx";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    // Fetch data
+    const impersonationLogs = await prisma.imprLog.findMany({
+      include: { superAdmin: true, subscriber: true },
+    });
+    const subscriptions = await prisma.subscription.findMany({
+      include: { organization: true },
+    });
+    const history = await prisma.history.findMany({
+      include: { actor: true, organization: true },
+    });
+
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+
+    const ws1 = XLSX.utils.json_to_sheet(
+      impersonationLogs.map((log) => ({
+        id: log.id,
+        superAdmin: log.superAdmin?.email,
+        subscriber: log.subscriber?.name,
+        startedAt: log.startedAt,
+        endedAt: log.endedAt,
+        alertSent: log.alertSent,
+      }))
+    );
+    XLSX.utils.book_append_sheet(wb, ws1, "ImpersonationLogs");
+
+    const ws2 = XLSX.utils.json_to_sheet(
+      subscriptions.map((sub) => ({
+        id: sub.id,
+        org: sub.organization?.name,
+        plan: sub.plan,
+        active: sub.active,
+        startDate: sub.startDate,
+        endDate: sub.endDate,
+      }))
+    );
+    XLSX.utils.book_append_sheet(wb, ws2, "Subscriptions");
+
+    const ws3 = XLSX.utils.json_to_sheet(
+      history.map((h) => ({
+        id: h.id,
+        org: h.organization?.name,
+        action: h.action,
+        actor: h.actor?.email,
+        createdAt: h.createdAt,
+      }))
+    );
+    XLSX.utils.book_append_sheet(wb, ws3, "History");
+
+    // Write buffer
+    const buffer = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+
+    // Send response
+    res.setHeader("Content-Disposition", "attachment; filename=compliance_export.xlsx");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.send(buffer);
+  } catch (error) {
+    console.error("Export error:", error);
+    res.status(500).json({ error: "Failed to export compliance data" });
+  }
+}
