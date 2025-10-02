@@ -7,12 +7,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const { status, from, to } = req.query as { status?: string | string[]; from?: string | string[]; to?: string | string[] };
+
+    const where: any = {};
+    const statusVal = Array.isArray(status) ? status[0] : status;
+    if (statusVal === "active") where.endedAt = null;
+    if (statusVal === "closed") where.endedAt = { not: null };
+
+    const fromVal = Array.isArray(from) ? from[0] : from;
+    const toVal = Array.isArray(to) ? to[0] : to;
+    if (fromVal || toVal) {
+      where.startedAt = {} as any;
+      if (fromVal) {
+        const d = new Date(fromVal);
+        if (!isNaN(d.getTime())) where.startedAt.gte = d;
+      }
+      if (toVal) {
+        const d = new Date(toVal);
+        if (!isNaN(d.getTime())) where.startedAt.lte = d;
+      }
+    }
+
     const logs = await prisma.imprLog.findMany({
+      where,
       orderBy: { startedAt: "desc" },
       take: 100,
       include: {
-        superAdmin: { select: { id: true, name: true, email: true } },
-        subscriber: { select: { id: true, name: true } },
+        superAdmin: { select: { name: true, email: true } },
+        subscriber: { select: { name: true } },
       },
     });
 
