@@ -9,19 +9,19 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       invariant: path.resolve(__dirname, "./src/shims/invariant.ts"),
       warning: path.resolve(__dirname, "./src/shims/warning.ts"),
-      lodash: 'lodash-es',
-      qrcode: path.resolve(__dirname, './src/shims/qrcode.ts'),
-      'dayjs/plugin/advancedFormat.js': 'dayjs/plugin/advancedFormat',
-      'dayjs/plugin/localizedFormat.js': 'dayjs/plugin/localizedFormat',
-      'dayjs/plugin/customParseFormat.js': 'dayjs/plugin/customParseFormat',
-      'dayjs/plugin/weekOfYear.js': 'dayjs/plugin/weekOfYear',
-      'dayjs/plugin/isBetween.js': 'dayjs/plugin/isBetween',
-      'dayjs/plugin/isSameOrBefore.js': 'dayjs/plugin/isSameOrBefore',
-      'dayjs/plugin/isSameOrAfter.js': 'dayjs/plugin/isSameOrAfter',
-      'dayjs/plugin/isLeapYear.js': 'dayjs/plugin/isLeapYear',
-      'dayjs/plugin/localeData.js': 'dayjs/plugin/localeData',
-      'dayjs/plugin/minMax.js': 'dayjs/plugin/minMax',
-      'dayjs/plugin/utc.js': 'dayjs/plugin/utc',
+      lodash: "lodash-es",
+      qrcode: path.resolve(__dirname, "./src/shims/qrcode.ts"),
+      "dayjs/plugin/advancedFormat.js": "dayjs/plugin/advancedFormat",
+      "dayjs/plugin/localizedFormat.js": "dayjs/plugin/localizedFormat",
+      "dayjs/plugin/customParseFormat.js": "dayjs/plugin/customParseFormat",
+      "dayjs/plugin/weekOfYear.js": "dayjs/plugin/weekOfYear",
+      "dayjs/plugin/isBetween.js": "dayjs/plugin/isBetween",
+      "dayjs/plugin/isSameOrBefore.js": "dayjs/plugin/isSameOrBefore",
+      "dayjs/plugin/isSameOrAfter.js": "dayjs/plugin/isSameOrAfter",
+      "dayjs/plugin/isLeapYear.js": "dayjs/plugin/isLeapYear",
+      "dayjs/plugin/localeData.js": "dayjs/plugin/localeData",
+      "dayjs/plugin/minMax.js": "dayjs/plugin/minMax",
+      "dayjs/plugin/utc.js": "dayjs/plugin/utc",
     },
   },
   optimizeDeps: {
@@ -41,8 +41,6 @@ export default defineConfig({
       // Ensure mispackaged ESM/CJS deps are pre-bundled to valid ESM
       "attr-accept",
       "react-dropzone",
-<<<<<<< HEAD
-=======
       // MUI packages that sometimes ship mixed ESM/CJS
       "@mui/material",
       "@mui/system",
@@ -52,7 +50,6 @@ export default defineConfig({
       "@emotion/styled",
       // specific deep modules that sometimes are imported directly
       "@mui/system/colorManipulator",
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
       // Dayjs core and plugins used by MUI AdapterDayjs
       "dayjs",
       "dayjs/plugin/advancedFormat",
@@ -71,26 +68,23 @@ export default defineConfig({
       "crypto-js",
       "qrcode",
       // Fix CJS default export interop for libraries used by Recharts
-      "eventemitter3"
+      "eventemitter3",
     ],
-    exclude: [
-      "@mui/icons-material",
-      "@mui/x-charts"
-    ],
+    exclude: ["@mui/icons-material", "@mui/x-charts"],
     force: true,
   },
   build: {
-    target: 'es2015',
-    minify: 'terser'
+    target: "es2015",
+    minify: "terser",
   },
   server: {
     port: 3000,
     host: true,
     hmr: {
-      overlay: false
-    }
+      overlay: false,
+    },
   },
   define: {
-    global: 'globalThis'
-  }
+    global: "globalThis",
+  },
 });

@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 import { prisma } from '@/lib/prisma';
 
 export type CompanyCreate = {
@@ -37,7 +37,7 @@ export async function updateCompany(id: string, data: Partial<CompanyCreate>) {
 
 export async function archiveCompany(id: string) {
   return prisma.company.update({ where: { id }, data: { archived: true } });
-=======
+
 // src/services/companies.ts
 export type CompaniesQuery = {
   page?: number;
@@ -83,5 +83,4 @@ export async function deleteCompany(id: string) {
     throw new Error(text || "Failed to delete company");
   }
   return res.json();
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 }

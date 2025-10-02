@@ -1,15 +1,13 @@
-<<<<<<< HEAD
+
 import * as React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
 import { safeFetch } from "../../utils/safeFetch";
-=======
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box"; // Added the missing import
 import { useMode } from "../contexts/ModeContext";
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { LocalStorageService } from "../services/LocalStorageService";
 import { suggestionService } from "../services/SuggestionService";
 import List from "@mui/material/List";
@@ -62,16 +60,12 @@ import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import { useRoleManagement } from "../hooks/useRoleManagement";
 import { useAuth } from "../contexts/AuthContext";
 import { useServiceProviderScope } from "../hooks/useServiceProviderScope";
-<<<<<<< HEAD
 import "./crm-side-menu.css";
-=======
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
 export const mainListItems = [
   { text: "Dashboard", icon: <DashboardRoundedIcon />, path: "/crm" },
   { text: "Calendar", icon: <CalendarTodayRoundedIcon />, path: "/crm/calendar" },
   { text: "Contact Management", icon: <GroupRoundedIcon />, path: "/crm/contacts" },
-<<<<<<< HEAD
   { text: "Sales Automation", icon: <SellRoundedIcon />, path: "/crm/sales" },
   { text: "Marketing Automation", icon: <AutorenewRoundedIcon />, path: "/crm/marketing" },
   { text: "Properties", icon: <HomeWorkRoundedIcon />, path: "/crm/properties" },
@@ -93,7 +87,6 @@ export const mainListItems = [
   { text: "Tasks", icon: <AssignmentRoundedIcon />, path: "/crm/tasks", badge: true },
   { text: "Analytics & Insights", icon: <AnalyticsRoundedIcon />, path: "/crm/analytics" },
   { text: "Reports", icon: <AssessmentRoundedIcon />, path: "/crm/reports" },
-=======
   { text: "Companies", icon: <BusinessCenterRoundedIcon />, path: "/crm/companies" },
 
   // Properties group with nested entries
@@ -147,7 +140,6 @@ export const mainListItems = [
   },
 
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 ];
 
 const marketingListItems = [
@@ -161,10 +153,7 @@ export const secondaryListItems = [
   { text: "Backup & Restore", icon: <BackupRoundedIcon />, path: "/crm/backup" },
   { text: "User Roles", icon: <SecurityRoundedIcon />, path: "/crm/user-roles" },
   { text: "Marketplace", icon: <StorefrontRoundedIcon />, path: "/crm/marketplace" },
-<<<<<<< HEAD
   { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
-=======
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
 ];
 
@@ -192,8 +181,6 @@ export const serviceProviderMenuItems = [
   { text: "Communications", icon: <ForumRoundedIcon />, path: "/crm/communications", badge: true },
 ];
 
-<<<<<<< HEAD
-=======
 class IconErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
   static getDerivedStateFromError() { return { hasError: true }; }
@@ -204,7 +191,6 @@ class IconErrorBoundary extends React.Component<{ children: React.ReactNode }, {
   }
 }
 
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 export default function CrmMenuContent() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -213,7 +199,6 @@ export default function CrmMenuContent() {
   const { user } = useAuth();
   const { filterWorkOrders } = useServiceProviderScope();
 
-<<<<<<< HEAD
   // Get actual new applications count from localStorage
   const [newApplicationsCount, setNewApplicationsCount] = React.useState(0);
   const [newTasksCount, setNewTasksCount] = React.useState(0);
@@ -223,7 +208,7 @@ export default function CrmMenuContent() {
   const [assignedPropsCount, setAssignedPropsCount] = React.useState(0);
 
   const recomputeAssignedPropsCount = React.useCallback(() => {
-=======
+
   // Role flags (normalize common role names)
   const roleRaw = (user?.role || '').toString();
   const roleLower = roleRaw.toLowerCase();
@@ -242,7 +227,6 @@ export default function CrmMenuContent() {
   const [assignedPropsCount, setAssignedPropsCount] = useState(0);
 
   const recomputeAssignedPropsCount = useCallback(() => {
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     try {
       const workOrders = LocalStorageService.getWorkOrders();
       const filtered = filterWorkOrders(workOrders || []);
@@ -254,11 +238,8 @@ export default function CrmMenuContent() {
     }
   }, [filterWorkOrders]);
 
-<<<<<<< HEAD
   React.useEffect(() => {
-=======
   useEffect(() => {
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     const updateApplicationCount = () => {
       const applications = LocalStorageService.getApplications();
       const newAppsCount = applications.filter((app: any) => app.status === 'New').length;
@@ -266,6 +247,7 @@ export default function CrmMenuContent() {
     };
 
     const updateTaskCount = () => {
+
       // Get tasks that are new or pending in the last 24 hours
       const crmData = LocalStorageService.loadAllData();
       const now = new Date();
@@ -324,17 +306,13 @@ export default function CrmMenuContent() {
     const updateUnreadMessages = async () => {
       try {
         if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
-<<<<<<< HEAD
         if (!user) return;
-=======
         if (!user) { setUnreadMessagesCount(0); return; }
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         if (typeof navigator !== 'undefined' && 'onLine' in navigator && (navigator as any).onLine === false) {
           setUnreadMessagesCount(0);
           return;
         }
 
-<<<<<<< HEAD
         const url = (typeof window !== 'undefined' && window.location && window.location.origin) ? `${window.location.origin}/api/messages/unread` : '/api/messages/unread';
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -362,7 +340,7 @@ export default function CrmMenuContent() {
         } finally {
           clearTimeout(timeout);
         }
-=======
+
         // Use same-origin API path and include credentials to match other message endpoints
         const url = `/api/messages/unread`;
 
@@ -397,7 +375,6 @@ export default function CrmMenuContent() {
         } catch (e) {
           setUnreadMessagesCount(0);
         }
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
       } catch (e: any) {
         if (e?.name === 'AbortError') return;
         setUnreadMessagesCount(0);
@@ -442,7 +419,7 @@ export default function CrmMenuContent() {
     navigate(path);
   };
 
-<<<<<<< HEAD
+
   return (
     <Stack className="crm-menu-stack">
       <Box>
@@ -637,7 +614,6 @@ export default function CrmMenuContent() {
                   ))}
                 </List>
               )}
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
             </ListItem>
           ))}
         </List>
@@ -647,35 +623,34 @@ export default function CrmMenuContent() {
       </Box>
       {/* Secondary items - Adjust based on mode */}
       <Box>
-<<<<<<< HEAD
         <Divider className="crm-menu-divider" />
         <List dense className="crm-menu-list">
-=======
+
         <Divider sx={{ my: 1 }} />
         <List dense>
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
+
           {(() => {
             const serviceProviderSecondaryItems = [
               { text: "Settings", icon: <SettingsRoundedIcon />, path: "/crm/settings" },
               { text: "Help & Support", icon: <HelpOutlineRoundedIcon />, path: "/crm/help" },
             ];
             let base = isTenantMode ? tenantSecondaryItems : secondaryListItems;
-<<<<<<< HEAD
+
             if (user?.role === 'Service Provider') {
               base = serviceProviderSecondaryItems;
             }
             const computed = isSuperAdmin() && user?.role !== 'Service Provider'
-=======
+
             if (isVendorUser) {
               base = serviceProviderSecondaryItems;
             }
             const computed = isSuperAdmin() && !isVendorUser
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
+
               ? [...base, { text: "Super Admin", icon: <AdminPanelSettingsRoundedIcon />, path: "/crm/super-admin" }]
               : base;
             return computed;
           })().map((item, index) => (
-<<<<<<< HEAD
+
             <ListItem key={index} disablePadding className="crm-list-item">
               <ListItemButton
                 selected={location.pathname === item.path}
@@ -684,7 +659,7 @@ export default function CrmMenuContent() {
               >
                 <ListItemIcon className="crm-list-icon">{item.icon}</ListItemIcon>
                 <ListItemText className="crm-list-text" primary={item.text} />
-=======
+
             <ListItem key={index} disablePadding sx={{ display: "block" }}>
               <ListItemButton
                 selected={location.pathname === item.path}
@@ -692,7 +667,7 @@ export default function CrmMenuContent() {
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text} />
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
+
               </ListItemButton>
             </ListItem>
           ))}

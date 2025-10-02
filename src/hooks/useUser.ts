@@ -1,36 +1,15 @@
-<<<<<<< HEAD
-import { useEffect, useState } from 'react';
-
-export default function useUser() {
-  const [userState, setUserState] = useState<{ loading: boolean; user?: any; subscriber?: any }>({ loading: true });
-
-  useEffect(() => {
-    let mounted = true;
-    fetch('/api/me', { credentials: 'include' }).then(async (r) => {
-      if (!mounted) return;
-      if (!r.ok) {
-        setUserState({ loading: false });
-        return;
-      }
-      const json = await r.json();
-      setUserState({ loading: false, user: json.user, subscriber: json.subscriber });
-    }).catch(() => { if (mounted) setUserState({ loading: false }); });
-
-    return () => { mounted = false; };
-  }, []);
-
-  return userState;
-=======
+// src/hooks/useUser.ts
 "use client";
 
 import { useEffect, useState } from "react";
 
 type Role = "SU" | "SA" | "Subscriber";
 
-type User = {
+export type User = {
   email?: string;
   name?: string | null;
-  role: Role;
+  role?: Role;
+  subscriber?: any; // Keep this flexible for subscription details
 };
 
 export function useUser(email?: string) {
@@ -42,18 +21,26 @@ export function useUser(email?: string) {
 
     async function fetchUser() {
       try {
+        // Prefer `/api/auth/session` if available, otherwise fallback to `/api/me`
         const query = email ? `?email=${encodeURIComponent(email)}` : "";
-        const res = await fetch(`/api/auth/session${query}`);
+        let res = await fetch(`/api/auth/session${query}`, { credentials: "include" });
+
+        if (!res.ok) {
+          // fallback to /api/me
+          res = await fetch("/api/me", { credentials: "include" });
+        }
+
         if (!res.ok) throw new Error("Failed to fetch user");
+
         const data = await res.json();
 
-        // Normalize role value if different casing
-        const role = (data?.role as Role) || "Subscriber";
+        const role: Role = (data?.role as Role) || "Subscriber";
 
         const u: User = {
           email: data?.email,
           name: data?.name ?? null,
           role,
+          subscriber: data?.subscriber,
         };
 
         if (mounted) setUser(u);
@@ -73,5 +60,4 @@ export function useUser(email?: string) {
   }, [email]);
 
   return { user, loading };
->>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 }
