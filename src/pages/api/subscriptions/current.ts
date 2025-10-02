@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "../../../lib/auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -8,55 +7,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // Prefer explicit orgId from query, else fall back to session-derived orgId
-    let orgId = (req.query.orgId as string) || undefined;
-    if (!orgId) {
-      const session = await getSession((req as any));
-      const email = session?.user?.email as string | undefined;
-      if (email) {
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (user?.orgId) orgId = user.orgId;
-      }
-    }
-
-    if (!orgId) {
+    const { orgId } = req.query;
+    if (!orgId || typeof orgId !== "string") {
       return res.status(400).json({ error: "Missing orgId" });
     }
 
-    // Try Plan-mode (OrganizationSubscription) first
-    const subscription = await prisma.organizationSubscription.findFirst({
-      where: { orgId, status: "active" },
-      include: { plan: true },
-    });
-
-    if (subscription) {
-      return res.status(200).json({
-        orgId,
-        mode: "PLAN",
-        plan: subscription.plan?.name,
-        status: subscription.status,
-        currentPeriodEnd: subscription.currentPeriodEnd,
-      });
-    }
-
-    // Fallback: legacy Tier mode
     const org = await prisma.organization.findUnique({
       where: { id: orgId },
-      select: { id: true, tier: true },
+      select: { id: true, name: true, tier: true, subscriptionMode: true },
     });
 
     if (!org) {
       return res.status(404).json({ error: "Organization not found" });
     }
 
-    return res.status(200).json({
-      orgId: org.id,
-      mode: "TIER",
-      tier: org.tier,
-      status: "active",
-    });
+    if (org.subscriptionMode === "TIER") {
+      return res.status(200).json({
+        mode: "TIER",
+        plan: org.tier,
+        orgId: org.id,
+      });
+    }
+
+    if (org.subscriptionMode === "PLAN") {
+      const activeSub = await prisma.organizationSubscription.findFirst({
+        where: { orgId: org.id, status: "active" },
+        include: { plan: true },
+      });
+
+      if (!activeSub) {
+        return res.status(200).json({ mode: "PLAN", plan: null, orgId: org.id });
+      }
+
+      const interval = (activeSub.plan as any)?.interval || (activeSub.plan as any)?.billingCycle || "monthly";
+
+      return res.status(200).json({
+        mode: "PLAN",
+        plan: activeSub.plan?.name,
+        price: activeSub.plan?.price,
+        interval,
+        currentPeriodEnd: activeSub.currentPeriodEnd,
+        orgId: org.id,
+      });
+    }
+
+    return res.status(400).json({ error: "Unknown subscription mode" });
   } catch (error) {
-    console.error("Error fetching subscription:", error);
-    return res.status(500).json({ error: "Failed to load subscription" });
+    console.error("Error loading current subscription:", error);
+    return res.status(500).json({ error: "Failed to load current subscription" });
   }
 }
