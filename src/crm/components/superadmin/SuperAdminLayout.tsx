@@ -7,6 +7,7 @@ const navItems = [
   { label: 'Dashboard', to: '/crm/super-admin/overview' },
   { label: 'Subscribers', to: '/crm/super-admin/subscribers' },
   { label: 'Impersonation', to: '/crm/super-admin/impersonate' },
+  { label: 'Impersonation Logs', to: '/crm/super-admin/impersonation-logs' },
   { label: 'Compliance', to: '/crm/super-admin/compliance' },
   { label: 'Analytics', to: '/crm/super-admin/analytics' },
   { label: 'Notifications', to: '/crm/super-admin/notifications' },
