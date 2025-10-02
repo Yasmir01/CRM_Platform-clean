@@ -49,6 +49,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         data: { status: "canceled" },
       });
 
+      // Audit log
+      await prisma.history.create({
+        data: {
+          orgId,
+          action: `Subscription canceled`,
+          actorId: null,
+        },
+      });
+
       return res.status(200).json({
         success: true,
         mode: "PLAN",
