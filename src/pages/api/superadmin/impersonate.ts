@@ -29,6 +29,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
+    // also write to History
+    await prisma.history.create({
+      data: {
+        orgId: targetOrgId,
+        action: `SuperAdmin started impersonation`,
+        actorId: superAdminId,
+      },
+    });
+
     const token = jwt.sign({ sub: superAdminId, org: targetOrgId, logId: log.id }, SECRET, { expiresIn: "15m" });
 
     return res.status(200).json({ token, logId: log.id });
