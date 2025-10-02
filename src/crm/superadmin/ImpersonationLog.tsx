@@ -16,6 +16,7 @@ import {
   TextField,
   MenuItem,
 } from "@mui/material";
+import * as XLSX from "xlsx";
 
 export default function ImpersonationLog() {
   const [loading, setLoading] = useState(true);
