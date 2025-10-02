@@ -1,0 +1,36 @@
+.centered, .error-state, .empty-state {
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 400px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.retry-btn, .primary-btn {
+  background: #0066ff;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.retry-btn:hover, .primary-btn:hover { background: #0052cc; }
+
+.contacts-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.contact-item { padding: 0.75rem; border-bottom: 1px solid #eaeaea; }
+
+.contact-item a { color: #0066ff; text-decoration: none; }
+
+.contact-item a:hover { text-decoration: underline; }

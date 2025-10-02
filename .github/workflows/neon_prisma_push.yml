@@ -1,0 +1,54 @@
+name: neo_prisma_push.yml
+
+# Run on pushes to main (or any branch you like)
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # allows manual runs from the Actions tab
+
+jobs:
+  prisma-push:
+    runs-on: ubuntu-latest
+
+    # Pull the secret into an environment variable for the job
+    env:
+      # If you stored only the password/API key:
+      # NEON_PASSWORD: ${{ secrets.NEON_API_KEY }}
+      # If you stored the full connection string:
+      DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Node (adjust version if needed)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'   # or 18, 16, etc.
+
+      # 3️⃣ Install dependencies (including Prisma)
+      - name: Install dependencies
+        run: npm ci   # or yarn install / pnpm install
+
+      # 4️⃣ (Optional) Export the full DATABASE_URL if you only have the password
+      # Only needed when you stored just the password/API key.
+      # Uncomment the block below if you stored only NEON_API_KEY.
+      #
+      # - name: Build full connection string
+      #   run: |
+      #     echo "DATABASE_URL=postgres://<USER>:${{ secrets.NEON_API_KEY }}@<HOST>/<DB>?sslmode=require" >> $GITHUB_ENV
+
+      # 5️⃣ Run Prisma DB push
+      - name: Prisma DB push
+        run: npx prisma db push --accept-data-loss
+        # The flag --accept-data-loss is required for destructive changes;
+        # remove it if you never expect destructive migrations.
+
+      # 6️⃣ (Optional) Verify the schema was applied
+      - name: Verify tables exist
+        run: |
+          psql "$DATABASE_URL" -c "\dt"
+        # You need the PostgreSQL client; install it if not present:
+        #   sudo apt-get update && sudo apt-get install -y postgresql-client
