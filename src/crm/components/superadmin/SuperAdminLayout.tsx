@@ -20,7 +20,7 @@ export default function SuperAdminLayout() {
   const location = useLocation();
 
   const exportCompliance = () => {
-    window.location.href = '/api/superadmin/compliance/export';
+    window.open('/api/compliance/export', '_blank');
   };
 
   const [showModal, setShowModal] = React.useState(false);
