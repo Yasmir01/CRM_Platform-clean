@@ -12,6 +12,7 @@ import {
   ListItemText,
   Divider,
 } from "@mui/material";
+import { endImpersonation } from "@/lib/endImpersonation";
 
 type Plan = {
   id: string;
@@ -151,6 +152,9 @@ export default function SubscriptionDashboard() {
           </Typography>
           <Button variant="outlined" color="error" sx={{ mt: 2 }} onClick={handleCancel}>
             Cancel Subscription
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={endImpersonation} sx={{ mt: 2, ml: 2 }}>
+            End Impersonation
           </Button>
         </CardContent>
       </Card>
