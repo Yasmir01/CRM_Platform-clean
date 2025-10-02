@@ -248,6 +248,17 @@ export function VendorProfile() {
   );
 }
 
+export function VendorWorkOrderDetails() {
+  const id = window.location.pathname.split('/').pop();
+  return (
+    <RoleLayout>
+      <h1>Work Order Details</h1>
+      <p className="text-sm text-gray-600">Request ID: {id}</p>
+      <p className="mt-2">Details for the work order will be displayed here.</p>
+    </RoleLayout>
+  );
+}
+
 export function ManagerDashboard() {
   return (
     <RoleLayout>

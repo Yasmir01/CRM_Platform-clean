@@ -87,9 +87,11 @@ model Organization {
   name               String
   logoUrl            String?
   tier               Tier                 @default(FREE)
+  subscriptionMode   String               @default("TIER")
   users              User[]
   orgSettings        OrgSettings?
   subscriptions      Subscription[]
+  orgSubscriptions   OrganizationSubscription[]
   properties         Property[]
   contacts           Contact[]
   companies          Company[]
@@ -211,6 +213,47 @@ model Subscription {
   prorated     Boolean      @default(false)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+}
+
+// --------------------
+// SaaS Subscription Plans (PLAN mode)
+// --------------------
+
+model SubscriptionPlan {
+  id           String           @id @default(cuid())
+  name         String
+  price        Float
+  billingCycle String           @default("monthly")
+  features     FeatureToggle[]
+  subscriptions OrganizationSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FeatureToggle {
+  id         String           @id @default(cuid())
+  featureKey String
+  description String?
+  enabled    Boolean          @default(true)
+  planId     String
+  plan       SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  createdAt  DateTime         @default(now())
+}
+
+model OrganizationSubscription {
+  id               String           @id @default(cuid())
+  orgId            String
+  organization     Organization     @relation(fields: [orgId], references: [id])
+  planId           String
+  plan             SubscriptionPlan @relation(fields: [planId], references: [id])
+  status           String           @default("active")
+  startDate        DateTime         @default(now())
+  currentPeriodEnd DateTime
+  canceledAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }
 
 // --------------------
