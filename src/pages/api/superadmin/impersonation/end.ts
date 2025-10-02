@@ -22,6 +22,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: { endedAt: new Date() },
     });
 
+    // also write to History
+    await prisma.history.create({
+      data: {
+        orgId: (payload as any).org,
+        action: `SuperAdmin ended impersonation`,
+        actorId: (payload as any).sub,
+      },
+    });
+
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Error ending impersonation:", error);
