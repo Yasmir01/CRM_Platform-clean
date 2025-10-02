@@ -110,6 +110,7 @@ export default function ImpersonationLog() {
         <TextField type="date" label="To" size="small" InputLabelProps={{ shrink: true }} value={to} onChange={(e) => setTo(e.target.value)} />
         <Button variant="outlined" onClick={fetchLogs}>Apply Filters</Button>
         <Button variant="contained" onClick={exportCSV}>Export CSV</Button>
+        <Button variant="contained" color="success" onClick={exportExcel}>Export Excel</Button>
       </Stack>
 
       {loading ? (
