@@ -37,6 +37,10 @@ import {
   FormControlLabel,
   LinearProgress,
 } from "@mui/material";
+<<<<<<< HEAD
+=======
+import { displayContactName } from '@/crm/utils/contactDisplay';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import PhoneCallbackRoundedIcon from "@mui/icons-material/PhoneCallbackRounded";
 import SmsRoundedIcon from "@mui/icons-material/SmsRounded";
@@ -768,7 +772,11 @@ export default function Communications() {
   };
 
   const filteredCommunications = communications.filter(comm =>
+<<<<<<< HEAD
     comm.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+=======
+    displayContactName(comm.contact).toLowerCase().includes(searchTerm.toLowerCase()) ||
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     comm.contact.number.includes(searchTerm) ||
     (comm.message && comm.message.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -939,7 +947,11 @@ export default function Communications() {
                   const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
                   const email = (user.email || '').toLowerCase();
                   return (
+<<<<<<< HEAD
                     comm.contact.name.toLowerCase() === fullName ||
+=======
+                    displayContactName(comm.contact).toLowerCase() === fullName ||
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                     (comm.contact.email || '').toLowerCase() === email
                   );
                 })
@@ -948,7 +960,11 @@ export default function Communications() {
                   <Paper key={comm.id} sx={{ p: 2, border: 1, borderColor: 'divider' }}>
                     <Stack spacing={1}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
+<<<<<<< HEAD
                         <Typography variant="subtitle2">{comm.type} {comm.direction === 'Inbound' ? 'from' : 'to'} {comm.contact.name}</Typography>
+=======
+                        <Typography variant="subtitle2">{comm.type} {comm.direction === 'Inbound' ? 'from' : 'to'} {displayContactName(comm.contact)}</Typography>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                         <Stack direction="row" spacing={1} alignItems="center">
                           <Typography variant="caption" color="text.secondary">
                             {new Date(comm.timestamp).toLocaleString()}
@@ -966,7 +982,11 @@ export default function Communications() {
                 const fullName = `${user.firstName} ${user.lastName}`.trim().toLowerCase();
                 const email = (user.email || '').toLowerCase();
                 return (
+<<<<<<< HEAD
                   comm.contact.name.toLowerCase() === fullName ||
+=======
+                  displayContactName(comm.contact).toLowerCase() === fullName ||
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                   (comm.contact.email || '').toLowerCase() === email
                 );
               }).length === 0 && (
@@ -1335,7 +1355,11 @@ export default function Communications() {
                     </TableCell>
                     <TableCell>
                       <Stack>
+<<<<<<< HEAD
                         <Typography variant="body2">{comm.contact.name}</Typography>
+=======
+                        <Typography variant="body2">{displayContactName(comm.contact)}</Typography>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                         <Typography variant="caption" color="text.secondary">
                           {formatPhoneDisplay(comm.contact.number)}
                         </Typography>
@@ -1380,9 +1404,15 @@ export default function Communications() {
                           onClick={() => {
                             setSelectedContact({
                               id: comm.id,
+<<<<<<< HEAD
                               firstName: comm.contact.name.split(' ')[0],
                               lastName: comm.contact.name.split(' ')[1] || '',
                               email: comm.contact.email || `${comm.contact.name.toLowerCase().replace(' ', '.')}@email.com`,
+=======
+                              firstName: (displayContactName(comm.contact).split(' ')[0]) || '',
+                              lastName: (displayContactName(comm.contact).split(' ')[1]) || '',
+                              email: comm.contact.email || `${displayContactName(comm.contact).toLowerCase().replace(/\s+/g, '.')}@email.com`,
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                               phone: comm.contact.number,
                             });
                             setOpenCommunicationDialog(true);

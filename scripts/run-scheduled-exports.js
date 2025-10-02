@@ -1,7 +1,11 @@
 /* Run: node scripts/run-scheduled-exports.js
    This script finds active ScheduledExport records and runs exports, emailing attachments.
 */
+<<<<<<< HEAD
 const { prisma } = require('../api/_db');
+=======
+const { prisma } = require('../pages/api/_db');
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 const { sendEmail } = require('../src/lib/mailer');
 const PDFDocument = require('pdfkit');
 const { Parser } = require('json2csv');

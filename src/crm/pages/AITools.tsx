@@ -59,6 +59,10 @@ import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { uniformTooltipStyles } from "../utils/formStyles";
+<<<<<<< HEAD
+=======
+import AIInsightsDashboard from "../components/AIInsightsDashboard";
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -388,6 +392,14 @@ export default function AITools() {
           </Card>
         </Grid>
 
+<<<<<<< HEAD
+=======
+        {/* AI Insights Dashboard */}
+        <Grid item xs={12}>
+          <AIInsightsDashboard />
+        </Grid>
+
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         {/* Copy.ai */}
         <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ height: '100%', cursor: 'pointer', '&:hover': { transform: 'translateY(-4px)' }, transition: 'transform 0.2s' }}>

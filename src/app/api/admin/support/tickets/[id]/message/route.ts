@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
+<<<<<<< HEAD
 import { prisma } from '../../../../../../api/_db';
+=======
+import { prisma } from '../../../../../../pages/api/_db';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { getSession } from '../../../../../lib/auth';
 import { sendEmail } from '../../../../../lib/mailer';
 

@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+<<<<<<< HEAD
 import { prisma } from '../../../../../api/_db';
+=======
+import { prisma } from '../../../../../pages/api/_db';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { getSession } from '../../../../lib/auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2024-06-20' });

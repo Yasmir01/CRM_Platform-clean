@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+<<<<<<< HEAD
+=======
+import SubscriptionControls from "./SubscriptionControls";
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
 type Invoice = {
   id: string;
@@ -36,7 +40,17 @@ export default function BillingHistory() {
 
   return (
     <div className="billing-history-container p-8">
+<<<<<<< HEAD
       <h1 className="billing-history-title text-2xl font-bold mb-6">Billing History</h1>
+=======
+      <h1 className="billing-history-title text-2xl font-bold mb-6">Billing</h1>
+
+      <div className="billing-section mb-6">
+        <SubscriptionControls />
+      </div>
+
+      <h2 className="billing-subtitle text-xl font-semibold mb-4">Billing History</h2>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
       {loading ? (
         <div className="billing-loading">Loading...</div>

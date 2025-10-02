@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession, requireSuperAdmin } from "../../../../lib/auth";
+<<<<<<< HEAD
 import { prisma } from "../../../../../api/_db";
+=======
+import { prisma } from "../../../../../pages/api/_db";
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
 export async function GET(req: Request) {
   try {

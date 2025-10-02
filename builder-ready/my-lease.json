@@ -1,0 +1,72 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "id": "my-lease-container",
+  "component": {
+    "name": "Container",
+    "options": {
+      "style": {
+        "padding": "20px",
+        "border": "1px solid #ddd",
+        "borderRadius": "8px",
+        "backgroundColor": "#ffffff"
+      }
+    }
+  },
+  "children": [
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-title",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "My Lease",
+          "style": {
+            "fontSize": "20px",
+            "fontWeight": "bold",
+            "marginBottom": "10px"
+          }
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-property",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "Property: {{ state.myLeaseData[0].property.name }}"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-address",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "Address: {{ state.myLeaseData[0].property.address }}"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-dates",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "Lease Dates: {{ state.myLeaseData[0].startDate }} → {{ state.myLeaseData[0].endDate }}"
+        }
+      }
+    },
+    {
+      "@type": "@builder.io/sdk:Element",
+      "id": "my-lease-rent",
+      "component": {
+        "name": "Text",
+        "options": {
+          "text": "Rent: ${{ state.myLeaseData[0].rentAmount }}"
+        }
+      }
+    }
+  ]
+}

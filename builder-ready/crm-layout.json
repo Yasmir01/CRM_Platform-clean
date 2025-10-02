@@ -1,0 +1,181 @@
+[
+  {
+    "@type": "@builder.io/sdk:Element",
+    "@version": 2,
+    "tagName": "div",
+    "responsiveStyles": {
+      "large": {
+        "display": "flex",
+        "flexDirection": "row",
+        "height": "100vh",
+        "width": "100%",
+        "backgroundColor": "#f9fafb"
+      }
+    },
+    "children": [
+      {
+        "@type": "@builder.io/sdk:Element",
+        "tagName": "aside",
+        "responsiveStyles": {
+          "large": {
+            "width": "220px",
+            "backgroundColor": "#111827",
+            "color": "#ffffff",
+            "padding": "20px",
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "20px"
+          }
+        },
+        "children": [
+          {
+            "@type": "@builder.io/sdk:Element",
+            "tagName": "h2",
+            "children": [
+              {
+                "@type": "@builder.io/sdk:Text",
+                "text": "CRM"
+              }
+            ],
+            "responsiveStyles": {
+              "large": {
+                "fontSize": "20px",
+                "fontWeight": "bold",
+                "marginBottom": "20px",
+                "color": "#ffffff"
+              }
+            }
+          },
+          {
+            "@type": "@builder.io/sdk:Element",
+            "tagName": "nav",
+            "children": [
+              {
+                "@type": "@builder.io/sdk:Element",
+                "tagName": "a",
+                "children": [
+                  { "@type": "@builder.io/sdk:Text", "text": "Dashboard" }
+                ],
+                "responsiveStyles": {
+                  "large": {
+                    "color": "#d1d5db",
+                    "textDecoration": "none",
+                    "padding": "8px 0",
+                    "display": "block"
+                  }
+                },
+                "meta": { "role": "all" }
+              },
+              {
+                "@type": "@builder.io/sdk:Element",
+                "tagName": "a",
+                "children": [
+                  { "@type": "@builder.io/sdk:Text", "text": "Contacts" }
+                ],
+                "responsiveStyles": {
+                  "large": {
+                    "color": "#d1d5db",
+                    "textDecoration": "none",
+                    "padding": "8px 0",
+                    "display": "block"
+                  }
+                },
+                "meta": { "role": "subscriber,super-admin" }
+              },
+              {
+                "@type": "@builder.io/sdk:Element",
+                "tagName": "a",
+                "children": [
+                  { "@type": "@builder.io/sdk:Text", "text": "Companies" }
+                ],
+                "responsiveStyles": {
+                  "large": {
+                    "color": "#d1d5db",
+                    "textDecoration": "none",
+                    "padding": "8px 0",
+                    "display": "block"
+                  }
+                },
+                "meta": { "role": "super-admin" }
+              },
+              {
+                "@type": "@builder.io/sdk:Element",
+                "tagName": "a",
+                "children": [
+                  { "@type": "@builder.io/sdk:Text", "text": "Service Providers" }
+                ],
+                "responsiveStyles": {
+                  "large": {
+                    "color": "#d1d5db",
+                    "textDecoration": "none",
+                    "padding": "8px 0",
+                    "display": "block"
+                  }
+                },
+                "meta": { "role": "subscriber" }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "@type": "@builder.io/sdk:Element",
+        "tagName": "main",
+        "responsiveStyles": {
+          "large": {
+            "flexGrow": "1",
+            "padding": "20px",
+            "overflowY": "auto"
+          }
+        },
+        "children": [
+          {
+            "@type": "@builder.io/sdk:Element",
+            "tagName": "header",
+            "responsiveStyles": {
+              "large": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+                "marginBottom": "20px"
+              }
+            },
+            "children": [
+              {
+                "@type": "@builder.io/sdk:Element",
+                "tagName": "button",
+                "children": [
+                  {
+                    "@type": "@builder.io/sdk:Text",
+                    "text": "☰"
+                  }
+                ],
+                "responsiveStyles": {
+                  "large": {
+                    "display": "none"
+                  },
+                  "medium": {
+                    "display": "block",
+                    "fontSize": "24px",
+                    "background": "transparent",
+                    "border": "none"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "@type": "@builder.io/sdk:Element",
+            "tagName": "div",
+            "children": [
+              {
+                "@type": "@builder.io/sdk:Text",
+                "text": "Main Content Area"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,5 +1,9 @@
 import PropertyLandingPage from "./PropertyLandingPage.tsx";
 import PropertyLeadForm from "./PropertyLeadForm.tsx";
+<<<<<<< HEAD
+=======
+import SidebarWrapper from "../SidebarWrapper";
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
 /**
  * Register components with Builder so editors can drag/drop and edit props.
@@ -56,6 +60,22 @@ import PropertyLeadForm from "./PropertyLeadForm.tsx";
         { name: "recaptchaSiteKey", type: "string" },
       ],
     });
+<<<<<<< HEAD
+=======
+
+    // Register SidebarWrapper for Builder editor
+    builder.registerComponent(SidebarWrapper, {
+      name: "SidebarWrapper",
+      inputs: [
+        {
+          name: "email",
+          type: "string",
+          defaultValue: "demo@yourcrm.com",
+          helperText: "Pass the user email for sidebar rendering",
+        },
+      ],
+    });
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   } catch (err) {
     // @builder/io/react not installed — that's fine in this environment.
     // Avoid throwing so dev server stays up.

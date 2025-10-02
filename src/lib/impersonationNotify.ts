@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { prisma } from '../../api/_db';
+=======
+import { prisma } from '../../pages/api/_db';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { sendMail } from './mailer';
 
 export async function notifyImpersonation(targetUserId: string, impersonatorEmail: string) {

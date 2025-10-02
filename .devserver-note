@@ -1,0 +1,5 @@
+Dev server command: npm run dev
+If dev fails due to missing deps, run:
+  npm install --legacy-peer-deps
+
+Vite requires @vitejs/plugin-react installed in devDependencies.

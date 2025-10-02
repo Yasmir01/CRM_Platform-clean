@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { prisma } from '../api/_db';
+=======
+import { prisma } from '../pages/api/_db';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { sendEmail } from './mailer';
 
 export async function createNotification(tenantId: string, type: string, message: string) {

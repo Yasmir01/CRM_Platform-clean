@@ -37,6 +37,10 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
+<<<<<<< HEAD
+=======
+import { displayContactName } from '@/crm/utils/contactDisplay';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import SMSConnectionDialog from "../components/SMSConnectionDialog";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
 import PhoneCallbackRoundedIcon from "@mui/icons-material/PhoneCallbackRounded";
@@ -809,7 +813,11 @@ export default function PowerDialer() {
             {callSession.isActive && selectedContact && (
               <Box sx={{ mt: 3, p: 2, bgcolor: "primary.light", borderRadius: 1, border: 2, borderColor: "primary.main" }}>
                 <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>🔊 Currently Calling:</Typography>
+<<<<<<< HEAD
                 <Typography variant="h6">{selectedContact.name}</Typography>
+=======
+                <Typography variant="h6">{displayContactName(selectedContact)}</Typography>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                 <Typography variant="body2" color="text.secondary">{selectedContact.phone}</Typography>
                 <Typography variant="body2" color="text.secondary">{selectedContact.type}</Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -884,7 +892,11 @@ export default function PowerDialer() {
                       }}
                     >
                       <TableCell>
+<<<<<<< HEAD
                         <Typography variant="subtitle2">{contact.name}</Typography>
+=======
+                        <Typography variant="subtitle2">{displayContactName(contact)}</Typography>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                         {contact.property && (
                           <Typography variant="body2" color="text.secondary">
                             {contact.property}

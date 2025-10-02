@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+import { safeParse } from '../../utils/safeJson';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 // LocalStorage service for CRM data persistence
 export class LocalStorageService {
   private static readonly PREFIX = 'crm_';
@@ -18,7 +22,11 @@ export class LocalStorageService {
       if (item === null) {
         return defaultValue;
       }
+<<<<<<< HEAD
       return JSON.parse(item);
+=======
+      return safeParse(item, defaultValue);
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     } catch (error) {
       console.error('Error reading from localStorage:', error);
       return defaultValue;

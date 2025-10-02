@@ -141,13 +141,41 @@ function withPlanInputs(baseInputs: any[] = []) {
       });
     }
 
+<<<<<<< HEAD
+=======
+    // Register SidebarLayout as a layout so it can be applied globally in Builder.io
+    if (BuilderComponents.SidebarLayout) {
+      builder.registerComponent(BuilderComponents.SidebarLayout as any, {
+        name: "SidebarLayout",
+        inputs: [
+          { name: "role", type: "string", enum: ["SUPER_ADMIN", "ADMIN", "USER"], defaultValue: "USER" },
+        ],
+        // allow children to be nested inside this layout
+        noWrap: false,
+      });
+    }
+
+    // Register ServiceProvidersBuilder explicitly
+    if (BuilderComponents.ServiceProvidersBuilder) {
+      builder.registerComponent(BuilderComponents.ServiceProvidersBuilder as any, {
+        name: 'ServiceProviders',
+        inputs: withPlanInputs([]),
+        wrap: (props: any) => wrapWithPlan(BuilderComponents.ServiceProvidersBuilder, props),
+      });
+    }
+
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     // Auto-register any other components exported from the barrel with plan inputs by default
     Object.entries(BuilderComponents).forEach(([name, comp]) => {
       if (!comp) return;
       // already registered above
       const registeredNames = [
         'PropertyLandingPage','PropertyLandingHero','PropertyLandingGallery','PropertyLandingContactForm',
+<<<<<<< HEAD
         'LeadPipelineBoard','LeadDetailCard','PaymentHistoryTable','PaymentProrationCalculator'
+=======
+        'LeadPipelineBoard','LeadDetailCard','PaymentHistoryTable','PaymentProrationCalculator','ServiceProvidersBuilder'
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
       ];
       if (registeredNames.includes(name)) return;
 

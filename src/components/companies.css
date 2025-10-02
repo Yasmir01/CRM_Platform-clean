@@ -1,0 +1,17 @@
+.companies-container { padding: 12px; }
+.companies-title { margin: 0 0 8px 0; font-size: 20px; }
+.companies-toolbar { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; }
+.companies-search { padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; }
+.companies-btn { padding: 6px 10px; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+.companies-page-size { display: inline-flex; align-items: center; gap: 8px; }
+.companies-table { width: 100%; border-collapse: collapse; }
+.companies-th { text-align: left; border-bottom: 1px solid #e5e7eb; padding: 6px 8px; }
+.companies-td { padding: 8px 4px; border-bottom: 1px solid #f3f4f6; }
+.companies-link { background: none; border: none; color: inherit; cursor: pointer; }
+.companies-pagination { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+.action-btn { padding: 4px 8px; margin-right: 6px; border-radius: 4px; cursor: pointer; }
+.action-btn.edit { background: #eef2ff; border: 1px solid #c7d2fe; }
+.action-btn.delete { background: #fff1f2; border: 1px solid #fecaca; }
+.action-btn.save { background: #dcfce7; border: 1px solid #86efac; }
+.action-btn.cancel { background: #f3f4f6; border: 1px solid #e5e7eb; }
+.row-editing { background: #fffdf6; }

@@ -33,6 +33,7 @@ export default function EscalationMatrixEditor() {
     if (scope === 'property' && propertyId) p.set('propertyId', propertyId);
     if (scope === 'plan' && planId) p.set('planId', planId);
 
+<<<<<<< HEAD
     try {
       const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
       if (!res.ok) {
@@ -83,6 +84,23 @@ export default function EscalationMatrixEditor() {
       setProperties([]);
       setPlans([]);
     }
+=======
+    const res = await fetch(`/api/sla/escalation-matrices?${p.toString()}`, { credentials: 'include' });
+    const data = await res.json();
+    setRows(Array.isArray(data) ? data : []);
+    setLoading(false);
+  }, [scope, propertyId, planId]);
+
+  const load = React.useCallback(async () => {
+    const [propsRes, plansRes] = await Promise.all([
+      fetch('/api/admin/filters/properties', { credentials: 'include' }),
+      fetch('/api/subscription-plans', { credentials: 'include' }),
+    ]);
+    const [props, pls] = await Promise.all([propsRes.json(), plansRes.json()]);
+    setProperties(Array.isArray(props) ? props : []);
+    setPlans(Array.isArray(pls) ? pls : []);
+    fetchScopeRows();
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   }, [fetchScopeRows]);
 
   React.useEffect(() => { load(); }, [load]);

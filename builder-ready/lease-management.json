@@ -1,0 +1,105 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "LeaseManagement",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "Lease Management" } }
+    },
+    {
+      "tagName": "div",
+      "children": [
+        {
+          "tagName": "input",
+          "properties": {
+            "placeholder": "Search leases by tenant or unit...",
+            "type": "text",
+            "style": "width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px;"
+          }
+        }
+      ]
+    },
+    {
+      "tagName": "table",
+      "properties": {
+        "style": "width: 100%; border-collapse: collapse; font-size: 14px;"
+      },
+      "children": [
+        {
+          "tagName": "thead",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Tenant" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Unit" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Start Date" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "End Date" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Monthly Rent" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Status" } } },
+                { "tagName": "th", "component": { "name": "Text", "options": { "text": "Actions" } } }
+              ]
+            }
+          ]
+        },
+        {
+          "tagName": "tbody",
+          "children": [
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "John Doe" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 101" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "01/01/2024" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "12/31/2024" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,200" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Active" } } },
+                {
+                  "tagName": "td",
+                  "children": [
+                    { "component": { "name": "Text", "options": { "text": "Renew" } } },
+                    { "component": { "name": "Text", "options": { "text": "Terminate" } } },
+                    { "component": { "name": "Text", "options": { "text": "View" } } }
+                  ]
+                }
+              ]
+            },
+            {
+              "tagName": "tr",
+              "children": [
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Jane Smith" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Unit 203" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "03/01/2023" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "02/28/2024" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "$1,450" } } },
+                { "tagName": "td", "component": { "name": "Text", "options": { "text": "Expiring Soon" } } },
+                {
+                  "tagName": "td",
+                  "children": [
+                    { "component": { "name": "Text", "options": { "text": "Renew" } } },
+                    { "component": { "name": "Text", "options": { "text": "Terminate" } } },
+                    { "component": { "name": "Text", "options": { "text": "View" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "div",
+      "children": [
+        {
+          "component": {
+            "name": "Text",
+            "options": {
+              "text": "⚙️ Late Fee Rules: Automatically apply late fees after 5 days past due."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -22,6 +22,10 @@ const Properties = React.lazy(() => import("./crm/pages/Properties"));
 const Tenants = React.lazy(() => import("./crm/pages/Tenants"));
 const PropertyManagers = React.lazy(() => import("./crm/pages/PropertyManagers"));
 const ContactManagement = React.lazy(() => import("./crm/pages/ContactManagement"));
+<<<<<<< HEAD
+=======
+const Companies = React.lazy(() => import("./crm/pages/Companies"));
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 const SalesAutomation = React.lazy(() => import("./crm/pages/SalesAutomation"));
 const Templates = React.lazy(() => import("./crm/pages/Templates"));
 const Settings = React.lazy(() => import("./crm/pages/Settings"));
@@ -75,6 +79,10 @@ const AITools = React.lazy(() => import("./crm/pages/AITools"));
 const RentCollection = React.lazy(() => import("./crm/pages/RentCollection"));
 const CustomerService = React.lazy(() => import("./crm/pages/CustomerService"));
 const AnalyticsInsights = React.lazy(() => import("./crm/pages/AnalyticsInsights"));
+<<<<<<< HEAD
+=======
+const TaxCompliance = React.lazy(() => import("./crm/pages/TaxCompliance"));
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import SLAPolicyManager from "./crm/pages/SLAPolicyManager";
 const EscalationMatrixEditor = React.lazy(() => import("./crm/pages/EscalationMatrixEditor"));
 const EscalationLogsTable = React.lazy(() => import("./crm/pages/EscalationLogs"));
@@ -97,6 +105,10 @@ const BankAccountSettings = React.lazy(() => import("./crm/pages/BankAccountSett
 const SubscriptionManagement = React.lazy(() => import("./crm/pages/SubscriptionManagement"));
 const Suggestions = React.lazy(() => import("./crm/pages/Suggestions"));
 const Documents = React.lazy(() => import("./crm/pages/Documents"));
+<<<<<<< HEAD
+=======
+const OwnerPortal = React.lazy(() => import("./crm/pages/OwnerPortal"));
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 const LateFees = React.lazy(() => import("./crm/pages/LateFees"));
 const LeasingFunnel = React.lazy(() => import("./crm/pages/LeasingFunnel"));
 const SuperAdminDashboardPage = React.lazy(() => import("./components/superadmin/Dashboard"));
@@ -252,6 +264,14 @@ function AppRoutes() {
             <ContactManagement />
           </React.Suspense>
         } />
+<<<<<<< HEAD
+=======
+        <Route path="companies" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <Companies />
+          </React.Suspense>
+        } />
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         <Route path="sales" element={
           <React.Suspense fallback={<PageLoader />}>
             <SalesAutomation />
@@ -378,6 +398,14 @@ function AppRoutes() {
             <AnalyticsInsights />
           </React.Suspense>
         } />
+<<<<<<< HEAD
+=======
+        <Route path="tax-compliance" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <TaxCompliance />
+          </React.Suspense>
+        } />
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         <Route path="sla-policies" element={
           <React.Suspense fallback={<PageLoader />}>
             {/* Eager import to keep simple */}
@@ -449,6 +477,14 @@ function AppRoutes() {
             <Documents />
           </React.Suspense>
         } />
+<<<<<<< HEAD
+=======
+        <Route path="owner-portal" element={
+          <React.Suspense fallback={<PageLoader />}>
+            <OwnerPortal />
+          </React.Suspense>
+        } />
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         <Route path="email-marketing" element={
           <React.Suspense fallback={<PageLoader />}>
             <EmailMarketing />
@@ -577,6 +613,10 @@ function AppRoutes() {
       } />
       {/* Redirect common paths to CRM equivalents */}
       <Route path="/profile" element={<Navigate to="/crm/profile" replace />} />
+<<<<<<< HEAD
+=======
+      <Route path="/companies" element={<Navigate to="/crm/companies" replace />} />
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
       <Route path="/settings" element={<Navigate to="/crm/settings" replace />} />
       <Route path="/properties" element={<Navigate to="/crm/properties" replace />} />
       <Route path="/tenants" element={<Navigate to="/crm/tenants" replace />} />

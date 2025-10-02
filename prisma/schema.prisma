@@ -74,7 +74,11 @@ model Organization {
   tier          Tier           @default(FREE)
   users         User[]
   orgSettings   OrgSettings?
+<<<<<<< HEAD
   subscriptions OrganizationSubscription[]
+=======
+  subscriptions Subscription[]
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   properties    Property[]
   contacts      Contact[]
   companies     Company[]
@@ -83,7 +87,10 @@ model Organization {
   ImprLog       ImprLog[]
   History       History[]
   Deal          Deal[]
+<<<<<<< HEAD
   FeatureToggle FeatureToggle[]
+=======
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 }
 
 model OrgSettings {
@@ -159,6 +166,7 @@ model Tenant {
 }
 
 model Reminder {
+<<<<<<< HEAD
   id        String   @id @default(cuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
@@ -268,3 +276,214 @@ model GlobalLog {
   message   String
   createdAt DateTime @default(now())
 }
+=======
+  id         String   @id @default(cuid())
+  tenantId   String?
+  tenant     User?    @relation(fields: [tenantId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  type       String
+  dueAt      DateTime
+  status     String   @default("PENDING")
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ReminderLog {
+  id         String   @id @default(cuid())
+  reminderId String
+  reminder   Reminder @relation(fields: [reminderId], references: [id])
+  channel    String
+  status     String
+  note       String?
+  response   Json?
+  createdAt  DateTime @default(now())
+}
+
+model Transaction {
+  id         String   @id @default(cuid())
+  tenantId   String?
+  tenant     User?    @relation(fields: [tenantId], references: [id])
+  propertyId String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  type       String
+  amount     Decimal  @db.Decimal(12,2)
+  status     String
+  description String?
+  createdAt  DateTime @default(now())
+}
+
+model Application {
+  id             String   @id @default(cuid())
+  propertyId     String
+  property       Property @relation(fields: [propertyId], references: [id])
+  unit           String?
+  applicantName  String
+  email          String
+  phone          String?
+  employment     String?
+  income         Decimal? @db.Decimal(12,2)
+  rentalHistory  String?
+  references     String?
+  status         String   @default("pending")
+  documentUrl    String?
+  screeningResult String?
+  createdAt      DateTime @default(now())
+}
+
+model AIInsight {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  category    String
+  insight     String
+  confidence  Decimal? @db.Decimal(5,2)
+  generatedAt DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  propertyId  String?
+  property    Property? @relation(fields: [propertyId], references: [id])
+  tenantId    String?
+  tenant      User?     @relation("DocumentTenant", fields: [tenantId], references: [id])
+  vendorId    String?
+  vendor      ServiceProvider? @relation(fields: [vendorId], references: [id])
+  type        String
+  title       String?
+  fileUrl     String
+  uploadedBy  String?
+  visibility  String   @default("private")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TaxReport {
+  id         String   @id @default(cuid())
+  landlordId String
+  landlord   User     @relation(fields: [landlordId], references: [id])
+  vendorId   String?
+  vendor     User?    @relation(fields: [vendorId], references: [id])
+  year       Int
+  type       String
+  fileUrl    String?
+  createdAt  DateTime @default(now())
+}
+
+model Owner {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  name      String
+  email     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  leases    Lease[]
+  properties OwnerProperty[]
+  distributions OwnerDistribution[]
+}
+
+model OwnerProperty {
+  id                  String   @id @default(cuid())
+  ownerId             String
+  owner               Owner    @relation(fields: [ownerId], references: [id])
+  propertyId          String
+  property            Property @relation(fields: [propertyId], references: [id])
+  ownershipPercentage Decimal  @db.Decimal(5,2)
+  createdAt           DateTime @default(now())
+}
+
+model OwnerDistribution {
+  id         String   @id @default(cuid())
+  ownerId    String   
+  owner      Owner    @relation(fields: [ownerId], references: [id])
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  amount     Decimal  @db.Decimal(12,2)
+  date       DateTime @default(now())
+  method     String   @default("ach")
+}
+
+/// --- Branding model (white-labeling & branding settings) ---
+model Branding {
+  id             String   @id @default(cuid())
+  landlordId     String
+  landlord       User     @relation(fields: [landlordId], references: [id])
+  logoUrl        String?
+  primaryColor   String?  // HEX like "#3498db"
+  secondaryColor String?
+  companyName    String?
+  customDomain   String?
+  emailSender    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+/// --- Property & Lease models ---
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  units     Int
+  leases    Lease[]
+  createdAt DateTime @default(now())
+}
+
+model Lease {
+  id         String   @id @default(cuid())
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+
+  tenant     User?    @relation(fields: [tenantId], references: [id])
+  tenantId   String?
+
+  owner      Owner?   @relation(fields: [ownerId], references: [id])
+  ownerId    String?
+
+  startDate  DateTime?
+  endDate    DateTime?
+  rentAmount Float?
+
+  payments   Payment[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ReportEmailLog {
+  id          String   @id @default(cuid())
+  adminId     String?
+  recipient   String
+  reportType  String
+  filter      String
+  filterId    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  sentAt      DateTime @default(now())
+}
+
+/// --- Maintenance requests ---
+model MaintenanceRequest {
+  id          String   @id @default(cuid())
+  tenantId    String
+  propertyId  String?
+  subject     String
+  description String
+  status      String   @default("open")
+  createdAt   DateTime @default(now())
+}
+
+/// Password reset tokens for forgot-password flow
+model PasswordResetToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  token      String   @unique
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9

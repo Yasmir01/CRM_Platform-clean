@@ -1399,6 +1399,7 @@ export default function QRCodeGenerator({
         ) : (
           <Stack direction="row" spacing={1} alignItems="center">
             <Tooltip title="Download QR Code with Logo" sx={uniformTooltipStyles}>
+<<<<<<< HEAD
               <span style={{ display: 'inline-block' }}>
                 <IconButton
                   onClick={downloadQR}
@@ -1442,6 +1443,45 @@ export default function QRCodeGenerator({
                   <CopyIcon />
                 </IconButton>
               </span>
+=======
+              <IconButton
+                onClick={downloadQR}
+                disabled={!formData.content}
+                sx={{
+                  bgcolor: 'action.hover',
+                  '&:hover': { bgcolor: 'primary.light', color: 'primary.main' },
+                  '&:disabled': { bgcolor: 'action.disabledBackground' }
+                }}
+              >
+                <DownloadIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Share QR Code" sx={uniformTooltipStyles}>
+              <IconButton
+                onClick={shareQR}
+                disabled={!formData.content}
+                sx={{
+                  bgcolor: 'action.hover',
+                  '&:hover': { bgcolor: 'success.light', color: 'success.main' },
+                  '&:disabled': { bgcolor: 'action.disabledBackground' }
+                }}
+              >
+                <ShareIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Copy QR Code URL to Clipboard" sx={uniformTooltipStyles}>
+              <IconButton
+                onClick={() => copyToClipboard(generatedQRUrl || generateQRCode())}
+                disabled={!formData.content}
+                sx={{
+                  bgcolor: 'action.hover',
+                  '&:hover': { bgcolor: 'info.light', color: 'info.main' },
+                  '&:disabled': { bgcolor: 'action.disabledBackground' }
+                }}
+              >
+                <CopyIcon />
+              </IconButton>
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
             </Tooltip>
             <Button
               variant="contained"

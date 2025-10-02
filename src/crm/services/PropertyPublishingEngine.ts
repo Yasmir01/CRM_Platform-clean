@@ -13,6 +13,10 @@ import {
   PlatformConfiguration,
   RealEstatePlatformService as ServiceInterface
 } from '../types/RealEstatePlatformTypes';
+<<<<<<< HEAD
+=======
+import { displayContactName } from '@/crm/utils/contactDisplay';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import { Property } from '../contexts/CrmDataContext';
 
 // Platform-specific adapter interfaces
@@ -186,7 +190,11 @@ class ZillowAdapter extends BasePlatformAdapter {
         leaseDuration: data.availability.leaseDuration
       },
       contact: {
+<<<<<<< HEAD
         agentName: data.contact.name,
+=======
+        agentName: displayContactName(data.contact),
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         phone: data.contact.phone,
         email: data.contact.email
       }
@@ -330,7 +338,11 @@ class ApartmentsComAdapter extends BasePlatformAdapter {
         isPrimary: photo.isPrimary
       })),
       contact: {
+<<<<<<< HEAD
         name: data.contact.name,
+=======
+        name: displayContactName(data.contact),
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         phone: data.contact.phone,
         email: data.contact.email,
         preferredContact: data.contact.preferredContact
@@ -455,7 +467,11 @@ class CraigslistAdapter extends BasePlatformAdapter {
       },
       images: data.media.photos.slice(0, 12).map(photo => photo.url),
       contact_info: {
+<<<<<<< HEAD
         name: data.contact.name,
+=======
+        name: displayContactName(data.contact),
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
         phone: data.contact.phone,
         email: data.contact.email
       }

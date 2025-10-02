@@ -26,6 +26,10 @@ import {
   Alert,
   LinearProgress,
 } from "@mui/material";
+<<<<<<< HEAD
+=======
+import { displayContactName } from '@/crm/utils/contactDisplay';
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -362,7 +366,11 @@ export default function QRAnalyticsDashboard({
                           <TableCell>
                             <Stack spacing={0.5}>
                               <Typography variant="subtitle2">
+<<<<<<< HEAD
                                 {contact.name || 'Anonymous'}
+=======
+                                {displayContactName(contact) || 'Anonymous'}
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
                               </Typography>
                               {contact.company && (
                                 <Typography variant="caption" color="text.secondary">

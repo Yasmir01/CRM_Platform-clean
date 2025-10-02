@@ -1,0 +1,97 @@
+{
+  "@type": "@builder.io/sdk:Element",
+  "tagName": "div",
+  "layerName": "ReportsDashboard",
+  "children": [
+    {
+      "tagName": "h2",
+      "component": { "name": "Text", "options": { "text": "📊 Reports & Analytics" } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 16px 0;"
+      },
+      "children": [
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🏢 Occupancy Rate" } } },
+            { "component": { "name": "Text", "options": { "text": "92%" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "💰 Total Rent Collected" } } },
+            { "component": { "name": "Text", "options": { "text": "$145,000" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "⚠️ Outstanding Balances" } } },
+            { "component": { "name": "Text", "options": { "text": "$4,250" } } }
+          ]
+        },
+        {
+          "tagName": "div",
+          "properties": { "style": "background: #f1f5f9; border-radius: 8px; padding: 12px;" },
+          "children": [
+            { "component": { "name": "Text", "options": { "text": "🛠️ Open Maintenance Requests" } } },
+            { "component": { "name": "Text", "options": { "text": "12" } } }
+          ]
+        }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "📈 Rent Collection Trend" } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "height: 200px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; color: #64748b;"
+      },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "Chart Placeholder (Integrate real chart lib later)" } } }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "📉 Delinquency Over Time" } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "height: 200px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; color: #64748b;"
+      },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "Chart Placeholder (Integrate real chart lib later)" } } }
+      ]
+    },
+    {
+      "tagName": "h3",
+      "component": { "name": "Text", "options": { "text": "💵 Expense Breakdown" } }
+    },
+    {
+      "tagName": "div",
+      "properties": {
+        "style": "height: 200px; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; color: #64748b;"
+      },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "Pie Chart Placeholder (Repairs, Utilities, Management Fees)" } } }
+      ]
+    },
+    {
+      "tagName": "div",
+      "properties": { "style": "margin-top: 16px;" },
+      "children": [
+        { "component": { "name": "Text", "options": { "text": "📤 Export: CSV | PDF" } } }
+      ]
+    }
+  ]
+}

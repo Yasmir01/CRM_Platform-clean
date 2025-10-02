@@ -8,16 +8,23 @@ const prisma = new PrismaClient();
 export async function main() {
   console.log('🌱 Seeding database...');
 
+<<<<<<< HEAD
   // --- Clean DB ---
   await prisma.deal.deleteMany();
   await prisma.organizationSubscription.deleteMany();
   await prisma.subscriptionPlan.deleteMany();
+=======
+  // --- Clean DB (optional reset) ---
+  await prisma.deal.deleteMany();
+  await prisma.subscription.deleteMany();
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   await prisma.tenant.deleteMany();
   await prisma.property.deleteMany();
   await prisma.contact.deleteMany();
   await prisma.company.deleteMany();
   await prisma.user.deleteMany();
   await prisma.organization.deleteMany();
+<<<<<<< HEAD
   await prisma.featureToggle.deleteMany();
 
   // --- Subscription Plans ---
@@ -56,26 +63,46 @@ export async function main() {
   });
 
   // --- Organization ---
+=======
+
+  // --- Organizations ---
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
   const org = await prisma.organization.create({
     data: {
       name: faker.company.name(),
       logoUrl: faker.image.url(),
+<<<<<<< HEAD
       tier: Tier.BASIC, // keep legacy Tier for now
+=======
+      tier: Tier.BASIC,
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     },
   });
 
   // --- Users ---
+<<<<<<< HEAD
   await prisma.user.create({
     data: {
       email: 'admin@example.com',
       name: 'Super Admin',
       password: await bcrypt.hash('SuperAdmin123!', 10),
+=======
+  const adminUser = await prisma.user.create({
+    data: {
+      email: 'admin@example.com',
+      name: 'Super Admin',
+      password: await bcrypt.hash('SuperAdmin123!', 10), // secure hash
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
       role: Role.SUPERADMIN,
       orgId: org.id,
     },
   });
 
+<<<<<<< HEAD
   await prisma.user.create({
+=======
+  const normalUser = await prisma.user.create({
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     data: {
       email: faker.internet.email(),
       name: faker.person.fullName(),
@@ -113,7 +140,11 @@ export async function main() {
     },
   });
 
+<<<<<<< HEAD
   await prisma.tenant.create({
+=======
+  const tenant = await prisma.tenant.create({
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
     data: {
       name: faker.person.fullName(),
       email: faker.internet.email(),
@@ -136,6 +167,7 @@ export async function main() {
     },
   });
 
+<<<<<<< HEAD
   // --- Org Subscription ---
   if (starterPlan) {
     await prisma.organizationSubscription.create({
@@ -156,6 +188,16 @@ export async function main() {
   ],
   skipDuplicates: true,
 });
+=======
+  // --- Subscription ---
+  await prisma.subscription.create({
+    data: {
+      orgId: org.id,
+      plan: Tier.BASIC,
+      active: true,
+    },
+  });
+>>>>>>> ac4b396533b24013bc1866988c2033005cd609c9
 
   console.log('✅ Database seeded successfully');
 }
