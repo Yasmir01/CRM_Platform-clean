@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../../../api/_db";
+import { prisma } from "@/lib/prisma";
 import { getSession } from "../../../lib/auth";
 
 const PLAN_TO_TIER: Record<string, 'BASIC' | 'PREMIUM' | 'ENTERPRISE'> = {
@@ -42,7 +42,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const mode = (org?.subscriptionMode || (bodyTier ? 'TIER' : 'PLAN')) as 'TIER' | 'PLAN';
 
     if (mode === 'PLAN') {
-      // PLAN mode: require planId and update OrganizationSubscription
       if (!planId) return res.status(400).json({ error: 'Missing planId for PLAN mode' });
       await prisma.organizationSubscription.updateMany({
         where: { orgId, status: 'active' },
@@ -52,14 +51,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         },
       });
+
+      // Audit log
+      await prisma.history.create({
+        data: {
+          orgId: orgId!,
+          action: `Subscription upgraded to ${planId}`,
+          actorId: null,
+        },
+      });
+
       return res.status(200).json({ success: true, mode });
     }
 
-    // TIER mode: update Organization.tier and Subscription rows
+    // TIER mode
     if (!desiredTier) return res.status(400).json({ error: 'Missing tier for TIER mode' });
     await prisma.organization.update({ where: { id: orgId }, data: { tier: desiredTier as any } });
     await prisma.subscription.updateMany({ where: { orgId, active: true }, data: { active: false, endDate: new Date() } });
     const created = await prisma.subscription.create({ data: { orgId, plan: desiredTier as any, active: true, startDate: new Date() } });
+
+    // Audit log
+    await prisma.history.create({
+      data: {
+        orgId: orgId!,
+        action: `Subscription upgraded to ${desiredTier}`,
+        actorId: null,
+      },
+    });
+
     return res.status(200).json({ success: true, mode, id: created.id });
   } catch (error) {
     console.error("Error upgrading subscription:", error);
