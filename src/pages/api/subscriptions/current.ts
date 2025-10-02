@@ -1,84 +1,62 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { prisma } from "../../../../api/_db";
+import { prisma } from "@/lib/prisma";
 import { getSession } from "../../../lib/auth";
 
-function getPlanForTier(tier: string) {
-  const base = [
-    { id: 'f-basic-crm', featureKey: 'basic-crm', enabled: true },
-    { id: 'f-email-support', featureKey: 'email-support', enabled: true },
-  ];
-  const advanced = [
-    { id: 'f-analytics', featureKey: 'advanced-analytics', enabled: true },
-    { id: 'f-branding', featureKey: 'custom-branding', enabled: true },
-  ];
-  const pro = [
-    { id: 'f-api', featureKey: 'api-access', enabled: true },
-    { id: 'f-priority', featureKey: 'priority-support', enabled: true },
-  ];
-  const enterprise = [
-    { id: 'f-sso', featureKey: 'sso-saml', enabled: true },
-    { id: 'f-multi', featureKey: 'multi-tenant', enabled: true },
-  ];
-
-  const map: Record<string, { price: number; features: { id: string; featureKey: string; enabled: boolean }[] }> = {
-    FREE: { price: 0, features: base },
-    BASIC: { price: 29, features: [...base, ...advanced.map(f => ({ ...f, enabled: false }))] },
-    PREMIUM: { price: 99, features: [...base, ...advanced, ...pro] },
-    ENTERPRISE: { price: 299, features: [...base, ...advanced, ...pro, ...enterprise] },
-  };
-
-  const t = tier?.toUpperCase() || 'FREE';
-  const cfg = map[t] || map.FREE;
-  return {
-    id: `plan-${t.toLowerCase()}`,
-    name: t.charAt(0) + t.slice(1).toLowerCase(),
-    price: cfg.price,
-    billingCycle: 'monthly',
-    features: cfg.features,
-  };
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   try {
-    const session = await getSession((req as any));
-    if (!session?.user?.email) return res.status(401).json({ error: 'Unauthorized' });
+    // Prefer explicit orgId from query, else fall back to session-derived orgId
+    let orgId = (req.query.orgId as string) || undefined;
+    if (!orgId) {
+      const session = await getSession((req as any));
+      const email = session?.user?.email as string | undefined;
+      if (email) {
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user?.orgId) orgId = user.orgId;
+      }
+    }
 
-    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-    if (!user?.orgId) return res.status(200).json(null);
+    if (!orgId) {
+      return res.status(400).json({ error: "Missing orgId" });
+    }
 
-    // Try subscription-first (treat as PLAN mode if any exists), else fallback to org.tier (TIER mode)
-    const [sub, org] = await Promise.all([
-      prisma.subscription.findFirst({ where: { orgId: user.orgId, active: true }, orderBy: { createdAt: 'desc' } }),
-      prisma.organization.findUnique({ where: { id: user.orgId }, select: { tier: true } }),
-    ]);
+    // Try Plan-mode (OrganizationSubscription) first
+    const subscription = await prisma.organizationSubscription.findFirst({
+      where: { orgId, status: "active" },
+      include: { plan: true },
+    });
 
-    if (sub) {
-      const plan = getPlanForTier(String(sub.plan));
-      const end = sub.endDate ?? new Date(new Date().setMonth(new Date().getMonth() + 1));
+    if (subscription) {
       return res.status(200).json({
-        mode: 'PLAN',
-        id: sub.id,
-        plan,
-        status: sub.active ? 'active' : 'inactive',
-        currentPeriodEnd: end.toISOString(),
+        orgId,
+        mode: "PLAN",
+        plan: subscription.plan?.name,
+        status: subscription.status,
+        currentPeriodEnd: subscription.currentPeriodEnd,
       });
     }
 
-    if (org) {
-      const plan = getPlanForTier(String(org.tier));
-      return res.status(200).json({
-        mode: 'TIER',
-        plan: { name: plan.name, price: plan.price, billingCycle: plan.billingCycle },
-        status: 'active',
-        currentPeriodEnd: null,
-      });
+    // Fallback: legacy Tier mode
+    const org = await prisma.organization.findUnique({
+      where: { id: orgId },
+      select: { id: true, tier: true },
+    });
+
+    if (!org) {
+      return res.status(404).json({ error: "Organization not found" });
     }
 
-    return res.status(200).json(null);
+    return res.status(200).json({
+      orgId: org.id,
+      mode: "TIER",
+      tier: org.tier,
+      status: "active",
+    });
   } catch (error) {
-    console.error('Error fetching current subscription:', error);
-    return res.status(500).json({ error: 'Failed to fetch subscription' });
+    console.error("Error fetching subscription:", error);
+    return res.status(500).json({ error: "Failed to load subscription" });
   }
 }
