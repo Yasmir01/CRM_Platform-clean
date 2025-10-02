@@ -33,6 +33,30 @@ export default function SubscriptionOverview() {
     fetchData();
   }, []);
 
+  const handleImpersonate = async (orgId: string) => {
+    try {
+      const res = await fetch("/api/superadmin/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ superAdminId: "demo-SA", targetOrgId: orgId }),
+      });
+      const data = await res.json();
+      if (data?.token) {
+        try {
+          localStorage.setItem("impersonationToken", data.token);
+        } catch {}
+        // also set cookie for middleware compatibility
+        document.cookie = `impersonationToken=${data.token}; path=/; max-age=900`;
+        window.location.href = "/crm/admin/dashboard?impersonation=true";
+      } else {
+        alert(data?.error || "Failed to impersonate");
+      }
+    } catch (err) {
+      console.error("Impersonation failed:", err);
+      alert("Impersonation failed");
+    }
+  };
+
   if (loading) {
     return (
       <Box p={3} textAlign="center">
@@ -77,11 +101,7 @@ export default function SubscriptionOverview() {
                   </TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => alert("Impersonate not wired yet, placeholder")}
-                      >
+                      <Button size="small" variant="outlined" onClick={() => handleImpersonate(org.id)}>
                         Impersonate
                       </Button>
                       <Button
