@@ -129,6 +129,7 @@ const AccountingIntegrations = React.lazy(() => import("./crm/superadmin/Account
 const SUAccountingIntegrationLogs = React.lazy(() => import("./crm/pages/SUAccountingIntegrationLogs"));
 const SyncLogs = React.lazy(() => import("./crm/superadmin/SyncLogs"));
 const SUAccountingSyncLogs = React.lazy(() => import("./crm/pages/SUAccountingSyncLogs"));
+const ImpersonationLog = React.lazy(() => import("./crm/superadmin/ImpersonationLog"));
 const MessagesInbox = React.lazy(() => import("./crm/pages/MessagesInbox"));
 const MessageThreadPage = React.lazy(() => import("./crm/pages/MessageThreadPage"));
 const Notifications = React.lazy(() => import("./crm/pages/Notifications"));
